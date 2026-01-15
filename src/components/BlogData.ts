@@ -1,0 +1,21 @@
+// Shared wedding photography images to add to all galleries
+export const sharedGalleryImages = [
+  'https://images.unsplash.com/photo-1571332760709-8943098311f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwY2VyZW1vbnklMjBhaXNsZXxlbnwxfHx8fDE3NjU4MDE1NjF8MA&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1719499683843-721331f2495f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwY291cGxlJTIwcG9ydHJhaXRzfGVufDF8fHx8MTc2NTgwMTU2MXww&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1677768061409-3d4fbd0250d1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwcmVjZXB0aW9uJTIwdGFibGVzfGVufDF8fHx8MTc2NTgwMTU2Mnww&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1604531826442-c7b02558f6d2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmlkYWwlMjB2ZWlsJTIwZGV0YWlsc3xlbnwxfHx8fDE3NjU4MDE1NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1599081753584-62c37d8fa189?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwc2hvZXMlMjBkZXRhaWxzfGVufDF8fHx8MTc2NTgwMTU2M3ww&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1664312688980-a805a6f208c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwZHJlc3MlMjBoYW5naW5nfGVufDF8fHx8MTc2NTgwMTU2M3ww&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1763538299820-0edb58c7835e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwa2lzcyUyMG1vbWVudHxlbnwxfHx8fDE3NjU4MDE1NjV8MA&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1620315472787-52921e5f88a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwY29uZmV0dGl8ZW58MXx8fHwxNzY1ODAxNTY2fDA&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1482575832494-771f74bf6857?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwZGFuY2luZ3xlbnwxfHx8fDE3NjU4MDE1NjZ8MA&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1708733925285-3c709f5eeae8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwdG9hc3RzfGVufDF8fHx8MTc2NTgwMTU2Nnww&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1558535284-39fe3f893047?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwY2VudGVycGllY2V8ZW58MXx8fHwxNzY1ODAxNTY3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1676853756998-b0ab9273a7bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwY2FuZGxlc3xlbnwxfHx8fDE3NjU4MDE1Njd8MA&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1674970538959-e7475d8d376f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwdmVudWUlMjBlbGVnYW50fGVufDF8fHx8MTc2NTY4MjA3OHww&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1508214564935-9f2adc2ec3c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwYm91cXVldCUyMHRvc3N8ZW58MXx8fHwxNzY1ODAxNTcwfDA&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1670291362999-00f36b631e15?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwZ3Jvb20lMjBwb3J0cmFpdHxlbnwxfHx8fDE3NjU4MDE1NzB8MA&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1731515672852-1b125bfd90d1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwYnJpZGVzbWFpZHN8ZW58MXx8fHwxNzY1ODAxNTcxfDA&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1553455274-5297e1a79c49?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwZ3Jvb21zbWVufGVufDF8fHx8MTc2NTgwMTU3MXww&ixlib=rb-4.1.0&q=80&w=1080',
+  'https://images.unsplash.com/photo-1629943206404-4b5c164957a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwc3Vuc2V0JTIwcm9tYW50aWN8ZW58MXx8fHwxNzY1ODAxNTcxfDA&ixlib=rb-4.1.0&q=80&w=1080',
+];
