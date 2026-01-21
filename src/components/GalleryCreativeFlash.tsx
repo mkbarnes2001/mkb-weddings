@@ -82,7 +82,7 @@ export function GalleryCreativeFlash() {
   return (
     <div className="min-h-screen bg-white">
       {/* HERO */}
-      <div className="relative h-[320px] md:h-[420px] overflow-hidden mb-24">
+      <div className="relative h-[320px] md:h-[420px] overflow-hidden mb-32">
         <ImageWithFallback
           src={creativeFlashHero}
           alt="Creative Flash Photography"
@@ -108,12 +108,12 @@ export function GalleryCreativeFlash() {
       </div>
 
       {/* BODY COPY */}
-      <div className="max-w-5xl mx-auto px-6">
+      <div className="max-w-5xl mx-auto px-6 pt-8 md:pt-12">
         <h2 className="text-center font-serif text-sm uppercase tracking-widest text-neutral-800 mb-8">
           Master of Flash Wedding Photography
         </h2>
 
-        <div className="text-center font-serif text-lg leading-relaxed text-neutral-700 space-y-8 mb-28">
+        <div className="text-center font-serif text-lg leading-relaxed text-neutral-700 space-y-8 mb-36">
           <p>
             Known as a master of flash wedding photography, MKB Weddings creates bold, vibrant, and
             dramatic images that stand out. Our flash photography expertise is perfect for evening
