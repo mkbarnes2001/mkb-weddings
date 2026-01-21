@@ -197,4 +197,34 @@ export function GalleryByMoments() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {moments.map((moment) => (
             <Link
-              key={momen
+              key={moment.id}
+              to={`/gallery/moment/${encodeURIComponent(moment.id)}`}
+              className="group relative aspect-[4/3] overflow-hidden rounded-lg"
+            >
+              <ImageWithFallback
+                src={moment.cover}
+                alt={moment.name}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+              <div className="absolute inset-0 flex flex-col justify-end p-6">
+                <h2 className="text-white text-2xl mb-2">{moment.name}</h2>
+                <p className="text-white/90 text-sm mb-3">{moment.description}</p>
+                <div className="flex items-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-sm uppercase tracking-wider">
+                    View Gallery ({moment.count})
+                  </span>
+                  <ChevronRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-2" />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {moments.length === 0 && (
+          <div className="text-center py-20 text-neutral-600">No moments found.</div>
+        )}
+      </div>
+    </div>
+  );
+}
