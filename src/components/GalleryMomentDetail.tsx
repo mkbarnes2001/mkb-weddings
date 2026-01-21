@@ -139,22 +139,24 @@ export function GalleryMomentDetail() {
   ========================= */
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO */}
-      <div className="relative h-[38vh] min-h-[260px] max-h-[420px] overflow-hidden">
-        <ImageWithFallback
-          src={images[0]?.full}
-          alt={momentName}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/45" />
-        <div className="absolute inset-0 flex items-end">
-          <div className="max-w-7xl mx-auto px-6 pb-10">
-            <h1 className="text-white text-4xl md:text-5xl uppercase tracking-widest">
-              {momentName}
-            </h1>
-          </div>
-        </div>
-      </div>
+     {/* HERO (fixed height + cropped) */}
+<div className="relative h-[320px] md:h-[380px] overflow-hidden">
+  <ImageWithFallback
+    src={heroImage}
+    alt={title}
+    className="w-full h-full object-cover object-[50%_60%]"
+  />
+  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+
+  <div className="absolute inset-0 flex items-end">
+    <div className="max-w-7xl mx-auto px-6 pb-8 w-full">
+      <h1 className="text-white text-4xl md:text-5xl uppercase tracking-widest">
+        {title}
+      </h1>
+    </div>
+  </div>
+</div>
+
 
       {/* META */}
       <div className="max-w-7xl mx-auto px-6 pt-12 pb-6">
