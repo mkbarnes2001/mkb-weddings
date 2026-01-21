@@ -163,25 +163,22 @@ const featured = useMemo(() => {
       </div>
 
       {/* BODY COPY */}
-      <div className="max-w-5xl mx-auto px-6 pt-8 md:pt-12">
-        <h2 className="text-center font-serif text-sm uppercase tracking-widest text-neutral-800 mb-8">
-          Master of Flash Wedding Photography
-        </h2>
+     <div className="brand-prose text-center mb-36">
+  <div className="eyebrow mb-8">Master of Flash Wedding Photography</div>
 
-        <div className="text-center font-serif text-lg leading-relaxed text-neutral-700 space-y-8 mb-36">
-          <p>
-            Known as a master of flash wedding photography, MKB Weddings creates bold, vibrant, and
-            dramatic images that stand out. Our flash photography expertise is perfect for evening
-            portraits, dark venues, Irish weather conditions, and high-energy dance-floor shots.
-          </p>
+  <p>
+    Known as a master of flash wedding photography, MKB Weddings creates bold, vibrant, and dramatic
+    images that stand out. Our flash photography expertise is perfect for evening portraits, dark
+    venues, Irish weather conditions, and high-energy dance-floor shots.
+  </p>
 
-          <p>
-            Using advanced off-camera flash techniques, we create striking editorial-style images
-            with perfect lighting regardless of the conditions. From moody atmospheric shots to
-            bright vibrant portraits, our flash work adds a unique artistic dimension to your
-            wedding story.
-          </p>
-        </div>
+  <p>
+    Using advanced off-camera flash techniques, we create striking editorial-style images with
+    perfect lighting regardless of the conditions. From moody atmospheric shots to bright vibrant
+    portraits, our flash work adds a unique artistic dimension to your wedding story.
+  </p>
+</div>
+
       </div>
 
       {/* GALLERY GRID (Moments-sized + venue caption) */}
