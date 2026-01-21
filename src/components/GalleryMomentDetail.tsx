@@ -19,13 +19,15 @@ type CsvRow = {
   tags?: string;
 };
 
-// R2 base
+// R2 base (same as your venue page)
 const THUMB_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
 const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
-// ---------------- helpers ----------------
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 function slugify(s: string) {
   return (s || "")
@@ -101,7 +103,7 @@ function fullUrlFromThumb(r: CsvRow) {
   )}/${encodeURIComponent(filename2000)}`;
 }
 
-// stable shuffle (no new libs)
+// Stable "random" ordering (same order per moment, changes if you bump version)
 function hashStringToInt(str: string) {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) {
@@ -121,12 +123,13 @@ function stableShuffle<T>(arr: T[], seed: string, keyFn: (t: T) => string) {
   return copy;
 }
 
-// Optional: pin a few images to the top PER MOMENT
+// Optional: pin images to the top PER moment.
 // Use the _500.webp filenames exactly as in CSV.
 const PINNED: Record<string, string[]> = {
   // ceremony: ["example_500.webp", "example2_500.webp"],
 };
 
+// Curated moment labels + hero + crop focus
 const MOMENT_META: Record<
   string,
   { name: string; description: string; hero: string; focus?: string }
@@ -171,7 +174,6 @@ const MOMENT_META: Record<
 
 export function GalleryMomentDetail() {
   const { momentId } = useParams<{ momentId: string }>();
-
   const meta = momentId ? MOMENT_META[momentId] : undefined;
 
   const [rows, setRows] = useState<CsvRow[]>([]);
@@ -214,13 +216,12 @@ export function GalleryMomentDetail() {
       thumb: thumbUrl(r),
       full: fullUrlFromThumb(r),
       alt: `${r.venue} – ${r.category}`,
-      venue: r.venue,
       filename: r.filename,
     }));
 
-    // pinned first (optional)
     const pinnedList = momentId ? PINNED[momentId] || [] : [];
     const pinnedSet = new Set(pinnedList.map((x) => x.toLowerCase().trim()));
+
     const pinned = mapped.filter((m) =>
       pinnedSet.has(m.filename.toLowerCase().trim())
     );
@@ -228,8 +229,11 @@ export function GalleryMomentDetail() {
       (m) => !pinnedSet.has(m.filename.toLowerCase().trim())
     );
 
-    // stable random order so it looks "mixed up"
-    const shuffled = stableShuffle(rest, `moment-${momentId || "unknown"}-v1`, (m) => m.filename);
+    const shuffled = stableShuffle(
+      rest,
+      `moment-${momentId || "unknown"}-v1`,
+      (m) => m.filename
+    );
 
     return [...pinned, ...shuffled];
   }, [momentRows, momentId]);
@@ -238,12 +242,6 @@ export function GalleryMomentDetail() {
     const set = new Set<string>();
     for (const r of momentRows) set.add(r.venue);
     return set.size;
-  }, [momentRows]);
-
-  const venues = useMemo(() => {
-    const set = new Set<string>();
-    for (const r of momentRows) set.add(r.venue);
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [momentRows]);
 
   if (loadError) {
@@ -281,7 +279,7 @@ export function GalleryMomentDetail() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO (same pattern as Creative Flash) */}
+      {/* HERO (Creative Flash style: big centered text over image) */}
       <div className="relative h-[300px] md:h-[420px] overflow-hidden">
         {heroSrc && (
           <ImageWithFallback
@@ -293,15 +291,23 @@ export function GalleryMomentDetail() {
         )}
         <div className="absolute inset-0 bg-black/35" />
         <div className="absolute inset-0 flex items-center justify-center px-6">
-          <h1 className="text-white text-center font-semibold drop-shadow leading-tight
-                         text-[34px] sm:text-[42px] md:text-[56px] lg:text-[66px]
-                         max-w-6xl mx-auto">
-            {momentName.toUpperCase()}
+          <h1
+            className="
+              text-white text-center font-semibold drop-shadow leading-tight
+              text-[38px]
+              sm:text-[50px]
+              md:text-[68px]
+              lg:text-[82px]
+              xl:text-[92px]
+              max-w-6xl mx-auto
+            "
+          >
+            {momentName}
           </h1>
         </div>
       </div>
 
-      {/* CONTENT BELOW HERO (centered) */}
+      {/* CONTENT BELOW HERO (centered, serif/news body) */}
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-16">
         <div className="text-center mb-12">
           <Link
@@ -313,36 +319,23 @@ export function GalleryMomentDetail() {
           </Link>
 
           {momentDescription && (
-            <p className="brand-prose mx-auto mb-8">{momentDescription}</p>
+            <div className="max-w-3xl mx-auto">
+              <p className="font-serif text-[20px] leading-[1.9] text-neutral-800">
+                {momentDescription}
+              </p>
+            </div>
           )}
 
-          <div className="eyebrow">
+          <div className="mt-8 text-xs uppercase tracking-[0.35em] text-neutral-700">
             {images.length} IMAGES · {venueCount} VENUES
           </div>
         </div>
 
-        {/* Venue pills (optional, but neat and still centered) */}
-        {venues.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-2 mb-10">
-            {venues.slice(0, 18).map((v) => (
-              <span
-                key={v}
-                className="px-3 py-1 rounded-full border border-neutral-200 text-sm text-neutral-700 bg-white"
-              >
-                {v}
-              </span>
-            ))}
-            {venues.length > 18 && (
-              <span className="px-3 py-1 rounded-full border border-neutral-200 text-sm text-neutral-500 bg-white">
-                +{venues.length - 18} more
-              </span>
-            )}
-          </div>
-        )}
-
         {/* GRID */}
         {images.length === 0 ? (
-          <div className="text-center py-20 text-neutral-600">No images found for this moment.</div>
+          <div className="text-center py-20 text-neutral-600">
+            No images found for this moment.
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {images.map((img, idx) => (
