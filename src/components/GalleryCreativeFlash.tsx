@@ -23,6 +23,47 @@ function setSeo(title: string, description: string) {
   }
   meta.setAttribute("content", description);
 }
+// --- Ordering helpers (pinned + stable shuffle) -----------------------------
+
+// Put these FIRST. Use filenames exactly as in CSV (the _500.webp names).
+// Example moment-style pinned, but for creative flash page:
+const PINNED: string[] = [
+  "MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp",
+  "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-113_2000.webp",
+  "mkb-weddings-irish-wedding-photographer-redcastle-hotel-moville-wedding-photography-24_500.webp",
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-112_500.webp"
+];
+
+// Simple hash for stable “random” ordering (no libraries)
+function hashStringToInt(str: string) {
+  let h = 2166136261; // FNV-ish
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/**
+ * Stable shuffle:
+ * - same order for the same seed
+ * - changes if you change the seed (or add/remove images)
+ */
+function stableShuffle<T>(arr: T[], seed: string, keyFn: (t: T) => string) {
+  const copy = [...arr];
+  copy.sort((a, b) => {
+    const ka = keyFn(a);
+    const kb = keyFn(b);
+    const ha = hashStringToInt(seed + "|" + ka);
+    const hb = hashStringToInt(seed + "|" + kb);
+    return ha - hb;
+  });
+  return copy;
+}
+
+function normalizeFilename(name: string) {
+  return (name || "").trim().toLowerCase();
+}
 
 export function GalleryCreativeFlash() {
   const [rows, setRows] = useState<any[]>([]);
@@ -58,15 +99,29 @@ export function GalleryCreativeFlash() {
     return rows.filter((r) => hasTag(r, "creative-flash"));
   }, [rows]);
 
-  const featured = useMemo(() => {
-    return flashRows.map((r) => ({
-      thumb: thumbUrl(r),
-      full: fullUrlFromThumb(r),
-      alt: `Creative Flash – ${r.venue}`,
-      venue: r.venue,
-      filename: r.filename,
-    }));
-  }, [flashRows]);
+const featured = useMemo(() => {
+  const mapped = flashRows.map((r) => ({
+    thumb: thumbUrl(r),
+    full: fullUrlFromThumb(r),
+    alt: `Creative Flash – ${r.venue}`,
+    venue: r.venue,
+    filename: r.filename, // CSV filename (thumb version)
+  }));
+
+  // 1) Pull out pinned first (match by CSV filename)
+  const pinnedSet = new Set(PINNED.map(normalizeFilename));
+
+  const pinned = mapped.filter((m) => pinnedSet.has(normalizeFilename(m.filename)));
+  const rest = mapped.filter((m) => !pinnedSet.has(normalizeFilename(m.filename)));
+
+  // 2) Stable shuffle the remainder (seed can be whatever you want)
+  // If you want it to change occasionally, change the seed string.
+  const shuffled = stableShuffle(rest, "creative-flash-v1", (m) => m.filename);
+
+  // 3) Final order: pinned first, then shuffled
+  return [...pinned, ...shuffled];
+}, [flashRows]);
+
 
   if (loadError) {
     return (
