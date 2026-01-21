@@ -8,12 +8,7 @@ import storiesImage from 'figma:asset/a4d9c41d478a42542f5eae424fde67c33f39b713.p
 
 export function GalleryLanding() {
   const mainTiles = [
-    {
-      title: 'Venues',
-      link: '/gallery/venues',
-      image: venueImage,
-      description: 'Browse weddings by location',
-    },
+    
     {
       title: 'Wedding Moments',
       link: '/gallery/moments',
@@ -31,6 +26,12 @@ export function GalleryLanding() {
       link: '/blog',
       image: storiesImage,
       description: 'Real wedding love stories',
+    },
+    {
+      title: 'Venues',
+      link: '/gallery/venues',
+      image: venueImage,
+      description: 'Browse weddings by location',
     },
   ];
 
