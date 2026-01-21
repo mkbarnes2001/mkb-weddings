@@ -14,9 +14,9 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
   const count = images.length;
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
-  // swipe
-  const touchStartX = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>(null);
+  // swipe state
+  const startX = useRef<number | null>(null);
+  const startY = useRef<number | null>(null);
 
   const safeIndex = useMemo(() => {
     if (!count) return 0;
@@ -26,8 +26,8 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
   const src = images[safeIndex];
   if (!src || !count) return null;
 
-  const goPrev = () => onNavigate((safeIndex - 1 + count) % count); // wrap
-  const goNext = () => onNavigate((safeIndex + 1) % count); // wrap
+  const goPrev = () => onNavigate((safeIndex - 1 + count) % count);
+  const goNext = () => onNavigate((safeIndex + 1) % count);
 
   useEffect(() => {
     overlayRef.current?.focus();
@@ -36,17 +36,12 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
       if (e.key === "Escape") {
         e.preventDefault();
         onClose();
-        return;
-      }
-      if (e.key === "ArrowLeft") {
+      } else if (e.key === "ArrowLeft") {
         e.preventDefault();
         goPrev();
-        return;
-      }
-      if (e.key === "ArrowRight") {
+      } else if (e.key === "ArrowRight") {
         e.preventDefault();
         goNext();
-        return;
       }
     };
 
@@ -62,19 +57,15 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [safeIndex, count, onClose]);
 
-  const node = (
+  const content = (
     <div
       ref={overlayRef}
       tabIndex={-1}
       role="dialog"
       aria-modal="true"
       aria-label="Image lightbox"
-      // z-[2147483647] is “max int” style – guaranteed above sticky headers
-      className="fixed top-0 left-0 w-screen h-screen z-[2147483647] bg-black/95"
-      style={{
-        // prevent weird bounce/back scroll interactions on mobile
-        overscrollBehavior: "contain",
-      }}
+      className="fixed inset-0 z-[2147483647] bg-black/95"
+      style={{ overscrollBehavior: "contain" }}
     >
       {/* Backdrop */}
       <button
@@ -85,8 +76,8 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
       />
 
       {/* Top bar */}
-      <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-none">
-        <div className="pointer-events-auto text-white/85 text-sm px-3 py-1 rounded-md bg-black/40">
+      <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between">
+        <div className="text-white/85 text-sm px-3 py-1 rounded-md bg-black/40">
           {safeIndex + 1} / {count}
         </div>
 
@@ -94,7 +85,7 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
           type="button"
           aria-label="Close (Esc)"
           onClick={onClose}
-          className="pointer-events-auto rounded-full bg-white/10 hover:bg-white/15 p-2 text-white"
+          className="rounded-full bg-white/10 hover:bg-white/15 p-2 text-white"
         >
           <X className="w-7 h-7" />
         </button>
@@ -119,19 +110,16 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
         <ChevronRight className="w-10 h-10 md:w-12 md:h-12" />
       </button>
 
-      {/* Stage:
-          - explicit width/height so overflow ALWAYS works
-          - scrollable for tall portraits
-          - click left/right half to navigate
-          - touch swipe left/right to navigate
-      */}
+      {/* Stage */}
       <div className="absolute inset-0 z-10 flex items-center justify-center p-4">
+        {/* FIX: fixed size container so overflow can actually scroll */}
         <div
           className="w-[94vw] h-[92vh] overflow-auto"
           style={{
             WebkitOverflowScrolling: "touch",
             touchAction: "pan-y", // allow vertical scroll; we handle horizontal swipe
           }}
+          // click empty area: left half prev, right half next
           onClick={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -140,21 +128,20 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
           }}
           onTouchStart={(e) => {
             const t = e.touches[0];
-            touchStartX.current = t.clientX;
-            touchStartY.current = t.clientY;
+            startX.current = t.clientX;
+            startY.current = t.clientY;
           }}
           onTouchEnd={(e) => {
-            const sx = touchStartX.current;
-            const sy = touchStartY.current;
-            touchStartX.current = null;
-            touchStartY.current = null;
+            const sx = startX.current;
+            const sy = startY.current;
+            startX.current = null;
+            startY.current = null;
             if (sx == null || sy == null) return;
 
             const t = e.changedTouches[0];
             const dx = t.clientX - sx;
             const dy = t.clientY - sy;
 
-            // Only treat as swipe if mostly horizontal and big enough
             if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.2) {
               if (dx < 0) goNext();
               else goPrev();
@@ -166,13 +153,18 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
             alt=""
             draggable={false}
             className="block max-w-full h-auto select-none"
-            onClick={(e) => e.stopPropagation()} // clicking image doesn't close or nav
+            // IMPORTANT: allow click to navigate (next), Shift+click prev
+            onClick={(e) => {
+              e.stopPropagation();
+              if ((e as any).shiftKey) goPrev();
+              else goNext();
+            }}
           />
         </div>
       </div>
     </div>
   );
 
-  return createPortal(node, document.body);
+  return createPortal(content, document.body);
 }
 
