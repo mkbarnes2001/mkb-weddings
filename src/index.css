@@ -3260,4 +3260,32 @@ footer .logo-mkb, footer .logo-weddings {
     line-height: 1.75;
   }
 }
+/* -------------------------------------------------------------------------- */
+/* Brand Prose Wrapper                                                        */
+/* -------------------------------------------------------------------------- */
+@layer base {
+  .brand-prose {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: var(--text-base);
+    line-height: 1.75;
+    color: rgb(64 64 64); /* neutral-700-ish */
+  }
+
+  .brand-prose p {
+    margin-top: 0;
+    margin-bottom: 1.25rem; /* consistent paragraph spacing */
+  }
+
+  .brand-prose p:last-child {
+    margin-bottom: 0;
+  }
+
+  .brand-prose .eyebrow {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: rgb(38 38 38); /* neutral-800 */
+  }
+}
 
