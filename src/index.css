@@ -431,37 +431,6 @@
     font-family: Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;
   }
 
- :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h1 {
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 2.5rem; /* ~text-4xl */
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-:where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h2 {
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 1.875rem; /* ~text-3xl */
-  font-weight: 500;
-  line-height: 1.3;
-}
-
-:where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h3 {
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 1.5rem; /* ~text-2xl */
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-:where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) p {
-  font-size: 1rem; /* base */
-  line-height: 1.6;
-}
-
-  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) p {
-    font-size: var(--text-base);
-    line-height: 1.6;
-  }
-
   :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) label, :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) button {
     font-size: var(--text-base);
     font-weight: var(--font-weight-medium);
@@ -3329,4 +3298,56 @@ footer .logo-mkb, footer .logo-weddings {
     font-family: Inter, system-ui, sans-serif;
   }
 }
+
+/* ===============================
+   BRAND TYPOGRAPHY SYSTEM
+   =============================== */
+
+/* Headings */
+.brand-heading,
+.brand-prose h1 {
+  font-family: "Canela", "Playfair Display", serif;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+}
+
+.brand-prose h1 {
+  font-size: clamp(2.75rem, 5vw, 4rem);
+}
+
+.brand-prose h2 {
+  font-family: "Canela", "Playfair Display", serif;
+  font-size: 2rem;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+}
+
+.brand-prose h3 {
+  font-family: "Canela", "Playfair Display", serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+/* News-style body copy */
+.brand-prose {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #2a2a2a;
+}
+
+.brand-prose p {
+  margin-bottom: 1.75rem;
+}
+
+/* Small caps / eyebrow text */
+.brand-eyebrow {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
 
