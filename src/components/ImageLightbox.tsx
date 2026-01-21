@@ -52,6 +52,7 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
 
     window.addEventListener("keydown", onKeyDown);
 
+    // lock background scroll
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
@@ -62,23 +63,26 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [safeIndex, count, onClose]);
 
+  // Critical overlay styling (inline to avoid purge/override)
   const overlayStyle: React.CSSProperties = {
     position: "fixed",
     top: 0,
     left: 0,
     width: "100vw",
     height: "100vh",
-    zIndex: 2147483647, // force above everything
+    zIndex: 2147483647,
     background: "rgba(0,0,0,0.95)",
     overscrollBehavior: "contain",
   };
 
+  // Stage: fixed size, no scrolling. Image fits inside.
   const stageStyle: React.CSSProperties = {
     width: "94vw",
     height: "92vh",
-    overflowY: "auto",
-    overflowX: "hidden",
-    WebkitOverflowScrolling: "touch",
+    overflow: "hidden",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     touchAction: "pan-y",
   };
 
@@ -86,8 +90,7 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
     background: "rgba(0,0,0,0.4)",
   };
 
-  const roundBtnClass =
-    "rounded-full p-2 text-white bg-white/10 hover:bg-white/15";
+  const roundBtnClass = "rounded-full p-2 text-white bg-white/10 hover:bg-white/15";
 
   const content = (
     <div
@@ -118,7 +121,6 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          pointerEvents: "auto",
         }}
       >
         <div className="text-white/85 text-sm px-3 py-1 rounded-md" style={pillStyle}>
@@ -130,7 +132,7 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
         </button>
       </div>
 
-      {/* Prev/Next buttons */}
+      {/* Prev/Next */}
       <button
         type="button"
         aria-label="Previous (←)"
@@ -177,13 +179,14 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
       >
         <div
           style={stageStyle}
+          // click empty area: left half prev, right half next
           onClick={(e) => {
-            // click empty area: left half prev, right half next
             const rect = e.currentTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
             if (x < rect.width / 2) goPrev();
             else goNext();
           }}
+          // swipe support
           onTouchStart={(e) => {
             const t = e.touches[0];
             startX.current = t.clientX;
@@ -200,6 +203,7 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
             const dx = t.clientX - sx;
             const dy = t.clientY - sy;
 
+            // horizontal swipe threshold + mostly horizontal
             if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.2) {
               if (dx < 0) goNext();
               else goPrev();
@@ -210,12 +214,19 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
             src={src}
             alt=""
             draggable={false}
-            // critical: allow image to exceed container height so you can scroll portrait
-            style={{ display: "block", maxWidth: "100%", height: "auto", maxHeight: "none" }}
             className="select-none"
+            // KEY CHANGE: fit entirely in stage (no scroll)
+            style={{
+              display: "block",
+              maxWidth: "100%",
+              maxHeight: "100%",
+              width: "auto",
+              height: "auto",
+              objectFit: "contain",
+            }}
+            // click image: next (Shift+click: prev)
             onClick={(e) => {
               e.stopPropagation();
-              // click image: next (Shift+click: prev)
               if ((e as any).shiftKey) goPrev();
               else goNext();
             }}
