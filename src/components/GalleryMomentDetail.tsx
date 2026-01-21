@@ -95,7 +95,7 @@ function fullUrlFromThumb(r: CsvRow) {
   )}/${encodeURIComponent(filename2000)}`;
 }
 
-// Hero per moment (keys must match slugify(category))
+// Keys must match slugify(category) from CSV
 const MOMENT_HERO: Record<string, string> = {
   "getting-ready": gettingReadyHero,
   ceremony: ceremonyHero,
@@ -105,7 +105,7 @@ const MOMENT_HERO: Record<string, string> = {
   "details-and-decor": detailsDecorHero,
 };
 
-// Curated overlay copy + SEO description
+// Curated copy (used below the hero + for SEO description)
 const MOMENT_COPY: Record<string, { title: string; description: string }> = {
   "getting-ready": {
     title: "Getting Ready",
@@ -195,18 +195,13 @@ export function GalleryMomentDetail() {
       thumb: thumbUrl(r),
       full: fullUrlFromThumb(r),
       alt: `${r.venue} – ${r.category}`,
-      venue: r.venue,
     }));
   }, [momentRows]);
 
-  const venues = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const r of momentRows) {
-      map.set(r.venue, (map.get(r.venue) ?? 0) + 1);
-    }
-    return Array.from(map.entries())
-      .map(([venue, count]) => ({ venue, count, venueId: slugify(venue) }))
-      .sort((a, b) => a.venue.localeCompare(b.venue));
+  const venuesCount = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of momentRows) set.add(r.venue);
+    return set.size;
   }, [momentRows]);
 
   const copy = momentId ? MOMENT_COPY[momentId] : undefined;
@@ -226,7 +221,9 @@ export function GalleryMomentDetail() {
     const origin = window.location.origin;
     setSeoMeta({
       title: `${title} | MKB Weddings`,
-      description: `${description} Browse ${images.length} image${images.length === 1 ? "" : "s"} across venues.`,
+      description: `${description} Browse ${images.length} image${
+        images.length === 1 ? "" : "s"
+      } across venues.`,
       canonical: `${origin}/gallery/moment/${encodeURIComponent(momentId)}`,
     });
   }, [momentId, title, description, images.length]);
@@ -263,51 +260,55 @@ export function GalleryMomentDetail() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO */}
-      <div className="relative h-[60vh] min-h-[420px]">
+      {/* HERO (smaller, title only) */}
+      <div className="relative h-[40vh] min-h-[280px]">
         <ImageWithFallback src={heroImage} alt={title} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
 
         <div className="absolute inset-0">
-          <div className="max-w-7xl mx-auto px-6 h-full flex flex-col justify-end pb-14">
-            <div className="mb-6 flex items-center justify-between gap-6 flex-wrap">
-              <Link
-                to="/gallery/moments"
-                className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                Back to Moments
-              </Link>
-
-              <nav className="text-white/75 text-sm flex items-center gap-2 flex-wrap">
-                <Link to="/gallery" className="hover:text-white transition-colors">
-                  Gallery
-                </Link>
-                <ChevronRight className="w-4 h-4 opacity-70" />
-                <Link to="/gallery/moments" className="hover:text-white transition-colors">
-                  Moments
-                </Link>
-                <ChevronRight className="w-4 h-4 opacity-70" />
-                <span className="text-white">{title}</span>
-              </nav>
-            </div>
-
-            <h1 className="text-white text-4xl md:text-5xl tracking-wide uppercase mb-4">
+          <div className="max-w-7xl mx-auto px-6 h-full flex items-end pb-8">
+            <h1 className="text-white text-4xl md:text-5xl tracking-wide uppercase">
               {title}
             </h1>
-            <p className="text-white/85 max-w-2xl text-base md:text-lg mb-6">{description}</p>
+          </div>
+        </div>
+      </div>
 
-            <div className="text-white/80 text-sm uppercase tracking-wider">
-              {images.length} image{images.length === 1 ? "" : "s"} across {venues.length} venue
-              {venues.length === 1 ? "" : "s"}
-            </div>
+      {/* META (under hero) */}
+      <div className="max-w-7xl mx-auto px-6 pt-8 pb-10">
+        {/* Back + breadcrumbs row */}
+        <div className="flex items-center justify-between gap-6 flex-wrap mb-5">
+          <Link
+            to="/gallery/moments"
+            className="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Moments
+          </Link>
 
-           </div>
+          <nav className="text-neutral-500 text-sm flex items-center gap-2 flex-wrap">
+            <Link to="/gallery" className="hover:text-neutral-900 transition-colors">
+              Gallery
+            </Link>
+            <ChevronRight className="w-4 h-4 opacity-60" />
+            <Link to="/gallery/moments" className="hover:text-neutral-900 transition-colors">
+              Moments
+            </Link>
+            <ChevronRight className="w-4 h-4 opacity-60" />
+            <span className="text-neutral-700">{title}</span>
+          </nav>
+        </div>
+
+        <p className="text-neutral-700 max-w-3xl text-lg mb-4">{description}</p>
+
+        <div className="text-neutral-500 text-sm uppercase tracking-wider">
+          {images.length} image{images.length === 1 ? "" : "s"} · {venuesCount} venue
+          {venuesCount === 1 ? "" : "s"}
         </div>
       </div>
 
       {/* GRID */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 pb-12">
         {images.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">No images found for this moment.</div>
         ) : (
@@ -321,6 +322,7 @@ export function GalleryMomentDetail() {
                   setLightboxOpen(true);
                 }}
                 className="aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left"
+                aria-label={`Open image ${idx + 1}`}
               >
                 <ImageWithFallback
                   src={img.thumb}
@@ -332,6 +334,7 @@ export function GalleryMomentDetail() {
           </div>
         )}
 
+        {/* LIGHTBOX */}
         {lightboxOpen && images.length > 0 && (
           <ImageLightbox
             images={images.map((i) => i.full)}
