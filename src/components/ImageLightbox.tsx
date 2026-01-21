@@ -113,14 +113,13 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
       {/* Stage */}
       <div className="absolute inset-0 z-10 flex items-center justify-center p-4">
         {/* FIX: fixed size container so overflow can actually scroll */}
-        <div
-          className="w-[94vw] h-[92vh] overflow-auto"
-          style={{
-            WebkitOverflowScrolling: "touch",
-            touchAction: "pan-y", // allow vertical scroll; we handle horizontal swipe
-          }}
-          // click empty area: left half prev, right half next
-          onClick={(e) => {
+       <div
+  className="w-[94vw] h-[92vh] overflow-y-auto overflow-x-hidden"
+  style={{
+    WebkitOverflowScrolling: "touch",
+    touchAction: "pan-y",
+  }}
+>
             const rect = e.currentTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
             if (x < rect.width / 2) goPrev();
@@ -148,18 +147,21 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
             }
           }}
         >
-          <img
-            src={src}
-            alt=""
-            draggable={false}
-            className="block max-w-full h-auto select-none"
-            // IMPORTANT: allow click to navigate (next), Shift+click prev
-            onClick={(e) => {
-              e.stopPropagation();
-              if ((e as any).shiftKey) goPrev();
-              else goNext();
-            }}
-          />
+     <img
+  src={src}
+  alt=""
+  draggable={false}
+  className="block w-auto max-w-full select-none"
+  style={{ maxHeight: "none" }}   // ← allows tall portraits
+  onClick={(e) => {
+    e.stopPropagation();
+    if (e.shiftKey) {
+      goPrev();
+    } else {
+      goNext();
+    }
+  }}
+/>
         </div>
       </div>
     </div>
