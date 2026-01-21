@@ -12,9 +12,10 @@ type Props = {
 
 export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Props) {
   const count = images.length;
+
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
-  // swipe state
+  // Swipe state
   const startX = useRef<number | null>(null);
   const startY = useRef<number | null>(null);
 
@@ -26,8 +27,8 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
   const src = images[safeIndex];
   if (!src || !count) return null;
 
-  const goPrev = () => onNavigate((safeIndex - 1 + count) % count);
-  const goNext = () => onNavigate((safeIndex + 1) % count);
+  const goPrev = () => onNavigate((safeIndex - 1 + count) % count); // wrap
+  const goNext = () => onNavigate((safeIndex + 1) % count); // wrap
 
   useEffect(() => {
     overlayRef.current?.focus();
@@ -36,17 +37,23 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
       if (e.key === "Escape") {
         e.preventDefault();
         onClose();
-      } else if (e.key === "ArrowLeft") {
+        return;
+      }
+      if (e.key === "ArrowLeft") {
         e.preventDefault();
         goPrev();
-      } else if (e.key === "ArrowRight") {
+        return;
+      }
+      if (e.key === "ArrowRight") {
         e.preventDefault();
         goNext();
+        return;
       }
     };
 
     window.addEventListener("keydown", onKeyDown);
 
+    // lock background scroll while open
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
@@ -91,7 +98,7 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
         </button>
       </div>
 
-      {/* Nav buttons (always visible) */}
+      {/* Prev / Next buttons (always visible) */}
       <button
         type="button"
         aria-label="Previous (←)"
@@ -110,21 +117,22 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
         <ChevronRight className="w-10 h-10 md:w-12 md:h-12" />
       </button>
 
-      {/* Stage */}
+      {/* Stage (scrollable, swipeable) */}
       <div className="absolute inset-0 z-10 flex items-center justify-center p-4">
-        {/* FIX: fixed size container so overflow can actually scroll */}
-       <div
-  className="w-[94vw] h-[92vh] overflow-y-auto overflow-x-hidden"
-  style={{
-    WebkitOverflowScrolling: "touch",
-    touchAction: "pan-y",
-  }}
->
+        <div
+          className="w-[94vw] h-[92vh] overflow-y-auto overflow-x-hidden"
+          style={{
+            WebkitOverflowScrolling: "touch",
+            touchAction: "pan-y",
+          }}
+          // click empty area: left half prev, right half next
+          onClick={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
             if (x < rect.width / 2) goPrev();
             else goNext();
           }}
+          // swipe support
           onTouchStart={(e) => {
             const t = e.touches[0];
             startX.current = t.clientX;
@@ -141,27 +149,31 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
             const dx = t.clientX - sx;
             const dy = t.clientY - sy;
 
+            // horizontal swipe threshold + must be mostly horizontal
             if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.2) {
               if (dx < 0) goNext();
               else goPrev();
             }
           }}
         >
-     <img
-  src={src}
-  alt=""
-  draggable={false}
-  className="block w-auto max-w-full select-none"
-  style={{ maxHeight: "none" }}   // ← allows tall portraits
-  onClick={(e) => {
-    e.stopPropagation();
-    if (e.shiftKey) {
-      goPrev();
-    } else {
-      goNext();
-    }
-  }}
-/>
+          {/* IMPORTANT:
+              maxHeight: none allows portrait images to exceed container height
+              so the container can scroll.
+          */}
+          <img
+            src={src}
+            alt=""
+            draggable={false}
+            className="block w-auto max-w-full select-none"
+            style={{ maxHeight: "none" }}
+            // click image: next, Shift+click: prev
+            onClick={(e) => {
+              e.stopPropagation();
+              if ((e as any).shiftKey) goPrev();
+              else goNext();
+            }}
+            onError={() => console.error("Lightbox image failed to load:", src)}
+          />
         </div>
       </div>
     </div>
