@@ -108,7 +108,7 @@ export function GalleryCreativeFlash() {
           Master of Flash Wedding Photography
         </h2>
 
-        <div className="text-center text-neutral-700 leading-relaxed space-y-6">
+        <p className="font-serif text-lg leading-relaxed text-neutral-700">
           <p>
             Known as a master of flash wedding photography, MKB Weddings creates bold, vibrant, and
             dramatic images that stand out. Our flash photography expertise is perfect for evening
