@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
 
-// Optional Figma hero images (use these instead of first gallery image if you prefer)
+// Optional Figma hero images (recommended for consistent look)
 import gettingReadyHero from "figma:asset/fb84c4cbee696343b417ad4224fe2d9c9960ad49.png";
 import ceremonyHero from "figma:asset/824b08dfe2d92a128003e19c7f69fd10d28b2015.png";
 import couplePortraitHero from "figma:asset/9caf1b2bbff1bbb43c7fe20f8da33be74aa354be.png";
@@ -25,10 +25,10 @@ const THUMB_BASE =
 const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
-/** Toggle: stable “mixed” order per moment (recommended if you want variety). */
+// Toggle: stable “mixed” order per moment (optional)
 const ENABLE_STABLE_SHUFFLE = false;
 
-/** Toggle: use Figma hero images per moment; fallback to first image in moment. */
+// Toggle: use Figma hero images; fallback to first gallery image if missing
 const USE_FIGMA_HERO = true;
 
 function slugify(s: string) {
@@ -105,7 +105,7 @@ function fullUrlFromThumb(r: CsvRow) {
   )}/${encodeURIComponent(filename2000)}`;
 }
 
-/** SEO helper */
+// SEO helper
 function setSeoMeta(args: { title: string; description: string; canonical?: string }) {
   document.title = args.title;
 
@@ -128,7 +128,7 @@ function setSeoMeta(args: { title: string; description: string; canonical?: stri
   }
 }
 
-/** Stable shuffle (optional) */
+// Stable shuffle (optional)
 function mulberry32(seed: number) {
   return function () {
     let t = (seed += 0x6d2b79f5);
@@ -155,7 +155,7 @@ function shuffledStable<T>(arr: T[], seedKey: string) {
   return out;
 }
 
-/** Moment config: title/description/SEO + hero image */
+// Curated copy + hero per moment (keys must match slugify(category) in CSV)
 const MOMENT_CONFIG: Record<
   string,
   { title: string; description: string; seoDescription?: string; hero?: string }
@@ -205,15 +205,15 @@ const MOMENT_CONFIG: Record<
 };
 
 /**
- * Hero crop focus per moment.
- * Edit values to adjust cropping focus:
- *   "50% 50%" = center
- *   "50% 60%" = lower (shows more below)
- *   "50% 40%" = higher (shows more above)
+ * Adjust hero crop focus per moment.
+ * Examples:
+ *  - "50% 50%" center
+ *  - "50% 60%" lower (shows more bottom)
+ *  - "50% 40%" higher (shows more top)
  */
 const HERO_FOCUS: Record<string, string> = {
   "getting-ready": "50% 45%",
-  ceremony: "50% 50%",
+  ceremony: "50% 55%",
   "couple-portraits": "50% 60%",
   "family-and-bridal-party": "50% 55%",
   "reception-and-party": "50% 55%",
@@ -229,7 +229,6 @@ export function GalleryMomentDetail() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  // Load CSV
   useEffect(() => {
     let cancelled = false;
 
@@ -272,10 +271,7 @@ export function GalleryMomentDetail() {
       venue: r.venue,
       filename: r.filename,
     }));
-
-    if (ENABLE_STABLE_SHUFFLE) {
-      return shuffledStable(base, momentId ?? "moment");
-    }
+    if (ENABLE_STABLE_SHUFFLE) return shuffledStable(base, momentId ?? "moment");
     return base;
   }, [momentRows, momentId]);
 
@@ -283,7 +279,6 @@ export function GalleryMomentDetail() {
   const title = cfg?.title ?? momentNameFromCsv ?? "Moment";
   const description = cfg?.description ?? "A curated selection of wedding images.";
 
-  // Pick hero image
   const heroImage =
     (USE_FIGMA_HERO ? cfg?.hero : undefined) ||
     images[0]?.full ||
@@ -340,37 +335,32 @@ export function GalleryMomentDetail() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO (fixed height + cropped) */}
-      <div className="relative h-[320px] md:h-[380px] overflow-hidden">
+      {/* HERO (hard-fixed height, cropped, no text on hero) */}
+      <div className="relative h-[220px] md:h-[300px] overflow-hidden">
         <ImageWithFallback
           src={heroImage}
           alt={title}
           className="w-full h-full object-cover"
           style={{ objectPosition: heroFocus }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-
-        <div className="absolute inset-0 flex items-end">
-          <div className="max-w-7xl mx-auto px-6 pb-8 w-full">
-            <h1 className="text-white text-4xl md:text-5xl uppercase tracking-widest">
-              {title}
-            </h1>
-          </div>
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-black/10 to-transparent" />
       </div>
 
-      {/* META (under hero) */}
+      {/* HEADER + META (below hero) */}
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-10">
         <Link
           to="/gallery/moments"
           className="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 mb-8"
         >
+         _bp
           <ArrowLeft className="w-5 h-5" />
           Back to Moments
         </Link>
 
-        {/* Increased spacing between heading/description by design:
-            Title is on hero; description gets generous margin */}
+        <h1 className="text-4xl md:text-5xl uppercase tracking-widest text-neutral-900 mb-6">
+          {title}
+        </h1>
+
         <p className="text-neutral-700 text-lg max-w-3xl leading-relaxed mb-10">
           {description}
         </p>
@@ -405,7 +395,7 @@ export function GalleryMomentDetail() {
                   />
                 </button>
 
-                {/* Simple story-style caption (clean + SEO-friendly) */}
+                {/* Simple story-style caption */}
                 <div className="mt-2 text-sm text-neutral-600">{img.venue}</div>
               </div>
             ))}
