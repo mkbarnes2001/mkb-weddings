@@ -3318,4 +3318,15 @@ footer .logo-mkb, footer .logo-weddings {
     margin-bottom: 0;
   }
 }
+@layer base {
+  /* Force editorial serif for content text by default */
+  p, li, blockquote, dd, dt, label, small, span {
+    font-family: "Canela", Georgia, "Times New Roman", serif;
+  }
+
+  /* Keep UI elements in Inter */
+  nav, header, footer, button, input, select, textarea, .ui-text {
+    font-family: Inter, system-ui, sans-serif;
+  }
+}
 
