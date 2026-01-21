@@ -352,7 +352,6 @@ export function GalleryMomentDetail() {
           to="/gallery/moments"
           className="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 mb-8"
         >
-         _bp
           <ArrowLeft className="w-5 h-5" />
           Back to Moments
         </Link>
