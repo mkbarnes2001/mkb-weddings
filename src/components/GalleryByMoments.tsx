@@ -76,28 +76,20 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
 }
 
 /**
- * Your curated Moments tiles (Figma images + display copy).
- * `id` MUST match slugify(category) from the CSV.
- *
- * From your CSV screenshot, categories are:
- *  - getting ready            => getting-ready
- *  - ceremony                 => ceremony
- *  - couple portraits         => couple-portraits
- *  - family and bridal party  => family-and-bridal-party
- *  - reception and party      => reception-and-party
- *  - details and decor        => details-and-decor
+ * Your curated tiles (Figma images + copy).
+ * IDs MUST match slugify(category) from CSV.
  */
 const MOMENT_TILES = [
   {
     id: "getting-ready",
     title: "Getting Ready",
-    description: "Preparation, anticipation, and the quiet moments before the ceremony",
+    description: "Preparation, anticipation, and quiet moments before the ceremony",
     image: gettingReadyImage,
   },
   {
     id: "ceremony",
     title: "Ceremony",
-    description: "The vows, the emotion, and the moment everything changes",
+    description: 'The vows, the emotion, and the moment you say “I do”',
     image: ceremonyImage,
   },
   {
@@ -108,19 +100,19 @@ const MOMENT_TILES = [
   },
   {
     id: "family-and-bridal-party",
-    title: "Family & Bridal Party",
+    title: "Family and Bridal Party",
     description: "Celebrating with the people who matter most",
     image: bridalPartyImage,
   },
   {
     id: "reception-and-party",
-    title: "Reception & Party",
+    title: "Reception and Party",
     description: "Speeches, laughter, dancing — the celebration in full swing",
     image: receptionImage,
   },
   {
     id: "details-and-decor",
-    title: "Details & Decor",
+    title: "Details and Decor",
     description: "The thoughtful styling, florals, and finishing touches",
     image: detailsDecorImage,
   },
@@ -160,7 +152,7 @@ export function GalleryByMoments() {
     return map;
   }, [rows]);
 
-  // Hide tiles that have no images in CSV (so you can “disable” by removing CSV rows)
+  // Hide tiles with no images (remove rows in CSV = disable moment)
   const tilesToShow = useMemo(() => {
     return MOMENT_TILES.filter((t) => (countsByMomentId.get(t.id) ?? 0) > 0);
   }, [countsByMomentId]);
@@ -182,10 +174,10 @@ export function GalleryByMoments() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
-        {/* Moments Grid — preserves your original Figma design */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {tilesToShow.map((moment) => {
             const count = countsByMomentId.get(moment.id) ?? 0;
+
             return (
               <Link
                 key={moment.id}
