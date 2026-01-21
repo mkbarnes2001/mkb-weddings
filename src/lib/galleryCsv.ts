@@ -1,19 +1,18 @@
 // src/lib/galleryCsv.ts
 export type CsvRow = {
   venue: string;
-  category: string; // primary folder category (moment)
-  filename: string; // thumbnail filename, ends _500.webp
-  tags?: string; // optional: comma-separated tags (e.g. "creative flash,portfolio")
+  category: string;
+  filename: string; // _500.webp
+  tags?: string; // optional: comma-separated
 };
 
-// IMPORTANT: keep same values you use elsewhere
 export const THUMB_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
 export const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
 export function slugify(s: string) {
-  return s
+  return (s || "")
     .trim()
     .toLowerCase()
     .replace(/&/g, "and")
@@ -25,7 +24,7 @@ export function encSegment(s: string) {
   return encodeURIComponent(s);
 }
 
-// Tiny CSV parser that respects quotes
+// CSV line parser (supports quoted cells)
 function parseLine(line: string) {
   const out: string[] = [];
   let cur = "";
@@ -56,10 +55,10 @@ export function parseGalleryCsv(csvText: string): CsvRow[] {
   const venueIdx = header.indexOf("venue");
   const categoryIdx = header.indexOf("category");
   const filenameIdx = header.indexOf("filename");
-  const tagsIdx = header.indexOf("tags"); // OPTIONAL column
+  const tagsIdx = header.indexOf("tags"); // optional
 
   if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) {
-    console.error("CSV header must include: venue,category,filename (tags optional)");
+    console.error("gallery.csv must include: venue,category,filename (tags optional)");
     return [];
   }
 
@@ -105,8 +104,7 @@ export function splitTags(row: CsvRow) {
     .filter(Boolean);
 }
 
-export function hasTag(row: CsvRow, tagSlug: string) {
-  const tags = splitTags(row).map(slugify);
-  return tags.includes(slugify(tagSlug));
+export function hasTag(row: CsvRow, tag: string) {
+  const want = slugify(tag);
+  return splitTags(row).some((t) => slugify(t) === want);
 }
-
