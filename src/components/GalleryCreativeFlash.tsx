@@ -228,7 +228,8 @@ export function GalleryCreativeFlash() {
       {/* TEXT */}
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <div className="eyebrow mb-10">Master of Flash Wedding Photography</div>
+          <div className="eyebrow mb-10 mt-2 text-center">
+      Master of Flash Wedding Photography</div>
 
           <div className="brand-prose mx-auto">
             <p>
