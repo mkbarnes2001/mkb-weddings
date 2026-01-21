@@ -80,7 +80,7 @@ export function GalleryCreativeFlash() {
   return (
     <div className="min-h-screen bg-white">
       {/* HERO (Figma look) */}
-      <div className="relative h-[280px] md:h-[360px] overflow-hidden">
+     <div className="relative h-[280px] md:h-[360px] overflow-hidden mb-20 md:mb-32">
         <ImageWithFallback
           src={creativeFlashHero}
           alt="Creative Flash Photography"
@@ -103,7 +103,7 @@ export function GalleryCreativeFlash() {
       </div>
 
       {/* BODY COPY (matches your designed page) */}
-      <div className="max-w-5xl mx-auto px-6 py-14">
+     <div className="max-w-3xl mx-auto text-center mt-12 md:mt-16">
         <h2 className="text-center text-sm uppercase tracking-widest text-neutral-800 mb-8">
           Master of Flash Wedding Photography
         </h2>
@@ -124,7 +124,7 @@ export function GalleryCreativeFlash() {
       </div>
 
 {/* GALLERY GRID (Moments-sized thumbnails + venue caption) */}
-<div className="max-w-7xl mx-auto px-6 pb-16">
+<div className="max-w-7xl mx-auto px-6 pt-16 md:pt-20 pb-16">
   {featured.length === 0 ? (
     <div className="text-center py-20 text-neutral-600">
       No images tagged <span className="font-medium">creative-flash</span> yet.
