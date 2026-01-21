@@ -209,8 +209,9 @@ export function GalleryCreativeFlash() {
       </div>
 
       {/* BODY */}
-      <div className="max-w-7xl mx-auto px-6 pb-16">
-        {/* Brand prose wrapper (global typography) */}
+      <div className="max-w-5xl mx-auto text-center mt-16 mb-16">
+  <div className="brand-prose">
+    <div className="eyebrow mb-8">Master of Flash Wedding Photography</div>prose wrapper (global typography) */}
         <div className="brand-prose text-center max-w-5xl mx-auto mb-16">
           <div className="eyebrow mb-8">Master of Flash Wedding Photography</div>
 
