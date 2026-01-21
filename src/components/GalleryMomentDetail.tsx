@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
 
-// Optional Figma hero images (recommended for consistent look)
+// Optional Figma hero images (keeps design consistent)
 import gettingReadyHero from "figma:asset/fb84c4cbee696343b417ad4224fe2d9c9960ad49.png";
 import ceremonyHero from "figma:asset/824b08dfe2d92a128003e19c7f69fd10d28b2015.png";
 import couplePortraitHero from "figma:asset/9caf1b2bbff1bbb43c7fe20f8da33be74aa354be.png";
@@ -19,24 +19,96 @@ type CsvRow = {
   filename: string; // ends in _500.webp
 };
 
-// Your R2 public base URLs
+// R2 public base URLs
 const THUMB_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
 const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
-// Toggle: stable “mixed” order per moment (optional)
-const ENABLE_STABLE_SHUFFLE = true;
+// Shuffle the NON-pinned items in a stable way (recommended)
+const ENABLE_STABLE_SHUFFLE_FOR_REST = true;
 
-// Toggle: use Figma hero images; fallback to first gallery image if missing
+// Use Figma hero images per moment (fallback to first image if missing)
 const USE_FIGMA_HERO = true;
 
+/**
+ * PINNED IMAGES: Put these FIRST for each moment.
+ * - Keys MUST match your moment route slug (momentId)
+ * - Values MUST be filenames exactly as in gallery.csv (the _500.webp names)
+ */
 const PINNED: Record<string, string[]> = {
-  ceremony: [
-    "MKB_1234_500.webp",
-    "MKB_1890_500.webp",
-    "MKB_1777_500.webp",
-  ],
+  // Example:
+  // ceremony: ["MKB_1234_500.webp", "MKB_1890_500.webp", "MKB_1777_500.webp"],
+  ceremony: [],
+  "getting-ready": [],
+  "couple-portraits": [],
+  "family-and-bridal-party": [],
+  "reception-and-party": [],
+  "details-and-decor": [],
+};
+
+/**
+ * Adjust hero crop focus per moment.
+ * Examples:
+ *  - "50% 50%" center
+ *  - "50% 60%" lower (show more bottom)
+ *  - "50% 40%" higher (show more top)
+ */
+const HERO_FOCUS: Record<string, string> = {
+  "getting-ready": "50% 45%",
+  ceremony: "50% 55%",
+  "couple-portraits": "50% 60%",
+  "family-and-bridal-party": "50% 55%",
+  "reception-and-party": "50% 55%",
+  "details-and-decor": "50% 50%",
+};
+
+const MOMENT_CONFIG: Record<
+  string,
+  { title: string; description: string; seoDescription?: string; hero?: string }
+> = {
+  "getting-ready": {
+    title: "Getting Ready",
+    description: "Preparation, anticipation, and quiet moments before the ceremony.",
+    seoDescription:
+      "Getting ready wedding photography – preparation, details, and candid moments before the ceremony.",
+    hero: gettingReadyHero,
+  },
+  ceremony: {
+    title: "Ceremony",
+    description: 'The vows, the emotion, and the moment you say “I do”.',
+    seoDescription:
+      "Ceremony wedding photography – vows, reactions, and emotional moments captured naturally.",
+    hero: ceremonyHero,
+  },
+  "couple-portraits": {
+    title: "Couple Portraits",
+    description: "Just the two of you — captured naturally and beautifully.",
+    seoDescription:
+      "Couple portraits wedding photography – romantic portraits, natural moments, and beautiful light.",
+    hero: couplePortraitHero,
+  },
+  "family-and-bridal-party": {
+    title: "Family & Bridal Party",
+    description: "Celebrating with the people who matter most.",
+    seoDescription:
+      "Family and bridal party wedding photography – group portraits and candid celebration moments.",
+    hero: bridalPartyHero,
+  },
+  "reception-and-party": {
+    title: "Reception & Party",
+    description: "Speeches, laughter, dancing — the celebration in full swing.",
+    seoDescription:
+      "Reception wedding photography – speeches, dancing, and the best party moments of the day.",
+    hero: receptionHero,
+  },
+  "details-and-decor": {
+    title: "Details & Decor",
+    description: "The thoughtful styling, florals, and finishing touches.",
+    seoDescription:
+      "Wedding details photography – décor, styling, florals, and the little things that matter.",
+    hero: detailsDecorHero,
+  },
 };
 
 function slugify(s: string) {
@@ -83,10 +155,7 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
   const categoryIdx = header.indexOf("category");
   const filenameIdx = header.indexOf("filename");
 
-  if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) {
-    console.error("CSV header must include: venue, category, filename");
-    return [];
-  }
+  if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) return [];
 
   const rows: CsvRow[] = [];
   for (let i = 1; i < lines.length; i++) {
@@ -136,7 +205,7 @@ function setSeoMeta(args: { title: string; description: string; canonical?: stri
   }
 }
 
-// Stable shuffle (optional)
+// Stable shuffle helpers
 function mulberry32(seed: number) {
   return function () {
     let t = (seed += 0x6d2b79f5);
@@ -163,60 +232,7 @@ function shuffledStable<T>(arr: T[], seedKey: string) {
   return out;
 }
 
-// Curated copy + hero per moment (keys must match slugify(category) in CSV)
-const MOMENT_CONFIG: Record<
-  string,
-  { title: string; description: string; seoDescription?: string; hero?: string }
-> = {
-  "getting-ready": {
-    title: "Getting Ready",
-    description: "Preparation, anticipation, and quiet moments before the ceremony.",
-    seoDescription:
-      "Getting ready wedding photography – preparation, details, and candid moments before the ceremony.",
-    hero: gettingReadyHero,
-  },
-  ceremony: {
-    title: "Ceremony",
-    description: 'The vows, the emotion, and the moment you say “I do”.',
-    seoDescription:
-      "Ceremony wedding photography – vows, reactions, and emotional moments captured naturally.",
-    hero: ceremonyHero,
-  },
-  "couple-portraits": {
-    title: "Couple Portraits",
-    description: "Just the two of you — captured naturally and beautifully.",
-    seoDescription:
-      "Couple portraits wedding photography – romantic portraits, natural moments, and beautiful light.",
-    hero: couplePortraitHero,
-  },
-  "family-and-bridal-party": {
-    title: "Family & Bridal Party",
-    description: "Celebrating with the people who matter most.",
-    seoDescription:
-      "Family and bridal party wedding photography – group portraits and candid celebration moments.",
-    hero: bridalPartyHero,
-  },
-  "reception-and-party": {
-    title: "Reception & Party",
-    description: "Speeches, laughter, dancing — the celebration in full swing.",
-    seoDescription:
-      "Reception wedding photography – speeches, dancing, and the best party moments of the day.",
-    hero: receptionHero,
-  },
-  "details-and-decor": {
-    title: "Details & Decor",
-    description: "The thoughtful styling, florals, and finishing touches.",
-    seoDescription:
-      "Wedding details photography – décor, styling, florals, and the little things that matter.",
-    hero: detailsDecorHero,
-  },
-};
-
-// Put these FIRST (per moment). Use filenames exactly as in CSV (the _500.webp ones).
-const PINNED: Record<string, string[]> = {
-  // ceremony: ["abc_500.webp", "def_500.webp"],
-};
-
+// Pinned ordering
 function orderWithPinned<T extends { filename: string }>(
   items: T[],
   pinnedFilenames: string[]
@@ -232,7 +248,7 @@ function orderWithPinned<T extends { filename: string }>(
     else rest.push(it);
   }
 
-  // Keep the pinned order exactly as you list it:
+  // Keep pinned order exactly as listed
   pinned.sort(
     (a, b) =>
       pinnedFilenames.indexOf(a.filename) - pinnedFilenames.indexOf(b.filename)
@@ -240,24 +256,6 @@ function orderWithPinned<T extends { filename: string }>(
 
   return [...pinned, ...rest];
 }
-
-
-
-/**
- * Adjust hero crop focus per moment.
- * Examples:
- *  - "50% 50%" center
- *  - "50% 60%" lower (shows more bottom)
- *  - "50% 40%" higher (shows more top)
- */
-const HERO_FOCUS: Record<string, string> = {
-  "getting-ready": "50% 45%",
-  ceremony: "50% 55%",
-  "couple-portraits": "50% 60%",
-  "family-and-bridal-party": "50% 55%",
-  "reception-and-party": "50% 55%",
-  "details-and-decor": "50% 50%",
-};
 
 export function GalleryMomentDetail() {
   const { momentId } = useParams<{ momentId: string }>();
@@ -268,6 +266,7 @@ export function GalleryMomentDetail() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  // Load CSV
   useEffect(() => {
     let cancelled = false;
 
@@ -302,27 +301,30 @@ export function GalleryMomentDetail() {
     return set.size;
   }, [momentRows]);
 
- const images = useMemo(() => {
-  const base = momentRows.map((r) => ({
-    thumb: thumbUrl(r),
-    full: fullUrlFromThumb(r),
-    alt: `${r.venue} – ${r.category}`,
-    venue: r.venue,
-    filename: r.filename, // IMPORTANT: keep this
-  }));
-
-  // Optional: stable shuffle for the rest
-  const mixed =
-    ENABLE_STABLE_SHUFFLE ? shuffledStable(base, momentId ?? "moment") : base;
-
-  // Pin selected filenames first (for this moment)
-  const pinnedList = momentId ? PINNED[momentId] : undefined;
-  return orderWithPinned(mixed, pinnedList ?? []);
-}, [momentRows, momentId]);
   const cfg = momentId ? MOMENT_CONFIG[momentId] : undefined;
   const title = cfg?.title ?? momentNameFromCsv ?? "Moment";
   const description = cfg?.description ?? "A curated selection of wedding images.";
 
+  // Build images, then stable shuffle rest, then pin selected to top
+  const images = useMemo(() => {
+    const base = momentRows.map((r) => ({
+      thumb: thumbUrl(r),
+      full: fullUrlFromThumb(r),
+      alt: `${r.venue} – ${r.category}`,
+      venue: r.venue,
+      filename: r.filename, // IMPORTANT for pinned
+    }));
+
+    const mixed =
+      ENABLE_STABLE_SHUFFLE_FOR_REST && momentId
+        ? shuffledStable(base, `moment:${momentId}`)
+        : base;
+
+    const pinnedList = momentId ? PINNED[momentId] : [];
+    return orderWithPinned(mixed, pinnedList ?? []);
+  }, [momentRows, momentId]);
+
+  // Pick hero image
   const heroImage =
     (USE_FIGMA_HERO ? cfg?.hero : undefined) ||
     images[0]?.full ||
@@ -331,7 +333,7 @@ export function GalleryMomentDetail() {
 
   const heroFocus = (momentId && HERO_FOCUS[momentId]) || "50% 50%";
 
-  // SEO
+  // SEO meta
   useEffect(() => {
     if (!momentId) return;
 
@@ -379,7 +381,7 @@ export function GalleryMomentDetail() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO (hard-fixed height, cropped, no text on hero) */}
+      {/* HERO (fixed height, cropped, no text on hero) */}
       <div className="relative h-[220px] md:h-[300px] overflow-hidden">
         <ImageWithFallback
           src={heroImage}
