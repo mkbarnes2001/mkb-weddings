@@ -302,22 +302,7 @@ export function GalleryMomentDetail() {
               {venues.length === 1 ? "" : "s"}
             </div>
 
-            {/* Venue pills */}
-            {venues.length > 0 && (
-              <div className="mt-5 flex flex-wrap gap-2">
-                {venues.map((v) => (
-                  <Link
-                    key={v.venueId}
-                    to={`/gallery/venue/${encodeURIComponent(v.venueId)}`}
-                    className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/15 text-white/90 text-sm transition-colors"
-                    title={`${v.count} image${v.count === 1 ? "" : "s"} from ${v.venue}`}
-                  >
-                    {v.venue}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+           </div>
         </div>
       </div>
 
