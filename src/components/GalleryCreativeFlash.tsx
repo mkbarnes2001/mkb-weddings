@@ -1,128 +1,168 @@
-import { useState } from 'react';
-import { ImageLightbox } from './ImageLightbox';
-import { ImageWithFallback } from './figma/ImageWithFallback';
-import { Zap } from 'lucide-react';
+// src/components/GalleryCreativeFlash.tsx
+import { useEffect, useMemo, useState } from "react";
+import { Zap } from "lucide-react";
+import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { ImageLightbox } from "./ImageLightbox";
+import { fetchGalleryRows, hasTag, thumbUrl, fullUrlFromThumb } from "../lib/galleryCsv";
+
+// If you already use a different Figma hero asset in your Creative Flash page,
+// keep your existing import and replace this one.
+import creativeFlashHero from "figma:asset/4e80a09ae14c9e2aaefa75a7ed64281f0bbc855b.png";
+
+function setSeo(title: string, description: string) {
+  document.title = title;
+  let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.setAttribute("name", "description");
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute("content", description);
+}
 
 export function GalleryCreativeFlash() {
+  const [rows, setRows] = useState<any[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  // Placeholder images for creative flash photography
-  const flashImages = Array.from({ length: 12 }, (_, i) => ({
-    id: `flash-${i + 1}`,
-    src: '',
-    alt: `Creative flash photography example ${i + 1}`,
-  }));
+  useEffect(() => {
+    setSeo(
+      "Creative Flash Wedding Photography | MKB Weddings",
+      "Bold, dramatic, and unforgettable moments illuminated with expert flash lighting."
+    );
+  }, []);
 
-  const openLightbox = (index: number) => {
-    setCurrentImageIndex(index);
-    setLightboxOpen(true);
-  };
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoadError(null);
+        const parsed = await fetchGalleryRows();
+        if (!cancelled) setRows(parsed);
+      } catch (e: any) {
+        if (!cancelled) setLoadError(e?.message || "Failed to load gallery.csv");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const flashRows = useMemo(() => {
+    return rows.filter((r) => hasTag(r, "creative-flash"));
+  }, [rows]);
+
+  const images = useMemo(() => {
+    return flashRows.map((r) => ({
+      thumb: thumbUrl(r),
+      full: fullUrlFromThumb(r),
+      alt: `Creative Flash – ${r.venue}`,
+      venue: r.venue,
+      filename: r.filename,
+    }));
+  }, [flashRows]);
+
+  const featured = images; // show all; change to images.slice(0, 12) if you want
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+        <div className="text-center max-w-xl">
+          <h1 className="text-3xl mb-3">Gallery loading error</h1>
+          <p className="text-neutral-600 mb-6">{loadError}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="pt-20 min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="py-20 px-6 md:px-20 bg-gradient-to-br from-primary to-primary/80 text-white">
-        <div className="max-w-[1440px] mx-auto text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent mb-6">
-            <Zap size={32} className="text-primary" />
+    <div className="min-h-screen bg-white">
+      {/* HERO (Figma look) */}
+      <div className="relative h-[280px] md:h-[360px] overflow-hidden">
+        <ImageWithFallback
+          src={creativeFlashHero}
+          alt="Creative Flash Photography"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/55" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center px-6">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/90 mb-4">
+              <Zap className="w-5 h-5 text-neutral-900" />
+            </div>
+            <div className="text-white/90 text-xs uppercase tracking-[0.25em] mb-3">
+              Creative Flash Photography
+            </div>
+            <h1 className="text-white text-2xl md:text-3xl font-medium max-w-3xl mx-auto">
+              Bold, dramatic, and unforgettable moments illuminated with expert flash lighting
+            </h1>
           </div>
-          <h1 className="mb-6 text-white">Creative Flash Photography</h1>
-          <p className="tagline text-white/90 max-w-3xl mx-auto" style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)' }}>
-            Bold, dramatic, and unforgettable moments illuminated with expert flash lighting
+        </div>
+      </div>
+
+      {/* BODY COPY (matches your designed page) */}
+      <div className="max-w-5xl mx-auto px-6 py-14">
+        <h2 className="text-center text-sm uppercase tracking-widest text-neutral-800 mb-8">
+          Master of Flash Wedding Photography
+        </h2>
+
+        <div className="text-center text-neutral-700 leading-relaxed space-y-6">
+          <p>
+            Known as a master of flash wedding photography, MKB Weddings creates bold, vibrant, and
+            dramatic images that stand out. Our flash photography expertise is perfect for evening
+            portraits, dark venues, Irish weather conditions, and high-energy dance-floor shots.
+          </p>
+          <p>
+            Using advanced off-camera flash techniques, we create striking editorial-style images
+            with perfect lighting regardless of the conditions. From moody atmospheric shots to
+            bright vibrant portraits, our flash work adds a unique artistic dimension to your
+            wedding story.
           </p>
         </div>
-      </section>
+      </div>
 
-      {/* About Flash Photography */}
-      <section className="py-16 px-6 md:px-20 max-w-[1440px] mx-auto">
-        <div className="max-w-4xl mx-auto text-center mb-16">
-          <h2 className="mb-6">Master of Flash Wedding Photography</h2>
-          <div className="space-y-4 text-foreground/80" style={{ fontSize: '1.125rem', lineHeight: '1.6' }}>
-            <p>
-              Known as a master of flash wedding photography, MKB Weddings creates bold, vibrant, and dramatic 
-              images that stand out. Our flash photography expertise is perfect for evening portraits, dark venues, 
-              Irish weather conditions, and high-energy dance-floor shots.
-            </p>
-            <p>
-              Using advanced off-camera flash techniques, we create striking editorial-style images with perfect 
-              lighting regardless of the conditions. From moody atmospheric shots to bright vibrant portraits, 
-              our flash work adds a unique artistic dimension to your wedding story.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Gallery Grid */}
-      <section className="py-16 px-6 md:px-20 max-w-[1440px] mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {flashImages.map((image, index) => (
-            <div
-              key={image.id}
-              onClick={() => openLightbox(index)}
-              className="group relative aspect-[3/4] overflow-hidden rounded-sm cursor-pointer bg-primary/5"
-            >
-              <div className="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-primary/20 hover:border-primary/40 transition-colors">
-                <Zap size={48} className="text-primary/40 mb-4" />
-                <p className="text-primary/60">Flash Example {index + 1}</p>
-                <p className="text-xs text-primary/40 mt-2 px-4 text-center">Upload creative flash photos here</p>
-              </div>
-              
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Why Flash Photography Section */}
-      <section className="py-20 px-6 md:px-20 bg-accent">
-        <div className="max-w-[1440px] mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="mb-6">Why Choose Flash Photography?</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-5xl mx-auto">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                <Zap size={32} className="text-primary" />
-              </div>
-              <h3 className="mb-3">Perfect for Irish Weather</h3>
-              <p className="text-foreground/80" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
-                Don't let clouds or rain ruin your photos. Flash photography creates stunning images in any conditions.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                <Zap size={32} className="text-primary" />
-              </div>
-              <h3 className="mb-3">Dramatic Evening Portraits</h3>
-              <p className="text-foreground/80" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
-                Create magazine-worthy portraits after sunset with expertly crafted lighting that makes you shine.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                <Zap size={32} className="text-primary" />
-              </div>
-              <h3 className="mb-3">Dance Floor Energy</h3>
-              <p className="text-foreground/80" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
-                Capture the wild energy and joy of your reception with vibrant, colorful flash photography.
-              </p>
+      {/* GALLERY GRID (replaces placeholders) */}
+      <div className="max-w-7xl mx-auto px-6 pb-16">
+        {featured.length === 0 ? (
+          <div className="text-center py-20 text-neutral-600">
+            No images tagged <span className="font-medium">creative-flash</span> yet.
+            <div className="mt-2 text-neutral-500 text-sm">
+              Add <code>creative-flash</code> in the <code>tags</code> column for any row.
             </div>
           </div>
-        </div>
-      </section>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featured.map((img, idx) => (
+              <button
+                key={`${img.thumb}-${idx}`}
+                type="button"
+                onClick={() => {
+                  setLightboxIndex(idx);
+                  setLightboxOpen(true);
+                }}
+                className="aspect-[3/4] rounded-xl overflow-hidden group text-left bg-neutral-100"
+                aria-label={`Open Creative Flash image ${idx + 1}`}
+              >
+                <ImageWithFallback
+                  src={img.thumb}
+                  alt={img.alt}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
-      {/* Lightbox */}
-      {lightboxOpen && (
+      {/* LIGHTBOX */}
+      {lightboxOpen && featured.length > 0 && (
         <ImageLightbox
-          images={flashImages}
-          currentIndex={currentImageIndex}
+          images={featured.map((i) => i.full)}
+          currentIndex={lightboxIndex}
           onClose={() => setLightboxOpen(false)}
-          onNavigate={setCurrentImageIndex}
+          onNavigate={(newIndex) => setLightboxIndex(newIndex)}
         />
       )}
     </div>
