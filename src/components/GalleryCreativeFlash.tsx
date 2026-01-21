@@ -163,7 +163,7 @@ const featured = useMemo(() => {
       </div>
 
       {/* BODY COPY */}
-     <div className="brand-prose text-center mb-36">
+    <div className="brand-prose text-center mb-36">
   <div className="eyebrow mb-8">Master of Flash Wedding Photography</div>
 
   <p>
@@ -178,7 +178,6 @@ const featured = useMemo(() => {
     portraits, our flash work adds a unique artistic dimension to your wedding story.
   </p>
 </div>
-
       </div>
 
       {/* GALLERY GRID (Moments-sized + venue caption) */}
