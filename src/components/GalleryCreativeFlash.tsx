@@ -1,28 +1,38 @@
 import { useEffect, useMemo, useState } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
+
+// Figma hero (already in your project)
 import creativeFlashHero from "figma:asset/4e80a09ae14c9e2aaefa75a7ed64281f0bbc855b.png";
 
 type CsvRow = {
   venue: string;
   category: string;
   filename: string; // _500.webp
-  tags?: string;    // optional
+  tags?: string; // optional
 };
 
+// Your R2 public base (same pattern as venues/moments)
 const THUMB_BASE = "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
 const FULL_BASE = "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
-// --- PINNED (use _500.webp filenames exactly as in CSV) ---------------------
+/**
+ * Put these FIRST. Use filenames exactly as in CSV (the _500.webp names).
+ * If you only have _2000.webp names, convert to _500.webp.
+ */
 const PINNED: string[] = [
   "MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_500.webp",
   "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-113_500.webp",
   "mkb-weddings-irish-wedding-photographer-redcastle-hotel-moville-wedding-photography-24_500.webp",
   "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-112_500.webp"
-
 ];
 
-// --- helpers ----------------------------------------------------------------
+// ----------------------- helpers --------------------------------------------
+
+function normalize(s: string) {
+  return (s || "").trim().toLowerCase();
+}
+
 function encSegment(s: string) {
   return encodeURIComponent(s);
 }
@@ -43,11 +53,7 @@ function fullUrl(r: CsvRow) {
   )}`;
 }
 
-function normalize(s: string) {
-  return (s || "").trim().toLowerCase();
-}
-
-// tiny CSV parser (quoted)
+// tiny CSV parser (handles quotes)
 function parseGalleryCsv(csvText: string): CsvRow[] {
   const lines = csvText.split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return [];
@@ -74,14 +80,14 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
     return out;
   };
 
-  const header = parseLine(lines[0]).map((h) => h.toLowerCase());
+  const header = parseLine(lines[0]).map((h) => normalize(h));
   const venueIdx = header.indexOf("venue");
   const categoryIdx = header.indexOf("category");
   const filenameIdx = header.indexOf("filename");
   const tagsIdx = header.indexOf("tags"); // optional
 
   if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) {
-    console.error("CSV header must include: venue,category,filename (and optional tags)");
+    console.error("CSV header must include: venue,category,filename (optional: tags)");
     return [];
   }
 
@@ -96,10 +102,21 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
     if (!venue || !category || !filename) continue;
     rows.push({ venue, category, filename, tags });
   }
+
   return rows;
 }
 
-// stable shuffle (no libs)
+function hasTag(tags: string | undefined, target: string) {
+  if (!tags) return false;
+  // supports comma or | separated list
+  const parts = tags
+    .split(/[,\|]/g)
+    .map((t) => normalize(t))
+    .filter(Boolean);
+  return parts.includes(normalize(target));
+}
+
+// Stable “random” order (no new libs)
 function hashStringToInt(str: string) {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) {
@@ -119,15 +136,7 @@ function stableShuffle<T>(arr: T[], seed: string, keyFn: (t: T) => string) {
   return copy;
 }
 
-// checks tags column contains creative-flash (comma/space separated)
-function hasCreativeFlashTag(tags?: string) {
-  if (!tags) return false;
-  const parts = tags
-    .split(/[,\|]/g)
-    .map((t) => normalize(t))
-    .filter(Boolean);
-  return parts.includes("creative-flash");
-}
+// ----------------------- component ------------------------------------------
 
 export function GalleryCreativeFlash() {
   const [rows, setRows] = useState<CsvRow[]>([]);
@@ -158,8 +167,12 @@ export function GalleryCreativeFlash() {
   }, []);
 
   const flashRows = useMemo(() => {
-    // Prefer tag column, fallback: category name equals "creative flash"
-    return rows.filter((r) => hasCreativeFlashTag(r.tags) || normalize(r.category) === "creative flash");
+    // primary: tags column
+    const tagged = rows.filter((r) => hasTag(r.tags, "creative-flash"));
+    if (tagged.length > 0) return tagged;
+
+    // fallback: category literal match if you ever use it
+    return rows.filter((r) => normalize(r.category) === "creative flash");
   }, [rows]);
 
   const images = useMemo(() => {
@@ -175,6 +188,7 @@ export function GalleryCreativeFlash() {
     const pinned = mapped.filter((m) => pinnedSet.has(normalize(m.filename)));
     const rest = mapped.filter((m) => !pinnedSet.has(normalize(m.filename)));
 
+    // stable random
     const shuffled = stableShuffle(rest, "creative-flash-v1", (m) => m.filename);
 
     return [...pinned, ...shuffled];
@@ -194,7 +208,7 @@ export function GalleryCreativeFlash() {
   return (
     <div className="min-h-screen bg-white">
       {/* HERO */}
-      <div className="relative h-[320px] md:h-[420px] overflow-hidden mb-32">
+      <div className="relative h-[320px] md:h-[420px] overflow-hidden mb-20">
         <ImageWithFallback
           src={creativeFlashHero}
           alt="Creative Flash Photography"
@@ -208,32 +222,33 @@ export function GalleryCreativeFlash() {
         </div>
       </div>
 
-      {/* BODY */}
-      <div className="max-w-5xl mx-auto text-center mt-16 mb-16">
-  <div className="brand-prose">
-    <div className="eyebrow mb-8">Master of Flash Wedding Photography</div>prose wrapper (global typography) */}
-        <div className="brand-prose text-center max-w-5xl mx-auto mb-16">
-          <div className="eyebrow mb-8">Master of Flash Wedding Photography</div>
+      {/* TEXT */}
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <div className="eyebrow mb-10">Master of Flash Wedding Photography</div>
 
-          <p>
-            Known as a master of flash wedding photography, MKB Weddings creates bold, vibrant, and
-            dramatic images that stand out. Our flash photography expertise is perfect for evening
-            portraits, dark venues, Irish weather conditions, and high-energy dance-floor shots.
-          </p>
+          <div className="brand-prose mx-auto">
+            <p>
+              Known as a master of flash wedding photography, MKB Weddings creates bold, vibrant,
+              and dramatic images that stand out. Our flash photography expertise is perfect for
+              evening portraits, dark venues, Irish weather conditions, and high-energy dance-floor
+              shots.
+            </p>
 
-          <p>
-            Using advanced off-camera flash techniques, we create striking editorial-style images
-            with perfect lighting regardless of the conditions. From moody atmospheric shots to
-            bright vibrant portraits, our flash work adds a unique artistic dimension to your
-            wedding story.
-          </p>
+            <p>
+              Using advanced off-camera flash techniques, we create striking editorial-style images
+              with perfect lighting regardless of the conditions. From moody atmospheric shots to
+              bright vibrant portraits, our flash work adds a unique artistic dimension to your
+              wedding story.
+            </p>
+          </div>
         </div>
 
-        {/* GALLERY GRID (Moments-sized tiles) */}
+        {/* GRID */}
         {images.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">No Creative Flash images found.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-16">
             {images.map((img, idx) => (
               <button
                 key={`${img.thumb}-${idx}`}
@@ -249,7 +264,6 @@ export function GalleryCreativeFlash() {
                   alt={img.alt}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                {/* Venue caption */}
                 <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
                   <div className="text-white/95 text-sm tracking-wide">{img.venue}</div>
                 </div>
