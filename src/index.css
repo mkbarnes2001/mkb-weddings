@@ -3201,3 +3201,63 @@ footer .logo-mkb, footer .logo-weddings {
   syntax: "*";
   inherits: false
 }
+
+
+/* -------------------------------------------------------------------------- */
+/* Brand Typography (Global)                                                  */
+/* Put this at the END of src/index.css so it overrides earlier styles.       */
+/* -------------------------------------------------------------------------- */
+
+@layer base {
+  :root {
+    /* Brand scale */
+    --text-h1: 2.75rem;  /* ~44px */
+    --text-h2: 2.00rem;  /* ~32px */
+    --text-h3: 1.50rem;  /* ~24px */
+    --text-body-large: 1.125rem; /* 18px */
+    --text-base: 1.0625rem; /* 17px */
+    --text-small: 0.9375rem; /* 15px */
+  }
+
+  /* Body (site-wide) */
+  body {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: var(--text-base);
+    line-height: 1.7;
+    letter-spacing: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Headings default (site-wide) */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  /* If you use plain headings without Tailwind text-* classes,
+     these match your existing :where(...) rules. */
+  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h1 {
+    font-size: var(--text-h1);
+    line-height: 1.12;
+  }
+
+  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h2 {
+    font-size: var(--text-h2);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+  }
+
+  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h3 {
+    font-size: var(--text-h3);
+    line-height: 1.28;
+    letter-spacing: -0.01em;
+  }
+
+  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) p {
+    font-size: var(--text-base);
+    line-height: 1.75;
+  }
+}
+
