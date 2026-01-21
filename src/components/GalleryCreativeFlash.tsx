@@ -123,38 +123,39 @@ export function GalleryCreativeFlash() {
         </div>
       </div>
 
-      {/* GALLERY GRID (replaces placeholders) */}
-      <div className="max-w-7xl mx-auto px-6 pb-16">
-        {featured.length === 0 ? (
-          <div className="text-center py-20 text-neutral-600">
-            No images tagged <span className="font-medium">creative-flash</span> yet.
-            <div className="mt-2 text-neutral-500 text-sm">
-              Add <code>creative-flash</code> in the <code>tags</code> column for any row.
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featured.map((img, idx) => (
-              <button
-                key={`${img.thumb}-${idx}`}
-                type="button"
-                onClick={() => {
-                  setLightboxIndex(idx);
-                  setLightboxOpen(true);
-                }}
-                className="aspect-[3/4] rounded-xl overflow-hidden group text-left bg-neutral-100"
-                aria-label={`Open Creative Flash image ${idx + 1}`}
-              >
-                <ImageWithFallback
-                  src={img.thumb}
-                  alt={img.alt}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-              </button>
-            ))}
-          </div>
-        )}
+    {/* GALLERY GRID (match Moments sizing) */}
+<div className="max-w-7xl mx-auto px-6 pb-16">
+  {featured.length === 0 ? (
+    <div className="text-center py-20 text-neutral-600">
+      No images tagged <span className="font-medium">creative-flash</span> yet.
+      <div className="mt-2 text-neutral-500 text-sm">
+        Add <code>creative-flash</code> in the <code>tags</code> column for any row.
       </div>
+    </div>
+  ) : (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {featured.map((img, idx) => (
+        <button
+          key={`${img.thumb}-${idx}`}
+          type="button"
+          onClick={() => {
+            setLightboxIndex(idx);
+            setLightboxOpen(true);
+          }}
+          className="aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left bg-neutral-100"
+          aria-label={`Open Creative Flash image ${idx + 1}`}
+        >
+          <ImageWithFallback
+            src={img.thumb}
+            alt={img.alt}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+        </button>
+      ))}
+    </div>
+  )}
+</div>
+
 
       {/* LIGHTBOX */}
       {lightboxOpen && featured.length > 0 && (
