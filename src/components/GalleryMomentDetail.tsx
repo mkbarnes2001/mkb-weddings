@@ -26,7 +26,7 @@ const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
 // Toggle: stable “mixed” order per moment (optional)
-const ENABLE_STABLE_SHUFFLE = false;
+const ENABLE_STABLE_SHUFFLE = true;
 
 // Toggle: use Figma hero images; fallback to first gallery image if missing
 const USE_FIGMA_HERO = true;
