@@ -103,7 +103,7 @@ export function GalleryCreativeFlash() {
       </div>
 
       {/* BODY COPY (matches your designed page) */}
-     <div className="max-w-3xl mx-auto text-center mt-12 md:mt-16">
+   <div className="max-w-3xl mx-auto text-center mt-16 mb-20 md:mb-28">
         <h2 className="text-center text-sm uppercase tracking-widest text-neutral-800 mb-8">
           Master of Flash Wedding Photography
         </h2>
