@@ -1,3 +1,4 @@
+// src/components/ImageLightbox.tsx
 import { useEffect, useMemo, useRef } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -6,17 +7,9 @@ type Props = {
   currentIndex: number;
   onClose: () => void;
   onNavigate: (newIndex: number) => void;
-  // Optional: default true
-  wrap?: boolean;
 };
 
-export function ImageLightbox({
-  images,
-  currentIndex,
-  onClose,
-  onNavigate,
-  wrap = true,
-}: Props) {
+export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Props) {
   const count = images.length;
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
@@ -30,18 +23,15 @@ export function ImageLightbox({
 
   const goPrev = () => {
     if (!count) return;
-    if (wrap) return onNavigate((safeIndex - 1 + count) % count);
-    return onNavigate(Math.max(0, safeIndex - 1));
+    onNavigate((safeIndex - 1 + count) % count); // wrap
   };
 
   const goNext = () => {
     if (!count) return;
-    if (wrap) return onNavigate((safeIndex + 1) % count);
-    return onNavigate(Math.min(count - 1, safeIndex + 1));
+    onNavigate((safeIndex + 1) % count); // wrap
   };
 
   useEffect(() => {
-    // Focus overlay so key handling feels consistent
     overlayRef.current?.focus();
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -64,7 +54,6 @@ export function ImageLightbox({
 
     window.addEventListener("keydown", onKeyDown);
 
-    // stop page behind scrolling
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
@@ -72,7 +61,6 @@ export function ImageLightbox({
       window.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = prevOverflow;
     };
-    // goPrev/goNext are stable enough (they close over safeIndex/count)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [safeIndex, count, onClose]);
 
@@ -85,7 +73,7 @@ export function ImageLightbox({
       aria-label="Image lightbox"
       className="fixed inset-0 z-50 bg-black/95"
     >
-      {/* Backdrop (behind controls) */}
+      {/* Backdrop */}
       <button
         type="button"
         aria-label="Close"
@@ -93,7 +81,7 @@ export function ImageLightbox({
         onClick={onClose}
       />
 
-      {/* Controls layer */}
+      {/* Controls */}
       <div className="absolute inset-0 z-20 pointer-events-none">
         {/* Close */}
         <button
@@ -105,7 +93,7 @@ export function ImageLightbox({
           <X className="w-7 h-7" />
         </button>
 
-        {/* Prev (ALWAYS visible + clickable) */}
+        {/* Prev (always visible/clickable) */}
         <button
           type="button"
           aria-label="Previous (←)"
@@ -115,7 +103,7 @@ export function ImageLightbox({
           <ChevronLeft className="w-10 h-10 md:w-12 md:h-12" />
         </button>
 
-        {/* Next (ALWAYS visible + clickable) */}
+        {/* Next (always visible/clickable) */}
         <button
           type="button"
           aria-label="Next (→)"
@@ -131,17 +119,16 @@ export function ImageLightbox({
         </div>
       </div>
 
-      {/* Image area
-          Key change for portraits:
-          - constrain the *container* height/width
-          - allow the image to be larger than the container -> scroll to see full portrait
+      {/* Image stage
+          - container is constrained and scrollable
+          - image is NOT max-height capped, so portraits can be scrolled fully
       */}
       <div className="absolute inset-0 z-10 flex items-center justify-center p-4">
         <div
           className="max-w-[94vw] max-h-[92vh] overflow-auto"
-          // Click navigation: click left half = prev, right half = next
+          // Click navigation: left half = prev, right half = next
           onClick={(e) => {
-            const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+            const rect = e.currentTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
             if (x < rect.width / 2) goPrev();
             else goNext();
@@ -152,7 +139,7 @@ export function ImageLightbox({
             alt=""
             className="block max-w-full h-auto select-none"
             draggable={false}
-            onClick={(e) => e.stopPropagation()} // clicking the image itself doesn't close or nav
+            onClick={(e) => e.stopPropagation()} // clicking the image itself doesn't close/navigate
             onError={() => console.error("Lightbox image failed to load:", src)}
           />
         </div>
