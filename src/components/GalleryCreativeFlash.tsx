@@ -28,8 +28,8 @@ function setSeo(title: string, description: string) {
 // Put these FIRST. Use filenames exactly as in CSV (the _500.webp names).
 // Example moment-style pinned, but for creative flash page:
 const PINNED: string[] = [
-  "MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp",
-  "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-113_2000.webp",
+  "MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_500.webp",
+  "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-113_500.webp",
   "mkb-weddings-irish-wedding-photographer-redcastle-hotel-moville-wedding-photography-24_500.webp",
   "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-112_500.webp"
 ];
