@@ -217,7 +217,7 @@ export function GalleryCreativeFlash() {
         <div className="absolute inset-0 bg-black/35" />
         <div className="absolute inset-0 flex items-center justify-center px-6">
       <h1 className="text-white text-center font-semibold drop-shadow leading-tight
-               text-[30px] sm:text-[36px] md:text-[46px] lg:text-[56px]
+               text-[34px] sm:text-[42px] md:text-[56px] lg:text-[68px]
                max-w-5xl mx-auto">
           Bold, dramatic, and unforgettable moments illuminated with expert flash lighting
     </h1>
