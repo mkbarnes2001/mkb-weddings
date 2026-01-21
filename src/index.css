@@ -3288,4 +3288,34 @@ footer .logo-mkb, footer .logo-weddings {
     color: rgb(38 38 38); /* neutral-800 */
   }
 }
+@layer base {
+  body {
+    font-family: "Canela", Georgia, "Times New Roman", serif;
+  }
+
+  .eyebrow {
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgb(82 82 82);
+  }
+
+  .brand-prose {
+    max-width: 58ch;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: rgb(64 64 64);
+  }
+
+  .brand-prose p {
+    margin: 0 0 1.75rem 0;
+  }
+
+  .brand-prose p:last-child {
+    margin-bottom: 0;
+  }
+}
 
