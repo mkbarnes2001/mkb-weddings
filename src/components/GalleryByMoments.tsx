@@ -9,7 +9,7 @@ type CsvRow = {
   filename: string; // ends in _500.webp
 };
 
-// Your working R2 public domain (same as Venue pages)
+// SAME R2 domain you already use elsewhere
 const THUMB_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
 
@@ -81,16 +81,33 @@ function thumbUrl(r: CsvRow) {
   )}/${encodeURIComponent(r.filename)}`;
 }
 
-// Optional: keep your Figma moment descriptions.
-// Key is slugified category (momentId in the URL).
+/**
+ * ✅ CURATED MOMENT DESCRIPTIONS (Figma copy)
+ * Keys MUST match slugify(category) exactly.
+ *
+ * Example:
+ *   CSV category: "Family & Bridal Party"
+ *   slugify(...) => "family-and-bridal-party"
+ *   so your key must be "family-and-bridal-party"
+ */
 const MOMENT_DESCRIPTIONS: Record<string, string> = {
   "getting-ready": "Intimate moments as the day begins",
-  ceremony: "The vows, the emotions, the magic",
-  "couple-portraits": "Beautiful portraits together",
-  "family-bridal-party": "Your people, your joy",
-  "reception-party": "Energy, speeches and dancing",
-  "details-decor": "The styling, florals and finishing touches",
+  ceremony: "The vows, the emotion, the atmosphere",
+  "couple-portraits": "Relaxed, romantic portraits together",
+  "family-and-bridal-party": "Your people, your energy",
+  "reception-and-party": "Speeches, dancing, and celebration",
+  "details-and-decor": "The styling, florals and finishing touches",
 };
+
+// Optional: if you want a custom order (instead of alphabetical), list IDs here.
+const MOMENT_ORDER: string[] = [
+  "getting-ready",
+  "ceremony",
+  "couple-portraits",
+  "family-and-bridal-party",
+  "reception-and-party",
+  "details-and-decor",
+];
 
 export function GalleryByMoments() {
   const [rows, setRows] = useState<CsvRow[]>([]);
@@ -127,11 +144,12 @@ export function GalleryByMoments() {
     for (const r of rows) {
       const id = slugify(r.category);
       const existing = map.get(id);
+
       if (!existing) {
         map.set(id, {
           id,
           name: r.category,
-          description: MOMENT_DESCRIPTIONS[id] ?? "View the gallery",
+          description: MOMENT_DESCRIPTIONS[id] ?? "Explore wedding day highlights",
           cover: thumbUrl(r), // first image becomes cover
           count: 1,
         });
@@ -140,7 +158,22 @@ export function GalleryByMoments() {
       }
     }
 
-    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+    const list = Array.from(map.values());
+
+    // If you provided a custom order, sort by it first, then fall back to name.
+    const orderIndex = new Map<string, number>();
+    MOMENT_ORDER.forEach((id, idx) => orderIndex.set(id, idx));
+
+    list.sort((a, b) => {
+      const ai = orderIndex.get(a.id);
+      const bi = orderIndex.get(b.id);
+      if (ai != null && bi != null) return ai - bi;
+      if (ai != null) return -1;
+      if (bi != null) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    return list;
   }, [rows]);
 
   if (loadError) {
@@ -160,39 +193,8 @@ export function GalleryByMoments() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
-        {/* Moments Grid (same design as your Figma cards) */}
+        {/* Moments Grid — preserves your Figma design */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {moments.map((moment) => (
             <Link
-              key={moment.id}
-              to={`/gallery/moment/${encodeURIComponent(moment.id)}`}
-              className="group relative aspect-[4/3] overflow-hidden rounded-lg"
-            >
-              <ImageWithFallback
-                src={moment.cover}
-                alt={moment.name}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-              <div className="absolute inset-0 flex flex-col justify-end p-6">
-                <h2 className="text-white text-2xl mb-2">{moment.name}</h2>
-                <p className="text-white/90 text-sm mb-3">{moment.description}</p>
-
-                <div className="flex items-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-sm uppercase tracking-wider">
-                    View Gallery{moment.count ? ` (${moment.count})` : ""}
-                  </span>
-                  <ChevronRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-2" />
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {moments.length === 0 && (
-          <div className="text-center py-20 text-neutral-600">No moments found.</div>
-        )}
-      </div>
-    </div>
-  );
-}
+              key={momen
