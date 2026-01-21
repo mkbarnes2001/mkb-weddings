@@ -31,6 +31,14 @@ const ENABLE_STABLE_SHUFFLE = true;
 // Toggle: use Figma hero images; fallback to first gallery image if missing
 const USE_FIGMA_HERO = true;
 
+const PINNED: Record<string, string[]> = {
+  ceremony: [
+    "MKB_1234_500.webp",
+    "MKB_1890_500.webp",
+    "MKB_1777_500.webp",
+  ],
+};
+
 function slugify(s: string) {
   return s
     .trim()
@@ -204,6 +212,37 @@ const MOMENT_CONFIG: Record<
   },
 };
 
+// Put these FIRST (per moment). Use filenames exactly as in CSV (the _500.webp ones).
+const PINNED: Record<string, string[]> = {
+  // ceremony: ["abc_500.webp", "def_500.webp"],
+};
+
+function orderWithPinned<T extends { filename: string }>(
+  items: T[],
+  pinnedFilenames: string[]
+) {
+  if (!pinnedFilenames?.length) return items;
+
+  const pinnedSet = new Set(pinnedFilenames);
+  const pinned: T[] = [];
+  const rest: T[] = [];
+
+  for (const it of items) {
+    if (pinnedSet.has(it.filename)) pinned.push(it);
+    else rest.push(it);
+  }
+
+  // Keep the pinned order exactly as you list it:
+  pinned.sort(
+    (a, b) =>
+      pinnedFilenames.indexOf(a.filename) - pinnedFilenames.indexOf(b.filename)
+  );
+
+  return [...pinned, ...rest];
+}
+
+
+
 /**
  * Adjust hero crop focus per moment.
  * Examples:
@@ -263,18 +302,23 @@ export function GalleryMomentDetail() {
     return set.size;
   }, [momentRows]);
 
-  const images = useMemo(() => {
-    const base = momentRows.map((r) => ({
-      thumb: thumbUrl(r),
-      full: fullUrlFromThumb(r),
-      alt: `${r.venue} – ${r.category}`,
-      venue: r.venue,
-      filename: r.filename,
-    }));
-    if (ENABLE_STABLE_SHUFFLE) return shuffledStable(base, momentId ?? "moment");
-    return base;
-  }, [momentRows, momentId]);
+ const images = useMemo(() => {
+  const base = momentRows.map((r) => ({
+    thumb: thumbUrl(r),
+    full: fullUrlFromThumb(r),
+    alt: `${r.venue} – ${r.category}`,
+    venue: r.venue,
+    filename: r.filename, // IMPORTANT: keep this
+  }));
 
+  // Optional: stable shuffle for the rest
+  const mixed =
+    ENABLE_STABLE_SHUFFLE ? shuffledStable(base, momentId ?? "moment") : base;
+
+  // Pin selected filenames first (for this moment)
+  const pinnedList = momentId ? PINNED[momentId] : undefined;
+  return orderWithPinned(mixed, pinnedList ?? []);
+}, [momentRows, momentId]);
   const cfg = momentId ? MOMENT_CONFIG[momentId] : undefined;
   const title = cfg?.title ?? momentNameFromCsv ?? "Moment";
   const description = cfg?.description ?? "A curated selection of wedding images.";
