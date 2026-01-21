@@ -91,12 +91,12 @@ function thumbUrl(r: CsvRow) {
  *   so your key must be "family-and-bridal-party"
  */
 const MOMENT_DESCRIPTIONS: Record<string, string> = {
-  "getting-ready": "Intimate moments as the day begins",
   ceremony: "The vows, the emotion, the atmosphere",
   "couple-portraits": "Relaxed, romantic portraits together",
-  "family-and-bridal-party": "Your people, your energy",
-  "reception-and-party": "Speeches, dancing, and celebration",
   "details-and-decor": "The styling, florals and finishing touches",
+  "family-and-bridal-party": "Your people, your energy",
+  "getting-ready": "Intimate moments as the day begins",
+  "reception-and-party": "Speeches, dancing, and celebration",
 };
 
 // Optional: if you want a custom order (instead of alphabetical), list IDs here.
