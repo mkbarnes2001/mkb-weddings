@@ -1,5 +1,6 @@
 // src/components/ImageLightbox.tsx
 import { useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 type Props = {
@@ -21,15 +22,8 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
   const src = images[safeIndex];
   if (!src || !count) return null;
 
-  const goPrev = () => {
-    if (!count) return;
-    onNavigate((safeIndex - 1 + count) % count); // wrap
-  };
-
-  const goNext = () => {
-    if (!count) return;
-    onNavigate((safeIndex + 1) % count); // wrap
-  };
+  const goPrev = () => onNavigate((safeIndex - 1 + count) % count); // wrap
+  const goNext = () => onNavigate((safeIndex + 1) % count); // wrap
 
   useEffect(() => {
     overlayRef.current?.focus();
@@ -38,17 +32,12 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
       if (e.key === "Escape") {
         e.preventDefault();
         onClose();
-        return;
-      }
-      if (e.key === "ArrowLeft") {
+      } else if (e.key === "ArrowLeft") {
         e.preventDefault();
         goPrev();
-        return;
-      }
-      if (e.key === "ArrowRight") {
+      } else if (e.key === "ArrowRight") {
         e.preventDefault();
         goNext();
-        return;
       }
     };
 
@@ -64,14 +53,14 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [safeIndex, count, onClose]);
 
-  return (
+  const node = (
     <div
       ref={overlayRef}
       tabIndex={-1}
       role="dialog"
       aria-modal="true"
       aria-label="Image lightbox"
-      className="fixed inset-0 z-50 bg-black/95"
+      className="fixed inset-0 z-[99999] bg-black/95"
     >
       {/* Backdrop */}
       <button
@@ -83,51 +72,44 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
 
       {/* Controls */}
       <div className="absolute inset-0 z-20 pointer-events-none">
-        {/* Close */}
         <button
           type="button"
           aria-label="Close (Esc)"
           onClick={onClose}
-          className="pointer-events-auto absolute top-5 right-5 text-white/90 hover:text-white rounded-full bg-white/10 hover:bg-white/15 p-2"
+          className="pointer-events-auto absolute top-5 right-5 rounded-full bg-white/10 hover:bg-white/15 p-2 text-white"
         >
           <X className="w-7 h-7" />
         </button>
 
-        {/* Prev (always visible/clickable) */}
         <button
           type="button"
           aria-label="Previous (←)"
           onClick={goPrev}
-          className="pointer-events-auto absolute left-3 md:left-8 top-1/2 -translate-y-1/2 text-white/90 hover:text-white rounded-full bg-white/10 hover:bg-white/15 p-2"
+          className="pointer-events-auto absolute left-3 md:left-8 top-1/2 -translate-y-1/2 rounded-full bg-white/10 hover:bg-white/15 p-2 text-white"
         >
           <ChevronLeft className="w-10 h-10 md:w-12 md:h-12" />
         </button>
 
-        {/* Next (always visible/clickable) */}
         <button
           type="button"
           aria-label="Next (→)"
           onClick={goNext}
-          className="pointer-events-auto absolute right-3 md:right-8 top-1/2 -translate-y-1/2 text-white/90 hover:text-white rounded-full bg-white/10 hover:bg-white/15 p-2"
+          className="pointer-events-auto absolute right-3 md:right-8 top-1/2 -translate-y-1/2 rounded-full bg-white/10 hover:bg-white/15 p-2 text-white"
         >
           <ChevronRight className="w-10 h-10 md:w-12 md:h-12" />
         </button>
 
-        {/* Counter */}
         <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white/85 text-sm px-3 py-1 rounded-md bg-black/40">
           {safeIndex + 1} / {count}
         </div>
       </div>
 
-      {/* Image stage
-          - container is constrained and scrollable
-          - image is NOT max-height capped, so portraits can be scrolled fully
-      */}
+      {/* Image stage (scrollable for tall portraits) */}
       <div className="absolute inset-0 z-10 flex items-center justify-center p-4">
         <div
           className="max-w-[94vw] max-h-[92vh] overflow-auto"
-          // Click navigation: left half = prev, right half = next
           onClick={(e) => {
+            // click navigation: left half prev, right half next
             const rect = e.currentTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
             if (x < rect.width / 2) goPrev();
@@ -139,11 +121,14 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
             alt=""
             className="block max-w-full h-auto select-none"
             draggable={false}
-            onClick={(e) => e.stopPropagation()} // clicking the image itself doesn't close/navigate
+            onClick={(e) => e.stopPropagation()} // clicking the image doesn't close / nav
             onError={() => console.error("Lightbox image failed to load:", src)}
           />
         </div>
       </div>
     </div>
   );
+
+  return createPortal(node, document.body);
 }
+
