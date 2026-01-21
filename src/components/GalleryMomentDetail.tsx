@@ -1,11 +1,10 @@
-// src/components/GalleryMomentDetail.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
 
-// Optional Figma hero images (keeps design consistent)
+// Hero images (Figma-selected)
 import gettingReadyHero from "figma:asset/fb84c4cbee696343b417ad4224fe2d9c9960ad49.png";
 import ceremonyHero from "figma:asset/824b08dfe2d92a128003e19c7f69fd10d28b2015.png";
 import couplePortraitHero from "figma:asset/9caf1b2bbff1bbb43c7fe20f8da33be74aa354be.png";
@@ -17,102 +16,19 @@ type CsvRow = {
   venue: string;
   category: string;
   filename: string; // ends in _500.webp
+  tags?: string;
 };
 
-// R2 public base URLs
+// R2 base
 const THUMB_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
 const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
-// Shuffle the NON-pinned items in a stable way (recommended)
-const ENABLE_STABLE_SHUFFLE_FOR_REST = true;
-
-// Use Figma hero images per moment (fallback to first image if missing)
-const USE_FIGMA_HERO = true;
-
-/**
- * PINNED IMAGES: Put these FIRST for each moment.
- * - Keys MUST match your moment route slug (momentId)
- * - Values MUST be filenames exactly as in gallery.csv (the _500.webp names)
- */
-const PINNED: Record<string, string[]> = {
-  // Example:
-  // ceremony: ["MKB_1234_500.webp", "MKB_1890_500.webp", "MKB_1777_500.webp"],
-  ceremony: [],
-  "getting-ready": [],
-  "couple-portraits": [],
-  "family-and-bridal-party": [],
-  "reception-and-party": [],
-  "details-and-decor": [],
-};
-
-/**
- * Adjust hero crop focus per moment.
- * Examples:
- *  - "50% 50%" center
- *  - "50% 60%" lower (show more bottom)
- *  - "50% 40%" higher (show more top)
- */
-const HERO_FOCUS: Record<string, string> = {
-  "getting-ready": "50% 45%",
-  ceremony: "50% 55%",
-  "couple-portraits": "50% 60%",
-  "family-and-bridal-party": "50% 55%",
-  "reception-and-party": "50% 55%",
-  "details-and-decor": "50% 50%",
-};
-
-const MOMENT_CONFIG: Record<
-  string,
-  { title: string; description: string; seoDescription?: string; hero?: string }
-> = {
-  "getting-ready": {
-    title: "Getting Ready",
-    description: "Preparation, anticipation, and quiet moments before the ceremony.",
-    seoDescription:
-      "Getting ready wedding photography – preparation, details, and candid moments before the ceremony.",
-    hero: gettingReadyHero,
-  },
-  ceremony: {
-    title: "Ceremony",
-    description: 'The vows, the emotion, and the moment you say “I do”.',
-    seoDescription:
-      "Ceremony wedding photography – vows, reactions, and emotional moments captured naturally.",
-    hero: ceremonyHero,
-  },
-  "couple-portraits": {
-    title: "Couple Portraits",
-    description: "Just the two of you — captured naturally and beautifully.",
-    seoDescription:
-      "Couple portraits wedding photography – romantic portraits, natural moments, and beautiful light.",
-    hero: couplePortraitHero,
-  },
-  "family-and-bridal-party": {
-    title: "Family & Bridal Party",
-    description: "Celebrating with the people who matter most.",
-    seoDescription:
-      "Family and bridal party wedding photography – group portraits and candid celebration moments.",
-    hero: bridalPartyHero,
-  },
-  "reception-and-party": {
-    title: "Reception & Party",
-    description: "Speeches, laughter, dancing — the celebration in full swing.",
-    seoDescription:
-      "Reception wedding photography – speeches, dancing, and the best party moments of the day.",
-    hero: receptionHero,
-  },
-  "details-and-decor": {
-    title: "Details & Decor",
-    description: "The thoughtful styling, florals, and finishing touches.",
-    seoDescription:
-      "Wedding details photography – décor, styling, florals, and the little things that matter.",
-    hero: detailsDecorHero,
-  },
-};
+// ---------------- helpers ----------------
 
 function slugify(s: string) {
-  return s
+  return (s || "")
     .trim()
     .toLowerCase()
     .replace(/&/g, "and")
@@ -154,6 +70,7 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
   const venueIdx = header.indexOf("venue");
   const categoryIdx = header.indexOf("category");
   const filenameIdx = header.indexOf("filename");
+  const tagsIdx = header.indexOf("tags"); // optional
 
   if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) return [];
 
@@ -163,8 +80,10 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
     const venue = (cols[venueIdx] || "").trim();
     const category = (cols[categoryIdx] || "").trim();
     const filename = (cols[filenameIdx] || "").trim();
+    const tags = tagsIdx >= 0 ? (cols[tagsIdx] || "").trim() : "";
+
     if (!venue || !category || !filename) continue;
-    rows.push({ venue, category, filename });
+    rows.push({ venue, category, filename, tags });
   }
   return rows;
 }
@@ -182,39 +101,8 @@ function fullUrlFromThumb(r: CsvRow) {
   )}/${encodeURIComponent(filename2000)}`;
 }
 
-// SEO helper
-function setSeoMeta(args: { title: string; description: string; canonical?: string }) {
-  document.title = args.title;
-
-  let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-  if (!meta) {
-    meta = document.createElement("meta");
-    meta.setAttribute("name", "description");
-    document.head.appendChild(meta);
-  }
-  meta.setAttribute("content", args.description);
-
-  if (args.canonical) {
-    let link = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-    if (!link) {
-      link = document.createElement("link");
-      link.setAttribute("rel", "canonical");
-      document.head.appendChild(link);
-    }
-    link.setAttribute("href", args.canonical);
-  }
-}
-
-// Stable shuffle helpers
-function mulberry32(seed: number) {
-  return function () {
-    let t = (seed += 0x6d2b79f5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-function seedFromString(str: string) {
+// stable shuffle (no new libs)
+function hashStringToInt(str: string) {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) {
     h ^= str.charCodeAt(i);
@@ -222,43 +110,69 @@ function seedFromString(str: string) {
   }
   return h >>> 0;
 }
-function shuffledStable<T>(arr: T[], seedKey: string) {
-  const rng = mulberry32(seedFromString(seedKey));
-  const out = [...arr];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
+
+function stableShuffle<T>(arr: T[], seed: string, keyFn: (t: T) => string) {
+  const copy = [...arr];
+  copy.sort((a, b) => {
+    const ha = hashStringToInt(seed + "|" + keyFn(a));
+    const hb = hashStringToInt(seed + "|" + keyFn(b));
+    return ha - hb;
+  });
+  return copy;
 }
 
-// Pinned ordering
-function orderWithPinned<T extends { filename: string }>(
-  items: T[],
-  pinnedFilenames: string[]
-) {
-  if (!pinnedFilenames?.length) return items;
+// Optional: pin a few images to the top PER MOMENT
+// Use the _500.webp filenames exactly as in CSV.
+const PINNED: Record<string, string[]> = {
+  // ceremony: ["example_500.webp", "example2_500.webp"],
+};
 
-  const pinnedSet = new Set(pinnedFilenames);
-  const pinned: T[] = [];
-  const rest: T[] = [];
-
-  for (const it of items) {
-    if (pinnedSet.has(it.filename)) pinned.push(it);
-    else rest.push(it);
-  }
-
-  // Keep pinned order exactly as listed
-  pinned.sort(
-    (a, b) =>
-      pinnedFilenames.indexOf(a.filename) - pinnedFilenames.indexOf(b.filename)
-  );
-
-  return [...pinned, ...rest];
-}
+const MOMENT_META: Record<
+  string,
+  { name: string; description: string; hero: string; focus?: string }
+> = {
+  "getting-ready": {
+    name: "Getting Ready",
+    description: "Preparation and anticipation before the day begins.",
+    hero: gettingReadyHero,
+    focus: "center",
+  },
+  ceremony: {
+    name: "Ceremony",
+    description: "The vows, the emotion, and the moment you say “I do”.",
+    hero: ceremonyHero,
+    focus: "center",
+  },
+  "couple-portraits": {
+    name: "Couple Portraits",
+    description: "Just the two of you — natural, relaxed portraits.",
+    hero: couplePortraitHero,
+    focus: "center",
+  },
+  "family-bridal-party": {
+    name: "Family and Bridal Party",
+    description: "Celebrating with the people who mean the most.",
+    hero: bridalPartyHero,
+    focus: "center",
+  },
+  "reception-party": {
+    name: "Reception and Party",
+    description: "Dance, celebrate, and have fun into the night.",
+    hero: receptionHero,
+    focus: "center",
+  },
+  "details-decor": {
+    name: "Details and Decor",
+    description: "The little things that make your day uniquely yours.",
+    hero: detailsDecorHero,
+    focus: "center",
+  },
+};
 
 export function GalleryMomentDetail() {
   const { momentId } = useParams<{ momentId: string }>();
+
+  const meta = momentId ? MOMENT_META[momentId] : undefined;
 
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -266,7 +180,6 @@ export function GalleryMomentDetail() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  // Load CSV
   useEffect(() => {
     let cancelled = false;
 
@@ -293,61 +206,45 @@ export function GalleryMomentDetail() {
     return rows.filter((r) => slugify(r.category) === momentId);
   }, [rows, momentId]);
 
-  const momentNameFromCsv = momentRows[0]?.category;
+  const momentName = meta?.name || momentRows[0]?.category;
+  const momentDescription = meta?.description;
 
-  const venuesCount = useMemo(() => {
+  const images = useMemo(() => {
+    const mapped = momentRows.map((r) => ({
+      thumb: thumbUrl(r),
+      full: fullUrlFromThumb(r),
+      alt: `${r.venue} – ${r.category}`,
+      venue: r.venue,
+      filename: r.filename,
+    }));
+
+    // pinned first (optional)
+    const pinnedList = momentId ? PINNED[momentId] || [] : [];
+    const pinnedSet = new Set(pinnedList.map((x) => x.toLowerCase().trim()));
+    const pinned = mapped.filter((m) =>
+      pinnedSet.has(m.filename.toLowerCase().trim())
+    );
+    const rest = mapped.filter(
+      (m) => !pinnedSet.has(m.filename.toLowerCase().trim())
+    );
+
+    // stable random order so it looks "mixed up"
+    const shuffled = stableShuffle(rest, `moment-${momentId || "unknown"}-v1`, (m) => m.filename);
+
+    return [...pinned, ...shuffled];
+  }, [momentRows, momentId]);
+
+  const venueCount = useMemo(() => {
     const set = new Set<string>();
     for (const r of momentRows) set.add(r.venue);
     return set.size;
   }, [momentRows]);
 
-  const cfg = momentId ? MOMENT_CONFIG[momentId] : undefined;
-  const title = cfg?.title ?? momentNameFromCsv ?? "Moment";
-  const description = cfg?.description ?? "A curated selection of wedding images.";
-
-  // Build images, then stable shuffle rest, then pin selected to top
-  const images = useMemo(() => {
-    const base = momentRows.map((r) => ({
-      thumb: thumbUrl(r),
-      full: fullUrlFromThumb(r),
-      alt: `${r.venue} – ${r.category}`,
-      venue: r.venue,
-      filename: r.filename, // IMPORTANT for pinned
-    }));
-
-    const mixed =
-      ENABLE_STABLE_SHUFFLE_FOR_REST && momentId
-        ? shuffledStable(base, `moment:${momentId}`)
-        : base;
-
-    const pinnedList = momentId ? PINNED[momentId] : [];
-    return orderWithPinned(mixed, pinnedList ?? []);
-  }, [momentRows, momentId]);
-
-  // Pick hero image
-  const heroImage =
-    (USE_FIGMA_HERO ? cfg?.hero : undefined) ||
-    images[0]?.full ||
-    images[0]?.thumb ||
-    "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
-
-  const heroFocus = (momentId && HERO_FOCUS[momentId]) || "50% 50%";
-
-  // SEO meta
-  useEffect(() => {
-    if (!momentId) return;
-
-    const pageTitle = `${title} | MKB Weddings`;
-    const pageDesc =
-      cfg?.seoDescription ??
-      `${description} Browse ${images.length} image${images.length === 1 ? "" : "s"} across venues.`;
-
-    setSeoMeta({
-      title: pageTitle,
-      description: pageDesc,
-      canonical: `${window.location.origin}/gallery/moment/${encodeURIComponent(momentId)}`,
-    });
-  }, [momentId, title, description, images.length, cfg?.seoDescription]);
+  const venues = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of momentRows) set.add(r.venue);
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [momentRows]);
 
   if (loadError) {
     return (
@@ -363,7 +260,7 @@ export function GalleryMomentDetail() {
     );
   }
 
-  if (!momentNameFromCsv) {
+  if (!momentName) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
         <div className="text-center max-w-xl">
@@ -379,84 +276,105 @@ export function GalleryMomentDetail() {
     );
   }
 
+  const heroSrc = meta?.hero || images[0]?.full || images[0]?.thumb;
+  const heroFocus = meta?.focus || "center";
+
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO (fixed height, cropped, no text on hero) */}
-      <div className="relative h-[220px] md:h-[300px] overflow-hidden">
-        <ImageWithFallback
-          src={heroImage}
-          alt={title}
-          className="w-full h-full object-cover"
-          style={{ objectPosition: heroFocus }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-black/10 to-transparent" />
-      </div>
-
-      {/* HEADER + META (below hero) */}
-      <div className="max-w-7xl mx-auto px-6 pt-10 pb-10">
-        <Link
-          to="/gallery/moments"
-          className="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 mb-8"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Back to Moments
-        </Link>
-
-        <h1 className="text-4xl md:text-5xl uppercase tracking-widest text-neutral-900 mb-6">
-          {title}
-        </h1>
-
-        <p className="text-neutral-700 text-lg max-w-3xl leading-relaxed mb-10">
-          {description}
-        </p>
-
-        <div className="text-neutral-500 text-sm uppercase tracking-wider">
-          {images.length} image{images.length === 1 ? "" : "s"} · {venuesCount} venue
-          {venuesCount === 1 ? "" : "s"}
+      {/* HERO (same pattern as Creative Flash) */}
+      <div className="relative h-[300px] md:h-[420px] overflow-hidden">
+        {heroSrc && (
+          <ImageWithFallback
+            src={heroSrc}
+            alt={momentName}
+            className="w-full h-full object-cover"
+            style={{ objectPosition: heroFocus }}
+          />
+        )}
+        <div className="absolute inset-0 bg-black/35" />
+        <div className="absolute inset-0 flex items-center justify-center px-6">
+          <h1 className="text-white text-center font-semibold drop-shadow leading-tight
+                         text-[34px] sm:text-[42px] md:text-[56px] lg:text-[66px]
+                         max-w-6xl mx-auto">
+            {momentName.toUpperCase()}
+          </h1>
         </div>
       </div>
 
-      {/* GRID */}
-      <div className="max-w-7xl mx-auto px-6 pb-16">
+      {/* CONTENT BELOW HERO (centered) */}
+      <div className="max-w-7xl mx-auto px-6 pt-10 pb-16">
+        <div className="text-center mb-12">
+          <Link
+            to="/gallery/moments"
+            className="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 mb-8 justify-center"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Moments
+          </Link>
+
+          {momentDescription && (
+            <p className="brand-prose mx-auto mb-8">{momentDescription}</p>
+          )}
+
+          <div className="eyebrow">
+            {images.length} IMAGES · {venueCount} VENUES
+          </div>
+        </div>
+
+        {/* Venue pills (optional, but neat and still centered) */}
+        {venues.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2 mb-10">
+            {venues.slice(0, 18).map((v) => (
+              <span
+                key={v}
+                className="px-3 py-1 rounded-full border border-neutral-200 text-sm text-neutral-700 bg-white"
+              >
+                {v}
+              </span>
+            ))}
+            {venues.length > 18 && (
+              <span className="px-3 py-1 rounded-full border border-neutral-200 text-sm text-neutral-500 bg-white">
+                +{venues.length - 18} more
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* GRID */}
         {images.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">No images found for this moment.</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {images.map((img, idx) => (
-              <div key={`${img.thumb}-${idx}`}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLightboxIndex(idx);
-                    setLightboxOpen(true);
-                  }}
-                  className="w-full aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left"
-                  aria-label={`Open image ${idx + 1}`}
-                >
-                  <ImageWithFallback
-                    src={img.thumb}
-                    alt={img.alt}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                </button>
-
-                {/* Simple story-style caption */}
-                <div className="mt-2 text-sm text-neutral-600">{img.venue}</div>
-              </div>
+              <button
+                key={`${img.thumb}-${idx}`}
+                type="button"
+                onClick={() => {
+                  setLightboxIndex(idx);
+                  setLightboxOpen(true);
+                }}
+                className="group relative aspect-[4/3] overflow-hidden rounded-lg text-left"
+              >
+                <ImageWithFallback
+                  src={img.thumb}
+                  alt={img.alt}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              </button>
             ))}
           </div>
         )}
-      </div>
 
-      {/* LIGHTBOX */}
-      {lightboxOpen && images.length > 0 && (
-        <ImageLightbox
-          images={images.map((i) => i.full)}
-          currentIndex={lightboxIndex}
-          onClose={() => setLightboxOpen(false)}
-          onNavigate={(newIndex) => setLightboxIndex(newIndex)}
-        />
-      )}
+        {/* LIGHTBOX */}
+        {lightboxOpen && images.length > 0 && (
+          <ImageLightbox
+            images={images.map((i) => i.full)}
+            currentIndex={lightboxIndex}
+            onClose={() => setLightboxOpen(false)}
+            onNavigate={(newIndex) => setLightboxIndex(newIndex)}
+          />
+        )}
+      </div>
     </div>
   );
 }
