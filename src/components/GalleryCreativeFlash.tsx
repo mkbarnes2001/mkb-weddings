@@ -104,24 +104,23 @@ export function GalleryCreativeFlash() {
 
       {/* BODY COPY (matches your designed page) */}
    <div className="max-w-3xl mx-auto text-center mt-16 mb-20 md:mb-28">
-        <h2 className="text-center text-sm uppercase tracking-widest text-neutral-800 mb-8">
-          Master of Flash Wedding Photography
-        </h2>
+    <h2 className="text-center font-serif text-sm uppercase tracking-widest text-neutral-800 mb-8">
+  Master of Flash Wedding Photography
+</h2>
 
-        <p className="font-serif text-lg leading-relaxed text-neutral-700">
-          <p>
-            Known as a master of flash wedding photography, MKB Weddings creates bold, vibrant, and
-            dramatic images that stand out. Our flash photography expertise is perfect for evening
-            portraits, dark venues, Irish weather conditions, and high-energy dance-floor shots.
-          </p>
-          <p>
-            Using advanced off-camera flash techniques, we create striking editorial-style images
-            with perfect lighting regardless of the conditions. From moody atmospheric shots to
-            bright vibrant portraits, our flash work adds a unique artistic dimension to your
-            wedding story.
-          </p>
-        </div>
-      </div>
+<div className="text-center font-serif text-lg leading-relaxed text-neutral-700 space-y-8 mb-24">
+  <p>
+    Known as a master of flash wedding photography, MKB Weddings creates bold, vibrant, and dramatic
+    images that stand out. Our flash photography expertise is perfect for evening portraits, dark
+    venues, Irish weather conditions, and high-energy dance-floor shots.
+  </p>
+
+  <p>
+    Using advanced off-camera flash techniques, we create striking editorial-style images with
+    perfect lighting regardless of the conditions. From moody atmospheric shots to bright vibrant
+    portraits, our flash work adds a unique artistic dimension to your wedding story.
+  </p>
+</div>
 
 {/* GALLERY GRID (Moments-sized thumbnails + venue caption) */}
 <div className="max-w-7xl mx-auto px-6 pt-16 md:pt-20 pb-16">
