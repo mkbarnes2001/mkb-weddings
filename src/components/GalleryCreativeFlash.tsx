@@ -104,7 +104,7 @@ export function GalleryCreativeFlash() {
 
       {/* BODY COPY (matches your designed page) */}
    <div className="max-w-3xl mx-auto text-center mt-16 mb-20 md:mb-28">
-    <h2 className="text-center font-serif text-sm uppercase tracking-widest text-neutral-800 mb-8">
+<h2 className="text-center font-serif text-sm uppercase tracking-widest text-neutral-800 mb-8">
   Master of Flash Wedding Photography
 </h2>
 
@@ -121,6 +121,7 @@ export function GalleryCreativeFlash() {
     portraits, our flash work adds a unique artistic dimension to your wedding story.
   </p>
 </div>
+
 
 {/* GALLERY GRID (Moments-sized thumbnails + venue caption) */}
 <div className="max-w-7xl mx-auto px-6 pt-16 md:pt-20 pb-16">
