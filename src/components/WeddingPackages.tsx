@@ -356,7 +356,7 @@ export function WeddingPackages() {
               <p className="text-foreground/70 mb-4" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
                 Add professional wedding videography to capture your day in motion. Includes highlights film and full ceremony footage.
               </p>
-              <p className="font-medium text-primary">From £600</p>
+              <p className="font-medium text-primary"></p>
             </div>
             <div className="bg-white border border-border rounded-lg p-8">
               <BookOpen className="w-12 h-12 text-primary mb-4" />
@@ -364,7 +364,7 @@ export function WeddingPackages() {
               <p className="text-foreground/70 mb-4" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
                 Premium quality albums with professional design. Available in various sizes with luxury binding options.
               </p>
-              <p className="font-medium text-primary">From £350</p>
+              <p className="font-medium text-primary"></p>
             </div>
             <div className="bg-white border border-border rounded-lg p-8">
               <Camera className="w-12 h-12 text-primary mb-4" />
@@ -372,7 +372,7 @@ export function WeddingPackages() {
               <p className="text-foreground/70 mb-4" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
                 Get comfortable in front of the camera with an engagement or pre-wedding photoshoot at a location of your choice.
               </p>
-              <p className="font-medium text-primary">From £195</p>
+              <p className="font-medium text-primary"></p>
             </div>
             <div className="bg-white border border-border rounded-lg p-8">
               <Clock className="w-12 h-12 text-primary mb-4" />
@@ -380,7 +380,7 @@ export function WeddingPackages() {
               <p className="text-foreground/70 mb-4" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
                 Extend your coverage to capture more of your special day, from extended preparations to late-night celebrations.
               </p>
-              <p className="font-medium text-primary">£150 per hour</p>
+              <p className="font-medium text-primary"></p>
             </div>
           </div>
         </div>
