@@ -154,10 +154,10 @@ export function Contact() {
                 <div>
                   <h3 className="mb-1">Email</h3>
                   <a
-                    href="mailto:hello@mkbweddings.com"
+                    href="mailto:mark@mkbweddings.com"
                     className="text-foreground/60 hover:text-primary transition-colors"
                   >
-                    hello@mkbweddings.com
+                    mark@mkbweddings.com
                   </a>
                 </div>
               </div>
@@ -169,10 +169,10 @@ export function Contact() {
                 <div>
                   <h3 className="mb-1">Phone</h3>
                   <a
-                    href="tel:+15551234567"
+                    href="tel:+447546456077"
                     className="text-foreground/60 hover:text-primary transition-colors"
                   >
-                    (555) 123-4567
+                    +44 (0) 7546 456077
                   </a>
                 </div>
               </div>
@@ -200,7 +200,7 @@ export function Contact() {
               </p>
               <div className="flex gap-4">
                 <a
-                  href="https://instagram.com"
+                  href="https://instagram.com/mkbweddings"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 bg-primary text-white flex items-center justify-center hover:bg-primary/80 transition-colors"
@@ -208,7 +208,7 @@ export function Contact() {
                   <Instagram size={20} />
                 </a>
                 <a
-                  href="https://facebook.com"
+                  href="https://facebook.com/mkbweddings"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 bg-primary text-white flex items-center justify-center hover:bg-primary/80 transition-colors"
@@ -255,14 +255,14 @@ export function Contact() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="mailto:hello@mkbweddings.com"
+              href="mailto:mark@mkbweddings.com"
               className="bg-white text-primary px-10 py-4 hover:bg-white/90 transition-colors inline-flex items-center justify-center gap-2"
             >
               <Mail size={20} />
               Email Us
             </a>
             <a
-              href="tel:+15551234567"
+              href="tel:+44 (0) 7546 456077"
               className="border-2 border-white text-white px-10 py-4 hover:bg-white hover:text-primary transition-colors inline-flex items-center justify-center gap-2"
             >
               <Phone size={20} />
