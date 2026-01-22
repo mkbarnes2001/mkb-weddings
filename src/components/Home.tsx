@@ -200,7 +200,7 @@ export function Home() {
           </div>
           <h2 className="mb-6 text-white">Let's Capture Your Special Day</h2>
           <p className="text-white/90 mb-12 max-w-2xl mx-auto" style={{ fontSize: '1.25rem', lineHeight: '1.6' }}>
-            Limited dates available for 2026 & 202y. Get in touch to check availability and discuss your wedding photography needs.
+            Limited dates available for 2026 & 2027. Get in touch to check availability and discuss your wedding photography needs.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
