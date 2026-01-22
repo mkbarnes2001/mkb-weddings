@@ -49,15 +49,15 @@ export function Footer() {
             <h4 className="mb-6 text-sm uppercase tracking-wide">Get in Touch</h4>
             <ul className="space-y-3 text-white/70">
               <li>
-                <a href="mailto:hello@mkbweddings.com" className="hover:text-white transition-colors flex items-center gap-2">
+                <a href="mailto:mark@mkbweddings.com" className="hover:text-white transition-colors flex items-center gap-2">
                   <Mail size={16} />
-                  hello@mkbweddings.com
+                  mark@mkbweddings.com
                 </a>
               </li>
               <li>
-                <a href="tel:+15551234567" className="hover:text-white transition-colors flex items-center gap-2">
+                <a href="tel:+447546456077" className="hover:text-white transition-colors flex items-center gap-2">
                   <Phone size={16} />
-                  (555) 123-4567
+                  +(44) 7546 456077
                 </a>
               </li>
             </ul>
