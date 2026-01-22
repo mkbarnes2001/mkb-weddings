@@ -126,6 +126,17 @@ function stableShuffle<T>(arr: T[], seed: string, keyFn: (t: T) => string) {
 // Use the _500.webp filenames exactly as in CSV.
 const PINNED: Record<string, string[]> = {
   // ceremony: ["example_500.webp", "example2_500.webp"],
+  getting ready: ["MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-186_500.webp",
+  "mkb-weddings-mkb-Photography-northern-ireland-wedding-photographer-LEIGHINMOHR-hotel-ballymena-wedding-photography-7_500.webp",
+         "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-100_500.webp,
+                  "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-dunadry-hotel-belfast-photography-105_500.webp",
+                  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-153_500.webp",
+                  "mkb-weddings-mkb-Photography-northern-ireland-wedding-photographer-merchant-hotel-belfast-wedding-photography-114_500.webp",
+"MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-67_500.webp",
+"mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-240_500.webp",
+"mkb-weddings-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-39_500.webp"]
+
+                  
 };
 
 // Curated moment labels + hero + crop focus (object-position)
