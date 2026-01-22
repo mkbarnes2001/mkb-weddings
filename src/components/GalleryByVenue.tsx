@@ -170,18 +170,7 @@ export function GalleryByVenue() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
-        <div className="flex items-end justify-between gap-6 flex-wrap mb-10">
-          <div>
-            <h1 className="text-5xl mb-3">Venues</h1>
-            <p className="text-neutral-600">
-              Browse weddings by location
-            </p>
-          </div>
-          <Link to="/gallery" className="text-neutral-600 hover:text-neutral-900">
-            Back to Gallery
-          </Link>
-        </div>
+    <div className="mb-10" />
 
         {venueCards.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">No venues found.</div>
