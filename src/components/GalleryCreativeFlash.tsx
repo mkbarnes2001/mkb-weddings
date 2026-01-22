@@ -18,14 +18,23 @@ const FULL_BASE = "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
 /**
  * Put these FIRST. Use filenames exactly as in CSV (the _500.webp names).
- * If you only have _2000.webp names, convert to _500.webp.
  */
 const PINNED: string[] = [
   "MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_500.webp",
   "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-113_500.webp",
   "mkb-weddings-irish-wedding-photographer-redcastle-hotel-moville-wedding-photography-24_500.webp",
-  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-112_500.webp"
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-112_500.webp",
 ];
+
+/**
+ * Optional: adjust hero crop focus.
+ * Examples:
+ * "50% 35%" (crop a bit higher)
+ * "50% 70%" (crop a bit lower)
+ * "30% 50%" (crop left)
+ * "70% 50%" (crop right)
+ */
+const HERO_FOCUS = "50% 50%";
 
 // ----------------------- helpers --------------------------------------------
 
@@ -108,7 +117,6 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
 
 function hasTag(tags: string | undefined, target: string) {
   if (!tags) return false;
-  // supports comma or | separated list
   const parts = tags
     .split(/[,\|]/g)
     .map((t) => normalize(t))
@@ -188,7 +196,6 @@ export function GalleryCreativeFlash() {
     const pinned = mapped.filter((m) => pinnedSet.has(normalize(m.filename)));
     const rest = mapped.filter((m) => !pinnedSet.has(normalize(m.filename)));
 
-    // stable random
     const shuffled = stableShuffle(rest, "creative-flash-v1", (m) => m.filename);
 
     return [...pinned, ...shuffled];
@@ -205,31 +212,42 @@ export function GalleryCreativeFlash() {
     );
   }
 
+  const heroImage = creativeFlashHero;
+
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO */}
-      <div className="relative h-[320px] md:h-[420px] overflow-hidden mb-20">
+      {/* HERO — match Moment/Venue hero sizing + crop */}
+      <div className="relative h-[60vh] min-h-[400px]">
         <ImageWithFallback
-          src={creativeFlashHero}
+          src={heroImage}
           alt="Creative Flash Photography"
           className="w-full h-full object-cover"
+          style={{ objectPosition: HERO_FOCUS }}
         />
-        <div className="absolute inset-0 bg-black/35" />
-        <div className="absolute inset-0 flex items-center justify-center px-6">
-      <h1 className="text-white text-center font-semibold drop-shadow leading-tight
-               text-[34px] sm:text-[42px] md:text-[56px] lg:text-[68px]
-               max-w-5xl mx-auto">
-          Bold, dramatic, and unforgettable moments illuminated with expert flash lighting
-    </h1>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
+        {/* Bottom-aligned text block (same structure as moment detail) */}
+        <div className="absolute inset-0 flex items-end">
+          <div className="max-w-7xl mx-auto px-6 pb-16 w-full text-center">
+            {/* Heading size matches GalleryMomentDetail */}
+            <h1 className="text-white text-5xl md:text-6xl mb-4">
+              Creative Flash
+            </h1>
+
+            {/* Optional short subline (keeps it elegant + consistent) */}
+            <p className="text-white text-sm md:text-base">
+              Bold, dramatic, and unforgettable moments illuminated with expert flash lighting
+            </p>
+          </div>
         </div>
       </div>
 
       {/* TEXT */}
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center mb-16">
-          <div className="eyebrow mb-10 mt-2 text-center">
-      Master of Flash Wedding Photography</div>
+          <div className="brand-eyebrow mb-10 mt-2 text-center">
+            Master of Flash Wedding Photography
+          </div>
 
           <div className="brand-prose mx-auto">
             <p>
@@ -250,7 +268,9 @@ export function GalleryCreativeFlash() {
 
         {/* GRID */}
         {images.length === 0 ? (
-          <div className="text-center py-20 text-neutral-600">No Creative Flash images found.</div>
+          <div className="text-center py-20 text-neutral-600">
+            No Creative Flash images found.
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-16">
             {images.map((img, idx) => (
