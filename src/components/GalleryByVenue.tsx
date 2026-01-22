@@ -1,22 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { ChevronRight } from "lucide-react";
 
 type CsvRow = {
   venue: string;
   category: string;
-  filename: string;
-  tags?: string;
+  filename: string; // ends in _500.webp
+  tags?: string; // optional (e.g. "creative-flash")
 };
 
-// IMPORTANT: use your real R2 public dev domain here
+// IMPORTANT: keep consistent with the other gallery pages
 const THUMB_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
+const FULL_BASE =
+  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
-// Put your favourite venues here (use VENUE NAMES exactly as in CSV)
+// Pin favourite venues to the top (use the *display name* exactly as in CSV)
 const PINNED_VENUES: string[] = [
-   "Orange tree house",
+    "Orange tree house",
    "Ballyscullion park",
    "Tullyglass hotel",
    "Killeavy castle",
@@ -77,7 +79,7 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
     const venue = (cols[venueIdx] || "").trim();
     const category = (cols[categoryIdx] || "").trim();
     const filename = (cols[filenameIdx] || "").trim();
-    const tags = tagsIdx !== -1 ? (cols[tagsIdx] || "").trim() : "";
+    const tags = tagsIdx >= 0 ? (cols[tagsIdx] || "").trim() : "";
 
     if (!venue || !category || !filename) continue;
     rows.push({ venue, category, filename, tags });
@@ -85,11 +87,26 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
   return rows;
 }
 
-function thumbUrl(venue: string, category: string, filename: string) {
-  return `${THUMB_BASE}/${encSegment(venue)}/${encSegment(category)}/${encodeURIComponent(
-    filename
-  )}`;
+function thumbUrl(r: CsvRow) {
+  return `${THUMB_BASE}/${encSegment(r.venue)}/${encSegment(
+    r.category
+  )}/${encodeURIComponent(r.filename)}`;
 }
+
+function fullUrlFromThumb(r: CsvRow) {
+  const filename2000 = r.filename.replace(/_500\.webp$/i, "_2000.webp");
+  return `${FULL_BASE}/${encSegment(r.venue)}/${encSegment(
+    r.category
+  )}/${encodeURIComponent(filename2000)}`;
+}
+
+type VenueCard = {
+  venue: string;
+  venueId: string;
+  coverThumb: string;
+  coverFull: string;
+  count: number;
+};
 
 export function GalleryByVenue() {
   const [rows, setRows] = useState<CsvRow[]>([]);
@@ -97,6 +114,7 @@ export function GalleryByVenue() {
 
   useEffect(() => {
     let cancelled = false;
+
     (async () => {
       try {
         setLoadError(null);
@@ -115,43 +133,39 @@ export function GalleryByVenue() {
     };
   }, []);
 
-  const venueCards = useMemo(() => {
-    // pick one thumbnail per venue (first row encountered)
-    const firstByVenue = new Map<string, CsvRow>();
+  const venueCards = useMemo((): VenueCard[] => {
+    const map = new Map<string, CsvRow[]>();
     for (const r of rows) {
-      if (!firstByVenue.has(r.venue)) firstByVenue.set(r.venue, r);
+      const key = r.venue;
+      const arr = map.get(key) ?? [];
+      arr.push(r);
+      map.set(key, arr);
     }
 
-    let cards = Array.from(firstByVenue.values()).map((r) => ({
-      venue: r.venue,
-      venueSlug: slugify(r.venue),
-      coverThumb: thumbUrl(r.venue, r.category, r.filename),
-    }));
+    const cards: VenueCard[] = [];
+    for (const [venue, venueRows] of map.entries()) {
+      // Pick a nice cover: first row with a valid thumb
+      const coverRow = venueRows[0];
+      if (!coverRow) continue;
 
-    // Base ordering: alphabetical
-    cards.sort((a, b) => a.venue.localeCompare(b.venue));
-
-    // Pinning: move pinned to top (in your specified order)
-    if (PINNED_VENUES.length) {
-      const pinnedLower = PINNED_VENUES.map((v) => v.toLowerCase());
-      const pinned: typeof cards = [];
-      const rest: typeof cards = [];
-
-      for (const c of cards) {
-        if (pinnedLower.includes(c.venue.toLowerCase())) pinned.push(c);
-        else rest.push(c);
-      }
-
-      pinned.sort(
-        (a, b) =>
-          pinnedLower.indexOf(a.venue.toLowerCase()) -
-          pinnedLower.indexOf(b.venue.toLowerCase())
-      );
-
-      cards = [...pinned, ...rest];
+      cards.push({
+        venue,
+        venueId: slugify(venue),
+        coverThumb: thumbUrl(coverRow),
+        coverFull: fullUrlFromThumb(coverRow),
+        count: venueRows.length,
+      });
     }
 
-    return cards;
+    // Sort with pinned venues first, then alphabetical
+    const pinnedSet = new Set(PINNED_VENUES.map((v) => v.trim().toLowerCase()));
+
+    return cards.sort((a, b) => {
+      const ap = pinnedSet.has(a.venue.trim().toLowerCase()) ? 0 : 1;
+      const bp = pinnedSet.has(b.venue.trim().toLowerCase()) ? 0 : 1;
+      if (ap !== bp) return ap - bp;
+      return a.venue.localeCompare(b.venue);
+    });
   }, [rows]);
 
   if (loadError) {
@@ -169,17 +183,21 @@ export function GalleryByVenue() {
   }
 
   return (
-  
-    <div className="mb-10" />
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
+        {/* Header removed (as requested). Optional tiny spacer: */}
+        <div className="mb-2" />
 
         {venueCards.length === 0 ? (
-          <div className="text-center py-20 text-neutral-600">No venues found.</div>
+          <div className="text-center py-20 text-neutral-600">
+            No venues found yet.
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {venueCards.map((v) => (
               <Link
-                key={v.venueSlug}
-                to={`/gallery/venue/${v.venueSlug}`}
+                key={v.venueId}
+                to={`/gallery/venue/${v.venueId}`}
                 className="group relative aspect-[4/3] overflow-hidden rounded-lg"
               >
                 <ImageWithFallback
@@ -190,6 +208,9 @@ export function GalleryByVenue() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                 <div className="absolute inset-0 flex flex-col justify-end p-6">
                   <h2 className="text-white text-2xl mb-2">{v.venue}</h2>
+                  <p className="text-white/85 text-sm mb-3">
+                    {v.count} image{v.count !== 1 ? "s" : ""}
+                  </p>
                   <div className="flex items-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="text-sm uppercase tracking-wider">Explore</span>
                     <ChevronRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-2" />
