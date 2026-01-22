@@ -159,4 +159,11 @@ export function ThankYou() {
       </section>
     </div>
   );
+
+  useEffect(() => {
+  if ((window as any).fbq) {
+    (window as any).fbq('track', 'Lead');
+  }
+}, []);
+
 }
