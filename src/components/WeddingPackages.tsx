@@ -204,7 +204,7 @@ export function WeddingPackages() {
       <section className="py-20 px-6 md:px-20 max-w-[1440px] mx-auto">
         <div className="max-w-4xl mx-auto text-center mb-16">
           <p className="text-foreground/70" style={{ fontSize: '1.125rem', lineHeight: '1.6' }}>
-            MKB Weddings offers five wedding photography packages designed to suit different wedding styles, timelines, and budgets. Whether you're planning an intimate elopement or a grand celebration, I provide the same creative, fun, and professional service with every booking.
+            MKB Weddings offers five wedding photography packages designed to suit different wedding styles, timelines, and budgets. Whether you're planning an intimate elopement or a grand celebration, we provide the same creative, fun, and professional service with every booking.
           </p>
         </div>
 
@@ -223,7 +223,7 @@ export function WeddingPackages() {
               <Check className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
               <div>
                 <p className="font-medium mb-1">Online Gallery</p>
-                <p className="text-sm text-foreground/60">Private online gallery for viewing and downloading</p>
+                <p className="text-sm text-foreground/60">Private online gallery for viewing, downloading and ordering prints directly</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -251,7 +251,7 @@ export function WeddingPackages() {
               <Check className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
               <div>
                 <p className="font-medium mb-1">Fast Turnaround</p>
-                <p className="text-sm text-foreground/60">Receive your gallery within 4-6 weeks</p>
+                <p className="text-sm text-foreground/60">Receive your gallery within 6-8 weeks</p>
               </div>
             </div>
           </div>
@@ -354,7 +354,7 @@ export function WeddingPackages() {
               <Video className="w-12 h-12 text-primary mb-4" />
               <h3 className="mb-3">Videography</h3>
               <p className="text-foreground/70 mb-4" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
-                Add professional wedding videography to capture your day in motion. Includes highlights film and full ceremony footage.
+                Add professional wedding videography to capture your day in motion, no hassle booking different vendors, we handle it all!
               </p>
               <p className="font-medium text-primary"></p>
             </div>
@@ -389,7 +389,7 @@ export function WeddingPackages() {
       {/* Videography Section */}
       <section className="py-20 px-6 md:px-20 bg-gradient-to-br from-secondary to-accent">
         <div className="max-w-[1440px] mx-auto text-center">
-          <h2 className="mb-6">Wedding Videography</h2>
+          <h1 className="mb-6">Wedding Videography</h1>
           <p className="tagline max-w-3xl mx-auto" style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)' }}>
             Cinematic wedding films that bring your story to life
           </p>
@@ -479,7 +479,7 @@ export function WeddingPackages() {
               </div>
               <h3 className="mb-3">Full Day Coverage</h3>
               <p className="text-foreground/80" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
-                From bridal preparations to the last dance, we capture every precious moment of your celebration
+                From bridal preparations to the dances, filmed in full, we capture every precious moment of your celebration
               </p>
             </div>
 
@@ -489,7 +489,7 @@ export function WeddingPackages() {
               </div>
               <h3 className="mb-3">Highlight Film</h3>
               <p className="text-foreground/80" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
-                A beautifully edited 5-10 minute cinematic film showcasing the best moments of your day
+                A beautifully edited 3 minute cinematic film showcasing the best moments of your day
               </p>
             </div>
 
@@ -499,7 +499,7 @@ export function WeddingPackages() {
               </div>
               <h3 className="mb-3">Full Ceremony</h3>
               <p className="text-foreground/80" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
-                Complete coverage of your ceremony from start to finish, capturing every vow and emotion
+                Complete coverage of your ceremony to dances, capturing every vow and emotion
               </p>
             </div>
           </div>
@@ -523,9 +523,9 @@ export function WeddingPackages() {
               we document the genuine emotions, heartfelt speeches, and joyful celebrations.
             </p>
             <p>
-              Working seamlessly alongside our photography team, we ensure complete coverage without 
-              disruption. The result is a beautifully crafted film that captures not just what your 
-              wedding looked like, but what it felt like.
+              Working seamlessly with our partners, we ensure complete coverage without disruption. 
+              The result is a beautifully crafted film that captures not just what your wedding looked like, 
+              but what it felt like.
             </p>
           </div>
         </div>
