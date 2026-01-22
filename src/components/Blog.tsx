@@ -562,7 +562,7 @@ export function Blog() {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center text-white px-6 max-w-5xl mx-auto w-full">
             <h1 className="tagline text-white mb-6" style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)' }}>
-              Stories and Reviews
+              Stories and Reviews (coming soon)
             </h1>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
               Real weddings, client reviews, tips, and inspiration from Northern Ireland and beyond
