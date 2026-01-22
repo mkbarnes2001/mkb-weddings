@@ -309,7 +309,7 @@ export function GalleryMomentDetail() {
             <h1 className="text-white text-5xl md:text-6xl mb-4">{momentName}</h1>
 
             {/* Keep the counts subtle on hero like venue */}
-            <p className="text-white/85 text-sm md:text-base">
+            <p className="text-white text-sm md:text-base">
               {images.length} {images.length === 1 ? "image" : "images"} · {venueCount}{" "}
               {venueCount === 1 ? "venue" : "venues"}
             </p>
