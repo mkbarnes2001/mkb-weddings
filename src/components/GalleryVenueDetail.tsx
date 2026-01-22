@@ -26,7 +26,6 @@ function slugify(s: string) {
 }
 
 function encSegment(s: string) {
-  // Encode each path segment (spaces, &, etc.)
   return encodeURIComponent(s);
 }
 
@@ -34,7 +33,6 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
   const lines = csvText.split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return [];
 
-  // Tiny CSV parser that respects quotes
   const parseLine = (line: string) => {
     const out: string[] = [];
     let cur = "";
@@ -73,7 +71,6 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
     const venue = (cols[venueIdx] || "").trim();
     const category = (cols[categoryIdx] || "").trim();
     const filename = (cols[filenameIdx] || "").trim();
-
     if (!venue || !category || !filename) continue;
     rows.push({ venue, category, filename });
   }
@@ -129,8 +126,7 @@ export function GalleryVenueDetail() {
 
   const venueRows = useMemo(() => {
     if (!venueId) return [];
-    const v = rows.filter((r) => slugify(r.venue) === venueId);
-    return v;
+    return rows.filter((r) => slugify(r.venue) === venueId);
   }, [rows, venueId]);
 
   const venueName = venueRows[0]?.venue;
@@ -148,7 +144,6 @@ export function GalleryVenueDetail() {
       out = out.filter((r) => r.category === categoryFilter);
     }
 
-    // Sort: "recent" = as-is, "oldest" = reverse
     if (sortBy === "oldest") {
       out = [...out].reverse();
     }
@@ -156,7 +151,6 @@ export function GalleryVenueDetail() {
     return out;
   }, [venueRows, categoryFilter, sortBy]);
 
-  // Build URLs for the grid + lightbox
   const images = useMemo(() => {
     return filtered.map((r) => ({
       thumb: thumbUrl(r),
@@ -204,18 +198,19 @@ export function GalleryVenueDetail() {
         <ImageWithFallback src={heroImage} alt={venueName} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
+        {/* Center-aligned hero content */}
         <div className="absolute inset-0 flex items-end">
-          <div className="max-w-7xl mx-auto px-6 pb-16 w-full">
+          <div className="max-w-7xl mx-auto px-6 pb-16 w-full text-center">
             <Link
               to="/gallery/venues"
-              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center"
             >
               <ArrowLeft className="w-5 h-5" />
               Back to Venues
             </Link>
 
             <h1 className="text-white text-5xl md:text-6xl mb-4">{venueName}</h1>
-            <p className="text-white/85 flex items-center gap-2">
+            <p className="text-white/85 flex items-center gap-2 justify-center">
               <MapPin className="w-4 h-4" />
               {images.length} {images.length === 1 ? "image" : "images"}
             </p>
