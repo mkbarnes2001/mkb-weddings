@@ -222,7 +222,7 @@ export function Home() {
           <div className="mt-16 pt-12 border-t border-white/20">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
               <div className="text-center">
-                <div className="text-accent mb-2" style={{ fontSize: '2rem', fontWeight: '600' }}>500+</div>
+                <div className="text-accent mb-2" style={{ fontSize: '2rem', fontWeight: '600' }}>200+</div>
                 <p className="text-white/80">Weddings Captured</p>
               </div>
               <div className="text-center">
