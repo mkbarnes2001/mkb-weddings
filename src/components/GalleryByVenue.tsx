@@ -169,7 +169,7 @@ export function GalleryByVenue() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+  
     <div className="mb-10" />
 
         {venueCards.length === 0 ? (
