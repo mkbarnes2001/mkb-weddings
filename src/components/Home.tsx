@@ -166,16 +166,16 @@ export function Home() {
 
           <div className="max-w-4xl mx-auto space-y-6 text-foreground/80 leading-relaxed" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
             <p>
-              Known as a master of flash wedding photography, I create bold, vibrant and dramatic images that stand out—perfect for evening portraits, dark venues, Irish weather, and high-energy dance-floor shots. My approach blends documentary wedding photography, candid moments, and flash-lit wedding portraits, giving you a mix of real emotions and striking, editorial-style images.
+              My approach is all about real moments over awkward poses, capturing natural emotion, big energy, and the story of your day as it actually unfolds.
             </p>
             <p>
-              With hundreds of weddings photographed across Northern Ireland and Ireland, I bring complete reliability, consistent quality, and a calm, friendly presence on your day. Couples choose MKB Weddings for fun wedding photography, bright and colourful imagery, and a highly professional experience from enquiry to delivery.
+              I combine candid documentary coverage with bold flash photography to create vibrant, striking images that stand out, especially in dark venues, wild Irish weather, and packed dance floors.
             </p>
             <p>
-              Whether you're planning a rustic barn wedding, luxury hotel celebration, castle wedding, intimate elopement or large traditional day, I provide creative wedding storytelling, expert lighting, and relaxed direction that helps you feel natural and confident.
+              With hundreds of weddings photographed across Northern Ireland and Ireland, couples choose MKB Weddings for colourful imagery, relaxed direction, and a professional, reliable experience from enquiry to delivery.
             </p>
             <p>
-              If you're searching for a fun, reliable, creative Northern Ireland wedding photographer who can produce expertly lit, vibrant, unforgettable wedding photos, MKB Weddings is the perfect fit.
+              Looking for a fun, creative Northern Ireland wedding photographer who delivers natural, unforgettable wedding photos? Let’s do this.
             </p>
           </div>
         </div>
@@ -200,7 +200,7 @@ export function Home() {
           </div>
           <h2 className="mb-6 text-white">Let's Capture Your Special Day</h2>
           <p className="text-white/90 mb-12 max-w-2xl mx-auto" style={{ fontSize: '1.25rem', lineHeight: '1.6' }}>
-            Limited dates available for 2025 & 2026. Get in touch to check availability and discuss your wedding photography needs.
+            Limited dates available for 2026 & 202y. Get in touch to check availability and discuss your wedding photography needs.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
