@@ -174,7 +174,8 @@ export function GalleryByMoments() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* ✅ 2 columns on desktop: keep md=2 and REMOVE lg=3 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {tilesToShow.map((moment) => {
             const count = countsByMomentId.get(moment.id) ?? 0;
 
