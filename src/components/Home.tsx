@@ -160,7 +160,7 @@ export function Home() {
           <div className="text-center mb-16">
             <h2 className="mb-6" style={{ fontFamily: 'Inter, sans-serif', fontWeight: '400' }}></h2>
             <p className="text-foreground/80 max-w-4xl mx-auto" style={{ fontSize: '1.125rem', lineHeight: '1.6' }}>
-              MKB Weddings is a Northern Ireland wedding photographer specialising in fun, creative and modern wedding photography for couples across Northern Ireland. We have covered most of the amazing venues across Belfast, Derry/Londonderry, Antrim, Down, Armagh, Tyrone, Fermanagh and the Irish border counties including Donegal, Monaghan and Cavan. We are a recommended supplier for multiple venues, including Orange Tree house in Greyabbey, Ballyscullion Park, The Merchant in Belfast and Rocky Mountain cottage in Newry.
+              Capturing real, natural moments with energy, emotion and none of that stiff, awkward posing.
             </p>
           </div>
 
