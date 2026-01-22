@@ -28,7 +28,6 @@ const FULL_BASE =
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
 function slugify(s: string) {
   return (s || "")
     .trim()
@@ -129,7 +128,7 @@ const PINNED: Record<string, string[]> = {
   // ceremony: ["example_500.webp", "example2_500.webp"],
 };
 
-// Curated moment labels + hero + crop focus
+// Curated moment labels + hero + crop focus (object-position)
 const MOMENT_META: Record<
   string,
   { name: string; description: string; hero: string; focus?: string }
@@ -138,37 +137,37 @@ const MOMENT_META: Record<
     name: "Getting Ready",
     description: "Preparation and anticipation before the day begins.",
     hero: gettingReadyHero,
-    focus: "center",
+    focus: "50% 50%",
   },
   ceremony: {
     name: "Ceremony",
     description: "The vows, the emotion, and the moment you say “I do”.",
     hero: ceremonyHero,
-    focus: "center",
+    focus: "50% 50%",
   },
   "couple-portraits": {
     name: "Couple Portraits",
     description: "Just the two of you — natural, relaxed portraits.",
     hero: couplePortraitHero,
-    focus: "center",
+    focus: "50% 50%",
   },
   "family-bridal-party": {
     name: "Family and Bridal Party",
     description: "Celebrating with the people who mean the most.",
     hero: bridalPartyHero,
-    focus: "center",
+    focus: "50% 50%",
   },
   "reception-party": {
     name: "Reception and Party",
     description: "Dance, celebrate, and have fun into the night.",
     hero: receptionHero,
-    focus: "center",
+    focus: "50% 50%",
   },
   "details-decor": {
     name: "Details and Decor",
     description: "The little things that make your day uniquely yours.",
     hero: detailsDecorHero,
-    focus: "center",
+    focus: "50% 50%",
   },
 };
 
@@ -274,62 +273,60 @@ export function GalleryMomentDetail() {
     );
   }
 
-  const heroSrc = meta?.hero || images[0]?.full || images[0]?.thumb;
-  const heroFocus = meta?.focus || "center";
+  // Match venue detail hero sizing/crop rules
+  const heroImage =
+    meta?.hero ||
+    images[0]?.full ||
+    images[0]?.thumb ||
+    "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
+
+  const heroFocus = meta?.focus || "50% 50%";
 
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO (Creative Flash style: big centered text over image) */}
-      <div className="relative h-[300px] md:h-[420px] overflow-hidden">
-        {heroSrc && (
-          <ImageWithFallback
-            src={heroSrc}
-            alt={momentName}
-            className="w-full h-full object-cover"
-            style={{ objectPosition: heroFocus }}
-          />
-        )}
-        <div className="absolute inset-0 bg-black/35" />
-        <div className="absolute inset-0 flex items-center justify-center px-6">
-          <h1
-            className="
-              text-white text-center font-semibold drop-shadow leading-tight
-              text-[38px]
-              sm:text-[50px]
-              md:text-[68px]
-              lg:text-[82px]
-              xl:text-[92px]
-              max-w-6xl mx-auto
-            "
-          >
-            {momentName}
-          </h1>
+      {/* HERO — match Venue Detail (height + crop) */}
+      <div className="relative h-[60vh] min-h-[400px]">
+        <ImageWithFallback
+          src={heroImage}
+          alt={momentName}
+          className="w-full h-full object-cover"
+          style={{ objectPosition: heroFocus }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+        {/* Bottom-aligned block, but centered text (per your request style direction) */}
+        <div className="absolute inset-0 flex items-end">
+          <div className="max-w-7xl mx-auto px-6 pb-16 w-full text-center">
+            <Link
+              to="/gallery/moments"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Moments
+            </Link>
+
+            {/* Heading size matches Venue Detail */}
+            <h1 className="text-white text-5xl md:text-6xl mb-4">{momentName}</h1>
+
+            {/* Keep the counts subtle on hero like venue */}
+            <p className="text-white/85 text-sm md:text-base">
+              {images.length} {images.length === 1 ? "image" : "images"} · {venueCount}{" "}
+              {venueCount === 1 ? "venue" : "venues"}
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* CONTENT BELOW HERO (centered, serif/news body) */}
-      <div className="max-w-7xl mx-auto px-6 pt-10 pb-16">
-        <div className="text-center mb-12">
-          <Link
-            to="/gallery/moments"
-            className="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 mb-8 justify-center"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Moments
-          </Link>
-
-          {momentDescription && (
-            <div className="max-w-3xl mx-auto">
-              <p className="font-serif text-[20px] leading-[1.9] text-neutral-800">
-                {momentDescription}
-              </p>
-            </div>
-          )}
-
-          <div className="mt-8 text-xs uppercase tracking-[0.35em] text-neutral-700">
-            {images.length} IMAGES · {venueCount} VENUES
+      {/* CONTENT BELOW HERO */}
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        {/* Centered description (serif/news body) */}
+        {momentDescription && (
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <p className="font-serif text-[20px] leading-[1.9] text-neutral-800">
+              {momentDescription}
+            </p>
           </div>
-        </div>
+        )}
 
         {/* GRID */}
         {images.length === 0 ? (
@@ -337,7 +334,7 @@ export function GalleryMomentDetail() {
             No images found for this moment.
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {images.map((img, idx) => (
               <button
                 key={`${img.thumb}-${idx}`}
@@ -346,7 +343,7 @@ export function GalleryMomentDetail() {
                   setLightboxIndex(idx);
                   setLightboxOpen(true);
                 }}
-                className="group relative aspect-[4/3] overflow-hidden rounded-lg text-left"
+                className="aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left"
               >
                 <ImageWithFallback
                   src={img.thumb}
