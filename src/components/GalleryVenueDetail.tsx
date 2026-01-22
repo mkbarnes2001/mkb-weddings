@@ -210,7 +210,7 @@ export function GalleryVenueDetail() {
             </Link>
 
             <h1 className="text-white text-5xl md:text-6xl mb-4">{venueName}</h1>
-            <p className="text-white/85 flex items-center gap-2 justify-center">
+            <p className="text-white flex items-center gap-2 justify-center">
               <MapPin className="w-4 h-4" />
               {images.length} {images.length === 1 ? "image" : "images"}
             </p>
