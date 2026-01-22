@@ -8,6 +8,7 @@ type CsvRow = {
   venue: string;
   category: string;
   filename: string; // thumbnail filename, ends in _500.webp
+  tags?: string; // optional, if you added tags column
 };
 
 // IMPORTANT: use your real R2 public dev domain here
@@ -15,6 +16,19 @@ const THUMB_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
 const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
+
+/**
+ * PINNED images PER VENUE.
+ * Key must match the venue route param (slugify(venue)).
+ * Values must be filenames EXACTLY as in CSV (use the _500.webp names).
+ */
+const PINNED_IMAGES: Record<string, string[]> = {
+  // Example:
+  // "ballyscullion-park": [
+  //   "mkb-weddings-...-123_500.webp",
+  //   "mkb-weddings-...-456_500.webp",
+  // ],
+};
 
 function slugify(s: string) {
   return s
@@ -33,6 +47,7 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
   const lines = csvText.split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return [];
 
+  // Tiny CSV parser that respects quotes
   const parseLine = (line: string) => {
     const out: string[] = [];
     let cur = "";
@@ -59,9 +74,10 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
   const venueIdx = header.indexOf("venue");
   const categoryIdx = header.indexOf("category");
   const filenameIdx = header.indexOf("filename");
+  const tagsIdx = header.indexOf("tags"); // optional
 
   if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) {
-    console.error("CSV header must be: venue,category,filename");
+    console.error("CSV header must include: venue,category,filename");
     return [];
   }
 
@@ -71,8 +87,10 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
     const venue = (cols[venueIdx] || "").trim();
     const category = (cols[categoryIdx] || "").trim();
     const filename = (cols[filenameIdx] || "").trim();
+    const tags = tagsIdx !== -1 ? (cols[tagsIdx] || "").trim() : "";
+
     if (!venue || !category || !filename) continue;
-    rows.push({ venue, category, filename });
+    rows.push({ venue, category, filename, tags });
   }
   return rows;
 }
@@ -90,6 +108,61 @@ function fullUrlFromThumb(r: CsvRow) {
   )}/${encodeURIComponent(filename2000)}`;
 }
 
+// ---- Stable shuffle helpers (no libs) ----
+function hashString(input: string) {
+  // deterministic 32-bit hash
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function stableShuffle<T>(items: T[], seed: string, keyFn: (t: T) => string) {
+  return [...items].sort((a, b) => {
+    const ha = hashString(seed + "::" + keyFn(a));
+    const hb = hashString(seed + "::" + keyFn(b));
+    return ha - hb;
+  });
+}
+
+function applyPinnedThenShuffle(rows: CsvRow[], venueSlug: string) {
+  const pinnedList = PINNED_IMAGES[venueSlug] ?? [];
+  if (pinnedList.length === 0) {
+    // no pinning: stable shuffle everything
+    return stableShuffle(rows, `venue:${venueSlug}`, (r) => r.filename);
+  }
+
+  const byFilename = new Map<string, CsvRow[]>();
+  for (const r of rows) {
+    const arr = byFilename.get(r.filename) ?? [];
+    arr.push(r);
+    byFilename.set(r.filename, arr);
+  }
+
+  // Pull pinned in the exact order you defined
+  const pinnedRows: CsvRow[] = [];
+  const pinnedSet = new Set<string>();
+  for (const fn of pinnedList) {
+    const matches = byFilename.get(fn);
+    if (matches && matches.length) {
+      pinnedRows.push(...matches);
+      pinnedSet.add(fn);
+    }
+  }
+
+  // Remaining rows (not pinned)
+  const remaining = rows.filter((r) => !pinnedSet.has(r.filename));
+  const shuffledRemaining = stableShuffle(
+    remaining,
+    `venue:${venueSlug}`,
+    (r) => r.filename
+  );
+
+  return [...pinnedRows, ...shuffledRemaining];
+}
+
 export function GalleryVenueDetail() {
   const { venueId } = useParams<{ venueId: string }>();
 
@@ -97,9 +170,9 @@ export function GalleryVenueDetail() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [sortBy, setSortBy] = useState<"recent" | "oldest">("recent");
+  const [sortBy, setSortBy] = useState<"recent" | "oldest" | "shuffle">("shuffle");
 
-  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
@@ -137,27 +210,35 @@ export function GalleryVenueDetail() {
     return ["all", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [venueRows]);
 
-  const filtered = useMemo(() => {
+  const filteredRows = useMemo(() => {
     let out = venueRows;
 
     if (categoryFilter !== "all") {
       out = out.filter((r) => r.category === categoryFilter);
     }
 
-    if (sortBy === "oldest") {
+    if (!venueId) return out;
+
+    // Order
+    if (sortBy === "shuffle") {
+      out = applyPinnedThenShuffle(out, venueId);
+    } else if (sortBy === "oldest") {
       out = [...out].reverse();
+    } else {
+      // "recent" = original CSV order (as-is)
+      out = [...out];
     }
 
     return out;
-  }, [venueRows, categoryFilter, sortBy]);
+  }, [venueRows, categoryFilter, sortBy, venueId]);
 
   const images = useMemo(() => {
-    return filtered.map((r) => ({
+    return filteredRows.map((r) => ({
       thumb: thumbUrl(r),
       full: fullUrlFromThumb(r),
       alt: `${r.venue} – ${r.category}`,
     }));
-  }, [filtered]);
+  }, [filteredRows]);
 
   if (loadError) {
     return (
@@ -198,19 +279,21 @@ export function GalleryVenueDetail() {
         <ImageWithFallback src={heroImage} alt={venueName} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-        {/* Center-aligned hero content */}
         <div className="absolute inset-0 flex items-end">
-          <div className="max-w-7xl mx-auto px-6 pb-16 w-full text-center">
+          <div className="max-w-7xl mx-auto px-6 pb-16 w-full">
             <Link
               to="/gallery/venues"
-              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
               Back to Venues
             </Link>
 
-            <h1 className="text-white text-5xl md:text-6xl mb-4">{venueName}</h1>
-            <p className="text-white flex items-center gap-2 justify-center">
+            <h1 className="text-white text-5xl md:text-6xl mb-4 text-center md:text-left">
+              {venueName}
+            </h1>
+
+            <p className="text-white flex items-center gap-2 justify-center md:justify-start">
               <MapPin className="w-4 h-4" />
               {images.length} {images.length === 1 ? "image" : "images"}
             </p>
@@ -239,6 +322,7 @@ export function GalleryVenueDetail() {
               onChange={(e) => setSortBy(e.target.value as any)}
               className="px-4 py-2 border border-neutral-300 rounded-lg bg-white"
             >
+              <option value="shuffle">Mixed (recommended)</option>
               <option value="recent">Recent first</option>
               <option value="oldest">Oldest first</option>
             </select>
@@ -262,7 +346,7 @@ export function GalleryVenueDetail() {
                 type="button"
                 onClick={() => {
                   setLightboxIndex(idx);
-                  setLightboxImage(img.full);
+                  setLightboxOpen(true);
                 }}
                 className="aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left"
               >
@@ -278,15 +362,12 @@ export function GalleryVenueDetail() {
       </div>
 
       {/* Lightbox */}
-      {lightboxImage && (
+      {lightboxOpen && images.length > 0 && (
         <ImageLightbox
           images={images.map((i) => i.full)}
           currentIndex={lightboxIndex}
-          onClose={() => setLightboxImage(null)}
-          onNavigate={(newIndex) => {
-            setLightboxIndex(newIndex);
-            setLightboxImage(images[newIndex]?.full ?? null);
-          }}
+          onClose={() => setLightboxOpen(false)}
+          onNavigate={(newIndex) => setLightboxIndex(newIndex)}
         />
       )}
     </div>
