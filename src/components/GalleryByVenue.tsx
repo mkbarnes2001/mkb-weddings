@@ -16,8 +16,12 @@ const THUMB_BASE =
 
 // Put your favourite venues here (use VENUE NAMES exactly as in CSV)
 const PINNED_VENUES: string[] = [
-  // "Ballyscullion park",
-  // "Lusty beg island",
+   "Orange tree house",
+   "Ballyscullion park",
+   "Tullyglass hotel",
+   "Killeavy castle",
+   "Slieve donard hotel",
+   "Wool tower",
 ];
 
 function slugify(s: string) {
