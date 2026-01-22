@@ -506,30 +506,30 @@ export function WeddingPackages() {
         </div>
       </section>
 
-      {/* Videography Approach */}
-      <section className="py-20 px-6 md:px-20 max-w-[1440px] mx-auto">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-center mb-12">Our Videography Approach</h2>
-          
-          <div className="space-y-6 text-foreground/80" style={{ fontSize: '1.125rem', lineHeight: '1.6' }}>
-            <p>
-              Complement your wedding photography with professionally crafted wedding films that tell 
-              your unique love story. Our videography style combines documentary storytelling with 
-              cinematic artistry to create films you'll treasure forever.
-            </p>
-            <p>
-              From emotional ceremony moments to energetic reception highlights, we capture every detail 
-              in stunning quality. Our unobtrusive approach allows you to enjoy your day naturally while 
-              we document the genuine emotions, heartfelt speeches, and joyful celebrations.
-            </p>
-            <p>
-              Working seamlessly with our partners, we ensure complete coverage without disruption. 
-              The result is a beautifully crafted film that captures not just what your wedding looked like, 
-              but what it felt like.
-            </p>
-          </div>
-        </div>
-      </section>
+  {/* Videography Approach */}
+<section className="py-16 md:py-20 px-6 md:px-20 max-w-[1440px] mx-auto">
+  <div className="max-w-4xl mx-auto text-center">
+    <h2 className="mb-8 md:mb-10">Our Videography Approach</h2>
+
+    <div className="prose-news mx-auto text-center text-[16px] md:text-[17px]">
+      <p>
+        Complement your wedding photography with professionally crafted wedding films that tell
+        your unique love story. Our videography style combines documentary storytelling with
+        cinematic artistry to create films you'll treasure forever.
+      </p>
+      <p>
+        From emotional ceremony moments to energetic reception highlights, we capture every detail
+        in stunning quality. Our unobtrusive approach allows you to enjoy your day naturally while
+        we document the genuine emotions, heartfelt speeches, and joyful celebrations.
+      </p>
+      <p>
+        Working seamlessly with our partners, we ensure complete coverage without disruption.
+        The result is a beautifully crafted film that captures not just what your wedding looked like,
+        but what it felt like.
+      </p>
+    </div>
+  </div>
+</section>
 
       {/* CTA Section */}
       <section className="py-32 px-6 md:px-20">
