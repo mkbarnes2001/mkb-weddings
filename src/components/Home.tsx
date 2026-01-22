@@ -164,7 +164,7 @@ export function Home() {
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto space-y-6 text-foreground/80 leading-relaxed" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
+         <div className="max-w-4xl mx-auto space-y-6 text-center text-foreground/80 leading-relaxed">
             <p>
               My approach is all about real moments over awkward poses, capturing natural emotion, big energy, and the story of your day as it actually unfolds.
             </p>
