@@ -26,6 +26,23 @@ import { ThankYou } from './components/ThankYou';
 
 import { Outlet } from 'react-router-dom';
 
+import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+
+function GoogleAnalyticsListener() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (window.gtag) {
+      window.gtag('config', 'G-XY6TDDLH1Q', {
+        page_path: location.pathname,
+      });
+    }
+  }, [location]);
+
+  return null;
+}
+
 /* ---------- Layout with Navigation + Footer ---------- */
 function SiteLayout() {
   return (
