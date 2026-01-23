@@ -8,7 +8,7 @@ import heroImage2 from 'figma:asset/f0c6a12bde87e175e2aadb88f75b83c7f4125e86.png
 import heroImage3 from 'figma:asset/6595a05dfe41b8f2fc54e571acf9e9a24994d353.png';
 import heroImage4 from 'figma:asset/2018a530540d6cd532e764d8c4467195d61fe49a.png';
 import heroImage5 from 'figma:asset/e950f257bc4bd40951c0693e9b3f467dba9dfa80.png';
-
+import { GoogleReviewsBadge } from './GoogleReviewsBadge';
 export function Home() {
   const heroSlides = [
     {
