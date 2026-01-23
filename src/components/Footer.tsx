@@ -64,10 +64,6 @@ export function Footer() {
           </div>
         </div>
 
-<div className="mt-6 flex justify-center">
-  <GoogleReviewsBadge />
-</div>
-
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-white/60">
           <p>© {new Date().getFullYear()} MKB Weddings. All rights reserved.</p>
