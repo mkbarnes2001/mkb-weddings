@@ -58,6 +58,7 @@ function SiteLayout() {
 export default function App() {
   return (
     <Router>
+        <GoogleAnalyticsListener />
       <div className="min-h-screen bg-white">
         <Routes>
 
