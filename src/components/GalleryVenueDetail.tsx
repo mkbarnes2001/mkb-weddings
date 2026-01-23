@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { MapPin, ArrowLeft } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
 
@@ -22,13 +23,7 @@ const FULL_BASE =
  * Key must match the venue route param (slugify(venue)).
  * Values must be filenames EXACTLY as in CSV (use the _500.webp names).
  */
-const PINNED_IMAGES: Record<string, string[]> = {
-  // Example:
-  // "ballyscullion-park": [
-  //   "mkb-weddings-...-123_500.webp",
-  //   "mkb-weddings-...-456_500.webp",
-  // ],
-};
+const PINNED_IMAGES: Record<string, string[]> = {};
 
 function slugify(s: string) {
   return s
@@ -130,7 +125,6 @@ function stableShuffle<T>(items: T[], seed: string, keyFn: (t: T) => string) {
 function applyPinnedThenShuffle(rows: CsvRow[], venueSlug: string) {
   const pinnedList = PINNED_IMAGES[venueSlug] ?? [];
   if (pinnedList.length === 0) {
-    // no pinning: stable shuffle everything
     return stableShuffle(rows, `venue:${venueSlug}`, (r) => r.filename);
   }
 
@@ -141,18 +135,16 @@ function applyPinnedThenShuffle(rows: CsvRow[], venueSlug: string) {
     byFilename.set(r.filename, arr);
   }
 
-  // Pull pinned in the exact order you defined
   const pinnedRows: CsvRow[] = [];
   const pinnedSet = new Set<string>();
   for (const fn of pinnedList) {
     const matches = byFilename.get(fn);
-    if (matches && matches.length) {
+    if (matches?.length) {
       pinnedRows.push(...matches);
       pinnedSet.add(fn);
     }
   }
 
-  // Remaining rows (not pinned)
   const remaining = rows.filter((r) => !pinnedSet.has(r.filename));
   const shuffledRemaining = stableShuffle(
     remaining,
@@ -163,6 +155,31 @@ function applyPinnedThenShuffle(rows: CsvRow[], venueSlug: string) {
   return [...pinnedRows, ...shuffledRemaining];
 }
 
+/** Make fast, consistent alt text for lots of images */
+function buildAltText(r: CsvRow, index1Based: number) {
+  const venue = r.venue?.trim();
+  const category = r.category?.trim();
+  const tags = (r.tags || "").trim();
+
+  // If you have tags in CSV, they become a nice human phrase.
+  // Example tags: "first dance; confetti; sunset" or "first dance, confetti"
+  const tagPhrase = tags
+    ? tags
+        .split(/[;,|]/)
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .slice(0, 3)
+        .join(", ")
+    : "";
+
+  const base = venue ? `${venue} wedding photography` : "Wedding photography";
+  const withCategory = category ? `${base} – ${category}` : base;
+  const withTags = tagPhrase ? `${withCategory} (${tagPhrase})` : withCategory;
+
+  // Add sequence number to reduce duplicate alts across big galleries
+  return `${withTags} – image ${index1Based}`;
+}
+
 export function GalleryVenueDetail() {
   const { venueId } = useParams<{ venueId: string }>();
 
@@ -170,7 +187,9 @@ export function GalleryVenueDetail() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [sortBy, setSortBy] = useState<"recent" | "oldest" | "shuffle">("shuffle");
+  const [sortBy, setSortBy] = useState<"recent" | "oldest" | "shuffle">(
+    "shuffle"
+  );
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -202,7 +221,7 @@ export function GalleryVenueDetail() {
     return rows.filter((r) => slugify(r.venue) === venueId);
   }, [rows, venueId]);
 
-  const venueName = venueRows[0]?.venue;
+  const venueName = venueRows[0]?.venue || "";
 
   const categories = useMemo(() => {
     const set = new Set<string>();
@@ -219,13 +238,11 @@ export function GalleryVenueDetail() {
 
     if (!venueId) return out;
 
-    // Order
     if (sortBy === "shuffle") {
       out = applyPinnedThenShuffle(out, venueId);
     } else if (sortBy === "oldest") {
       out = [...out].reverse();
     } else {
-      // "recent" = original CSV order (as-is)
       out = [...out];
     }
 
@@ -233,16 +250,36 @@ export function GalleryVenueDetail() {
   }, [venueRows, categoryFilter, sortBy, venueId]);
 
   const images = useMemo(() => {
-    return filteredRows.map((r) => ({
+    return filteredRows.map((r, idx) => ({
       thumb: thumbUrl(r),
       full: fullUrlFromThumb(r),
-      alt: `${r.venue} – ${r.category}`,
+      alt: buildAltText(r, idx + 1),
     }));
   }, [filteredRows]);
+
+  // SEO strings
+  const seoTitle = venueName
+    ? `${venueName} Wedding Photographer | MKB Weddings`
+    : "Wedding Venue Gallery | MKB Weddings";
+
+  const seoDescription = venueName
+    ? `View real weddings photographed at ${venueName}. Natural, relaxed wedding photography by MKB Weddings across Northern Ireland, Donegal, Monaghan & Cavan.`
+    : "Browse wedding venue galleries by MKB Weddings across Northern Ireland, Donegal, Monaghan & Cavan.";
+
+  // Canonical (helps avoid duplicate URLs)
+  const canonicalUrl = venueId
+    ? `https://www.mkbweddings.com/gallery/venue/${venueId}`
+    : "https://www.mkbweddings.com/gallery/venues";
 
   if (loadError) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
+        <Helmet>
+          <title>Gallery loading error | MKB Weddings</title>
+          <meta name="description" content="There was a problem loading this gallery." />
+          <link rel="canonical" href={canonicalUrl} />
+        </Helmet>
+
         <div className="text-center max-w-xl">
           <h1 className="text-3xl mb-3">Gallery loading error</h1>
           <p className="text-neutral-600 mb-6">{loadError}</p>
@@ -257,6 +294,12 @@ export function GalleryVenueDetail() {
   if (!venueName) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
+        <Helmet>
+          <title>Venue Not Found | MKB Weddings</title>
+          <meta name="description" content="This venue gallery could not be found." />
+          <link rel="canonical" href={canonicalUrl} />
+        </Helmet>
+
         <div className="text-center">
           <h1 className="text-4xl mb-4">Venue Not Found</h1>
           <Link to="/gallery/venues" className="text-neutral-600 hover:text-neutral-900">
@@ -274,9 +317,20 @@ export function GalleryVenueDetail() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* ---------- SEO ---------- */}
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+      </Helmet>
+
       {/* Hero */}
       <div className="relative h-[60vh] min-h-[400px]">
-        <ImageWithFallback src={heroImage} alt={venueName} className="w-full h-full object-cover" />
+        <ImageWithFallback
+          src={heroImage}
+          alt={`${venueName} wedding photography hero`}
+          className="w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
         <div className="absolute inset-0 flex items-end">
