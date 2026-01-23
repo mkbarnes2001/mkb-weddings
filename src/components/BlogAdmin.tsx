@@ -96,8 +96,8 @@ export function BlogAdmin() {
       readTime,
       category,
       tags: tagsArray,
-      galleryImages: galleryImagesArray,
-    };
+    galleryImages: galleryImagesArray.length ? galleryImagesArray : undefined,
+};
 
     let updatedPosts: BlogPost[];
     if (editingPost) {
