@@ -1,1 +1,5 @@
 /*  /index.html  200
+/contact-me        /contact        301
+/contact-us        /contact        301
+/about-me          /about          301
+/blog/*            /blog            301
