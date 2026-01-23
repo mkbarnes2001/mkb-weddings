@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
+import { Helmet } from "react-helmet-async";
 import { Home } from './components/Home';
 import { Galleries } from './components/Galleries';
 import { Categories } from './components/Categories';
@@ -58,6 +59,15 @@ function SiteLayout() {
 export default function App() {
   return (
     <Router>
+
+      <Helmet>
+        <title>Northern Ireland Wedding Photographer | MKB Weddings</title>
+        <meta
+          name="description"
+          content="Natural, relaxed wedding photography across Northern Ireland, Donegal, Monaghan & Cavan."
+        />
+      </Helmet>
+      
         <GoogleAnalyticsListener />
       <div className="min-h-screen bg-white">
         <Routes>
