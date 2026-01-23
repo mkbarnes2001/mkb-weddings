@@ -153,8 +153,6 @@ export function Home() {
           </Link>
         </div>
       </section>
-<div className="mt-6 flex justify-center">
-  <GoogleReviewsBadge />
 </div>
       {/* Why Choose MKB */}
       <section className="py-20 bg-accent">
