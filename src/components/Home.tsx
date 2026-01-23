@@ -153,7 +153,8 @@ export function Home() {
           </Link>
         </div>
       </section>
-</div>
+
+
       {/* Why Choose MKB */}
       <section className="py-20 bg-accent">
         <div className="px-6 md:px-20 max-w-[1440px] mx-auto">
