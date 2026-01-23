@@ -1,8 +1,47 @@
 // src/components/Blog.tsx
 import { useEffect, useMemo, useState } from "react";
-import { Calendar, Clock, ArrowRight, Tag } from "lucide-react";
+import { Calendar, Clock, ArrowRight, Tag, Quote } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+
+type Testimonial = {
+  id: string;
+  name: string;
+  review: string;
+};
+
+const testimonials: Testimonial[] = [
+  {
+    id: "1",
+    name: "Eamie & Ben",
+    review:
+      "We can not thank Mark enough for our beautiful photos. From the very start he has been so kind and nothing was a bother to him. He made us both feel so relaxed and captured some amazing photos that we didn't even realise he was taken. A complete Gentleman and a pleasure to work with.",
+  },
+  {
+    id: "2",
+    name: "Coleen & Blake",
+    review:
+      "I can't praise Mark highly enough for the work he does! Mark photographed our Wedding only last week, and we have already received a bunch of beautiful photographs. Mark has a way of making you feel comfortable, have a laugh and capture beautiful memories without even realizing!",
+  },
+  {
+    id: "3",
+    name: "Ciara & Conor",
+    review:
+      "Where do I start.. right from the get go Mark was absolutely brilliant, he made us all feel so relaxed and made getting photos taken so easy! My husband is camera shy at best and Mark just made everything so easy.",
+  },
+  {
+    id: "4",
+    name: "Aoife & Andrea",
+    review:
+      "We cannot recommend Mark highly enough. From the moment we met Mark, he made us feel completely at ease. What we appreciated most were the candid photos, so many beautiful, genuine moments of us laughing and being ourselves.",
+  },
+  {
+    id: "5",
+    name: "Gemma & Craig",
+    review:
+      "Thanks Mark for the amazing photos from our wedding day. We now have the hard task of selecting for our album from such a multitude of beautiful photos. We would highly recommend Mark as a photographer.",
+  },
+];
 
 type BlogPost = {
   id: string;
@@ -17,10 +56,6 @@ type BlogPost = {
   galleryImages?: string[];
 };
 
-// ---------------------------
-// Edit these posts for now
-// Later we’ll replace this with a proper blog system.
-// ---------------------------
 const hardcodedBlogPosts: BlogPost[] = [
   {
     id: "12",
@@ -28,7 +63,7 @@ const hardcodedBlogPosts: BlogPost[] = [
     excerpt:
       "Natural and relaxed wedding photography at Killeavy Castle — highlights, moments and inspiration.",
     content:
-      "Declan & Charlotte’s day at Killeavy Castle was packed with energy, laughs and stunning light.\n\nFrom bridal prep through to the party, we captured a mix of candid storytelling and bold portraits.\n\nSuppliers: Chapter II Films, Fairy Tale Design Couture, The Look Beauty Salon.",
+      "Declan & Charlotte’s day at Killeavy Castle was packed with energy, laughs and stunning light.\n\nFrom bridal prep through to the party, we captured a mix of candid storytelling and bold portraits.",
     image:
       "https://mkbweddings.com/wp-content/uploads/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-107.jpg",
     date: "January 04, 2025",
@@ -66,7 +101,6 @@ const hardcodedBlogPosts: BlogPost[] = [
   },
 ];
 
-// Hero carousel images (you can swap these later)
 const heroCarouselImages: string[] = [
   "https://mkbweddings.com/wp-content/uploads/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-107.jpg",
   "https://mkbweddings.com/wp-content/uploads/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-65-1-1024x682.jpg",
@@ -86,6 +120,9 @@ export function Blog() {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // Reviews banner scroll position (infinite)
+  const [scrollPosition, setScrollPosition] = useState(0);
+
   // Auto rotate hero slides
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -93,6 +130,20 @@ export function Blog() {
     }, 5000);
     return () => window.clearInterval(timer);
   }, []);
+
+  // Scrolling testimonials animation
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setScrollPosition((prev) => prev - 1);
+    }, 30);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  // duplicate for infinite scroll
+  const scrollingTestimonials = useMemo(
+    () => [...testimonials, ...testimonials, ...testimonials],
+    []
+  );
 
   const posts = useMemo(() => hardcodedBlogPosts, []);
 
@@ -102,7 +153,6 @@ export function Blog() {
   if (selectedPost) {
     return (
       <div className="min-h-screen bg-white">
-        {/* HERO (same sizing style you’ve used elsewhere) */}
         <div className="relative h-[60vh] min-h-[400px]">
           <ImageWithFallback
             src={selectedPost.image}
@@ -139,7 +189,6 @@ export function Blog() {
           </div>
         </div>
 
-        {/* BODY */}
         <div className="max-w-4xl mx-auto px-6 py-14">
           <div className="brand-prose">
             <p className="text-lg md:text-xl text-neutral-700 leading-relaxed">
@@ -153,7 +202,6 @@ export function Blog() {
             </div>
           </div>
 
-          {/* TAGS */}
           {selectedPost.tags?.length > 0 && (
             <div className="mt-10 pt-8 border-t border-neutral-200">
               <div className="flex items-center gap-2 mb-4 text-neutral-600">
@@ -172,24 +220,6 @@ export function Blog() {
               </div>
             </div>
           )}
-
-          {/* OPTIONAL: simple gallery grid (no lightbox yet) */}
-          {selectedPost.galleryImages?.length ? (
-            <div className="mt-12">
-              <h2 className="text-2xl md:text-3xl mb-6">Photos from the Wedding Day</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {selectedPost.galleryImages.map((img, idx) => (
-                  <div key={`${img}-${idx}`} className="aspect-[4/3] overflow-hidden rounded-lg">
-                    <ImageWithFallback
-                      src={img}
-                      alt={`Wedding photo ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
         </div>
       </div>
     );
@@ -227,7 +257,9 @@ export function Blog() {
               key={index}
               onClick={() => setCurrentSlide(index)}
               className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                index === currentSlide ? "bg-white scale-125" : "bg-white/50 hover:bg-white/70"
+                index === currentSlide
+                  ? "bg-white scale-125"
+                  : "bg-white/50 hover:bg-white/70"
               }`}
               aria-label={`Go to slide ${index + 1}`}
               type="button"
@@ -245,9 +277,37 @@ export function Blog() {
               Stories & Reviews
             </h1>
             <p className="text-white/90 text-lg md:text-xl max-w-3xl mx-auto">
-              Real weddings, venue guides, tips, and inspiration across Northern Ireland and beyond.
+              Real weddings, venue guides, tips, and inspiration across Northern
+              Ireland and beyond.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* REVIEWS CAROUSEL (scrolling banner) */}
+      <section className="py-12 bg-black text-white overflow-hidden">
+        <div
+          className="flex"
+          style={{ transform: `translateX(${scrollPosition}px)` }}
+        >
+          {scrollingTestimonials.map((t, idx) => (
+            <div
+              key={`${t.id}-${idx}`}
+              className="flex-shrink-0 px-8 flex items-start gap-4"
+              style={{ minWidth: "600px", maxWidth: "600px" }}
+            >
+              <Quote size={28} className="flex-shrink-0 text-white/30 mt-1" />
+              <div>
+                <p
+                  className="text-white/90 mb-2 italic leading-relaxed"
+                  style={{ fontSize: "0.95rem", lineHeight: "1.6" }}
+                >
+                  “{t.review}”
+                </p>
+                <p className="text-white/70 text-sm">— {t.name}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -268,7 +328,9 @@ export function Blog() {
                 />
               </div>
 
-              <h2 className="text-2xl mb-3 group-hover:underline">{post.title}</h2>
+              <h2 className="text-2xl mb-3 group-hover:underline">
+                {post.title}
+              </h2>
 
               <p className="text-neutral-700 mb-4 line-clamp-2">{post.excerpt}</p>
 
@@ -295,3 +357,4 @@ export function Blog() {
     </div>
   );
 }
+
