@@ -5,3 +5,4 @@
 /blog/*            /blog            301
 /wedding-photographers/   /   301
 /wedding-blog/            /blog   301
+/blog*  /gallery/venues  301
