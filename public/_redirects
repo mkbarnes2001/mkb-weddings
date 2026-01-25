@@ -1,7 +1,10 @@
-/*  /index.html  200
-/contact-me        /contact        301
-/contact-us        /contact        301
-/about-me          /about          301
-/wedding-photographers/   /   301
-/wedding-blog/            /blog   301
+/1939/killeavy-castle-wedding-photographer/  /gallery/venues  301
+/[0-9]*/  /gallery/venues  301
+ /*/*  /gallery/venues  301
 /blog*  /gallery/venues  301
+/contact-me  /contact  301
+/contact-us  /contact  301
+/about-me  /about  301
+/wedding-photographers/  /  301
+/wedding-blog/  /blog  301
+/*  /index.html  200
