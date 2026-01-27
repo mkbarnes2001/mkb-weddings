@@ -200,7 +200,7 @@ export function GalleryVenueDetail() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
         <div className="absolute inset-0 flex items-end">
-          <div className="max-w-7xl mx-auto px-6 pb-14">
+          <div className="max-w-7xl mx-auto px-6 pb-14 text-center">
             <Link
               to="/gallery/venues"
               className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6"
@@ -209,16 +209,20 @@ export function GalleryVenueDetail() {
               Back to Venues
             </Link>
 
-            <h1 className="text-white text-5xl md:text-6xl mb-2">{name}</h1>
-            <p className="text-white/90 text-lg">{introLine}</p>
+          <h1 className="text-white text-5xl md:text-6xl mb-2 text-center">
+  {name}
+</h1>
+<p className="text-white/90 text-lg text-center">
+  {introLine}
+</p>
           </div>
         </div>
       </div>
 
       {/* VENUE INFO */}
-      <section className="max-w-5xl mx-auto px-6 py-10">
+      <section className="max-w-5xl mx-auto px-6 py-10 text-center">
         {location && (
-          <div className="flex items-center gap-2 text-neutral-700 mb-4">
+         <div className="flex items-center justify-center gap-2 text-neutral-700 mb-4">
             <MapPin className="w-4 h-4" />
             <span>{location}</span>
           </div>
@@ -229,14 +233,14 @@ export function GalleryVenueDetail() {
             href={website}
             target="_blank"
             rel="nofollow noopener noreferrer"
-            className="inline-flex items-center gap-2 underline mb-6"
+            className="inline-flex items-center justify-center gap-2 underline mb-6"
           >
             Visit venue website <ExternalLink className="w-4 h-4" />
           </a>
         )}
 
         {description && (
-          <div className="text-neutral-700 leading-relaxed space-y-4 text-lg">
+          <div className="text-neutral-700 leading-relaxed space-y-4 text-lg text-center">
             {description.split(/\n{2,}/).map((p, i) => (
               <p key={i}>{p}</p>
             ))}
