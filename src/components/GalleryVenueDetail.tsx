@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft, ExternalLink, MapPin } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { ChevronRight } from "lucide-react";
+import { ImageLightbox } from "./ImageLightbox";
 
 type GalleryRow = {
   venue: string;
@@ -11,25 +12,17 @@ type GalleryRow = {
 };
 
 type VenueMetaRow = {
-  venue: string; // must match gallery.csv exactly
+  venue: string; // must match gallery.csv venue EXACTLY
   venueName?: string; // venue-name
+  venueLocation?: string; // venue-location
+  venueWebsite?: string; // venue-website
+  venueDescription?: string; // venue-description
 };
 
-// IMPORTANT: keep consistent with the other gallery pages
 const THUMB_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
 const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
-
-// Pin favourite venues to the top (use RAW venue key, not display name)
-const PINNED_VENUES: string[] = [
-  "Orange Tree House",
-  "Ballyscullion Park",
-  "Tullyglass Hotel",
-  "Killeavy Castle",
-  "Slieve Donard Hotel",
-  "Wool Tower",
-];
 
 function slugify(s: string) {
   return s
@@ -43,8 +36,6 @@ function slugify(s: string) {
 function encSegment(s: string) {
   return encodeURIComponent(s);
 }
-
-/* ---------- CSV PARSERS ---------- */
 
 function parseCsvLines(csvText: string): string[][] {
   const lines = csvText.split(/\r?\n/).filter(Boolean);
@@ -85,12 +76,15 @@ function parseGalleryCsv(csvText: string): GalleryRow[] {
 
   if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) return [];
 
-  return rows.slice(1).map((cols) => ({
-    venue: (cols[venueIdx] || "").trim(),
-    category: (cols[categoryIdx] || "").trim(),
-    filename: (cols[filenameIdx] || "").trim(),
-    tags: tagsIdx !== -1 ? (cols[tagsIdx] || "").trim() : "",
-  })).filter(r => r.venue && r.category && r.filename);
+  return rows
+    .slice(1)
+    .map((cols) => ({
+      venue: (cols[venueIdx] || "").trim(),
+      category: (cols[categoryIdx] || "").trim(),
+      filename: (cols[filenameIdx] || "").trim(),
+      tags: tagsIdx !== -1 ? (cols[tagsIdx] || "").trim() : "",
+    }))
+    .filter((r) => r.venue && r.category && r.filename);
 }
 
 function parseVenueMetaCsv(csvText: string): VenueMetaRow[] {
@@ -100,16 +94,23 @@ function parseVenueMetaCsv(csvText: string): VenueMetaRow[] {
   const header = rows[0].map((h) => h.toLowerCase());
   const venueIdx = header.indexOf("venue");
   const nameIdx = header.indexOf("venue-name");
+  const locIdx = header.indexOf("venue-location");
+  const webIdx = header.indexOf("venue-website");
+  const descIdx = header.indexOf("venue-description");
 
   if (venueIdx === -1) return [];
 
-  return rows.slice(1).map((cols) => ({
-    venue: (cols[venueIdx] || "").trim(),
-    venueName: nameIdx !== -1 ? (cols[nameIdx] || "").trim() : "",
-  })).filter(v => v.venue);
+  return rows
+    .slice(1)
+    .map((cols) => ({
+      venue: (cols[venueIdx] || "").trim(),
+      venueName: nameIdx !== -1 ? (cols[nameIdx] || "").trim() : "",
+      venueLocation: locIdx !== -1 ? (cols[locIdx] || "").trim() : "",
+      venueWebsite: webIdx !== -1 ? (cols[webIdx] || "").trim() : "",
+      venueDescription: descIdx !== -1 ? (cols[descIdx] || "").trim() : "",
+    }))
+    .filter((v) => v.venue);
 }
-
-/* ---------- IMAGE HELPERS ---------- */
 
 function thumbUrl(r: GalleryRow) {
   return `${THUMB_BASE}/${encSegment(r.venue)}/${encSegment(
@@ -124,65 +125,49 @@ function fullUrlFromThumb(r: GalleryRow) {
   )}/${encodeURIComponent(filename2000)}`;
 }
 
-/* ---------- TYPES ---------- */
+export function GalleryVenueDetail() {
+  const { venueId } = useParams<{ venueId: string }>();
 
-type VenueCard = {
-  venue: string;        // raw key
-  venueId: string;      // slug
-  displayName: string;  // from venue-name or fallback
-  coverThumb: string;
-  coverFull: string;
-  count: number;
-};
-
-/* ---------- COMPONENT ---------- */
-
-export function GalleryByVenue() {
   const [galleryRows, setGalleryRows] = useState<GalleryRow[]>([]);
-  const [venueNameMap, setVenueNameMap] = useState<Record<string, string>>({});
+  const [venueMetaMap, setVenueMetaMap] = useState<Record<string, VenueMetaRow>>(
+    {}
+  );
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  /* Load gallery.csv */
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
       try {
         setLoadError(null);
-        const res = await fetch("/gallery.csv", { cache: "no-store" });
-        if (!res.ok) throw new Error("Failed to load gallery.csv");
-        const text = await res.text();
-        const parsed = parseGalleryCsv(text);
-        if (!cancelled) setGalleryRows(parsed);
-      } catch (e: any) {
-        if (!cancelled) setLoadError(e?.message || "Failed to load gallery.csv");
-      }
-    })();
 
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+        const [galleryRes, venueRes] = await Promise.all([
+          fetch("/gallery.csv", { cache: "no-store" }),
+          fetch("/galleryvenuedesc.csv", { cache: "no-store" }),
+        ]);
 
-  /* Load galleryvenuedesc.csv (optional) */
-  useEffect(() => {
-    let cancelled = false;
+        if (!galleryRes.ok) throw new Error("Failed to load gallery.csv");
+        const galleryText = await galleryRes.text();
+        const parsedGallery = parseGalleryCsv(galleryText);
 
-    (async () => {
-      try {
-        const res = await fetch("/galleryvenuedesc.csv", { cache: "no-store" });
-        if (!res.ok) return;
-        const text = await res.text();
-        const parsed = parseVenueMetaCsv(text);
-
-        const map: Record<string, string> = {};
-        for (const v of parsed) {
-          if (v.venueName) map[v.venue] = v.venueName;
+        // venue metadata is optional
+        let metaMap: Record<string, VenueMetaRow> = {};
+        if (venueRes.ok) {
+          const venueText = await venueRes.text();
+          const parsedMeta = parseVenueMetaCsv(venueText);
+          metaMap = {};
+          for (const v of parsedMeta) metaMap[v.venue] = v;
         }
 
-        if (!cancelled) setVenueNameMap(map);
-      } catch {
-        // optional file – ignore errors
+        if (!cancelled) {
+          setGalleryRows(parsedGallery);
+          setVenueMetaMap(metaMap);
+        }
+      } catch (e: any) {
+        if (!cancelled) setLoadError(e?.message || "Failed to load gallery data");
       }
     })();
 
@@ -191,40 +176,26 @@ export function GalleryByVenue() {
     };
   }, []);
 
-  const venueCards = useMemo((): VenueCard[] => {
-    const map = new Map<string, GalleryRow[]>();
+  const venueRows = useMemo(() => {
+    if (!venueId) return [];
+    return galleryRows.filter((r) => slugify(r.venue) === venueId);
+  }, [galleryRows, venueId]);
 
-    for (const r of galleryRows) {
-      const arr = map.get(r.venue) ?? [];
-      arr.push(r);
-      map.set(r.venue, arr);
-    }
+  const rawVenueKey = venueRows[0]?.venue || "";
+  const meta = rawVenueKey ? venueMetaMap[rawVenueKey] : undefined;
 
-    const cards: VenueCard[] = [];
+  const displayName = meta?.venueName || rawVenueKey || "Venue";
+  const location = meta?.venueLocation || "";
+  const website = meta?.venueWebsite || "";
+  const description = meta?.venueDescription || "";
 
-    for (const [venue, rows] of map.entries()) {
-      const coverRow = rows[0];
-      if (!coverRow) continue;
-
-      cards.push({
-        venue,
-        venueId: slugify(venue),
-        displayName: venueNameMap[venue] || venue,
-        coverThumb: thumbUrl(coverRow),
-        coverFull: fullUrlFromThumb(coverRow),
-        count: rows.length,
-      });
-    }
-
-    const pinnedSet = new Set(PINNED_VENUES.map(v => v.toLowerCase()));
-
-    return cards.sort((a, b) => {
-      const ap = pinnedSet.has(a.venue.toLowerCase()) ? 0 : 1;
-      const bp = pinnedSet.has(b.venue.toLowerCase()) ? 0 : 1;
-      if (ap !== bp) return ap - bp;
-      return a.displayName.localeCompare(b.displayName);
-    });
-  }, [galleryRows, venueNameMap]);
+  const images = useMemo(() => {
+    return venueRows.map((r) => ({
+      thumb: thumbUrl(r),
+      full: fullUrlFromThumb(r),
+      alt: `${displayName}${location ? `, ${location}` : ""} – ${r.category}`,
+    }));
+  }, [venueRows, displayName, location]);
 
   if (loadError) {
     return (
@@ -232,56 +203,124 @@ export function GalleryByVenue() {
         <div className="text-center max-w-xl">
           <h1 className="text-3xl mb-3">Gallery loading error</h1>
           <p className="text-neutral-600 mb-6">{loadError}</p>
-          <Link to="/gallery" className="text-neutral-600 hover:text-neutral-900">
-            Back to Gallery
+          <Link to="/gallery/venues" className="text-neutral-600 hover:text-neutral-900">
+            Back to Venues
           </Link>
         </div>
       </div>
     );
   }
 
+  if (!rawVenueKey) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+        <div className="text-center">
+          <h1 className="text-4xl mb-4">Venue Not Found</h1>
+          <Link to="/gallery/venues" className="text-neutral-600 hover:text-neutral-900">
+            Back to Venues
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const heroImage =
+    images[0]?.full ||
+    images[0]?.thumb ||
+    "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
+
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
-        <div className="mb-2" />
+      {/* Hero */}
+      <div className="relative h-[60vh] min-h-[420px]">
+        <ImageWithFallback
+          src={heroImage}
+          alt={displayName}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
 
-        {venueCards.length === 0 ? (
+        <div className="absolute inset-0 flex items-end">
+          <div className="max-w-7xl mx-auto px-6 pb-14 w-full">
+            <Link
+              to="/gallery/venues"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Venues
+            </Link>
+
+            <h1 className="text-white text-5xl md:text-6xl mb-3">
+              {displayName}
+            </h1>
+
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-white/85">
+              {location && (
+                <span className="inline-flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  {location}
+                </span>
+              )}
+              <span>{images.length} image{images.length !== 1 ? "s" : ""}</span>
+
+              {website && (
+                <a
+                  href={website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-white hover:text-white/90 underline underline-offset-4"
+                >
+                  Venue website <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
+            </div>
+
+            {description && (
+              <p className="mt-5 max-w-3xl text-white/90 leading-relaxed">
+                {description}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Grid */}
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        {images.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">
-            No venues found yet.
+            No images found for this venue.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {venueCards.map((v) => (
-              <Link
-                key={v.venueId}
-                to={`/gallery/venue/${v.venueId}`}
-                className="group relative aspect-[4/3] overflow-hidden rounded-lg"
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {images.map((img, idx) => (
+              <button
+                key={`${img.thumb}-${idx}`}
+                type="button"
+                onClick={() => {
+                  setLightboxIndex(idx);
+                  setLightboxOpen(true);
+                }}
+                className="aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left"
               >
                 <ImageWithFallback
-                  src={v.coverThumb}
-                  alt={v.displayName}
+                  src={img.thumb}
+                  alt={img.alt}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                <div className="absolute inset-0 flex flex-col justify-end p-6">
-                  <h2 className="text-white text-2xl mb-2">
-                    {v.displayName}
-                  </h2>
-                  <p className="text-white/85 text-sm mb-3">
-                    {v.count} image{v.count !== 1 ? "s" : ""}
-                  </p>
-                  <div className="flex items-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-sm uppercase tracking-wider">
-                      Explore
-                    </span>
-                    <ChevronRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-2" />
-                  </div>
-                </div>
-              </Link>
+              </button>
             ))}
           </div>
         )}
       </div>
+
+      {lightboxOpen && images.length > 0 && (
+        <ImageLightbox
+          images={images.map((i) => i.full)}
+          currentIndex={lightboxIndex}
+          onClose={() => setLightboxOpen(false)}
+          onNavigate={(newIndex) => setLightboxIndex(newIndex)}
+        />
+      )}
     </div>
   );
 }
