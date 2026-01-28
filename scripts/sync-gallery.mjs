@@ -1,16 +1,30 @@
 /**
  * scripts/sync-gallery.mjs
  *
- * Updates ONLY the gallery image CSV in the schema:
+ * Syncs your image gallery CSV from Cloudflare R2.
+ *
+ * ✅ CSV schema (MUST match your React code):
  *   venue,category,filename,tags
  *
- * R2 key format expected:
+ * ✅ R2 full-size key format expected:
  *   full/<venue>/<category>/<filename>
  *
- * It will:
- * - list objects under Prefix "full/"
- * - append rows for any images not already present in the CSV
- * - NEVER add extra columns
+ * 🔑 Important behavior:
+ * - Your site "used to all be 500" thumbs.
+ * - This script STANDARDISES the CSV filename to the thumb version:
+ *     *_2000.webp  -> *_500.webp
+ * - It ONLY APPENDS new rows (never edits existing rows).
+ *
+ * Usage:
+ *   npm run sync-gallery
+ *
+ * Env (in .env.local or .env):
+ *   R2_BUCKET=mkb-gallery
+ *   R2_ACCOUNT_ID=...
+ *   R2_ACCESS_KEY_ID=...
+ *   R2_SECRET_ACCESS_KEY=...
+ *   (optional) GALLERY_CSV=public/gallery.csv
+ *   (optional) GALLERY_PREFIX=full/
  */
 
 import fs from "node:fs";
@@ -19,13 +33,13 @@ import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { parse } from "csv-parse/sync";
 import { stringify } from "csv-stringify/sync";
 
-// Load env from .env.local (common) then .env (fallback)
+// Load env from .env.local first (common in Vite), then fall back to .env
 try {
   const dotenv = await import("dotenv");
   dotenv.config({ path: ".env.local" });
   dotenv.config({ path: ".env" });
 } catch {
-  // ok
+  // If dotenv isn't installed, env vars may be provided by the shell/CI.
 }
 
 const BUCKET = process.env.R2_BUCKET;
@@ -33,13 +47,11 @@ const ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
 const ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
 const SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
 
-// Must point to your image CSV (NOT the venue SEO CSV)
 const CSV_PATH = process.env.GALLERY_CSV ?? "public/gallery.csv";
+const GALLERY_PREFIX = (process.env.GALLERY_PREFIX ?? "full/")
+  .replace(/^\//, "")
+  .replace(/(?<!\/)$/, "/");
 
-// Where full-size images live in R2
-const GALLERY_PREFIX = "full/";
-
-// Filter files
 const VALID_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
 
 if (!BUCKET || !ACCOUNT_ID || !ACCESS_KEY_ID || !SECRET_ACCESS_KEY) {
@@ -63,7 +75,7 @@ function readCsv(filePath) {
 }
 
 function writeCsv(filePath, rows) {
-  // EXACT schema your React gallery expects
+  // EXACT schema your gallery expects
   const csv = stringify(rows, {
     header: true,
     columns: ["venue", "category", "filename", "tags"],
@@ -81,8 +93,15 @@ function normalizeRow(r) {
 }
 
 function rowIdentity(r) {
-  // Unique identity
+  // identity is venue/category/filename (case-insensitive)
   return `${r.venue}/${r.category}/${r.filename}`.toLowerCase();
+}
+
+function toThumbFilename(filename) {
+  // Standardise CSV to thumb naming.
+  // Converts "..._2000.webp" -> "..._500.webp"
+  // Leaves "..._500.webp" as-is.
+  return filename.replace(/_2000(\.\w+)$/i, "_500$1");
 }
 
 function keyToRow(key) {
@@ -92,24 +111,30 @@ function keyToRow(key) {
   const remainder = key.slice(GALLERY_PREFIX.length); // <venue>/<category>/<filename>
   const parts = remainder.split("/");
 
+  // Must have venue/category/filename
   if (parts.length < 3) return null;
 
-  const venue = parts[0];
-  const category = parts[1];
-  const filename = parts.slice(2).join("/"); // supports deeper nesting if you ever do it
+  const venue = (parts[0] ?? "").trim();
+  const category = (parts[1] ?? "").trim();
+  let filename = parts.slice(2).join("/").trim();
+
+  if (!venue || !category || !filename) return null;
 
   const ext = path.extname(filename).toLowerCase();
   if (!VALID_EXT.has(ext)) return null;
+
+  // 🔑 Always store thumb version in CSV
+  filename = toThumbFilename(filename);
 
   return {
     venue,
     category,
     filename,
-    tags: "", // default empty; you can fill later
+    tags: "",
   };
 }
 
-async function listAllKeys() {
+async function listAllKeysUnderPrefix() {
   const keys = [];
   let token = undefined;
 
@@ -134,10 +159,10 @@ async function listAllKeys() {
 }
 
 async function main() {
-  const rows = readCsv(CSV_PATH).map(normalizeRow);
-  const existing = new Set(rows.map(rowIdentity));
+  const existingRows = readCsv(CSV_PATH).map(normalizeRow);
+  const existingSet = new Set(existingRows.map(rowIdentity));
 
-  const keys = await listAllKeys();
+  const keys = await listAllKeysUnderPrefix();
 
   const newRows = [];
   for (const k of keys) {
@@ -145,9 +170,9 @@ async function main() {
     if (!row) continue;
 
     const id = rowIdentity(row);
-    if (!existing.has(id)) {
+    if (!existingSet.has(id)) {
       newRows.push(row);
-      existing.add(id);
+      existingSet.add(id);
     }
   }
 
@@ -157,9 +182,9 @@ async function main() {
     return;
   }
 
-  const merged = rows.concat(newRows);
+  const merged = existingRows.concat(newRows);
 
-  // Optional: keep things tidy
+  // Keep file tidy / predictable
   merged.sort((a, b) => {
     const aKey = `${a.venue}||${a.category}||${a.filename}`.toLowerCase();
     const bKey = `${b.venue}||${b.category}||${b.filename}`.toLowerCase();
@@ -170,6 +195,7 @@ async function main() {
 
   console.log(`✅ Added ${newRows.length} new row(s) to ${CSV_PATH}`);
   console.log(`Scanned prefix: ${GALLERY_PREFIX}`);
+  console.log("CSV filenames normalised to _500 thumbs.");
 }
 
 main().catch((err) => {
