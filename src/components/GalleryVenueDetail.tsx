@@ -209,23 +209,23 @@ export function GalleryVenueDetail() {
               Back to Venues
             </Link>
 
-          <h1 className="text-white text-5xl md:text-6xl mb-2 text-center">
+          <h1 className="text-white text-5xl md:text-6xl mb-2 text-center md:text-left">
   {name}
 </h1>
-<p className="text-white/90 text-lg text-center">
-  {introLine}
-</p>
           </div>
         </div>
       </div>
 
       {/* VENUE INFO */}
-      <section className="max-w-5xl mx-auto px-6 py-10 text-center">
+      <section className="max-w-5xl mx-auto px-6 py-10 text-center md:text-left">
         {location && (
-         <div className="flex items-center justify-center gap-2 text-neutral-700 mb-4">
+         <div className="flex items-center justify-center md:justify-start gap-2 text-neutral-700 mb-4">
             <MapPin className="w-4 h-4" />
             <span>{location}</span>
           </div>
+          <p className="text-white/90 text-lg text-center md:text-left">
+  {introLine}
+</p>
         )}
 
         {website && (
@@ -233,14 +233,14 @@ export function GalleryVenueDetail() {
             href={website}
             target="_blank"
             rel="nofollow noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 underline mb-6"
+            className="inline-flex items-center justify-center md:justify-start gap-2 underline mb-6"
           >
             Visit venue website <ExternalLink className="w-4 h-4" />
           </a>
         )}
 
         {description && (
-          <div className="text-neutral-700 leading-relaxed space-y-4 text-lg text-center">
+          <div className="text-neutral-700 leading-relaxed space-y-4 text-lg text-center md:text-left">
             {description.split(/\n{2,}/).map((p, i) => (
               <p key={i}>{p}</p>
             ))}
@@ -249,7 +249,7 @@ export function GalleryVenueDetail() {
       </section>
 
       {/* GRID */}
-      <div className="max-w-7xl mx-auto px-6 pb-20">
+      <div className="max-w-7xl mx-auto px-6 pt-16 pb-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {images.map((img, idx) => (
             <button
