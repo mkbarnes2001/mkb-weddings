@@ -36,6 +36,19 @@ const PINNED: Record<string, string[]> = {
   //   "mkb-weddings-killeavy-castle-123_500.webp",
   //   "mkb-weddings-killeavy-castle-456_500.webp",
   // ],
+
+  "orange-tree-house": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-411_500.webp",
+    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-411_500.webp",
+    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-493_500.webp",
+    "mkb-weddings-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-1.jpg_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-618_500.webp",
+    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-56_500.webp",
+    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-357_500.webp",
+    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_500.webp",
+  ],
+
+  
 };
 
 // --- Ordering helpers (pinned + stable shuffle) -----------------------------
