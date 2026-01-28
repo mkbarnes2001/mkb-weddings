@@ -41,7 +41,7 @@ function YouTubeEmbed({
   );
 }
 
-export default function WeddingPackages() {
+export function WeddingPackages() {
   return (
     <main className="pb-32">
       {/* Hero */}
