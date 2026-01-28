@@ -190,3 +190,4 @@ export function WeddingPackages() {
     </main>
   );
 }
+export default WeddingPackages;
