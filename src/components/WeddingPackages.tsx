@@ -291,7 +291,6 @@ export function WeddingPackages() {
                   <h3 className="text-white mb-4">{pkg.name}</h3>
                   <div className="text-white/90">{pkg.hours} hours coverage</div>
                   <div className="text-white/90 mt-2">{pkg.images} images</div>
-                  <div className="text-3xl font-bold text-white mt-4">{pkg.price}</div>
                 </div>
 
                 <div className="p-8">
