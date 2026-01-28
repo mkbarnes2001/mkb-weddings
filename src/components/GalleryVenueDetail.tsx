@@ -131,57 +131,86 @@ export function GalleryVenueDetail() {
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
+
     (async () => {
-      const [galleryRes, venueRes] = await Promise.all([
-        fetch("/gallery.csv", { cache: "no-store" }),
-        fetch("/galleryvenuedesc.csv", { cache: "no-store" }),
-      ]);
+      try {
+        const [galleryRes, venueRes] = await Promise.all([
+          fetch("/gallery.csv", { cache: "no-store" }),
+          fetch("/galleryvenuedesc.csv", { cache: "no-store" }),
+        ]);
 
-      const galleryText = await galleryRes.text();
-      setGalleryRows(parseGalleryCsv(galleryText));
+        const galleryText = await galleryRes.text();
+        if (!cancelled) setGalleryRows(parseGalleryCsv(galleryText));
 
-      if (venueRes.ok) {
-        const venueText = await venueRes.text();
-        const parsed = parseVenueMetaCsv(venueText);
-        const map: Record<string, VenueMetaRow> = {};
-        parsed.forEach((v) => (map[v.venue] = v));
-        setVenueMetaMap(map);
+        if (venueRes.ok) {
+          const venueText = await venueRes.text();
+          const parsed = parseVenueMetaCsv(venueText);
+
+          const map: Record<string, VenueMetaRow> = {};
+          parsed.forEach((v) => {
+            map[v.venue] = v;
+          });
+
+          if (!cancelled) setVenueMetaMap(map);
+        }
+      } catch {
+        // keep silent; page will just show no images
       }
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const venueRows = useMemo(
-    () => galleryRows.filter((r) => slugify(r.venue) === venueId),
-    [galleryRows, venueId]
-  );
+  const venueRows = useMemo(() => {
+    if (!venueId) return [];
+    return galleryRows.filter((r) => slugify(r.venue) === venueId);
+  }, [galleryRows, venueId]);
 
   const rawVenue = venueRows[0]?.venue || "";
   const meta = rawVenue ? venueMetaMap[rawVenue] : undefined;
 
   const name = meta?.venueName || rawVenue;
   const location = meta?.venueLocation || "";
-  const description = meta?.venueDescription || "";
   const website = meta?.venueWebsite || "";
+  const description = meta?.venueDescription || "";
 
-  const introLine = `Wedding photography at ${name}${
-    location ? `, ${location}` : ""
-  }`;
+  const introLine = `Wedding photography at ${name}${location ? `, ${location}` : ""}`;
 
   const metaTitle = `${name} Wedding Photography | MKB Weddings`;
-
   const metaDescription =
     description ||
     `Natural, documentary wedding photography at ${name}${
       location ? ` in ${location}` : ""
     }. View real weddings and venue galleries by MKB Weddings.`;
 
-  const images = venueRows.map((r) => ({
-    thumb: thumbUrl(r),
-    full: fullUrlFromThumb(r),
-    alt: `${name}${location ? `, ${location}` : ""} – ${r.category}`,
-  }));
+  const images = useMemo(() => {
+    return venueRows.map((r) => ({
+      thumb: thumbUrl(r),
+      full: fullUrlFromThumb(r),
+      alt: `${name}${location ? `, ${location}` : ""} – ${r.category}`,
+    }));
+  }, [venueRows, name, location]);
 
-  const heroImage = images[0]?.full;
+  const heroImage =
+    images[0]?.full ||
+    images[0]?.thumb ||
+    "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
+
+  if (!venueRows.length) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+        <div className="text-center">
+          <h1 className="text-3xl mb-3">Venue not found</h1>
+          <Link to="/gallery/venues" className="text-neutral-600 hover:text-neutral-900">
+            Back to Venues
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -192,94 +221,99 @@ export function GalleryVenueDetail() {
 
       {/* HERO */}
       <div className="relative h-[60vh] min-h-[420px]">
-        <ImageWithFallback
-          src={heroImage}
-          alt={name}
-          className="w-full h-full object-cover"
-        />
+        <ImageWithFallback src={heroImage} alt={name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
+        {/* Move the H1 higher by increasing bottom padding */}
         <div className="absolute inset-0 flex items-end">
-          <div className="max-w-7xl mx-auto px-6 pb-14 text-center">
+          <div className="w-full max-w-7xl mx-auto px-6 pb-24 md:pb-20 text-center md:text-left">
             <Link
               to="/gallery/venues"
-              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center md:justify-start"
             >
               <ArrowLeft className="w-5 h-5" />
               Back to Venues
             </Link>
 
-          <h1 className="text-white text-5xl md:text-6xl mb-2 text-center md:text-left">
-  {name}
-</h1>
+            <h1 className="text-white text-5xl md:text-6xl mb-3">
+              {name}
+            </h1>
+
+            {location ? (
+              <div className="flex items-center gap-2 text-white/90 justify-center md:justify-start">
+                <MapPin className="w-4 h-4" />
+                <span>{location}</span>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
 
-{/* VENUE INFO UNDER HERO */}
-<section className="max-w-5xl mx-auto px-6 py-10 text-center md:text-left">
-  {location && (
-    <div className="flex items-center justify-center md:justify-start gap-2 text-neutral-700 mb-4">
-      <MapPin className="w-4 h-4" />
-      <span>{location}</span>
-    </div>
-  )}
+      {/* VENUE INFO (UNDER HERO) */}
+      <section className="max-w-5xl mx-auto px-6 pt-12 pb-6 text-center md:text-left">
+        {/* Intro line */}
+        <p className="text-neutral-900 text-lg font-medium mb-8">
+          {introLine}
+        </p>
 
-  {/* one-line intro (always valid JSX, not inside location block) */}
-  <p className="text-neutral-900 text-lg font-medium mb-6 text-center md:text-left">
-    {introLine}
-  </p>
+        {/* Website */}
+        {website ? (
+          <div className="mb-10">
+            <a
+              href={website}
+              target="_blank"
+              rel="nofollow noopener noreferrer"
+              className="inline-flex items-center gap-2 text-neutral-900 hover:text-neutral-700 underline underline-offset-4 justify-center md:justify-start"
+            >
+              Visit venue website <ExternalLink className="w-4 h-4" />
+            </a>
+          </div>
+        ) : null}
 
-  {website && (
-    <div className="mb-6">
-      <a
-        href={website}
-        target="_blank"
-        rel="nofollow noopener noreferrer"
-        className="inline-flex items-center justify-center md:justify-start gap-2 text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
-      >
-        Visit venue website <ExternalLink className="w-4 h-4" />
-      </a>
-    </div>
-  )}
-
-  {description && (
-    <div className="text-neutral-700 leading-relaxed space-y-4 text-lg text-center md:text-left">
-      {description.split(/\n{2,}/).map((p, i) => (
-        <p key={i}>{p}</p>
-      ))}
-    </div>
-  )}
-</section>
+        {/* Description */}
+        {description ? (
+          <div className="text-neutral-700 leading-relaxed text-lg space-y-5 mb-16">
+            {description
+              .split(/\n{2,}/)
+              .map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+          </div>
+        ) : (
+          <div className="mb-16" />
+        )}
+      </section>
 
       {/* GRID */}
-      <div className="max-w-7xl mx-auto px-6 pt-16 pb-20">
+      <div className="max-w-7xl mx-auto px-6 pb-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {images.map((img, idx) => (
             <button
-              key={idx}
+              key={`${img.thumb}-${idx}`}
+              type="button"
               onClick={() => {
                 setLightboxIndex(idx);
                 setLightboxOpen(true);
               }}
-              className="aspect-[4/3] overflow-hidden rounded-lg"
+              className="aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left"
             >
               <ImageWithFallback
                 src={img.thumb}
                 alt={img.alt}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
             </button>
           ))}
         </div>
       </div>
 
-      {lightboxOpen && (
+      {/* LIGHTBOX */}
+      {lightboxOpen && images.length > 0 && (
         <ImageLightbox
           images={images.map((i) => i.full)}
           currentIndex={lightboxIndex}
           onClose={() => setLightboxOpen(false)}
-          onNavigate={setLightboxIndex}
+          onNavigate={(newIndex) => setLightboxIndex(newIndex)}
         />
       )}
     </div>
