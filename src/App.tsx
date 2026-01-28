@@ -22,7 +22,7 @@ import { GalleryFeaturedStories } from './components/GalleryFeaturedStories';
 import { GalleryStoryDetail } from './components/GalleryStoryDetail';
 import { GalleryCreativeFlash } from './components/GalleryCreativeFlash';
 
-import { WeddingPackages } from './components/WeddingPackages';
+import  WeddingPackages from './components/WeddingPackages';
 import { ThankYou } from './components/ThankYou';
 
 import { Outlet } from 'react-router-dom';
