@@ -1,23 +1,11 @@
 import React from "react";
 
 const VIDEOS = [
-  {
-    title: "Wedding Film – Example 1",
-    youtubeId: "GzZbcfdpIX4",
-  },
-  {
-    title: "Wedding Film – Example 2",
-    youtubeId: "d_yrNr8bTgE",
-  },
-  {
-    title: "Wedding Film – Example 3",
-    youtubeId: "e6iZjDdmRWc",
-  },
-  {
-    title: "Wedding Film – Example 4",
-    youtubeId: "Y0_IAaY7X8LA",
-  },
-];
+  { title: "Wedding Film – Example 1", youtubeId: "GzZbcfdpIX4" },
+  { title: "Wedding Film – Example 2", youtubeId: "d_yrNr8bTgE" },
+  { title: "Wedding Film – Example 3", youtubeId: "e6iZjDdmRWc" },
+  { title: "Wedding Film – Example 4", youtubeId: "Y0_IAaY7X8LA" },
+] as const;
 
 function YouTubeEmbed({
   youtubeId,
@@ -37,6 +25,25 @@ function YouTubeEmbed({
         allowFullScreen
         referrerPolicy="strict-origin-when-cross-origin"
       />
+    </div>
+  );
+}
+
+function PackageCard({
+  title,
+  bullets,
+}: {
+  title: string;
+  bullets: string[];
+}) {
+  return (
+    <div className="border border-foreground/10 p-8">
+      <h3 className="text-xl font-serif mb-4">{title}</h3>
+      <ul className="space-y-2 text-foreground/80 text-sm">
+        {bullets.map((b) => (
+          <li key={b}>• {b}</li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -66,40 +73,35 @@ export function WeddingPackages() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {/* Package 1 */}
-            <div className="border border-foreground/10 p-8">
-              <h3 className="text-xl font-serif mb-4">Half Day Coverage</h3>
-              <ul className="space-y-2 text-foreground/80 text-sm">
-                <li>• Up to 5 hours coverage</li>
-                <li>• Full gallery of edited images</li>
-                <li>• Online private gallery</li>
-                <li>• High-resolution downloads</li>
-              </ul>
-            </div>
+            <PackageCard
+              title="Half Day Coverage"
+              bullets={[
+                "Up to 5 hours coverage",
+                "Full gallery of edited images",
+                "Online private gallery",
+                "High-resolution downloads",
+              ]}
+            />
 
-            {/* Package 2 */}
-            <div className="border border-foreground/10 p-8">
-              <h3 className="text-xl font-serif mb-4">Full Day Coverage</h3>
-              <ul className="space-y-2 text-foreground/80 text-sm">
-                <li>• Morning preparations to evening party</li>
-                <li>• Full gallery of edited images</li>
-                <li>• Online private gallery</li>
-                <li>• High-resolution downloads</li>
-              </ul>
-            </div>
+            <PackageCard
+              title="Full Day Coverage"
+              bullets={[
+                "Morning preparations to evening party",
+                "Full gallery of edited images",
+                "Online private gallery",
+                "High-resolution downloads",
+              ]}
+            />
 
-            {/* Package 3 */}
-            <div className="border border-foreground/10 p-8">
-              <h3 className="text-xl font-serif mb-4">
-                Photography + Videography
-              </h3>
-              <ul className="space-y-2 text-foreground/80 text-sm">
-                <li>• Full day photography</li>
-                <li>• Cinematic highlight wedding film</li>
-                <li>• Carefully synced photo + video coverage</li>
-                <li>• Online gallery & film delivery</li>
-              </ul>
-            </div>
+            <PackageCard
+              title="Photography + Videography"
+              bullets={[
+                "Full day photography",
+                "Cinematic highlight wedding film",
+                "Carefully synced photo + video coverage",
+                "Online gallery & film delivery",
+              ]}
+            />
           </div>
         </div>
       </section>
@@ -140,8 +142,8 @@ export function WeddingPackages() {
           </h2>
 
           <p className="text-foreground/80 max-w-2xl mx-auto mb-8">
-            If you’re planning your wedding and would like relaxed,
-            unobtrusive coverage, I’d love to hear more about your day.
+            If you’re planning your wedding and would like relaxed, unobtrusive
+            coverage, I’d love to hear more about your day.
           </p>
 
           <a
