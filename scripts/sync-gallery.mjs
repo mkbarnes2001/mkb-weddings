@@ -1,18 +1,47 @@
-import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
+/**
+ * scripts/sync-gallery.mjs
+ *
+ * Purpose:
+ * - List images in Cloudflare R2 under a prefix (default: "full/")
+ * - Compare against gallery CSV
+ * - Append any new images as new rows
+ *
+ * Assumptions:
+ * - R2 object keys look like: full/<venue>/<moment>/<file>
+ * - CSV stores: venue, moment, file, tag (optional: published, sort)
+ *
+ * Usage:
+ * - Put creds in .env (recommended) or .env.local
+ * - npm run sync-gallery
+ */
+
 import fs from "node:fs";
 import path from "node:path";
+import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { parse } from "csv-parse/sync";
 import { stringify } from "csv-stringify/sync";
+
+// Load env from .env.local first (common in Vite), then fall back to .env
+try {
+  const dotenv = await import("dotenv");
+  dotenv.config({ path: ".env.local" });
+  dotenv.config({ path: ".env" });
+} catch {
+  // If dotenv isn't installed, it's fine—env vars may be set by the shell/CI.
+}
 
 const BUCKET = process.env.R2_BUCKET;
 const ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
 const ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
 const SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
 
-// Path to your CSV in the repo:
+// Where your CSV lives in the repo
 const CSV_PATH = process.env.GALLERY_CSV ?? "public/gallery.csv";
 
-// If you store images as: venue/moment/file.jpg
+// Only scan the "full" gallery prefix in R2
+// MUST end with "/" for predictable parsing
+const GALLERY_PREFIX = (process.env.GALLERY_PREFIX ?? "full/").replace(/^\//, "").replace(/(?<!\/)$/, "/");
+
 const VALID_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
 
 if (!BUCKET || !ACCOUNT_ID || !ACCESS_KEY_ID || !SECRET_ACCESS_KEY) {
@@ -39,7 +68,7 @@ function readCsv(filePath) {
 }
 
 function writeCsv(filePath, rows) {
-  // Keep your original columns, plus optional published/sort if you decide to use them
+  // Keep your existing columns + the optional extras we’ve been using
   const csv = stringify(rows, {
     header: true,
     columns: ["venue", "moment", "file", "tag", "published", "sort"],
@@ -47,13 +76,36 @@ function writeCsv(filePath, rows) {
   fs.writeFileSync(filePath, csv, "utf8");
 }
 
+function normalizeRow(r) {
+  return {
+    venue: (r.venue ?? "").trim(),
+    moment: (r.moment ?? "").trim(),
+    file: ((r.file ?? r.filename) ?? "").trim(),
+    tag: (r.tag ?? "").trim(),
+    published: (r.published ?? "true").toString().trim(), // existing rows default true
+    sort: (r.sort ?? "").toString().trim(),
+  };
+}
+
+function rowIdentity(r) {
+  // Unique identity for a gallery item in your CSV
+  return `${(r.venue ?? "").trim()}/${(r.moment ?? "").trim()}/${(r.file ?? "").trim()}`;
+}
+
 function keyToRow(key) {
-  const parts = key.split("/");
+  // expected: full/<venue>/<moment>/<file>
+  // BUT prefix is configurable; we parse relative to GALLERY_PREFIX.
+
+  if (!key.startsWith(GALLERY_PREFIX)) return null;
+
+  const remainder = key.slice(GALLERY_PREFIX.length); // <venue>/<moment>/<file>
+  const parts = remainder.split("/");
+
   if (parts.length < 3) return null;
 
   const venue = parts[0];
   const moment = parts[1];
-  const file = parts.slice(2).join("/"); // allows nested later if needed
+  const file = parts.slice(2).join("/");
 
   const ext = path.extname(file).toLowerCase();
   if (!VALID_EXT.has(ext)) return null;
@@ -62,18 +114,13 @@ function keyToRow(key) {
     venue,
     moment,
     file,
-    tag: "",            // you can fill in later
-    published: "false", // safe default
-    sort: "",           // blank = append/end
+    tag: "",
+    published: "false",
+    sort: "",
   };
 }
 
-function rowIdentity(r) {
-  // the “unique key” for a row
-  return `${(r.venue ?? "").trim()}/${(r.moment ?? "").trim()}/${(r.file ?? "").trim()}`;
-}
-
-async function listAllKeys() {
+async function listAllKeysUnderPrefix() {
   const keys = [];
   let token = undefined;
 
@@ -81,6 +128,7 @@ async function listAllKeys() {
     const res = await client.send(
       new ListObjectsV2Command({
         Bucket: BUCKET,
+        Prefix: GALLERY_PREFIX,
         ContinuationToken: token,
       })
     );
@@ -97,30 +145,20 @@ async function listAllKeys() {
 }
 
 async function main() {
-  const rows = readCsv(CSV_PATH);
+  const existingRows = readCsv(CSV_PATH).map(normalizeRow);
+  const existingSet = new Set(existingRows.map(rowIdentity));
 
-  // Normalize existing rows (and handle CSVs that use "filename" instead of "file")
-  const normalized = rows.map((r) => ({
-    venue: (r.venue ?? "").trim(),
-    moment: (r.moment ?? "").trim(),
-    file: ((r.file ?? r.filename) ?? "").trim(),
-    tag: (r.tag ?? "").trim(),
-    published: (r.published ?? "true").toString().trim(), // existing rows default true
-    sort: (r.sort ?? "").toString().trim(),
-  }));
-
-  const existing = new Set(normalized.map(rowIdentity));
-
-  const keys = await listAllKeys();
+  const keys = await listAllKeysUnderPrefix();
   const newRows = [];
 
   for (const k of keys) {
     const row = keyToRow(k);
     if (!row) continue;
+
     const id = rowIdentity(row);
-    if (!existing.has(id)) {
+    if (!existingSet.has(id)) {
       newRows.push(row);
-      existing.add(id);
+      existingSet.add(id);
     }
   }
 
@@ -129,9 +167,9 @@ async function main() {
     return;
   }
 
-  const merged = normalized.concat(newRows);
+  const merged = existingRows.concat(newRows);
 
-  // Optional tidy sort: venue + moment, then sort, then file name
+  // Optional tidy sort: venue + moment, then sort, then file
   merged.sort((a, b) => {
     const aKey = `${a.venue}||${a.moment}`;
     const bKey = `${b.venue}||${b.moment}`;
@@ -148,6 +186,7 @@ async function main() {
   writeCsv(CSV_PATH, merged);
 
   console.log(`✅ Added ${newRows.length} new row(s) to ${CSV_PATH}`);
+  console.log(`Scanned prefix: ${GALLERY_PREFIX}`);
   console.log("New rows default to published=false and empty tag.");
 }
 
