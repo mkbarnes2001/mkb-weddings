@@ -68,6 +68,14 @@ const PINNED: Record<string, string[]> = {
 
 ],
 
+"Slieve-donard-hotel":[
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_500.webp",
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp",
+"MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-donard-hotel-newcastle-wedding-photography2_500.webp",
+"MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-slieve-donard-hotel-newcastle-wedding-photography-191_500.webp",
+"MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-slieve-donard-hotel-newcastle-wedding-photography-367_500.webp",
+
+],
 
 };
 
