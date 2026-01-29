@@ -107,7 +107,8 @@ function applyPinnedOrder(
   venueSlug: string,
   seed: string
 ): GalleryRow[] {
-  const pinnedFilenames = (PINNED[venueSlug] || []).filter(Boolean);
+  const pinnedFilenames = (PINNED[(venueSlug || "").toLowerCase()] || []).filter(Boolean);
+
 
   if (!pinnedFilenames.length) {
     return stableShuffle(rows, seed);
