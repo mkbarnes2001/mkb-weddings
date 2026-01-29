@@ -1,57 +1,52 @@
-/**
- * scripts/sync-gallery.mjs
- *
- * Syncs your image gallery CSV from Cloudflare R2.
- *
- * ✅ CSV schema (MUST match your React code):
- *   venue,category,filename,tags
- *
- * ✅ R2 full-size key format expected:
- *   full/<venue>/<category>/<filename>
- *
- * 🔑 Important behavior:
- * - Your site "used to all be 500" thumbs.
- * - This script STANDARDISES the CSV filename to the thumb version:
- *     *_2000.webp  -> *_500.webp
- * - It ONLY APPENDS new rows (never edits existing rows).
- *
- * Usage:
- *   npm run sync-gallery
- *
- * Env (in .env.local or .env):
- *   R2_BUCKET=mkb-gallery
- *   R2_ACCOUNT_ID=...
- *   R2_ACCESS_KEY_ID=...
- *   R2_SECRET_ACCESS_KEY=...
- *   (optional) GALLERY_CSV=public/gallery.csv
- *   (optional) GALLERY_PREFIX=full/
- */
-
 import fs from "node:fs";
 import path from "node:path";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { parse } from "csv-parse/sync";
 import { stringify } from "csv-stringify/sync";
 
-// Load env from .env.local first (common in Vite), then fall back to .env
-try {
-  const dotenv = await import("dotenv");
-  dotenv.config({ path: ".env.local" });
-  dotenv.config({ path: ".env" });
-} catch {
-  // If dotenv isn't installed, env vars may be provided by the shell/CI.
+// --- Load env from .env.local or .env (works with ESM) ---
+function loadEnvFile(file) {
+  try {
+    const p = path.resolve(process.cwd(), file);
+    if (!fs.existsSync(p)) return;
+    const raw = fs.readFileSync(p, "utf8");
+    for (const line of raw.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eq = trimmed.indexOf("=");
+      if (eq === -1) continue;
+      const key = trimmed.slice(0, eq).trim();
+      let val = trimmed.slice(eq + 1).trim();
+      // strip quotes
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      ) {
+        val = val.slice(1, -1);
+      }
+      if (process.env[key] === undefined) process.env[key] = val;
+    }
+  } catch {
+    // ignore
+  }
 }
+loadEnvFile(".env.local");
+loadEnvFile(".env");
 
+// --- Required env ---
 const BUCKET = process.env.R2_BUCKET;
 const ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
 const ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
 const SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
 
+// --- Config ---
 const CSV_PATH = process.env.GALLERY_CSV ?? "public/gallery.csv";
-const GALLERY_PREFIX = (process.env.GALLERY_PREFIX ?? "full/")
-  .replace(/^\//, "")
-  .replace(/(?<!\/)$/, "/");
 
+// IMPORTANT: use THUMB prefix because your gallery CSV uses _500.webp thumbs
+// You can override with R2_PREFIX if needed.
+const PREFIX = (process.env.R2_PREFIX ?? "thumb/").replace(/^\/+/, "");
+
+// Extensions allowed
 const VALID_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
 
 if (!BUCKET || !ACCOUNT_ID || !ACCESS_KEY_ID || !SECRET_ACCESS_KEY) {
@@ -67,6 +62,7 @@ const client = new S3Client({
   credentials: { accessKeyId: ACCESS_KEY_ID, secretAccessKey: SECRET_ACCESS_KEY },
 });
 
+// --- CSV helpers ---
 function readCsv(filePath) {
   if (!fs.existsSync(filePath)) return [];
   const raw = fs.readFileSync(filePath, "utf8");
@@ -75,66 +71,51 @@ function readCsv(filePath) {
 }
 
 function writeCsv(filePath, rows) {
-  // EXACT schema your gallery expects
   const csv = stringify(rows, {
     header: true,
-    columns: ["venue", "category", "filename", "tags"],
+    columns: ["venue", "category", "filename", "tag"],
   });
   fs.writeFileSync(filePath, csv, "utf8");
 }
 
-function normalizeRow(r) {
-  return {
-    venue: (r.venue ?? "").trim(),
-    category: (r.category ?? "").trim(),
-    filename: (r.filename ?? "").trim(),
-    tags: (r.tags ?? "").trim(),
-  };
+// Unique identity for a row
+function rowId(r) {
+  return `${(r.venue ?? "").trim()}||${(r.category ?? "").trim()}||${(r.filename ?? "").trim()}`;
 }
 
-function rowIdentity(r) {
-  // identity is venue/category/filename (case-insensitive)
-  return `${r.venue}/${r.category}/${r.filename}`.toLowerCase();
-}
-
-function toThumbFilename(filename) {
-  // Standardise CSV to thumb naming.
-  // Converts "..._2000.webp" -> "..._500.webp"
-  // Leaves "..._500.webp" as-is.
-  return filename.replace(/_2000(\.\w+)$/i, "_500$1");
-}
-
+// Turn an R2 key into a CSV row
+// Expected structure (thumb): thumb/<venue>/<category>/<filename>
 function keyToRow(key) {
-  // Expected: full/<venue>/<category>/<filename>
-  if (!key.startsWith(GALLERY_PREFIX)) return null;
+  if (!key.startsWith(PREFIX)) return null;
 
-  const remainder = key.slice(GALLERY_PREFIX.length); // <venue>/<category>/<filename>
-  const parts = remainder.split("/");
+  // Remove prefix
+  const rel = key.slice(PREFIX.length); // e.g. "Galgorm/ceremony/file_500.webp"
+  if (!rel || rel.endsWith("/")) return null;
 
-  // Must have venue/category/filename
-  if (parts.length < 3) return null;
+  // ignore DS_Store and folders
+  const base = path.basename(rel);
+  if (base === ".DS_Store") return null;
 
-  const venue = (parts[0] ?? "").trim();
-  const category = (parts[1] ?? "").trim();
-  let filename = parts.slice(2).join("/").trim();
-
-  if (!venue || !category || !filename) return null;
-
-  const ext = path.extname(filename).toLowerCase();
+  const ext = path.extname(base).toLowerCase();
   if (!VALID_EXT.has(ext)) return null;
 
-  // 🔑 Always store thumb version in CSV
-  filename = toThumbFilename(filename);
+  const parts = rel.split("/").filter(Boolean);
+  // needs at least venue/category/filename
+  if (parts.length < 3) return null;
+
+  const venue = parts[0];
+  const category = parts[1];
+  const filename = parts.slice(2).join("/"); // supports nested filenames if ever
 
   return {
     venue,
     category,
     filename,
-    tags: "",
+    tag: "", // default for new rows
   };
 }
 
-async function listAllKeysUnderPrefix() {
+async function listAllKeysWithPrefix() {
   const keys = [];
   let token = undefined;
 
@@ -142,7 +123,7 @@ async function listAllKeysUnderPrefix() {
     const res = await client.send(
       new ListObjectsV2Command({
         Bucket: BUCKET,
-        Prefix: GALLERY_PREFIX,
+        Prefix: PREFIX,
         ContinuationToken: token,
       })
     );
@@ -159,17 +140,26 @@ async function listAllKeysUnderPrefix() {
 }
 
 async function main() {
-  const existingRows = readCsv(CSV_PATH).map(normalizeRow);
-  const existingSet = new Set(existingRows.map(rowIdentity));
+  const existingRowsRaw = readCsv(CSV_PATH);
 
-  const keys = await listAllKeysUnderPrefix();
+  // Normalize existing rows and PRESERVE tag
+  const existingRows = existingRowsRaw.map((r) => ({
+    venue: (r.venue ?? "").trim(),
+    category: (r.category ?? "").trim(),
+    filename: ((r.filename ?? r.file ?? r.name) ?? "").trim(),
+    tag: (r.tag ?? "").trim(),
+  }));
 
+  const existingSet = new Set(existingRows.map(rowId));
+
+  const keys = await listAllKeysWithPrefix();
   const newRows = [];
+
   for (const k of keys) {
     const row = keyToRow(k);
     if (!row) continue;
 
-    const id = rowIdentity(row);
+    const id = rowId(row);
     if (!existingSet.has(id)) {
       newRows.push(row);
       existingSet.add(id);
@@ -177,25 +167,19 @@ async function main() {
   }
 
   if (newRows.length === 0) {
-    console.log("No new images found.");
-    console.log(`Scanned prefix: ${GALLERY_PREFIX}`);
+    console.log(`No new images found under prefix: ${PREFIX}`);
     return;
   }
 
+  // IMPORTANT: keep your current ordering; append new rows at end
   const merged = existingRows.concat(newRows);
 
-  // Keep file tidy / predictable
-  merged.sort((a, b) => {
-    const aKey = `${a.venue}||${a.category}||${a.filename}`.toLowerCase();
-    const bKey = `${b.venue}||${b.category}||${b.filename}`.toLowerCase();
-    return aKey.localeCompare(bKey);
-  });
-
+  // Write back with stable columns (venue,category,filename,tag) and tag preserved
   writeCsv(CSV_PATH, merged);
 
   console.log(`✅ Added ${newRows.length} new row(s) to ${CSV_PATH}`);
-  console.log(`Scanned prefix: ${GALLERY_PREFIX}`);
-  console.log("CSV filenames normalised to _500 thumbs.");
+  console.log(`Scanned prefix: ${PREFIX}`);
+  console.log(`Existing tag values were preserved. New rows have empty tag.`);
 }
 
 main().catch((err) => {
