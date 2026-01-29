@@ -27,6 +27,7 @@ const PINNED_VENUES: string[] = [
   "Killeavy Castle",
   "Slieve Donard Hotel",
   "Wool Tower",
+  "merchant"
 ];
 
 function slugify(s: string) {
