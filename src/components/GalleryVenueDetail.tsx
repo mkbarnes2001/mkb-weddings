@@ -91,6 +91,17 @@ const PINNED: Record<string, string[]> = {
 
 
 ],
+
+"wool-tower" :[
+
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-417_500.webp",
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-110_500.webp",
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-224_500.webp",
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-412_500.webp",
+
+],
+
+
 };
 
 // --- Ordering helpers (pinned + stable shuffle) -----------------------------
