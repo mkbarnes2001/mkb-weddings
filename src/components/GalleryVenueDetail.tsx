@@ -77,6 +77,18 @@ const PINNED: Record<string, string[]> = {
 
 ],
 
+
+"tullyglass-hotel" :[
+
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-557_500.webp",
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-521_500.webp",
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-hotel-ballymena-wedding-photography-163_500.webp",
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-525_500.webp",
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-596_500.webp",
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-512_500.webp",
+
+
+],
 };
 
 // --- Ordering helpers (pinned + stable shuffle) -----------------------------
