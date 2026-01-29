@@ -265,6 +265,17 @@ function fullUrlFromThumb(r: GalleryRow) {
   )}/${encodeURIComponent(r.filename.replace(/_500\.webp$/i, "_2000.webp"))}`;
 }
 
+function getFallbackVenueDescription(
+  venueName: string,
+  location?: string
+) {
+  return `Wedding photography at ${venueName}${
+    location ? `, ${location}` : ""
+  }. I photograph weddings here with a relaxed, documentary approach — capturing genuine moments, natural emotion, and the atmosphere of the day as it unfolds. Ideal for couples who want authentic storytelling with a creative edge.`;
+}
+
+
+
 // ----------------------------------------------------------------------------
 export function GalleryVenueDetail() {
   const { venueId } = useParams<{ venueId: string }>();
@@ -322,7 +333,10 @@ export function GalleryVenueDetail() {
   const name = meta?.venueName || rawVenue;
   const location = meta?.venueLocation || "";
   const website = meta?.venueWebsite || "";
-  const description = meta?.venueDescription || "";
+  const description =
+  meta?.venueDescription?.trim() ||
+  getFallbackVenueDescription(name, location);
+
 
   const introLine = `Wedding photography at ${name}${location ? `, ${location}` : ""}`;
 
