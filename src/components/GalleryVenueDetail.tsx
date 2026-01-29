@@ -68,7 +68,7 @@ const PINNED: Record<string, string[]> = {
 
 ],
 
-"Slieve-donard-hotel":[
+"slieve-donard-hotel":[
 "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_500.webp",
 "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp",
 "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-donard-hotel-newcastle-wedding-photography2_500.webp",
