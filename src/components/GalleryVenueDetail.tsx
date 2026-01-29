@@ -48,7 +48,27 @@ const PINNED: Record<string, string[]> = {
     "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_500.webp",
   ],
 
-  
+   "ballyscullion-park": [
+    “MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ballyscullion-park-belaghy-wedding-photography2_500.webp”,
+    “mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-447_500.webp”,
+    “mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-460_500.webp”,
+    “mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-179_500.webp”,
+    “MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ballyscullion-park-belaghy-wedding-photography8_500.webp”,
+    “mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-413_500.webp”,
+
+],
+
+
+  “Killeavy-castle”: [
+    “mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-116_500.webp”,
+    “MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography6_500.webp”,
+    “MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_500.webp”,
+    “MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_killeavy-castle_Wedding_Photography-462_500.webp”,
+    “MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_killeavy-castle_Wedding_Photography-609_500.webp”,
+
+],
+
+
 };
 
 // --- Ordering helpers (pinned + stable shuffle) -----------------------------
