@@ -103,6 +103,25 @@ const PINNED: Record<string, string[]> = {
 
 ],
 
+"leighinmohr-house-hotel" :[
+
+
+  "MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Leighinmohr_House_Hotel_Wedding_Photography-Full%20Res-361_500.webp",
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-leighinmohr-house-hotel-ballymena-wedding-photography--355_500.webp",
+  "mkb-weddings-mkb-Photography-northern-ireland-wedding-photographer-LEIGHINMOHR-hotel-ballymena-wedding-photography-10_500.webp",
+  "mkb-weddings-northern-ireland-wedding-photographer-leighinmohr-house-ballymena-wedding-photography-1_500.webp",
+
+],
+
+
+"rabbit-hotel-and-spa" :[
+
+  "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography4_2000.webp",
+  "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-344_500.webp",
+  "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-406_500.webp",
+  "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-511_500.webp",
+
+],
 
 };
 
