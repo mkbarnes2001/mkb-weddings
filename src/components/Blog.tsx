@@ -195,7 +195,7 @@ export function Blog() {
 
       {/* Coming soon content */}
       <section className="py-16 px-6 max-w-4xl mx-auto text-center">
-        <h2 className="text-4xl md:text-5xl mb-6">Wedding Stories are Coming Soon</h2>
+        <h3 className="text-4xl md:text-5xl mb-6">Wedding Stories are Coming Soon</h3>
         <p className="text-lg text-neutral-700 max-w-2xl mx-auto leading-relaxed">
           I’m currently moving my full wedding blog over to the new website. In the meantime, you can
           explore the galleries by venue, wedding moments, and creative flash.
