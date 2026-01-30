@@ -160,7 +160,7 @@ export function Blog() {
               className="tagline text-white mb-6"
               style={{ fontSize: "clamp(1.25rem, 3vw, 1.75rem)" }}
             >
-              Stories and Reviews <span className="text-white/80">(Coming Soon)</span>
+              Stories and Reviews <span className="text-white/80"></span>
             </h1>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
               Real weddings, client reviews, tips, and inspiration from Northern Ireland and beyond
