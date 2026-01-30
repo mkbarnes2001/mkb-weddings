@@ -1,10 +1,12 @@
 // src/components/GalleryVenueDetail.tsx
+import { useEffect } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ExternalLink, MapPin } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
+
 
 type GalleryRow = {
   venue: string;
@@ -279,6 +281,11 @@ function getFallbackVenueDescription(
 // ----------------------------------------------------------------------------
 export function GalleryVenueDetail() {
   const { venueId } = useParams<{ venueId: string }>();
+
+    // Ensure page always loads at top when venue changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [venueId]);
 
   const [galleryRows, setGalleryRows] = useState<GalleryRow[]>([]);
   const [venueMetaMap, setVenueMetaMap] = useState<Record<string, VenueMetaRow>>(
