@@ -28,8 +28,8 @@ const PINNED_VENUES: string[] = [
   "Slieve Donard Hotel",
   "Wool Tower",
   "merchant",
-  "rabbit-hotel-and-spa",
-  "leighinmohr-house-hotel"
+  "rabbit hotel and spa",
+  "leighinmohr house hotel",
 ];
 
 function slugify(s: string) {
