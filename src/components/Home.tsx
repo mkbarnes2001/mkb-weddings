@@ -167,11 +167,11 @@ export function Home() {
         {/* ---------- Intro Text Block ---------- */}
 <section className="py-24 px-6 md:px-20">
   <div className="max-w-4xl mx-auto text-center">
-    <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif mb-8">
+    <h2 className="text-3xl md:text-3xl lg:text-4xl font-serif mb-8">
       Natural wedding photography, with a bold edge
     </h2>
 
-    <p className="text-lg md:text-xl leading-relaxed text-gray-700">
+   <p className="text-primary/80 max-w-3xl mx-auto text-center mb-16 leading-relaxed">
       I photograph weddings across Northern Ireland and beyond with a focus on
       real moments, genuine connection, and a relaxed experience from start to
       finish. You’ll get natural, documentary coverage through the day, plus
@@ -181,7 +181,7 @@ export function Home() {
   
 
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left sm:text-center">
+            <div className="grid gap-8 max-w-4xl mx-auto text-center">
               <div className="rounded-sm border border-primary/10 p-6">
                 <h3 className="text-base font-semibold mb-2">Candid, not staged</h3>
                 <p className="text-primary/75">
@@ -200,6 +200,7 @@ export function Home() {
                 <p className="text-primary/75">
                   From prep to dancefloor, your gallery tells the full story — not just the “posed”
                   bits.
+                  <div className="grid gap-8 max-w-4xl mx-auto text-center mb-24">
                 </p>
               </div>
             </div>
