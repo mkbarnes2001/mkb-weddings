@@ -162,6 +162,42 @@ export function Home() {
           </div>
         </section>
 
+        {/* ---------- Missing Text Block (re-added) ---------- */}
+        <section className="pb-20 px-6 md:px-20 max-w-[1440px] mx-auto">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="mb-6">Natural wedding photography, with a bold edge</h2>
+            <p className="text-primary/80 text-lg leading-relaxed mb-8">
+              I photograph weddings across Northern Ireland and beyond with a focus on real moments,
+              genuine connection, and a relaxed experience from start to finish. You’ll get natural,
+              documentary coverage through the day, plus creative portraits and punchy flash when the
+              party kicks off — so your gallery feels honest, stylish, and full of energy.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left sm:text-center">
+              <div className="rounded-sm border border-primary/10 p-6">
+                <h3 className="text-base font-semibold mb-2">Candid, not staged</h3>
+                <p className="text-primary/75">
+                  A documentary approach that lets you enjoy the day — I’ll guide when needed, never
+                  take over.
+                </p>
+              </div>
+              <div className="rounded-sm border border-primary/10 p-6">
+                <h3 className="text-base font-semibold mb-2">Colour + contrast</h3>
+                <p className="text-primary/75">
+                  Clean edits with depth and punch — true-to-life skin tones and vibrant atmosphere.
+                </p>
+              </div>
+              <div className="rounded-sm border border-primary/10 p-6">
+                <h3 className="text-base font-semibold mb-2">Built for real life</h3>
+                <p className="text-primary/75">
+                  From prep to dancefloor, your gallery tells the full story — not just the “posed”
+                  bits.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ---------- CTA ---------- */}
         <section className="py-32 px-6 md:px-20 relative overflow-hidden">
           <div className="absolute inset-0">
