@@ -165,7 +165,7 @@ export function Home() {
         {/* ---------- Missing Text Block (re-added) ---------- */}
         <section className="pb-20 px-6 md:px-20 max-w-[1440px] mx-auto">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="mb-6">Natural wedding photography, with a bold edge</h2>
+            <h3 className="mb-6">Natural wedding photography, with a bold edge</h3>
             <p className="text-primary/80 text-lg leading-relaxed mb-8">
               I photograph weddings across Northern Ireland and beyond with a focus on real moments,
               genuine connection, and a relaxed experience from start to finish. You’ll get natural,
