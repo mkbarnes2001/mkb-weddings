@@ -132,7 +132,8 @@ export function Home() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-10">
                 <Camera size={40} className="text-white mb-4" />
-                <h2 className="text-white mb-4">Gallery</h2>
+                <h2 className="text-white text-2xl md:text-3xl font-serif mb-4">Gallery</h2>
+
                 <p className="text-white/90 mb-6">
                   Browse our portfolio by venue, style and moments from real weddings.
                 </p>
@@ -150,7 +151,8 @@ export function Home() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-10">
                 <Heart size={40} className="text-white mb-4" />
-                <h2 className="text-white mb-4">Stories & Reviews</h2>
+                <h2 className="text-white text-2xl md:text-3xl font-serif mb-4">Stories & Reviews</h2>
+
                 <p className="text-white/90 mb-6">
                   Real weddings, client reviews, venue guides and photography tips.
                 </p>
@@ -162,16 +164,23 @@ export function Home() {
           </div>
         </section>
 
-        {/* ---------- Missing Text Block (re-added) ---------- */}
-        <section className="pb-20 px-6 md:px-20 max-w-[1440px] mx-auto">
-          <div className="max-w-4xl mx-auto text-center">
-            <h3 className="mb-6">Natural wedding photography, with a bold edge</h3>
-            <p className="text-primary/80 text-lg leading-relaxed mb-8">
-              I photograph weddings across Northern Ireland and beyond with a focus on real moments,
-              genuine connection, and a relaxed experience from start to finish. You’ll get natural,
-              documentary coverage through the day, plus creative portraits and punchy flash when the
-              party kicks off — so your gallery feels honest, stylish, and full of energy.
-            </p>
+        {/* ---------- Intro Text Block ---------- */}
+<section className="py-24 px-6 md:px-20">
+  <div className="max-w-4xl mx-auto text-center">
+    <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif mb-8">
+      Natural wedding photography, with a bold edge
+    </h2>
+
+    <p className="text-lg md:text-xl leading-relaxed text-gray-700">
+      I photograph weddings across Northern Ireland and beyond with a focus on
+      real moments, genuine connection, and a relaxed experience from start to
+      finish. You’ll get natural, documentary coverage through the day, plus
+      creative portraits and punchy flash when the party kicks off – so your
+      gallery feels honest, stylish, and full of energy.
+    </p>
+  </div>
+</section>
+
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left sm:text-center">
               <div className="rounded-sm border border-primary/10 p-6">
