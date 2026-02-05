@@ -131,7 +131,7 @@ export function Home() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-10">
                 <Camera size={40} className="text-white mb-4" />
-                <h2 className="text-white text-2xl md:text-3xl font-serif mb-4">Gallery</h2>
+                <h2 className="text-white text-2xl md:text-2xl font-serif mb-4">Gallery</h2>
                 <p className="text-white/90 mb-6">
                   Browse our portfolio by venue, style and moments from real weddings.
                 </p>
@@ -149,7 +149,7 @@ export function Home() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-10">
                 <Heart size={40} className="text-white mb-4" />
-                <h2 className="text-white text-2xl md:text-3xl font-serif mb-4">
+                <h2 className="text-white text-2xl md:text-2xl font-serif mb-4">
                   Stories & Reviews
                 </h2>
                 <p className="text-white/90 mb-6">
