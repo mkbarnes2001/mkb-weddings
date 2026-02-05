@@ -47,7 +47,6 @@ export function Home() {
 
   return (
     <>
-      {/* ---------- SEO ---------- */}
       <Helmet>
         <title>Northern Ireland Wedding Photographer | MKB Weddings</title>
         <meta
@@ -73,7 +72,7 @@ export function Home() {
                 alt={heroSlides[currentSlide].alt}
                 className="w-full h-full object-cover object-center"
               />
-              <div className="absolute inset-0 bg-black/45"></div>
+              <div className="absolute inset-0 bg-black/45" />
             </motion.div>
           </AnimatePresence>
 
@@ -133,7 +132,6 @@ export function Home() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-10">
                 <Camera size={40} className="text-white mb-4" />
                 <h2 className="text-white text-2xl md:text-3xl font-serif mb-4">Gallery</h2>
-
                 <p className="text-white/90 mb-6">
                   Browse our portfolio by venue, style and moments from real weddings.
                 </p>
@@ -151,8 +149,9 @@ export function Home() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-10">
                 <Heart size={40} className="text-white mb-4" />
-                <h2 className="text-white text-2xl md:text-3xl font-serif mb-4">Stories & Reviews</h2>
-
+                <h2 className="text-white text-2xl md:text-3xl font-serif mb-4">
+                  Stories & Reviews
+                </h2>
                 <p className="text-white/90 mb-6">
                   Real weddings, client reviews, venue guides and photography tips.
                 </p>
@@ -165,42 +164,47 @@ export function Home() {
         </section>
 
         {/* ---------- Intro Text Block ---------- */}
-<section className="py-24 px-6 md:px-20">
-  <div className="max-w-4xl mx-auto text-center">
-    <h2 className="text-3xl md:text-3xl lg:text-4xl font-serif mb-8">
-      Natural wedding photography, with a bold edge
-    </h2>
+        <section className="pt-8 pb-28 px-6 md:px-20">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-serif mb-6">
+              Natural wedding photography, with a bold edge
+            </h2>
 
-   <p className="text-primary/80 max-w-3xl mx-auto text-center mb-16 leading-relaxed">
-      I photograph weddings across Northern Ireland and beyond with a focus on
-      real moments, genuine connection, and a relaxed experience from start to
-      finish. You’ll get natural, documentary coverage through the day, plus
-      creative portraits and punchy flash when the party kicks off – so your
-      gallery feels honest, stylish, and full of energy.
-    </p>
-  
+            <p className="text-primary/80 max-w-3xl mx-auto leading-relaxed text-lg md:text-xl mb-14">
+              I photograph weddings across Northern Ireland and beyond with a focus on real moments,
+              genuine connection, and a relaxed experience from start to finish. You’ll get natural,
+              documentary coverage through the day, plus creative portraits and punchy flash when the
+              party kicks off – so your gallery feels honest, stylish, and full of energy.
+            </p>
 
-
-            <div className="grid gap-8 max-w-4xl mx-auto text-center">
-              <div className="rounded-sm border border-primary/10 p-6">
-                <h3 className="text-base font-semibold mb-2">Candid, not staged</h3>
-                <p className="text-primary/75">
+            {/* Cards */}
+            <div className="grid gap-8 max-w-4xl mx-auto text-center mt-6">
+              <div className="rounded-sm border border-primary/10 p-8">
+                <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">
+                  Candid, not staged
+                </h3>
+                <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed">
                   A documentary approach that lets you enjoy the day — I’ll guide when needed, never
                   take over.
                 </p>
               </div>
-              <div className="rounded-sm border border-primary/10 p-6">
-                <h3 className="text-base font-semibold mb-2">Colour + contrast</h3>
-                <p className="text-primary/75">
+
+              <div className="rounded-sm border border-primary/10 p-8">
+                <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">
+                  Colour + contrast
+                </h3>
+                <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed">
                   Clean edits with depth and punch — true-to-life skin tones and vibrant atmosphere.
                 </p>
               </div>
-              <div className="rounded-sm border border-primary/10 p-6">
-                <h3 className="text-base font-semibold mb-2">Built for real life</h3>
-                <p className="text-primary/75">
+
+              <div className="rounded-sm border border-primary/10 p-8">
+                <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">
+                  Built for real life
+                </h3>
+                <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed">
                   From prep to dancefloor, your gallery tells the full story — not just the “posed”
                   bits.
-                  <div className="grid gap-8 max-w-4xl mx-auto text-center mb-24">
                 </p>
               </div>
             </div>
@@ -215,7 +219,7 @@ export function Home() {
               alt="Check availability for your wedding date"
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-accent/80"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-accent/80" />
           </div>
 
           <div className="relative max-w-5xl mx-auto text-center">
