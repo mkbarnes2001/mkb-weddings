@@ -24,6 +24,14 @@ const PINNED: string[] = [
   "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-113_500.webp",
   "mkb-weddings-irish-wedding-photographer-redcastle-hotel-moville-wedding-photography-24_500.webp",
   "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-112_500.webp",
+  "MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Lusty_Beg_Wedding_Photography_Hayley%26Brian-For_print-449_500.webp",
+"mkb-weddings-rossharbour-resort-wedding-photography-704_500.webp",
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photography-brookhall-cottages-lisburn-wedding-photography--1_500.webp",
+"MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballymascanlon-house-hotel-dundalk-wedding-photography-11_500.webp",
+"mkb-weddings-rossharbour-resort-wedding-photography-363_500.webp",
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp",
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photography-la-mon-hotel-belfast-wedding-photography--394_500.webp",
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-558_500.webp",
 ];
 
 /**
