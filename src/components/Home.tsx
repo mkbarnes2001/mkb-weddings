@@ -178,8 +178,7 @@ export function Home() {
       creative portraits and punchy flash when the party kicks off – so your
       gallery feels honest, stylish, and full of energy.
     </p>
-  </div>
-</section>
+  
 
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left sm:text-center">
