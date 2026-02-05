@@ -132,6 +132,14 @@ const PINNED: Record<string, string[]> = {
 
 ],
 
+"landsdowne-hotel" :[
+
+"mkb-weddings-landsdowne-hotel-belfast-wedding-photographer-234_500.webp",
+"mkb-weddings-landsdowne-hotel-belfast-wedding-photographer-226_500.webp",
+"mkb-weddings-landsdowne-hotel-belfast-wedding-photographer-164_500.webp",
+
+],
+
 };
 
 // --- Ordering helpers (pinned + stable shuffle) -----------------------------
