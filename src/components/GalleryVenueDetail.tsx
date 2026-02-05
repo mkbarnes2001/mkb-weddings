@@ -123,7 +123,7 @@ const PINNED: Record<string, string[]> = {
 
 ],
 
-"belmont :[
+"belmont" :[
 
   "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-100-1_500.webp",
   "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-138_500.webp",
