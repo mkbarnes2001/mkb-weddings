@@ -166,7 +166,7 @@ export function Home() {
         {/* ---------- Intro Text Block ---------- */}
         <section className="pt-8 pb-28 px-6 md:px-20">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-serif mb-5">
+            <h2 className="text-2xl md:text-3xl font-serif mb-6">
               Natural wedding photography, with a bold edge
             </h2>
 
