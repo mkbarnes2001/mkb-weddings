@@ -33,6 +33,7 @@ const PINNED_VENUES: string[] = [
   "beech-hill"
 ];
 
+
 function slugify(s: string) {
   return s
     .trim()
