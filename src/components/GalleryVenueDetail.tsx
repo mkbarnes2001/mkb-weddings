@@ -114,7 +114,7 @@ const PINNED: Record<string, string[]> = {
 ],
 
 
-"rabbit-hotel-and-spa" :[
+"rabbit-hotel-and-spa" :[g
 
   "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography4_500.webp",
   "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-344_500.webp",
@@ -139,6 +139,16 @@ const PINNED: Record<string, string[]> = {
 "mkb-weddings-landsdowne-hotel-belfast-wedding-photographer-164_500.webp",
 
 ],
+
+"beech-hill" :[
+
+"mkb-weddings-northern-ireland-wedding-photographer-beech-hill-country-house-wedding-photography-9_500.webp",
+"MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-Beech-hill-country-house-derry-wedding-photography-FULL-RES-144_500.webp",
+"mkb-weddings-northern-ireland-wedding-photographer-beech-hill-country-house-wedding-photography-10_500.webp",
+"MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-beech-hill-country-house-derry-wedding-photography-Full-res-361_500.webp",
+
+],
+
 
 };
 
