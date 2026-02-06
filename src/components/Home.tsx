@@ -202,7 +202,7 @@ export function Home() {
                 <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">
                   Built for real life
                 </h3>
-                <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed">
+                <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed mb-6">
                   From prep to dancefloor, your gallery tells the full story, not just the “posed”
                   bits.
                 </p>
