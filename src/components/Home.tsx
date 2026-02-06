@@ -174,36 +174,36 @@ export function Home() {
               I photograph weddings across Northern Ireland and beyond with a focus on real moments,
               genuine connection, and a relaxed experience from start to finish. You’ll get natural,
               documentary coverage through the day, plus creative portraits and punchy flash when the
-              party kicks off – so your gallery feels honest, stylish, and full of energy.
+              party kicks off, so your gallery feels honest, stylish, and full of energy.
             </p>
 
             {/* Cards */}
             <div className="grid gap-8 max-w-4xl mx-auto text-center mt-6">
-              <div className="rounded-sm border border-primary/10 p-8">
+              <div className="rounded-sm border border-primary/10 p-8 pb-12">
                 <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">
                   Candid, not staged
                 </h3>
                 <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed">
-                  A documentary approach that lets you enjoy the day — I’ll guide when needed, never
+                  A documentary approach that lets you enjoy the day, I’ll guide when needed, never
                   take over.
                 </p>
               </div>
 
-              <div className="rounded-sm border border-primary/10 p-8">
+              <div className="rounded-sm border border-primary/10 p-8 pb-12">
                 <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">
                   Colour + contrast
                 </h3>
                 <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed">
-                  Clean edits with depth and punch — true-to-life skin tones and vibrant atmosphere.
+                  Clean edits with depth and punch, true-to-life skin tones and vibrant atmosphere.
                 </p>
               </div>
 
-              <div className="rounded-sm border border-primary/10 p-8">
+              <div className="rounded-sm border border-primary/10 p-8 pb-12">
                 <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">
                   Built for real life
                 </h3>
                 <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed">
-                  From prep to dancefloor, your gallery tells the full story — not just the “posed”
+                  From prep to dancefloor, your gallery tells the full story, not just the “posed”
                   bits.
                 </p>
               </div>
