@@ -30,7 +30,7 @@ const PINNED_VENUES: string[] = [
   "merchant",
   "rabbit hotel and spa",
   "leighinmohr house hotel",
-  "beech-hill",
+  "beech hill",
 ];
 
 
