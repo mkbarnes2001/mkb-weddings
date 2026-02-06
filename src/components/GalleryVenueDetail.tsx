@@ -531,6 +531,7 @@ export function GalleryVenueDetail() {
           ))}
         </div>
       </div>
+      
 
       {/* LIGHTBOX */}
       {lightboxOpen && images.length > 0 && (
