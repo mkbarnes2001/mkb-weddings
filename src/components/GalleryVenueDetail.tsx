@@ -511,7 +511,7 @@ export function GalleryVenueDetail() {
 
       {/* GRID (extra gap from description) */}
       <div className="max-w-7xl mx-auto px-6 pb-40">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-24">
           {images.map((img, idx) => (
             <button
               key={`${img.thumb}-${idx}`}
@@ -531,7 +531,7 @@ export function GalleryVenueDetail() {
           ))}
         </div>
       </div>
-      
+
 
       {/* LIGHTBOX */}
       {lightboxOpen && images.length > 0 && (
