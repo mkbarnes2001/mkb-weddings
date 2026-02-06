@@ -512,9 +512,9 @@ export function GalleryVenueDetail() {
       {/* GRID (extra gap from description) */}
 <div className="max-w-7xl mx-auto px-6 pb-40">
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    {images.map((img, idx) => {
-      const isLast = idx === images.length - 1;
-      const remainderLg = images.length % 3;
+    {images?.map((img, idx) => {
+      const remainderLg = (images?.length ?? 0) % 3;
+      const isLast = idx === (images?.length ?? 0) - 1;
       const shouldSpanLg = isLast && remainderLg === 1;
 
       return (
@@ -525,10 +525,9 @@ export function GalleryVenueDetail() {
             setLightboxIndex(idx);
             setLightboxOpen(true);
           }}
-          className={[
-            "aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left",
-            shouldSpanLg ? "lg:col-span-3" : "",
-          ].join(" ")}
+          className={`aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left ${
+            shouldSpanLg ? "lg:col-span-3" : ""
+          }`}
         >
           <ImageWithFallback
             src={img.thumb}
@@ -540,7 +539,6 @@ export function GalleryVenueDetail() {
     })}
   </div>
 </div>
-
 
       {/* LIGHTBOX */}
       {lightboxOpen && images.length > 0 && (
