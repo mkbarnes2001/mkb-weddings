@@ -511,26 +511,34 @@ export function GalleryVenueDetail() {
 
       {/* GRID (extra gap from description) */}
       <div className="max-w-7xl mx-auto px-6 pb-40">
-       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-24">
-          {images.map((img, idx) => (
-            <button
-              key={`${img.thumb}-${idx}`}
-              type="button"
-              onClick={() => {
-                setLightboxIndex(idx);
-                setLightboxOpen(true);
-              }}
-              className="aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left"
-            >
-              <ImageWithFallback
-                src={img.thumb}
-                alt={img.alt}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-            </button>
-          ))}
-        </div>
-      </div>
+       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  {images.map((img, idx) => {
+    const isLast = idx === images.length - 1;
+    const remainderLg = images.length % 3; // how many items in last row on lg
+    const shouldSpanLg = isLast && remainderLg === 1;
+
+    return (
+      <button
+        key={`${img.thumb}-${idx}`}
+        type="button"
+        onClick={() => {
+          setLightboxIndex(idx);
+          setLightboxOpen(true);
+        }}
+        className={[
+          "aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left",
+          shouldSpanLg ? "lg:col-span-3" : "",
+        ].join(" ")}
+      >
+        <ImageWithFallback
+          src={img.thumb}
+          alt={img.alt}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+      </button>
+    );
+  })}
+</div>
 
 
       {/* LIGHTBOX */}
