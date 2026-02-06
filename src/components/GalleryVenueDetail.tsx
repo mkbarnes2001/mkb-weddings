@@ -114,7 +114,7 @@ const PINNED: Record<string, string[]> = {
 ],
 
 
-"rabbit-hotel-and-spa" :[g
+"rabbit-hotel-and-spa" :[
 
   "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography4_500.webp",
   "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-344_500.webp",
