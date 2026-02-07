@@ -150,6 +150,122 @@ const PINNED: Record<string, string[]> = {
 ],
 
 
+"la-mon-hotel" :[
+
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photography-la-mon-hotel-belfast-wedding-photography--394_500.webp",
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photography-la-mon-hotel-belfast-wedding-photography--412_500.webp",
+
+],
+
+"larchfields" :[
+
+"mkb-weddings-northern-ireland-wedding-photographer-larchfields-estate-lisburn-wedding-photography-32_500.webp",
+"MKB_weddings_MKB_Photography_Ireland_Northen_ireland_Wedding_Photographer_Larchfield_estate_Wedding_Photography-376_500.webp",
+"MKB_weddings_MKB_Photography_Ireland_Northen_ireland_Wedding_Photographer_Larchfield_estate_Wedding_Photography-421_500.webp",
+
+],
+
+"lough-erne-resort" :[
+
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-280_500.webp",
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-277_500.webp",
+  "MKB-weddings-mkb-photography_Northern_Ireland_wedding_photographer_Lough_Erne_Resort_Eniskillen_Wedding_photography-Full%20res-204_500.webp",
+
+],
+
+"lusty-beg-island" :[
+
+"MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Lusty_Beg_Wedding_Photography_Hayley%26Brian-For_print-449_500.webp",
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-lusty-beg-island-eniskillen-wedding-photography-291_500.webp",
+
+
+],
+
+"millbrook-lodge" :[
+
+  "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-millbrook-lodge-ballynahinch-wedding-photography3_500.webp",
+  "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-millbrook-lodge-ballynahinch-wedding-photography5_500.webp",
+
+],
+
+"rocky-mountain-cottage" :[
+
+"mkb-weddings-mkb-photography-northern-ireland-wedding-photography-rocky-mountain-cottage-newry-wedding-photography-439_500.webp",
+
+],
+
+"roe-valley-resort" :[
+
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-419_500.webp",
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-422_500.webp",
+
+],
+
+"rossharbour-resort" :[
+
+  "mkb-weddings-rossharbour-resort-wedding-photography-363_500.webp",
+  "mkb-weddings-rossharbour-resort-wedding-photography-704_500.webp",
+  "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-harbour-enniskillen-wedding-photography_500.webp",
+  "mkb-weddings-rossharbour-resort-wedding-photography-390_500.webp",
+
+],
+
+"shandon-hotel" :[
+
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-shandon-hotel-marble-hill-donegal-wedding-photography-404_500.webp",
+
+],
+
+"cavan-crystal" :[
+
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-cavan-crystal-hotel-wedding-photography--7_500.webp",
+  "mkb-weddings-cavan-crystal-hotel-wedding-photographer-431_500.webp",
+
+],
+
+"clandeboye-lodge" :[
+
+  "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-383_500.webp",
+  "mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-108_500.webp",
+  
+],
+
+"corick-house" :[
+
+  "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-corrick-house-wedding-photography13_500.webp",
+  "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-corrick-house-wedding-photography12_500.webp",
+
+],
+
+"darver-castle" :[
+
+  "MKB-photography-Northern-Ireland-wedding-photographer-Irish-Wedding-photography-Darver-castle-wedding-photography-Full%20res-586_500.webp",
+  "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-315_500.webp",
+  "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-142_500.webp",
+
+],
+
+"dunadry" :[
+
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-dunadry-hotel-belfast-photography-373_500.webp",
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-dunadry-hotel-belfast-photography-530_500.webp",
+
+],
+
+"galgorm" :[
+
+  "MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Galgorm_Manor_wedding_photography_Galgorm_resort_wedding_photographer-Full-res-256_500.webp",
+  "MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-318_500.webp",
+  "MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-307_500.webp",
+
+],
+
+"four-seasons-monaghan" :[
+
+  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-four-seasons-hotel-monaghan-wedding-photography-334_500.webp",
+
+],
+
 };
 
 // --- Ordering helpers (pinned + stable shuffle) -----------------------------
