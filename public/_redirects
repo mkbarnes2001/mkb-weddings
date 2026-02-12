@@ -1,7 +1,9 @@
-/robots.txt   /robots.txt   200
-/sitemap.xml  /sitemap.xml  200
+# Always serve these as-is
+/robots.txt       /robots.txt       200
+/sitemap.xml      /sitemap.xml      200
+/site.webmanifest /site.webmanifest 200
 
-# Old WP numeric posts
+# ---- Old WordPress URLs ----
 /1939/killeavy-castle-wedding-photographer/  /gallery/venues  301
 /2251/shannen-daniel-at-orange-tree-house-greyabbey/  /gallery/venues  301
 /2854/killeavy-castle-wedding-photography/  /gallery/venues  301
@@ -10,27 +12,18 @@
 /2591/crover-house-cavan-wedding-photography/  /gallery/venues  301
 /tag/irishweddings/page/2/  /gallery/venues  301
 
-# Old blog
+# ---- Old blog URLs ----
 /blog*         /gallery/venues  301
 /wedding-blog/  /gallery/venues  301
 
-# Legacy
-/contact-me    /contact  301
-/contact-us    /contact  301
-/about-me      /about    301
-/wedding-photographers/ / 301
+# ---- Small legacy slugs ----
+/contact-me  /contact  301
+/contact-us  /contact  301
+/about-me    /about    301
+/wedding-photographers/  /  301
 
-# ---- Allow built assets + real files through ----
-/assets/*            /assets/:splat        200
-/*.css               /:splat              200
-/*.js                /:splat              200
-/*.png               /:splat              200
-/*.jpg               /:splat              200
-/*.jpeg              /:splat              200
-/*.webp              /:splat              200
-/*.svg               /:splat              200
-/*.ico               /:splat              200
-/site.webmanifest    /site.webmanifest    200
+# ---- CRITICAL: DO NOT LET SPA FALLBACK CATCH ASSETS ----
+/assets/*  /assets/:splat  200
 
-# ---- SPA fallback (LAST) ----
-/*   /   200
+# ---- SPA fallback MUST BE LAST ----
+/*  /  200
