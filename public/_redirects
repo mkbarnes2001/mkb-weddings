@@ -19,4 +19,18 @@
 /contact-us    /contact  301
 /about-me      /about    301
 /wedding-photographers/ / 301
-/*  /  200
+
+# ---- Allow built assets + real files through ----
+/assets/*            /assets/:splat        200
+/*.css               /:splat              200
+/*.js                /:splat              200
+/*.png               /:splat              200
+/*.jpg               /:splat              200
+/*.jpeg              /:splat              200
+/*.webp              /:splat              200
+/*.svg               /:splat              200
+/*.ico               /:splat              200
+/site.webmanifest    /site.webmanifest    200
+
+# ---- SPA fallback (LAST) ----
+/*                   /index.html          200
