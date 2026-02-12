@@ -1,6 +1,7 @@
 node_modules
 dist
-.env
-.DS_Store
 build
-.env.localpublic/gallery.test.csv
+.env
+.env.local
+.DS_Store
+public/gallery.test.csv
