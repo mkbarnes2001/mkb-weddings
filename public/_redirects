@@ -1,7 +1,7 @@
-/sitemap.xml  /sitemap.xml  200
 /robots.txt   /robots.txt   200
+/sitemap.xml  /sitemap.xml  200
 
-# ---- Old WordPress URLs (exact matches first) ----
+# Old WP numeric posts
 /1939/killeavy-castle-wedding-photographer/  /gallery/venues  301
 /2251/shannen-daniel-at-orange-tree-house-greyabbey/  /gallery/venues  301
 /2854/killeavy-castle-wedding-photography/  /gallery/venues  301
@@ -10,15 +10,13 @@
 /2591/crover-house-cavan-wedding-photography/  /gallery/venues  301
 /tag/irishweddings/page/2/  /gallery/venues  301
 
-# ---- Old blog URLs + query pagination junk ----
-/blog*  /gallery/venues  301
+# Old blog
+/blog*         /gallery/venues  301
 /wedding-blog/  /gallery/venues  301
 
-# ---- Small legacy slugs ----
-/contact-me  /contact  301
-/contact-us  /contact  301
-/about-me  /about  301
-/wedding-photographers/  /  301
-
-# ---- SPA fallback (MUST BE LAST) ----
-/*  /index.html  200
+# Legacy
+/contact-me    /contact  301
+/contact-us    /contact  301
+/about-me      /about    301
+/wedding-photographers/ / 301
+/*  /  200
