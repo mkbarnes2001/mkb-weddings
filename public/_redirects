@@ -27,7 +27,7 @@
 /about-me    /about    301
 /wedding-photographers/  /  301
 
-# ---- CRITICAL: DO NOT LET SPA FALLBACK CATCH ASSETS ----
+# ---- CRITICAL: DO NOT LET SPA FALLBACK CATCH ASSETS -----
 /assets/*  /assets/:splat  200
 
 # ---- SPA fallback MUST BE LAST ----
