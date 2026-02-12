@@ -3,6 +3,11 @@
 /sitemap.xml      /sitemap.xml      200
 /site.webmanifest /site.webmanifest 200
 
+# Data files (must not be rewritten to /)
+ /gallery.csv             /gallery.csv             200
+ /galleryvenuedesc.csv    /galleryvenuedesc.csv    200
+ /*.csv                   /:splat                  200
+
 # ---- Old WordPress URLs ----
 /1939/killeavy-castle-wedding-photographer/  /gallery/venues  301
 /2251/shannen-daniel-at-orange-tree-house-greyabbey/  /gallery/venues  301
