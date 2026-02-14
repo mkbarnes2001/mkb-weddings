@@ -3,15 +3,13 @@
       "version": "0.1.0",
       "private": true,
       "type": "module",
-
       "scripts": {
-      "dev": "vite",
-      "sync-gallery": "node -r dotenv/config scripts/sync-gallery.mjs",
-      "sitemap": "node scripts/generate-sitemap.mjs",
-      "build": "npm run sitemap && vite build",
-      "preview": "vite preview"
-  },
-
+            "dev": "vite",
+            "sync-gallery": "node -r dotenv/config scripts/sync-gallery.mjs",
+            "sitemap": "node scripts/generate-sitemap.mjs",
+            "build": "npm run sitemap && vite build",
+            "preview": "vite preview"
+      },
       "dependencies": {
             "@aws-sdk/client-s3": "^3.975.0",
             "@radix-ui/react-accordion": "^1.2.3",
@@ -68,6 +66,4 @@
             "@vitejs/plugin-react-swc": "^3.10.2",
             "vite": "6.3.5"
       }
-
-
 }
