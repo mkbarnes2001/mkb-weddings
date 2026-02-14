@@ -53,7 +53,6 @@ export function Home() {
           name="description"
           content="Relaxed, natural wedding photography across Northern Ireland, Donegal, Monaghan & Cavan. Candid moments, bold flash, and colourful images you’ll relive."
         />
-
         <Link
         rel="canonical"
         href="https://www.mkbweddings.co.uk/"
