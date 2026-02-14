@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.mkbweddings.com/sitemap.xml
+Sitemap: https://www.mkbweddings.co.uk/sitemap.xml
