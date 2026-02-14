@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const SITE = "https://www.mkbweddings.com";
+const SITE = "https://www.mkbweddings.co.uk";
 
 // CSV files (adjust if your filenames differ)
 const GALLERY_CSV_PATH = path.join(process.cwd(), "public", "gallery.csv");
