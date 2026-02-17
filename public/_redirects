@@ -3,10 +3,18 @@
 /sitemap.xml      /sitemap.xml      200
 /site.webmanifest /site.webmanifest 200
 
+# Favicons / PWA icons
+/favicon.ico                 /favicon.ico                 200
+/favicon-16x16.png           /favicon-16x16.png           200
+/favicon-32x32.png           /favicon-32x32.png           200
+/apple-touch-icon.png        /apple-touch-icon.png        200
+/android-chrome-192x192.png  /android-chrome-192x192.png  200
+/android-chrome-512x512.png  /android-chrome-512x512.png  200
+
 # Data files (must not be rewritten to /)
- /gallery.csv             /gallery.csv             200
- /galleryvenuedesc.csv    /galleryvenuedesc.csv    200
- /*.csv                   /:splat                  200
+/gallery.csv             /gallery.csv             200
+/galleryvenuedesc.csv    /galleryvenuedesc.csv    200
+/*.csv                   /:splat                  200
 
 # ---- Old WordPress URLs ----
 /1939/killeavy-castle-wedding-photographer/  /gallery/venues  301
