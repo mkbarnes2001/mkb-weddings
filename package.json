@@ -7,7 +7,7 @@
             "dev": "vite",
             "sync-gallery": "node -r dotenv/config scripts/sync-gallery.mjs",
             "sitemap": "node scripts/generate-sitemap.mjs",
-            "build": "npm run sitemap && vite build",
+            "build": "npm run sitemap && vite build && cp public/_redirects build/_redirects",
             "preview": "vite preview"
       },
       "dependencies": {
