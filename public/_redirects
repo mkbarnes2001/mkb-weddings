@@ -39,4 +39,4 @@
 /assets/*  /assets/:splat  200
 
 # ---- SPA fallback MUST BE LAST ----
-/*  /  200
+/*  /index.html  200
