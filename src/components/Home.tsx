@@ -45,17 +45,160 @@ export function Home() {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
+  const canonical = "https://www.mkbweddings.co.uk/";
+  const metaTitle = "Northern Ireland Wedding Photographer | MKB Weddings";
+  const metaDescription =
+    "Relaxed, natural wedding photography across Northern Ireland, Donegal, Monaghan & Cavan. Candid moments, bold flash, and colourful images you’ll relive.";
+
+  // Optional: replace with a real public URL image if you have one
+  // (recommended for sharing previews + schema image)
+  const ogImage = "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Killeavy%20castle/couple%20portraits/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp";
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://www.mkbweddings.co.uk/#website",
+        url: canonical,
+        name: "MKB Weddings",
+        inLanguage: "en-GB",
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://www.mkbweddings.co.uk/#webpage",
+        url: canonical,
+        name: metaTitle,
+        description: metaDescription,
+        isPartOf: { "@id": "https://www.mkbweddings.co.uk/#website" },
+        about: { "@id": "https://www.mkbweddings.co.uk/#business" },
+        inLanguage: "en-GB",
+      },
+      {
+        "@type": ["LocalBusiness", "PhotographyBusiness"],
+        "@id": "https://www.mkbweddings.co.uk/#business",
+        name: "MKB Weddings",
+        url: canonical,
+        image: ogImage,
+        logo: "https://www.mkbweddings.co.uk/android-chrome-512x512.png",
+        telephone: "+447546456077",
+        priceRange: "£££",
+        description:
+          "Wedding photographer based in Northern Ireland, covering Ireland and destinations. Relaxed documentary coverage, candid moments, and bold creative flash for the dancefloor.",
+        knowsAbout: [
+          "Northern Ireland wedding photography",
+          "Ireland wedding photography",
+          "Documentary wedding photography",
+          "Candid wedding photography",
+          "Creative flash wedding photography",
+          "Wedding venue photography",
+        ],
+        areaServed: [
+          { "@type": "AdministrativeArea", name: "Northern Ireland" },
+          { "@type": "AdministrativeArea", name: "County Donegal" },
+          { "@type": "AdministrativeArea", name: "County Monaghan" },
+          { "@type": "AdministrativeArea", name: "County Cavan" },
+          { "@type": "Country", name: "Ireland" },
+          { "@type": "Country", name: "United Kingdom" },
+        ],
+        address: {
+          "@type": "PostalAddress",
+          addressCountry: "GB",
+          addressRegion: "Northern Ireland",
+          // Optional (stronger local signal) if you're happy to add it:
+          // addressLocality: "Belfast",
+        },
+        sameAs: [
+          "https://www.instagram.com/mkbweddings",
+          "https://www.facebook.com/mkbweddings",
+        ],
+        makesOffer: [
+          {
+            "@type": "Offer",
+            name: "Wedding Photography Packages",
+            url: "https://www.mkbweddings.co.uk/packages",
+            priceCurrency: "GBP",
+            availability: "https://schema.org/InStock",
+          },
+        ],
+        hasOfferCatalog: {
+          "@type": "OfferCatalog",
+          name: "Wedding Photography Services",
+          itemListElement: [
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "Wedding Photography (Full Day)",
+                serviceType: "Wedding Photography",
+                areaServed: ["Northern Ireland", "Ireland"],
+              },
+            },
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "Elopement & Intimate Wedding Photography",
+                serviceType: "Elopement Photography",
+                areaServed: ["Northern Ireland", "Ireland"],
+              },
+            },
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "Creative Flash Dancefloor Photography",
+                serviceType: "Wedding Reception Photography",
+                areaServed: ["Northern Ireland", "Ireland"],
+              },
+            },
+          ],
+        },
+      },
+      {
+        "@type": "Person",
+        "@id": "https://www.mkbweddings.co.uk/#photographer",
+        name: "Mark Barnes",
+        jobTitle: "Wedding Photographer",
+        url: canonical,
+        worksFor: { "@id": "https://www.mkbweddings.co.uk/#business" },
+        sameAs: [
+          "https://www.instagram.com/mkbweddings",
+          "https://www.facebook.com/mkbweddings",
+        ],
+        knowsAbout: [
+          "Northern Ireland wedding photography",
+          "Ireland wedding photography",
+          "Documentary wedding photography",
+          "Creative flash wedding photography",
+        ],
+      },
+    ],
+  };
+
   return (
     <>
-   <Helmet>
-  <title>Northern Ireland Wedding Photographer | MKB Weddings</title>
-  <meta
-    name="description"
-    content="Relaxed, natural wedding photography across Northern Ireland, Donegal, Monaghan & Cavan. Candid moments, bold flash, and colourful images you’ll relive."
-  />
-  <link rel="canonical" href="https://www.mkbweddings.co.uk/" />
-  <meta property="og:url" content="https://www.mkbweddings.co.uk/" />
-  </Helmet>
+      <Helmet>
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDescription} />
+
+        <link rel="canonical" href={canonical} />
+        <meta property="og:url" content={canonical} />
+
+        {/* Optional but recommended social tags */}
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={ogImage} />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={metaTitle} />
+        <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:image" content={ogImage} />
+
+        {/* Structured Data (Homepage only) */}
+        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+      </Helmet>
 
       <div className="-mt-20">
         {/* ---------- Hero Carousel ---------- */}
@@ -125,7 +268,10 @@ export function Home() {
         {/* ---------- Gallery / Stories ---------- */}
         <section className="py-20 px-6 md:px-20 max-w-[1440px] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Link to="/gallery" className="group relative overflow-hidden aspect-[4/5] rounded-sm">
+            <Link
+              to="/gallery"
+              className="group relative overflow-hidden aspect-[4/5] rounded-sm"
+            >
               <ImageWithFallback
                 src={heroImage4}
                 alt="Browse wedding photography gallery"
@@ -133,7 +279,9 @@ export function Home() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-10">
                 <Camera size={40} className="text-white mb-4" />
-                <h2 className="text-white text-2xl md:text-2xl font-serif mb-4">Gallery</h2>
+                <h2 className="text-white text-2xl md:text-2xl font-serif mb-4">
+                  Gallery
+                </h2>
                 <p className="text-white/90 mb-6">
                   Browse our portfolio by venue, style and moments from real weddings.
                 </p>
@@ -143,7 +291,10 @@ export function Home() {
               </div>
             </Link>
 
-            <Link to="/blog" className="group relative overflow-hidden aspect-[4/5] rounded-sm">
+            <Link
+              to="/blog"
+              className="group relative overflow-hidden aspect-[4/5] rounded-sm"
+            >
               <ImageWithFallback
                 src={heroImage3}
                 alt="Wedding stories and reviews"
@@ -205,8 +356,7 @@ export function Home() {
                   Built for real life
                 </h3>
                 <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed mb-6">
-                  From prep to dancefloor, your gallery tells the full story, not just the “posed”
-                  bits.
+                  From prep to dancefloor, your gallery tells the full story, not just the “posed” bits.
                 </p>
               </div>
             </div>
