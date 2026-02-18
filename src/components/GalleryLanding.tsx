@@ -1,42 +1,62 @@
-import { Link } from 'react-router-dom';
-import { ImageWithFallback } from './figma/ImageWithFallback';
-import { ChevronRight } from 'lucide-react';
-import venueImage from 'figma:asset/4b4f26e7cf88fc98e5d685335cd0e537ad22acf3.png';
-import creativeFlashImage from 'figma:asset/4e80a09ae14c9e2aaefa75a7ed64281f0bbc855b.png';
-import momentsImage from 'figma:asset/f2c5f140202f18a23299f273bccbba6885f5bb2a.png';
-import storiesImage from 'figma:asset/a4d9c41d478a42542f5eae424fde67c33f39b713.png';
+import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { ChevronRight } from "lucide-react";
+
+import venueImage from "figma:asset/4b4f26e7cf88fc98e5d685335cd0e537ad22acf3.png";
+import creativeFlashImage from "figma:asset/4e80a09ae14c9e2aaefa75a7ed64281f0bbc855b.png";
+import momentsImage from "figma:asset/f2c5f140202f18a23299f273bccbba6885f5bb2a.png";
+import storiesImage from "figma:asset/a4d9c41d478a42542f5eae424fde67c33f39b713.png";
 
 export function GalleryLanding() {
+  const canonical = "https://www.mkbweddings.co.uk/gallery";
+  const title = "Wedding Photography Gallery | MKB Weddings";
+  const description =
+    "Explore MKB Weddings’ portfolio by venue, moments, creative flash, and real wedding stories across Northern Ireland and beyond.";
+
   const mainTiles = [
-    
     {
-      title: 'Wedding Moments',
-      link: '/gallery/moments',
+      title: "Wedding Moments",
+      link: "/gallery/moments",
       image: momentsImage,
-      description: 'Explore wedding day highlights',
+      description: "Explore wedding day highlights",
     },
     {
-      title: 'Creative Flash',
-      link: '/gallery/creative-flash',
+      title: "Creative Flash",
+      link: "/gallery/creative-flash",
       image: creativeFlashImage,
-      description: 'Bold, dramatic flash photography',
+      description: "Bold, dramatic flash photography",
     },
     {
-      title: 'Stories & Reviews',
-      link: '/blog',
+      title: "Stories & Reviews",
+      link: "/blog",
       image: storiesImage,
-      description: 'Real wedding love stories',
+      description: "Real wedding love stories",
     },
     {
-      title: 'Venues',
-      link: '/gallery/venues',
+      title: "Venues",
+      link: "/gallery/venues",
       image: venueImage,
-      description: 'Browse weddings by location',
+      description: "Browse weddings by location",
     },
   ];
 
   return (
     <div className="min-h-screen bg-white">
+      <Helmet>
+        <title>{title}</title>
+        <meta name="description" content={description} />
+
+        <link rel="canonical" href={canonical} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+
+        {/* Optional: you can set a fixed OG image if you have one hosted */}
+        {/* <meta property="og:image" content="https://www.mkbweddings.co.uk/og-gallery.jpg" /> */}
+        <meta property="og:type" content="website" />
+      </Helmet>
+
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
         {/* Main Navigation Tiles */}
