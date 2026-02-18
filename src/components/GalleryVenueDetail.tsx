@@ -468,39 +468,46 @@ export function GalleryVenueDetail() {
       </div>
 
       {/* BREADCRUMBS (moved BELOW hero) */}
-      <div className="max-w-7xl mx-auto px-6 pt-6">
-        <nav aria-label="Breadcrumb">
-          <ol className="flex flex-wrap items-center gap-2 text-neutral-600 text-sm">
-            <li>
-              <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
-                Home
-              </Link>
-            </li>
-            <li className="opacity-70">
-              <ChevronRight className="w-4 h-4" />
-            </li>
-            <li>
-              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
-                Gallery
-              </Link>
-            </li>
-            <li className="opacity-70">
-              <ChevronRight className="w-4 h-4" />
-            </li>
-            <li>
-              <Link
-                to="/gallery/venues"
-                className="hover:text-neutral-900 underline underline-offset-4"
-              >
-                Venues
-              </Link>
-            </li>
-            <li className="opacity-70">
-              <ChevronRight className="w-4 h-4" />
-            </li>
-            <li className="text-neutral-900">{name}</li>
-          </ol>
-        </nav>
+<nav aria-label="Breadcrumb" className="mb-8">
+  <ol className="flex flex-wrap items-center justify-center gap-2 text-sm text-neutral-600 text-center">
+    <li>
+      <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
+        Home
+      </Link>
+    </li>
+
+    <li className="opacity-50">
+      <ChevronRight className="w-4 h-4" />
+    </li>
+
+    <li>
+      <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
+        Gallery
+      </Link>
+    </li>
+
+    <li className="opacity-50">
+      <ChevronRight className="w-4 h-4" />
+    </li>
+
+    <li>
+      <Link
+        to="/gallery/venues"
+        className="hover:text-neutral-900 underline underline-offset-4"
+      >
+        Venues
+      </Link>
+    </li>
+
+    <li className="opacity-50">
+      <ChevronRight className="w-4 h-4" />
+    </li>
+
+    <li className="text-neutral-900 font-medium">
+      {name}
+    </li>
+  </ol>
+</nav>
       </div>
 
       {/* VENUE INFO */}
