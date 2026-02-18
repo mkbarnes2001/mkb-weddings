@@ -1,6 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
+import { BrowserRouter as Router, Routes, Route, Outlet, useLocation } from 'react-router-dom';
 import { Helmet } from "react-helmet-async";
+import { useEffect } from 'react';
+
 import { Home } from './components/Home';
 import { Galleries } from './components/Galleries';
 import { Categories } from './components/Categories';
@@ -22,14 +23,10 @@ import { GalleryFeaturedStories } from './components/GalleryFeaturedStories';
 import { GalleryStoryDetail } from './components/GalleryStoryDetail';
 import { GalleryCreativeFlash } from './components/GalleryCreativeFlash';
 
-import  WeddingPackages from './components/WeddingPackages';
+import WeddingPackages from './components/WeddingPackages';
 import { ThankYou } from './components/ThankYou';
 
-import { Outlet } from 'react-router-dom';
-
-import { useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
-
+/* ---------------- Google Analytics Listener ---------------- */
 function GoogleAnalyticsListener() {
   const location = useLocation();
 
@@ -44,7 +41,7 @@ function GoogleAnalyticsListener() {
   return null;
 }
 
-
+/* ---------------- Global Canonical ---------------- */
 function CanonicalHelmet() {
   const { pathname } = useLocation();
   const ORIGIN = "https://www.mkbweddings.co.uk";
@@ -59,17 +56,25 @@ function CanonicalHelmet() {
   return (
     <Helmet>
       <link rel="canonical" href={canonical} />
-      {/* Optional but helpful */}
       <meta property="og:url" content={canonical} />
     </Helmet>
   );
 }
 
+/* ---------------- Admin Meta (noindex) ---------------- */
+function AdminMeta() {
+  return (
+    <Helmet>
+      <meta name="robots" content="noindex,nofollow" />
+    </Helmet>
+  );
+}
 
-/* ---------- Layout with Navigation + Footer ---------- */
+/* ---------------- Layout with Navigation + Footer ---------------- */
 function SiteLayout() {
   return (
     <>
+      <CanonicalHelmet />
       <Navigation />
       <Outlet />
       <Footer />
@@ -81,24 +86,30 @@ function SiteLayout() {
 export default function App() {
   return (
     <Router>
+      <GoogleAnalyticsListener />
 
-      <Helmet>
-        <title>Northern Ireland Wedding Photographer | MKB Weddings</title>
-        <meta
-          name="description"
-          content="Natural, relaxed wedding photography across Northern Ireland, Donegal, Monaghan & Cavan."
-        />
-      </Helmet>
-      
-<CanonicalHelmet />
-
-        <GoogleAnalyticsListener />
       <div className="min-h-screen bg-white">
         <Routes>
 
           {/* -------- Admin routes (no nav / footer) -------- */}
-          <Route path="/admin" element={<BlogAdmin />} />
-          <Route path="/gallery-admin" element={<GalleryAdmin />} />
+          <Route
+            path="/admin"
+            element={
+              <>
+                <AdminMeta />
+                <BlogAdmin />
+              </>
+            }
+          />
+          <Route
+            path="/gallery-admin"
+            element={
+              <>
+                <AdminMeta />
+                <GalleryAdmin />
+              </>
+            }
+          />
 
           {/* -------- Public site routes -------- */}
           <Route element={<SiteLayout />}>
