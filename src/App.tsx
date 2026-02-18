@@ -1,30 +1,30 @@
-import { BrowserRouter as Router, Routes, Route, Outlet, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
-import { Home } from './components/Home';
-import { Galleries } from './components/Galleries';
-import { Categories } from './components/Categories';
-import { Blog } from './components/Blog';
-import { BlogAdmin } from './components/BlogAdmin';
-import { GalleryAdmin } from './components/GalleryAdmin';
-import { Contact } from './components/Contact';
-import { Navigation } from './components/Navigation';
-import { Footer } from './components/Footer';
-import { ScrollToTop } from './components/ScrollToTop';
+import { Home } from "./components/Home";
+import { Galleries } from "./components/Galleries";
+import { Categories } from "./components/Categories";
+import { Blog } from "./components/Blog";
+import { BlogAdmin } from "./components/BlogAdmin";
+import { GalleryAdmin } from "./components/GalleryAdmin";
+import { Contact } from "./components/Contact";
+import { Navigation } from "./components/Navigation";
+import { Footer } from "./components/Footer";
+import { ScrollToTop } from "./components/ScrollToTop";
 
-import { GalleryLanding } from './components/GalleryLanding';
-import { GalleryByVenue } from './components/GalleryByVenue';
-import { GalleryVenueDetail } from './components/GalleryVenueDetail';
-import { GalleryByMoments } from './components/GalleryByMoments';
-import { GalleryMomentDetail } from './components/GalleryMomentDetail';
-import { GalleryByStyle } from './components/GalleryByStyle';
-import { GalleryFeaturedStories } from './components/GalleryFeaturedStories';
-import { GalleryStoryDetail } from './components/GalleryStoryDetail';
-import { GalleryCreativeFlash } from './components/GalleryCreativeFlash';
+import { GalleryLanding } from "./components/GalleryLanding";
+import { GalleryByVenue } from "./components/GalleryByVenue";
+import { GalleryVenueDetail } from "./components/GalleryVenueDetail";
+import { GalleryByMoments } from "./components/GalleryByMoments";
+import { GalleryMomentDetail } from "./components/GalleryMomentDetail";
+import { GalleryByStyle } from "./components/GalleryByStyle";
+import { GalleryFeaturedStories } from "./components/GalleryFeaturedStories";
+import { GalleryStoryDetail } from "./components/GalleryStoryDetail";
+import { GalleryCreativeFlash } from "./components/GalleryCreativeFlash";
 
-import WeddingPackages from './components/WeddingPackages';
-import { ThankYou } from './components/ThankYou';
+import WeddingPackages from "./components/WeddingPackages";
+import { ThankYou } from "./components/ThankYou";
 
 /* ---------------- Google Analytics Listener ---------------- */
 function GoogleAnalyticsListener() {
@@ -32,33 +32,13 @@ function GoogleAnalyticsListener() {
 
   useEffect(() => {
     if (window.gtag) {
-      window.gtag('config', 'G-XY6TDDLH1Q', {
+      window.gtag("config", "G-XY6TDDLH1Q", {
         page_path: location.pathname,
       });
     }
   }, [location]);
 
   return null;
-}
-
-/* ---------------- Global Canonical ---------------- */
-function CanonicalHelmet() {
-  const { pathname } = useLocation();
-  const ORIGIN = "https://www.mkbweddings.co.uk";
-
-  const normalize = (p: string) => {
-    if (p === "/") return "/";
-    return p.endsWith("/") ? p.slice(0, -1) : p;
-  };
-
-  const canonical = ORIGIN + normalize(pathname);
-
-  return (
-    <Helmet>
-      <link rel="canonical" href={canonical} />
-      <meta property="og:url" content={canonical} />
-    </Helmet>
-  );
 }
 
 /* ---------------- Admin Meta (noindex) ---------------- */
@@ -70,11 +50,10 @@ function AdminMeta() {
   );
 }
 
-/* ---------------- Layout with Navigation + Footer ---------------- */
+/* ---------- Layout with Navigation + Footer ---------- */
 function SiteLayout() {
   return (
     <>
-      <CanonicalHelmet />
       <Navigation />
       <Outlet />
       <Footer />
@@ -90,7 +69,6 @@ export default function App() {
 
       <div className="min-h-screen bg-white">
         <Routes>
-
           {/* -------- Admin routes (no nav / footer) -------- */}
           <Route
             path="/admin"
@@ -135,7 +113,6 @@ export default function App() {
             <Route path="/gallery/best-of/:categoryId" element={<GalleryVenueDetail />} />
             <Route path="/gallery/creative-flash" element={<GalleryCreativeFlash />} />
           </Route>
-
         </Routes>
       </div>
     </Router>
