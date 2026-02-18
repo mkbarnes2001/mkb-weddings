@@ -27,13 +27,182 @@ const THUMB_BASE =
 const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
-// Primary site origin (www + https)
+// Primary origin (www + https)
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 
 // --- PINNED IMAGES (PER VENUE) ---------------------------------------------
+// Use the _500.webp filenames exactly as in CSV.
+// Keys must match the venueId slug in your URL (slugify(venue)).
 const PINNED: Record<string, string[]> = {
-  // ... keep your existing pinned map exactly as-is ...
-  // (unchanged — omitted here for brevity)
+  "orange-tree-house": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-411_500.webp",
+    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-411_500.webp",
+    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-493_500.webp",
+    "mkb-weddings-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-1.jpg_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-618_500.webp",
+    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-56_500.webp",
+    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-357_500.webp",
+    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_500.webp",
+  ],
+
+  "ballyscullion-park": [
+    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ballyscullion-park-belaghy-wedding-photography2_500.webp",
+    "mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-447_500.webp",
+    "mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-460_500.webp",
+    "mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-179_500.webp",
+    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ballyscullion-park-belaghy-wedding-photography8_500.webp",
+    "mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-413_500.webp",
+  ],
+
+  "killeavy-castle": [
+    "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-160_500.webp",
+    "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_killeavy-castle_Wedding_Photography-462_500.webp",
+    "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-116_500.webp",
+    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography6_500.webp",
+    "MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_500.webp",
+    "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_killeavy-castle_Wedding_Photography-609_500.webp",
+  ],
+
+  "slieve-donard-hotel": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp",
+    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-donard-hotel-newcastle-wedding-photography2_500.webp",
+    "MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-slieve-donard-hotel-newcastle-wedding-photography-191_500.webp",
+    "MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-slieve-donard-hotel-newcastle-wedding-photography-367_500.webp",
+  ],
+
+  "tullyglass-hotel": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-557_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-521_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-hotel-ballymena-wedding-photography-163_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-525_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-596_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-512_500.webp",
+  ],
+
+  "wool-tower": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-417_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-110_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-224_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-412_500.webp",
+  ],
+
+  "leighinmohr-house-hotel": [
+    "MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Leighinmohr_House_Hotel_Wedding_Photography-Full%20Res-361_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-leighinmohr-house-hotel-ballymena-wedding-photography--355_500.webp",
+    "mkb-weddings-mkb-Photography-northern-ireland-wedding-photographer-LEIGHINMOHR-hotel-ballymena-wedding-photography-10_500.webp",
+    "mkb-weddings-northern-ireland-wedding-photographer-leighinmohr-house-ballymena-wedding-photography-1_500.webp",
+  ],
+
+  "rabbit-hotel-and-spa": [
+    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography4_500.webp",
+    "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-344_500.webp",
+    "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-406_500.webp",
+    "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-511_500.webp",
+  ],
+
+  "belmont": [
+    "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-100-1_500.webp",
+    "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-138_500.webp",
+    "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-118_500.webp",
+    "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-259_500.webp",
+  ],
+
+  "landsdowne-hotel": [
+    "mkb-weddings-landsdowne-hotel-belfast-wedding-photographer-234_500.webp",
+    "mkb-weddings-landsdowne-hotel-belfast-wedding-photographer-226_500.webp",
+    "mkb-weddings-landsdowne-hotel-belfast-wedding-photographer-164_500.webp",
+  ],
+
+  "beech-hill": [
+    "mkb-weddings-northern-ireland-wedding-photographer-beech-hill-country-house-wedding-photography-9_500.webp",
+    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-Beech-hill-country-house-derry-wedding-photography-FULL-RES-144_500.webp",
+    "mkb-weddings-northern-ireland-wedding-photographer-beech-hill-country-house-wedding-photography-10_500.webp",
+    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-beech-hill-country-house-derry-wedding-photography-Full-res-361_500.webp",
+  ],
+
+  "la-mon-hotel": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-la-mon-hotel-belfast-wedding-photography--394_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-la-mon-hotel-belfast-wedding-photography--412_500.webp",
+  ],
+
+  "larchfields": [
+    "mkb-weddings-northern-ireland-wedding-photographer-larchfields-estate-lisburn-wedding-photography-32_500.webp",
+    "MKB_weddings_MKB_Photography_Ireland_Northen_ireland_Wedding_Photographer_Larchfield_estate_Wedding_Photography-376_500.webp",
+    "MKB_weddings_MKB_Photography_Ireland_Northen_ireland_Wedding_Photographer_Larchfield_estate_Wedding_Photography-421_500.webp",
+  ],
+
+  "lough-erne-resort": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-280_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-277_500.webp",
+    "MKB-weddings-mkb-photography_Northern_Ireland_wedding_photographer_Lough_Erne_Resort_Eniskillen_Wedding_photography-Full%20res-204_500.webp",
+  ],
+
+  "lusty-beg-island": [
+    "MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Lusty_Beg_Wedding_Photography_Hayley%26Brian-For_print-449_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-lusty-beg-island-eniskillen-wedding-photography-291_500.webp",
+  ],
+
+  "millbrook-lodge": [
+    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-millbrook-lodge-ballynahinch-wedding-photography3_500.webp",
+    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-millbrook-lodge-ballynahinch-wedding-photography5_500.webp",
+  ],
+
+  "rocky-mountain-cottage": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-rocky-mountain-cottage-newry-wedding-photography-439_500.webp",
+  ],
+
+  "roe-valley-resort": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-419_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-422_500.webp",
+  ],
+
+  "rossharbour-resort": [
+    "mkb-weddings-rossharbour-resort-wedding-photography-363_500.webp",
+    "mkb-weddings-rossharbour-resort-wedding-photography-704_500.webp",
+    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-harbour-enniskillen-wedding-photography_500.webp",
+    "mkb-weddings-rossharbour-resort-wedding-photography-390_500.webp",
+  ],
+
+  "shandon-hotel": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-shandon-hotel-marble-hill-donegal-wedding-photography-404_500.webp",
+  ],
+
+  "cavan-crystal": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-cavan-crystal-hotel-wedding-photography--7_500.webp",
+    "mkb-weddings-cavan-crystal-hotel-wedding-photographer-431_500.webp",
+  ],
+
+  "clandeboye-lodge": [
+    "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-383_500.webp",
+    "mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-108_500.webp",
+  ],
+
+  "corick-house": [
+    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-corrick-house-wedding-photography13_500.webp",
+    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-corrick-house-wedding-photography12_500.webp",
+  ],
+
+  "darver-castle": [
+    "MKB-photography-Northern-Ireland-wedding-photographer-Irish-Wedding-photography-Darver-castle-wedding-photography-Full%20res-586_500.webp",
+    "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-315_500.webp",
+    "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-142_500.webp",
+  ],
+
+  "dunadry": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-dunadry-hotel-belfast-photography-373_500.webp",
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-dunadry-hotel-belfast-photography-530_500.webp",
+  ],
+
+  "galgorm": [
+    "MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Galgorm_Manor_wedding_photography_Galgorm_resort_wedding_photographer-Full-res-256_500.webp",
+    "MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-318_500.webp",
+    "MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-307_500.webp",
+  ],
+
+  "four-seasons-monaghan": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-four-seasons-hotel-monaghan-wedding-photography-334_500.webp",
+  ],
 };
 
 // --- Ordering helpers (pinned + stable shuffle) -----------------------------
@@ -64,10 +233,8 @@ function stableShuffle<T>(arr: T[], seed: string) {
   return out;
 }
 
-function applyPinnedOrder(rows: GalleryRow[], venueSlug: string, seed: string) {
-  const pinnedFilenames = (PINNED[(venueSlug || "").toLowerCase()] || []).filter(
-    Boolean
-  );
+function applyPinnedOrder(rows: GalleryRow[], venueSlug: string, seed: string): GalleryRow[] {
+  const pinnedFilenames = (PINNED[(venueSlug || "").toLowerCase()] || []).filter(Boolean);
   if (!pinnedFilenames.length) return stableShuffle(rows, seed);
 
   const pinnedSet = new Set(pinnedFilenames);
@@ -98,46 +265,33 @@ function encSegment(s: string) {
   return encodeURIComponent(s);
 }
 
-function cleanText(s: string) {
-  // Trim + remove BOM + collapse whitespace + remove stray wrapping quotes
-  const t = (s || "").replace(/^\uFEFF/, "").trim().replace(/\s+/g, " ");
-  // Strip wrapping quotes repeatedly (handles weird """" cases)
-  return t.replace(/^"+|"+$/g, "");
+function cleanCsvValue(v: string) {
+  // trims + removes weird repeated quote wrapping like """"Greyabbey""""
+  const t = (v || "").trim();
+  return t.replace(/^"+|"+$/g, "").replace(/""+/g, '"').replace(/"/g, "").trim();
 }
 
 function parseCsvLines(csvText: string): string[][] {
-  const lines = csvText.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  const lines = csvText.split(/\r?\n/).filter(Boolean);
 
   const parseLine = (line: string) => {
     const out: string[] = [];
     let cur = "";
     let inQuotes = false;
 
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-
+    for (const ch of line) {
       if (ch === '"') {
-        // Handle escaped quote inside quoted field: ""
-        const next = line[i + 1];
-        if (inQuotes && next === '"') {
-          cur += '"';
-          i++; // skip the escaped quote
-          continue;
-        }
         inQuotes = !inQuotes;
         continue;
       }
-
       if (ch === "," && !inQuotes) {
-        out.push(cleanText(cur));
+        out.push(cur.trim());
         cur = "";
-        continue;
+      } else {
+        cur += ch;
       }
-
-      cur += ch;
     }
-
-    out.push(cleanText(cur));
+    out.push(cur.trim());
     return out;
   };
 
@@ -148,7 +302,7 @@ function parseGalleryCsv(csvText: string): GalleryRow[] {
   const rows = parseCsvLines(csvText);
   if (rows.length < 2) return [];
 
-  const header = rows[0].map((h) => cleanText(h).toLowerCase());
+  const header = rows[0].map((h) => h.toLowerCase());
   const venueIdx = header.indexOf("venue");
   const categoryIdx = header.indexOf("category");
   const filenameIdx = header.indexOf("filename");
@@ -159,10 +313,10 @@ function parseGalleryCsv(csvText: string): GalleryRow[] {
   return rows
     .slice(1)
     .map((cols) => ({
-      venue: cleanText(cols[venueIdx] || ""),
-      category: cleanText(cols[categoryIdx] || ""),
-      filename: cleanText(cols[filenameIdx] || ""),
-      tags: tagsIdx >= 0 ? cleanText(cols[tagsIdx] || "") : undefined,
+      venue: cleanCsvValue(cols[venueIdx] || ""),
+      category: cleanCsvValue(cols[categoryIdx] || ""),
+      filename: cleanCsvValue(cols[filenameIdx] || ""),
+      tags: tagsIdx >= 0 ? cleanCsvValue(cols[tagsIdx] || "") : undefined,
     }))
     .filter((r) => r.venue && r.category && r.filename);
 }
@@ -171,7 +325,7 @@ function parseVenueMetaCsv(csvText: string): VenueMetaRow[] {
   const rows = parseCsvLines(csvText);
   if (rows.length < 2) return [];
 
-  const header = rows[0].map((h) => cleanText(h).toLowerCase());
+  const header = rows[0].map((h) => h.toLowerCase());
   const venueIdx = header.indexOf("venue");
   const nameIdx = header.indexOf("venue-name");
   const locIdx = header.indexOf("venue-location");
@@ -183,26 +337,26 @@ function parseVenueMetaCsv(csvText: string): VenueMetaRow[] {
   return rows
     .slice(1)
     .map((cols) => ({
-      venue: cleanText(cols[venueIdx] || ""),
-      venueName: nameIdx >= 0 ? cleanText(cols[nameIdx] || "") : "",
-      venueLocation: locIdx >= 0 ? cleanText(cols[locIdx] || "") : "",
-      venueWebsite: webIdx >= 0 ? cleanText(cols[webIdx] || "") : "",
-      venueDescription: descIdx >= 0 ? cleanText(cols[descIdx] || "") : "",
+      venue: cleanCsvValue(cols[venueIdx] || ""),
+      venueName: nameIdx >= 0 ? cleanCsvValue(cols[nameIdx] || "") : "",
+      venueLocation: locIdx >= 0 ? cleanCsvValue(cols[locIdx] || "") : "",
+      venueWebsite: webIdx >= 0 ? cleanCsvValue(cols[webIdx] || "") : "",
+      venueDescription: descIdx >= 0 ? cleanCsvValue(cols[descIdx] || "") : "",
     }))
     .filter((v) => v.venue);
 }
 
 // --- URL builders ------------------------------------------------------------
 function thumbUrl(r: GalleryRow) {
-  return `${THUMB_BASE}/${encSegment(r.venue)}/${encSegment(
-    r.category
-  )}/${encodeURIComponent(r.filename)}`;
+  return `${THUMB_BASE}/${encSegment(r.venue)}/${encSegment(r.category)}/${encodeURIComponent(
+    r.filename
+  )}`;
 }
 
 function fullUrlFromThumb(r: GalleryRow) {
-  return `${FULL_BASE}/${encSegment(r.venue)}/${encSegment(
-    r.category
-  )}/${encodeURIComponent(r.filename.replace(/_500\.webp$/i, "_2000.webp"))}`;
+  return `${FULL_BASE}/${encSegment(r.venue)}/${encSegment(r.category)}/${encodeURIComponent(
+    r.filename.replace(/_500\.webp$/i, "_2000.webp")
+  )}`;
 }
 
 function getFallbackVenueDescription(venueName: string, location?: string) {
@@ -218,9 +372,7 @@ export function GalleryVenueDetail() {
   }, [venueId]);
 
   const [galleryRows, setGalleryRows] = useState<GalleryRow[]>([]);
-  const [venueMetaMap, setVenueMetaMap] = useState<Record<string, VenueMetaRow>>(
-    {}
-  );
+  const [venueMetaMap, setVenueMetaMap] = useState<Record<string, VenueMetaRow>>({});
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -250,7 +402,7 @@ export function GalleryVenueDetail() {
           if (!cancelled) setVenueMetaMap(map);
         }
       } catch {
-        // silent fail
+        // silent
       }
     })();
 
@@ -264,24 +416,26 @@ export function GalleryVenueDetail() {
     return galleryRows.filter((r) => slugify(r.venue) === venueId);
   }, [galleryRows, venueId]);
 
-  const rawVenue = cleanText(venueRowsRaw[0]?.venue || "");
+  const rawVenue = venueRowsRaw[0]?.venue || "";
   const meta = rawVenue ? venueMetaMap[rawVenue] : undefined;
 
-  // --- FIX: choose a sensible venue name ---
-  // Prefer venue-name, else use the gallery venue before comma (avoids "Venue, Town" becoming the name)
-  const fallbackName = rawVenue ? cleanText(rawVenue.split(",")[0]) : "";
-  const name = cleanText(meta?.venueName || "") || fallbackName || rawVenue;
+  // Fix: avoid using venueLocation as the "name" if CSV columns got mixed / duplicated
+  const possibleName = (meta?.venueName || "").trim();
+  const possibleLoc = (meta?.venueLocation || "").trim();
+  const name =
+    possibleName && possibleName.toLowerCase() !== possibleLoc.toLowerCase()
+      ? possibleName
+      : rawVenue;
 
-  const location = cleanText(meta?.venueLocation || "");
-  const website = cleanText(meta?.venueWebsite || "");
+  const location = possibleLoc || "";
+  const website = (meta?.venueWebsite || "").trim();
+  const descriptionFromCsv = (meta?.venueDescription || "").trim();
   const description =
-    cleanText(meta?.venueDescription || "") ||
-    getFallbackVenueDescription(name, location);
+    descriptionFromCsv || getFallbackVenueDescription(name || rawVenue, location);
 
-  const introLine = `Wedding photography at ${name}${
-    location ? `, ${location}` : ""
-  }`;
+  const introLine = `Wedding photography at ${name}${location ? `, ${location}` : ""}`;
 
+  // Pinned + stable shuffle per venue
   const venueRows = useMemo(() => {
     if (!venueRowsRaw.length) return [];
     const seed = `${venueId || ""}:${venueRowsRaw.length}`;
@@ -307,10 +461,7 @@ export function GalleryVenueDetail() {
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
         <div className="text-center">
           <h1 className="text-3xl mb-3">Venue not found</h1>
-          <Link
-            to="/gallery/venues"
-            className="text-neutral-600 hover:text-neutral-900"
-          >
+          <Link to="/gallery/venues" className="text-neutral-600 hover:text-neutral-900">
             Back to Venues
           </Link>
         </div>
@@ -319,16 +470,12 @@ export function GalleryVenueDetail() {
   }
 
   const safeVenueId = (venueId || "").replace(/\/+$/, "");
-  const canonical = `${SITE_ORIGIN}/gallery/venue/${encodeURIComponent(
-    safeVenueId
-  )}`;
+  const canonical = `${SITE_ORIGIN}/gallery/venue/${encodeURIComponent(safeVenueId)}`;
 
   const metaTitle = `${name} Wedding Photography | MKB Weddings`;
   const metaDescription =
-    cleanText(description) ||
-    `Natural, documentary wedding photography at ${name}${
-      location ? ` in ${location}` : ""
-    }. View real weddings and venue galleries by MKB Weddings.`;
+    description ||
+    `Natural, documentary wedding photography at ${name}${location ? ` in ${location}` : ""}. View real weddings and venue galleries by MKB Weddings.`;
 
   const safeWebsite = website ? encodeURI(website) : "";
 
@@ -338,7 +485,30 @@ export function GalleryVenueDetail() {
     { name: "Gallery", item: `${SITE_ORIGIN}/gallery` },
     { name: "Venues", item: `${SITE_ORIGIN}/gallery/venues` },
     { name, item: canonical },
-  ];
+  ].map((x, idx) => ({
+    "@type": "ListItem",
+    position: idx + 1,
+    name: x.name,
+    item: x.item,
+  }));
+
+  const heroImageObject = {
+    "@type": "ImageObject",
+    "@id": `${canonical}#primaryimage`,
+    contentUrl: heroImage,
+    url: heroImage,
+    caption: `${name}${location ? `, ${location}` : ""} wedding photography`,
+    representativeOfPage: true,
+  };
+
+  // keep this small (don’t dump hundreds of images into JSON-LD)
+  const galleryImageObjects = images.slice(0, 12).map((img, idx) => ({
+    "@type": "ImageObject",
+    "@id": `${canonical}#image-${idx + 1}`,
+    contentUrl: img.full,
+    url: img.full,
+    caption: img.alt,
+  }));
 
   const pageJsonLd = {
     "@context": "https://schema.org",
@@ -352,21 +522,9 @@ export function GalleryVenueDetail() {
       {
         "@type": "BreadcrumbList",
         "@id": `${canonical}#breadcrumb`,
-        itemListElement: breadcrumbItems.map((b, idx) => ({
-          "@type": "ListItem",
-          position: idx + 1,
-          name: b.name,
-          item: b.item,
-        })),
+        itemListElement: breadcrumbItems,
       },
-      {
-        "@type": "ImageObject",
-        "@id": `${canonical}#primaryimage`,
-        url: heroImage,
-        contentUrl: heroImage,
-        caption: `${name}${location ? `, ${location}` : ""} wedding photography`,
-        representativeOfPage: true,
-      },
+      heroImageObject,
       {
         "@type": "WebPage",
         "@id": `${canonical}#webpage`,
@@ -376,6 +534,8 @@ export function GalleryVenueDetail() {
         isPartOf: { "@id": `${SITE_ORIGIN}/#website` },
         breadcrumb: { "@id": `${canonical}#breadcrumb` },
         primaryImageOfPage: { "@id": `${canonical}#primaryimage` },
+        // optional, lightweight gallery hint
+        hasPart: galleryImageObjects,
       },
     ],
   };
@@ -398,15 +558,11 @@ export function GalleryVenueDetail() {
 
       {/* HERO */}
       <div className="relative h-[60vh] min-h-[420px]">
-        <ImageWithFallback
-          src={heroImage}
-          alt={name}
-          className="w-full h-full object-cover"
-        />
+        <ImageWithFallback src={heroImage} alt={name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
         <div className="absolute inset-0 flex items-end">
-          <div className="w-full max-w-7xl mx-auto px-6 pb-20 md:pb-20 text-center">
+          <div className="w-full max-w-7xl mx-auto px-6 pb-20 text-center">
             <Link
               to="/gallery/venues"
               className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center"
@@ -433,28 +589,24 @@ export function GalleryVenueDetail() {
         </div>
       </div>
 
-      {/* CONTENT */}
-      <section className="max-w-5xl mx-auto px-6 pt-10 pb-10 text-center">
-        {/* Breadcrumbs BELOW hero, centered, with spacing */}
-        <nav aria-label="Breadcrumb" className="mb-8 flex justify-center">
-          <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-500 text-sm">
+      {/* BREADCRUMBS (below hero) */}
+      <div className="max-w-7xl mx-auto px-6 pt-6">
+        <nav aria-label="Breadcrumb" className="flex justify-center">
+          <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
             <li>
               <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
                 Home
               </Link>
             </li>
-            <li className="opacity-70">
+            <li className="opacity-60">
               <ChevronRight className="w-4 h-4" />
             </li>
             <li>
-              <Link
-                to="/gallery"
-                className="hover:text-neutral-900 underline underline-offset-4"
-              >
+              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
                 Gallery
               </Link>
             </li>
-            <li className="opacity-70">
+            <li className="opacity-60">
               <ChevronRight className="w-4 h-4" />
             </li>
             <li>
@@ -465,14 +617,20 @@ export function GalleryVenueDetail() {
                 Venues
               </Link>
             </li>
-            <li className="opacity-70">
+            <li className="opacity-60">
               <ChevronRight className="w-4 h-4" />
             </li>
-            <li className="text-neutral-800">{name}</li>
+            <li className="text-neutral-900">{name}</li>
           </ol>
         </nav>
+      </div>
 
-        <p className="text-neutral-900 text-lg font-medium mb-8">{introLine}</p>
+      {/* VENUE INFO */}
+      <section className="max-w-5xl mx-auto px-6 pt-10 pb-10 text-center">
+        {/* extra spacing from breadcrumb */}
+        <p className="text-neutral-900 text-3xl md:text-5xl font-serif mb-10">
+          {introLine}
+        </p>
 
         {safeWebsite ? (
           <div className="mb-10">
@@ -487,11 +645,15 @@ export function GalleryVenueDetail() {
           </div>
         ) : null}
 
-        <div className="text-neutral-700 leading-relaxed text-lg space-y-5 mb-16">
-          {description.split(/\n{2,}/).map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
-        </div>
+        {description ? (
+          <div className="text-neutral-700 leading-relaxed text-lg space-y-5 mb-20">
+            {description.split(/\n{2,}/).map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
+          </div>
+        ) : (
+          <div className="mb-20" />
+        )}
       </section>
 
       {/* GRID */}
