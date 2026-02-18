@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ChevronRight } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 type GalleryRow = {
   venue: string;
@@ -20,6 +21,8 @@ const THUMB_BASE =
 const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
+const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
+
 const PINNED_VENUES: string[] = [
   "Orange Tree House",
   "Ballyscullion Park",
@@ -32,7 +35,6 @@ const PINNED_VENUES: string[] = [
   "leighinmohr house hotel",
   "beech hill",
 ];
-
 
 function slugify(s: string) {
   return s
@@ -155,8 +157,7 @@ export function GalleryByVenue() {
         const parsed = parseGalleryCsv(text);
         if (!cancelled) setGalleryRows(parsed);
       } catch (e: any) {
-        if (!cancelled)
-          setLoadError(e?.message || "Failed to load gallery.csv");
+        if (!cancelled) setLoadError(e?.message || "Failed to load gallery.csv");
       }
     })();
 
@@ -222,10 +223,50 @@ export function GalleryByVenue() {
     });
   }, [galleryRows, venueNameMap]);
 
+  // --- SEO / Schema ---
+  const canonical = `${SITE_ORIGIN}/gallery/venues`;
+  const metaTitle = "Wedding Venues Gallery | Northern Ireland Wedding Photographer | MKB Weddings";
+  const metaDescription =
+    "Browse wedding photography by venue across Northern Ireland and Ireland. Explore real weddings, venue galleries, and inspiration for your day.";
+
+  const ogImage =
+    venueCards[0]?.coverFull ||
+    venueCards[0]?.coverThumb ||
+    `${SITE_ORIGIN}/og-home.jpg`;
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${canonical}#webpage`,
+        url: canonical,
+        name: metaTitle,
+        description: metaDescription,
+        isPartOf: { "@id": `${SITE_ORIGIN}/#website` },
+        about: { "@id": `${SITE_ORIGIN}/#business` },
+        inLanguage: "en-GB",
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${canonical}#breadcrumbs`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Gallery", item: `${SITE_ORIGIN}/gallery` },
+          { "@type": "ListItem", position: 2, name: "Venues", item: canonical },
+        ],
+      },
+    ],
+  };
+
   if (loadError) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
         <div className="text-center max-w-xl">
+          <Helmet>
+            <title>Wedding Venues Gallery | MKB Weddings</title>
+            <meta name="robots" content="noindex" />
+          </Helmet>
+
           <h1 className="text-3xl mb-3">Gallery loading error</h1>
           <p className="text-neutral-600 mb-6">{loadError}</p>
           <Link to="/gallery" className="text-neutral-600 hover:text-neutral-900">
@@ -238,11 +279,23 @@ export function GalleryByVenue() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Helmet>
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDescription} />
+
+        <link rel="canonical" href={canonical} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:type" content="website" />
+
+        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+      </Helmet>
+
       <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
         {venueCards.length === 0 ? (
-          <div className="text-center py-20 text-neutral-600">
-            No venues found yet.
-          </div>
+          <div className="text-center py-20 text-neutral-600">No venues found yet.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {venueCards.map((v) => (
@@ -263,9 +316,7 @@ export function GalleryByVenue() {
                     {v.count} image{v.count !== 1 ? "s" : ""}
                   </p>
                   <div className="flex items-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-sm uppercase tracking-wider">
-                      Explore
-                    </span>
+                    <span className="text-sm uppercase tracking-wider">Explore</span>
                     <ChevronRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-2" />
                   </div>
                 </div>
