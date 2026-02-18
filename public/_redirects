@@ -35,6 +35,12 @@
 /about-me    /about    301
 /wedding-photographers/  /  301
 
+
+# Redirect apex -> www (keep path + query)
+https://mkbweddings.co.uk/*  https://www.mkbweddings.co.uk/:splat  301!
+http://mkbweddings.co.uk/*   https://www.mkbweddings.co.uk/:splat  301!
+
+
 # ---- CRITICAL: DO NOT LET SPA FALLBACK CATCH ASSETS -----
 /assets/*  /assets/:splat  200
 
