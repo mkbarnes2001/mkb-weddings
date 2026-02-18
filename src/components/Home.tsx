@@ -47,14 +47,15 @@ export function Home() {
 
   return (
     <>
-      <Helmet>
-        <title>Northern Ireland Wedding Photographer | MKB Weddings</title>
-        <meta
-          name="description"
-          content="Relaxed, natural wedding photography across Northern Ireland, Donegal, Monaghan & Cavan. Candid moments, bold flash, and colourful images you’ll relive."
-        />
-        
-      </Helmet>
+   <Helmet>
+  <title>Northern Ireland Wedding Photographer | MKB Weddings</title>
+  <meta
+    name="description"
+    content="Relaxed, natural wedding photography across Northern Ireland, Donegal, Monaghan & Cavan. Candid moments, bold flash, and colourful images you’ll relive."
+  />
+  <link rel="canonical" href="https://www.mkbweddings.co.uk/" />
+  <meta property="og:url" content="https://www.mkbweddings.co.uk/" />
+  </Helmet>
 
       <div className="-mt-20">
         {/* ---------- Hero Carousel ---------- */}
