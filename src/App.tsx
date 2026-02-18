@@ -44,6 +44,28 @@ function GoogleAnalyticsListener() {
   return null;
 }
 
+
+function CanonicalHelmet() {
+  const { pathname } = useLocation();
+  const ORIGIN = "https://www.mkbweddings.co.uk";
+
+  const normalize = (p: string) => {
+    if (p === "/") return "/";
+    return p.endsWith("/") ? p.slice(0, -1) : p;
+  };
+
+  const canonical = ORIGIN + normalize(pathname);
+
+  return (
+    <Helmet>
+      <link rel="canonical" href={canonical} />
+      {/* Optional but helpful */}
+      <meta property="og:url" content={canonical} />
+    </Helmet>
+  );
+}
+
+
 /* ---------- Layout with Navigation + Footer ---------- */
 function SiteLayout() {
   return (
@@ -68,6 +90,8 @@ export default function App() {
         />
       </Helmet>
       
+<CanonicalHelmet />
+
         <GoogleAnalyticsListener />
       <div className="min-h-screen bg-white">
         <Routes>
