@@ -32,7 +32,7 @@ function GoogleAnalyticsListener() {
 
   useEffect(() => {
     if (window.gtag) {
-      window.gtag("config", "G-XY6TDDLH1Q", {
+      window.gtag("config", "G-RQB9V9DTZP", {
         page_path: location.pathname,
       });
     }
