@@ -22,6 +22,12 @@ export function GalleryLanding() {
       description: "Explore wedding day highlights",
     },
     {
+      title: "Venues",
+      link: "/gallery/venues",
+      image: venueImage,
+      description: "Browse weddings by location",
+    },
+    {
       title: "Creative Flash",
       link: "/gallery/creative-flash",
       image: creativeFlashImage,
@@ -33,12 +39,7 @@ export function GalleryLanding() {
       image: storiesImage,
       description: "Real wedding love stories",
     },
-    {
-      title: "Venues",
-      link: "/gallery/venues",
-      image: venueImage,
-      description: "Browse weddings by location",
-    },
+   
   ];
 
   return (
