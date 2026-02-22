@@ -364,6 +364,25 @@ function fullUrlFromThumb(r: GalleryRow) {
   )}/${encodeURIComponent(r.filename.replace(/_500\.webp$/i, "_2000.webp"))}`;
 }
 
+// Avoid encodeURI/URIError crashes if CSV contains bad % sequences
+function safeExternalUrl(input: string): string {
+  const raw = (input || "").trim();
+  if (!raw) return "";
+  try {
+    // If already absolute
+    const u = new URL(raw);
+    return u.href;
+  } catch {
+    try {
+      // If missing scheme
+      const u = new URL(`https://${raw.replace(/^\/+/, "")}`);
+      return u.href;
+    } catch {
+      return "";
+    }
+  }
+}
+
 // --- GEO inference (helps NI vs ROI SEO signals) ----------------------------
 function inferGeo(locationRaw: string): {
   regionLabel: string;
@@ -433,6 +452,7 @@ function inferGeo(locationRaw: string): {
     };
   }
 
+  // default (since most of your business is NI)
   return {
     regionLabel: "Northern Ireland",
     addressCountryCode: "GB",
@@ -511,7 +531,8 @@ export function GalleryVenueDetail() {
       : rawVenue;
 
   const location = possibleLoc || "";
-  const website = (meta?.venueWebsite || "").trim();
+  const websiteRaw = (meta?.venueWebsite || "").trim();
+  const safeWebsite = safeExternalUrl(websiteRaw);
 
   const descriptionFromCsv = (meta?.venueDescription || "").trim();
   const description =
@@ -519,6 +540,7 @@ export function GalleryVenueDetail() {
 
   const geo = inferGeo(location);
 
+  // Visible copy
   const introLine = `Wedding photography at ${name}${location ? `, ${location}` : ""}`;
 
   // Pinned + stable shuffle per venue
@@ -542,6 +564,24 @@ export function GalleryVenueDetail() {
     images[0]?.thumb ||
     "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
 
+  // ----- Internal links (More venues) -----
+  const moreVenueLinks = useMemo(() => {
+    const uniqueVenueNames = Array.from(new Set(galleryRows.map((r) => r.venue))).filter(Boolean);
+
+    const all = uniqueVenueNames
+      .map((venue) => {
+        const m = venueMetaMap[venue];
+        const loc = (m?.venueLocation || "").trim();
+        const displayName = (m?.venueName || "").trim() || venue;
+        const slug = slugify(venue);
+        return { venue, slug, displayName, loc };
+      })
+      .filter((v) => v.slug && v.slug !== (venueId || ""));
+
+    const shuffled = stableShuffle(all, `more:${venueId || ""}:${all.length}`);
+    return shuffled.slice(0, 6);
+  }, [galleryRows, venueMetaMap, venueId]);
+
   if (!venueRowsRaw.length) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
@@ -563,27 +603,7 @@ export function GalleryVenueDetail() {
     description ||
     `Natural, documentary wedding photography at ${name}${location ? ` in ${location}` : ""}. View real weddings and venue galleries by MKB Weddings.`;
 
-  const safeWebsite = website ? encodeURI(website) : "";
-
-  // ----- Internal links (More venues) -----
-  const moreVenueLinks = useMemo(() => {
-    const uniqueVenueNames = Array.from(new Set(galleryRows.map((r) => r.venue))).filter(Boolean);
-
-    const all = uniqueVenueNames
-      .map((venue) => {
-        const m = venueMetaMap[venue];
-        const loc = (m?.venueLocation || "").trim();
-        const displayName = (m?.venueName || "").trim() || venue;
-        const slug = slugify(venue);
-        return { venue, slug, displayName, loc };
-      })
-      .filter((v) => v.slug && v.slug !== (venueId || ""));
-
-    const shuffled = stableShuffle(all, `more:${venueId || ""}:${all.length}`);
-    return shuffled.slice(0, 6);
-  }, [galleryRows, venueMetaMap, venueId]);
-
-  // ---------- JSON-LD ----------
+  // ---------- JSON-LD (Breadcrumbs + WebPage + Place/EventVenue + ImageObject) ----------
   const breadcrumbItems = [
     { name: "Home", item: `${SITE_ORIGIN}/` },
     { name: "Gallery", item: `${SITE_ORIGIN}/gallery` },
@@ -605,6 +625,7 @@ export function GalleryVenueDetail() {
     representativeOfPage: true,
   };
 
+  // Keep this small (don’t dump hundreds of images into JSON-LD)
   const galleryImageObjects = images.slice(0, 12).map((img, idx) => ({
     "@type": "ImageObject",
     "@id": `${canonical}#image-${idx + 1}`,
@@ -615,11 +636,12 @@ export function GalleryVenueDetail() {
 
   const localityGuess = location.includes(",") ? location.split(",")[0].trim() : "";
 
-  const venuePlaceJsonLd: any = {
+  const venuePlaceJsonLd = {
     "@type": ["Place", "EventVenue"],
     "@id": `${canonical}#venue`,
     name,
     url: canonical,
+    sameAs: safeWebsite ? [safeWebsite] : undefined,
     address: {
       "@type": "PostalAddress",
       addressLocality: localityGuess || undefined,
@@ -627,8 +649,6 @@ export function GalleryVenueDetail() {
       addressCountry: geo.addressCountryCode,
     },
   };
-
-  if (safeWebsite) venuePlaceJsonLd.sameAs = [safeWebsite];
 
   const pageJsonLd = {
     "@context": "https://schema.org",
@@ -773,7 +793,7 @@ export function GalleryVenueDetail() {
       </section>
 
       {/* GRID */}
-      <div className="max-w-7xl mx-auto px-6 pb-24">
+      <div className="max-w-7xl mx-auto px-6 pb-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {images.map((img, idx) => {
             const remainderLg = images.length % 3;
@@ -803,7 +823,7 @@ export function GalleryVenueDetail() {
         </div>
       </div>
 
-      {/* EXPLORE MORE VENUES (moved BELOW the grid) */}
+      {/* Explore more venues (moved BELOW gallery pics) */}
       <section className="max-w-5xl mx-auto px-6 pb-40 text-center">
         <div className="pt-10 border-t border-neutral-200">
           <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-4">
@@ -813,29 +833,29 @@ export function GalleryVenueDetail() {
             Browse more real wedding galleries across {geo.regionLabel} and beyond.
           </p>
 
-          {/* simple links (no boxes) */}
+          {/* Simple text links (no boxes) */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
             <Link
               to="/gallery/venues"
-              className="text-neutral-900 underline underline-offset-4 hover:text-neutral-700"
+              className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
             >
               View all venues
             </Link>
             <Link
               to="/gallery"
-              className="text-neutral-900 underline underline-offset-4 hover:text-neutral-700"
+              className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
             >
               Back to gallery
             </Link>
           </div>
 
           {moreVenueLinks.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-left">
               {moreVenueLinks.map((v) => (
                 <Link
                   key={v.slug}
                   to={`/gallery/venue/${v.slug}`}
-                  className="rounded-lg border border-neutral-200 p-4 hover:border-neutral-300 hover:bg-neutral-50 transition-colors text-left"
+                  className="rounded-lg border border-neutral-200 p-4 hover:border-neutral-300 hover:bg-neutral-50 transition-colors"
                 >
                   <div className="text-neutral-900 font-medium">{v.displayName}</div>
                   {v.loc ? <div className="text-neutral-600 text-sm mt-1">{v.loc}</div> : null}
