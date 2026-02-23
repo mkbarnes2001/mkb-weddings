@@ -225,14 +225,19 @@ export function GalleryByVenue() {
 
   // --- SEO / Schema ---
   const canonical = `${SITE_ORIGIN}/gallery/venues`;
-  const metaTitle = "Wedding Venues Gallery | Northern Ireland Wedding Photographer | MKB Weddings";
+
+  // Title ~50–60 chars, clear intent + geo
+  const metaTitle =
+    "Wedding Venue Galleries | Northern Ireland & Ireland | MKB Weddings";
+
+  // Description ~150–160 chars; includes NI + Ireland + what user gets
   const metaDescription =
-    "Browse wedding photography by venue across Northern Ireland and Ireland. Explore real weddings, venue galleries, and inspiration for your day.";
+    "Browse real wedding photography by venue across Northern Ireland and Ireland. Explore venue galleries, style inspiration, and full wedding stories by MKB Weddings.";
 
   const ogImage =
     venueCards[0]?.coverFull ||
     venueCards[0]?.coverThumb ||
-    `${SITE_ORIGIN}/og-home.jpg`;
+    `${SITE_ORIGIN}/android-chrome-512x512.png`;
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -244,15 +249,30 @@ export function GalleryByVenue() {
         name: metaTitle,
         description: metaDescription,
         isPartOf: { "@id": `${SITE_ORIGIN}/#website` },
-        about: { "@id": `${SITE_ORIGIN}/#business` },
         inLanguage: "en-GB",
       },
       {
         "@type": "BreadcrumbList",
         "@id": `${canonical}#breadcrumbs`,
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Gallery", item: `${SITE_ORIGIN}/gallery` },
-          { "@type": "ListItem", position: 2, name: "Venues", item: canonical },
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: `${SITE_ORIGIN}/`,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Gallery",
+            item: `${SITE_ORIGIN}/gallery`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: "Venues",
+            item: canonical,
+          },
         ],
       },
     ],
@@ -263,12 +283,13 @@ export function GalleryByVenue() {
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
         <div className="text-center max-w-xl">
           <Helmet>
-            <title>Wedding Venues Gallery | MKB Weddings</title>
+            <title>Wedding Venue Galleries | MKB Weddings</title>
+            <meta name="robots" content="noindex" />
           </Helmet>
 
           <h1 className="text-3xl mb-3">Gallery loading error</h1>
           <p className="text-neutral-600 mb-6">{loadError}</p>
-          <Link to="/gallery" className="text-neutral-600 hover:text-neutral-900">
+          <Link to="/gallery" className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4">
             Back to Gallery
           </Link>
         </div>
@@ -289,10 +310,51 @@ export function GalleryByVenue() {
         <meta property="og:image" content={ogImage} />
         <meta property="og:type" content="website" />
 
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={metaTitle} />
+        <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:image" content={ogImage} />
+
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
       <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
+        {/* Visible breadcrumbs (internal links) */}
+        <nav aria-label="Breadcrumb" className="flex justify-center mb-8">
+          <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
+            <li>
+              <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
+                Home
+              </Link>
+            </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
+            <li>
+              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
+                Gallery
+              </Link>
+            </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
+            <li className="text-neutral-900">Venues</li>
+          </ol>
+        </nav>
+
+        {/* SEO copy (H1 + intro text) */}
+        <header className="text-center max-w-3xl mx-auto mb-12">
+          <h1 className="text-neutral-900 text-4xl md:text-5xl font-serif mb-4">
+            Wedding venue galleries
+          </h1>
+          <p className="text-neutral-700 text-lg md:text-xl leading-relaxed">
+            Browse real wedding photography by venue across{" "}
+            <strong>Northern Ireland</strong> and <strong>Ireland</strong>. Use these galleries to
+            see how a venue photographs in different seasons, light and weather — and to find
+            inspiration for your own day.
+          </p>
+        </header>
+
         {venueCards.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">No venues found yet.</div>
         ) : (
@@ -305,7 +367,7 @@ export function GalleryByVenue() {
               >
                 <ImageWithFallback
                   src={v.coverThumb}
-                  alt={v.displayName}
+                  alt={`${v.displayName} wedding photography venue gallery`}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
