@@ -41,15 +41,6 @@ function GoogleAnalyticsListener() {
   return null;
 }
 
-/* ---------------- Admin Meta (noindex) ---------------- */
-function AdminMeta() {
-  return (
-    <Helmet>
-      <meta name="robots" content="noindex,nofollow" />
-    </Helmet>
-  );
-}
-
 /* ---------- Layout with Navigation + Footer ---------- */
 function SiteLayout() {
   return (
@@ -74,7 +65,7 @@ export default function App() {
             path="/admin"
             element={
               <>
-                <AdminMeta />
+                
                 <BlogAdmin />
               </>
             }
@@ -83,7 +74,7 @@ export default function App() {
             path="/gallery-admin"
             element={
               <>
-                <AdminMeta />
+                
                 <GalleryAdmin />
               </>
             }

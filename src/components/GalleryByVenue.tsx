@@ -264,7 +264,6 @@ export function GalleryByVenue() {
         <div className="text-center max-w-xl">
           <Helmet>
             <title>Wedding Venues Gallery | MKB Weddings</title>
-            <meta name="robots" content="noindex" />
           </Helmet>
 
           <h1 className="text-3xl mb-3">Gallery loading error</h1>
