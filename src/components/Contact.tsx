@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Mail, Phone, MapPin, Instagram, Facebook } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
@@ -14,7 +14,10 @@ const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 export function Contact() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const heroCarouselImages = [heroImage1, heroImage2, heroImage3, heroImage4];
+  const heroCarouselImages = useMemo(
+    () => [heroImage1, heroImage2, heroImage3, heroImage4],
+    []
+  );
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -26,46 +29,31 @@ export function Contact() {
 
   const canonical = `${SITE_ORIGIN}/contact`;
 
-  const metaTitle = "Contact | MKB Weddings – Wedding Photographer Northern Ireland & Ireland";
+  const metaTitle = "Contact MKB Weddings | Northern Ireland & Ireland Wedding Photographer";
   const metaDescription =
-    "Contact MKB Weddings to check availability, pricing and wedding photography packages across Northern Ireland and Ireland (Donegal, Monaghan & Cavan).";
+    "Get in touch with MKB Weddings to check availability, pricing and wedding photography packages across Northern Ireland and Ireland (Donegal, Monaghan & Cavan).";
 
   const pageJsonLd = {
     "@context": "https://schema.org",
-    "@graph": [
+    "@type": "ProfessionalService",
+    name: "MKB Weddings",
+    url: canonical,
+    areaServed: [
+      { "@type": "AdministrativeArea", name: "Northern Ireland" },
+      { "@type": "Country", name: "Ireland" },
+    ],
+    contactPoint: [
       {
-        "@type": "WebSite",
-        "@id": `${SITE_ORIGIN}/#website`,
-        url: `${SITE_ORIGIN}/`,
-        name: "MKB Weddings",
-      },
-      {
-        "@type": "ContactPage",
-        "@id": `${canonical}#contactpage`,
-        url: canonical,
-        name: metaTitle,
-        description: metaDescription,
-        isPartOf: { "@id": `${SITE_ORIGIN}/#website` },
-      },
-      {
-        "@type": "LocalBusiness",
-        "@id": `${SITE_ORIGIN}/#localbusiness`,
-        name: "MKB Weddings",
-        url: `${SITE_ORIGIN}/`,
-        image: [`${SITE_ORIGIN}/`],
+        "@type": "ContactPoint",
+        contactType: "customer service",
         email: "mark@mkbweddings.com",
         telephone: "+447546456077",
-        sameAs: ["https://instagram.com/mkbweddings", "https://facebook.com/mkbweddings"],
-        areaServed: [
-          { "@type": "AdministrativeArea", name: "Northern Ireland" },
-          { "@type": "Country", name: "Ireland" },
-          { "@type": "AdministrativeArea", name: "Donegal" },
-          { "@type": "AdministrativeArea", name: "Monaghan" },
-          { "@type": "AdministrativeArea", name: "Cavan" },
-        ],
       },
     ],
+    sameAs: ["https://instagram.com/mkbweddings", "https://facebook.com/mkbweddings"],
   };
+
+  const ogImage = heroCarouselImages[0];
 
   return (
     <>
@@ -74,13 +62,12 @@ export function Contact() {
         <meta name="description" content={metaDescription} />
 
         <link rel="canonical" href={canonical} />
+
+        <meta property="og:type" content="website" />
         <meta property="og:url" content={canonical} />
         <meta property="og:title" content={metaTitle} />
         <meta property="og:description" content={metaDescription} />
-        <meta property="og:type" content="website" />
-
-        {/* This DOES NOT override X-Robots-Tag headers, but keep it clean */}
-        <meta name="robots" content="index,follow" />
+        <meta property="og:image" content={ogImage} />
 
         <script type="application/ld+json">{JSON.stringify(pageJsonLd)}</script>
       </Helmet>
@@ -99,7 +86,7 @@ export function Contact() {
             >
               <ImageWithFallback
                 src={heroCarouselImages[currentSlide]}
-                alt="Contact MKB Weddings – Wedding Photographer Northern Ireland and Ireland"
+                alt={`Contact MKB Weddings – slide ${currentSlide + 1}`}
                 className="w-full h-full object-cover object-center"
                 style={{ objectPosition: "center 40%" }}
               />
@@ -117,7 +104,6 @@ export function Contact() {
                   index === currentSlide ? "bg-accent scale-125" : "bg-white/50 hover:bg-white/70"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
-                type="button"
               />
             ))}
           </div>
@@ -125,10 +111,10 @@ export function Contact() {
           {/* Hero Text */}
           <div className="absolute inset-0 flex items-end justify-center pb-32 pointer-events-none">
             <div className="text-center text-white px-6 max-w-5xl mx-auto w-full">
-              <h1 className="tagline text-white mb-4">Contact MKB Weddings</h1>
+              <h1 className="tagline text-white mb-4">Contact your wedding photographer</h1>
               <p className="text-xl text-white/90 max-w-3xl mx-auto">
-                Check availability, pricing and packages for wedding photography across Northern
-                Ireland and Ireland.
+                Check availability and pricing for wedding photography across Northern Ireland and
+                Ireland.
               </p>
             </div>
           </div>
@@ -141,20 +127,16 @@ export function Contact() {
             <div>
               <h2 className="mb-6">Send a message</h2>
               <p className="text-foreground/60 mb-4">
-                Use the form to check availability and tell us about your venue, date and plans.
+                Use the form to check availability and tell us about your day.
               </p>
-              <p className="text-primary mb-10 font-medium">
-                Most couples receive a reply within 24 hours.
-              </p>
+              <p className="text-primary mb-10 font-medium">Most couples receive a reply within 24 hours.</p>
 
               <iframe
-                title="MKB Weddings contact form"
+                title="MKB Weddings enquiry form"
                 height="759"
                 style={{ minWidth: "100%", maxWidth: "1260px", border: 0 }}
                 id="sn-form-wsgz3"
                 src="https://app.studioninja.co/contactform/parser/0a800fc9-82a4-1a61-8182-f546140b694f/0a800fc8-82a4-122c-8183-0a866445138a"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
                 allowFullScreen
               />
             </div>
@@ -162,9 +144,7 @@ export function Contact() {
             {/* Contact Info */}
             <div>
               <h2 className="mb-6">Contact details</h2>
-              <p className="text-foreground/60 mb-8">
-                Prefer to reach out directly? Email or call — or follow recent weddings on social.
-              </p>
+              <p className="text-foreground/60 mb-8">Prefer to reach out directly?</p>
 
               <div className="space-y-6 mb-12">
                 <ContactItem
@@ -237,9 +217,9 @@ function SocialLink({ href, icon }: { href: string; icon: React.ReactNode }) {
     <a
       href={href}
       target="_blank"
-      rel="noopener noreferrer"
+      rel="nofollow noopener noreferrer"
       className="w-12 h-12 bg-primary text-white flex items-center justify-center hover:bg-primary/80 transition-colors"
-      aria-label="Social link"
+      aria-label={href.includes("instagram") ? "Instagram" : "Facebook"}
     >
       {icon}
     </a>
