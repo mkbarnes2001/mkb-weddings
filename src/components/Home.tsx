@@ -46,9 +46,9 @@ export function Home() {
   }, [heroSlides.length]);
 
   const canonical = "https://www.mkbweddings.co.uk/";
-  const metaTitle = "Northern Ireland Wedding Photographer | MKB Weddings";
+  const metaTitle = "Northern Ireland Wedding Photographer | Belfast & Ireland | MKB Weddings";
   const metaDescription =
-    "Relaxed, natural wedding photography across Northern Ireland, Donegal, Monaghan & Cavan. Candid moments, bold flash, and colourful images you’ll relive.";
+    "Cinematic Northern Ireland wedding photographer based in Belfast, covering weddings across Northern Ireland and Ireland. Natural, timeless photography capturing real moments and stunning venues.";
 
   // Optional: replace with a real public URL image if you have one
   // (recommended for sharing previews + schema image)
