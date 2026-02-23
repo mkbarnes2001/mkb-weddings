@@ -35,7 +35,7 @@ http://mkbweddings.co.uk/*   https://www.mkbweddings.co.uk/:splat  301!
 /wedding-photographers/  /  301
 
 # Assets (optional; usually not needed, but harmless)
-/assets/*  /assets/:splat  200
+/assets/*  /assets/:splat  200!
 
 # SPA fallback MUST BE LAST
 /*  /index.html  200
