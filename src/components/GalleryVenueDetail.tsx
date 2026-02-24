@@ -767,7 +767,7 @@ export function GalleryVenueDetail() {
       </div>
 
       {/* VENUE INFO */}
-      <section className="max-w-5xl mx-auto px-6 pt-10 pb-10 text-center">
+      <section className="max-w-5xl mx-auto px-6 pt-16 pb-10 text-center">
         <p className="text-neutral-900 text-2xl md:text-4xl font-serif mb-10">{introLine}</p>
 
         {safeWebsite ? (
