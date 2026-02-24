@@ -344,8 +344,8 @@ export function GalleryByVenue() {
 
         {/* SEO copy (H1 + intro text) */}
         <header className="text-center max-w-3xl mx-auto mb-12">
-          <h1 className="text-neutral-900 text-4xl md:text-5xl font-serif mb-4">
-            Wedding venue galleries
+          <h1 className="text-neutral-900 text-3xl md:text-4xl font-serif mb-4">
+            Wedding Venue Galleries
           </h1>
           <p className="text-neutral-700 text-lg md:text-xl leading-relaxed">
             Browse real wedding photography by venue across{" "}
