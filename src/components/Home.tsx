@@ -325,7 +325,8 @@ export function Home() {
 
             <p className="text-primary/80 max-w-3xl mx-auto leading-relaxed text-lg md:text-xl mb-14">
               I photograph weddings across Northern Ireland, Ireland and beyond with a focus on real moments,
-              genuine connection, and a relaxed experience from start to finish. 
+              genuine connection, and a relaxed experience from start to finish.
+              Based in Northern Ireland and also serving weddings throughout Ireland — including Donegal, Cavan, Monaghan, Louth, and surrounding counties.
               Capturing real, natural moments with energy, emotion and none of that stiff awkward posing!
             </p>
 

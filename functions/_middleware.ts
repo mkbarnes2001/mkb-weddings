@@ -110,7 +110,7 @@ export async function onRequest(context: any) {
   if (path === "/" ) {
     title = "Wedding Photographer Northern Ireland & Ireland | MKB Weddings";
     description =
-    "Natural, cinematic, documentary wedding photography across Northern Ireland and Ireland. View real weddings, venues and galleries by MKB Weddings.";
+    "Natural, cinematic, documentary wedding photography across Northern Ireland and Ireland. View real weddings, venues and galleries by MKB Weddings. Based in Northern Ireland and also serving weddings throughout Ireland — including Donegal, Cavan, Monaghan, Louth, and surrounding counties.";
   canonical = `${origin}/`;
   }
 
