@@ -30,7 +30,7 @@ export function Contact() {
         <title>Contact | MKB Weddings</title>
         <meta
           name="description"
-          content="Get in touch with MKB Weddings to check availability, pricing and wedding photography packages across Northern Ireland, Donegal, Monaghan & Cavan."
+          content="Get in touch with MKB Weddings to check availability, pricing and wedding photography packages across Northern Ireland, Ireland, including Donegal, Monaghan & Cavan and other bordering counties."
         />
       </Helmet>
 
@@ -79,7 +79,7 @@ export function Contact() {
               <h1 className="tagline text-white mb-4">Get in Touch</h1>
               <p className="text-xl text-white/90 max-w-3xl mx-auto">
                 Ready to book your wedding photography? We'd love to hear about
-                your day and how we can capture it beautifully.
+                your day and how we can capture it naturally, without all of that stiff posing!
               </p>
             </div>
           </div>
@@ -122,8 +122,8 @@ export function Contact() {
                 <ContactItem
                   icon={<Mail size={20} />}
                   title="Email"
-                  value="mark@mkbweddings.com"
-                  link="mailto:mark@mkbweddings.com"
+                  value="mark@mkbweddings.co.uk"
+                  link="mailto:mark@mkbweddings.co.uk"
                 />
                 <ContactItem
                   icon={<Phone size={20} />}
@@ -134,7 +134,7 @@ export function Contact() {
                 <ContactItem
                   icon={<MapPin size={20} />}
                   title="Service Area"
-                  value="Northern Ireland & destination weddings"
+                  value="Northern Ireland, Ireland & destination weddings"
                 />
               </div>
 
