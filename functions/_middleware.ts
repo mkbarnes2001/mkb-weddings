@@ -101,10 +101,18 @@ export async function onRequest(context: any) {
     s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
   // --- Route-specific title/description ---
-  let title = "Northern Ireland Wedding Photographer | MKB Weddings";
+  let title = "Wedding Photographer Northern Ireland & Ireland | MKB Weddings";
   let description =
-    "Natural, documentary wedding photography across Northern Ireland and Ireland. Explore galleries, venues, and real wedding stories by MKB Weddings.";
+  "Natural, cinematic, documentary wedding photography across Northern Ireland and Ireland. View real weddings, venues and galleries by MKB Weddings.";
   let canonical = `${origin}${path.replace(/\/+$/, "") || "/"}`;
+
+  // Home page
+  if (path === "/" ) {
+    title = "Wedding Photographer Northern Ireland & Ireland | MKB Weddings";
+    description =
+    "Natural, cinematic, documentary wedding photography across Northern Ireland and Ireland. View real weddings, venues and galleries by MKB Weddings.";
+  canonical = `${origin}/`;
+  }
 
   // Gallery page
   if (path === "/gallery" || path === "/gallery/") {
