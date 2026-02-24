@@ -51,7 +51,7 @@ export function Footer() {
               <li>
                 <a href="mailto:mark@mkbweddings.com" className="hover:text-white transition-colors flex items-center gap-2">
                   <Mail size={16} />
-                  mark@mkbweddings.com
+                  mark@mkbweddings.co.uk
                 </a>
               </li>
               <li>
