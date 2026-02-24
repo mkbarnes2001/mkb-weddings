@@ -16,9 +16,9 @@ type GalleryRow = {
 type VenueMetaRow = {
   venue: string;
   venueName?: string;
-  venueLocation?: string;   // Town
-  venueRegion?: string;     // County
-  venueCountry?: string;    // Northern Ireland | Ireland
+  venueLocation?: string; // Town
+  venueRegion?: string; // County
+  venueCountry?: string; // Northern Ireland | Ireland
   venueWebsite?: string;
   venueDescription?: string;
 };
@@ -375,12 +375,10 @@ function safeExternalUrl(input: string): string {
   const raw = (input || "").trim();
   if (!raw) return "";
   try {
-    // If already absolute
     const u = new URL(raw);
     return u.href;
   } catch {
     try {
-      // If missing scheme
       const u = new URL(`https://${raw.replace(/^\/+/, "")}`);
       return u.href;
     } catch {
@@ -389,77 +387,17 @@ function safeExternalUrl(input: string): string {
   }
 }
 
+function countryCodeFromVenueCountry(countryRaw: string): "GB" | "IE" | undefined {
+  const c = (countryRaw || "").trim().toLowerCase();
+  if (!c) return undefined;
+  if (c === "ireland" || c === "republic of ireland" || c === "roi") return "IE";
+  if (c === "northern ireland" || c === "ni") return "GB";
+  return undefined;
+}
 
-  const loc = (locationRaw || "").toLowerCase();
-
-  const roiHints = [
-    "donegal",
-    "monaghan",
-    "cavan",
-    "dublin",
-    "galway",
-    "mayo",
-    "sligo",
-    "leitrim",
-    "meath",
-    "louth",
-    "kildare",
-    "wicklow",
-    "wexford",
-    "waterford",
-    "cork",
-    "kerry",
-    "clare",
-    "limerick",
-    "tipperary",
-    "laois",
-    "offaly",
-    "westmeath",
-    "longford",
-    "roscommon",
-    "kilkenny",
-    "carlow",
-  ];
-
-  const niHints = [
-    "antrim",
-    "down",
-    "armagh",
-    "tyrone",
-    "fermanagh",
-    "derry",
-    "londonderry",
-    "belfast",
-    "lisburn",
-    "bangor",
-    "newry",
-    "coleraine",
-    "enniskillen",
-    "omagh",
-    "ballymena",
-    "larne",
-    "carrickfergus",
-    "newtownards",
-  ];
-
-  if (roiHints.some((h) => loc.includes(h))) {
-    return { regionLabel: "Ireland", addressCountryCode: "IE", addressCountryName: "Ireland" };
-  }
-  if (niHints.some((h) => loc.includes(h))) {
-    return {
-      regionLabel: "Northern Ireland",
-      addressCountryCode: "GB",
-      addressCountryName: "United Kingdom",
-    };
-  }
-
-  // default (since most of your business is NI)
-  return {
-    regionLabel: "Northern Ireland",
-    addressCountryCode: "GB",
-    addressCountryName: "United Kingdom",
-  };
-
+function makeLocationLine(town: string, region: string, country: string) {
+  return [town, region, country].filter(Boolean).join(", ");
+}
 
 function getFallbackVenueDescription(
   venueName: string,
@@ -467,9 +405,8 @@ function getFallbackVenueDescription(
   region?: string,
   country?: string
 ) {
-  const locParts = [town, region, country].filter(Boolean);
-  const locText = locParts.length ? ` in ${locParts.join(", ")}` : "";
-
+  const locLine = makeLocationLine(town || "", region || "", country || "");
+  const locText = locLine ? ` in ${locLine}` : "";
   return `Wedding photography at ${venueName}${locText}. I photograph weddings here in a relaxed, documentary style — capturing genuine moments, natural emotion, and the atmosphere of the day as it unfolds. Couples receive authentic storytelling with a creative edge, plus confident direction when it matters.`;
 }
 
@@ -482,7 +419,9 @@ export function GalleryVenueDetail() {
   }, [venueId]);
 
   const [galleryRows, setGalleryRows] = useState<GalleryRow[]>([]);
-  const [venueMetaMap, setVenueMetaMap] = useState<Record<string, VenueMetaRow>>({});
+  const [venueMetaMap, setVenueMetaMap] = useState<Record<string, VenueMetaRow>>(
+    {}
+  );
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -531,27 +470,27 @@ export function GalleryVenueDetail() {
 
   // Prevent location being used as name if columns got mixed
   const possibleName = (meta?.venueName || "").trim();
-  const possibleLoc = (meta?.venueLocation || "").trim();
+  const possibleTown = (meta?.venueLocation || "").trim();
   const name =
-    possibleName && possibleName.toLowerCase() !== possibleLoc.toLowerCase()
+    possibleName && possibleName.toLowerCase() !== possibleTown.toLowerCase()
       ? possibleName
       : rawVenue;
 
   const town = (meta?.venueLocation || "").trim();
   const region = (meta?.venueRegion || "").trim();
   const country = (meta?.venueCountry || "").trim();
+  const locationLine = makeLocationLine(town, region, country);
 
-  const location = [town, region].filter(Boolean).join(", ");
   const websiteRaw = (meta?.venueWebsite || "").trim();
   const safeWebsite = safeExternalUrl(websiteRaw);
 
   const descriptionFromCsv = (meta?.venueDescription || "").trim();
   const description =
-  descriptionFromCsv ||
-  getFallbackVenueDescription(name || rawVenue, town, region, country);
+    descriptionFromCsv ||
+    getFallbackVenueDescription(name || rawVenue, town, region, country);
 
   // Visible copy
-  const introLine = `Wedding photography at ${name}${location ? `, ${location}` : ""}${country ? `, ${country}` : ""}`;
+  const introLine = `Wedding photography at ${name}${locationLine ? `, ${locationLine}` : ""}`;
 
   // Pinned + stable shuffle per venue
   const venueRows = useMemo(() => {
@@ -564,10 +503,10 @@ export function GalleryVenueDetail() {
     return venueRows.map((r) => ({
       thumb: thumbUrl(r),
       full: fullUrlFromThumb(r),
-      alt: `${name}${location ? `, ${location}` : ""} – ${r.category}`,
+      alt: `${name}${locationLine ? `, ${locationLine}` : ""} – ${r.category}`,
       filename: r.filename,
     }));
-  }, [venueRows, name, location]);
+  }, [venueRows, name, locationLine]);
 
   const heroImage =
     images[0]?.full ||
@@ -576,21 +515,38 @@ export function GalleryVenueDetail() {
 
   // ----- Internal links (More venues) -----
   const moreVenueLinks = useMemo(() => {
-    const uniqueVenueNames = Array.from(new Set(galleryRows.map((r) => r.venue))).filter(Boolean);
+    const uniqueVenueNames = Array.from(new Set(galleryRows.map((r) => r.venue))).filter(
+      Boolean
+    );
 
     const all = uniqueVenueNames
       .map((venue) => {
         const m = venueMetaMap[venue];
-        const loc = (m?.venueLocation || "").trim();
         const displayName = (m?.venueName || "").trim() || venue;
+        const t = (m?.venueLocation || "").trim();
+        const r = (m?.venueRegion || "").trim();
+        const c = (m?.venueCountry || "").trim();
+        const locLine = makeLocationLine(t, r, c);
         const slug = slugify(venue);
-        return { venue, slug, displayName, loc };
+        return { venue, slug, displayName, locLine, country: c };
       })
       .filter((v) => v.slug && v.slug !== (venueId || ""));
 
-    const shuffled = stableShuffle(all, `more:${venueId || ""}:${all.length}`);
-    return shuffled.slice(0, 6);
-  }, [galleryRows, venueMetaMap, venueId]);
+    // mild preference for same-country venues first (good contextual internal linking)
+    const sameCountry = all.filter(
+      (v) => country && v.country && v.country.toLowerCase() === country.toLowerCase()
+    );
+    const otherCountry = all.filter(
+      (v) => !country || !v.country || v.country.toLowerCase() !== country.toLowerCase()
+    );
+
+    const mixed = [
+      ...stableShuffle(sameCountry, `more:same:${venueId || ""}:${sameCountry.length}`),
+      ...stableShuffle(otherCountry, `more:other:${venueId || ""}:${otherCountry.length}`),
+    ];
+
+    return mixed.slice(0, 6);
+  }, [galleryRows, venueMetaMap, venueId, country]);
 
   if (!venueRowsRaw.length) {
     return (
@@ -608,12 +564,16 @@ export function GalleryVenueDetail() {
   const safeVenueId = (venueId || "").replace(/\/+$/, "");
   const canonical = `${SITE_ORIGIN}/gallery/venue/${encodeURIComponent(safeVenueId)}`;
 
-  const metaTitle = `${name} Wedding Photography${region ? ` | ${region}` : ""}${country ? `, ${country}` : ""} | MKB Weddings`;
-  const metaDescription =
-  description ||
-  `Natural, documentary wedding photography at ${name}${location ? ` in ${location}` : ""}${country ? `, ${country}` : ""}. View real weddings and venue galleries by MKB Weddings.`;
+  const metaTitle = `${name} Wedding Photography${
+    region ? ` | ${region}` : ""
+  }${country ? `, ${country}` : ""} | MKB Weddings`;
 
-  // ---------- JSON-LD (Breadcrumbs + WebPage + Place/EventVenue + ImageObject) ----------
+  const metaDescription =
+    description ||
+    `Natural, documentary wedding photography at ${name}${
+      locationLine ? ` in ${locationLine}` : ""
+    }. View real weddings and venue galleries by MKB Weddings.`;
+
   const breadcrumbItems = [
     { name: "Home", item: `${SITE_ORIGIN}/` },
     { name: "Gallery", item: `${SITE_ORIGIN}/gallery` },
@@ -631,11 +591,10 @@ export function GalleryVenueDetail() {
     "@id": `${canonical}#primaryimage`,
     contentUrl: heroImage,
     url: heroImage,
-    caption: `${name}${location ? `, ${location}` : ""} wedding photography`,
+    caption: `${name}${locationLine ? `, ${locationLine}` : ""} wedding photography`,
     representativeOfPage: true,
   };
 
-  // Keep this small (don’t dump hundreds of images into JSON-LD)
   const galleryImageObjects = images.slice(0, 12).map((img, idx) => ({
     "@type": "ImageObject",
     "@id": `${canonical}#image-${idx + 1}`,
@@ -644,8 +603,6 @@ export function GalleryVenueDetail() {
     caption: img.alt,
   }));
 
-  const localityGuess = location.includes(",") ? location.split(",")[0].trim() : "";
-
   const venuePlaceJsonLd = {
     "@type": ["Place", "EventVenue"],
     "@id": `${canonical}#venue`,
@@ -653,16 +610,11 @@ export function GalleryVenueDetail() {
     url: canonical,
     sameAs: safeWebsite ? [safeWebsite] : undefined,
     address: {
-  "@type": "PostalAddress",
-  addressLocality: town || undefined,
-  addressRegion: region || undefined,
-  addressCountry:
-    country === "Ireland"
-      ? "IE"
-      : country === "Northern Ireland"
-      ? "GB"
-      : undefined,
-},
+      "@type": "PostalAddress",
+      addressLocality: town || undefined,
+      addressRegion: region || undefined,
+      addressCountry: countryCodeFromVenueCountry(country),
+    },
   };
 
   const pageJsonLd = {
@@ -730,10 +682,10 @@ export function GalleryVenueDetail() {
             <h1 className="text-white text-5xl md:text-6xl mb-4">{name}</h1>
 
             <div className="flex flex-col items-center gap-2 text-white/90">
-              {location ? (
+              {locationLine ? (
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4" />
-                  <span>{location}</span>
+                  <span>{locationLine}</span>
                 </div>
               ) : null}
 
@@ -838,7 +790,7 @@ export function GalleryVenueDetail() {
         </div>
       </div>
 
-      {/* Explore more venues (moved BELOW gallery pics) */}
+      {/* Explore more venues */}
       <section className="max-w-5xl mx-auto px-6 pb-40 text-center">
         <div className="pt-10 border-t border-neutral-200">
           <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-4">
@@ -848,7 +800,6 @@ export function GalleryVenueDetail() {
             Browse more real wedding galleries across Northern Ireland and Ireland.
           </p>
 
-          {/* Simple text links (no boxes) */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
             <Link
               to="/gallery/venues"
@@ -873,7 +824,9 @@ export function GalleryVenueDetail() {
                   className="rounded-lg border border-neutral-200 p-4 hover:border-neutral-300 hover:bg-neutral-50 transition-colors"
                 >
                   <div className="text-neutral-900 font-medium">{v.displayName}</div>
-                  {v.loc ? <div className="text-neutral-600 text-sm mt-1">{v.loc}</div> : null}
+                  {v.locLine ? (
+                    <div className="text-neutral-600 text-sm mt-1">{v.locLine}</div>
+                  ) : null}
                 </Link>
               ))}
             </div>
