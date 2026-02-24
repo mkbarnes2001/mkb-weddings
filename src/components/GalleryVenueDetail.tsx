@@ -731,7 +731,7 @@ export function GalleryVenueDetail() {
       </div>
 
       {/* BREADCRUMBS */}
-      <div className="max-w-7xl mx-auto px-6 pt-6 pb-16">
+      <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
         <nav aria-label="Breadcrumb" className="flex justify-center">
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
             <li>
@@ -767,7 +767,7 @@ export function GalleryVenueDetail() {
       </div>
 
       {/* VENUE INFO */}
-      <section className="max-w-5xl mx-auto px-6 pt-16 pb-10 text-center">
+      <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
         <p className="text-neutral-900 text-2xl md:text-4xl font-serif mb-10">{introLine}</p>
 
         {safeWebsite ? (
