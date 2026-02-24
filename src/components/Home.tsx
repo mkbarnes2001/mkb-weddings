@@ -324,10 +324,9 @@ export function Home() {
             </h2>
 
             <p className="text-primary/80 max-w-3xl mx-auto leading-relaxed text-lg md:text-xl mb-14">
-              I photograph weddings across Northern Ireland and beyond with a focus on real moments,
-              genuine connection, and a relaxed experience from start to finish. You’ll get natural,
-              documentary coverage through the day, plus creative portraits and punchy flash when the
-              party kicks off, so your gallery feels honest, stylish, and full of energy.
+              I photograph weddings across Northern Ireland, Ireland and beyond with a focus on real moments,
+              genuine connection, and a relaxed experience from start to finish. 
+              Capturing real, natural moments with energy, emotion and none of that stiff awkward posing!
             </p>
 
             {/* Cards */}
