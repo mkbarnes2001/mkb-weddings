@@ -16,7 +16,9 @@ type GalleryRow = {
 type VenueMetaRow = {
   venue: string;
   venueName?: string;
-  venueLocation?: string;
+  venueLocation?: string;   // Town
+  venueRegion?: string;     // County
+  venueCountry?: string;    // Northern Ireland | Ireland
   venueWebsite?: string;
   venueDescription?: string;
 };
@@ -334,6 +336,8 @@ function parseVenueMetaCsv(csvText: string): VenueMetaRow[] {
   const venueIdx = header.indexOf("venue");
   const nameIdx = header.indexOf("venue-name");
   const locIdx = header.indexOf("venue-location");
+  const regionIdx = header.indexOf("venue-region");
+  const countryIdx = header.indexOf("venue-country");
   const webIdx = header.indexOf("venue-website");
   const descIdx = header.indexOf("venue-description");
 
@@ -345,6 +349,8 @@ function parseVenueMetaCsv(csvText: string): VenueMetaRow[] {
       venue: cleanCsvValue(cols[venueIdx] || ""),
       venueName: nameIdx >= 0 ? cleanCsvValue(cols[nameIdx] || "") : "",
       venueLocation: locIdx >= 0 ? cleanCsvValue(cols[locIdx] || "") : "",
+      venueRegion: regionIdx >= 0 ? cleanCsvValue(cols[regionIdx] || "") : "",
+      venueCountry: countryIdx >= 0 ? cleanCsvValue(cols[countryIdx] || "") : "",
       venueWebsite: webIdx >= 0 ? cleanCsvValue(cols[webIdx] || "") : "",
       venueDescription: descIdx >= 0 ? cleanCsvValue(cols[descIdx] || "") : "",
     }))
@@ -383,12 +389,7 @@ function safeExternalUrl(input: string): string {
   }
 }
 
-// --- GEO inference (helps NI vs ROI SEO signals) ----------------------------
-function inferGeo(locationRaw: string): {
-  regionLabel: string;
-  addressCountryCode: "GB" | "IE";
-  addressCountryName: "United Kingdom" | "Ireland";
-} {
+
   const loc = (locationRaw || "").toLowerCase();
 
   const roiHints = [
@@ -458,12 +459,18 @@ function inferGeo(locationRaw: string): {
     addressCountryCode: "GB",
     addressCountryName: "United Kingdom",
   };
-}
 
-function getFallbackVenueDescription(venueName: string, location?: string) {
-  const geo = inferGeo(location || "");
-  const locText = location ? `, ${location}` : "";
-  return `Wedding photography at ${venueName}${locText} (${geo.regionLabel}). I photograph weddings here with a relaxed, documentary approach — capturing genuine moments, natural emotion, and the atmosphere of the day as it unfolds. Couples get authentic storytelling with a creative edge, plus confident direction when it matters.`;
+
+function getFallbackVenueDescription(
+  venueName: string,
+  town?: string,
+  region?: string,
+  country?: string
+) {
+  const locParts = [town, region, country].filter(Boolean);
+  const locText = locParts.length ? ` in ${locParts.join(", ")}` : "";
+
+  return `Wedding photography at ${venueName}${locText}. I photograph weddings here in a relaxed, documentary style — capturing genuine moments, natural emotion, and the atmosphere of the day as it unfolds. Couples receive authentic storytelling with a creative edge, plus confident direction when it matters.`;
 }
 
 // ----------------------------------------------------------------------------
@@ -530,18 +537,21 @@ export function GalleryVenueDetail() {
       ? possibleName
       : rawVenue;
 
-  const location = possibleLoc || "";
+  const town = (meta?.venueLocation || "").trim();
+  const region = (meta?.venueRegion || "").trim();
+  const country = (meta?.venueCountry || "").trim();
+
+  const location = [town, region].filter(Boolean).join(", ");
   const websiteRaw = (meta?.venueWebsite || "").trim();
   const safeWebsite = safeExternalUrl(websiteRaw);
 
   const descriptionFromCsv = (meta?.venueDescription || "").trim();
   const description =
-    descriptionFromCsv || getFallbackVenueDescription(name || rawVenue, location);
-
-  const geo = inferGeo(location);
+  descriptionFromCsv ||
+  getFallbackVenueDescription(name || rawVenue, town, region, country);
 
   // Visible copy
-  const introLine = `Wedding photography at ${name}${location ? `, ${location}` : ""}`;
+  const introLine = `Wedding photography at ${name}${location ? `, ${location}` : ""}${country ? `, ${country}` : ""}`;
 
   // Pinned + stable shuffle per venue
   const venueRows = useMemo(() => {
@@ -598,10 +608,10 @@ export function GalleryVenueDetail() {
   const safeVenueId = (venueId || "").replace(/\/+$/, "");
   const canonical = `${SITE_ORIGIN}/gallery/venue/${encodeURIComponent(safeVenueId)}`;
 
-  const metaTitle = `${name} Wedding Photography | MKB Weddings`;
+  const metaTitle = `${name} Wedding Photography${region ? ` | ${region}` : ""}${country ? `, ${country}` : ""} | MKB Weddings`;
   const metaDescription =
-    description ||
-    `Natural, documentary wedding photography at ${name}${location ? ` in ${location}` : ""}. View real weddings and venue galleries by MKB Weddings.`;
+  description ||
+  `Natural, documentary wedding photography at ${name}${location ? ` in ${location}` : ""}${country ? `, ${country}` : ""}. View real weddings and venue galleries by MKB Weddings.`;
 
   // ---------- JSON-LD (Breadcrumbs + WebPage + Place/EventVenue + ImageObject) ----------
   const breadcrumbItems = [
@@ -643,11 +653,16 @@ export function GalleryVenueDetail() {
     url: canonical,
     sameAs: safeWebsite ? [safeWebsite] : undefined,
     address: {
-      "@type": "PostalAddress",
-      addressLocality: localityGuess || undefined,
-      addressRegion: geo.regionLabel,
-      addressCountry: geo.addressCountryCode,
-    },
+  "@type": "PostalAddress",
+  addressLocality: town || undefined,
+  addressRegion: region || undefined,
+  addressCountry:
+    country === "Ireland"
+      ? "IE"
+      : country === "Northern Ireland"
+      ? "GB"
+      : undefined,
+},
   };
 
   const pageJsonLd = {
@@ -830,7 +845,7 @@ export function GalleryVenueDetail() {
             Explore more venues
           </h2>
           <p className="text-neutral-600 mb-6">
-            Browse more real wedding galleries across {geo.regionLabel} and beyond.
+            Browse more real wedding galleries across Northern Ireland and Ireland.
           </p>
 
           {/* Simple text links (no boxes) */}
