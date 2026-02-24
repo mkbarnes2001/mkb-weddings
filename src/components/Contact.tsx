@@ -76,7 +76,9 @@ export function Contact() {
           {/* Hero Text */}
           <div className="absolute inset-0 flex items-end justify-center pb-32 pointer-events-none">
             <div className="text-center text-white px-6 max-w-5xl mx-auto w-full">
-              <h1 className="tagline text-white mb-4">Get in Touch</h1>
+              <h1 className="tagline text-white mb-4 text-4xl sm:text-5xl md:text-6xl">
+                Get in Touch
+                </h1>
               <p className="text-xl text-white/90 max-w-3xl mx-auto">
                 Ready to book your wedding photography? We'd love to hear about
                 your day and how we can capture it naturally, without all of that stiff posing!
