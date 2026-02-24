@@ -603,6 +603,12 @@ export function GalleryVenueDetail() {
     description ||
     `Natural, documentary wedding photography at ${name}${location ? ` in ${location}` : ""}. View real weddings and venue galleries by MKB Weddings.`;
 
+ // ✅ Added: ensure browser title always updates (without changing anything else)
+  useEffect(() => {
+    document.title = metaTitle;
+  }, [metaTitle]);
+
+
   // ---------- JSON-LD (Breadcrumbs + WebPage + Place/EventVenue + ImageObject) ----------
   const breadcrumbItems = [
     { name: "Home", item: `${SITE_ORIGIN}/` },
