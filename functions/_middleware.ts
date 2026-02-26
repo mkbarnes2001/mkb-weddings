@@ -156,8 +156,10 @@ export async function onRequest(context: any) {
     canonical = `${origin}/gallery/venue/${encodeURIComponent(slug)}`;
   }
 
-  // County page: /county/:countySlug
-  const countyMatch = path.match(/^\/county\/([^/]+)\/?$/i);
+  // County page:
+  // New: /wedding-photographer/:countySlug
+  // (Optional legacy support): /county/:countySlug
+  const countyMatch = path.match(/^\/(?:wedding-photographer|county)\/([^/]+)\/?$/i);
   if (countyMatch) {
     let countySlug = "";
     try {
@@ -166,7 +168,7 @@ export async function onRequest(context: any) {
       countySlug = (countyMatch[1] || "").toLowerCase();
     }
 
-    const countyMap = await getJsonCached("/county-meta.json", 3600);
+    const countyMap = await getJsonCached("/county-meta.json", 300); // consider 300s while iterating
     const c = countyMap?.[countySlug];
 
     const countyName = (c?.county || titleCaseFromSlug(countySlug)).toString().trim();
@@ -180,9 +182,9 @@ export async function onRequest(context: any) {
       (c?.seoDescription || "").toString().trim() ||
       `Natural, documentary wedding photography in ${countyName}${country ? `, ${country}` : ""}. Explore venues and real wedding galleries by MKB Weddings.`;
 
-    canonical = `${origin}/county/${encodeURIComponent(countySlug)}`;
+    // Canonical should match your chosen URL structure:
+    canonical = `${origin}/wedding-photographer/${encodeURIComponent(countySlug)}`;
   }
-
   // --- Apply into HTML ---
   if (/<title>.*<\/title>/i.test(html)) {
     html = html.replace(/<title>.*<\/title>/i, `<title>${escapeHtmlAttr(title)}</title>`);
