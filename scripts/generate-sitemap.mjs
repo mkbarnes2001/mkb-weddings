@@ -130,7 +130,28 @@ for (const v of venueNames) {
   urls.add(`${SITE}/gallery/venue/${slug}`);
 }
 
-// Optional: if you also have "moment detail" pages etc, we can add later.
+// Moment detail pages (derived from gallery.csv "category")
+const momentNames = new Set();
+
+for (const r of galleryRows) {
+  const raw = (r.category || "").trim();
+  if (!raw) continue;
+
+  // Support multiple categories in a single cell if you ever add them:
+  // e.g. "Ceremony|Reception" or "Ceremony, Reception"
+  const parts = raw
+    .split(/[|;,/]/g)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  for (const p of parts) momentNames.add(p);
+}
+
+for (const m of momentNames) {
+  const slug = slugify(m);
+  if (!slug) continue;
+  urls.add(`${SITE}/gallery/moment/${slug}`);
+}
 
 // Write sitemap
 const xml =
@@ -145,5 +166,5 @@ const xml =
 fs.writeFileSync(OUT_PATH, xml, "utf8");
 
 console.log(
-  `✅ sitemap.xml generated: ${OUT_PATH}\n   URLs: ${urls.size}\n   Venues: ${venueNames.size}`
+  `✅ sitemap.xml generated: ${OUT_PATH}\n   URLs: ${urls.size}\n   Venues: ${venueNames.size}\n   Moments: ${momentNames.size}`
 );
