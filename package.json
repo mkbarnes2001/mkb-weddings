@@ -9,7 +9,8 @@
     "sitemap": "node scripts/generate-sitemap.mjs",
     "build": "npm run sitemap && vite build && cp public/_redirects build/_redirects",
     "preview": "vite preview",
-    "build:county-meta": "node scripts/build-county-meta.mjs"
+    "build:county-meta": "node scripts/build-county-meta.mjs",
+    "build:venue-meta": "node scripts/make-venue-meta.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.975.0",
