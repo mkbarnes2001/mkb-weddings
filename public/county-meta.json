@@ -1,0 +1,643 @@
+{
+  "co-down": {
+    "slug": "co-down",
+    "country": "Norhern Ireland",
+    "countryCode": "UK",
+    "county": "County Down",
+    "primaryKeyword": "Wedding Photographer County Down",
+    "secondaryKeywords": [
+      "Newcastle wedding photographer",
+      "Bangor wedding photographer",
+      "Newry wedding photographer\","
+    ],
+    "seoTitle": "Wedding Photographer County Down | Natural Documentary Style | MKB Weddings",
+    "seoDescription": "Looking for a wedding photographer in County Down? Natural, documentary wedding photography across Newcastle, Bangor, Holywood and beyond.",
+    "intro": "County Down offers everything from coastal Mourne Mountain backdrops to elegant estate venues. I photograph weddings here in a relaxed, documentary style, capturing real emotion rather than stiff awkard posing!",
+    "whySection": "Many couples choose County Down for its mix of coastline, countryside and refined venues. My approach adapts naturally to both outdoor ceremonies and grand hotel celebrations.",
+    "travelSection": "I regularly travel across Newcastle, Bangor, Holywood and surrounding areas. Travel is included for all County Down weddings.",
+    "faqs": [
+      {
+        "question": "Do you travel across County Down?",
+        "answer": "Yes, I regularly photograph weddings in Newcastle, Bangor, Holywood and throughout County Down."
+      },
+      {
+        "question": "Do you photograph outdoor weddings in the Mournes?",
+        "answer": "Absolutely. I specialise in natural light and documentary coverage, perfect for outdoor ceremonies."
+      }
+    ],
+    "venues": [
+      {
+        "venueSlug": "edenmore",
+        "venueName": "Edenmore House",
+        "town": "Moira",
+        "url": "/gallery/venue/edenmore"
+      },
+      {
+        "venueSlug": "scarbo-golf-course",
+        "venueName": "Scrabo Golf Club",
+        "town": "Newtownards",
+        "url": "/gallery/venue/scarbo-golf-course"
+      },
+      {
+        "venueSlug": "field-of-dreams",
+        "venueName": "Field of dreams",
+        "town": "Bangor",
+        "url": "/gallery/venue/field-of-dreams"
+      },
+      {
+        "venueSlug": "whistledown-hotel",
+        "venueName": "The Whistledown Hotel",
+        "town": "Warrenpoint",
+        "url": "/gallery/venue/whistledown-hotel"
+      },
+      {
+        "venueSlug": "rocky-mountain-cottage",
+        "venueName": "Rocky Mountain Cottage",
+        "town": "Newry",
+        "url": "/gallery/venue/rocky-mountain-cottage"
+      },
+      {
+        "venueSlug": "killeavy-castle",
+        "venueName": "Killeavy Castle Estate",
+        "town": "Newry",
+        "url": "/gallery/venue/killeavy-castle"
+      },
+      {
+        "venueSlug": "belmont",
+        "venueName": "Belmont House Hotel",
+        "town": "Banbridge",
+        "url": "/gallery/venue/belmont"
+      },
+      {
+        "venueSlug": "millbrook-lodge",
+        "venueName": "Millbrook Lodge",
+        "town": "Ballynahinch",
+        "url": "/gallery/venue/millbrook-lodge"
+      },
+      {
+        "venueSlug": "orange-tree-house",
+        "venueName": "Orange Tree House",
+        "town": "Greyabbey",
+        "url": "/gallery/venue/orange-tree-house"
+      },
+      {
+        "venueSlug": "brookhall-cottages",
+        "venueName": "Brookhall Cottages",
+        "town": "Lisburn",
+        "url": "/gallery/venue/brookhall-cottages"
+      },
+      {
+        "venueSlug": "clandeboye-lodge",
+        "venueName": "Clandeboye Lodge Hotel",
+        "town": "Bangor",
+        "url": "/gallery/venue/clandeboye-lodge"
+      },
+      {
+        "venueSlug": "slieve-donard-hotel",
+        "venueName": "Slieve Donard Hotel",
+        "town": "Newcastle",
+        "url": "/gallery/venue/slieve-donard-hotel"
+      },
+      {
+        "venueSlug": "hillsborough-castle",
+        "venueName": "Hillsborough Castle",
+        "town": "Hillsborough",
+        "url": "/gallery/venue/hillsborough-castle"
+      },
+      {
+        "venueSlug": "la-mon-hotel",
+        "venueName": "La Mon Hotel",
+        "town": "Belfast",
+        "url": "/gallery/venue/la-mon-hotel"
+      }
+    ]
+  },
+  "co-antrim": {
+    "slug": "co-antrim",
+    "country": "Norhern Ireland",
+    "countryCode": "UK",
+    "county": "County Antrim",
+    "primaryKeyword": "Wedding Photographer County Antrim",
+    "secondaryKeywords": [
+      "Belfast  wedding photographer",
+      "Ballymena wedding photographer",
+      "Antrim wedding photographer\","
+    ],
+    "seoTitle": "Wedding Photographer County Antrim| Natural Documentary Style | MKB Weddings",
+    "seoDescription": "Looking for a wedding photographer in County Antrim? Natural, documentary wedding photography across Belfast, Ballymena, Antrim and beyond.",
+    "intro": "County Antrim offers everything from Inner City backdrops to luxury Spa resorts and hidden forrest gems. I photograph weddings here in a relaxed, documentary style, capturing real emotion rather than stiff awkard posing!",
+    "whySection": "Many couples choose County Antrim for its mix of bustling City venues, grand Castle locations and luxury spa resorts. My approach adapts naturally to both outdoor ceremonies and grand hotel celebrations.",
+    "travelSection": "I regularly travel across Belfast, Ballymena, Antrim and surrounding areas. Travel is included for all County Antrim weddings.",
+    "faqs": [
+      {
+        "question": "Do you travel across County Antrim?",
+        "answer": "Yes, I regularly photograph weddings in Belfast, Ballymena, Antrim  and throughout County Antrim."
+      },
+      {
+        "question": "Do you offer engagement shoots prior to the wedding day?",
+        "answer": "Yes, pre wedding shoots are a great way to help you feel more confident in front of the camera!"
+      }
+    ],
+    "venues": [
+      {
+        "venueSlug": "galgorm",
+        "venueName": "Galgorm Resort",
+        "town": "Ballymena",
+        "url": "/gallery/venue/galgorm"
+      },
+      {
+        "venueSlug": "kilmore-house",
+        "venueName": "Kilmore Country House",
+        "town": "Glenariff",
+        "url": "/gallery/venue/kilmore-house"
+      },
+      {
+        "venueSlug": "larchfields",
+        "venueName": "Larchfield Estate",
+        "town": "Lisburn",
+        "url": "/gallery/venue/larchfields"
+      },
+      {
+        "venueSlug": "dunadry",
+        "venueName": "Dunadry Hotel",
+        "town": "Antrim",
+        "url": "/gallery/venue/dunadry"
+      },
+      {
+        "venueSlug": "ten-square",
+        "venueName": "Ten Square Hotel",
+        "town": "Belfast",
+        "url": "/gallery/venue/ten-square"
+      },
+      {
+        "venueSlug": "rabbit-hotel-and-spa",
+        "venueName": "The Rabbit Hotel",
+        "town": "Templepatrick",
+        "url": "/gallery/venue/rabbit-hotel-and-spa"
+      },
+      {
+        "venueSlug": "tree-house",
+        "venueName": "The Tree House",
+        "town": "Belfast",
+        "url": "/gallery/venue/tree-house"
+      },
+      {
+        "venueSlug": "ivory-pavillion",
+        "venueName": "The Ivory Pavillion",
+        "town": "Galgorm",
+        "url": "/gallery/venue/ivory-pavillion"
+      },
+      {
+        "venueSlug": "leighinmohr-house-hotel",
+        "venueName": "Leighinmohr House Hotel",
+        "town": "Ballymena",
+        "url": "/gallery/venue/leighinmohr-house-hotel"
+      },
+      {
+        "venueSlug": "tullyglass-hotel",
+        "venueName": "Tullyglass Hotel",
+        "town": "Ballymena",
+        "url": "/gallery/venue/tullyglass-hotel"
+      },
+      {
+        "venueSlug": "ulster-museum",
+        "venueName": "Ulster Museum",
+        "town": "Belfast",
+        "url": "/gallery/venue/ulster-museum"
+      },
+      {
+        "venueSlug": "belfast-castle",
+        "venueName": "Belfast Castle",
+        "town": "Belfast",
+        "url": "/gallery/venue/belfast-castle"
+      },
+      {
+        "venueSlug": "wool-tower",
+        "venueName": "The Wool Tower",
+        "town": "Ballymena",
+        "url": "/gallery/venue/wool-tower"
+      },
+      {
+        "venueSlug": "ross-park",
+        "venueName": "Ross Park Hotel",
+        "town": "Ballymena",
+        "url": "/gallery/venue/ross-park"
+      },
+      {
+        "venueSlug": "ballyliffen",
+        "venueName": "Ballyliffen Lodge",
+        "town": "Ballymena",
+        "url": "/gallery/venue/ballyliffen"
+      },
+      {
+        "venueSlug": "stormont",
+        "venueName": "Stormont Hotel",
+        "town": "Belfast",
+        "url": "/gallery/venue/stormont"
+      },
+      {
+        "venueSlug": "merchant",
+        "venueName": "The Merchant Hotel",
+        "town": "Belfast",
+        "url": "/gallery/venue/merchant"
+      },
+      {
+        "venueSlug": "landsdowne-hotel",
+        "venueName": "The Landsdowne Hotel",
+        "town": "Belfast",
+        "url": "/gallery/venue/landsdowne-hotel"
+      },
+      {
+        "venueSlug": "ballygally",
+        "venueName": "Ballygally Castle Hotel",
+        "town": "Ballygally",
+        "url": "/gallery/venue/ballygally"
+      }
+    ]
+  },
+  "co-louth": {
+    "slug": "co-louth",
+    "country": "Ireland",
+    "countryCode": "ROI",
+    "county": "County Louth",
+    "primaryKeyword": "Wedding Photographer County Louth",
+    "secondaryKeywords": [
+      "Carlingford  wedding photographer",
+      "Dundalk wedding photographer",
+      "Castlebellingham wedding photographer\","
+    ],
+    "seoTitle": "Wedding Photographer County Louth | Natural Documentary Style | MKB Weddings",
+    "seoDescription": "Looking for a wedding photographer in County Louth? Natural, documentary wedding photography across Carlingford, Dundalk, Castlebellingham and beyond.",
+    "intro": "County Louth offers everything from stunning costal locations to luxury castle venues and boutique hotels. I photograph weddings here in a relaxed, documentary style, capturing real emotion rather than stiff awkard posing!",
+    "whySection": "Many couples choose County Antrim for its mix of bustling City venues, grand Castle locations and luxury spa resorts. My approach adapts naturally to both outdoor ceremonies and grand hotel celebrations.",
+    "travelSection": "I regularly travel across Carlingford, Dundalk, Castlebellingham and surrounding areas. Travel is included for all County Louth weddings.",
+    "faqs": [
+      {
+        "question": "Do you travel across County Louth?",
+        "answer": "Yes, I regularly photograph weddings in Carlingford, Dundalk, Castlebellingham  and throughout County Louth."
+      },
+      {
+        "question": "Do you charge additional for travel to County Louth?",
+        "answer": "No, there is no additional travel cost for weddings in County Louth"
+      }
+    ],
+    "venues": [
+      {
+        "venueSlug": "bellingham-castle",
+        "venueName": "Bellingham Castle",
+        "town": "Castlebellingham",
+        "url": "/gallery/venue/bellingham-castle"
+      },
+      {
+        "venueSlug": "ghan-house",
+        "venueName": "Ghan House",
+        "town": "Carlingford",
+        "url": "/gallery/venue/ghan-house"
+      },
+      {
+        "venueSlug": "ballysmascanlon",
+        "venueName": "Ballymascanlon Hotel",
+        "town": "Dundalk",
+        "url": "/gallery/venue/ballysmascanlon"
+      },
+      {
+        "venueSlug": "darver-castle",
+        "venueName": "Darver Castle",
+        "town": "Readypenny",
+        "url": "/gallery/venue/darver-castle"
+      }
+    ]
+  },
+  "co-cavan": {
+    "slug": "co-cavan",
+    "country": "Ireland",
+    "countryCode": "ROI",
+    "county": "County Cavan",
+    "primaryKeyword": "Wedding Photographer County Cavan",
+    "secondaryKeywords": [
+      "Cavan  wedding photographer",
+      "Ballyconnell wedding photographer",
+      "Farnham wedding photographer\","
+    ],
+    "seoTitle": "Wedding Photographer County Cavan | Natural Documentary Style | MKB Weddings",
+    "seoDescription": "Looking for a wedding photographer in County Cavan? Natural, documentary wedding photography across Cavan, Ballyconnell, Farnham and beyond.",
+    "intro": "County Cavan offers everything from stunning countryside retreats to luxurious spa hotels. I photograph weddings here in a relaxed, documentary style, capturing real emotion rather than stiff awkard posing!",
+    "whySection": "Many couples choose County Cavan for its mix of tranquil countryiside settings, hidden forrest gems and luxury spa resorts. My approach adapts naturally to both outdoor ceremonies and grand hotel celebrations.",
+    "travelSection": "I regularly travel across Cavan, Ballyconnell, Farnham and surrounding areas. Travel is included for all County Cavan weddings.",
+    "faqs": [
+      {
+        "question": "Do you travel across County Cavan?",
+        "answer": "Yes, I regularly photograph weddings in Cavan, Ballyconnell, Farnham  and throughout County Cavan."
+      },
+      {
+        "question": "Do you charge additional for travel to County Cavan?",
+        "answer": "No, there is no additional travel cost for weddings in County Cavan"
+      }
+    ],
+    "venues": [
+      {
+        "venueSlug": "cavan-crystal",
+        "venueName": "Cavan Crystal Hotel",
+        "town": "Cavan",
+        "url": "/gallery/venue/cavan-crystal"
+      },
+      {
+        "venueSlug": "crover-house",
+        "venueName": "Crover House",
+        "town": "Cavan",
+        "url": "/gallery/venue/crover-house"
+      },
+      {
+        "venueSlug": "slieve-russell",
+        "venueName": "Slieve Russell Hotel",
+        "town": "Ballyconnell",
+        "url": "/gallery/venue/slieve-russell"
+      },
+      {
+        "venueSlug": "farnham",
+        "venueName": "Farnham Estate",
+        "town": "Cavan",
+        "url": "/gallery/venue/farnham"
+      }
+    ]
+  },
+  "co-fermanagh": {
+    "slug": "co-fermanagh",
+    "country": "Norhern Ireland",
+    "countryCode": "UK",
+    "county": "County Fermanagh",
+    "primaryKeyword": "Wedding Photographer County Fermanagh",
+    "secondaryKeywords": [
+      "Eniskillen  wedding photographer",
+      "Lough Erne wedding photographer\","
+    ],
+    "seoTitle": "Wedding Photographer County Fermanagh | Natural Documentary Style | MKB Weddings",
+    "seoDescription": "Looking for a wedding photographer in County Fermanagh? Natural, documentary wedding photography across Enniskillen, Lough Erne and beyond.",
+    "intro": "County Fermanagh offers everything from stunning lakeside retreats to private island resorts and luxurious hotels. I photograph weddings here in a relaxed, documentary style, capturing real emotion rather than stiff awkard posing!",
+    "whySection": "Many couples choose County Fermanagh for its mix of private island resorts, lakeside retreats and luxury hotels. My approach adapts naturally to both outdoor ceremonies and hotel celebrations.",
+    "travelSection": "I regularly travel across Eniskillen, Lough Erne and surrounding areas. Travel is included for all County Fermanagh weddings.",
+    "faqs": [
+      {
+        "question": "Do you travel across County Fermanagh?",
+        "answer": "Yes, I regularly photograph weddings in Eniskillen, Lough Erne and throughout County Fermanagh."
+      },
+      {
+        "question": "Do you photograph outdoor weddings on island resorts in County Fermanagh?",
+        "answer": "Absolutely. I specialise in natural light and documentary coverage, perfect for outdoor ceremonies."
+      }
+    ],
+    "venues": [
+      {
+        "venueSlug": "lusty-beg-island",
+        "venueName": "Lusty Beg Island Resort and Spa",
+        "town": "Lough Erne",
+        "url": "/gallery/venue/lusty-beg-island"
+      },
+      {
+        "venueSlug": "manor-house",
+        "venueName": "Manor House Country Hotel",
+        "town": "Lough Erne",
+        "url": "/gallery/venue/manor-house"
+      },
+      {
+        "venueSlug": "lough-erne-resort",
+        "venueName": "Lough Erne Resort",
+        "town": "Lough Erne",
+        "url": "/gallery/venue/lough-erne-resort"
+      },
+      {
+        "venueSlug": "rossharbour-resort",
+        "venueName": "Rossharbour Resort",
+        "town": "Lough Erne",
+        "url": "/gallery/venue/rossharbour-resort"
+      }
+    ]
+  },
+  "co-tyrone": {
+    "slug": "co-tyrone",
+    "country": "Norhern Ireland",
+    "countryCode": "UK",
+    "county": "County Tyrone",
+    "primaryKeyword": "Wedding Photographer County Tyrone",
+    "secondaryKeywords": [
+      "Clogher wedding photographer",
+      "Cookstown wedding photographer ",
+      "Killyman wedding photographer\","
+    ],
+    "seoTitle": "Wedding Photographer County Tyrone | Natural Documentary Style | MKB Weddings",
+    "seoDescription": "Looking for a wedding photographer in County Tyrone? Natural, documentary wedding photography across Clogher, Cookstown and beyond.",
+    "intro": "County Tyrone offers everything from quiet countryside resorts, to stunning boutique hotels. I photograph weddings here in a relaxed, documentary style, capturing real emotion rather than stiff awkard posing!",
+    "whySection": "Many couples choose County Tyrone for its peaceful countryside venues. My approach adapts naturally to both outdoor ceremonies and hotel celebrations.",
+    "travelSection": "I regularly travel across Clogher, Cookstown and surrounding areas. Travel is included for all County Tyrone weddings.",
+    "faqs": [
+      {
+        "question": "Do you travel across County Tyrone?",
+        "answer": "Yes, I regularly photograph weddings in Clogher, Cookstown and throughout County Tyrone."
+      },
+      {
+        "question": "Do you offer engagement shoots prior to the wedding day?",
+        "answer": "Yes, pre wedding shoots are a great way to help you feel more confident in front of the camera!"
+      }
+    ],
+    "venues": [
+      {
+        "venueSlug": "old-rectory",
+        "venueName": "Old Rectory",
+        "town": "Killyman",
+        "url": "/gallery/venue/old-rectory"
+      },
+      {
+        "venueSlug": "corick-house",
+        "venueName": "Corick House Hotel",
+        "town": "Clogher",
+        "url": "/gallery/venue/corick-house"
+      },
+      {
+        "venueSlug": "greenvale-hotel",
+        "venueName": "Greenvale Hotel",
+        "town": "Cookstown",
+        "url": "/gallery/venue/greenvale-hotel"
+      },
+      {
+        "venueSlug": "glenavon",
+        "venueName": "Glenavon House Hotel",
+        "town": "Cookstown",
+        "url": "/gallery/venue/glenavon"
+      }
+    ]
+  },
+  "co-donegal": {
+    "slug": "co-donegal",
+    "country": "Ireland",
+    "countryCode": "ROI",
+    "county": "County Donegal",
+    "primaryKeyword": "Wedding Photographer County Donegal",
+    "secondaryKeywords": [
+      "Moville wedding photographer",
+      "Dunfanghy wedding photographer ",
+      "Inishowen wedding photographer\","
+    ],
+    "seoTitle": "Wedding Photographer County Donegal | Natural Documentary Style | MKB Weddings",
+    "seoDescription": "Looking for a wedding photographer in County Donegal? Natural, documentary wedding photography across Moville, Dunfanaghy, Inishowen and beyond.",
+    "intro": "County Donegal offers everything from stunning  costal resorts to remote countryside hotels. I photograph weddings here in a relaxed, documentary style, capturing real emotion rather than stiff awkard posing!",
+    "whySection": "Many couples choose County Donegal for its stunning costal views and beachside hotels. My approach adapts naturally to both outdoor ceremonies and hotel celebrations.",
+    "travelSection": "I regularly travel across Moville, Dunfanaghy, Inishowen, Letterkenny and surrounding areas. Travel is included for all County Donegal  weddings.",
+    "faqs": [
+      {
+        "question": "Do you travel across County Donegal?",
+        "answer": "Yes, I regularly photograph weddings in Moville, Inishowen, Letterkenny and throughout County Donegal."
+      },
+      {
+        "question": "Do you charge additional for travel to County Donegal?",
+        "answer": "No, there is no additional travel cost for weddings in County Donegal"
+      }
+    ],
+    "venues": [
+      {
+        "venueSlug": "shandon-hotel",
+        "venueName": "Shandon Hotel and spa",
+        "town": "Dunfanaghy",
+        "url": "/gallery/venue/shandon-hotel"
+      },
+      {
+        "venueSlug": "harveys-point",
+        "venueName": "Harveys Point",
+        "town": "Lough Eske",
+        "url": "/gallery/venue/harveys-point"
+      },
+      {
+        "venueSlug": "redcastle-hotel",
+        "venueName": "Redcastle Hotel",
+        "town": "Moville",
+        "url": "/gallery/venue/redcastle-hotel"
+      }
+    ]
+  },
+  "co-meath": {
+    "slug": "co-meath",
+    "country": "Ireland",
+    "countryCode": "ROI",
+    "county": "County Meath",
+    "primaryKeyword": "Wedding Photographer County Meath",
+    "secondaryKeywords": [
+      "Slane wedding photographer",
+      "County Meath  wedding photographer\","
+    ],
+    "seoTitle": "Wedding Photographer County Meath | Natural Documentary Style | MKB Weddings",
+    "seoDescription": "Looking for a wedding photographer in County Meath? Natural, documentary wedding photography across Slane and beyond.",
+    "intro": "County Meath offers peace and tranquility in the stunning countryside with stunning venues across the region. I photograph weddings here in a relaxed, documentary style, capturing real emotion rather than stiff awkard posing!",
+    "whySection": "Many couples choose County Meath for its stunning countryside. My approach adapts naturally to both outdoor ceremonies and hotel celebrations.",
+    "travelSection": "I regularly travel across Slane and surrounding areas. Travel is included for all County Meath weddings.",
+    "faqs": [
+      {
+        "question": "Do you travel across County Meath?",
+        "answer": "Yes, I regularly photograph weddings in Slane and throughout County Meath."
+      },
+      {
+        "question": "Do you charge additional for travel to County Meath?",
+        "answer": "No, there is no additional travel cost for weddings in County Donegal"
+      }
+    ],
+    "venues": [
+      {
+        "venueSlug": "millhouse-slane",
+        "venueName": "The Millhouse",
+        "town": "Slane",
+        "url": "/gallery/venue/millhouse-slane"
+      }
+    ]
+  },
+  "co-londonderry": {
+    "slug": "co-londonderry",
+    "country": "Norhern Ireland",
+    "countryCode": "UK",
+    "county": "County Londonderry",
+    "primaryKeyword": "Wedding Photographer County Londonderry",
+    "secondaryKeywords": [
+      "Derry-Londonderry wedding photographer",
+      "Belaghy wedding photographer ",
+      "Limavady wedding photographer\","
+    ],
+    "seoTitle": "Wedding Photographer County Londonderry | Natural Documentary Style | MKB Weddings",
+    "seoDescription": "Looking for a wedding photographer in County Londonderry? Natural, documentary wedding photography across Derry-Londonderry, Limavady, Belaghy and beyond.",
+    "intro": "County Londonderry offers everything from historic venues to modern boutique hotels and even venues featured in Game of Thrones! I photograph weddings here in a relaxed, documentary style, capturing real emotion rather than stiff awkard posing!",
+    "whySection": "Many couples choose County Londonderry for its amazing selection of modern spa hotels, historic family homes and stunnng outdoor locations. My approach adapts naturally to both outdoor ceremonies and hotel celebrations.",
+    "travelSection": "I regularly travel across Derry-Londonderry, Limavady,  Belaghy and surrounding areas. Travel is included for all County Londonderry weddings.",
+    "faqs": [
+      {
+        "question": "Do you travel across County Londonderry?",
+        "answer": "Yes, I regularly photograph weddings in Limavady, Derry-Londonderry, Belaghy and throughout County Londonderry."
+      },
+      {
+        "question": "Do you charge additional for travel to County Londonderry?",
+        "answer": "No, there is no additional travel cost for weddings in County Donegal"
+      }
+    ],
+    "venues": [
+      {
+        "venueSlug": "ballyscullion-park",
+        "venueName": "Ballyscullion Park",
+        "town": "Belaghy",
+        "url": "/gallery/venue/ballyscullion-park"
+      },
+      {
+        "venueSlug": "beech-hill",
+        "venueName": "Beech Hill Country House",
+        "town": "Derry-Londonderry",
+        "url": "/gallery/venue/beech-hill"
+      },
+      {
+        "venueSlug": "roe-valley-resort",
+        "venueName": "Roe Valley Resort",
+        "town": "Limavady",
+        "url": "/gallery/venue/roe-valley-resort"
+      }
+    ]
+  },
+  "co-monaghan": {
+    "slug": "co-monaghan",
+    "country": "Ireland",
+    "countryCode": "ROI",
+    "county": "County Monaghan",
+    "primaryKeyword": "Wedding Photographer County Monaghan",
+    "secondaryKeywords": [
+      "Monaghan wedding photographer",
+      "Glaslough wedding photographer\","
+    ],
+    "seoTitle": "Wedding Photographer County Monaghan | Natural Documentary Style | MKB Weddings",
+    "seoDescription": "Looking for a wedding photographer in County Monaghan? Natural, documentary wedding photography across Monaghan, Glaslough and beyond.",
+    "intro": "County Monaghan offers an amazing choice of modern hotels and historic castle venues. I photograph weddings here in a relaxed, documentary style, capturing real emotion rather than stiff awkard posing!",
+    "whySection": "Many couples choose County Monaghan for its amazing selection of modern hotels and historic castle venues. My approach adapts naturally to both outdoor ceremonies and hotel celebrations.",
+    "travelSection": "I regularly travel across Monaghan, Glaslough and surrounding areas. Travel is included for all County Monaghan weddings.",
+    "faqs": [
+      {
+        "question": "Do you travel across County Monaghan?",
+        "answer": "Yes, I regularly photograph weddings in Monaghan, Glaslough and throughout County Monaghan."
+      },
+      {
+        "question": "Do you charge additional for travel to County Monaghan?",
+        "answer": "No, there is no additional travel cost for weddings in County Donegal"
+      }
+    ],
+    "venues": [
+      {
+        "venueSlug": "castle-leslie",
+        "venueName": "Castle Leslie Estate",
+        "town": "Glaslough",
+        "url": "/gallery/venue/castle-leslie"
+      },
+      {
+        "venueSlug": "four-seasons-monaghan",
+        "venueName": "Four Seasons Hotel",
+        "town": "Monaghan",
+        "url": "/gallery/venue/four-seasons-monaghan"
+      },
+      {
+        "venueSlug": "hillgrove-hotel",
+        "venueName": "Hillgrove Hotel",
+        "town": "Monaghan",
+        "url": "/gallery/venue/hillgrove-hotel"
+      }
+    ]
+  }
+}
