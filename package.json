@@ -8,7 +8,9 @@
             "sync-gallery": "node -r dotenv/config scripts/sync-gallery.mjs",
             "sitemap": "node scripts/generate-sitemap.mjs",
             "build": "npm run sitemap && vite build && cp public/_redirects build/_redirects",
-            "preview": "vite preview"
+            "preview": "vite preview",
+            "build:county-meta": "node scripts/build-county-meta.mjs"
+}
       },
       "dependencies": {
             "@aws-sdk/client-s3": "^3.975.0",

@@ -1,14 +1,13 @@
-// functions/middleware.ts (or whatever your Pages Functions middleware path is)
+// functions/middleware.ts
 export async function onRequest(context: any) {
   const url = new URL(context.request.url);
 
   const isGet = context.request.method === "GET";
   const accept = context.request.headers.get("accept") || "";
   const wantsHtml = accept.includes("text/html");
-
   const path = url.pathname;
 
-  // Don’t touch static files / assets (IMPORTANT: don’t rewrite JSON requests)
+  // Do NOT touch assets or JSON
   const isStatic =
     path.startsWith("/assets/") ||
     path === "/robots.txt" ||
@@ -39,7 +38,8 @@ export async function onRequest(context: any) {
   let html = await res.text();
   const origin = "https://www.mkbweddings.co.uk";
 
-  // --- Helpers ---
+  // ---------------- HELPERS ----------------
+
   const escapeHtmlAttr = (s: string) =>
     (s || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
@@ -51,115 +51,74 @@ export async function onRequest(context: any) {
       .join(" ");
 
   const setOrInsertMeta = (htmlIn: string, name: string, content: string): string => {
-    const metaRe = new RegExp(`<meta\\s+name=["']${name}["'][^>]*>`, "i");
+    const re = new RegExp(`<meta\\s+name=["']${name}["'][^>]*>`, "i");
     const tag = `<meta name="${name}" content="${escapeHtmlAttr(content)}">`;
-    return metaRe.test(htmlIn)
-      ? htmlIn.replace(metaRe, tag)
+    return re.test(htmlIn)
+      ? htmlIn.replace(re, tag)
       : htmlIn.replace("</head>", `  ${tag}\n</head>`);
   };
 
   const setOrInsertLinkRel = (htmlIn: string, rel: string, href: string): string => {
-    const linkRe = new RegExp(`<link\\s+rel=["']${rel}["'][^>]*>`, "i");
+    const re = new RegExp(`<link\\s+rel=["']${rel}["'][^>]*>`, "i");
     const tag = `<link rel="${rel}" href="${escapeHtmlAttr(href)}">`;
-    return linkRe.test(htmlIn)
-      ? htmlIn.replace(linkRe, tag)
+    return re.test(htmlIn)
+      ? htmlIn.replace(re, tag)
       : htmlIn.replace("</head>", `  ${tag}\n</head>`);
   };
 
   const setOrInsertOg = (htmlIn: string, prop: string, content: string) => {
-    const ogRe = new RegExp(`<meta\\s+property=["']${prop}["'][^>]*>`, "i");
+    const re = new RegExp(`<meta\\s+property=["']${prop}["'][^>]*>`, "i");
     const tag = `<meta property="${prop}" content="${escapeHtmlAttr(content)}">`;
-    return ogRe.test(htmlIn)
-      ? htmlIn.replace(ogRe, tag)
+    return re.test(htmlIn)
+      ? htmlIn.replace(re, tag)
       : htmlIn.replace("</head>", `  ${tag}\n</head>`);
   };
 
-  const canonicalFromPath = (p: string) => `${origin}${p.replace(/\/+$/, "") || "/"}`;
+  const canonicalFromPath = (p: string) =>
+    `${origin}${p.replace(/\/+$/, "") || "/"}`;
 
-  // ---- cached JSON fetch ----
-  async function getVenueMetaMap(): Promise<Record<string, any>> {
-    const cache = (globalThis as any).caches?.default; // TS-safe
-    const cacheKey = new Request(`${origin}/venue-meta.json`, { method: "GET" });
+  // -------- JSON Fetch Helper (cached) --------
+
+  async function getJson(file: string): Promise<any> {
+    const cache = (globalThis as any).caches?.default;
+    const cacheKey = new Request(`${origin}/${file}`, { method: "GET" });
 
     if (cache) {
       const cached = await cache.match(cacheKey);
       if (cached) {
         try {
           return await cached.json();
-        } catch {
-          // fallthrough to refetch
-        }
+        } catch {}
       }
     }
 
-    // Cloudflare 'cf' options aren’t in TS types, so cast to any
     const upstream = await fetch(cacheKey, { cf: { cacheTtl: 3600 } } as any);
     if (!upstream.ok) return {};
 
-    if (cache) {
-      context.waitUntil(cache.put(cacheKey, upstream.clone()));
-    }
+    if (cache) context.waitUntil(cache.put(cacheKey, upstream.clone()));
 
     return await upstream.json();
   }
 
-  // --- defaults ---
+  // --------------- DEFAULTS ----------------
+
   let title = "Wedding Photographer Northern Ireland & Ireland | MKB Weddings";
   let description =
-    "Natural, cinematic, documentary wedding photography across Northern Ireland and Ireland. View real weddings, venues and galleries by MKB Weddings.";
+    "Natural, cinematic, documentary wedding photography across Northern Ireland and Ireland.";
   let canonical = canonicalFromPath(path);
 
-  // Home
-  if (path === "/") {
-    title = "Wedding Photographer Northern Ireland & Ireland | MKB Weddings";
-    description =
-      "Natural, cinematic, documentary wedding photography across Northern Ireland and Ireland. View real weddings, venues and galleries by MKB Weddings. Based in Northern Ireland and also serving weddings throughout Ireland — including Donegal, Cavan, Monaghan, Louth, and surrounding counties.";
-    canonical = `${origin}/`;
-  }
+  // ---------------- VENUE PAGE ----------------
 
-  // Gallery
-  if (path === "/gallery" || path === "/gallery/") {
-    title = "Wedding Photography Gallery | Northern Ireland & Ireland | MKB Weddings";
-    description =
-      "Browse real wedding photography across Northern Ireland and Ireland — highlights, stories, and venue galleries by MKB Weddings.";
-    canonical = `${origin}/gallery`;
-  }
-
-  // Venues index
-  if (path === "/gallery/venues" || path === "/gallery/venues/") {
-    title = "Wedding Venues Gallery | Northern Ireland & Ireland | MKB Weddings";
-    description =
-      "Explore wedding venue galleries across Northern Ireland and Ireland — see real weddings photographed by MKB Weddings.";
-    canonical = `${origin}/gallery/venues`;
-  }
-
-  // Venue detail: /gallery/venue/:slug
   const venueMatch = path.match(/^\/gallery\/venue\/([^/]+)\/?$/i);
   if (venueMatch) {
-    let slug = "";
-    try {
-      slug = decodeURIComponent(venueMatch[1]).toLowerCase();
-    } catch {
-      slug = (venueMatch[1] || "").toLowerCase();
-    }
-
-    const metaMap = await getVenueMetaMap();
+    const slug = decodeURIComponent(venueMatch[1]).toLowerCase();
+    const metaMap = await getJson("venue-meta.json");
     const v = metaMap?.[slug];
 
-    // ✅ Match your JSON structure:
-    // {
-    //   "lusty-beg-island": {
-    //     "venueName": "...",
-    //     "venueTown": "...",
-    //     "venueRegion": "...",
-    //     "venueCountry": "..."
-    //   }
-    // }
-    const venueName = (v?.venueName || titleCaseFromSlug(slug)).toString().trim();
-
-    const town = (v?.venueTown || "").toString().trim();
-    const region = (v?.venueRegion || "").toString().trim();
-    const country = (v?.venueCountry || "").toString().trim();
+    const venueName = (v?.venueName || titleCaseFromSlug(slug)).trim();
+    const town = (v?.venueTown || "").trim();
+    const region = (v?.venueRegion || "").trim();
+    const country = (v?.venueCountry || "").trim();
 
     const locBits = [town, region, country].filter(Boolean);
     const locText = locBits.length ? ` | ${locBits.join(", ")}` : "";
@@ -169,10 +128,41 @@ export async function onRequest(context: any) {
       locBits.length ? ` in ${locBits.join(", ")}` : ""
     } — natural, documentary coverage with real venue gallery images by MKB Weddings.`;
 
-    canonical = `${origin}/gallery/venue/${encodeURIComponent(slug)}`;
+    canonical = `${origin}/gallery/venue/${slug}`;
   }
 
-  // --- Apply into HTML ---
+  // ---------------- COUNTY PAGE ----------------
+
+  const countyMatch = path.match(/^\/counties\/([^/]+)\/?$/i);
+  if (countyMatch) {
+    const countySlug = decodeURIComponent(countyMatch[1]).toLowerCase();
+
+    const countyMeta = await getJson("county-meta.json");
+    const countyCopy = await getJson("county-copy.json");
+
+    const meta = countyMeta?.[countySlug];
+    const copy = countyCopy?.[countySlug];
+
+    const countyName =
+      meta?.countyName || titleCaseFromSlug(countySlug);
+
+    const country = meta?.country || "";
+
+    title =
+      copy?.seoTitle ||
+      `${countyName} Wedding Photographer${country ? ` | ${country}` : ""} | MKB Weddings`;
+
+    description =
+      copy?.metaDescription ||
+      `Natural documentary wedding photography in ${countyName}${
+        country ? `, ${country}` : ""
+      }. Explore real venues and weddings photographed by MKB Weddings.`;
+
+    canonical = `${origin}/counties/${countySlug}`;
+  }
+
+  // --------------- APPLY INTO HTML ---------------
+
   if (/<title>.*<\/title>/i.test(html)) {
     html = html.replace(/<title>.*<\/title>/i, `<title>${escapeHtmlAttr(title)}</title>`);
   } else {
