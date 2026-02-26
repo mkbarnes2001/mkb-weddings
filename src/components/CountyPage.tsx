@@ -103,17 +103,17 @@ export function CountyPage() {
 
   // Loading / not-found states
   if (!countySlug) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6">
-        <div className="text-center">
-          <h1 className="text-3xl mb-3">County not found</h1>
-          <Link to="/gallery/venues" className="text-neutral-600 hover:text-neutral-900">
-            Browse venues
-          </Link>
-        </div>
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center px-6">
+      <div className="text-center">
+        <h1 className="text-3xl mb-3">County not found</h1>
+        <Link to="/wedding-photographer" className="text-neutral-600 hover:text-neutral-900">
+          Back to Counties
+        </Link>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   if (!county) {
     return (
@@ -345,6 +345,32 @@ export function CountyPage() {
       ) : (
         <div className="pb-40" />
       )}
+   {/* Explore more counties */}
+      <section className="max-w-5xl mx-auto px-6 pb-40 text-center">
+        <div className="pt-10 border-t border-neutral-200">
+          <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-4">
+            Explore more counties
+          </h2>
+          <p className="text-neutral-600 mb-6">
+            Browse all county pages, then jump into venue galleries.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/wedding-photographer"
+              className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
+            >
+              View all counties
+            </Link>
+            <Link
+              to="/gallery/venues"
+              className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
+            >
+              Browse venues
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
