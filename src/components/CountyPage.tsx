@@ -1,3 +1,4 @@
+// src/components/CountyPage.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ChevronRight, MapPin } from "lucide-react";
@@ -8,46 +9,63 @@ type CountyVenue = {
   venueSlug: string;
   venueName: string;
   town?: string;
-  url?: string;
+  url: string; // e.g. "/gallery/venue/edenmore"
+};
+
+type CountyFaq = {
+  question: string;
+  answer: string;
 };
 
 type CountyMeta = {
   slug: string;
-  county: string; // e.g. "County Down"
-  country?: string; // e.g. "Northern Ireland" | "Ireland"
-  countryCode?: string; // e.g. "GB" | "IE"
+  country?: string;
+  countryCode?: string; // keep flexible: "UK", "GB", "ROI", "IE" etc.
+  county: string;
+
   primaryKeyword?: string;
   secondaryKeywords?: string[];
+
   seoTitle?: string;
   seoDescription?: string;
+
   intro?: string;
   whySection?: string;
   travelSection?: string;
-  faqs?: { question: string; answer: string }[];
+
+  faqs?: CountyFaq[];
   venues?: CountyVenue[];
+
+  // Optional (if you add it later):
+  heroImageUrl?: string;
 };
 
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
+
+// Same fallback you used on venue pages
+const FALLBACK_HERO =
+  "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
 
 function safeSlug(input: string) {
   return (input || "").trim().toLowerCase().replace(/\/+$/, "");
 }
 
-function escapeJsonLdString(s: string) {
-  return (s || "").replace(/\u2028|\u2029/g, "");
+function escapeForJsonLd(s: string) {
+  return (s || "").replace(/\u2028|\u2029/g, " ");
 }
 
 export function CountyPage() {
-  // ✅ Hooks always run (no early return before hooks)
-  const { countyId } = useParams<{ countyId: string }>();
-  const countySlug = safeSlug(countyId || "");
+  const { countySlug } = useParams<{ countySlug: string }>();
+  const slug = safeSlug(countySlug || "");
 
-  const [countyMap, setCountyMap] = useState<Record<string, CountyMeta>>({});
+  const [metaMap, setMetaMap] = useState<Record<string, CountyMeta>>({});
   const [loadError, setLoadError] = useState<string>("");
+
+  const county = slug ? metaMap[slug] : undefined;
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
-  }, [countySlug]);
+  }, [slug]);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,12 +74,20 @@ export function CountyPage() {
       try {
         setLoadError("");
         const res = await fetch("/county-meta.json", { cache: "no-store" });
-        if (!res.ok) throw new Error(`county-meta.json fetch failed: ${res.status}`);
+        if (!res.ok) {
+          if (!cancelled) setLoadError(`Failed to load county-meta.json (${res.status})`);
+          return;
+        }
 
-        const data = (await res.json()) as Record<string, CountyMeta>;
-        if (!cancelled) setCountyMap(data || {});
+        // If JSON is invalid, this throws — we surface a message instead of silent failure
+        const json = (await res.json()) as Record<string, CountyMeta>;
+        if (!cancelled) setMetaMap(json || {});
       } catch (e: any) {
-        if (!cancelled) setLoadError(e?.message || "Failed to load county data");
+        if (!cancelled) {
+          setLoadError(
+            "county-meta.json could not be parsed. Check for broken quotes/commas in the JSON."
+          );
+        }
       }
     })();
 
@@ -70,53 +96,65 @@ export function CountyPage() {
     };
   }, []);
 
-  const meta = useMemo(() => {
-    return countySlug ? countyMap[countySlug] : undefined;
-  }, [countyMap, countySlug]);
+  const canonical = useMemo(() => {
+    const safe = encodeURIComponent(slug);
+    return `${SITE_ORIGIN}/wedding-photographer/${safe}`;
+  }, [slug]);
 
-  const countyName = (meta?.county || "").trim();
-  const countryName = (meta?.country || "").trim();
-  const pageTitle =
-    (meta?.seoTitle || "").trim() ||
-    (countyName ? `${countyName} Wedding Photographer | MKB Weddings` : "County Weddings | MKB Weddings");
+  // Loading / not-found states
+  if (!countySlug) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+        <div className="text-center">
+          <h1 className="text-3xl mb-3">County not found</h1>
+          <Link to="/gallery/venues" className="text-neutral-600 hover:text-neutral-900">
+            Browse venues
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
-  const pageDescription =
-    (meta?.seoDescription || "").trim() ||
-    (countyName
-      ? `Wedding photography in ${countyName}${countryName ? `, ${countryName}` : ""}. Natural, documentary coverage by MKB Weddings.`
-      : "Wedding photography across Northern Ireland and Ireland by MKB Weddings.");
+  if (!county) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
+        <div className="text-neutral-600">Loading…</div>
+        {loadError ? (
+          <div className="mt-4 max-w-xl text-sm text-red-600">{loadError}</div>
+        ) : null}
+      </div>
+    );
+  }
 
-  const canonical = `${SITE_ORIGIN}/wedding-photographer/${encodeURIComponent(countySlug)}`;
+  const title =
+    (county.seoTitle || "").trim() || `${county.county} Wedding Photographer | MKB Weddings`;
 
-  // Pick a “hero” image:
-  // - If you later add meta.heroImage in county-meta.json, use that.
-  // - For now, fallback to a stable Unsplash hero.
-  const heroImage =
-    "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
+  const description =
+    (county.seoDescription || "").trim() ||
+    `Natural, documentary wedding photography in ${county.county}. Explore venues and real wedding galleries by MKB Weddings.`;
 
-  const introLine = useMemo(() => {
-    if (!countyName) return "Wedding photography";
-    const loc = [countyName, countryName].filter(Boolean).join(", ");
-    return `Wedding photographer in ${loc}`;
-  }, [countyName, countryName]);
+  const venues = county.venues || [];
+  const faqs = county.faqs || [];
 
-  const venues = meta?.venues || [];
+  const locationLine = [county.county, county.country].filter(Boolean).join(", ");
 
-  // ---------- JSON-LD ----------
+  const heroImage = (county.heroImageUrl || "").trim() || FALLBACK_HERO;
+
+  // --- Breadcrumbs (matches GalleryVenueDetail format) ---
   const breadcrumbItems = [
     { name: "Home", item: `${SITE_ORIGIN}/` },
-    { name: "Gallery", item: `${SITE_ORIGIN}/gallery` },
-    { name: "Venues", item: `${SITE_ORIGIN}/gallery/venues` },
-    { name: countyName || countySlug, item: canonical },
+    { name: "Wedding Photographer", item: `${SITE_ORIGIN}/wedding-photographer` },
+    { name: county.county, item: canonical },
   ].map((x, idx) => ({
     "@type": "ListItem",
     position: idx + 1,
-    name: x.name,
+    name: escapeForJsonLd(x.name),
     item: x.item,
   }));
 
-  const pageJsonLd = useMemo(() => {
-    const graph: any[] = [
+  const pageJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
       {
         "@type": "WebSite",
         "@id": `${SITE_ORIGIN}/#website`,
@@ -132,103 +170,54 @@ export function CountyPage() {
         "@type": "WebPage",
         "@id": `${canonical}#webpage`,
         url: canonical,
-        name: pageTitle,
-        description: pageDescription,
+        name: escapeForJsonLd(title),
+        description: escapeForJsonLd(description),
         isPartOf: { "@id": `${SITE_ORIGIN}/#website` },
         breadcrumb: { "@id": `${canonical}#breadcrumb` },
       },
-    ];
-
-    return {
-      "@context": "https://schema.org",
-      "@graph": graph,
-    };
-  }, [canonical, pageTitle, pageDescription]); // breadcrumbItems depends on countyName; ok to omit for stability
-
-  // ✅ Only now we can safely decide “not found”
-  const notFound = !!countySlug && !loadError && Object.keys(countyMap).length > 0 && !meta;
-
-  if (loadError) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6">
-        <div className="text-center max-w-lg">
-          <h1 className="text-3xl mb-3">County page error</h1>
-          <p className="text-neutral-600 mb-6">{loadError}</p>
-          <Link to="/gallery/venues" className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4">
-            Back to Venues
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (notFound) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6">
-        <div className="text-center">
-          <h1 className="text-3xl mb-3">County not found</h1>
-          <Link to="/gallery/venues" className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4">
-            Back to Venues
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // While county-meta is loading, render a safe skeleton (no early-return hooks issues)
-  if (!meta) {
-    return (
-      <div className="min-h-screen bg-white">
-        <div className="relative h-[60vh] min-h-[420px] bg-neutral-100" />
-        <div className="max-w-5xl mx-auto px-6 pt-12 pb-40">
-          <div className="h-10 w-2/3 bg-neutral-100 rounded mb-6" />
-          <div className="h-5 w-1/2 bg-neutral-100 rounded mb-3" />
-          <div className="h-5 w-3/4 bg-neutral-100 rounded" />
-        </div>
-      </div>
-    );
-  }
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
+        <title>{title}</title>
+        <meta name="description" content={description} />
         <link rel="canonical" href={canonical} />
 
         <meta property="og:url" content={canonical} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
         <meta property="og:image" content={heroImage} />
         <meta property="og:type" content="website" />
 
-        <script type="application/ld+json">
-          {JSON.stringify(JSON.parse(escapeJsonLdString(JSON.stringify(pageJsonLd))))}
-        </script>
+        <script type="application/ld+json">{JSON.stringify(pageJsonLd)}</script>
       </Helmet>
 
-      {/* HERO (matches GalleryVenueDetail styling) */}
+      {/* HERO (match GalleryVenueDetail) */}
       <div className="relative h-[60vh] min-h-[420px]">
-        <ImageWithFallback src={heroImage} alt={countyName} className="w-full h-full object-cover" />
+        <ImageWithFallback src={heroImage} alt={county.county} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
         <div className="absolute inset-0 flex items-end">
           <div className="w-full max-w-7xl mx-auto px-6 pb-20 text-center">
             <Link
-              to="/gallery/venues"
+              to="/wedding-photographer"
               className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center"
             >
               <ArrowLeft className="w-5 h-5" />
-              Back to Venues
+              Back to Counties
             </Link>
 
-            <h1 className="text-white text-5xl md:text-6xl mb-4">{countyName}</h1>
+            <h1 className="text-white text-5xl md:text-6xl mb-4">
+              {county.primaryKeyword || `Wedding Photographer ${county.county}`}
+            </h1>
 
             <div className="flex flex-col items-center gap-2 text-white/90">
-              {countryName ? (
+              {locationLine ? (
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4" />
-                  <span>{countryName}</span>
+                  <span>{locationLine}</span>
                 </div>
               ) : null}
 
@@ -240,7 +229,7 @@ export function CountyPage() {
         </div>
       </div>
 
-      {/* BREADCRUMBS */}
+      {/* BREADCRUMBS (match GalleryVenueDetail) */}
       <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
         <nav aria-label="Breadcrumb" className="flex justify-center">
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
@@ -253,66 +242,65 @@ export function CountyPage() {
               <ChevronRight className="w-4 h-4" />
             </li>
             <li>
-              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
-                Gallery
+              <Link
+                to="/wedding-photographer"
+                className="hover:text-neutral-900 underline underline-offset-4"
+              >
+                Wedding Photographer
               </Link>
             </li>
             <li className="opacity-60">
               <ChevronRight className="w-4 h-4" />
             </li>
-            <li>
-              <Link to="/gallery/venues" className="hover:text-neutral-900 underline underline-offset-4">
-                Venues
-              </Link>
-            </li>
-            <li className="opacity-60">
-              <ChevronRight className="w-4 h-4" />
-            </li>
-            <li className="text-neutral-900">{countyName}</li>
+            <li className="text-neutral-900">{county.county}</li>
           </ol>
         </nav>
       </div>
 
-      {/* COUNTY INFO */}
+      {/* COUNTY INFO (typography + spacing aligned to venue page) */}
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
-        <p className="text-neutral-900 text-2xl md:text-4xl font-serif mb-10">{introLine}</p>
+        {county.secondaryKeywords?.length ? (
+          <p className="text-neutral-600 mb-8">
+            {county.secondaryKeywords.filter(Boolean).join(" • ")}
+          </p>
+        ) : null}
 
-        {meta.intro ? (
+        {county.intro ? (
           <div className="text-neutral-700 leading-relaxed text-lg space-y-5 mb-10">
-            {meta.intro.split(/\n{2,}/).map((p, i) => (
+            {county.intro.split(/\n{2,}/).map((p, i) => (
               <p key={i}>{p}</p>
             ))}
           </div>
         ) : null}
 
-        {meta.whySection ? (
+        {county.whySection ? (
           <div className="text-neutral-700 leading-relaxed text-lg space-y-5 mb-10">
             <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-4">
-              Why get married in {countyName}?
+              Why get married in {county.county}?
             </h2>
-            {meta.whySection.split(/\n{2,}/).map((p, i) => (
+            {county.whySection.split(/\n{2,}/).map((p, i) => (
               <p key={i}>{p}</p>
             ))}
           </div>
         ) : null}
 
-        {meta.travelSection ? (
+        {county.travelSection ? (
           <div className="text-neutral-700 leading-relaxed text-lg space-y-5 mb-10">
             <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-4">
-              Travel & coverage
+              Travel &amp; coverage
             </h2>
-            {meta.travelSection.split(/\n{2,}/).map((p, i) => (
+            {county.travelSection.split(/\n{2,}/).map((p, i) => (
               <p key={i}>{p}</p>
             ))}
           </div>
         ) : null}
       </section>
 
-      {/* VENUES LIST */}
-      <section className="max-w-7xl mx-auto px-6 pb-24">
-        <div className="pt-10 border-t border-neutral-200">
+      {/* VENUES GRID (match venue "Explore more venues" cards) */}
+      <section className="max-w-7xl mx-auto px-6 pb-20">
+        <div className="max-w-5xl mx-auto">
           <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-6 text-center">
-            Wedding venues in {countyName}
+            Wedding venues in {county.county}
           </h2>
 
           {venues.length ? (
@@ -320,7 +308,7 @@ export function CountyPage() {
               {venues.map((v) => (
                 <Link
                   key={v.venueSlug}
-                  to={v.url || `/gallery/venue/${v.venueSlug}`}
+                  to={v.url}
                   className="rounded-lg border border-neutral-200 p-4 hover:border-neutral-300 hover:bg-neutral-50 transition-colors"
                 >
                   <div className="text-neutral-900 font-medium">{v.venueName}</div>
@@ -329,25 +317,27 @@ export function CountyPage() {
               ))}
             </div>
           ) : (
-            <div className="text-neutral-600 text-center">No venues listed yet.</div>
+            <p className="text-neutral-600 text-center">No venues listed yet for this county.</p>
           )}
         </div>
       </section>
 
-      {/* FAQs */}
-      {meta.faqs?.length ? (
+      {/* FAQS */}
+      {faqs.length ? (
         <section className="max-w-5xl mx-auto px-6 pb-40">
           <div className="pt-10 border-t border-neutral-200">
             <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-6 text-center">
               FAQs
             </h2>
 
-            <div className="space-y-6">
-              {meta.faqs.map((f, idx) => (
-                <div key={idx} className="rounded-lg border border-neutral-200 p-6">
-                  <div className="text-neutral-900 font-medium mb-2">{f.question}</div>
-                  <div className="text-neutral-700 leading-relaxed">{f.answer}</div>
-                </div>
+            <div className="space-y-4">
+              {faqs.map((f, i) => (
+                <details key={i} className="rounded-lg border border-neutral-200 p-4">
+                  <summary className="cursor-pointer text-neutral-900 font-medium">
+                    {f.question}
+                  </summary>
+                  <div className="text-neutral-700 mt-3 leading-relaxed">{f.answer}</div>
+                </details>
               ))}
             </div>
           </div>

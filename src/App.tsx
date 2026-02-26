@@ -92,7 +92,7 @@ export default function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/packages" element={<WeddingPackages />} />
             <Route path="/thank-you" element={<ThankYou />} />
-            <Route path="/county/:countySlug" element={<CountyPage />} />
+            <Route path="/wedding-photographer/:countySlug" element={<CountyPage />} />
 
             {/* -------- Gallery system -------- */}
             <Route path="/gallery" element={<GalleryLanding />} />
