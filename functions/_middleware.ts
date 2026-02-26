@@ -5,9 +5,10 @@ export async function onRequest(context: any) {
   const isGet = context.request.method === "GET";
   const accept = context.request.headers.get("accept") || "";
   const wantsHtml = accept.includes("text/html");
+
   const path = url.pathname;
 
-  // Do NOT touch assets or JSON
+  // Don’t touch static files / assets (IMPORTANT: don’t rewrite JSON requests)
   const isStatic =
     path.startsWith("/assets/") ||
     path === "/robots.txt" ||
@@ -38,8 +39,7 @@ export async function onRequest(context: any) {
   let html = await res.text();
   const origin = "https://www.mkbweddings.co.uk";
 
-  // ---------------- HELPERS ----------------
-
+  // --- Helpers ---
   const escapeHtmlAttr = (s: string) =>
     (s || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
@@ -51,74 +51,100 @@ export async function onRequest(context: any) {
       .join(" ");
 
   const setOrInsertMeta = (htmlIn: string, name: string, content: string): string => {
-    const re = new RegExp(`<meta\\s+name=["']${name}["'][^>]*>`, "i");
+    const metaRe = new RegExp(`<meta\\s+name=["']${name}["'][^>]*>`, "i");
     const tag = `<meta name="${name}" content="${escapeHtmlAttr(content)}">`;
-    return re.test(htmlIn)
-      ? htmlIn.replace(re, tag)
+    return metaRe.test(htmlIn)
+      ? htmlIn.replace(metaRe, tag)
       : htmlIn.replace("</head>", `  ${tag}\n</head>`);
   };
 
   const setOrInsertLinkRel = (htmlIn: string, rel: string, href: string): string => {
-    const re = new RegExp(`<link\\s+rel=["']${rel}["'][^>]*>`, "i");
+    const linkRe = new RegExp(`<link\\s+rel=["']${rel}["'][^>]*>`, "i");
     const tag = `<link rel="${rel}" href="${escapeHtmlAttr(href)}">`;
-    return re.test(htmlIn)
-      ? htmlIn.replace(re, tag)
+    return linkRe.test(htmlIn)
+      ? htmlIn.replace(linkRe, tag)
       : htmlIn.replace("</head>", `  ${tag}\n</head>`);
   };
 
   const setOrInsertOg = (htmlIn: string, prop: string, content: string) => {
-    const re = new RegExp(`<meta\\s+property=["']${prop}["'][^>]*>`, "i");
+    const ogRe = new RegExp(`<meta\\s+property=["']${prop}["'][^>]*>`, "i");
     const tag = `<meta property="${prop}" content="${escapeHtmlAttr(content)}">`;
-    return re.test(htmlIn)
-      ? htmlIn.replace(re, tag)
+    return ogRe.test(htmlIn)
+      ? htmlIn.replace(ogRe, tag)
       : htmlIn.replace("</head>", `  ${tag}\n</head>`);
   };
 
-  const canonicalFromPath = (p: string) =>
-    `${origin}${p.replace(/\/+$/, "") || "/"}`;
+  const canonicalFromPath = (p: string) => `${origin}${p.replace(/\/+$/, "") || "/"}`;
 
-  // -------- JSON Fetch Helper (cached) --------
-
-  async function getJson(file: string): Promise<any> {
+  async function getJsonCached(pathname: string, cacheTtlSeconds = 3600): Promise<any> {
     const cache = (globalThis as any).caches?.default;
-    const cacheKey = new Request(`${origin}/${file}`, { method: "GET" });
+    const cacheKey = new Request(`${origin}${pathname}`, { method: "GET" });
 
     if (cache) {
       const cached = await cache.match(cacheKey);
       if (cached) {
         try {
           return await cached.json();
-        } catch {}
+        } catch {
+          // fallthrough to refetch
+        }
       }
     }
 
-    const upstream = await fetch(cacheKey, { cf: { cacheTtl: 3600 } } as any);
+    const upstream = await fetch(cacheKey, { cf: { cacheTtl: cacheTtlSeconds } } as any);
     if (!upstream.ok) return {};
 
     if (cache) context.waitUntil(cache.put(cacheKey, upstream.clone()));
-
     return await upstream.json();
   }
 
-  // --------------- DEFAULTS ----------------
-
+  // --- defaults ---
   let title = "Wedding Photographer Northern Ireland & Ireland | MKB Weddings";
   let description =
-    "Natural, cinematic, documentary wedding photography across Northern Ireland and Ireland.";
+    "Natural, cinematic, documentary wedding photography across Northern Ireland and Ireland. View real weddings, venues and galleries by MKB Weddings.";
   let canonical = canonicalFromPath(path);
 
-  // ---------------- VENUE PAGE ----------------
+  // Home
+  if (path === "/") {
+    title = "Wedding Photographer Northern Ireland & Ireland | MKB Weddings";
+    description =
+      "Natural, cinematic, documentary wedding photography across Northern Ireland and Ireland. View real weddings, venues and galleries by MKB Weddings. Based in Northern Ireland and also serving weddings throughout Ireland — including Donegal, Cavan, Monaghan, Louth, and surrounding counties.";
+    canonical = `${origin}/`;
+  }
 
+  // Gallery
+  if (path === "/gallery" || path === "/gallery/") {
+    title = "Wedding Photography Gallery | Northern Ireland & Ireland | MKB Weddings";
+    description =
+      "Browse real wedding photography across Northern Ireland and Ireland — highlights, stories, and venue galleries by MKB Weddings.";
+    canonical = `${origin}/gallery`;
+  }
+
+  // Venues index
+  if (path === "/gallery/venues" || path === "/gallery/venues/") {
+    title = "Wedding Venues Gallery | Northern Ireland & Ireland | MKB Weddings";
+    description =
+      "Explore wedding venue galleries across Northern Ireland and Ireland — see real weddings photographed by MKB Weddings.";
+    canonical = `${origin}/gallery/venues`;
+  }
+
+  // Venue detail: /gallery/venue/:slug
   const venueMatch = path.match(/^\/gallery\/venue\/([^/]+)\/?$/i);
   if (venueMatch) {
-    const slug = decodeURIComponent(venueMatch[1]).toLowerCase();
-    const metaMap = await getJson("venue-meta.json");
+    let slug = "";
+    try {
+      slug = decodeURIComponent(venueMatch[1]).toLowerCase();
+    } catch {
+      slug = (venueMatch[1] || "").toLowerCase();
+    }
+
+    const metaMap = await getJsonCached("/venue-meta.json", 3600);
     const v = metaMap?.[slug];
 
-    const venueName = (v?.venueName || titleCaseFromSlug(slug)).trim();
-    const town = (v?.venueTown || "").trim();
-    const region = (v?.venueRegion || "").trim();
-    const country = (v?.venueCountry || "").trim();
+    const venueName = (v?.venueName || titleCaseFromSlug(slug)).toString().trim();
+    const town = (v?.venueTown || "").toString().trim();
+    const region = (v?.venueRegion || "").toString().trim();
+    const country = (v?.venueCountry || "").toString().trim();
 
     const locBits = [town, region, country].filter(Boolean);
     const locText = locBits.length ? ` | ${locBits.join(", ")}` : "";
@@ -127,42 +153,37 @@ export async function onRequest(context: any) {
     description = `Wedding photography at ${venueName}${
       locBits.length ? ` in ${locBits.join(", ")}` : ""
     } — natural, documentary coverage with real venue gallery images by MKB Weddings.`;
-
-    canonical = `${origin}/gallery/venue/${slug}`;
+    canonical = `${origin}/gallery/venue/${encodeURIComponent(slug)}`;
   }
 
-  // ---------------- COUNTY PAGE ----------------
-
-  const countyMatch = path.match(/^\/counties\/([^/]+)\/?$/i);
+  // County page: /county/:countySlug
+  const countyMatch = path.match(/^\/county\/([^/]+)\/?$/i);
   if (countyMatch) {
-    const countySlug = decodeURIComponent(countyMatch[1]).toLowerCase();
+    let countySlug = "";
+    try {
+      countySlug = decodeURIComponent(countyMatch[1]).toLowerCase();
+    } catch {
+      countySlug = (countyMatch[1] || "").toLowerCase();
+    }
 
-    const countyMeta = await getJson("county-meta.json");
-    const countyCopy = await getJson("county-copy.json");
+    const countyMap = await getJsonCached("/county-meta.json", 3600);
+    const c = countyMap?.[countySlug];
 
-    const meta = countyMeta?.[countySlug];
-    const copy = countyCopy?.[countySlug];
-
-    const countyName =
-      meta?.countyName || titleCaseFromSlug(countySlug);
-
-    const country = meta?.country || "";
+    const countyName = (c?.county || titleCaseFromSlug(countySlug)).toString().trim();
+    const country = (c?.country || "").toString().trim();
 
     title =
-      copy?.seoTitle ||
-      `${countyName} Wedding Photographer${country ? ` | ${country}` : ""} | MKB Weddings`;
+      (c?.seoTitle || "").toString().trim() ||
+      `${countyName} Wedding Photographer | MKB Weddings`;
 
     description =
-      copy?.metaDescription ||
-      `Natural documentary wedding photography in ${countyName}${
-        country ? `, ${country}` : ""
-      }. Explore real venues and weddings photographed by MKB Weddings.`;
+      (c?.seoDescription || "").toString().trim() ||
+      `Natural, documentary wedding photography in ${countyName}${country ? `, ${country}` : ""}. Explore venues and real wedding galleries by MKB Weddings.`;
 
-    canonical = `${origin}/counties/${countySlug}`;
+    canonical = `${origin}/county/${encodeURIComponent(countySlug)}`;
   }
 
-  // --------------- APPLY INTO HTML ---------------
-
+  // --- Apply into HTML ---
   if (/<title>.*<\/title>/i.test(html)) {
     html = html.replace(/<title>.*<\/title>/i, `<title>${escapeHtmlAttr(title)}</title>`);
   } else {

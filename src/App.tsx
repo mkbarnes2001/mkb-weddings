@@ -25,6 +25,8 @@ import { GalleryCreativeFlash } from "./components/GalleryCreativeFlash";
 
 import WeddingPackages from "./components/WeddingPackages";
 import { ThankYou } from "./components/ThankYou";
+import { CountyPage } from "./components/CountyPage";
+
 
 /* ---------------- Google Analytics Listener ---------------- */
 function GoogleAnalyticsListener() {
@@ -90,6 +92,7 @@ export default function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/packages" element={<WeddingPackages />} />
             <Route path="/thank-you" element={<ThankYou />} />
+            <Route path="/county/:countySlug" element={<CountyPage />} />
 
             {/* -------- Gallery system -------- */}
             <Route path="/gallery" element={<GalleryLanding />} />

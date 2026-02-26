@@ -10,9 +10,9 @@ import storiesImage from "figma:asset/a4d9c41d478a42542f5eae424fde67c33f39b713.p
 
 export function GalleryLanding() {
   const canonical = "https://www.mkbweddings.co.uk/gallery";
-  const title = "Wedding Photography Gallery | MKB Weddings";
+  const title = "Wedding Photography Gallery | Northern Ireland & Ireland | MKB Weddings";
   const description =
-    "Explore MKB Weddings’ portfolio by venue, moments, creative flash, and real wedding stories across Northern Ireland and beyond.";
+    "Browse real wedding photography from venues across Northern Ireland and Ireland. View ceremony, reception, getting ready and couple portraits captured by MKB Weddings.";
 
   const mainTiles = [
     {
