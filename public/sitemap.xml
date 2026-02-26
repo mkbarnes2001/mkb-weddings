@@ -10,36 +10,6 @@
     <loc>https://www.mkbweddings.co.uk/contact</loc>
   </url>
   <url>
-    <loc>https://www.mkbweddings.co.uk/county/co-antrim</loc>
-  </url>
-  <url>
-    <loc>https://www.mkbweddings.co.uk/county/co-cavan</loc>
-  </url>
-  <url>
-    <loc>https://www.mkbweddings.co.uk/county/co-donegal</loc>
-  </url>
-  <url>
-    <loc>https://www.mkbweddings.co.uk/county/co-down</loc>
-  </url>
-  <url>
-    <loc>https://www.mkbweddings.co.uk/county/co-fermanagh</loc>
-  </url>
-  <url>
-    <loc>https://www.mkbweddings.co.uk/county/co-londonderry</loc>
-  </url>
-  <url>
-    <loc>https://www.mkbweddings.co.uk/county/co-louth</loc>
-  </url>
-  <url>
-    <loc>https://www.mkbweddings.co.uk/county/co-meath</loc>
-  </url>
-  <url>
-    <loc>https://www.mkbweddings.co.uk/county/co-monaghan</loc>
-  </url>
-  <url>
-    <loc>https://www.mkbweddings.co.uk/county/co-tyrone</loc>
-  </url>
-  <url>
     <loc>https://www.mkbweddings.co.uk/gallery</loc>
   </url>
   <url>
@@ -245,5 +215,35 @@
   </url>
   <url>
     <loc>https://www.mkbweddings.co.uk/gallery/venues</loc>
+  </url>
+  <url>
+    <loc>https://www.mkbweddings.co.uk/wedding-photographer/co-antrim</loc>
+  </url>
+  <url>
+    <loc>https://www.mkbweddings.co.uk/wedding-photographer/co-cavan</loc>
+  </url>
+  <url>
+    <loc>https://www.mkbweddings.co.uk/wedding-photographer/co-donegal</loc>
+  </url>
+  <url>
+    <loc>https://www.mkbweddings.co.uk/wedding-photographer/co-down</loc>
+  </url>
+  <url>
+    <loc>https://www.mkbweddings.co.uk/wedding-photographer/co-fermanagh</loc>
+  </url>
+  <url>
+    <loc>https://www.mkbweddings.co.uk/wedding-photographer/co-londonderry</loc>
+  </url>
+  <url>
+    <loc>https://www.mkbweddings.co.uk/wedding-photographer/co-louth</loc>
+  </url>
+  <url>
+    <loc>https://www.mkbweddings.co.uk/wedding-photographer/co-meath</loc>
+  </url>
+  <url>
+    <loc>https://www.mkbweddings.co.uk/wedding-photographer/co-monaghan</loc>
+  </url>
+  <url>
+    <loc>https://www.mkbweddings.co.uk/wedding-photographer/co-tyrone</loc>
   </url>
 </urlset>

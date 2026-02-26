@@ -172,12 +172,11 @@ for (const m of momentNames) {
 }
 
 // ----- County Pages -----
-
 const countyMeta = readJsonIfExists(COUNTY_META_PATH);
 if (countyMeta) {
   for (const slug of Object.keys(countyMeta)) {
     if (!slug) continue;
-    urls.add(`${SITE}/county/${slug}`);
+    urls.add(`${SITE}/wedding-photographer/${slug}`);
   }
 }
 
