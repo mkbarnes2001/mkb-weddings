@@ -19,8 +19,8 @@
     "venueWebsite": "https://edenmore.com",
     "venueDescription": ""
   },
-  "scarbo-golf-course": {
-    "venue": "Scarbo golf course",
+  "scrabo-golf-course": {
+    "venue": "Scrabo golf course",
     "venueName": "Scrabo Golf Club",
     "venueTown": "Newtownards",
     "venueRegion": "Co. Down",
@@ -462,10 +462,10 @@
   "ballyliffen": {
     "venue": "Ballyliffen",
     "venueName": "Ballyliffen Lodge",
-    "venueTown": "Ballymena",
-    "venueRegion": "Co. Antrim",
-    "venueCountry": "Northern Ireland",
-    "venueCountryCode": "GB",
+    "venueTown": "Inishowen",
+    "venueRegion": "Co. Donegal",
+    "venueCountry": "Ireland",
+    "venueCountryCode": "IE",
     "venueWebsite": "https://www.ballyliffinlodge.com",
     "venueDescription": ""
   },
