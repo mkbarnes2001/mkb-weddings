@@ -209,7 +209,7 @@ export function CountyPage() {
               Back to Counties
             </Link>
 
-            <h1 className="text-white text-5xl md:text-6xl mb-4">
+            <h1 className="text-white text-4xl md:text-5xl mb-4">
               {county.primaryKeyword || `Wedding Photographer ${county.county}`}
             </h1>
 
@@ -329,17 +329,18 @@ export function CountyPage() {
             <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-6 text-center">
               FAQs
             </h2>
-
-            <div className="space-y-4">
-              {faqs.map((f, i) => (
-                <details key={i} className="rounded-lg border border-neutral-200 p-4">
-                  <summary className="cursor-pointer text-neutral-900 font-medium">
-                    {f.question}
-                  </summary>
-                  <div className="text-neutral-700 mt-3 leading-relaxed">{f.answer}</div>
-                </details>
-              ))}
-            </div>
+  <div className="space-y-6 text-left max-w-3xl mx-auto">
+    {faqs.map((f, i) => (
+      <details key={i} className="group">
+        <summary className="cursor-pointer text-neutral-900 font-medium text-lg">
+        {f.question}
+        </summary>
+        <div className="text-neutral-700 mt-3 leading-relaxed">
+        {f.answer}
+      </div>
+       </details>
+      ))}
+    </div>
           </div>
         </section>
       ) : (

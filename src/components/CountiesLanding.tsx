@@ -148,7 +148,6 @@ export function CountiesLanding() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
               <div className="absolute inset-0 flex flex-col justify-end p-8">
                 <h2 className="text-white text-2xl md:text-3xl mb-2">{c.countyName}</h2>
-                <p className="text-white/90 text-lg mb-4">{c.description}</p>
                 <div className="flex items-center text-white">
                   <span className="text-sm uppercase tracking-wider">Explore</span>
                   <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-2" />
