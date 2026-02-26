@@ -4,7 +4,7 @@ import path from "node:path";
 
 const SITE = "https://www.mkbweddings.co.uk";
 
-// CSV files (adjust if your filenames differ)
+// CSV paths
 const GALLERY_CSV_PATH = path.join(process.cwd(), "public", "gallery.csv");
 const VENUE_DETAILS_CSV_PATH = path.join(
   process.cwd(),
@@ -12,10 +12,18 @@ const VENUE_DETAILS_CSV_PATH = path.join(
   "galleryvenuedesc.csv"
 );
 
-// Output sitemap to /public so it is deployed at /sitemap.xml
+// County JSON
+const COUNTY_META_PATH = path.join(
+  process.cwd(),
+  "public",
+  "county-meta.json"
+);
+
+// Output
 const OUT_PATH = path.join(process.cwd(), "public", "sitemap.xml");
 
-// --- helpers ---
+// ------------------ HELPERS ------------------
+
 function slugify(s) {
   return String(s || "")
     .trim()
@@ -25,7 +33,6 @@ function slugify(s) {
     .replace(/(^-|-$)/g, "");
 }
 
-// Tiny CSV parser that respects quotes (same style as your components)
 function parseCsv(text) {
   const lines = text.split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return { header: [], rows: [] };
@@ -34,12 +41,15 @@ function parseCsv(text) {
     const out = [];
     let cur = "";
     let inQuotes = false;
+
     for (let i = 0; i < line.length; i++) {
       const ch = line[i];
+
       if (ch === '"') {
         inQuotes = !inQuotes;
         continue;
       }
+
       if (ch === "," && !inQuotes) {
         out.push(cur.trim());
         cur = "";
@@ -47,6 +57,7 @@ function parseCsv(text) {
         cur += ch;
       }
     }
+
     out.push(cur.trim());
     return out;
   };
@@ -60,12 +71,22 @@ function parseCsv(text) {
     header.forEach((h, idx) => (obj[h] = (cols[idx] ?? "").trim()));
     rows.push(obj);
   }
+
   return { header, rows };
 }
 
 function readCsvIfExists(filePath) {
   if (!fs.existsSync(filePath)) return null;
   return fs.readFileSync(filePath, "utf8");
+}
+
+function readJsonIfExists(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch {
+    return null;
+  }
 }
 
 function xmlEscape(s) {
@@ -78,41 +99,16 @@ function xmlEscape(s) {
 }
 
 function urlEntry(loc) {
-  return `  <url>\n    <loc>${xmlEscape(loc)}</loc>\n  </url>`;
+  return `  <url>
+    <loc>${xmlEscape(loc)}</loc>
+  </url>`;
 }
 
-// --- main ---
-const galleryText = readCsvIfExists(GALLERY_CSV_PATH);
-if (!galleryText) {
-  console.error(`ERROR: Missing ${GALLERY_CSV_PATH}`);
-  process.exit(1);
-}
+// ------------------ MAIN ------------------
 
-const { rows: galleryRows } = parseCsv(galleryText);
-
-// We’ll generate venues from whichever CSV is available:
-// Prefer venue-details CSV (since you’re now maintaining that),
-// otherwise fall back to unique venues from gallery.csv.
-let venueNames = new Set();
-
-const venueDetailsText = readCsvIfExists(VENUE_DETAILS_CSV_PATH);
-if (venueDetailsText) {
-  const { rows: venueRows } = parseCsv(venueDetailsText);
-  // Expect a "venue" column (your folder key)
-  for (const r of venueRows) {
-    if (r.venue) venueNames.add(r.venue);
-  }
-} else {
-  // fallback: derive from gallery.csv
-  for (const r of galleryRows) {
-    if (r.venue) venueNames.add(r.venue);
-  }
-}
-
-// Build list of URLs
 const urls = new Set();
 
-// Core pages (add/remove as you like)
+// ----- Core Pages -----
 [
   "/",
   "/gallery",
@@ -123,22 +119,44 @@ const urls = new Set();
   "/contact",
 ].forEach((p) => urls.add(`${SITE}${p}`));
 
-// Venue detail pages
+// ----- Venue Pages -----
+
+const galleryText = readCsvIfExists(GALLERY_CSV_PATH);
+if (!galleryText) {
+  console.error(`ERROR: Missing ${GALLERY_CSV_PATH}`);
+  process.exit(1);
+}
+
+const { rows: galleryRows } = parseCsv(galleryText);
+
+let venueNames = new Set();
+
+const venueDetailsText = readCsvIfExists(VENUE_DETAILS_CSV_PATH);
+if (venueDetailsText) {
+  const { rows: venueRows } = parseCsv(venueDetailsText);
+  for (const r of venueRows) {
+    if (r.venue) venueNames.add(r.venue);
+  }
+} else {
+  for (const r of galleryRows) {
+    if (r.venue) venueNames.add(r.venue);
+  }
+}
+
 for (const v of venueNames) {
   const slug = slugify(v);
   if (!slug) continue;
   urls.add(`${SITE}/gallery/venue/${slug}`);
 }
 
-// Moment detail pages (derived from gallery.csv "category")
+// ----- Moment Pages -----
+
 const momentNames = new Set();
 
 for (const r of galleryRows) {
   const raw = (r.category || "").trim();
   if (!raw) continue;
 
-  // Support multiple categories in a single cell if you ever add them:
-  // e.g. "Ceremony|Reception" or "Ceremony, Reception"
   const parts = raw
     .split(/[|;,/]/g)
     .map((s) => s.trim())
@@ -153,7 +171,18 @@ for (const m of momentNames) {
   urls.add(`${SITE}/gallery/moment/${slug}`);
 }
 
-// Write sitemap
+// ----- County Pages -----
+
+const countyMeta = readJsonIfExists(COUNTY_META_PATH);
+if (countyMeta) {
+  for (const slug of Object.keys(countyMeta)) {
+    if (!slug) continue;
+    urls.add(`${SITE}/county/${slug}`);
+  }
+}
+
+// ----- Build XML -----
+
 const xml =
   `<?xml version="1.0" encoding="UTF-8"?>\n` +
   `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
@@ -166,5 +195,9 @@ const xml =
 fs.writeFileSync(OUT_PATH, xml, "utf8");
 
 console.log(
-  `✅ sitemap.xml generated: ${OUT_PATH}\n   URLs: ${urls.size}\n   Venues: ${venueNames.size}\n   Moments: ${momentNames.size}`
+  `✅ sitemap.xml generated:
+   URLs: ${urls.size}
+   Venues: ${venueNames.size}
+   Moments: ${momentNames.size}
+   Counties: ${countyMeta ? Object.keys(countyMeta).length : 0}`
 );
