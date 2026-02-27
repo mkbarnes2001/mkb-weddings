@@ -696,42 +696,65 @@ export function GalleryVenueDetail() {
           </div>
         </div>
       </div>
+{/* BREADCRUMBS */}
+<div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
+  <nav aria-label="Breadcrumb" className="flex justify-center">
+    <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
+      {/* Home */}
+      <li>
+        <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
+          Home
+        </Link>
+      </li>
 
-      {/* BREADCRUMBS */}
-      <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
-        <nav aria-label="Breadcrumb" className="flex justify-center">
-          <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
-            <li>
-              <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
-                Home
-              </Link>
-            </li>
-            <li className="opacity-60">
-              <ChevronRight className="w-4 h-4" />
-            </li>
-            <li>
-              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
-                Gallery
-              </Link>
-            </li>
-            <li className="opacity-60">
-              <ChevronRight className="w-4 h-4" />
-            </li>
-            <li>
-              <Link
-                to="/gallery/venues"
-                className="hover:text-neutral-900 underline underline-offset-4"
-              >
-                Venues
-              </Link>
-            </li>
-            <li className="opacity-60">
-              <ChevronRight className="w-4 h-4" />
-            </li>
-            <li className="text-neutral-900">{name}</li>
-          </ol>
-        </nav>
-      </div>
+      <li className="opacity-60">
+        <ChevronRight className="w-4 h-4" />
+      </li>
+
+      {/* Gallery */}
+      <li>
+        <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
+          Gallery
+        </Link>
+      </li>
+
+      <li className="opacity-60">
+        <ChevronRight className="w-4 h-4" />
+      </li>
+
+      {/* Counties Landing */}
+     <li>
+      <Link
+         to={`/wedding-photographer/${countySlug}`}
+          className="hover:text-neutral-900 underline underline-offset-4"
+      >
+      {countyName}
+      </Link>
+      </li>
+
+      <li className="opacity-60">
+        <ChevronRight className="w-4 h-4" />
+      </li>
+
+      {/* Venues Landing */}
+      <li>
+        <Link
+          to="/gallery/venues"
+          className="hover:text-neutral-900 underline underline-offset-4"
+        >
+          Venues
+        </Link>
+      </li>
+
+      <li className="opacity-60">
+        <ChevronRight className="w-4 h-4" />
+      </li>
+
+      {/* Current Venue */}
+      <li className="text-neutral-900">{name}</li>
+    </ol>
+  </nav>
+</div>
 
       {/* VENUE INFO */}
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
