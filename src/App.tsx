@@ -48,7 +48,10 @@ function SiteLayout() {
   return (
     <>
       <Navigation />
-      <Outlet />
+      {/* Push all page content below fixed header */}
+      <main className="pt-24">
+        <Outlet />
+      </main>
       <Footer />
       <ScrollToTop />
     </>
