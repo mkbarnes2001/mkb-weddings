@@ -50,9 +50,8 @@ export function Home() {
   const metaDescription =
     "Cinematic Northern Ireland wedding photographer based in Belfast, covering weddings across Northern Ireland and Ireland. Natural, timeless photography capturing real moments and stunning venues.";
 
-  // Optional: replace with a real public URL image if you have one
-  // (recommended for sharing previews + schema image)
-  const ogImage = "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Killeavy%20castle/couple%20portraits/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp";
+  const ogImage =
+    "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Killeavy%20castle/couple%20portraits/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp";
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -105,13 +104,8 @@ export function Home() {
           "@type": "PostalAddress",
           addressCountry: "GB",
           addressRegion: "Northern Ireland",
-          // Optional (stronger local signal) if you're happy to add it:
-          // addressLocality: "Belfast",
         },
-        sameAs: [
-          "https://www.instagram.com/mkbweddings",
-          "https://www.facebook.com/mkbweddings",
-        ],
+        sameAs: ["https://www.instagram.com/mkbweddings", "https://www.facebook.com/mkbweddings"],
         makesOffer: [
           {
             "@type": "Offer",
@@ -162,10 +156,7 @@ export function Home() {
         jobTitle: "Wedding Photographer",
         url: canonical,
         worksFor: { "@id": "https://www.mkbweddings.co.uk/#business" },
-        sameAs: [
-          "https://www.instagram.com/mkbweddings",
-          "https://www.facebook.com/mkbweddings",
-        ],
+        sameAs: ["https://www.instagram.com/mkbweddings", "https://www.facebook.com/mkbweddings"],
         knowsAbout: [
           "Northern Ireland wedding photography",
           "Ireland wedding photography",
@@ -185,7 +176,6 @@ export function Home() {
         <link rel="canonical" href={canonical} />
         <meta property="og:url" content={canonical} />
 
-        {/* Optional but recommended social tags */}
         <meta property="og:title" content={metaTitle} />
         <meta property="og:description" content={metaDescription} />
         <meta property="og:type" content="website" />
@@ -196,7 +186,6 @@ export function Home() {
         <meta name="twitter:description" content={metaDescription} />
         <meta name="twitter:image" content={ogImage} />
 
-        {/* Structured Data (Homepage only) */}
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
@@ -228,9 +217,7 @@ export function Home() {
                 key={index}
                 onClick={() => setCurrentSlide(index)}
                 className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  index === currentSlide
-                    ? "bg-accent scale-125"
-                    : "bg-white/50 hover:bg-white/70"
+                  index === currentSlide ? "bg-accent scale-125" : "bg-white/50 hover:bg-white/70"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -268,10 +255,7 @@ export function Home() {
         {/* ---------- Gallery / Stories ---------- */}
         <section className="py-20 px-6 md:px-20 max-w-[1440px] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Link
-              to="/gallery"
-              className="group relative overflow-hidden aspect-[4/5] rounded-sm"
-            >
+            <Link to="/gallery" className="group relative overflow-hidden aspect-[4/5] rounded-sm">
               <ImageWithFallback
                 src={heroImage4}
                 alt="Browse wedding photography gallery"
@@ -279,9 +263,7 @@ export function Home() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-10">
                 <Camera size={40} className="text-white mb-4" />
-                <h2 className="text-white text-2xl md:text-2xl font-serif mb-4">
-                  Gallery
-                </h2>
+                <h2 className="text-white text-2xl md:text-2xl font-serif mb-4">Gallery</h2>
                 <p className="text-white/90 mb-6">
                   Browse our portfolio by venue, style and moments from real weddings.
                 </p>
@@ -291,10 +273,7 @@ export function Home() {
               </div>
             </Link>
 
-            <Link
-              to="/blog"
-              className="group relative overflow-hidden aspect-[4/5] rounded-sm"
-            >
+            <Link to="/blog" className="group relative overflow-hidden aspect-[4/5] rounded-sm">
               <ImageWithFallback
                 src={heroImage3}
                 alt="Wedding stories and reviews"
@@ -323,43 +302,28 @@ export function Home() {
               Natural wedding photography, with a bold edge
             </h2>
 
-           <p className="text-primary/80 max-w-3xl mx-auto leading-relaxed text-lg md:text-xl mb-14">
-  I photograph weddings across{" "}
-  <Link
-    to="/wedding-photographer"
-    className="underline underline-offset-4 hover:text-primary transition-colors"
-  >
-    Northern Ireland and Ireland
-  </Link>{" "}
-  with a focus on real moments, genuine connection, and a relaxed experience from start to finish.
-
-  Based in Northern Ireland and also serving weddings throughout Ireland — including Donegal,
-  Cavan, Monaghan, Louth and surrounding counties.
-
-  <br />
-  <br />
-
-  Planning your wedding locally?{" "}
-  <Link
-    to="/wedding-photographer"
-    className="underline underline-offset-4 hover:text-primary transition-colors"
-  >
-    Explore real wedding galleries by county
-  </Link>{" "}
-  to see venues and celebrations near you.
-
-  <br />
-  <br />
-
-  Capturing real, natural moments with energy, emotion and none of that stiff awkward posing!
-</p>
+            {/* ✅ SEO-stronger copy + bold county link */}
+            <p className="text-primary/80 max-w-3xl mx-auto leading-relaxed text-lg md:text-xl mb-14">
+              I’m a{" "}
+              <strong>documentary wedding photographer covering Northern Ireland and Ireland</strong>{" "}
+              — from Belfast and the North Coast, to Donegal, Cavan, Monaghan and Louth. If you’re
+              planning locally, the fastest way to see weddings near you is to{" "}
+              <Link
+                to="/wedding-photographer"
+                className="font-semibold text-primary underline underline-offset-4 hover:text-primary/90 transition-colors"
+              >
+                explore real wedding galleries by county
+              </Link>{" "}
+              (venues, celebrations and full stories).
+              <br />
+              <br />
+              Expect relaxed guidance, real emotion, and none of that stiff awkward posing.
+            </p>
 
             {/* Cards */}
             <div className="grid gap-8 max-w-4xl mx-auto text-center mt-6">
               <div className="rounded-sm border border-primary/10 p-8 pb-12">
-                <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">
-                  Candid, not staged
-                </h3>
+                <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">Candid, not staged</h3>
                 <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed">
                   A documentary approach that lets you enjoy the day, I’ll guide when needed, never
                   take over.
@@ -367,23 +331,28 @@ export function Home() {
               </div>
 
               <div className="rounded-sm border border-primary/10 p-8 pb-12">
-                <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">
-                  Colour + contrast
-                </h3>
+                <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">Colour + contrast</h3>
                 <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed">
                   Clean edits with depth and punch, true-to-life skin tones and vibrant atmosphere.
                 </p>
               </div>
 
               <div className="rounded-sm border border-primary/10 p-8 pb-12">
-                <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">
-                  Built for real life
-                </h3>
+                <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">Built for real life</h3>
                 <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed mb-6">
-                  From prep to dancefloor, your gallery tells the full story, not just the “posed” bits.
+                  From prep to dancefloor, your gallery tells the full story, not just the “posed”
+                  bits.
                 </p>
               </div>
             </div>
+
+            {/* ✅ Subtle button (as requested) */}
+            <Link
+              to="/wedding-photographer"
+              className="inline-block mt-8 text-sm uppercase tracking-wider underline underline-offset-4 hover:text-primary transition-colors"
+            >
+              Browse Wedding Photography by County
+            </Link>
           </div>
         </section>
 
