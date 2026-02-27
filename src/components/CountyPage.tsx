@@ -267,9 +267,12 @@ export function CountyPage() {
       {/* COUNTY INFO */}
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
         {county.secondaryKeywords?.length ? (
-          <p className="text-neutral-600 mb-8">
-            {county.secondaryKeywords.filter(Boolean).join(" • ")}
-          </p>
+  <p className="text-neutral-700 mb-10 font-semibold">
+    {county.secondaryKeywords
+      .map((s) => (s || "").replace(/["\\]+/g, "").trim())
+      .filter(Boolean)
+        .join(" • ")}
+        </p>
         ) : null}
 
         {county.intro ? (
@@ -330,59 +333,59 @@ export function CountyPage() {
       </section>
 
       {/* FAQS */}
-      {faqs.length ? (
-        <section className="max-w-5xl mx-auto px-6 pb-20">
-          <div className="pt-10 border-t border-neutral-200">
-            <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-6 text-center">
-              FAQs
-            </h2>
+          {faqs.length ? (
+  <section className="max-w-5xl mx-auto px-6 pb-28">
+    <div className="pt-16 border-t border-neutral-200">
+      <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-8 text-center">
+        FAQs
+      </h2>
 
-            <div className="space-y-6 text-left max-w-3xl mx-auto">
-              {faqs.map((f, i) => (
-                <details key={i} className="group">
-                  <summary className="cursor-pointer text-neutral-900 font-medium text-lg">
-                    {f.question}
-                  </summary>
-                  <div className="text-neutral-700 mt-3 leading-relaxed">{f.answer}</div>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
+      <div className="space-y-8 text-left max-w-3xl mx-auto">
+        {faqs.map((f, i) => (
+          <details key={i} className="group">
+            <summary className="cursor-pointer text-neutral-900 font-medium text-base md:text-lg">
+              {f.question}
+            </summary>
+            <div className="text-neutral-700 mt-3 leading-relaxed">{f.answer}</div>
+          </details>
+        ))}
+      </div>
+    </div>
+    </section>
+    ) : null}
 
       {/* Explore more counties */}
-      <section className="max-w-5xl mx-auto px-6 pb-40 text-center">
-        <div className="pt-10 border-t border-neutral-200">
-          <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-4">
-            Explore more counties
-          </h2>
-          <p className="text-neutral-600 mb-6">
-            Browse all county pages, then jump into venue galleries.
-          </p>
+     <section className="max-w-5xl mx-auto px-6 pb-40 text-center mt-8">
+  <div className="pt-16 border-t border-neutral-200">
+    <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-4">
+      Explore more counties
+    </h2>
+    <p className="text-neutral-600 mb-8">
+      Browse all county pages, then jump into venue galleries.
+    </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/wedding-photographer"
-              className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
-            >
-              View all counties
-            </Link>
-            <Link
-              to="/gallery"
-              className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
-            >
-              Back to gallery
-            </Link>
-            <Link
-              to="/gallery/venues"
-              className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
-            >
-              Browse venues
-            </Link>
-          </div>
-        </div>
-      </section>
+    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <Link
+        to="/wedding-photographer"
+        className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
+      >
+        View all counties
+      </Link>
+      <Link
+        to="/gallery"
+        className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
+      >
+        Back to gallery
+      </Link>
+      <Link
+        to="/gallery/venues"
+        className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
+      >
+        Browse venues
+      </Link>
+    </div>
+  </div>
+</section>
     </div>
   );
 }
