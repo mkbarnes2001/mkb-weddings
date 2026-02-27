@@ -146,8 +146,9 @@ export function GalleryByVenue() {
   const [venueNameMap, setVenueNameMap] = useState<Record<string, string>>({});
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // ✅ Ensure the user lands at the true top (helps with sticky nav oddities)
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "auto" });
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
 
   useEffect(() => {
@@ -231,9 +232,7 @@ export function GalleryByVenue() {
   // --- SEO / Schema ---
   const canonical = `${SITE_ORIGIN}/gallery/venues`;
 
-  const metaTitle =
-    "Wedding Venue Galleries | Northern Ireland & Ireland | MKB Weddings";
-
+  const metaTitle = "Wedding Venue Galleries | Northern Ireland & Ireland | MKB Weddings";
   const metaDescription =
     "Browse real wedding photography by venue across Northern Ireland and Ireland. Explore venue galleries, style inspiration, and full wedding stories by MKB Weddings.";
 
@@ -242,7 +241,6 @@ export function GalleryByVenue() {
     venueCards[0]?.coverThumb ||
     `${SITE_ORIGIN}/android-chrome-512x512.png`;
 
-  // Breadcrumbs: Home > Counties > Venues
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -259,24 +257,10 @@ export function GalleryByVenue() {
         "@type": "BreadcrumbList",
         "@id": `${canonical}#breadcrumbs`,
         itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: "Home",
-            item: `${SITE_ORIGIN}/`,
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "Counties",
-            item: `${SITE_ORIGIN}/wedding-photographer`,
-          },
-          {
-            "@type": "ListItem",
-            position: 3,
-            name: "Venues",
-            item: canonical,
-          },
+          { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_ORIGIN}/` },
+          { "@type": "ListItem", position: 2, name: "Gallery", item: `${SITE_ORIGIN}/gallery` },
+          { "@type": "ListItem", position: 3, name: "Counties", item: `${SITE_ORIGIN}/wedding-photographer` },
+          { "@type": "ListItem", position: 4, name: "Venues", item: canonical },
         ],
       },
     ],
@@ -305,7 +289,8 @@ export function GalleryByVenue() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    // ✅ KEY FIX: pad the top so breadcrumbs/H1 are not under the sticky menu
+    <div className="min-h-screen bg-white pt-24 md:pt-28">
       <Helmet>
         <title>{metaTitle}</title>
         <meta name="description" content={metaDescription} />
@@ -325,9 +310,8 @@ export function GalleryByVenue() {
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
-      {/* IMPORTANT: top padding so breadcrumb isn't under fixed header */}
-      <div className="max-w-7xl mx-auto px-6 pt-28 pb-12 md:pt-32 md:pb-16">
-        {/* Visible breadcrumbs (internal links) */}
+      <div className="max-w-7xl mx-auto px-6 pb-12 md:pb-16">
+        {/* Visible breadcrumbs */}
         <nav aria-label="Breadcrumb" className="flex justify-center mb-8">
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
             <li>
@@ -335,11 +319,17 @@ export function GalleryByVenue() {
                 Home
               </Link>
             </li>
-
             <li className="opacity-60">
               <ChevronRight className="w-4 h-4" />
             </li>
-
+            <li>
+              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
+                Gallery
+              </Link>
+            </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
             <li>
               <Link
                 to="/wedding-photographer"
@@ -348,16 +338,14 @@ export function GalleryByVenue() {
                 Counties
               </Link>
             </li>
-
             <li className="opacity-60">
               <ChevronRight className="w-4 h-4" />
             </li>
-
             <li className="text-neutral-900">Venues</li>
           </ol>
         </nav>
 
-        {/* SEO copy (H1 + intro text) */}
+        {/* SEO copy */}
         <header className="text-center max-w-3xl mx-auto mb-12">
           <h1 className="text-neutral-900 text-3xl md:text-4xl font-serif mb-4">
             Wedding Venue Galleries
