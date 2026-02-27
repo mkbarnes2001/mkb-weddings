@@ -1,3 +1,4 @@
+// src/components/GalleryByVenue.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
@@ -146,6 +147,10 @@ export function GalleryByVenue() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
 
     (async () => {
@@ -226,11 +231,9 @@ export function GalleryByVenue() {
   // --- SEO / Schema ---
   const canonical = `${SITE_ORIGIN}/gallery/venues`;
 
-  // Title ~50–60 chars, clear intent + geo
   const metaTitle =
     "Wedding Venue Galleries | Northern Ireland & Ireland | MKB Weddings";
 
-  // Description ~150–160 chars; includes NI + Ireland + what user gets
   const metaDescription =
     "Browse real wedding photography by venue across Northern Ireland and Ireland. Explore venue galleries, style inspiration, and full wedding stories by MKB Weddings.";
 
@@ -239,6 +242,7 @@ export function GalleryByVenue() {
     venueCards[0]?.coverThumb ||
     `${SITE_ORIGIN}/android-chrome-512x512.png`;
 
+  // Breadcrumbs: Home > Counties > Venues
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -264,8 +268,8 @@ export function GalleryByVenue() {
           {
             "@type": "ListItem",
             position: 2,
-            name: "Gallery",
-            item: `${SITE_ORIGIN}/gallery`,
+            name: "Counties",
+            item: `${SITE_ORIGIN}/wedding-photographer`,
           },
           {
             "@type": "ListItem",
@@ -289,7 +293,10 @@ export function GalleryByVenue() {
 
           <h1 className="text-3xl mb-3">Gallery loading error</h1>
           <p className="text-neutral-600 mb-6">{loadError}</p>
-          <Link to="/gallery" className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4">
+          <Link
+            to="/gallery"
+            className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4"
+          >
             Back to Gallery
           </Link>
         </div>
@@ -318,7 +325,8 @@ export function GalleryByVenue() {
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
-      <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
+      {/* IMPORTANT: top padding so breadcrumb isn't under fixed header */}
+      <div className="max-w-7xl mx-auto px-6 pt-28 pb-12 md:pt-32 md:pb-16">
         {/* Visible breadcrumbs (internal links) */}
         <nav aria-label="Breadcrumb" className="flex justify-center mb-8">
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
@@ -327,17 +335,24 @@ export function GalleryByVenue() {
                 Home
               </Link>
             </li>
+
             <li className="opacity-60">
               <ChevronRight className="w-4 h-4" />
             </li>
+
             <li>
-              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
-                Gallery
+              <Link
+                to="/wedding-photographer"
+                className="hover:text-neutral-900 underline underline-offset-4"
+              >
+                Counties
               </Link>
             </li>
+
             <li className="opacity-60">
               <ChevronRight className="w-4 h-4" />
             </li>
+
             <li className="text-neutral-900">Venues</li>
           </ol>
         </nav>
