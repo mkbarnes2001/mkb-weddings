@@ -13,9 +13,8 @@ type CountyMeta = {
   seoTitle?: string;
   seoDescription?: string;
 
-  // from your updated build-county-meta script:
-  heroImageUrl?: string;     // full hero
-  heroThumbUrl?: string;     // thumb hero for cards (recommended)
+  heroImageUrl?: string; // full hero
+  heroThumbUrl?: string; // thumb hero for cards
 };
 
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
@@ -66,12 +65,10 @@ export function CountiesLanding() {
   }, []);
 
   const counties = useMemo(() => {
-    const arr = Object.entries(metaMap)
+    return Object.entries(metaMap)
       .map(([slug, v]) => ({ ...v, slug: safeSlug(v.slug || slug) }))
       .filter((c) => c.slug && c.county)
       .sort(byCountyName);
-
-    return arr;
   }, [metaMap]);
 
   const canonical = `${SITE_ORIGIN}/wedding-photographer`;
@@ -94,11 +91,11 @@ export function CountiesLanding() {
         <meta property="og:type" content="website" />
       </Helmet>
 
-      {/* HERO (matches GalleryVenueDetail / CountyPage style) */}
+      {/* HERO */}
       <div className="relative h-[60vh] min-h-[420px]">
         <ImageWithFallback
           src={HERO_IMAGE}
-          alt="Wedding Photographer by County"
+          alt="Northern Ireland & Ireland wedding photography"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -113,8 +110,9 @@ export function CountiesLanding() {
               Back to Home
             </Link>
 
-            <h1 className="text-white text-5xl md:text-6xl mb-4">
-              Wedding Photographer by County
+            {/* ✅ new hero title + reduced size */}
+            <h1 className="text-white text-4xl md:text-5xl mb-4">
+              Northern Ireland &amp; Ireland Wedding Photography
             </h1>
 
             <div className="text-white/85 text-sm">
@@ -125,7 +123,7 @@ export function CountiesLanding() {
       </div>
 
       {/* BREADCRUMBS */}
-      <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
+      <div className="max-w-7xl mx-auto px-6 pt-6 pb-12">
         <nav aria-label="Breadcrumb" className="flex justify-center">
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
             <li>
@@ -136,24 +134,37 @@ export function CountiesLanding() {
             <li className="opacity-60">
               <ChevronRight className="w-4 h-4" />
             </li>
-            <li className="text-neutral-900">Wedding Photographer</li>
+            <li>
+              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
+                Gallery
+              </Link>
+            </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
+            <li className="text-neutral-900">Counties</li>
           </ol>
         </nav>
       </div>
 
-      {/* CONTENT */}
-      <section className="max-w-7xl mx-auto px-6 pb-24">
-        {loadError ? (
-          <div className="text-center text-red-600">{loadError}</div>
-        ) : null}
+      {/* ✅ Intro text below breadcrumbs (same vibe/spacing as CountyPage) */}
+      <section className="max-w-5xl mx-auto px-6 pt-6 pb-10 text-center">
+        <div className="text-neutral-700 leading-relaxed text-lg space-y-5">
+          <p>
+            Browse real wedding photography by county across Northern Ireland and Ireland. Use these
+            galleries to explore the various venues within each county.
+          </p>
+        </div>
+      </section>
+
+      {/* CONTENT (✅ added spacing so thumbnails don’t butt up against breadcrumbs) */}
+      <section className="max-w-7xl mx-auto px-6 pb-24 pt-6">
+        {loadError ? <div className="text-center text-red-600">{loadError}</div> : null}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {counties.map((c) => {
-            // Use thumb for cards if you have it.
             const cardImage =
-              (c.heroThumbUrl || "").trim() ||
-              (c.heroImageUrl || "").trim() ||
-              FALLBACK_CARD;
+              (c.heroThumbUrl || "").trim() || (c.heroImageUrl || "").trim() || FALLBACK_CARD;
 
             const countryLabel = (c.country || "").trim();
 
@@ -172,11 +183,9 @@ export function CountiesLanding() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
                   <div className="absolute inset-x-0 bottom-0 p-4">
-                    <div className="text-white text-xl font-serif leading-tight">
-                      {c.county}
-                    </div>
+                    <div className="text-white text-xl font-serif leading-tight">{c.county}</div>
 
-                    {/* country text in WHITE (as requested) */}
+                    {/* ✅ country text white */}
                     {countryLabel ? (
                       <div className="text-white/90 text-sm mt-1">{countryLabel}</div>
                     ) : null}

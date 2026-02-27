@@ -9,7 +9,7 @@ type CountyVenue = {
   venueSlug: string;
   venueName: string;
   town?: string;
-  url: string; // e.g. "/gallery/venue/edenmore"
+  url: string;
 };
 
 type CountyFaq = {
@@ -20,7 +20,7 @@ type CountyFaq = {
 type CountyMeta = {
   slug: string;
   country?: string;
-  countryCode?: string; // keep flexible: "UK", "GB", "ROI", "IE" etc.
+  countryCode?: string;
   county: string;
 
   primaryKeyword?: string;
@@ -36,13 +36,11 @@ type CountyMeta = {
   faqs?: CountyFaq[];
   venues?: CountyVenue[];
 
-  // Optional (if you add it later):
   heroImageUrl?: string;
 };
 
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 
-// Same fallback you used on venue pages
 const FALLBACK_HERO =
   "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
 
@@ -79,10 +77,9 @@ export function CountyPage() {
           return;
         }
 
-        // If JSON is invalid, this throws — we surface a message instead of silent failure
         const json = (await res.json()) as Record<string, CountyMeta>;
         if (!cancelled) setMetaMap(json || {});
-      } catch (e: any) {
+      } catch {
         if (!cancelled) {
           setLoadError(
             "county-meta.json could not be parsed. Check for broken quotes/commas in the JSON."
@@ -101,19 +98,18 @@ export function CountyPage() {
     return `${SITE_ORIGIN}/wedding-photographer/${safe}`;
   }, [slug]);
 
-  // Loading / not-found states
   if (!countySlug) {
-  return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-6">
-      <div className="text-center">
-        <h1 className="text-3xl mb-3">County not found</h1>
-        <Link to="/wedding-photographer" className="text-neutral-600 hover:text-neutral-900">
-          Back to Counties
-        </Link>
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+        <div className="text-center">
+          <h1 className="text-3xl mb-3">County not found</h1>
+          <Link to="/wedding-photographer" className="text-neutral-600 hover:text-neutral-900">
+            Back to Counties
+          </Link>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   if (!county) {
     return (
@@ -135,15 +131,14 @@ export function CountyPage() {
 
   const venues = county.venues || [];
   const faqs = county.faqs || [];
-
   const locationLine = [county.county, county.country].filter(Boolean).join(", ");
-
   const heroImage = (county.heroImageUrl || "").trim() || FALLBACK_HERO;
 
-  // --- Breadcrumbs (matches GalleryVenueDetail format) ---
+  // ✅ Breadcrumbs now: Home → Gallery → Counties → County
   const breadcrumbItems = [
     { name: "Home", item: `${SITE_ORIGIN}/` },
-    { name: "Wedding Photographer", item: `${SITE_ORIGIN}/wedding-photographer` },
+    { name: "Gallery", item: `${SITE_ORIGIN}/gallery` },
+    { name: "Counties", item: `${SITE_ORIGIN}/wedding-photographer` },
     { name: county.county, item: canonical },
   ].map((x, idx) => ({
     "@type": "ListItem",
@@ -194,9 +189,13 @@ export function CountyPage() {
         <script type="application/ld+json">{JSON.stringify(pageJsonLd)}</script>
       </Helmet>
 
-      {/* HERO (match GalleryVenueDetail) */}
+      {/* HERO */}
       <div className="relative h-[60vh] min-h-[420px]">
-        <ImageWithFallback src={heroImage} alt={county.county} className="w-full h-full object-cover" />
+        <ImageWithFallback
+          src={heroImage}
+          alt={county.county}
+          className="w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
         <div className="absolute inset-0 flex items-end">
@@ -229,7 +228,7 @@ export function CountyPage() {
         </div>
       </div>
 
-      {/* BREADCRUMBS (match GalleryVenueDetail) */}
+      {/* BREADCRUMBS */}
       <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
         <nav aria-label="Breadcrumb" className="flex justify-center">
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
@@ -242,11 +241,19 @@ export function CountyPage() {
               <ChevronRight className="w-4 h-4" />
             </li>
             <li>
+              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
+                Gallery
+              </Link>
+            </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
+            <li>
               <Link
                 to="/wedding-photographer"
                 className="hover:text-neutral-900 underline underline-offset-4"
               >
-                Wedding Photographer
+                Counties
               </Link>
             </li>
             <li className="opacity-60">
@@ -257,7 +264,7 @@ export function CountyPage() {
         </nav>
       </div>
 
-      {/* COUNTY INFO (typography + spacing aligned to venue page) */}
+      {/* COUNTY INFO */}
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
         {county.secondaryKeywords?.length ? (
           <p className="text-neutral-600 mb-8">
@@ -296,7 +303,7 @@ export function CountyPage() {
         ) : null}
       </section>
 
-      {/* VENUES GRID (match venue "Explore more venues" cards) */}
+      {/* VENUES GRID */}
       <section className="max-w-7xl mx-auto px-6 pb-20">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-6 text-center">
@@ -324,29 +331,27 @@ export function CountyPage() {
 
       {/* FAQS */}
       {faqs.length ? (
-        <section className="max-w-5xl mx-auto px-6 pb-40">
+        <section className="max-w-5xl mx-auto px-6 pb-20">
           <div className="pt-10 border-t border-neutral-200">
             <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-6 text-center">
               FAQs
             </h2>
-  <div className="space-y-6 text-left max-w-3xl mx-auto">
-    {faqs.map((f, i) => (
-      <details key={i} className="group">
-        <summary className="cursor-pointer text-neutral-900 font-medium text-lg">
-        {f.question}
-        </summary>
-        <div className="text-neutral-700 mt-3 leading-relaxed">
-        {f.answer}
-      </div>
-       </details>
-      ))}
-    </div>
+
+            <div className="space-y-6 text-left max-w-3xl mx-auto">
+              {faqs.map((f, i) => (
+                <details key={i} className="group">
+                  <summary className="cursor-pointer text-neutral-900 font-medium text-lg">
+                    {f.question}
+                  </summary>
+                  <div className="text-neutral-700 mt-3 leading-relaxed">{f.answer}</div>
+                </details>
+              ))}
+            </div>
           </div>
         </section>
-      ) : (
-        <div className="pb-40" />
-      )}
-   {/* Explore more counties */}
+      ) : null}
+
+      {/* Explore more counties */}
       <section className="max-w-5xl mx-auto px-6 pb-40 text-center">
         <div className="pt-10 border-t border-neutral-200">
           <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-4">
@@ -362,6 +367,12 @@ export function CountyPage() {
               className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
             >
               View all counties
+            </Link>
+            <Link
+              to="/gallery"
+              className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
+            >
+              Back to gallery
             </Link>
             <Link
               to="/gallery/venues"
