@@ -21,7 +21,7 @@ export function GalleryLanding() {
   const mainTiles = [
     // ✅ 1) Counties FIRST
     {
-      title: "Explore by county",
+      title: "Explore by County",
       link: "/wedding-photographer",
       image: countiesThumb,
       description: "Browse wedding galleries by county",
