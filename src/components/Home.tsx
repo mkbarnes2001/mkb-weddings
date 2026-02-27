@@ -323,12 +323,36 @@ export function Home() {
               Natural wedding photography, with a bold edge
             </h2>
 
-            <p className="text-primary/80 max-w-3xl mx-auto leading-relaxed text-lg md:text-xl mb-14">
-              I photograph weddings across Northern Ireland, Ireland and beyond with a focus on real moments,
-              genuine connection, and a relaxed experience from start to finish.
-              Based in Northern Ireland and also serving weddings throughout Ireland — including Donegal, Cavan, Monaghan, Louth, and surrounding counties.
-              Capturing real, natural moments with energy, emotion and none of that stiff awkward posing!
-            </p>
+           <p className="text-primary/80 max-w-3xl mx-auto leading-relaxed text-lg md:text-xl mb-14">
+  I photograph weddings across{" "}
+  <Link
+    to="/wedding-photographer"
+    className="underline underline-offset-4 hover:text-primary transition-colors"
+  >
+    Northern Ireland and Ireland
+  </Link>{" "}
+  with a focus on real moments, genuine connection, and a relaxed experience from start to finish.
+
+  Based in Northern Ireland and also serving weddings throughout Ireland — including Donegal,
+  Cavan, Monaghan, Louth and surrounding counties.
+
+  <br />
+  <br />
+
+  Planning your wedding locally?{" "}
+  <Link
+    to="/wedding-photographer"
+    className="underline underline-offset-4 hover:text-primary transition-colors"
+  >
+    Explore real wedding galleries by county
+  </Link>{" "}
+  to see venues and celebrations near you.
+
+  <br />
+  <br />
+
+  Capturing real, natural moments with energy, emotion and none of that stiff awkward posing!
+</p>
 
             {/* Cards */}
             <div className="grid gap-8 max-w-4xl mx-auto text-center mt-6">
