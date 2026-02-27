@@ -13,6 +13,7 @@ type CountyMeta = {
   seoTitle?: string;
   seoDescription?: string;
 
+  // from build-county-meta
   heroImageUrl?: string; // full hero
   heroThumbUrl?: string; // thumb hero for cards
 };
@@ -75,7 +76,7 @@ export function CountiesLanding() {
 
   const title = "Wedding Photographer by County | Northern Ireland & Ireland | MKB Weddings";
   const description =
-    "Browse wedding photography by county across Northern Ireland and Ireland. Explore venues and real wedding galleries by MKB Weddings.";
+    "Browse real wedding photography by county across Northern Ireland and Ireland. Use these galleries to explore the various venues within each county.";
 
   return (
     <div className="min-h-screen bg-white">
@@ -95,7 +96,7 @@ export function CountiesLanding() {
       <div className="relative h-[60vh] min-h-[420px]">
         <ImageWithFallback
           src={HERO_IMAGE}
-          alt="Northern Ireland & Ireland wedding photography"
+          alt="Northern Ireland & Ireland Wedding Photography"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -103,15 +104,14 @@ export function CountiesLanding() {
         <div className="absolute inset-0 flex items-end">
           <div className="w-full max-w-7xl mx-auto px-6 pb-20 text-center">
             <Link
-              to="/"
+              to="/gallery"
               className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center"
             >
               <ArrowLeft className="w-5 h-5" />
-              Back to Home
+              Back to Gallery
             </Link>
 
-            {/* ✅ new hero title + reduced size */}
-            <h1 className="text-white text-4xl md:text-5xl mb-4">
+            <h1 className="text-white text-4xl md:text-5xl mb-4 font-serif">
               Northern Ireland &amp; Ireland Wedding Photography
             </h1>
 
@@ -123,7 +123,7 @@ export function CountiesLanding() {
       </div>
 
       {/* BREADCRUMBS */}
-      <div className="max-w-7xl mx-auto px-6 pt-6 pb-12">
+      <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
         <nav aria-label="Breadcrumb" className="flex justify-center">
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
             <li>
@@ -147,24 +147,24 @@ export function CountiesLanding() {
         </nav>
       </div>
 
-      {/* ✅ Intro text below breadcrumbs (same vibe/spacing as CountyPage) */}
-      <section className="max-w-5xl mx-auto px-6 pt-6 pb-10 text-center">
-        <div className="text-neutral-700 leading-relaxed text-lg space-y-5">
-          <p>
-            Browse real wedding photography by county across Northern Ireland and Ireland. Use these
-            galleries to explore the various venues within each county.
-          </p>
-        </div>
+      {/* INTRO TEXT (same spacing/feel as CountyPage) */}
+      <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
+        <p className="text-neutral-700 leading-relaxed text-lg">
+          Browse real wedding photography by county across Northern Ireland and Ireland. Use these
+          galleries to explore the various venues within each county.
+        </p>
       </section>
 
-      {/* CONTENT (✅ added spacing so thumbnails don’t butt up against breadcrumbs) */}
-      <section className="max-w-7xl mx-auto px-6 pb-24 pt-6">
-        {loadError ? <div className="text-center text-red-600">{loadError}</div> : null}
+      {/* SPACE between breadcrumbs/intro and tiles */}
+      <div className="max-w-7xl mx-auto px-6 pb-24 pt-6">
+        {loadError ? <div className="text-center text-red-600 mb-8">{loadError}</div> : null}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {counties.map((c) => {
             const cardImage =
-              (c.heroThumbUrl || "").trim() || (c.heroImageUrl || "").trim() || FALLBACK_CARD;
+              (c.heroThumbUrl || "").trim() ||
+              (c.heroImageUrl || "").trim() ||
+              FALLBACK_CARD;
 
             const countryLabel = (c.country || "").trim();
 
@@ -172,32 +172,38 @@ export function CountiesLanding() {
               <Link
                 key={c.slug}
                 to={`/wedding-photographer/${encodeURIComponent(c.slug)}`}
-                className="group overflow-hidden rounded-lg border border-neutral-200 hover:border-neutral-300 transition-colors"
+                className="group relative aspect-[4/3] overflow-hidden rounded-lg"
               >
-                <div className="relative aspect-[4/3]">
-                  <ImageWithFallback
-                    src={cardImage}
-                    alt={c.county}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <ImageWithFallback
+                  src={cardImage}
+                  alt={c.county}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-                  <div className="absolute inset-x-0 bottom-0 p-4">
-                    <div className="text-white text-xl font-serif leading-tight">{c.county}</div>
+                <div className="absolute inset-0 flex flex-col justify-end p-8">
+                  <h2 className="text-white text-2xl md:text-3xl mb-2 font-serif leading-tight">
+                    {c.county}
+                  </h2>
 
-                    {/* ✅ country text white */}
-                    {countryLabel ? (
-                      <div className="text-white/90 text-sm mt-1">{countryLabel}</div>
-                    ) : null}
+                  {/* country text in WHITE */}
+                  {countryLabel ? (
+                    <p className="text-white/90 text-sm mb-4">{countryLabel}</p>
+                  ) : (
+                    <div className="mb-4" />
+                  )}
 
-                    {/* ✅ No description text (removed) */}
+                  {/* Match GalleryLanding "Explore" row */}
+                  <div className="flex items-center text-white">
+                    <span className="text-sm uppercase tracking-wider">Explore</span>
+                    <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-2" />
                   </div>
                 </div>
               </Link>
             );
           })}
         </div>
-      </section>
+      </div>
     </div>
   );
 }
