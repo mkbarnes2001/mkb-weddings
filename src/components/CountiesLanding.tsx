@@ -147,7 +147,7 @@ export function CountiesLanding() {
         </nav>
       </div>
 
-      {/* INTRO TEXT (same spacing/feel as CountyPage) */}
+      {/* INTRO TEXT */}
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
         <p className="text-neutral-700 leading-relaxed text-lg">
           Browse real wedding photography by county across Northern Ireland and Ireland. Use these
@@ -155,8 +155,8 @@ export function CountiesLanding() {
         </p>
       </section>
 
-      {/* SPACE between breadcrumbs/intro and tiles */}
-      <div className="max-w-7xl mx-auto px-6 pb-24 pt-6">
+      {/* TILES (✅ more bottom space so footer doesn't touch) */}
+      <div className="max-w-7xl mx-auto px-6 pb-40 pt-6">
         {loadError ? <div className="text-center text-red-600 mb-8">{loadError}</div> : null}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -186,14 +186,12 @@ export function CountiesLanding() {
                     {c.county}
                   </h2>
 
-                  {/* country text in WHITE */}
                   {countryLabel ? (
                     <p className="text-white/90 text-sm mb-4">{countryLabel}</p>
                   ) : (
                     <div className="mb-4" />
                   )}
 
-                  {/* Match GalleryLanding "Explore" row */}
                   <div className="flex items-center text-white">
                     <span className="text-sm uppercase tracking-wider">Explore</span>
                     <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-2" />
