@@ -1,85 +1,53 @@
-// src/components/CountiesLanding.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
-type CountyVenue = {
-  venueSlug: string;
-  venueName: string;
-  town?: string;
-  url: string;
-};
-
 type CountyMeta = {
   slug: string;
-  country?: string;
-  countryCode?: string;
   county: string;
-  primaryKeyword?: string;
-  secondaryKeywords?: string[];
+  country?: string;
   seoTitle?: string;
   seoDescription?: string;
-  intro?: string;
-  whySection?: string;
-  travelSection?: string;
-  faqs?: { question: string; answer: string }[];
-  venues?: CountyVenue[];
+
+  // ✅ expected from build-county-meta.json
+  heroImageUrl?: string; // full (optional here)
+  heroThumbUrl?: string; // thumb (used on landing)
 };
 
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 
-// ✅ Set your county landing route here
-const COUNTY_LANDING_PATH = "/wedding-photographer";
+const FALLBACK_THUMB =
+  "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1200&q=80";
 
-// ✅ Set your county detail route prefix here
-const COUNTY_DETAIL_PREFIX = "/wedding-photographer";
-
-// ---------------------------------------------------------------------------
-// THUMBNAIL IMAGES FOR EACH COUNTY (EDIT HERE)
-// Keys must match county slug in county-meta.json (e.g. "co-down").
-//
-// You can use:
-// - a hosted image URL, OR
-// - a file in /public (e.g. "/img/counties/co-down.jpg").
-//
-// Tip: pick 1 strong hero image per county (coastline/landmark/venue).
-// ---------------------------------------------------------------------------
-const COUNTY_THUMBS: Record<string, string> = {
-  // "co-down": "/img/counties/co-down.jpg",
-  // "co-antrim": "/img/counties/co-antrim.jpg",
-  // "co-londonderry": "/img/counties/co-londonderry.jpg",
-  // "co-fermanagh": "/img/counties/co-fermanagh.jpg",
-  // "co-tyrone": "/img/counties/co-tyrone.jpg",
-  // "co-donegal": "/img/counties/co-donegal.jpg",
-  // "co-cavan": "/img/counties/co-cavan.jpg",
-  // "co-monaghan": "/img/counties/co-monaghan.jpg",
-  // "co-louth": "/img/counties/co-louth.jpg",
-  // "co-meath": "/img/counties/co-meath.jpg",
-};
-
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
-
-function safeText(s: unknown) {
-  return (typeof s === "string" ? s : "").trim();
+function safeSlug(input: string) {
+  return (input || "").trim().toLowerCase().replace(/\/+$/, "");
 }
 
 export function CountiesLanding() {
-  const [countyMap, setCountyMap] = useState<Record<string, CountyMeta>>({});
+  const [metaMap, setMetaMap] = useState<Record<string, CountyMeta>>({});
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
       try {
+        setLoadError("");
         const res = await fetch("/county-meta.json", { cache: "no-store" });
-        if (!res.ok) return;
+        if (!res.ok) {
+          if (!cancelled) setLoadError(`Failed to load county-meta.json (${res.status})`);
+          return;
+        }
         const json = (await res.json()) as Record<string, CountyMeta>;
-        if (!cancelled) setCountyMap(json || {});
+        if (!cancelled) setMetaMap(json || {});
       } catch {
-        // silent
+        if (!cancelled) setLoadError("county-meta.json could not be loaded/parsed.");
       }
     })();
 
@@ -89,77 +57,107 @@ export function CountiesLanding() {
   }, []);
 
   const counties = useMemo(() => {
-    const list = Object.values(countyMap || {})
-      .filter((c) => safeText(c.slug) && safeText(c.county))
-      .map((c) => {
-        const slug = safeText(c.slug);
-        const countyName = safeText(c.county) || slug;
-        const description =
-          safeText(c.seoDescription) ||
-          `Explore real wedding photography across ${countyName}.`;
+    const arr = Object.values(metaMap || {}).filter((c) => c?.slug);
+    // sort by county name
+    return arr.sort((a, b) => (a.county || "").localeCompare(b.county || ""));
+  }, [metaMap]);
 
-        const image = COUNTY_THUMBS[slug] || FALLBACK_IMAGE;
+  const canonical = `${SITE_ORIGIN}/wedding-photographer`;
 
-        return {
-          slug,
-          countyName,
-          description,
-          image,
-          link: `${COUNTY_DETAIL_PREFIX}/${encodeURIComponent(slug)}`,
-        };
-      });
-
-    // Alphabetical by county name
-    return list.sort((a, b) => a.countyName.localeCompare(b.countyName));
-  }, [countyMap]);
-
-  const title = "Wedding Photographer by County | Northern Ireland & Ireland | MKB Weddings";
+  const title = "Wedding Photographer Northern Ireland & Ireland | Counties | MKB Weddings";
   const description =
-    "Browse wedding photography by county across Northern Ireland and Ireland — explore venue galleries and real weddings photographed by MKB Weddings.";
-  const canonical = `${SITE_ORIGIN}${COUNTY_LANDING_PATH}`;
+    "Browse wedding photography by county across Northern Ireland and Ireland. Explore venues, real wedding galleries, and local coverage by MKB Weddings.";
 
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
-
         <link rel="canonical" href={canonical} />
+
         <meta property="og:url" content={canonical} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:type" content="website" />
       </Helmet>
 
-      {/* Hero Section (matches GalleryLanding tile style) */}
-      <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {counties.map((c) => (
-            <Link
-              key={c.slug}
-              to={c.link}
-              className="group relative aspect-[4/3] overflow-hidden rounded-lg"
-            >
-              <ImageWithFallback
-                src={c.image}
-                alt={c.countyName}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-              <div className="absolute inset-0 flex flex-col justify-end p-8">
-                <h2 className="text-white text-2xl md:text-3xl mb-2">{c.countyName}</h2>
-                <div className="flex items-center text-white">
-                  <span className="text-sm uppercase tracking-wider">Explore</span>
-                  <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-2" />
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+      {/* HERO (matches your Venue/County styling) */}
+      <div className="relative h-[60vh] min-h-[420px]">
+        <ImageWithFallback
+          src={FALLBACK_THUMB}
+          alt="Wedding photography across Northern Ireland and Ireland"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-        {!counties.length ? (
-          <div className="text-center text-neutral-600 mt-10">Loading counties…</div>
-        ) : null}
+        <div className="absolute inset-0 flex items-end">
+          <div className="w-full max-w-7xl mx-auto px-6 pb-20 text-center">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Home
+            </Link>
+
+            <h1 className="text-white text-5xl md:text-6xl mb-4">Wedding Photographer by County</h1>
+
+            <div className="text-white/85 text-sm">
+              {counties.length} {counties.length === 1 ? "county" : "counties"}
+            </div>
+
+            {loadError ? (
+              <div className="mt-4 text-sm text-red-200">{loadError}</div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      {/* GRID */}
+      <div className="max-w-7xl mx-auto px-6 pt-12 pb-28">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {counties.map((c) => {
+            const slug = safeSlug(c.slug);
+
+            // ✅ THIS IS THE ONLY LINE YOU MAY NEED TO ADJUST IF YOUR FIELD NAME DIFFERS
+            const thumb = (c.heroThumbUrl || "").trim() || (c.heroImageUrl || "").trim() || FALLBACK_THUMB;
+
+            const countyName = (c.county || slug).trim();
+            const country = (c.country || "").trim();
+            const subtitle = [country].filter(Boolean).join(" • ");
+
+            return (
+              <Link
+                key={slug}
+                to={`/wedding-photographer/${encodeURIComponent(slug)}`}
+                className="group rounded-xl overflow-hidden border border-neutral-200 hover:border-neutral-300 transition-colors"
+              >
+                <div className="relative aspect-[4/3]">
+                  <ImageWithFallback
+                    src={thumb}
+                    alt={`${countyName} wedding photography`}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+
+                  <div className="absolute inset-x-0 bottom-0 p-5">
+                    <div className="text-white text-xl md:text-2xl font-serif leading-tight">
+                      {countyName}
+                    </div>
+                    {subtitle ? <div className="text-white/85 text-sm mt-1">{subtitle}</div> : null}
+                  </div>
+                </div>
+
+                <div className="p-5">
+                  <div className="text-neutral-700 text-sm leading-relaxed line-clamp-3">
+                    {(c.seoDescription || "").trim() ||
+                      `Explore venues and real wedding galleries across ${countyName}.`}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
