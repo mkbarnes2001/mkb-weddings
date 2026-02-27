@@ -333,7 +333,7 @@ export function CountyPage() {
       {faqs.length ? (
         <section className="max-w-5xl mx-auto px-6 pb-20">
           <div className="pt-10 border-t border-neutral-200">
-            <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-6 text-center">
+            <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-6 text-center">
               FAQs
             </h2>
 
@@ -354,7 +354,7 @@ export function CountyPage() {
       {/* Explore more counties */}
       <section className="max-w-5xl mx-auto px-6 pb-40 text-center">
         <div className="pt-10 border-t border-neutral-200">
-          <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-4">
+          <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-4">
             Explore more counties
           </h2>
           <p className="text-neutral-600 mb-6">
