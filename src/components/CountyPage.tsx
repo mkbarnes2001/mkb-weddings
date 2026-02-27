@@ -282,7 +282,7 @@ export function CountyPage() {
 
         {county.whySection ? (
           <div className="text-neutral-700 leading-relaxed text-lg space-y-5 mb-10">
-            <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-4">
+            <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-4">
               Why get married in {county.county}?
             </h2>
             {county.whySection.split(/\n{2,}/).map((p, i) => (
@@ -293,7 +293,7 @@ export function CountyPage() {
 
         {county.travelSection ? (
           <div className="text-neutral-700 leading-relaxed text-lg space-y-5 mb-10">
-            <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-4">
+            <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-4">
               Travel &amp; coverage
             </h2>
             {county.travelSection.split(/\n{2,}/).map((p, i) => (
@@ -306,7 +306,7 @@ export function CountyPage() {
       {/* VENUES GRID */}
       <section className="max-w-7xl mx-auto px-6 pb-20">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-6 text-center">
+          <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-6 text-center">
             Wedding venues in {county.county}
           </h2>
 
