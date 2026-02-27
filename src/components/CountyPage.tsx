@@ -267,7 +267,7 @@ export function CountyPage() {
       {/* COUNTY INFO */}
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
         {county.secondaryKeywords?.length ? (
-  <p className="text-neutral-700 mb-10 font-semibold">
+  <p className="text-neutral-700 mb-12 font-semibold">
     {county.secondaryKeywords
       .map((s) => (s || "").replace(/["\\]+/g, "").trim())
       .filter(Boolean)
