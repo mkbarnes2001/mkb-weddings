@@ -1,7 +1,3 @@
-# Redirect apex -> www (MUST BE FIRST)
-https://mkbweddings.co.uk/*  https://www.mkbweddings.co.uk/:splat  301!
-http://mkbweddings.co.uk/*   https://www.mkbweddings.co.uk/:splat  301!
-
 # Always serve these as-is
 /robots.txt       /robots.txt       200
 /sitemap.xml      /sitemap.xml      200
@@ -15,27 +11,11 @@ http://mkbweddings.co.uk/*   https://www.mkbweddings.co.uk/:splat  301!
 /android-chrome-192x192.png  /android-chrome-192x192.png  200
 /android-chrome-512x512.png  /android-chrome-512x512.png  200
 
-# Data files
+# Data files (if you still want these publicly accessible)
 /gallery.csv           /gallery.csv           200
 /galleryvenuedesc.csv  /galleryvenuedesc.csv  200
-
-# Old WordPress/blog redirects
-/1939/killeavy-castle-wedding-photographer/  /gallery/venues  301
-/2251/shannen-daniel-at-orange-tree-house-greyabbey/  /gallery/venues  301
-/2854/killeavy-castle-wedding-photography/  /gallery/venues  301
-/4469/orange-tree-house-wedding-photographer/  /gallery/venues  301
-/4371/edenmore-house-moira-wedding-photography/  /gallery/venues  301
-/2591/crover-house-cavan-wedding-photography/  /gallery/venues  301
-/tag/irishweddings/page/2/  /gallery/venues  301
-/blog*         /gallery/venues  301
-/wedding-blog/  /gallery/venues  301
-/contact-me  /contact  301
-/contact-us  /contact  301
-/about-me    /about    301
-/wedding-photographers/  /  301
-
-# Assets (optional; usually not needed, but harmless)
-/assets/*  /assets/:splat  200!
+/venue-meta.json       /venue-meta.json       200
+/county-meta.json      /county-meta.json      200
 
 # SPA fallback MUST BE LAST
 /*  /index.html  200
