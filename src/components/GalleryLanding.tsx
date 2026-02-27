@@ -14,18 +14,33 @@ export function GalleryLanding() {
   const description =
     "Browse real wedding photography from venues across Northern Ireland and Ireland. View ceremony, reception, getting ready and couple portraits captured by MKB Weddings.";
 
+  // ✅ New hosted tile image
+  const countiesThumb =
+    "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp";
+
   const mainTiles = [
+    // ✅ 1) Counties FIRST
     {
-      title: "Wedding Moments",
-      link: "/gallery/moments",
-      image: momentsImage,
-      description: "Explore wedding day highlights",
+      title: "Explore by county",
+      link: "/wedding-photographer",
+      image: countiesThumb,
+      description: "Browse wedding galleries by county",
     },
+
+    // ✅ 2) Venues SECOND
     {
       title: "Venues",
       link: "/gallery/venues",
       image: venueImage,
       description: "Browse weddings by location",
+    },
+
+    // ✅ then moments, flash, stories/reviews
+    {
+      title: "Wedding Moments",
+      link: "/gallery/moments",
+      image: momentsImage,
+      description: "Explore wedding day highlights",
     },
     {
       title: "Creative Flash",
@@ -39,7 +54,6 @@ export function GalleryLanding() {
       image: storiesImage,
       description: "Real wedding love stories",
     },
-   
   ];
 
   return (
@@ -52,15 +66,10 @@ export function GalleryLanding() {
         <meta property="og:url" content={canonical} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-
-        {/* Optional: you can set a fixed OG image if you have one hosted */}
-        {/* <meta property="og:image" content="https://www.mkbweddings.co.uk/og-gallery.jpg" /> */}
         <meta property="og:type" content="website" />
       </Helmet>
 
-      {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
-        {/* Main Navigation Tiles */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {mainTiles.map((tile) => (
             <Link
