@@ -23,7 +23,7 @@ const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 
 // ✅ Hero image requested
 const HERO_IMAGE =
-  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb/Greenvale%20Hotel/family%20and%20bridal%20party/MKB-weddings-mkb-photography-NI-wedding-photographer-greenvale-cookstown-wedding-photography-434_500.webp";
+  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Greenvale%20Hotel/family%20and%20bridal%20party/MKB-weddings-mkb-photography-NI-wedding-photographer-greenvale-cookstown-wedding-photography-434_2000.webp";
 
 function slugify(s: string) {
   return (s || "")
