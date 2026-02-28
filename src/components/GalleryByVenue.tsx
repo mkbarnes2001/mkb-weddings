@@ -1,8 +1,7 @@
-// src/components/GalleryByVenue.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
 type GalleryRow = {
@@ -22,10 +21,10 @@ const THUMB_BASE =
 const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
+const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
+
 const HERO_IMAGE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Crover%20House/couple%20portraits/mkb-weddings-irish-wedding-photographer-crover-house-cavan-wedding-photography-9_2000.webp";
-
-const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 
 const PINNED_VENUES: string[] = [
   "Orange Tree House",
@@ -190,7 +189,7 @@ export function GalleryByVenue() {
         }
         if (!cancelled) setVenueNameMap(map);
       } catch {
-        // optional file
+        // optional
       }
     })();
 
@@ -231,20 +230,17 @@ export function GalleryByVenue() {
     });
   }, [galleryRows, venueNameMap]);
 
-  // --- SEO / Schema ---
   const canonical = `${SITE_ORIGIN}/gallery/venues`;
 
   const metaTitle = "Wedding Venue Galleries | Northern Ireland & Ireland | MKB Weddings";
-
   const metaDescription =
     "Browse real wedding photography by venue across Northern Ireland and Ireland. Explore venue galleries, style inspiration, and full wedding stories by MKB Weddings.";
 
   const ogImage =
     venueCards[0]?.coverFull ||
     venueCards[0]?.coverThumb ||
-    `${SITE_ORIGIN}/android-chrome-512x512.png`;
+    HERO_IMAGE;
 
-  // ✅ Breadcrumbs: Home > Counties > Venues
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -262,13 +258,9 @@ export function GalleryByVenue() {
         "@id": `${canonical}#breadcrumbs`,
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_ORIGIN}/` },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "Counties",
-            item: `${SITE_ORIGIN}/wedding-photographer`,
-          },
-          { "@type": "ListItem", position: 3, name: "Venues", item: canonical },
+          { "@type": "ListItem", position: 2, name: "Gallery", item: `${SITE_ORIGIN}/gallery` },
+          { "@type": "ListItem", position: 3, name: "Counties", item: `${SITE_ORIGIN}/wedding-photographer` },
+          { "@type": "ListItem", position: 4, name: "Venues", item: canonical },
         ],
       },
     ],
@@ -317,85 +309,84 @@ export function GalleryByVenue() {
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
-      {/* ✅ IMPORTANT: top padding to clear your fixed header */}
-      {/* If your nav is taller/shorter, tweak pt-24/pt-28 */}
-      
-{/* HERO */}
-<div className="relative h-[60vh] min-h-[420px]">
-  <ImageWithFallback
-    src={HERO_IMAGE}
-    alt="Wedding Venue Galleries across Northern Ireland and Ireland"
-    className="w-full h-full object-cover"
-  />
-  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+      {/* HERO (CountyPage style) */}
+      <div className="relative h-[60vh] min-h-[420px]">
+        <ImageWithFallback
+          src={HERO_IMAGE}
+          alt="Wedding venue galleries across Northern Ireland and Ireland"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-  <div className="absolute inset-0 flex items-end">
-    <div className="w-full max-w-7xl mx-auto px-6 pb-20 text-center">
+        <div className="absolute inset-0 flex items-end">
+          <div className="w-full max-w-7xl mx-auto px-6 pb-20 text-center">
+            <Link
+              to="/gallery"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Gallery
+            </Link>
 
-      <Link
-        to="/gallery"
-        className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center"
-      >
-        Back to Gallery
-      </Link>
+            <h1 className="text-white text-4xl md:text-5xl mb-4 font-serif">
+              Wedding Venue Galleries
+            </h1>
 
-      <h1 className="text-white text-4xl md:text-5xl font-serif mb-4">
-        Wedding Venue Galleries
-      </h1>
-
-      <div className="text-white/85 text-sm">
-        {venueCards.length} {venueCards.length === 1 ? "venue" : "venues"}
+            <div className="text-white/85 text-sm">
+              {venueCards.length} {venueCards.length === 1 ? "venue" : "venues"}
+            </div>
+          </div>
+        </div>
       </div>
 
-    </div>
-  </div>
-</div>
+      {/* BREADCRUMBS (now safely below hero, not under nav) */}
+      <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
+        <nav aria-label="Breadcrumb" className="flex justify-center">
+          <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
+            <li>
+              <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
+                Home
+              </Link>
+            </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
+            <li>
+              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
+                Gallery
+              </Link>
+            </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
+            <li>
+              <Link
+                to="/wedding-photographer"
+                className="hover:text-neutral-900 underline underline-offset-4"
+              >
+                Counties
+              </Link>
+            </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
+            <li className="text-neutral-900">Venues</li>
+          </ol>
+        </nav>
+      </div>
 
+      {/* INTRO (same vibe as your other pages) */}
+      <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
+        <p className="text-neutral-700 text-lg md:text-xl leading-relaxed">
+          Browse real wedding photography by venue across{" "}
+          <strong>Northern Ireland</strong> and <strong>Ireland</strong>. Use these galleries to
+          see how a venue photographs in different seasons, light and weather — and to find
+          inspiration for your own day.
+        </p>
+      </section>
 
-       {/* BREADCRUMBS */}
-<div className="max-w-7xl mx-auto px-6 pt-8 pb-10">
-  <nav aria-label="Breadcrumb" className="flex justify-center">
-    <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
-      <li>
-        <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
-          Home
-        </Link>
-      </li>
-
-      <li className="opacity-60">
-        <ChevronRight className="w-4 h-4" />
-      </li>
-
-      <li>
-        <Link
-          to="/wedding-photographer"
-          className="hover:text-neutral-900 underline underline-offset-4"
-        >
-          Counties
-        </Link>
-      </li>
-
-      <li className="opacity-60">
-        <ChevronRight className="w-4 h-4" />
-      </li>
-
-      <li className="text-neutral-900">Venues</li>
-    </ol>
-  </nav>
-</div>
-
-        {/* H1 + intro */}
-        <header className="text-center max-w-3xl mx-auto mb-12">
-          <h1 className="text-neutral-900 text-3xl md:text-4xl font-serif mb-4">
-            Wedding Venue Galleries
-          </h1>
-          <p className="text-neutral-700 text-lg md:text-xl leading-relaxed">
-            Browse real wedding photography by venue across <strong>Northern Ireland</strong> and{" "}
-            <strong>Ireland</strong>. Use these galleries to see how a venue photographs in different
-            seasons, light and weather — and to find inspiration for your own day.
-          </p>
-        </header>
-
+      {/* GRID */}
+      <div className="max-w-7xl mx-auto px-6 pb-40">
         {venueCards.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">No venues found yet.</div>
         ) : (
@@ -413,11 +404,11 @@ export function GalleryByVenue() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                 <div className="absolute inset-0 flex flex-col justify-end p-6">
-                  <h2 className="text-white text-2xl mb-2">{v.displayName}</h2>
+                  <h2 className="text-white text-2xl mb-2 font-serif">{v.displayName}</h2>
                   <p className="text-white/85 text-sm mb-3">
                     {v.count} image{v.count !== 1 ? "s" : ""}
                   </p>
-                  <div className="flex items-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center text-white">
                     <span className="text-sm uppercase tracking-wider">Explore</span>
                     <ChevronRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-2" />
                   </div>
