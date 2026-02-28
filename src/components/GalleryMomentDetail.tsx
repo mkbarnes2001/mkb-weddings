@@ -1,6 +1,8 @@
+// src/components/GalleryMomentDetail.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
 
@@ -19,15 +21,14 @@ type CsvRow = {
   tags?: string;
 };
 
-// R2 base (same as your venue page)
+const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
+
+// R2 base
 const THUMB_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
 const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 function slugify(s: string) {
   return (s || "")
     .trim()
@@ -102,7 +103,6 @@ function fullUrlFromThumb(r: CsvRow) {
   )}/${encodeURIComponent(filename2000)}`;
 }
 
-// Stable "random" ordering (same order per moment, changes if you bump version)
 function hashStringToInt(str: string) {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) {
@@ -187,13 +187,11 @@ const PINNED: Record<string, string[]> = {
     "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-shandon-hotel-marble-hill-donegal-wedding-photography-104_500.webp",
   ],
 };
-
-
-// Curated moment labels + hero + crop focus (object-position)
 const MOMENT_META: Record<
   string,
   { name: string; description: string; hero: string; focus?: string }
 > = {
+  // ✅ FIXED KEYS to match your URLs + MOMENT_TILES ids
   "getting-ready": {
     name: "Getting Ready",
     description: "Preparation and anticipation before the day begins.",
@@ -212,19 +210,19 @@ const MOMENT_META: Record<
     hero: couplePortraitHero,
     focus: "50% 50%",
   },
-  "family-bridal-party": {
+  "family-and-bridal-party": {
     name: "Family and Bridal Party",
     description: "Celebrating with the people who mean the most.",
     hero: bridalPartyHero,
     focus: "50% 50%",
   },
-  "reception-party": {
+  "reception-and-party": {
     name: "Reception and Party",
     description: "Dance, celebrate, and have fun into the night.",
     hero: receptionHero,
     focus: "50% 50%",
   },
-  "details-decor": {
+  "details-and-decor": {
     name: "Details and Decor",
     description: "The little things that make your day uniquely yours.",
     hero: detailsDecorHero,
@@ -241,6 +239,10 @@ export function GalleryMomentDetail() {
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [momentId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -268,7 +270,7 @@ export function GalleryMomentDetail() {
     return rows.filter((r) => slugify(r.category) === momentId);
   }, [rows, momentId]);
 
-  const momentName = meta?.name || momentRows[0]?.category;
+  const momentName = meta?.name || momentRows[0]?.category || "";
   const momentDescription = meta?.description;
 
   const images = useMemo(() => {
@@ -282,18 +284,10 @@ export function GalleryMomentDetail() {
     const pinnedList = momentId ? PINNED[momentId] || [] : [];
     const pinnedSet = new Set(pinnedList.map((x) => x.toLowerCase().trim()));
 
-    const pinned = mapped.filter((m) =>
-      pinnedSet.has(m.filename.toLowerCase().trim())
-    );
-    const rest = mapped.filter(
-      (m) => !pinnedSet.has(m.filename.toLowerCase().trim())
-    );
+    const pinned = mapped.filter((m) => pinnedSet.has(m.filename.toLowerCase().trim()));
+    const rest = mapped.filter((m) => !pinnedSet.has(m.filename.toLowerCase().trim()));
 
-    const shuffled = stableShuffle(
-      rest,
-      `moment-${momentId || "unknown"}-v1`,
-      (m) => m.filename
-    );
+    const shuffled = stableShuffle(rest, `moment-${momentId || "unknown"}-v1`, (m) => m.filename);
 
     return [...pinned, ...shuffled];
   }, [momentRows, momentId]);
@@ -310,7 +304,7 @@ export function GalleryMomentDetail() {
         <div className="text-center max-w-xl">
           <h1 className="text-3xl mb-3">Gallery loading error</h1>
           <p className="text-neutral-600 mb-6">{loadError}</p>
-          <Link to="/gallery/moments" className="text-neutral-600 hover:text-neutral-900">
+          <Link to="/gallery/moments" className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4">
             Back to Moments
           </Link>
         </div>
@@ -326,7 +320,7 @@ export function GalleryMomentDetail() {
           <p className="text-neutral-600 mb-6">
             This moment doesn’t exist in gallery.csv (or has no images).
           </p>
-          <Link to="/gallery/moments" className="text-neutral-600 hover:text-neutral-900">
+          <Link to="/gallery/moments" className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4">
             Back to Moments
           </Link>
         </div>
@@ -334,7 +328,6 @@ export function GalleryMomentDetail() {
     );
   }
 
-  // Match venue detail hero sizing/crop rules
   const heroImage =
     meta?.hero ||
     images[0]?.full ||
@@ -343,9 +336,27 @@ export function GalleryMomentDetail() {
 
   const heroFocus = meta?.focus || "50% 50%";
 
+  const canonical = `${SITE_ORIGIN}/gallery/moment/${encodeURIComponent(momentId || "")}`;
+  const metaTitle = `${momentName} Wedding Photos | Northern Ireland & Ireland | MKB Weddings`;
+  const metaDescription =
+    momentDescription ||
+    `Browse ${momentName.toLowerCase()} wedding photography across Northern Ireland and Ireland — real moments, real weddings, captured by MKB Weddings.`;
+
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO — match Venue Detail (height + crop) */}
+      <Helmet>
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <link rel="canonical" href={canonical} />
+
+        <meta property="og:url" content={canonical} />
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content={heroImage} />
+        <meta property="og:type" content="website" />
+      </Helmet>
+
+      {/* HERO (match Venue Detail) */}
       <div className="relative h-[60vh] min-h-[400px]">
         <ImageWithFallback
           src={heroImage}
@@ -355,7 +366,6 @@ export function GalleryMomentDetail() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-        {/* Bottom-aligned block, but centered text (per your request style direction) */}
         <div className="absolute inset-0 flex items-end">
           <div className="max-w-7xl mx-auto px-6 pb-16 w-full text-center">
             <Link
@@ -366,10 +376,8 @@ export function GalleryMomentDetail() {
               Back to Moments
             </Link>
 
-            {/* Heading size matches Venue Detail */}
             <h1 className="text-white text-5xl md:text-6xl mb-4">{momentName}</h1>
 
-            {/* Keep the counts subtle on hero like venue */}
             <p className="text-white text-sm md:text-base">
               {images.length} {images.length === 1 ? "image" : "images"} · {venueCount}{" "}
               {venueCount === 1 ? "venue" : "venues"}
@@ -378,9 +386,44 @@ export function GalleryMomentDetail() {
         </div>
       </div>
 
-      {/* CONTENT BELOW HERO */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Centered description (serif/news body) */}
+      {/* BREADCRUMBS */}
+      <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
+        <nav aria-label="Breadcrumb" className="flex justify-center">
+          <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
+            <li>
+              <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
+                Home
+              </Link>
+            </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
+            <li>
+              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
+                Gallery
+              </Link>
+            </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
+            <li>
+              <Link
+                to="/gallery/moments"
+                className="hover:text-neutral-900 underline underline-offset-4"
+              >
+                Moments
+              </Link>
+            </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
+            <li className="text-neutral-900">{momentName}</li>
+          </ol>
+        </nav>
+      </div>
+
+      {/* CONTENT */}
+      <div className="max-w-7xl mx-auto px-6 pb-32">
         {momentDescription && (
           <div className="text-center max-w-3xl mx-auto mb-10">
             <p className="font-serif text-[20px] leading-[1.9] text-neutral-800">
@@ -389,7 +432,6 @@ export function GalleryMomentDetail() {
           </div>
         )}
 
-        {/* GRID */}
         {images.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">
             No images found for this moment.
@@ -416,7 +458,6 @@ export function GalleryMomentDetail() {
           </div>
         )}
 
-        {/* LIGHTBOX */}
         {lightboxOpen && images.length > 0 && (
           <ImageLightbox
             images={images.map((i) => i.full)}

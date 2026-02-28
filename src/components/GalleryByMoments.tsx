@@ -1,8 +1,9 @@
 // src/components/GalleryByMoments.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { Helmet } from "react-helmet-async";
 
 // Your original Figma-selected tile images:
 import gettingReadyImage from "figma:asset/fb84c4cbee696343b417ad4224fe2d9c9960ad49.png";
@@ -18,8 +19,14 @@ type CsvRow = {
   filename: string;
 };
 
+const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
+
+// ✅ Hero image requested
+const HERO_IMAGE =
+  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb/Greenvale%20Hotel/family%20and%20bridal%20party/MKB-weddings-mkb-photography-NI-wedding-photographer-greenvale-cookstown-wedding-photography-434_500.webp";
+
 function slugify(s: string) {
-  return s
+  return (s || "")
     .trim()
     .toLowerCase()
     .replace(/&/g, "and")
@@ -76,7 +83,7 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
 }
 
 /**
- * Your curated tiles (Figma images + copy).
+ * Curated tiles (Figma images + copy).
  * IDs MUST match slugify(category) from CSV.
  */
 const MOMENT_TILES = [
@@ -123,6 +130,10 @@ export function GalleryByMoments() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
 
     (async () => {
@@ -152,10 +163,14 @@ export function GalleryByMoments() {
     return map;
   }, [rows]);
 
-  // Hide tiles with no images (remove rows in CSV = disable moment)
   const tilesToShow = useMemo(() => {
     return MOMENT_TILES.filter((t) => (countsByMomentId.get(t.id) ?? 0) > 0);
   }, [countsByMomentId]);
+
+  const canonical = `${SITE_ORIGIN}/gallery/moments`;
+  const metaTitle = "Wedding Moments Gallery | Northern Ireland & Ireland | MKB Weddings";
+  const metaDescription =
+    "Browse real wedding photography by moment — getting ready, ceremony, couple portraits, bridal party, reception and details — across Northern Ireland and Ireland.";
 
   if (loadError) {
     return (
@@ -163,7 +178,7 @@ export function GalleryByMoments() {
         <div className="text-center max-w-xl">
           <h1 className="text-3xl mb-3">Gallery loading error</h1>
           <p className="text-neutral-600 mb-6">{loadError}</p>
-          <Link to="/gallery" className="text-neutral-600 hover:text-neutral-900">
+          <Link to="/gallery" className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4">
             Back to Gallery
           </Link>
         </div>
@@ -173,9 +188,84 @@ export function GalleryByMoments() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
-        {/* ✅ 2 columns on desktop: keep md=2 and REMOVE lg=3 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Helmet>
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <link rel="canonical" href={canonical} />
+
+        <meta property="og:url" content={canonical} />
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content={HERO_IMAGE} />
+        <meta property="og:type" content="website" />
+      </Helmet>
+
+      {/* HERO (match Venue/Moment detail style) */}
+      <div className="relative h-[60vh] min-h-[420px]">
+        <ImageWithFallback
+          src={HERO_IMAGE}
+          alt="Wedding moments gallery across Northern Ireland and Ireland"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+        <div className="absolute inset-0 flex items-end">
+          <div className="w-full max-w-7xl mx-auto px-6 pb-20 text-center">
+            <Link
+              to="/gallery"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Gallery
+            </Link>
+
+            <h1 className="text-white text-4xl md:text-5xl mb-4 font-serif">
+              Wedding Moments
+            </h1>
+
+            <div className="text-white/85 text-sm">
+              {tilesToShow.length} {tilesToShow.length === 1 ? "gallery" : "galleries"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* BREADCRUMBS */}
+      <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
+        <nav aria-label="Breadcrumb" className="flex justify-center">
+          <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
+            <li>
+              <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
+                Home
+              </Link>
+            </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
+            <li>
+              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
+                Gallery
+              </Link>
+            </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
+            <li className="text-neutral-900">Moments</li>
+          </ol>
+        </nav>
+      </div>
+
+      {/* INTRO */}
+      <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
+        <p className="text-neutral-700 leading-relaxed text-lg">
+          Browse real wedding photography by moment — from getting ready to the dancefloor —
+          across Northern Ireland and Ireland.
+        </p>
+      </section>
+
+      {/* TILES */}
+      <div className="max-w-7xl mx-auto px-6 pb-32 pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {tilesToShow.map((moment) => {
             const count = countsByMomentId.get(moment.id) ?? 0;
 
@@ -191,14 +281,17 @@ export function GalleryByMoments() {
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                <div className="absolute inset-0 flex flex-col justify-end p-6">
-                  <h2 className="text-white text-2xl mb-2">{moment.title}</h2>
-                  <p className="text-white/90 text-sm mb-3">{moment.description}</p>
-                  <div className="flex items-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute inset-0 flex flex-col justify-end p-8">
+                  <h2 className="text-white text-2xl md:text-3xl mb-2 font-serif leading-tight">
+                    {moment.title}
+                  </h2>
+                  <p className="text-white/90 text-sm mb-4">{moment.description}</p>
+
+                  <div className="flex items-center text-white">
                     <span className="text-sm uppercase tracking-wider">
                       View Gallery{count ? ` (${count})` : ""}
                     </span>
-                    <ChevronRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-2" />
+                    <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-2" />
                   </div>
                 </div>
               </Link>
