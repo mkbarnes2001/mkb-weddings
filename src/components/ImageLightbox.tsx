@@ -8,9 +8,27 @@ type Props = {
   currentIndex: number;
   onClose: () => void;
   onNavigate: (newIndex: number) => void;
+
+  // ✅ SEO / accessibility upgrade:
+  // Provide the same-length array of alt text (recommended)
+  alts?: string[];
+
+  // Optional caption text shown in the UI
+  captions?: string[];
+
+  // Optional label used when alt text is missing
+  contextLabel?: string; // e.g. "Killeavy Castle wedding photography"
 };
 
-export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Props) {
+export function ImageLightbox({
+  images,
+  currentIndex,
+  onClose,
+  onNavigate,
+  alts,
+  captions,
+  contextLabel,
+}: Props) {
   const count = images.length;
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
@@ -28,6 +46,20 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
 
   const goPrev = () => onNavigate((safeIndex - 1 + count) % count);
   const goNext = () => onNavigate((safeIndex + 1) % count);
+
+  const currentAlt = useMemo(() => {
+    const a = alts?.[safeIndex]?.trim();
+    if (a) return a;
+    // reasonable fallback if you don't pass alts
+    return contextLabel
+      ? `${contextLabel} – image ${safeIndex + 1} of ${count}`
+      : `Wedding gallery image ${safeIndex + 1} of ${count}`;
+  }, [alts, contextLabel, safeIndex, count]);
+
+  const currentCaption = useMemo(() => {
+    const c = captions?.[safeIndex]?.trim();
+    return c || "";
+  }, [captions, safeIndex]);
 
   useEffect(() => {
     overlayRef.current?.focus();
@@ -121,9 +153,14 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: 12,
         }}
       >
-        <div className="text-white/85 text-sm px-3 py-1 rounded-md" style={pillStyle}>
+        <div
+          className="text-white/85 text-sm px-3 py-1 rounded-md"
+          style={pillStyle}
+          aria-live="polite"
+        >
           {safeIndex + 1} / {count}
         </div>
 
@@ -131,6 +168,30 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
           <X className="w-7 h-7" />
         </button>
       </div>
+
+      {/* Optional caption (UI + accessible) */}
+      {(currentCaption || currentAlt) && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 18,
+            left: 18,
+            right: 18,
+            zIndex: 30,
+            display: "flex",
+            justifyContent: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <div
+            className="text-white/85 text-sm px-3 py-2 rounded-md max-w-[900px] text-center"
+            style={pillStyle}
+            aria-live="polite"
+          >
+            {currentCaption || currentAlt}
+          </div>
+        </div>
+      )}
 
       {/* Prev/Next */}
       <button
@@ -212,10 +273,11 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
         >
           <img
             src={src}
-            alt=""
+            alt={currentAlt}                 // ✅ important change
             draggable={false}
             className="select-none"
-            // KEY CHANGE: fit entirely in stage (no scroll)
+            loading="eager"
+            decoding="async"
             style={{
               display: "block",
               maxWidth: "100%",
@@ -239,4 +301,3 @@ export function ImageLightbox({ images, currentIndex, onClose, onNavigate }: Pro
 
   return createPortal(content, document.body);
 }
-

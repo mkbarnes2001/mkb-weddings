@@ -855,10 +855,12 @@ export function GalleryVenueDetail() {
       {/* LIGHTBOX */}
       {lightboxOpen && images.length > 0 && (
         <ImageLightbox
-          images={images.map((i) => i.full)}
-          currentIndex={lightboxIndex}
-          onClose={() => setLightboxOpen(false)}
-          onNavigate={(newIndex) => setLightboxIndex(newIndex)}
+        images={images.map((i) => i.full)}
+        alts={images.map((i) => i.alt)}          // ✅ add this
+        // captions={images.map((i) => i.alt)}    // optional: if you want visible captions too
+        currentIndex={lightboxIndex}
+        onClose={() => setLightboxOpen(false)}
+        onNavigate={(newIndex) => setLightboxIndex(newIndex)}
         />
       )}
     </div>
