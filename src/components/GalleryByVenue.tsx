@@ -22,6 +22,9 @@ const THUMB_BASE =
 const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
+const HERO_IMAGE =
+  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Crover%20House/couple%20portraits/mkb-weddings-irish-wedding-photographer-crover-house-cavan-wedding-photography-9_2000.webp";
+
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 
 const PINNED_VENUES: string[] = [
@@ -316,32 +319,70 @@ export function GalleryByVenue() {
 
       {/* ✅ IMPORTANT: top padding to clear your fixed header */}
       {/* If your nav is taller/shorter, tweak pt-24/pt-28 */}
-      <div className="max-w-7xl mx-auto px-6 pt-28 pb-12 md:pt-32 md:pb-16">
-        {/* Visible breadcrumbs */}
-        <nav aria-label="Breadcrumb" className="flex justify-center mb-10">
-          <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
-            <li>
-              <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
-                Home
-              </Link>
-            </li>
-            <li className="opacity-60">
-              <ChevronRight className="w-4 h-4" />
-            </li>
-            <li>
-              <Link
-                to="/wedding-photographer"
-                className="hover:text-neutral-900 underline underline-offset-4"
-              >
-                Counties
-              </Link>
-            </li>
-            <li className="opacity-60">
-              <ChevronRight className="w-4 h-4" />
-            </li>
-            <li className="text-neutral-900">Venues</li>
-          </ol>
-        </nav>
+      
+{/* HERO */}
+<div className="relative h-[60vh] min-h-[420px]">
+  <ImageWithFallback
+    src={HERO_IMAGE}
+    alt="Wedding Venue Galleries across Northern Ireland and Ireland"
+    className="w-full h-full object-cover"
+  />
+  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+  <div className="absolute inset-0 flex items-end">
+    <div className="w-full max-w-7xl mx-auto px-6 pb-20 text-center">
+
+      <Link
+        to="/gallery"
+        className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center"
+      >
+        Back to Gallery
+      </Link>
+
+      <h1 className="text-white text-4xl md:text-5xl font-serif mb-4">
+        Wedding Venue Galleries
+      </h1>
+
+      <div className="text-white/85 text-sm">
+        {venueCards.length} {venueCards.length === 1 ? "venue" : "venues"}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+       {/* BREADCRUMBS */}
+<div className="max-w-7xl mx-auto px-6 pt-8 pb-10">
+  <nav aria-label="Breadcrumb" className="flex justify-center">
+    <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
+      <li>
+        <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
+          Home
+        </Link>
+      </li>
+
+      <li className="opacity-60">
+        <ChevronRight className="w-4 h-4" />
+      </li>
+
+      <li>
+        <Link
+          to="/wedding-photographer"
+          className="hover:text-neutral-900 underline underline-offset-4"
+        >
+          Counties
+        </Link>
+      </li>
+
+      <li className="opacity-60">
+        <ChevronRight className="w-4 h-4" />
+      </li>
+
+      <li className="text-neutral-900">Venues</li>
+    </ol>
+  </nav>
+</div>
 
         {/* H1 + intro */}
         <header className="text-center max-w-3xl mx-auto mb-12">
