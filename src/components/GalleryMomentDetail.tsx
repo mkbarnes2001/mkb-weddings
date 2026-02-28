@@ -425,7 +425,7 @@ export function GalleryMomentDetail() {
       {/* CONTENT */}
       <div className="max-w-7xl mx-auto px-6 pb-32">
         {momentDescription && (
-          <div className="text-center max-w-3xl mx-auto mb-10">
+          <div className="text-center max-w-3xl mx-auto mt-10 mb-10">
             <p className="font-serif text-[20px] leading-[1.9] text-neutral-800">
               {momentDescription}
             </p>
