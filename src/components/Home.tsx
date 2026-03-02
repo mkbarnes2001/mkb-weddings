@@ -54,15 +54,15 @@ const HERO_SLIDES: HeroSlide[] = [
 
 // Replaced heroImage4 (Gallery tile)
 const GALLERY_IMAGE =
-  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-419_2000.webp";
+  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-447_2000_1200.webp";
 
 // Replaced heroImage3 (Blog tile)
 const BLOG_IMAGE =
-  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Killeavy%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-159_2000.webp";
+  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000_1200.webp";
 
 // Replaced heroImage5 (CTA background)
 const CTA_IMAGE =
-  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Galgorm/couple%20portraits/MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Galgorm_Manor_wedding_photography_Galgorm_resort_wedding_photographer-Full-res-256_2000.webp";
+  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Galgorm_Manor_wedding_photography_Galgorm_resort_wedding_photographer-Full-res-256_2000_1200.webp";
 
 /* ---------------- COMPONENT ---------------- */
 
