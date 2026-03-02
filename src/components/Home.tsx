@@ -1,14 +1,10 @@
-// src/components/Home.tsx
 import { ArrowRight, Camera, Heart, Award } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { useState, useEffect, useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Helmet } from "react-helmet-async";
 
-import heroImage3 from "figma:asset/6595a05dfe41b8f2fc54e571acf9e9a24994d353.png";
-import heroImage4 from "figma:asset/2018a530540d6cd532e764d8c4467195d61fe49a.png";
-import heroImage5 from "figma:asset/e950f257bc4bd40951c0693e9b3f467dba9dfa80.png";
+/* ---------------- HERO CAROUSEL IMAGES (R2 Optimised) ---------------- */
 
 type HeroSlide = {
   desktop: string;
@@ -16,284 +12,141 @@ type HeroSlide = {
   alt: string;
 };
 
-export function Home() {
-  // ✅ Optimised hero: use R2 “Hero/Desktop” + “Hero/Mobile” with srcSet so mobile downloads smaller
-  const heroSlides: HeroSlide[] = useMemo(
-    () => [
-      {
-        desktop:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp",
-        mobile:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000_1200.webp",
-        alt: "Northern Ireland wedding photography – couple portraits at Killeavy Castle",
-      },
-      {
-        desktop:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000.webp",
-        mobile:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000_1200.webp",
-        alt: "Orange Tree House wedding photography – couple portrait",
-      },
-      {
-        desktop:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000.webp",
-        mobile:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000_1200.webp",
-        alt: "Slieve Donard Hotel wedding photography – dramatic portrait",
-      },
-      {
-        desktop:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000.webp",
-        mobile:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000_1200.webp",
-        alt: "Slieve Donard Hotel wedding photography – romantic couple portrait",
-      },
-      {
-        desktop:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/mkb-weddings-rossharbour-resort-wedding-photography-363_2000.webp",
-        mobile:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/mkb-weddings-rossharbour-resort-wedding-photography-363_2000_1200.webp",
-        alt: "Ross Harbour Resort wedding photography – couple portrait",
-      },
-    ],
-    []
-  );
+const HERO_SLIDES: HeroSlide[] = [
+  {
+    desktop:
+      "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp",
+    mobile:
+      "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000_1200.webp",
+    alt: "Northern Ireland wedding photography – Killeavy Castle",
+  },
+  {
+    desktop:
+      "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000.webp",
+    mobile:
+      "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000_1200.webp",
+    alt: "Wedding photography – Orange Tree House",
+  },
+  {
+    desktop:
+      "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000.webp",
+    mobile:
+      "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000_1200.webp",
+    alt: "Wedding photography – Slieve Donard Hotel",
+  },
+  {
+    desktop:
+      "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000.webp",
+    mobile:
+      "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000_1200.webp",
+    alt: "Wedding photography – Slieve Donard portrait",
+  },
+  {
+    desktop:
+      "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/mkb-weddings-rossharbour-resort-wedding-photography-363_2000.webp",
+    mobile:
+      "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/mkb-weddings-rossharbour-resort-wedding-photography-363_2000_1200.webp",
+    alt: "Wedding photography – Ross Harbour Resort",
+  },
+];
 
+/* ---------------- REPLACED STATIC IMAGES ---------------- */
+
+// Replaced heroImage4 (Gallery tile)
+const GALLERY_IMAGE =
+  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-419_2000.webp";
+
+// Replaced heroImage3 (Blog tile)
+const BLOG_IMAGE =
+  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Killeavy%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-159_2000.webp";
+
+// Replaced heroImage5 (CTA background)
+const CTA_IMAGE =
+  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Galgorm/couple%20portraits/MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Galgorm_Manor_wedding_photography_Galgorm_resort_wedding_photographer-Full-res-256_2000.webp";
+
+/* ---------------- COMPONENT ---------------- */
+
+export function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
     }, 5000);
-
     return () => clearInterval(timer);
-  }, [heroSlides.length]);
-
-  // ✅ Preload next slide for smoother transitions (browser cache warms up)
-  useEffect(() => {
-    const next = heroSlides[(currentSlide + 1) % heroSlides.length];
-    const img = new Image();
-    img.src = next.desktop;
-  }, [currentSlide, heroSlides]);
+  }, []);
 
   const canonical = "https://www.mkbweddings.co.uk/";
-  const metaTitle = "Northern Ireland Wedding Photographer | Belfast & Ireland | MKB Weddings";
+  const metaTitle =
+    "Northern Ireland Wedding Photographer | Belfast & Ireland | MKB Weddings";
   const metaDescription =
     "Cinematic Northern Ireland wedding photographer based in Belfast, covering weddings across Northern Ireland and Ireland. Natural, timeless photography capturing real moments and stunning venues.";
 
-  const ogImage =
-    "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Killeavy%20castle/couple%20portraits/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp";
+  const ogImage = HERO_SLIDES[0].desktop;
 
-  // ✅ Schema kept (same as your previous version)
   const structuredData = {
     "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebSite",
-        "@id": "https://www.mkbweddings.co.uk/#website",
-        url: canonical,
-        name: "MKB Weddings",
-        inLanguage: "en-GB",
-      },
-      {
-        "@type": "WebPage",
-        "@id": "https://www.mkbweddings.co.uk/#webpage",
-        url: canonical,
-        name: metaTitle,
-        description: metaDescription,
-        isPartOf: { "@id": "https://www.mkbweddings.co.uk/#website" },
-        about: { "@id": "https://www.mkbweddings.co.uk/#business" },
-        inLanguage: "en-GB",
-      },
-      {
-        "@type": ["LocalBusiness", "PhotographyBusiness"],
-        "@id": "https://www.mkbweddings.co.uk/#business",
-        name: "MKB Weddings",
-        url: canonical,
-        image: ogImage,
-        logo: "https://www.mkbweddings.co.uk/android-chrome-512x512.png",
-        telephone: "+447546456077",
-        priceRange: "£££",
-        description:
-          "Wedding photographer based in Northern Ireland, covering Ireland and destinations. Relaxed documentary coverage, candid moments, and bold creative flash for the dancefloor.",
-        knowsAbout: [
-          "Northern Ireland wedding photography",
-          "Ireland wedding photography",
-          "Documentary wedding photography",
-          "Candid wedding photography",
-          "Creative flash wedding photography",
-          "Wedding venue photography",
-        ],
-        areaServed: [
-          { "@type": "AdministrativeArea", name: "Northern Ireland" },
-          { "@type": "AdministrativeArea", name: "County Donegal" },
-          { "@type": "AdministrativeArea", name: "County Monaghan" },
-          { "@type": "AdministrativeArea", name: "County Cavan" },
-          { "@type": "Country", name: "Ireland" },
-          { "@type": "Country", name: "United Kingdom" },
-        ],
-        address: {
-          "@type": "PostalAddress",
-          addressCountry: "GB",
-          addressRegion: "Northern Ireland",
-        },
-        sameAs: ["https://www.instagram.com/mkbweddings", "https://www.facebook.com/mkbweddings"],
-        makesOffer: [
-          {
-            "@type": "Offer",
-            name: "Wedding Photography Packages",
-            url: "https://www.mkbweddings.co.uk/packages",
-            priceCurrency: "GBP",
-            availability: "https://schema.org/InStock",
-          },
-        ],
-        hasOfferCatalog: {
-          "@type": "OfferCatalog",
-          name: "Wedding Photography Services",
-          itemListElement: [
-            {
-              "@type": "Offer",
-              itemOffered: {
-                "@type": "Service",
-                name: "Wedding Photography (Full Day)",
-                serviceType: "Wedding Photography",
-                areaServed: ["Northern Ireland", "Ireland"],
-              },
-            },
-            {
-              "@type": "Offer",
-              itemOffered: {
-                "@type": "Service",
-                name: "Elopement & Intimate Wedding Photography",
-                serviceType: "Elopement Photography",
-                areaServed: ["Northern Ireland", "Ireland"],
-              },
-            },
-            {
-              "@type": "Offer",
-              itemOffered: {
-                "@type": "Service",
-                name: "Creative Flash Dancefloor Photography",
-                serviceType: "Wedding Reception Photography",
-                areaServed: ["Northern Ireland", "Ireland"],
-              },
-            },
-          ],
-        },
-      },
-      {
-        "@type": "Person",
-        "@id": "https://www.mkbweddings.co.uk/#photographer",
-        name: "Mark Barnes",
-        jobTitle: "Wedding Photographer",
-        url: canonical,
-        worksFor: { "@id": "https://www.mkbweddings.co.uk/#business" },
-        sameAs: ["https://www.instagram.com/mkbweddings", "https://www.facebook.com/mkbweddings"],
-        knowsAbout: [
-          "Northern Ireland wedding photography",
-          "Ireland wedding photography",
-          "Documentary wedding photography",
-          "Creative flash wedding photography",
-        ],
-      },
-    ],
+    "@type": "LocalBusiness",
+    name: "MKB Weddings",
+    url: canonical,
+    image: ogImage,
+    telephone: "+447546456077",
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "GB",
+      addressRegion: "Northern Ireland",
+    },
   };
-
-  const current = heroSlides[currentSlide];
 
   return (
     <>
       <Helmet>
         <title>{metaTitle}</title>
         <meta name="description" content={metaDescription} />
-
         <link rel="canonical" href={canonical} />
-        <meta property="og:url" content={canonical} />
-
-        <meta property="og:title" content={metaTitle} />
-        <meta property="og:description" content={metaDescription} />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content={ogImage} />
-
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={metaTitle} />
-        <meta name="twitter:description" content={metaDescription} />
-        <meta name="twitter:image" content={ogImage} />
-
-        {/* ✅ Hint browser to fetch the first hero image early */}
-        <link
-          rel="preload"
-          as="image"
-          href={current.desktop}
-          // imagesrcset/imagesizes helps browsers choose the right one for preload
-          // (safe even if ignored by some browsers)
-          imagesrcset={`${current.mobile} 1200w, ${current.desktop} 2000w`}
-          imagesizes="100vw"
-        />
-
-        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+        <link rel="preload" as="image" href={HERO_SLIDES[0].desktop} />
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
       </Helmet>
 
       <div className="-mt-20">
-        {/* ---------- Hero Carousel ---------- */}
+        {/* ---------------- HERO ---------------- */}
         <section className="relative h-screen overflow-hidden">
           <AnimatePresence mode="wait">
-            <motion.div
+            <motion.img
               key={currentSlide}
+              src={HERO_SLIDES[currentSlide].desktop}
+              alt={HERO_SLIDES[currentSlide].alt}
+              className="absolute inset-0 w-full h-full object-cover"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="absolute inset-0"
-            >
-              <ImageWithFallback
-                src={current.desktop}
-                srcSet={`${current.mobile} 1200w, ${current.desktop} 2000w`}
-                sizes="100vw"
-                alt={current.alt}
-                className="w-full h-full object-cover object-center"
-                decoding="async"
-                loading={currentSlide === 0 ? "eager" : "lazy"}
-                fetchPriority={currentSlide === 0 ? "high" : "auto"}
-              />
-              <div className="absolute inset-0 bg-black/45" />
-            </motion.div>
+              transition={{ duration: 0.3 }}
+              loading={currentSlide === 0 ? "eager" : "lazy"}
+              decoding="async"
+            />
           </AnimatePresence>
 
-          {/* Carousel Dots */}
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex gap-3">
-            {heroSlides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  index === currentSlide ? "bg-accent scale-125" : "bg-white/50 hover:bg-white/70"
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
+          <div className="absolute inset-0 bg-black/45" />
 
-          {/* Hero Content */}
-          <div className="absolute inset-0 flex items-end pb-20 pointer-events-none">
-            <div className="text-center text-white px-6 max-w-5xl mx-auto w-full pointer-events-auto">
-              <h1
-                className="tagline text-white mb-6"
-                style={{ fontSize: "clamp(1.25rem, 3vw, 1.75rem)" }}
-              >
+          <div className="absolute inset-0 flex items-end pb-20">
+            <div className="text-center text-white px-6 max-w-5xl mx-auto w-full">
+              <h1 className="tagline mb-6">
                 Laugh Loud. Love Hard. Stories You'll Relive.
               </h1>
 
-              <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 justify-center items-center mt-8">
+              <div className="flex flex-col sm:flex-row gap-6 justify-center mt-8">
                 <Link
                   to="/contact"
-                  className="bg-accent text-primary px-10 h-16 sm:h-14 hover:bg-accent/90 transition-all hover:scale-105 inline-flex items-center gap-3 rounded-sm shadow-xl text-lg font-medium min-w-[200px] justify-center"
+                  className="bg-accent text-primary px-10 h-16 sm:h-14 inline-flex items-center justify-center rounded-sm shadow-xl text-lg font-medium"
                 >
                   Contact / Check Availability
                 </Link>
+
                 <Link
                   to="/gallery"
-                  className="border-2 border-white/90 text-white px-10 h-16 sm:h-14 hover:bg-white/10 transition-all inline-flex items-center gap-3 rounded-sm text-lg min-w-[200px] justify-center"
+                  className="border-2 border-white text-white px-10 h-16 sm:h-14 inline-flex items-center justify-center rounded-sm text-lg"
                 >
                   View Portfolio
                 </Link>
@@ -302,147 +155,65 @@ export function Home() {
           </div>
         </section>
 
-        {/* ---------- Gallery / Stories ---------- */}
+        {/* ---------------- GALLERY TILE ---------------- */}
         <section className="py-20 px-6 md:px-20 max-w-[1440px] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Link to="/gallery" className="group relative overflow-hidden aspect-[4/5] rounded-sm">
-              <ImageWithFallback
-                src={heroImage4}
+            <Link to="/gallery" className="group relative overflow-hidden aspect-[4/5]">
+              <img
+                src={GALLERY_IMAGE}
                 alt="Browse wedding photography gallery"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                decoding="async"
                 loading="lazy"
+                decoding="async"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-10">
-                <Camera size={40} className="text-white mb-4" />
-                <h2 className="text-white text-2xl md:text-2xl font-serif mb-4">Gallery</h2>
-                <p className="text-white/90 mb-6">
-                  Browse our portfolio by venue, style and moments from real weddings.
-                </p>
-                <span className="inline-flex items-center gap-2 text-accent">
-                  Explore Galleries <ArrowRight size={20} />
-                </span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-10 text-white">
+                <Camera size={40} className="mb-4" />
+                <h2 className="text-2xl font-serif mb-4">Gallery</h2>
+                <p>Browse our portfolio by venue, style and real weddings.</p>
               </div>
             </Link>
 
-            <Link to="/blog" className="group relative overflow-hidden aspect-[4/5] rounded-sm">
-              <ImageWithFallback
-                src={heroImage3}
+            <Link to="/blog" className="group relative overflow-hidden aspect-[4/5]">
+              <img
+                src={BLOG_IMAGE}
                 alt="Wedding stories and reviews"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                decoding="async"
                 loading="lazy"
+                decoding="async"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-10">
-                <Heart size={40} className="text-white mb-4" />
-                <h2 className="text-white text-2xl md:text-2xl font-serif mb-4">
-                  Stories & Reviews
-                </h2>
-                <p className="text-white/90 mb-6">
-                  Real weddings, client reviews, venue guides and photography tips.
-                </p>
-                <span className="inline-flex items-center gap-2 text-accent">
-                  Read More <ArrowRight size={20} />
-                </span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-10 text-white">
+                <Heart size={40} className="mb-4" />
+                <h2 className="text-2xl font-serif mb-4">Stories & Reviews</h2>
+                <p>Real weddings, venue guides and client reviews.</p>
               </div>
             </Link>
           </div>
         </section>
 
-        {/* ---------- Intro Text Block ---------- */}
-        <section className="pt-8 pb-28 px-6 md:px-20">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-serif mb-6">
-              Natural wedding photography, with a bold edge
-            </h2>
-
-            <p className="text-primary/80 max-w-3xl mx-auto leading-relaxed text-lg md:text-xl mb-14">
-              I’m a{" "}
-              <strong>documentary wedding photographer covering Northern Ireland and Ireland</strong>{" "}
-              — from Belfast and the North Coast, to Donegal, Cavan, Monaghan and Louth. If you’re
-              planning locally, the fastest way to see weddings near you is to{" "}
-              <Link
-                to="/wedding-photographer"
-                className="font-semibold text-primary underline underline-offset-4 hover:text-primary/90 transition-colors"
-              >
-                explore real wedding galleries by county
-              </Link>{" "}
-              (venues, celebrations and full stories).
-              <br />
-              <br />
-              Expect relaxed guidance, real emotion, and none of that stiff awkward posing.
-            </p>
-
-            {/* Cards */}
-            <div className="grid gap-8 max-w-4xl mx-auto text-center mt-6">
-              <div className="rounded-sm border border-primary/10 p-8 pb-12">
-                <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">Candid, not staged</h3>
-                <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed">
-                  A documentary approach that lets you enjoy the day, I’ll guide when needed, never
-                  take over.
-                </p>
-              </div>
-
-              <div className="rounded-sm border border-primary/10 p-8 pb-12">
-                <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">Colour + contrast</h3>
-                <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed">
-                  Clean edits with depth and punch, true-to-life skin tones and vibrant atmosphere.
-                </p>
-              </div>
-
-              <div className="rounded-sm border border-primary/10 p-8 pb-12">
-                <h3 className="text-xl md:text-2xl font-serif mb-3 text-center">Built for real life</h3>
-                <p className="text-primary/75 text-base md:text-lg text-center leading-relaxed mb-6">
-                  From prep to dancefloor, your gallery tells the full story, not just the “posed”
-                  bits.
-                </p>
-              </div>
-            </div>
-
-            {/* Subtle button */}
-            <Link
-              to="/wedding-photographer"
-              className="inline-block mt-8 text-sm uppercase tracking-wider underline underline-offset-4 hover:text-primary transition-colors"
-            >
-              Browse Wedding Photography by County
-            </Link>
-          </div>
-        </section>
-
-        {/* ---------- CTA ---------- */}
+        {/* ---------------- CTA ---------------- */}
         <section className="py-32 px-6 md:px-20 relative overflow-hidden">
-          <div className="absolute inset-0">
-            <ImageWithFallback
-              src={heroImage5}
-              alt="Check availability for your wedding date"
-              className="w-full h-full object-cover"
-              decoding="async"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-accent/80" />
-          </div>
+          <img
+            src={CTA_IMAGE}
+            alt="Check availability for your wedding date"
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/90 to-accent/80" />
 
-          <div className="relative max-w-5xl mx-auto text-center">
-            <Award size={40} className="text-accent mx-auto mb-8" />
-            <h2 className="mb-6 text-white">Let's Capture Your Special Day</h2>
-            <p className="text-white/90 mb-12 max-w-2xl mx-auto">
+          <div className="relative max-w-5xl mx-auto text-center text-white">
+            <Award size={40} className="mx-auto mb-8 text-accent" />
+            <h2 className="mb-6">Let's Capture Your Special Day</h2>
+            <p className="mb-12">
               Limited dates available for 2026 & 2027. Get in touch to check availability.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/contact"
-                className="bg-accent text-primary px-10 h-14 hover:bg-accent/90 transition-all inline-flex items-center gap-3 rounded-sm shadow-xl text-lg font-medium"
-              >
-                Check Availability <ArrowRight size={24} />
-              </Link>
-              <Link
-                to="/packages"
-                className="border-2 border-white/90 text-white px-10 h-14 hover:bg-white/10 transition-all inline-flex items-center gap-3 rounded-sm text-lg"
-              >
-                View Packages
-              </Link>
-            </div>
+            <Link
+              to="/contact"
+              className="bg-accent text-primary px-10 h-14 inline-flex items-center justify-center rounded-sm shadow-xl text-lg font-medium"
+            >
+              Check Availability <ArrowRight size={24} />
+            </Link>
           </div>
         </section>
       </div>
