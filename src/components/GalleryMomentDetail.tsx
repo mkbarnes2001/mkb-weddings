@@ -27,7 +27,7 @@ const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 const THUMB_BASE =
   "https://images.mkbweddings.co.uk/thumb";
 const FULL_BASE =
-  "https://images.mkbweddings.co.uk/thumb/full";
+  "https://images.mkbweddings.co.uk/full";
 
 function slugify(s: string) {
   return (s || "")
