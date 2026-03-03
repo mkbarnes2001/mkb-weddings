@@ -57,37 +57,37 @@ export function Home() {
     () => [
       {
         desktop:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp",
+          "https://images.mkbweddings.co.uk/Hero/Desktop/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp",
         mobile:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000_1200.webp",
+          "https://images.mkbweddings.co.uk/Hero/Mobile/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000_1200.webp",
         alt: "Northern Ireland wedding photography – couple portrait at Killeavy Castle",
       },
       {
         desktop:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000.webp",
+          "https://images.mkbweddings.co.uk/Hero/Desktop/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000.webp",
         mobile:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000_1200.webp",
+          "https://images.mkbweddings.co.uk/Hero/Mobile/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000_1200.webp",
         alt: "Wedding couple portrait – Orange Tree House Greyabbey",
       },
       {
         desktop:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000.webp",
+          "https://images.mkbweddings.co.uk/Hero/Desktop/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000.webp",
         mobile:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000_1200.webp",
+          "https://images.mkbweddings.co.uk/Hero/Mobile/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000_1200.webp",
         alt: "Slieve Donard Hotel wedding photography – couple portrait",
       },
       {
         desktop:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000.webp",
+          "https://images.mkbweddings.co.uk/Hero/Desktop/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000.webp",
         mobile:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000_1200.webp",
+          "https://images.mkbweddings.co.uk/Hero/Mobile/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000_1200.webp",
         alt: "Wedding photography – Slieve Donard Hotel Newcastle",
       },
       {
         desktop:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Desktop/mkb-weddings-rossharbour-resort-wedding-photography-363_2000.webp",
+          "https://images.mkbweddings.co.uk/Hero/Desktop/mkb-weddings-rossharbour-resort-wedding-photography-363_2000.webp",
         mobile:
-          "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/mkb-weddings-rossharbour-resort-wedding-photography-363_2000_1200.webp",
+          "https://images.mkbweddings.co.uk/Hero/Mobile/mkb-weddings-rossharbour-resort-wedding-photography-363_2000_1200.webp",
         alt: "Ross Harbour Resort wedding photography – couple portrait",
       },
     ],
@@ -99,13 +99,13 @@ export function Home() {
   // as per your exact URLs
   // ------------------------------------------------------------
   const galleryCardImage =
-    "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-447_2000_1200.webp";
+    "https://images.mkbweddings.co.uk/Hero/Mobile/mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-447_2000_1200.webp";
 
   const storiesCardImage =
-    "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000_1200.webp";
+    "https://images.mkbweddings.co.uk/Hero/Mobile/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000_1200.webp";
 
   const ctaBgImage =
-    "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/Hero/Mobile/MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Galgorm_Manor_wedding_photography_Galgorm_resort_wedding_photographer-Full-res-256_2000_1200.webp";
+    "https://images.mkbweddings.co.uk/Hero/Mobile/MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Galgorm_Manor_wedding_photography_Galgorm_resort_wedding_photographer-Full-res-256_2000_1200.webp";
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -148,7 +148,7 @@ export function Home() {
     "Cinematic Northern Ireland wedding photographer based in Belfast, covering weddings across Northern Ireland and Ireland. Natural, timeless photography capturing real moments and stunning venues.";
 
   const ogImage =
-    "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Killeavy%20castle/couple%20portraits/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp";
+    "https://images.mkbweddings.co.uk/full/Killeavy%20castle/couple%20portraits/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp";
 
   const structuredData = {
     "@context": "https://schema.org",

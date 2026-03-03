@@ -13,8 +13,8 @@ type CsvRow = {
 };
 
 // Your R2 public base (same pattern as venues/moments)
-const THUMB_BASE = "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
-const FULL_BASE = "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
+const THUMB_BASE = "https://images.mkbweddings.co.uk/thumb";
+const FULL_BASE = "https://images.mkbweddings.co.uk/full";
 
 /**
  * Put these FIRST. Use filenames exactly as in CSV (the _500.webp names).

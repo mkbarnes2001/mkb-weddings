@@ -16,7 +16,7 @@ export function GalleryLanding() {
 
   // ✅ New hosted tile image
   const countiesThumb =
-    "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp";
+    "https://images.mkbweddings.co.uk/thumb/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp";
 
   const mainTiles = [
     // ✅ 1) Counties FIRST
