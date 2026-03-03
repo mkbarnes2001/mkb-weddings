@@ -30,8 +30,8 @@ type CountyMeta = {
 };
 
 // R2 base URLs
-const THUMB_BASE = "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
-const FULL_BASE = "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
+const THUMB_BASE = "https://images.mkbweddings.co.uk/thumb";
+const FULL_BASE = "https://images.mkbweddings.co.uk/full";
 
 // Primary origin
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
