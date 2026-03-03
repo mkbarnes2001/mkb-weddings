@@ -21,7 +21,7 @@ type CountyMeta = {
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 
 const HERO_IMAGE =
-  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000.webp";
+  "https://images.mkbweddings.co.uk/full/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000.webp";
 
 const FALLBACK_CARD =
   "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
