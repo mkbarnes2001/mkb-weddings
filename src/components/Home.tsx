@@ -427,9 +427,7 @@ export function Home() {
             </h2>
 
           <p className="text-primary/75 max-w-2xl mx-auto text-base md:text-lg leading-loose mb-14">
-            I’m a{" "}
-            <strong>documentary wedding photographer covering Northern Ireland and Ireland</strong>{" "}
-            , from Belfast and the North Coast, to Donegal, Cavan, Monaghan and Louth. If you’re
+            I’m a documentary wedding photographer covering Northern Ireland and Ireland, from Belfast and the North Coast, to Donegal, Cavan, Monaghan and Louth. If you’re
             planning locally, the fastest way to see weddings near you is to{" "}
             <Link
               to="/wedding-photographer"
