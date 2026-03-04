@@ -426,22 +426,22 @@ export function Home() {
               Natural wedding photography, with a bold edge
             </h2>
 
-            <p className="text-primary/80 max-w-3xl mx-auto leading-relaxed text-lg md:text-xl mb-14">
-              I’m a{" "}
-              <strong>documentary wedding photographer covering Northern Ireland and Ireland</strong>{" "}
-              — from Belfast and the North Coast, to Donegal, Cavan, Monaghan and Louth. If you’re
-              planning locally, the fastest way to see weddings near you is to{" "}
-              <Link
-                to="/wedding-photographer"
-                className="font-semibold text-primary underline underline-offset-4 hover:text-primary/90 transition-colors"
-              >
-                explore real wedding galleries by county
-              </Link>{" "}
-              (venues, celebrations and full stories).
-              <br />
-              <br />
-              Expect relaxed guidance, real emotion, and none of that stiff awkward posing.
-            </p>
+          <p className="text-primary/75 max-w-2xl mx-auto text-base md:text-lg leading-loose mb-14">
+            I’m a{" "}
+            <strong>documentary wedding photographer covering Northern Ireland and Ireland</strong>{" "}
+            , from Belfast and the North Coast, to Donegal, Cavan, Monaghan and Louth. If you’re
+            planning locally, the fastest way to see weddings near you is to{" "}
+            <Link
+              to="/wedding-photographer"
+              className="font-semibold hover:underline underline-offset-4 transition-colors"
+            >
+              explore real wedding galleries by county
+            </Link>{" "}
+            (venues, celebrations and full stories).
+            <br />
+            <br />
+            Expect relaxed guidance, real emotion, and none of that stiff awkward posing.
+          </p>
 
             {/* Cards */}
             <div className="grid gap-8 max-w-4xl mx-auto text-center mt-6">
