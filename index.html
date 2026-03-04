@@ -35,6 +35,30 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=9" />
     <link rel="manifest" href="/site.webmanifest?v=9" />
 
+
+<!-- Preconnect to hero image origin (important: different domain) -->
+<link rel="preconnect" href="https://images.mkbweddings.co.uk" crossorigin>
+<link rel="dns-prefetch" href="https://images.mkbweddings.co.uk">
+
+<!-- Preload the LCP hero image (mobile + desktop) -->
+<link
+  rel="preload"
+  as="image"
+  href="https://images.mkbweddings.co.uk/Hero/Mobile/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000_1200.webp"
+  media="(max-width: 768px)"
+  crossorigin
+  fetchpriority="high"
+/>
+
+<link
+  rel="preload"
+  as="image"
+  href="https://images.mkbweddings.co.uk/Hero/Desktop/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp"
+  media="(min-width: 769px)"
+  crossorigin
+  fetchpriority="high"
+/>
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RQB9V9DTZP"></script>
     <script>

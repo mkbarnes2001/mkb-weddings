@@ -34,15 +34,17 @@ function HeroPicture({
   return (
     <picture>
       {/* Mobile first */}
-      <source media="(max-width: 768px)" srcSet={mobileSrc} />
-      <source media="(min-width: 769px)" srcSet={desktopSrc} />
+      <source type="image/webp" media="(max-width: 768px)" srcSet={mobileSrc} />
+      <source type="image/webp" media="(min-width: 769px)" srcSet={desktopSrc} />
       <img
         src={desktopSrc}
         alt={alt}
+        width={2000}
+        height={1333}
         className="w-full h-full object-cover object-center"
         loading={loading}
         decoding="async"
-        // @ts-expect-error - fetchPriority is supported in modern browsers but not always in TS DOM typings
+        // @ts-expect-error
         fetchPriority={fetchPriority}
       />
     </picture>
@@ -285,36 +287,48 @@ export function Home() {
         <meta name="twitter:description" content={metaDescription} />
         <meta name="twitter:image" content={ogImage} />
 
-        {/* Preload the LCP image (mobile + desktop variants) */}
-        <link rel="preload" as="image" href={firstHero.mobile} media="(max-width: 768px)" />
-        <link rel="preload" as="image" href={firstHero.desktop} media="(min-width: 769px)" />
-
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
       <div className="-mt-20">
         {/* ---------- Hero Carousel ---------- */}
-        <section className="relative h-screen overflow-hidden">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="absolute inset-0"
-            >
-              <HeroPicture
-                desktopSrc={heroSlides[currentSlide].desktop}
-                mobileSrc={heroSlides[currentSlide].mobile}
-                alt={heroSlides[currentSlide].alt}
-                // LCP: first slide should be eager/high priority
-                fetchPriority={currentSlide === 0 ? "high" : "low"}
-                loading={currentSlide === 0 ? "eager" : "lazy"}
-              />
-              <div className="absolute inset-0 bg-black/45" />
-            </motion.div>
-          </AnimatePresence>
+       <section className="relative h-screen overflow-hidden">
+  {/* Static first paint (LCP) */}
+  {currentSlide === 0 && (
+    <div className="absolute inset-0">
+      <HeroPicture
+        desktopSrc={heroSlides[0].desktop}
+        mobileSrc={heroSlides[0].mobile}
+        alt={heroSlides[0].alt}
+        fetchPriority="high"
+        loading="eager"
+      />
+      <div className="absolute inset-0 bg-black/45" />
+    </div>
+  )}
+
+  {/* Animate subsequent slides */}
+  <AnimatePresence mode="wait">
+    {currentSlide !== 0 && (
+      <motion.div
+        key={currentSlide}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2, ease: "easeInOut" }}
+        className="absolute inset-0"
+      >
+        <HeroPicture
+          desktopSrc={heroSlides[currentSlide].desktop}
+          mobileSrc={heroSlides[currentSlide].mobile}
+          alt={heroSlides[currentSlide].alt}
+          fetchPriority="low"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-black/45" />
+      </motion.div>
+    )}
+  </AnimatePresence>
 
           {/* Carousel Dots */}
           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex gap-3">
