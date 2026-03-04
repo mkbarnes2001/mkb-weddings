@@ -3,10 +3,6 @@ import { Helmet } from "react-helmet-async";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ChevronRight } from "lucide-react";
 
-import venueImage from "figma:asset/4b4f26e7cf88fc98e5d685335cd0e537ad22acf3.png";
-import creativeFlashImage from "figma:asset/4e80a09ae14c9e2aaefa75a7ed64281f0bbc855b.png";
-import momentsImage from "figma:asset/f2c5f140202f18a23299f273bccbba6885f5bb2a.png";
-import storiesImage from "figma:asset/a4d9c41d478a42542f5eae424fde67c33f39b713.png";
 
 export function GalleryLanding() {
   const canonical = "https://www.mkbweddings.co.uk/gallery";
@@ -17,6 +13,18 @@ export function GalleryLanding() {
   const countiesThumb =
     "https://images.mkbweddings.co.uk/thumb/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp";
 
+
+    const venueImage =
+  "https://images.mkbweddings.co.uk/thumb/Killeavy%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-113_500.webp";
+
+const creativeFlashImage =
+  "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/MKB-photography-Northern-Ireland-wedding-photographer-Irish-Wedding-photography-Darver-castle-wedding-photography-Full%20res-586_500.webp";
+
+const momentsImage =
+  "https://images.mkbweddings.co.uk/thumb/Darver%20castle/reception%20and%20party/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-189_500.webp";
+
+const storiesImage =
+  "https://images.mkbweddings.co.uk/thumb/Orange%20tree%20house/getting%20ready/mkb-weddings-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-39_500.webp";
   const mainTiles = [
     {
       title: "Explore by County",
@@ -63,7 +71,7 @@ export function GalleryLanding() {
         <meta property="og:type" content="website" />
       </Helmet>
 
-      <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
+      <div className="max-w-7xl mx-auto px-6 pt-32 pb-16 md:pt-36 md:pb-24">
 
         {/* Intro Section */}
         <div className="text-center max-w-2xl mx-auto mb-16">
