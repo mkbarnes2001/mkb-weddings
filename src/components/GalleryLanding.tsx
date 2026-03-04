@@ -14,28 +14,22 @@ export function GalleryLanding() {
   const description =
     "Browse real wedding photography from venues across Northern Ireland and Ireland. View ceremony, reception, getting ready and couple portraits captured by MKB Weddings.";
 
-  // ✅ New hosted tile image
   const countiesThumb =
     "https://images.mkbweddings.co.uk/thumb/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp";
 
   const mainTiles = [
-    // ✅ 1) Counties FIRST
     {
       title: "Explore by County",
       link: "/wedding-photographer",
       image: countiesThumb,
       description: "Browse wedding galleries by county",
     },
-
-    // ✅ 2) Venues SECOND
     {
       title: "Venues",
       link: "/gallery/venues",
       image: venueImage,
       description: "Browse weddings by location",
     },
-
-    // ✅ then moments, flash, stories/reviews
     {
       title: "Wedding Moments",
       link: "/gallery/moments",
@@ -70,6 +64,22 @@ export function GalleryLanding() {
       </Helmet>
 
       <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
+
+        {/* Intro Section */}
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <h1 className="text-3xl md:text-4xl font-serif mb-6">
+            Wedding Photography Galleries
+          </h1>
+
+          <p className="text-primary/75 text-base md:text-lg leading-loose">
+            Browse real wedding photography captured across Northern Ireland and
+            Ireland, from ceremony moments and candid portraits to dramatic
+            creative flash dancefloor images. Explore galleries by county, venue,
+            or wedding moments.
+          </p>
+        </div>
+
+        {/* Tiles */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {mainTiles.map((tile) => (
             <Link
@@ -82,18 +92,30 @@ export function GalleryLanding() {
                 alt={tile.title}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
+
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
               <div className="absolute inset-0 flex flex-col justify-end p-8">
-                <h2 className="text-white text-2xl md:text-3xl mb-2">{tile.title}</h2>
-                <p className="text-white/90 text-lg mb-4">{tile.description}</p>
+                <h2 className="text-white text-2xl md:text-3xl mb-2">
+                  {tile.title}
+                </h2>
+
+                <p className="text-white/90 text-lg mb-4">
+                  {tile.description}
+                </p>
+
                 <div className="flex items-center text-white">
-                  <span className="text-sm uppercase tracking-wider">Explore</span>
+                  <span className="text-sm uppercase tracking-wider">
+                    Explore
+                  </span>
+
                   <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-2" />
                 </div>
               </div>
             </Link>
           ))}
         </div>
+
       </div>
     </div>
   );
