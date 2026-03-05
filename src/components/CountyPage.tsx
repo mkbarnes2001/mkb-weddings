@@ -338,7 +338,7 @@ export function CountyPage() {
 
       {/* FAQS */}
       {faqs.length ? (
-        <section className="max-w-5xl mx-auto px-6 pb-28">
+        <section className="max-w-5xl mx-auto px-6 pb-40">
           <div className="pt-16 border-t border-neutral-200">
             <h2 className={`${h2Main} text-center mb-10`}>FAQs</h2>
 
@@ -357,14 +357,14 @@ export function CountyPage() {
       ) : null}
 
       {/* Explore more counties */}
-      <section className="max-w-5xl mx-auto px-6 pb-56 text-center mt-24">
+      <section className="max-w-5xl mx-auto px-6 pt-12 pb-56 text-center">
         <div className="pt-16 border-t border-neutral-200">
           <h2 className={`${h2Main} mb-4`}>Explore more counties</h2>
           <p className={`${bodyText} mb-10`}>
             Browse all county pages, then jump into venue galleries.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pb-12">
             <Link
               to="/wedding-photographer"
               className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
