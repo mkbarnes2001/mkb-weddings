@@ -175,7 +175,9 @@ export function CountyPage() {
 
   // Typography tokens (main content)
   const bodyText = "text-primary/75 text-base md:text-lg leading-loose";
-  const h2Main = "text-neutral-900 text-2xl md:text-3xl font-serif mb-4";
+
+  // ✅ Smaller headings (previously text-2xl md:text-3xl)
+  const h2Main = "text-neutral-900 text-xl md:text-2xl font-serif mb-4";
 
   return (
     <div className="min-h-screen bg-white">
@@ -360,9 +362,7 @@ export function CountyPage() {
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-56 text-center">
         <div className="pt-16 border-t border-neutral-200">
           <h2 className={`${h2Main} mb-4`}>Explore more counties</h2>
-          <p className={`${bodyText} mb-10`}>
-            Browse all county pages, then jump into venue galleries.
-          </p>
+          <p className={`${bodyText} mb-10`}>Browse all county pages, then jump into venue galleries.</p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pb-12">
             <Link
