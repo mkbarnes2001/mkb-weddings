@@ -12,7 +12,7 @@ export function GalleryLanding() {
 
   // Match the hero pattern used on GalleryByMoments (full-width hero + gradient overlay)
   const HERO_IMAGE =
-    "https://images.mkbweddings.co.uk/full/Greenvale%20Hotel/family%20and%20bridal%20party/MKB-weddings-mkb-photography-NI-wedding-photographer-greenvale-cookstown-wedding-photography-434_2000.webp";
+    "https://images.mkbweddings.co.uk/full/Orange%20tree%20house/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000.webp";
 
   // Tile images (your image library)
   const countiesThumb =
