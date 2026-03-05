@@ -134,7 +134,7 @@ export function CountyPage() {
   const locationLine = [county.county, county.country].filter(Boolean).join(", ");
   const heroImage = (county.heroImageUrl || "").trim() || FALLBACK_HERO;
 
-  // ✅ Breadcrumbs now: Home → Gallery → Counties → County
+  // Breadcrumbs: Home → Gallery → Counties → County
   const breadcrumbItems = [
     { name: "Home", item: `${SITE_ORIGIN}/` },
     { name: "Gallery", item: `${SITE_ORIGIN}/gallery` },
@@ -173,6 +173,10 @@ export function CountyPage() {
     ],
   };
 
+  // Typography tokens (main content)
+  const bodyText = "text-primary/75 text-base md:text-lg leading-loose";
+  const h2Main = "text-neutral-900 text-2xl md:text-3xl font-serif mb-4";
+
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
@@ -191,11 +195,7 @@ export function CountyPage() {
 
       {/* HERO */}
       <div className="relative h-[60vh] min-h-[420px]">
-        <ImageWithFallback
-          src={heroImage}
-          alt={county.county}
-          className="w-full h-full object-cover"
-        />
+        <ImageWithFallback src={heroImage} alt={county.county} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
         <div className="absolute inset-0 flex items-end">
@@ -208,7 +208,7 @@ export function CountyPage() {
               Back to Counties
             </Link>
 
-            <h1 className="text-white text-4xl md:text-5xl mb-4">
+            <h1 className="text-white text-4xl md:text-5xl mb-4 font-serif">
               {county.primaryKeyword || `Wedding Photographer ${county.county}`}
             </h1>
 
@@ -267,16 +267,16 @@ export function CountyPage() {
       {/* COUNTY INFO */}
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
         {county.secondaryKeywords?.length ? (
-  <p className="text-neutral-700 mb-12 font-semibold">
-    {county.secondaryKeywords
-      .map((s) => (s || "").replace(/["\\]+/g, "").trim())
-      .filter(Boolean)
-        .join(" • ")}
-        </p>
+          <p className="text-neutral-700 mb-12 font-semibold text-sm md:text-base">
+            {county.secondaryKeywords
+              .map((s) => (s || "").replace(/["\\]+/g, "").trim())
+              .filter(Boolean)
+              .join(" • ")}
+          </p>
         ) : null}
 
         {county.intro ? (
-          <div className="text-neutral-700 leading-relaxed text-lg space-y-5 mb-10">
+          <div className={`${bodyText} space-y-6 mb-12`}>
             {county.intro.split(/\n{2,}/).map((p, i) => (
               <p key={i}>{p}</p>
             ))}
@@ -284,24 +284,24 @@ export function CountyPage() {
         ) : null}
 
         {county.whySection ? (
-          <div className="text-neutral-700 leading-relaxed text-lg space-y-5 mb-10">
-            <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-4">
-              Why get married in {county.county}?
-            </h2>
-            {county.whySection.split(/\n{2,}/).map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
+          <div className="mb-12">
+            <h2 className={h2Main}>Why get married in {county.county}?</h2>
+            <div className={`${bodyText} space-y-6`}>
+              {county.whySection.split(/\n{2,}/).map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </div>
           </div>
         ) : null}
 
         {county.travelSection ? (
-          <div className="text-neutral-700 leading-relaxed text-lg space-y-5 mb-10">
-            <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-4">
-              Travel &amp; coverage
-            </h2>
-            {county.travelSection.split(/\n{2,}/).map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
+          <div className="mb-12">
+            <h2 className={h2Main}>Travel &amp; coverage</h2>
+            <div className={`${bodyText} space-y-6`}>
+              {county.travelSection.split(/\n{2,}/).map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </div>
           </div>
         ) : null}
       </section>
@@ -309,9 +309,7 @@ export function CountyPage() {
       {/* VENUES GRID */}
       <section className="max-w-7xl mx-auto px-6 pb-20">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-6 text-center">
-            Wedding venues in {county.county}
-          </h2>
+          <h2 className={`${h2Main} text-center mb-8`}>Wedding venues in {county.county}</h2>
 
           {venues.length ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-left">
@@ -321,71 +319,73 @@ export function CountyPage() {
                   to={v.url}
                   className="rounded-lg border border-neutral-200 p-4 hover:border-neutral-300 hover:bg-neutral-50 transition-colors"
                 >
-                  <div className="text-neutral-900 font-medium">{v.venueName}</div>
-                  {v.town ? <div className="text-neutral-600 text-sm mt-1">{v.town}</div> : null}
+                  <div className="text-neutral-900 font-medium text-base md:text-lg">
+                    {v.venueName}
+                  </div>
+                  {v.town ? (
+                    <div className="text-neutral-600 text-sm md:text-base mt-1">{v.town}</div>
+                  ) : null}
                 </Link>
               ))}
             </div>
           ) : (
-            <p className="text-neutral-600 text-center">No venues listed yet for this county.</p>
+            <p className="text-neutral-600 text-center text-base md:text-lg">
+              No venues listed yet for this county.
+            </p>
           )}
         </div>
       </section>
 
       {/* FAQS */}
-          {faqs.length ? (
-  <section className="max-w-5xl mx-auto px-6 pb-28">
-    <div className="pt-16 border-t border-neutral-200">
-      <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-8 text-center">
-        FAQs
-      </h2>
+      {faqs.length ? (
+        <section className="max-w-5xl mx-auto px-6 pb-28">
+          <div className="pt-16 border-t border-neutral-200">
+            <h2 className={`${h2Main} text-center mb-10`}>FAQs</h2>
 
-      <div className="space-y-8 text-left max-w-3xl mx-auto">
-        {faqs.map((f, i) => (
-          <details key={i} className="group">
-            <summary className="cursor-pointer text-neutral-900 font-medium text-base md:text-lg">
-              {f.question}
-            </summary>
-            <div className="text-neutral-700 mt-3 leading-relaxed">{f.answer}</div>
-          </details>
-        ))}
-      </div>
-    </div>
-    </section>
-    ) : null}
+            <div className="space-y-8 text-left max-w-3xl mx-auto">
+              {faqs.map((f, i) => (
+                <details key={i} className="group">
+                  <summary className="cursor-pointer text-neutral-900 font-medium text-base md:text-lg">
+                    {f.question}
+                  </summary>
+                  <div className={`${bodyText} mt-3`}>{f.answer}</div>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* Explore more counties */}
-     <section className="max-w-5xl mx-auto px-6 pb-40 text-center mt-8">
-  <div className="pt-16 border-t border-neutral-200">
-    <h2 className="text-neutral-900 text-1xl md:text-2xl font-serif mb-4">
-      Explore more counties
-    </h2>
-    <p className="text-neutral-600 mb-8">
-      Browse all county pages, then jump into venue galleries.
-    </p>
+      <section className="max-w-5xl mx-auto px-6 pb-40 text-center mt-8">
+        <div className="pt-16 border-t border-neutral-200">
+          <h2 className={`${h2Main} mb-4`}>Explore more counties</h2>
+          <p className={`${bodyText} mb-10`}>
+            Browse all county pages, then jump into venue galleries.
+          </p>
 
-    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-      <Link
-        to="/wedding-photographer"
-        className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
-      >
-        View all counties
-      </Link>
-      <Link
-        to="/gallery"
-        className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
-      >
-        Back to gallery
-      </Link>
-      <Link
-        to="/gallery/venues"
-        className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
-      >
-        Browse venues
-      </Link>
-    </div>
-  </div>
-</section>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/wedding-photographer"
+              className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
+            >
+              View all counties
+            </Link>
+            <Link
+              to="/gallery"
+              className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
+            >
+              Back to gallery
+            </Link>
+            <Link
+              to="/gallery/venues"
+              className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
+            >
+              Browse venues
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
