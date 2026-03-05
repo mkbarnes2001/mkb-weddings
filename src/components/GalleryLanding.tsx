@@ -90,17 +90,12 @@ export function GalleryLanding() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-        <div className="absolute inset-0 flex items-end">
-          <div className="max-w-6xl mx-auto w-full px-6 pb-12">
-            <h1 className="text-white text-4xl md:text-5xl mb-4 font-serif">
-              Wedding Photography Galleries
-            </h1>
-            <div className="text-white/85 text-sm">
-              Explore by county, venues, moments, creative flash, and real wedding stories.
-            </div>
-          </div>
+        <div className="absolute inset-0 flex items-center justify-center text-center px-6">
+        <h1 className="text-white text-4xl md:text-5xl font-serif">
+          Wedding Photography Galleries
+          </h1>
         </div>
-      </div>
+        </div>
 
       {/* BREADCRUMBS: Home > Gallery */}
       <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
