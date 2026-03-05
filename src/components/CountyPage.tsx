@@ -357,14 +357,14 @@ export function CountyPage() {
       ) : null}
 
       {/* Explore more counties */}
-      <section className="max-w-5xl mx-auto px-6 pb-40 text-center mt-8">
+      <section className="max-w-5xl mx-auto px-6 pb-56 text-center mt-24">
         <div className="pt-16 border-t border-neutral-200">
           <h2 className={`${h2Main} mb-4`}>Explore more counties</h2>
           <p className={`${bodyText} mb-10`}>
             Browse all county pages, then jump into venue galleries.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
             <Link
               to="/wedding-photographer"
               className="text-neutral-900 hover:text-neutral-700 underline underline-offset-4"
