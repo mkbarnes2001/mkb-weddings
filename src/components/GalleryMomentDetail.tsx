@@ -6,13 +6,6 @@ import { Helmet } from "react-helmet-async";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
 
-// Hero images (Figma-selected)
-import gettingReadyHero from "figma:asset/fb84c4cbee696343b417ad4224fe2d9c9960ad49.png";
-import ceremonyHero from "figma:asset/824b08dfe2d92a128003e19c7f69fd10d28b2015.png";
-import couplePortraitHero from "figma:asset/9caf1b2bbff1bbb43c7fe20f8da33be74aa354be.png";
-import bridalPartyHero from "figma:asset/7bd3106c0b8c5268adbbc2617f84fb2440375cf1.png";
-import receptionHero from "figma:asset/e2462e6839aea3c2d398e8bf894093d9d55e2977.png";
-import detailsDecorHero from "figma:asset/7ec5ca5baceba029305e6928146e8f7050cf2009.png";
 
 type CsvRow = {
   venue: string;
@@ -21,13 +14,16 @@ type CsvRow = {
   tags?: string;
 };
 
+type VenueMetaRow = {
+  venue: string;
+  county?: string;
+};
+
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 
 // R2 base
-const THUMB_BASE =
-  "https://images.mkbweddings.co.uk/thumb";
-const FULL_BASE =
-  "https://images.mkbweddings.co.uk/full";
+const THUMB_BASE = "https://images.mkbweddings.co.uk/thumb";
+const FULL_BASE = "https://images.mkbweddings.co.uk/full";
 
 function slugify(s: string) {
   return (s || "")
@@ -42,9 +38,8 @@ function encSegment(s: string) {
   return encodeURIComponent(s);
 }
 
-function parseGalleryCsv(csvText: string): CsvRow[] {
+function parseCsvLines(csvText: string): string[][] {
   const lines = csvText.split(/\r?\n/).filter(Boolean);
-  if (lines.length < 2) return [];
 
   const parseLine = (line: string) => {
     const out: string[] = [];
@@ -53,10 +48,12 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
 
     for (let i = 0; i < line.length; i++) {
       const ch = line[i];
+
       if (ch === '"') {
         inQuotes = !inQuotes;
         continue;
       }
+
       if (ch === "," && !inQuotes) {
         out.push(cur.trim());
         cur = "";
@@ -64,11 +61,19 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
         cur += ch;
       }
     }
+
     out.push(cur.trim());
     return out;
   };
 
-  const header = parseLine(lines[0]).map((h) => h.toLowerCase());
+  return lines.map(parseLine);
+}
+
+function parseGalleryCsv(csvText: string): CsvRow[] {
+  const rows = parseCsvLines(csvText);
+  if (rows.length < 2) return [];
+
+  const header = rows[0].map((h) => h.toLowerCase());
   const venueIdx = header.indexOf("venue");
   const categoryIdx = header.indexOf("category");
   const filenameIdx = header.indexOf("filename");
@@ -76,31 +81,47 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
 
   if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) return [];
 
-  const rows: CsvRow[] = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cols = parseLine(lines[i]);
-    const venue = (cols[venueIdx] || "").trim();
-    const category = (cols[categoryIdx] || "").trim();
-    const filename = (cols[filenameIdx] || "").trim();
-    const tags = tagsIdx >= 0 ? (cols[tagsIdx] || "").trim() : "";
+  return rows
+    .slice(1)
+    .map((cols) => ({
+      venue: (cols[venueIdx] || "").trim(),
+      category: (cols[categoryIdx] || "").trim(),
+      filename: (cols[filenameIdx] || "").trim(),
+      tags: tagsIdx >= 0 ? (cols[tagsIdx] || "").trim() : "",
+    }))
+    .filter((r) => r.venue && r.category && r.filename);
+}
 
-    if (!venue || !category || !filename) continue;
-    rows.push({ venue, category, filename, tags });
-  }
-  return rows;
+function parseVenueMetaCsv(csvText: string): VenueMetaRow[] {
+  const rows = parseCsvLines(csvText);
+  if (rows.length < 2) return [];
+
+  const header = rows[0].map((h) => h.toLowerCase());
+  const venueIdx = header.indexOf("venue");
+  const countyIdx = header.indexOf("venue-region");
+
+  if (venueIdx === -1) return [];
+
+  return rows
+    .slice(1)
+    .map((cols) => ({
+      venue: (cols[venueIdx] || "").trim(),
+      county: countyIdx !== -1 ? (cols[countyIdx] || "").trim() : "",
+    }))
+    .filter((v) => v.venue);
 }
 
 function thumbUrl(r: CsvRow) {
-  return `${THUMB_BASE}/${encSegment(r.venue)}/${encSegment(
-    r.category
-  )}/${encodeURIComponent(r.filename)}`;
+  return `${THUMB_BASE}/${encSegment(r.venue)}/${encSegment(r.category)}/${encodeURIComponent(
+    r.filename
+  )}`;
 }
 
 function fullUrlFromThumb(r: CsvRow) {
   const filename2000 = r.filename.replace(/_500\.webp$/i, "_2000.webp");
-  return `${FULL_BASE}/${encSegment(r.venue)}/${encSegment(
-    r.category
-  )}/${encodeURIComponent(filename2000)}`;
+  return `${FULL_BASE}/${encSegment(r.venue)}/${encSegment(r.category)}/${encodeURIComponent(
+    filename2000
+  )}`;
 }
 
 function hashStringToInt(str: string) {
@@ -123,8 +144,6 @@ function stableShuffle<T>(arr: T[], seed: string, keyFn: (t: T) => string) {
 }
 
 // Optional: pin images to the top PER moment.
-// Keys must match your URL momentId (slug), e.g. "getting-ready", "ceremony", etc.
-// Use the _500.webp filenames exactly as in CSV.
 const PINNED: Record<string, string[]> = {
   "getting-ready": [
     "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-186_500.webp",
@@ -138,7 +157,7 @@ const PINNED: Record<string, string[]> = {
     "mkb-weddings-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-39_500.webp",
   ],
 
-  "ceremony": [
+  ceremony: [
     "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-100_500.webp",
     "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-164_500.webp",
     "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-135_500.webp",
@@ -187,45 +206,50 @@ const PINNED: Record<string, string[]> = {
     "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-shandon-hotel-marble-hill-donegal-wedding-photography-104_500.webp",
   ],
 };
+
 const MOMENT_META: Record<
   string,
   { name: string; description: string; hero: string; focus?: string }
 > = {
-  // ✅ FIXED KEYS to match your URLs + MOMENT_TILES ids
   "getting-ready": {
     name: "Getting Ready",
     description: "Preparation and anticipation before the day begins.",
-    hero: gettingReadyHero,
+    hero: "https://images.mkbweddings.co.uk/full/Galgorm/getting%20ready/MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-67_2000.webp",
     focus: "50% 50%",
   },
+
   ceremony: {
     name: "Ceremony",
     description: "The vows, the emotion, and the moment you say “I do”.",
-    hero: ceremonyHero,
+    hero: "https://images.mkbweddings.co.uk/full/Killeavy%20castle/ceremony/mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-135_2000.webp",
     focus: "50% 50%",
   },
+
   "couple-portraits": {
     name: "Couple Portraits",
     description: "Just the two of you — natural, relaxed portraits.",
-    hero: couplePortraitHero,
+    hero: "https://images.mkbweddings.co.uk/full/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000.webp",
     focus: "50% 50%",
   },
+
   "family-and-bridal-party": {
     name: "Family and Bridal Party",
     description: "Celebrating with the people who mean the most.",
-    hero: bridalPartyHero,
+    hero: "https://images.mkbweddings.co.uk/full/Orange%20tree%20house/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-415_2000.webp",
     focus: "50% 50%",
   },
+
   "reception-and-party": {
     name: "Reception and Party",
     description: "Dance, celebrate, and have fun into the night.",
-    hero: receptionHero,
+    hero: "https://images.mkbweddings.co.uk/full/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-300_2000.webp",
     focus: "50% 50%",
   },
+
   "details-and-decor": {
     name: "Details and Decor",
     description: "The little things that make your day uniquely yours.",
-    hero: detailsDecorHero,
+    hero: "https://images.mkbweddings.co.uk/full/Leighinmohr%20house%20hotel/details%20and%20decor/mkb-weddings-northern-ireland-wedding-photographer-creative-wedding-photography-10_2000.webp",
     focus: "50% 50%",
   },
 };
@@ -235,6 +259,7 @@ export function GalleryMomentDetail() {
   const meta = momentId ? MOMENT_META[momentId] : undefined;
 
   const [rows, setRows] = useState<CsvRow[]>([]);
+  const [venueCountyMap, setVenueCountyMap] = useState<Record<string, string>>({});
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -265,6 +290,35 @@ export function GalleryMomentDetail() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch("/galleryvenuedesc.csv", { cache: "no-store" });
+        if (!res.ok) return;
+
+        const text = await res.text();
+        const parsed = parseVenueMetaCsv(text);
+
+        const map: Record<string, string> = {};
+        for (const row of parsed) {
+          if (row.venue && row.county) {
+            map[row.venue] = row.county;
+          }
+        }
+
+        if (!cancelled) setVenueCountyMap(map);
+      } catch {
+        // optional file, ignore failures
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const momentRows = useMemo(() => {
     if (!momentId) return [];
     return rows.filter((r) => slugify(r.category) === momentId);
@@ -277,7 +331,7 @@ export function GalleryMomentDetail() {
     const mapped = momentRows.map((r) => ({
       thumb: thumbUrl(r),
       full: fullUrlFromThumb(r),
-      alt: `${r.venue} – ${r.category}`,
+      alt: `${r.category} at ${r.venue}${venueCountyMap[r.venue] ? `, ${venueCountyMap[r.venue]}` : ""}`,
       filename: r.filename,
     }));
 
@@ -290,7 +344,7 @@ export function GalleryMomentDetail() {
     const shuffled = stableShuffle(rest, `moment-${momentId || "unknown"}-v1`, (m) => m.filename);
 
     return [...pinned, ...shuffled];
-  }, [momentRows, momentId]);
+  }, [momentRows, momentId, venueCountyMap]);
 
   const venueCount = useMemo(() => {
     const set = new Set<string>();
@@ -304,7 +358,10 @@ export function GalleryMomentDetail() {
         <div className="text-center max-w-xl">
           <h1 className="text-3xl mb-3">Gallery loading error</h1>
           <p className="text-neutral-600 mb-6">{loadError}</p>
-          <Link to="/gallery/moments" className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4">
+          <Link
+            to="/gallery/moments"
+            className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4"
+          >
             Back to Moments
           </Link>
         </div>
@@ -320,7 +377,10 @@ export function GalleryMomentDetail() {
           <p className="text-neutral-600 mb-6">
             This moment doesn’t exist in gallery.csv (or has no images).
           </p>
-          <Link to="/gallery/moments" className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4">
+          <Link
+            to="/gallery/moments"
+            className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4"
+          >
             Back to Moments
           </Link>
         </div>
@@ -348,7 +408,13 @@ export function GalleryMomentDetail() {
         <title>{metaTitle}</title>
         <meta name="description" content={metaDescription} />
         <link rel="canonical" href={canonical} />
-
+        
+        <link
+          rel="preload"
+          as="image"
+          href={heroImage}
+          fetchpriority="high"
+        />
         <meta property="og:url" content={canonical} />
         <meta property="og:title" content={metaTitle} />
         <meta property="og:description" content={metaDescription} />
@@ -356,13 +422,17 @@ export function GalleryMomentDetail() {
         <meta property="og:type" content="website" />
       </Helmet>
 
-      {/* HERO (match Venue Detail) */}
+      {/* HERO */}
       <div className="relative h-[60vh] min-h-[400px]">
         <ImageWithFallback
-          src={heroImage}
-          alt={momentName}
-          className="w-full h-full object-cover"
-          style={{ objectPosition: heroFocus }}
+        src={heroImage}
+        alt={`${momentName} wedding photography in Northern Ireland`}
+        width={2000}
+        height={1200}
+        fetchPriority="high"
+        decoding="async"
+        className="w-full h-full object-cover"
+        style={{ objectPosition: heroFocus }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
@@ -433,9 +503,7 @@ export function GalleryMomentDetail() {
         )}
 
         {images.length === 0 ? (
-          <div className="text-center py-20 text-neutral-600">
-            No images found for this moment.
-          </div>
+          <div className="text-center py-20 text-neutral-600">No images found for this moment.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {images.map((img, idx) => (
@@ -458,15 +526,15 @@ export function GalleryMomentDetail() {
           </div>
         )}
 
-       {lightboxOpen && images.length > 0 && (
-      <ImageLightbox
-        images={images.map((i) => i.full)}
-        alts={images.map((i) => i.alt)}
-        currentIndex={lightboxIndex}
-        onClose={() => setLightboxOpen(false)}
-        onNavigate={(newIndex) => setLightboxIndex(newIndex)}
-        />
-      )}
+        {lightboxOpen && images.length > 0 && (
+          <ImageLightbox
+            images={images.map((i) => i.full)}
+            alts={images.map((i) => i.alt)}
+            currentIndex={lightboxIndex}
+            onClose={() => setLightboxOpen(false)}
+            onNavigate={(newIndex) => setLightboxIndex(newIndex)}
+          />
+        )}
       </div>
     </div>
   );
