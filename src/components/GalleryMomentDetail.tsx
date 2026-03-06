@@ -457,7 +457,7 @@ export function GalleryMomentDetail() {
       </div>
 
       {/* BREADCRUMBS */}
-      <div className="max-w-7xl mx-auto px-6 pt-6 pb-16">
+      <div className="max-w-7xl mx-auto px-6 pt-6 pb-12">
         <nav aria-label="Breadcrumb" className="flex justify-center">
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
             <li>
