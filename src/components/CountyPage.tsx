@@ -270,7 +270,7 @@ export function CountyPage() {
     
 <section className="max-w-4xl mx-auto px-6 pt-14 pb-14 text-center">
   {county.secondaryKeywords?.length ? (
-    <p className="text-neutral-900/90 text-xl md:text-2xl font-serif mb-14">
+    <p className="text-neutral-900/90 text-xl md:text-2xl font-serif mt-12 mb-16">
       {county.secondaryKeywords
         .map((s) => (s || "").replace(/["\\]+/g, "").trim())
         .filter(Boolean)
