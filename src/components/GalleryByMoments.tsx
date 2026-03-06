@@ -13,28 +13,28 @@ type CsvRow = {
 
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 
-// Hero image
+// Hero image stays full-size
 const HERO_IMAGE =
   "https://images.mkbweddings.co.uk/full/Greenvale%20Hotel/family%20and%20bridal%20party/MKB-weddings-mkb-photography-NI-wedding-photographer-greenvale-cookstown-wedding-photography-434_2000.webp";
 
-// Moment tile images from image library
+// Moment tile images swapped to thumb versions
 const gettingReadyImage =
-  "https://images.mkbweddings.co.uk/full/Galgorm/getting%20ready/MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-67_2000.webp";
+  "https://images.mkbweddings.co.uk/thumb/Galgorm/getting%20ready/MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-67_500.webp";
 
 const ceremonyImage =
-  "https://images.mkbweddings.co.uk/full/Killeavy%20castle/ceremony/mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-135_2000.webp";
+  "https://images.mkbweddings.co.uk/thumb/Killeavy%20castle/ceremony/mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-135_500.webp";
 
 const couplePortraitImage =
-  "https://images.mkbweddings.co.uk/full/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000.webp";
+  "https://images.mkbweddings.co.uk/thumb/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_500.webp";
 
 const bridalPartyImage =
-  "https://images.mkbweddings.co.uk/full/Orange%20tree%20house/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-415_2000.webp";
+  "https://images.mkbweddings.co.uk/thumb/Orange%20tree%20house/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-415_500.webp";
 
 const receptionImage =
-  "https://images.mkbweddings.co.uk/full/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-300_2000.webp";
+  "https://images.mkbweddings.co.uk/thumb/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-300_500.webp";
 
 const detailsDecorImage =
-  "https://images.mkbweddings.co.uk/full/Leighinmohr%20house%20hotel/details%20and%20decor/mkb-weddings-northern-ireland-wedding-photographer-creative-wedding-photography-10_2000.webp";
+  "https://images.mkbweddings.co.uk/thumb/Leighinmohr%20house%20hotel/details%20and%20decor/mkb-weddings-northern-ireland-wedding-photographer-creative-wedding-photography-10_500.webp";
 
 function slugify(s: string) {
   return (s || "")
@@ -93,10 +93,6 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
   return rows;
 }
 
-/**
- * Curated tiles.
- * IDs MUST match slugify(category) from CSV.
- */
 const MOMENT_TILES = [
   {
     id: "getting-ready",
@@ -214,7 +210,6 @@ export function GalleryByMoments() {
         <meta property="og:type" content="website" />
       </Helmet>
 
-      {/* HERO */}
       <div className="relative h-[60vh] min-h-[420px]">
         <ImageWithFallback
           src={HERO_IMAGE}
@@ -244,7 +239,6 @@ export function GalleryByMoments() {
         </div>
       </div>
 
-      {/* BREADCRUMBS */}
       <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
         <nav aria-label="Breadcrumb" className="flex justify-center">
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
@@ -269,7 +263,6 @@ export function GalleryByMoments() {
         </nav>
       </div>
 
-      {/* INTRO */}
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
         <p className="text-neutral-700 leading-relaxed text-lg">
           Browse real wedding photography by moment — from getting ready to the dancefloor —
@@ -277,7 +270,6 @@ export function GalleryByMoments() {
         </p>
       </section>
 
-      {/* TILES */}
       <div className="max-w-7xl mx-auto px-6 pb-32 pt-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {tilesToShow.map((moment) => {
