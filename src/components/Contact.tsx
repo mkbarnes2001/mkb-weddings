@@ -5,15 +5,15 @@ import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { AnimatePresence, motion } from "motion/react";
 
-import heroImage1 from "figma:asset/56c087b2e44825658578c4eebea8003fc82789e5.png";
-import heroImage2 from "figma:asset/f0c6a12bde87e175e2aadb88f75b83c7f4125e86.png";
-import heroImage3 from "figma:asset/6595a05dfe41b8f2fc54e571acf9e9a24994d353.png";
-import heroImage4 from "figma:asset/2018a530540d6cd532e764d8c4467195d61fe49a.png";
-
 export function Contact() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const heroCarouselImages = [heroImage1, heroImage2, heroImage3, heroImage4];
+ const heroCarouselImages = [
+  "https://images.mkbweddings.co.uk/full/Galgorm/getting%20ready/MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-67_2000.webp",
+  "https://images.mkbweddings.co.uk/full/Killeavy%20castle/ceremony/mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-135_2000.webp",
+  "https://images.mkbweddings.co.uk/full/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000.webp",
+  "https://images.mkbweddings.co.uk/full/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-300_2000.webp",
+];
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -48,7 +48,11 @@ export function Contact() {
             >
               <ImageWithFallback
                 src={heroCarouselImages[currentSlide]}
-                alt={`Contact MKB Weddings – slide ${currentSlide + 1}`}
+                alt="Natural wedding photography across Northern Ireland and Ireland"
+                width={2000}
+                height={1200}
+                fetchPriority="high"
+                decoding="async"
                 className="w-full h-full object-cover object-center"
                 style={{ objectPosition: "center 40%" }}
               />
