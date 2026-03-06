@@ -267,35 +267,46 @@ export function CountyPage() {
       </div>
 
       {/* COUNTY INFO */}
-      <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
-       {county.secondaryKeywords?.length ? (
-        <p className="text-neutral-900 text-xl md:text-2xl font-serif mb-12">
-          {county.secondaryKeywords
-          .map((s) => (s || "").replace(/["\\]+/g, "").trim())
-          .filter(Boolean)
-          .join(" • ")}
-          </p>
-        ) : null}
+   <section className="max-w-4xl mx-auto px-6 pt-14 pb-14 text-center">
+  {county.secondaryKeywords?.length ? (
+    <p className="text-neutral-900/90 text-xl md:text-2xl font-serif mb-14">
+      {county.secondaryKeywords
+        .map((s) => (s || "").replace(/["\\]+/g, "").trim())
+        .filter(Boolean)
+        .join(" • ")}
+    </p>
+  ) : null}
 
-        {county.intro ? (
-          <div className={`${bodyText} space-y-6 mb-12`}>
-            {county.intro.split(/\n{2,}/).map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
-          </div>
-        ) : null}
+  {county.intro ? (
+    <div className={`${bodyText} space-y-6 mb-16`}>
+      {county.intro.split(/\n{2,}/).map((p, i) => (
+        <p key={i}>{p}</p>
+      ))}
+    </div>
+  ) : null}
 
-        {county.whySection ? (
-          <div className="mb-12">
-            <h2 className={h2Main}>Why get married in {county.county}?</h2>
-            <div className={`${bodyText} space-y-6`}>
-              {county.whySection.split(/\n{2,}/).map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
-            </div>
-          </div>
-        ) : null}
+  {county.whySection ? (
+    <div className="mb-16">
+      <h2 className={h2Main}>Why get married in {county.county}?</h2>
+      <div className={`${bodyText} space-y-6`}>
+        {county.whySection.split(/\n{2,}/).map((p, i) => (
+          <p key={i}>{p}</p>
+        ))}
+      </div>
+    </div>
+  ) : null}
 
+  {county.travelSection ? (
+    <div className="mb-16">
+      <h2 className={h2Main}>Travel &amp; coverage</h2>
+      <div className={`${bodyText} space-y-6`}>
+        {county.travelSection.split(/\n{2,}/).map((p, i) => (
+          <p key={i}>{p}</p>
+        ))}
+      </div>
+    </div>
+  ) : null}
+</section>
         {county.travelSection ? (
           <div className="mb-12">
             <h2 className={h2Main}>Travel &amp; coverage</h2>
