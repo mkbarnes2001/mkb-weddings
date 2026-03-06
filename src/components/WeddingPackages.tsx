@@ -1,121 +1,169 @@
-import { Check, X, Camera, Clock, Video, BookOpen, ArrowRight, Film, Play, Heart } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { ImageWithFallback } from './figma/ImageWithFallback';
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import heroImage1 from 'figma:asset/03addbb5f7743f01a58fb3d5a7dc0a04d8a597ea.png';
-import heroImage2 from 'figma:asset/4e80a09ae14c9e2aaefa75a7ed64281f0bbc855b.png';
-import heroImage3 from 'figma:asset/bd5d99d7e1f595c1b6ea3f81cca8271b8b5af07b.png';
-import heroImage4 from 'figma:asset/0ba91b91cae5c758237fda465ce29e30c29636e7.png';
-import logo from 'figma:asset/59cfbace7d9f63a450210fde4f6bf784db9c67f5.png';
+import {
+  Check,
+  X,
+  Camera,
+  Clock,
+  Video,
+  BookOpen,
+  ArrowRight,
+  Film,
+  Play,
+  Heart,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import logo from "figma:asset/59cfbace7d9f63a450210fde4f6bf784db9c67f5.png";
+
+type HeroSlide = {
+  desktop: string;
+  mobile: string;
+  alt: string;
+};
 
 export function WeddingPackages() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const heroCarouselImages = [heroImage1, heroImage2, heroImage3, heroImage4];
+  const heroSlides: HeroSlide[] = [
+    {
+      desktop:
+        "https://images.mkbweddings.co.uk/Hero/Desktop/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp",
+      mobile:
+        "https://images.mkbweddings.co.uk/Hero/Mobile/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000_1200.webp",
+      alt: "Northern Ireland wedding photography – couple portrait at Killeavy Castle",
+    },
+    {
+      desktop:
+        "https://images.mkbweddings.co.uk/Hero/Desktop/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000.webp",
+      mobile:
+        "https://images.mkbweddings.co.uk/Hero/Mobile/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000_1200.webp",
+      alt: "Wedding couple portrait – Orange Tree House Greyabbey",
+    },
+    {
+      desktop:
+        "https://images.mkbweddings.co.uk/Hero/Desktop/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000.webp",
+      mobile:
+        "https://images.mkbweddings.co.uk/Hero/Mobile/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000_1200.webp",
+      alt: "Slieve Donard Hotel wedding photography – couple portrait",
+    },
+    {
+      desktop:
+        "https://images.mkbweddings.co.uk/Hero/Desktop/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000.webp",
+      mobile:
+        "https://images.mkbweddings.co.uk/Hero/Mobile/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000_1200.webp",
+      alt: "Wedding photography – Slieve Donard Hotel Newcastle",
+    },
+    {
+      desktop:
+        "https://images.mkbweddings.co.uk/Hero/Desktop/mkb-weddings-rossharbour-resort-wedding-photography-363_2000.webp",
+      mobile:
+        "https://images.mkbweddings.co.uk/Hero/Mobile/mkb-weddings-rossharbour-resort-wedding-photography-363_2000_1200.webp",
+      alt: "Ross Harbour Resort wedding photography – couple portrait",
+    },
+  ];
 
-  // Hero carousel auto-rotation
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroCarouselImages.length);
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
 
     return () => clearInterval(timer);
-  }, [heroCarouselImages.length]);
+  }, [heroSlides.length]);
 
   const packages = [
     {
-      name: 'Elope',
-      price: '£795',
-      hours: '4',
-      images: '100-200',
-      color: 'from-teal-600 to-teal-700',
+      name: "Elope",
+      price: "£795",
+      hours: "4",
+      images: "100-200",
+      color: "from-teal-600 to-teal-700",
       features: {
         travelIncluded: true,
         preWeddingConsultation: true,
-        preWeddingShoot: 'Option',
+        preWeddingShoot: "Option",
         morningPrep: false,
         ceremony: true,
         portraits: true,
         reception: false,
         dances: false,
-        album: 'Option',
+        album: "Option",
         videography: false,
-        contentCreation: 'Option',
-        photobook: 'Option',
+        contentCreation: "Option",
+        photobook: "Option",
       },
     },
     {
-      name: 'Key',
-      price: '£995',
-      hours: '6',
-      images: '300',
-      color: 'from-gray-500 to-gray-600',
+      name: "Key",
+      price: "£995",
+      hours: "6",
+      images: "300",
+      color: "from-gray-500 to-gray-600",
       features: {
         travelIncluded: true,
         preWeddingConsultation: true,
-        preWeddingShoot: 'Option',
+        preWeddingShoot: "Option",
         morningPrep: false,
         ceremony: true,
         portraits: true,
         reception: false,
         dances: false,
-        album: 'Option',
+        album: "Option",
         videography: false,
-        contentCreation: 'Option',
-        photobook: 'Option',
+        contentCreation: "Option",
+        photobook: "Option",
       },
     },
     {
-      name: 'Lite',
-      price: '£1,195',
-      hours: '8',
-      images: '400',
-      color: 'from-purple-600 to-purple-700',
+      name: "Lite",
+      price: "£1,195",
+      hours: "8",
+      images: "400",
+      color: "from-purple-600 to-purple-700",
       popular: true,
       features: {
         travelIncluded: true,
         preWeddingConsultation: true,
-        preWeddingShoot: 'Option',
+        preWeddingShoot: "Option",
         morningPrep: true,
         ceremony: true,
         portraits: true,
         reception: true,
         dances: false,
-        album: 'Option',
-        videography: 'Option',
-        contentCreation: 'Option',
-        photobook: 'Option',
+        album: "Option",
+        videography: "Option",
+        contentCreation: "Option",
+        photobook: "Option",
       },
     },
     {
-      name: 'Pro',
-      price: '£1,450',
-      hours: '10',
-      images: '500-700',
-      color: 'from-blue-700 to-blue-800',
+      name: "Pro",
+      price: "£1,450",
+      hours: "10",
+      images: "500-700",
+      color: "from-blue-700 to-blue-800",
       popular: true,
       features: {
         travelIncluded: true,
         preWeddingConsultation: true,
-        preWeddingShoot: 'Option',
+        preWeddingShoot: "Option",
         morningPrep: true,
         ceremony: true,
         portraits: true,
         reception: true,
         dances: true,
-        album: 'Option',
-        videography: 'Option',
-        contentCreation: 'Option',
-        photobook: 'Option',
+        album: "Option",
+        videography: "Option",
+        contentCreation: "Option",
+        photobook: "Option",
       },
     },
     {
-      name: 'Elite',
-      price: '£1,750',
-      hours: '12',
-      images: '500-700',
-      color: 'from-blue-900 to-blue-950',
+      name: "Elite",
+      price: "£1,750",
+      hours: "12",
+      images: "500-700",
+      color: "from-blue-900 to-blue-950",
       features: {
         travelIncluded: true,
         preWeddingConsultation: true,
@@ -126,9 +174,9 @@ export function WeddingPackages() {
         reception: true,
         dances: true,
         album: true,
-        videography: 'Option',
-        contentCreation: 'Option',
-        photobook: 'Option',
+        videography: "Option",
+        contentCreation: "Option",
+        photobook: "Option",
       },
     },
   ];
@@ -140,10 +188,10 @@ export function WeddingPackages() {
   };
 
   const VIDEOS = [
-    { title: 'Wedding Film – Example 1', youtubeId: 'GzZbcfdpIX4' },
-    { title: 'Wedding Film – Example 2', youtubeId: 'd_yrNr8bTgE' },
-    { title: 'Wedding Film – Example 3', youtubeId: 'e6iZjDdmRWc' },
-    { title: 'Wedding Film – Example 4', youtubeId: 'Y0_IAaY7X8LA' },
+    { title: "Wedding Film – Example 1", youtubeId: "GzZbcfdpIX4" },
+    { title: "Wedding Film – Example 2", youtubeId: "d_yrNr8bTgE" },
+    { title: "Wedding Film – Example 3", youtubeId: "e6iZjDdmRWc" },
+    { title: "Wedding Film – Example 4", youtubeId: "Y0_IAaY7X8LA" },
   ] as const;
 
   const YouTubeEmbed = ({ youtubeId, title }: { youtubeId: string; title: string }) => {
@@ -172,29 +220,37 @@ export function WeddingPackages() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
             className="absolute inset-0"
           >
-            <ImageWithFallback
-              src={heroCarouselImages[currentSlide]}
-              alt={`Wedding package ${currentSlide + 1}`}
-              className="w-full h-full object-cover object-center"
-              style={{ objectPosition: 'center 40%' }}
-            />
+            <picture>
+              <source media="(max-width: 768px)" srcSet={heroSlides[currentSlide].mobile} />
+              <ImageWithFallback
+                src={heroSlides[currentSlide].desktop}
+                alt={heroSlides[currentSlide].alt}
+                width={2000}
+                height={1200}
+                fetchPriority="high"
+                decoding="async"
+                className="w-full h-full object-cover object-center"
+                style={{ objectPosition: "center 40%" }}
+              />
+            </picture>
             <div className="absolute inset-0 bg-black/40" />
           </motion.div>
         </AnimatePresence>
 
         {/* Carousel Dots */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex gap-3">
-          {heroCarouselImages.map((_, index) => (
+          {heroSlides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
               className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                index === currentSlide ? 'bg-accent scale-125' : 'bg-white/50 hover:bg-white/70'
+                index === currentSlide ? "bg-accent scale-125" : "bg-white/50 hover:bg-white/70"
               }`}
               aria-label={`Go to slide ${index + 1}`}
+              type="button"
             />
           ))}
         </div>
@@ -202,11 +258,12 @@ export function WeddingPackages() {
         {/* Content Overlay */}
         <div className="absolute inset-0 flex items-end justify-center pb-32 pointer-events-none">
           <div className="text-center text-white px-6 max-w-5xl mx-auto w-full">
-            <h1 className="tagline text-white mb-4" style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)' }}>
+            <h1 className="tagline text-white mb-4" style={{ fontSize: "clamp(1.25rem, 3vw, 1.75rem)" }}>
               Wedding Photography Packages
             </h1>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              From intimate elopements to full-day celebrations, choose the perfect package for your special day
+              From intimate elopements to full-day celebrations, choose the perfect package for
+              your special day
             </p>
           </div>
         </div>
@@ -215,10 +272,11 @@ export function WeddingPackages() {
       {/* Introduction */}
       <section className="py-20 px-6 md:px-20 max-w-[1440px] mx-auto">
         <div className="max-w-4xl mx-auto text-center mb-16">
-          <p className="text-foreground/70" style={{ fontSize: '1.125rem', lineHeight: '1.6' }}>
-            MKB Weddings offers five wedding photography packages designed to suit different wedding styles, timelines, and budgets.
-            Whether you're planning an intimate elopement or a grand celebration, we provide the same creative, fun, and professional
-            service with every booking.
+          <p className="text-foreground/70" style={{ fontSize: "1.125rem", lineHeight: "1.6" }}>
+            MKB Weddings offers five wedding photography packages designed to suit different
+            wedding styles, timelines, and budgets. Whether you're planning an intimate elopement
+            or a grand celebration, we provide the same creative, fun, and professional service
+            with every booking.
           </p>
         </div>
 
@@ -228,28 +286,28 @@ export function WeddingPackages() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
               {
-                title: 'Professional Editing',
-                desc: 'Full color correction and artistic enhancement',
+                title: "Professional Editing",
+                desc: "Full color correction and artistic enhancement",
               },
               {
-                title: 'Online Gallery',
-                desc: 'Private gallery for viewing, downloading and ordering prints directly',
+                title: "Online Gallery",
+                desc: "Private gallery for viewing, downloading and ordering prints directly",
               },
               {
-                title: 'Travel Included',
-                desc: 'Coverage across Northern Ireland',
+                title: "Travel Included",
+                desc: "Coverage across Northern Ireland",
               },
               {
-                title: 'High-Resolution Images',
-                desc: 'Full-resolution digital files',
+                title: "High-Resolution Images",
+                desc: "Full-resolution digital files",
               },
               {
-                title: 'Personal Print Rights',
-                desc: 'Print your images for personal use',
+                title: "Personal Print Rights",
+                desc: "Print your images for personal use",
               },
               {
-                title: 'Fast Turnaround',
-                desc: 'Receive your gallery within 6-8 weeks',
+                title: "Fast Turnaround",
+                desc: "Receive your gallery within 6-8 weeks",
               },
             ].map((item) => (
               <div key={item.title} className="flex items-start gap-3">
@@ -268,7 +326,7 @@ export function WeddingPackages() {
       <section className="py-20 px-6 md:px-20 bg-secondary">
         <div className="max-w-[1440px] mx-auto">
           <div className="text-center mb-10">
-            <p className="text-primary text-lg" style={{ fontWeight: '500' }}>
+            <p className="text-primary text-lg" style={{ fontWeight: "500" }}>
               Limited 2026 & 2027 dates available — enquire early to avoid disappointment.
             </p>
           </div>
@@ -279,11 +337,13 @@ export function WeddingPackages() {
               <div
                 key={pkg.name}
                 className={`bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow ${
-                  pkg.popular ? 'ring-2 ring-primary' : ''
+                  pkg.popular ? "ring-2 ring-primary" : ""
                 }`}
               >
                 {pkg.popular && (
-                  <div className="bg-primary text-white text-center py-2 text-sm font-medium">Most Popular</div>
+                  <div className="bg-primary text-white text-center py-2 text-sm font-medium">
+                    Most Popular
+                  </div>
                 )}
 
                 <div className={`bg-gradient-to-r ${pkg.color} text-white p-8 text-center`}>
@@ -359,32 +419,36 @@ export function WeddingPackages() {
             <div className="bg-white border border-border rounded-lg p-8">
               <Video className="w-12 h-12 text-primary mb-4" />
               <h3 className="mb-3">Videography</h3>
-              <p className="text-foreground/70 mb-4" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
-                Add professional wedding videography to capture your day in motion — no hassle booking different vendors, we handle it all!
+              <p className="text-foreground/70 mb-4" style={{ fontSize: "1rem", lineHeight: "1.6" }}>
+                Add professional wedding videography to capture your day in motion — no hassle
+                booking different vendors, we handle it all!
               </p>
             </div>
 
             <div className="bg-white border border-border rounded-lg p-8">
               <BookOpen className="w-12 h-12 text-primary mb-4" />
               <h3 className="mb-3">Wedding Album</h3>
-              <p className="text-foreground/70 mb-4" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
-                Premium quality albums with professional design. Available in various sizes with luxury binding options.
+              <p className="text-foreground/70 mb-4" style={{ fontSize: "1rem", lineHeight: "1.6" }}>
+                Premium quality albums with professional design. Available in various sizes with
+                luxury binding options.
               </p>
             </div>
 
             <div className="bg-white border border-border rounded-lg p-8">
               <Camera className="w-12 h-12 text-primary mb-4" />
               <h3 className="mb-3">Pre-Wedding Shoot</h3>
-              <p className="text-foreground/70 mb-4" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
-                Get comfortable in front of the camera with an engagement or pre-wedding photoshoot at a location of your choice.
+              <p className="text-foreground/70 mb-4" style={{ fontSize: "1rem", lineHeight: "1.6" }}>
+                Get comfortable in front of the camera with an engagement or pre-wedding photoshoot
+                at a location of your choice.
               </p>
             </div>
 
             <div className="bg-white border border-border rounded-lg p-8">
               <Clock className="w-12 h-12 text-primary mb-4" />
               <h3 className="mb-3">Additional Hours</h3>
-              <p className="text-foreground/70 mb-4" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
-                Extend your coverage to capture more of your special day — from extended preparations to late-night celebrations.
+              <p className="text-foreground/70 mb-4" style={{ fontSize: "1rem", lineHeight: "1.6" }}>
+                Extend your coverage to capture more of your special day — from extended
+                preparations to late-night celebrations.
               </p>
             </div>
           </div>
@@ -395,17 +459,17 @@ export function WeddingPackages() {
       <section className="py-20 px-6 md:px-20 bg-gradient-to-br from-secondary to-accent">
         <div className="max-w-[1440px] mx-auto text-center">
           <h1 className="mb-6">Wedding Videography</h1>
-          <p className="tagline max-w-3xl mx-auto" style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)' }}>
+          <p className="tagline max-w-3xl mx-auto" style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}>
             Cinematic wedding films that bring your story to life
           </p>
         </div>
       </section>
 
-      {/* Video Showcase Grid (NO PLACEHOLDERS) */}
+      {/* Video Showcase Grid */}
       <section className="py-20 px-6 md:px-20 max-w-[1440px] mx-auto">
         <div className="mb-16 text-center">
           <h2 className="mb-4">Our Videography Work</h2>
-          <p className="text-foreground/80 max-w-3xl mx-auto" style={{ fontSize: '1.125rem', lineHeight: '1.6' }}>
+          <p className="text-foreground/80 max-w-3xl mx-auto" style={{ fontSize: "1.125rem", lineHeight: "1.6" }}>
             Experience the emotion, energy, and magic of real weddings through our cinematic films
           </p>
         </div>
@@ -425,8 +489,9 @@ export function WeddingPackages() {
         <div className="max-w-[1440px] mx-auto">
           <div className="text-center mb-16">
             <h2 className="mb-6">What's Included</h2>
-            <p className="text-foreground/80 max-w-3xl mx-auto" style={{ fontSize: '1.125rem', lineHeight: '1.6' }}>
-              Our videography packages are designed to capture every meaningful moment of your wedding day
+            <p className="text-foreground/80 max-w-3xl mx-auto" style={{ fontSize: "1.125rem", lineHeight: "1.6" }}>
+              Our videography packages are designed to capture every meaningful moment of your
+              wedding day
             </p>
           </div>
 
@@ -436,8 +501,9 @@ export function WeddingPackages() {
                 <Film size={32} className="text-primary" />
               </div>
               <h3 className="mb-3">Full Day Coverage</h3>
-              <p className="text-foreground/80" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
-                From bridal preparations to the dances, we capture every precious moment of your celebration.
+              <p className="text-foreground/80" style={{ fontSize: "1rem", lineHeight: "1.6" }}>
+                From bridal preparations to the dances, we capture every precious moment of your
+                celebration.
               </p>
             </div>
 
@@ -446,7 +512,7 @@ export function WeddingPackages() {
                 <Play size={32} className="text-primary" />
               </div>
               <h3 className="mb-3">Highlight Film</h3>
-              <p className="text-foreground/80" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
+              <p className="text-foreground/80" style={{ fontSize: "1rem", lineHeight: "1.6" }}>
                 A beautifully edited cinematic film showcasing the best moments of your day.
               </p>
             </div>
@@ -456,7 +522,7 @@ export function WeddingPackages() {
                 <Heart size={32} className="text-primary" />
               </div>
               <h3 className="mb-3">Full Ceremony</h3>
-              <p className="text-foreground/80" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
+              <p className="text-foreground/80" style={{ fontSize: "1rem", lineHeight: "1.6" }}>
                 Complete coverage capturing every vow and emotion, so you can relive it all.
               </p>
             </div>
@@ -468,15 +534,21 @@ export function WeddingPackages() {
       <section className="py-20 px-6 md:px-20 max-w-[1440px] mx-auto">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-center mb-12">Our Videography Approach</h2>
-          <div className="space-y-6 text-foreground/80" style={{ fontSize: '1.125rem', lineHeight: '1.6' }}>
+          <div className="space-y-6 text-foreground/80" style={{ fontSize: "1.125rem", lineHeight: "1.6" }}>
             <p>
-              Complement your wedding photography with professionally crafted wedding films that tell your unique love story. Our videography style combines documentary storytelling with cinematic artistry.
+              Complement your wedding photography with professionally crafted wedding films that
+              tell your unique love story. Our videography style combines documentary storytelling
+              with cinematic artistry.
             </p>
             <p>
-              From emotional ceremony moments to energetic reception highlights, we capture every detail in stunning quality. Our unobtrusive approach allows you to enjoy your day naturally while we document the genuine emotions.
+              From emotional ceremony moments to energetic reception highlights, we capture every
+              detail in stunning quality. Our unobtrusive approach allows you to enjoy your day
+              naturally while we document the genuine emotions.
             </p>
             <p>
-              Working seamlessly alongside your photography, we ensure complete coverage without disruption. The result is a beautifully crafted film that captures not just what your wedding looked like, but what it felt like.
+              Working seamlessly alongside your photography, we ensure complete coverage without
+              disruption. The result is a beautifully crafted film that captures not just what your
+              wedding looked like, but what it felt like.
             </p>
           </div>
         </div>
@@ -486,8 +558,9 @@ export function WeddingPackages() {
       <section className="py-32 px-6 md:px-20">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="mb-8">Ready to Book Your Wedding Photography?</h2>
-          <p className="text-foreground/60 mb-12 max-w-2xl mx-auto" style={{ fontSize: '1.125rem', lineHeight: '1.6' }}>
-            Get in touch to check availability for your wedding date and discuss which package is right for you. Limited dates available for 2025-2026.
+          <p className="text-foreground/60 mb-12 max-w-2xl mx-auto" style={{ fontSize: "1.125rem", lineHeight: "1.6" }}>
+            Get in touch to check availability for your wedding date and discuss which package is
+            right for you. Limited dates available for 2025-2026.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
