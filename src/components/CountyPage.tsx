@@ -267,7 +267,8 @@ export function CountyPage() {
       </div>
 
       {/* COUNTY INFO */}
-   <section className="max-w-4xl mx-auto px-6 pt-14 pb-14 text-center">
+    
+<section className="max-w-4xl mx-auto px-6 pt-14 pb-14 text-center">
   {county.secondaryKeywords?.length ? (
     <p className="text-neutral-900/90 text-xl md:text-2xl font-serif mb-14">
       {county.secondaryKeywords
@@ -307,17 +308,8 @@ export function CountyPage() {
     </div>
   ) : null}
 </section>
-        {county.travelSection ? (
-          <div className="mb-12">
-            <h2 className={h2Main}>Travel &amp; coverage</h2>
-            <div className={`${bodyText} space-y-6`}>
-              {county.travelSection.split(/\n{2,}/).map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
-            </div>
-          </div>
-        ) : null}
-      </section>
+
+
 
       {/* VENUES GRID */}
       <section className="max-w-7xl mx-auto px-6 pb-20">
