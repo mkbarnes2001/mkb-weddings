@@ -37,8 +37,6 @@ const FULL_BASE = "https://images.mkbweddings.co.uk/full";
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 
 // --- PINNED IMAGES (PER VENUE) ---------------------------------------------
-// Use the _500.webp filenames exactly as in CSV.
-// Keys must match the venueId slug in your URL (slugify(venue)).
 const PINNED: Record<string, string[]> = {
   "orange-tree-house": [
     "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-411_500.webp",
@@ -120,7 +118,7 @@ const PINNED: Record<string, string[]> = {
     "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-la-mon-hotel-belfast-wedding-photography--394_500.webp",
     "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-la-mon-hotel-belfast-wedding-photography--412_500.webp",
   ],
-  "larchfields": [
+  larchfields: [
     "mkb-weddings-northern-ireland-wedding-photographer-larchfields-estate-lisburn-wedding-photography-32_500.webp",
     "MKB_weddings_MKB_Photography_Ireland_Northen_ireland_Wedding_Photographer_Larchfield_estate_Wedding_Photography-376_500.webp",
     "MKB_weddings_MKB_Photography_Ireland_Northen_ireland_Wedding_Photographer_Larchfield_estate_Wedding_Photography-421_500.webp",
@@ -151,7 +149,9 @@ const PINNED: Record<string, string[]> = {
     "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-harbour-enniskillen-wedding-photography_500.webp",
     "mkb-weddings-rossharbour-resort-wedding-photography-390_500.webp",
   ],
-  "shandon-hotel": ["mkb-weddings-mkb-photography-northern-ireland-wedding-photography-shandon-hotel-marble-hill-donegal-wedding-photography-404_500.webp"],
+  "shandon-hotel": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-shandon-hotel-marble-hill-donegal-wedding-photography-404_500.webp",
+  ],
   "cavan-crystal": [
     "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-cavan-crystal-hotel-wedding-photography--7_500.webp",
     "mkb-weddings-cavan-crystal-hotel-wedding-photographer-431_500.webp",
@@ -169,19 +169,21 @@ const PINNED: Record<string, string[]> = {
     "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-315_500.webp",
     "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-142_500.webp",
   ],
-  "dunadry": [
+  dunadry: [
     "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-dunadry-hotel-belfast-photography-373_500.webp",
     "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-dunadry-hotel-belfast-photography-530_500.webp",
   ],
-  "galgorm": [
+  galgorm: [
     "MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Galgorm_Manor_wedding_photography_Galgorm_resort_wedding_photographer-Full-res-256_500.webp",
     "MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-318_500.webp",
     "MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-307_500.webp",
   ],
-  "four-seasons-monaghan": ["mkb-weddings-mkb-photography-northern-ireland-wedding-photography-four-seasons-hotel-monaghan-wedding-photography-334_500.webp"],
+  "four-seasons-monaghan": [
+    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-four-seasons-hotel-monaghan-wedding-photography-334_500.webp",
+  ],
 };
 
-// --- Ordering helpers (pinned + stable shuffle) -----------------------------
+// --- Ordering helpers -------------------------------------------------------
 function hashString(input: string) {
   let h = 2166136261;
   for (let i = 0; i < input.length; i++) {
@@ -227,7 +229,7 @@ function applyPinnedOrder(rows: GalleryRow[], venueSlug: string, seed: string): 
   return [...pinned, ...shuffledRest];
 }
 
-// --- CSV helpers -------------------------------------------------------------
+// --- CSV helpers ------------------------------------------------------------
 function slugify(s: string) {
   return s
     .trim()
@@ -325,7 +327,7 @@ function parseVenueMetaCsv(csvText: string): VenueMetaRow[] {
     .filter((v) => v.venue);
 }
 
-// --- URL builders ------------------------------------------------------------
+// --- URL builders -----------------------------------------------------------
 function thumbUrl(r: GalleryRow) {
   return `${THUMB_BASE}/${encSegment(r.venue)}/${encSegment(r.category)}/${encodeURIComponent(
     r.filename
@@ -366,7 +368,12 @@ function makeLocationLine(town: string, region: string, country: string) {
   return [town, region, country].filter(Boolean).join(", ");
 }
 
-function getFallbackVenueDescription(venueName: string, town?: string, region?: string, country?: string) {
+function getFallbackVenueDescription(
+  venueName: string,
+  town?: string,
+  region?: string,
+  country?: string
+) {
   const locLine = makeLocationLine(town || "", region || "", country || "");
   const locText = locLine ? ` in ${locLine}` : "";
   return `Wedding photography at ${venueName}${locText}. I photograph weddings here in a relaxed, documentary style — capturing genuine moments, natural emotion, and the atmosphere of the day as it unfolds. Couples receive authentic storytelling with a creative edge, plus confident direction when it matters.`;
@@ -444,10 +451,12 @@ export function GalleryVenueDetail() {
   const possibleName = (meta?.venueName || "").trim();
   const possibleTown = (meta?.venueLocation || "").trim();
   const name =
-    possibleName && possibleName.toLowerCase() !== possibleTown.toLowerCase() ? possibleName : rawVenue;
+    possibleName && possibleName.toLowerCase() !== possibleTown.toLowerCase()
+      ? possibleName
+      : rawVenue;
 
   const town = (meta?.venueLocation || "").trim();
-  const region = (meta?.venueRegion || "").trim(); // this is your "County X"
+  const region = (meta?.venueRegion || "").trim();
   const country = (meta?.venueCountry || "").trim();
   const locationLine = makeLocationLine(town, region, country);
 
@@ -455,11 +464,11 @@ export function GalleryVenueDetail() {
   const safeWebsite = safeExternalUrl(websiteRaw);
 
   const descriptionFromCsv = (meta?.venueDescription || "").trim();
-  const description = descriptionFromCsv || getFallbackVenueDescription(name || rawVenue, town, region, country);
+  const description =
+    descriptionFromCsv || getFallbackVenueDescription(name || rawVenue, town, region, country);
 
   const introLine = `Wedding photography at ${name}${locationLine ? `, ${locationLine}` : ""}`;
 
-  // Resolve County slug/name for breadcrumb (match venueRegion -> county-meta.json)
   const { countySlug, countyName } = useMemo(() => {
     const regionNorm = normCountyName(region);
     if (!regionNorm) return { countySlug: "", countyName: "" };
@@ -472,7 +481,6 @@ export function GalleryVenueDetail() {
       }
     }
 
-    // fallback: if region is already like "County Down" but not found, try slugify(region)
     const fallbackSlug = slugify(region);
     return { countySlug: fallbackSlug, countyName: region };
   }, [countyMetaMap, region]);
@@ -487,7 +495,7 @@ export function GalleryVenueDetail() {
     return venueRows.map((r) => ({
       thumb: thumbUrl(r),
       full: fullUrlFromThumb(r),
-      alt: `${name}${locationLine ? `, ${locationLine}` : ""} – ${r.category}`,
+      alt: `${r.category} at ${name}${locationLine ? `, ${locationLine}` : ""}`,
       filename: r.filename,
     }));
   }, [venueRows, name, locationLine]);
@@ -554,13 +562,17 @@ export function GalleryVenueDetail() {
       locationLine ? ` in ${locationLine}` : ""
     }. View real weddings and venue galleries by MKB Weddings.`;
 
-  // JSON-LD breadcrumbs: Home > Gallery > Counties > County > Venues > Venue
   const breadcrumbItems = [
     { name: "Home", item: `${SITE_ORIGIN}/` },
     { name: "Gallery", item: `${SITE_ORIGIN}/gallery` },
     { name: "Counties", item: `${SITE_ORIGIN}/wedding-photographer` },
     ...(countyName
-      ? [{ name: countyName, item: `${SITE_ORIGIN}/wedding-photographer/${encodeURIComponent(countySlug)}` }]
+      ? [
+          {
+            name: countyName,
+            item: `${SITE_ORIGIN}/wedding-photographer/${encodeURIComponent(countySlug)}`,
+          },
+        ]
       : []),
     { name: "Venues", item: `${SITE_ORIGIN}/gallery/venues` },
     { name, item: canonical },
@@ -640,6 +652,8 @@ export function GalleryVenueDetail() {
         <meta name="description" content={metaDescription} />
 
         <link rel="canonical" href={canonical} />
+        <link rel="preload" as="image" href={heroImage} fetchpriority="high" />
+
         <meta property="og:url" content={canonical} />
         <meta property="og:title" content={metaTitle} />
         <meta property="og:description" content={metaDescription} />
@@ -651,7 +665,15 @@ export function GalleryVenueDetail() {
 
       {/* HERO */}
       <div className="relative h-[60vh] min-h-[420px]">
-        <ImageWithFallback src={heroImage} alt={name} className="w-full h-full object-cover" />
+        <ImageWithFallback
+          src={heroImage}
+          alt={`${name}${locationLine ? `, ${locationLine}` : ""} wedding photography`}
+          width={2000}
+          height={1200}
+          fetchPriority="high"
+          decoding="async"
+          className="w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
         <div className="absolute inset-0 flex items-end">
@@ -855,12 +877,11 @@ export function GalleryVenueDetail() {
       {/* LIGHTBOX */}
       {lightboxOpen && images.length > 0 && (
         <ImageLightbox
-        images={images.map((i) => i.full)}
-        alts={images.map((i) => i.alt)}          // ✅ add this
-        // captions={images.map((i) => i.alt)}    // optional: if you want visible captions too
-        currentIndex={lightboxIndex}
-        onClose={() => setLightboxOpen(false)}
-        onNavigate={(newIndex) => setLightboxIndex(newIndex)}
+          images={images.map((i) => i.full)}
+          alts={images.map((i) => i.alt)}
+          currentIndex={lightboxIndex}
+          onClose={() => setLightboxOpen(false)}
+          onNavigate={(newIndex) => setLightboxIndex(newIndex)}
         />
       )}
     </div>
