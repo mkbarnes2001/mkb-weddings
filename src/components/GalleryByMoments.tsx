@@ -5,14 +5,6 @@ import { ArrowLeft, ChevronRight } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Helmet } from "react-helmet-async";
 
-// Your original Figma-selected tile images:
-import gettingReadyImage from "figma:asset/fb84c4cbee696343b417ad4224fe2d9c9960ad49.png";
-import ceremonyImage from "figma:asset/824b08dfe2d92a128003e19c7f69fd10d28b2015.png";
-import couplePortraitImage from "figma:asset/9caf1b2bbff1bbb43c7fe20f8da33be74aa354be.png";
-import bridalPartyImage from "figma:asset/7bd3106c0b8c5268adbbc2617f84fb2440375cf1.png";
-import receptionImage from "figma:asset/e2462e6839aea3c2d398e8bf894093d9d55e2977.png";
-import detailsDecorImage from "figma:asset/7ec5ca5baceba029305e6928146e8f7050cf2009.png";
-
 type CsvRow = {
   venue: string;
   category: string;
@@ -21,9 +13,28 @@ type CsvRow = {
 
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 
-// ✅ Hero image requested
+// Hero image
 const HERO_IMAGE =
   "https://images.mkbweddings.co.uk/full/Greenvale%20Hotel/family%20and%20bridal%20party/MKB-weddings-mkb-photography-NI-wedding-photographer-greenvale-cookstown-wedding-photography-434_2000.webp";
+
+// Moment tile images from image library
+const gettingReadyImage =
+  "https://images.mkbweddings.co.uk/full/Galgorm/getting%20ready/MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-67_2000.webp";
+
+const ceremonyImage =
+  "https://images.mkbweddings.co.uk/full/Killeavy%20castle/ceremony/mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-135_2000.webp";
+
+const couplePortraitImage =
+  "https://images.mkbweddings.co.uk/full/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000.webp";
+
+const bridalPartyImage =
+  "https://images.mkbweddings.co.uk/full/Orange%20tree%20house/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-415_2000.webp";
+
+const receptionImage =
+  "https://images.mkbweddings.co.uk/full/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-300_2000.webp";
+
+const detailsDecorImage =
+  "https://images.mkbweddings.co.uk/full/Leighinmohr%20house%20hotel/details%20and%20decor/mkb-weddings-northern-ireland-wedding-photographer-creative-wedding-photography-10_2000.webp";
 
 function slugify(s: string) {
   return (s || "")
@@ -83,7 +94,7 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
 }
 
 /**
- * Curated tiles (Figma images + copy).
+ * Curated tiles.
  * IDs MUST match slugify(category) from CSV.
  */
 const MOMENT_TILES = [
@@ -178,7 +189,10 @@ export function GalleryByMoments() {
         <div className="text-center max-w-xl">
           <h1 className="text-3xl mb-3">Gallery loading error</h1>
           <p className="text-neutral-600 mb-6">{loadError}</p>
-          <Link to="/gallery" className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4">
+          <Link
+            to="/gallery"
+            className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4"
+          >
             Back to Gallery
           </Link>
         </div>
@@ -200,7 +214,7 @@ export function GalleryByMoments() {
         <meta property="og:type" content="website" />
       </Helmet>
 
-      {/* HERO (match Venue/Moment detail style) */}
+      {/* HERO */}
       <div className="relative h-[60vh] min-h-[420px]">
         <ImageWithFallback
           src={HERO_IMAGE}
