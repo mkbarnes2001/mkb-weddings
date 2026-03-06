@@ -376,7 +376,7 @@ export function GalleryByVenue() {
       </div>
 
       {/* INTRO (same vibe as your other pages) */}
-      <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
+      <section className="max-w-5xl mx-auto px-6 pt-12 pb-20 text-center">
         <p className="text-neutral-700 text-lg md:text-xl leading-relaxed">
           Browse real wedding photography by venue across{" "}
           <strong>Northern Ireland</strong> and <strong>Ireland</strong>. Use these galleries to
