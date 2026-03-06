@@ -268,12 +268,12 @@ export function CountyPage() {
 
       {/* COUNTY INFO */}
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
-        {county.secondaryKeywords?.length ? (
-          <p className="text-neutral-700 mb-12 font-semibold text-sm md:text-base">
-            {county.secondaryKeywords
-              .map((s) => (s || "").replace(/["\\]+/g, "").trim())
-              .filter(Boolean)
-              .join(" • ")}
+       {county.secondaryKeywords?.length ? (
+        <p className="text-neutral-900 text-xl md:text-2xl font-serif mb-12">
+          {county.secondaryKeywords
+          .map((s) => (s || "").replace(/["\\]+/g, "").trim())
+          .filter(Boolean)
+          .join(" • ")}
           </p>
         ) : null}
 
