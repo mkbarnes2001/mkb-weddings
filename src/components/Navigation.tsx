@@ -36,9 +36,8 @@ export function Navigation() {
     return location.pathname === path;
   };
 
-  const transparentHeaderPaths = ["/", "/gallery"];
-  const hasTransparentHeroHeader = transparentHeaderPaths.includes(location.pathname);
-  const isTransparentHeader = hasTransparentHeroHeader && !scrolled;
+  // Apply transparent header on ALL pages until user scrolls
+  const isTransparentHeader = !scrolled;
 
   return (
     <nav
