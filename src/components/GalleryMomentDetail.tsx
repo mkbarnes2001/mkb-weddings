@@ -458,14 +458,15 @@ export function GalleryMomentDetail() {
           </div>
         )}
 
-        {lightboxOpen && images.length > 0 && (
-          <ImageLightbox
-            images={images.map((i) => i.full)}
-            currentIndex={lightboxIndex}
-            onClose={() => setLightboxOpen(false)}
-            onNavigate={(newIndex) => setLightboxIndex(newIndex)}
-          />
-        )}
+       {lightboxOpen && images.length > 0 && (
+      <ImageLightbox
+        images={images.map((i) => i.full)}
+        alts={images.map((i) => i.alt)}
+        currentIndex={lightboxIndex}
+        onClose={() => setLightboxOpen(false)}
+        onNavigate={(newIndex) => setLightboxIndex(newIndex)}
+        />
+      )}
       </div>
     </div>
   );
