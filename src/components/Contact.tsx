@@ -5,27 +5,63 @@ import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { AnimatePresence, motion } from "motion/react";
 
+type HeroSlide = {
+  desktop: string;
+  mobile: string;
+  alt: string;
+};
+
 export function Contact() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
- const heroCarouselImages = [
-  "https://images.mkbweddings.co.uk/full/Galgorm/getting%20ready/MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-67_2000.webp",
-  "https://images.mkbweddings.co.uk/full/Killeavy%20castle/ceremony/mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-135_2000.webp",
-  "https://images.mkbweddings.co.uk/full/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000.webp",
-  "https://images.mkbweddings.co.uk/full/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-300_2000.webp",
-];
+  const heroSlides: HeroSlide[] = [
+    {
+      desktop:
+        "https://images.mkbweddings.co.uk/Hero/Desktop/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000.webp",
+      mobile:
+        "https://images.mkbweddings.co.uk/Hero/Mobile/MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_2000_1200.webp",
+      alt: "Northern Ireland wedding photography – couple portrait at Killeavy Castle",
+    },
+    {
+      desktop:
+        "https://images.mkbweddings.co.uk/Hero/Desktop/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000.webp",
+      mobile:
+        "https://images.mkbweddings.co.uk/Hero/Mobile/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000_1200.webp",
+      alt: "Wedding couple portrait – Orange Tree House Greyabbey",
+    },
+    {
+      desktop:
+        "https://images.mkbweddings.co.uk/Hero/Desktop/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000.webp",
+      mobile:
+        "https://images.mkbweddings.co.uk/Hero/Mobile/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_2000_1200.webp",
+      alt: "Slieve Donard Hotel wedding photography – couple portrait",
+    },
+    {
+      desktop:
+        "https://images.mkbweddings.co.uk/Hero/Desktop/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000.webp",
+      mobile:
+        "https://images.mkbweddings.co.uk/Hero/Mobile/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_2000_1200.webp",
+      alt: "Wedding photography – Slieve Donard Hotel Newcastle",
+    },
+    {
+      desktop:
+        "https://images.mkbweddings.co.uk/Hero/Desktop/mkb-weddings-rossharbour-resort-wedding-photography-363_2000.webp",
+      mobile:
+        "https://images.mkbweddings.co.uk/Hero/Mobile/mkb-weddings-rossharbour-resort-wedding-photography-363_2000_1200.webp",
+      alt: "Ross Harbour Resort wedding photography – couple portrait",
+    },
+  ];
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroCarouselImages.length);
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
 
     return () => window.clearInterval(timer);
-  }, [heroCarouselImages.length]);
+  }, [heroSlides.length]);
 
   return (
     <>
-      {/* ---------- SEO ---------- */}
       <Helmet>
         <title>Contact | MKB Weddings</title>
         <meta
@@ -35,7 +71,7 @@ export function Contact() {
       </Helmet>
 
       <div className="-mt-20 min-h-screen">
-        {/* ---------- Hero Carousel ---------- */}
+        {/* Hero Carousel */}
         <section className="relative h-[70vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
@@ -46,30 +82,31 @@ export function Contact() {
               transition={{ duration: 0.2, ease: "easeInOut" }}
               className="absolute inset-0"
             >
-              <ImageWithFallback
-                src={heroCarouselImages[currentSlide]}
-                alt="Natural wedding photography across Northern Ireland and Ireland"
-                width={2000}
-                height={1200}
-                fetchPriority="high"
-                decoding="async"
-                className="w-full h-full object-cover object-center"
-                style={{ objectPosition: "center 40%" }}
-              />
+              <picture>
+                <source media="(max-width: 768px)" srcSet={heroSlides[currentSlide].mobile} />
+                <ImageWithFallback
+                  src={heroSlides[currentSlide].desktop}
+                  alt={heroSlides[currentSlide].alt}
+                  width={2000}
+                  height={1200}
+                  fetchPriority="high"
+                  decoding="async"
+                  className="w-full h-full object-cover object-center"
+                  style={{ objectPosition: "center 40%" }}
+                />
+              </picture>
               <div className="absolute inset-0 bg-black/45" />
             </motion.div>
           </AnimatePresence>
 
           {/* Carousel Dots */}
           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex gap-3">
-            {heroCarouselImages.map((_, index) => (
+            {heroSlides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
                 className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  index === currentSlide
-                    ? "bg-accent scale-125"
-                    : "bg-white/50 hover:bg-white/70"
+                  index === currentSlide ? "bg-accent scale-125" : "bg-white/50 hover:bg-white/70"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
                 type="button"
@@ -82,24 +119,24 @@ export function Contact() {
             <div className="text-center text-white px-6 max-w-5xl mx-auto w-full">
               <h1 className="tagline text-white mb-4 text-3xl sm:text-4xl md:text-5xl">
                 Get in Touch
-                </h1>
+              </h1>
               <p className="text-xl text-white/90 max-w-3xl mx-auto">
-                Ready to book your wedding photography? We'd love to hear about
-                your day and how we can capture it naturally, without all of that stiff posing!
+                Ready to book your wedding photography? We'd love to hear about your day and how we
+                can capture it naturally, without all of that stiff posing!
               </p>
             </div>
           </div>
         </section>
 
-        {/* ---------- Main Content ---------- */}
+        {/* Main Content */}
         <section className="py-20 px-6 md:px-20 max-w-[1440px] mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
             {/* Contact Form */}
             <div>
               <h2 className="mb-6">Send Us a Message</h2>
               <p className="text-foreground/60 mb-4">
-                Fill out the form below to check availability and discuss your
-                wedding photography needs.
+                Fill out the form below to check availability and discuss your wedding photography
+                needs.
               </p>
               <p className="text-primary mb-10 font-medium">
                 Most couples receive a reply within 24 hours.
@@ -120,8 +157,7 @@ export function Contact() {
             <div>
               <h2 className="mb-6">Contact Information</h2>
               <p className="text-foreground/60 mb-8">
-                Prefer to reach out directly? Here are all the ways you can get
-                in touch.
+                Prefer to reach out directly? Here are all the ways you can get in touch.
               </p>
 
               <div className="space-y-6 mb-12">
@@ -166,7 +202,7 @@ export function Contact() {
   );
 }
 
-/* ---------- Small Helpers ---------- */
+/* Small Helpers */
 
 function ContactItem({
   icon,
@@ -181,9 +217,7 @@ function ContactItem({
 }) {
   return (
     <div className="flex items-start gap-4">
-      <div className="w-12 h-12 bg-secondary flex items-center justify-center">
-        {icon}
-      </div>
+      <div className="w-12 h-12 bg-secondary flex items-center justify-center">{icon}</div>
       <div>
         <h3 className="mb-1">{title}</h3>
         {link ? (
