@@ -588,5 +588,15 @@
     "venueCountryCode": "IE",
     "venueWebsite": "https://www.farnhamestate.ie",
     "venueDescription": ""
+  },
+  "belfast-city-hall": {
+    "venue": "Belfast City Hall",
+    "venueName": "Belfast City Hall",
+    "venueTown": "Belfast",
+    "venueRegion": "Co. Antrim",
+    "venueCountry": "Northern Ireland",
+    "venueCountryCode": "GB",
+    "venueWebsite": "https://www.belfastcity.gov.uk/Things-to-Do/City-Hall",
+    "venueDescription": ""
   }
 }

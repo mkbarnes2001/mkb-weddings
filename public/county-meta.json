@@ -154,6 +154,12 @@
         "url": "/gallery/venue/belfast-castle"
       },
       {
+        "venueSlug": "belfast-city-hall",
+        "venueName": "Belfast City Hall",
+        "town": "Belfast",
+        "url": "/gallery/venue/belfast-city-hall"
+      },
+      {
         "venueSlug": "dunadry",
         "venueName": "Dunadry Hotel",
         "town": "Antrim",
