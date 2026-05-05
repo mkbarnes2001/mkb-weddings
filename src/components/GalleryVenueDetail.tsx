@@ -181,7 +181,7 @@ const PINNED: Record<string, string[]> = {
   "four-seasons-monaghan": [
     "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-four-seasons-hotel-monaghan-wedding-photography-334_500.webp",
   ],
-  "Merchant":  [
+  "merchant":  [
     "mkb-weddings-belfast-city-hall-merchant-hotel-wedding-photography-27_500.webp",
     "mkb-weddings-mkb-Photography-northern-ireland-wedding-photographer-merchant-hotel-belfast-wedding-photography-160_500.webp",
 
