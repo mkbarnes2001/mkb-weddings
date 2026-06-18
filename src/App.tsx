@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Outlet, useLocation } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { useEffect } from "react";
 
 import { Home } from "./components/Home";
 import { Galleries } from "./components/Galleries";
 import { Categories } from "./components/Categories";
 import { Blog } from "./components/Blog";
+import { WeddingStoryPage } from "./components/WeddingStoryPage";
 import { BlogAdmin } from "./components/BlogAdmin";
 import { GalleryAdmin } from "./components/GalleryAdmin";
 import { Contact } from "./components/Contact";
@@ -48,7 +48,6 @@ function SiteLayout() {
   return (
     <>
       <Navigation />
-      {/* Push all page content below fixed header */}
       <main className="pt-24">
         <Outlet />
       </main>
@@ -65,40 +64,32 @@ export default function App() {
 
       <div className="min-h-screen bg-white">
         <Routes>
-          {/* -------- Admin routes (no nav / footer) -------- */}
-          <Route
-            path="/admin"
-            element={
-              <>
-                
-                <BlogAdmin />
-              </>
-            }
-          />
-          <Route
-            path="/gallery-admin"
-            element={
-              <>
-                
-                <GalleryAdmin />
-              </>
-            }
-          />
+          {/* -------- Admin routes: no nav/footer -------- */}
+          <Route path="/admin" element={<BlogAdmin />} />
+          <Route path="/gallery-admin" element={<GalleryAdmin />} />
 
           {/* -------- Public site routes -------- */}
           <Route element={<SiteLayout />}>
             <Route path="/" element={<Home />} />
+
             <Route path="/galleries" element={<Galleries />} />
+
             <Route path="/categories" element={<Categories />} />
             <Route path="/categories/:category" element={<Categories />} />
+
+            {/* Blog */}
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<WeddingStoryPage />} />
+
             <Route path="/contact" element={<Contact />} />
             <Route path="/packages" element={<WeddingPackages />} />
             <Route path="/thank-you" element={<ThankYou />} />
+
+            {/* County SEO pages */}
             <Route path="/wedding-photographer" element={<CountiesLanding />} />
             <Route path="/wedding-photographer/:countySlug" element={<CountyPage />} />
 
-            {/* -------- Gallery system -------- */}
+            {/* Gallery system */}
             <Route path="/gallery" element={<GalleryLanding />} />
             <Route path="/gallery/venues" element={<GalleryByVenue />} />
             <Route path="/gallery/venue/:venueId" element={<GalleryVenueDetail />} />

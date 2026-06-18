@@ -103,6 +103,7 @@ export async function onRequest(context: any) {
   let description =
     "Natural, cinematic, documentary wedding photography across Northern Ireland and Ireland. View real weddings, venues and galleries by MKB Weddings.";
   let canonical = canonicalFromPath(path);
+  let ogType = "website";
 
   // Home
   if (path === "/") {
@@ -185,6 +186,33 @@ export async function onRequest(context: any) {
     // Canonical should match your chosen URL structure:
     canonical = `${origin}/wedding-photographer/${encodeURIComponent(countySlug)}`;
   }
+  // Blog index
+  if (path === "/blog" || path === "/blog/") {
+  title = "Wedding Stories | Real Weddings Northern Ireland & Ireland | MKB Weddings";
+  description =
+    "Read real wedding stories photographed by MKB Weddings across Northern Ireland and Ireland, with galleries, venues, wedding details and photography inspiration.";
+  canonical = `${origin}/blog`;
+  }
+
+  // Blog detail: /blog/:slug
+  const blogMatch = path.match(/^\/blog\/([^/]+)\/?$/i);
+  if (blogMatch) {
+  let slug = "";
+  try {
+    slug = decodeURIComponent(blogMatch[1]).toLowerCase();
+  } catch {
+    slug = (blogMatch[1] || "").toLowerCase();
+  }
+
+  const readableTitle = titleCaseFromSlug(slug);
+
+  title = `${readableTitle} Wedding Story | MKB Weddings`;
+  description = `Real wedding photography story for ${readableTitle} by MKB Weddings — natural, candid and documentary wedding photography across Northern Ireland and Ireland.`;
+  canonical = `${origin}/blog/${encodeURIComponent(slug)}`;
+  ogType = "article";
+  }
+
+
   // --- Apply into HTML ---
   if (/<title>.*<\/title>/i.test(html)) {
     html = html.replace(/<title>.*<\/title>/i, `<title>${escapeHtmlAttr(title)}</title>`);
@@ -198,7 +226,7 @@ export async function onRequest(context: any) {
   html = setOrInsertOg(html, "og:title", title);
   html = setOrInsertOg(html, "og:description", description);
   html = setOrInsertOg(html, "og:url", canonical);
-  html = setOrInsertOg(html, "og:type", "website");
+  html = setOrInsertOg(html, "og:type", ogType);
 
   const newHeaders = new Headers(res.headers);
   newHeaders.delete("content-length");

@@ -1,8 +1,12 @@
 // src/components/Blog.tsx
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Quote } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { motion, AnimatePresence } from "motion/react";
+import { weddingStories } from "../data/weddingStories";
+import { buildBlogCards } from "../lib/blogGallery";
+import type { BlogCard } from "../lib/blogGallery";
 
 // Reuse the SAME hero images you already use in WeddingPackages.tsx
 import heroImage1 from "figma:asset/03addbb5f7743f01a58fb3d5a7dc0a04d8a597ea.png";
@@ -94,6 +98,7 @@ const testimonials: Testimonial[] = [
 export function Blog() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [blogCards, setBlogCards] = useState<BlogCard[]>([]);
 
   const heroCarouselImages = [heroImage1, heroImage2, heroImage3, heroImage4];
 
@@ -112,6 +117,24 @@ export function Blog() {
       setScrollPosition((prev) => prev - 1);
     }, 30);
     return () => clearInterval(interval);
+  }, []);
+
+  // Load the CSV and build wedding story cards from rows with a blogSlug.
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/gallery.csv")
+      .then((res) => (res.ok ? res.text() : ""))
+      .then((csvText) => {
+        if (!cancelled) setBlogCards(buildBlogCards(csvText, weddingStories));
+      })
+      .catch(() => {
+        if (!cancelled) setBlogCards([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Create duplicated array for infinite scroll
@@ -193,28 +216,60 @@ export function Blog() {
         </div>
       </section>
 
-      {/* Coming soon content */}
-      <section className="py-16 px-6 max-w-4xl mx-auto text-center">
-        <h3 className="text-4xl md:text-5xl mb-6">Wedding Stories are Coming Soon</h3>
-        <p className="text-lg text-neutral-700 max-w-2xl mx-auto leading-relaxed">
-          I’m currently moving my full wedding blog over to the new website. In the meantime, you can
-          explore the galleries by venue, wedding moments, and creative flash.
-        </p>
-
-        <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-          <a
-            href="/gallery/moments"
-            className="px-7 py-3 rounded-lg bg-black text-white hover:bg-black/90 transition-colors"
-          >
-            Browse Wedding Moments
-          </a>
-          <a
-            href="/gallery/venues"
-            className="px-7 py-3 rounded-lg border border-neutral-300 text-neutral-900 hover:bg-neutral-50 transition-colors"
-          >
-            Browse By Venue
-          </a>
+      {/* Wedding Stories */}
+      <section className="py-16 px-6 max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <p className="uppercase tracking-[0.25em] text-xs text-neutral-500 mb-4">The Blog</p>
+          <h2 className="text-4xl md:text-5xl mb-6">Real Wedding Stories</h2>
+          <p className="text-lg text-neutral-700 max-w-3xl mx-auto leading-relaxed">
+            Browse full wedding stories from venues across Northern Ireland and Ireland. Each story
+            includes a short write-up and a selected gallery pulled from the existing R2 gallery images.
+          </p>
         </div>
+
+        {blogCards.length === 0 ? (
+          <div className="text-center bg-neutral-50 rounded-2xl p-10 max-w-3xl mx-auto">
+            <h3 className="text-3xl mb-4">No wedding stories selected yet</h3>
+            <p className="text-neutral-700 leading-relaxed">
+              Add <span className="font-mono">blogSlug</span>, <span className="font-mono">blogOrder</span>,
+              and <span className="font-mono">blogCover</span> values to <span className="font-mono">public/gallery.csv</span>.
+              Any CSV rows with a matching blog slug will appear here automatically.
+            </p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {blogCards.map(({ story, coverImage, imageCount }) => (
+              <Link
+                key={story.slug}
+                to={`/blog/${story.slug}`}
+                className="group bg-white border border-neutral-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300"
+              >
+                <div className="aspect-[4/5] overflow-hidden bg-neutral-100">
+                  {coverImage ? (
+                    <ImageWithFallback
+                      src={coverImage.thumbSrc}
+                      alt={`${story.couple} wedding at ${story.venue}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-neutral-500">
+                      Add blog images in gallery.csv
+                    </div>
+                  )}
+                </div>
+                <div className="p-6">
+                  <p className="text-sm text-neutral-500 mb-2">{story.venue}</p>
+                  <h3 className="text-2xl mb-3 leading-tight">{story.title}</h3>
+                  <p className="text-neutral-700 leading-relaxed mb-4">{story.excerpt}</p>
+                  <div className="flex items-center justify-between text-sm text-neutral-500">
+                    <span>{story.weddingDate}</span>
+                    <span>{imageCount} photos</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
