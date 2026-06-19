@@ -1,8 +1,9 @@
 // src/components/WeddingStoryPage.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Calendar, MapPin } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { ImageLightbox } from "./ImageLightbox";
 import { weddingStories } from "../data/weddingStories";
 import { getBlogImages, getCoverImage } from "../lib/blogGallery";
 import type { BlogImage } from "../lib/blogGallery";
@@ -10,16 +11,21 @@ import type { BlogImage } from "../lib/blogGallery";
 export function WeddingStoryPage() {
   const { slug } = useParams();
   const [images, setImages] = useState<BlogImage[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const story = weddingStories.find((item) => item.slug === slug);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [slug]);
 
   useEffect(() => {
     if (!slug || !story) return;
 
     let cancelled = false;
 
-    fetch("/gallery.csv")
+    fetch("/gallery.csv", { cache: "no-store" })
       .then((res) => (res.ok ? res.text() : ""))
       .then((csvText) => {
         if (!cancelled) setImages(getBlogImages(csvText, slug, story));
@@ -32,6 +38,11 @@ export function WeddingStoryPage() {
       cancelled = true;
     };
   }, [slug, story]);
+
+  const cover = getCoverImage(images);
+
+  const lightboxImages = useMemo(() => images.map((image) => image.fullSrc), [images]);
+  const lightboxAlts = useMemo(() => images.map((image) => image.alt), [images]);
 
   if (!story) {
     return (
@@ -46,20 +57,24 @@ export function WeddingStoryPage() {
     );
   }
 
-  const cover = getCoverImage(images);
-  const selectedImage = selectedIndex !== null ? images[selectedIndex] : null;
-
   return (
     <div className="min-h-screen bg-white">
+      {/* HERO */}
       <section className="relative h-[70vh] min-h-[500px] bg-neutral-200">
-        {cover && (
+        {cover ? (
           <ImageWithFallback
             src={cover.fullSrc}
             alt={`${story.couple} wedding at ${story.venue}`}
+            width={2000}
+            height={1200}
+            fetchPriority="high"
+            decoding="async"
             className="w-full h-full object-cover"
           />
-        )}
+        ) : null}
+
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
+
         <div className="absolute inset-0 flex items-end">
           <div className="max-w-7xl mx-auto px-6 pb-16 w-full text-white">
             <Link
@@ -69,13 +84,19 @@ export function WeddingStoryPage() {
               <ArrowLeft className="w-5 h-5" />
               Back to Wedding Stories
             </Link>
-            <p className="uppercase tracking-[0.25em] text-xs text-white/70 mb-4">Wedding Story</p>
+
+            <p className="uppercase tracking-[0.25em] text-xs text-white/70 mb-4">
+              Wedding Story
+            </p>
+
             <h1 className="text-5xl md:text-7xl mb-6 leading-tight">{story.title}</h1>
+
             <div className="flex flex-wrap gap-6 text-white/90 text-lg">
               <span className="flex items-center gap-2">
                 <MapPin className="w-5 h-5" />
                 {story.venue}
               </span>
+
               <span className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
                 {story.weddingDate}
@@ -85,20 +106,29 @@ export function WeddingStoryPage() {
         </div>
       </section>
 
-      <main className="max-w-4xl mx-auto px-6 py-16">
-        <p className="text-xl leading-relaxed text-neutral-800 mb-10">{story.intro}</p>
+      {/* STORY TEXT */}
+      <main className="max-w-4xl mx-auto px-6 py-16 text-center">
+        <p className="text-xl md:text-2xl leading-relaxed text-neutral-800 mb-10 font-serif">
+          {story.intro}
+        </p>
 
-        <div className="space-y-6 text-lg leading-relaxed text-neutral-700 mb-16">
+        <div className="space-y-6 text-lg leading-relaxed text-neutral-700 text-left">
           {story.story.map((paragraph, index) => (
             <p key={index}>{paragraph}</p>
           ))}
         </div>
       </main>
 
+      {/* GALLERY - matches venue gallery viewing style */}
       <section className="max-w-7xl mx-auto px-6 pb-20">
-        <div className="mb-8">
+        <div className="mb-8 text-center">
           <p className="uppercase tracking-[0.25em] text-xs text-neutral-500 mb-3">Gallery</p>
-          <h2 className="text-4xl md:text-5xl">The photographs</h2>
+          <h2 className="text-4xl md:text-5xl font-serif">The photographs</h2>
+          {images.length > 0 ? (
+            <p className="text-neutral-600 mt-3">
+              {images.length} {images.length === 1 ? "image" : "images"}
+            </p>
+          ) : null}
         </div>
 
         {images.length === 0 ? (
@@ -110,28 +140,40 @@ export function WeddingStoryPage() {
             </p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {images.map((image, index) => (
-              <button
-                key={`${image.filename}-${index}`}
-                type="button"
-                onClick={() => setSelectedIndex(index)}
-                className="group aspect-[4/5] overflow-hidden rounded-xl bg-neutral-100"
-              >
-                <ImageWithFallback
-                  src={image.thumbSrc}
-                  alt={image.alt}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </button>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {images.map((image, index) => {
+              const remainderLg = images.length % 3;
+              const isLast = index === images.length - 1;
+              const shouldSpanLg = isLast && remainderLg === 1;
+
+              return (
+                <button
+                  key={`${image.thumbSrc}-${index}`}
+                  type="button"
+                  onClick={() => {
+                    setLightboxIndex(index);
+                    setLightboxOpen(true);
+                  }}
+                  className={`aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left bg-neutral-100 ${
+                    shouldSpanLg ? "lg:col-span-3" : ""
+                  }`}
+                >
+                  <ImageWithFallback
+                    src={image.thumbSrc}
+                    alt={image.alt}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                </button>
+              );
+            })}
           </div>
         )}
       </section>
 
+      {/* CTA */}
       <section className="bg-neutral-50 py-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl mb-4">Getting married at {story.venue}?</h2>
+          <h2 className="text-4xl mb-4 font-serif">Getting married at {story.venue}?</h2>
           <p className="text-lg text-neutral-700 mb-8">
             Get in touch to check availability and talk through your wedding plans.
           </p>
@@ -144,27 +186,16 @@ export function WeddingStoryPage() {
         </div>
       </section>
 
-      {selectedImage && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setSelectedIndex(null)}
-        >
-          <button
-            type="button"
-            className="absolute top-6 right-6 text-white text-3xl"
-            onClick={() => setSelectedIndex(null)}
-            aria-label="Close image"
-          >
-            ×
-          </button>
-          <img
-            src={selectedImage.fullSrc}
-            alt={selectedImage.alt}
-            className="max-w-full max-h-full object-contain"
-            onClick={(event) => event.stopPropagation()}
-          />
-        </div>
-      )}
+      {/* LIGHTBOX - same component used by venue galleries */}
+      {lightboxOpen && images.length > 0 ? (
+        <ImageLightbox
+          images={lightboxImages}
+          alts={lightboxAlts}
+          currentIndex={lightboxIndex}
+          onClose={() => setLightboxOpen(false)}
+          onNavigate={(newIndex) => setLightboxIndex(newIndex)}
+        />
+      ) : null}
     </div>
   );
 }
