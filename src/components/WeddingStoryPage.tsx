@@ -16,6 +16,8 @@ export function WeddingStoryPage() {
 
   const story = weddingStories.find((item) => item.slug === slug);
 
+  const venueUrl = story ? `/gallery/venue/${story.slug}` : "/gallery/venues";
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [slug]);
@@ -94,7 +96,12 @@ export function WeddingStoryPage() {
             <div className="flex flex-wrap gap-6 text-white/90 text-lg">
               <span className="flex items-center gap-2">
                 <MapPin className="w-5 h-5" />
-                {story.venue}
+                <Link
+                  to={venueUrl}
+                  className="underline underline-offset-4 hover:text-white transition-colors"
+                >
+                  {story.venue}
+                </Link>
               </span>
 
               <span className="flex items-center gap-2">
@@ -116,6 +123,19 @@ export function WeddingStoryPage() {
           {story.story.map((paragraph, index) => (
             <p key={index}>{paragraph}</p>
           ))}
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-neutral-200 text-center">
+          <p className="text-neutral-700 leading-relaxed">
+            Planning your wedding at{" "}
+            <Link
+              to={venueUrl}
+              className="font-medium underline underline-offset-4 hover:text-black transition-colors"
+            >
+              {story.venue}
+            </Link>
+            ? Browse the full venue gallery for more real wedding inspiration.
+          </p>
         </div>
       </main>
 
@@ -173,10 +193,21 @@ export function WeddingStoryPage() {
       {/* CTA */}
       <section className="bg-neutral-50 py-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl mb-4 font-serif">Getting married at {story.venue}?</h2>
+          <h2 className="text-2xl md:text-3xl mb-4 font-serif">
+            Getting married at{" "}
+            <Link
+              to={venueUrl}
+              className="underline underline-offset-4 hover:text-black transition-colors"
+            >
+              {story.venue}
+            </Link>
+            ?
+          </h2>
+
           <p className="text-lg text-neutral-700 mb-8">
             Get in touch to check availability and talk through your wedding plans.
           </p>
+
           <Link
             to="/contact"
             className="inline-block px-8 py-4 rounded-lg bg-black text-white hover:bg-black/90 transition-colors"
