@@ -222,8 +222,7 @@ export function Blog() {
           <p className="uppercase tracking-[0.25em] text-xs text-neutral-500 mb-4">The Blog</p>
           <h2 className="text-2xl md:text-3xl mb-6">Real Wedding Stories</h2>
           <p className="text-lg text-neutral-700 max-w-3xl mx-auto leading-relaxed">
-            Browse full wedding stories from venues across Northern Ireland and Ireland. Each story
-            includes a short write-up and a selected gallery pulled from the existing R2 gallery images.
+            Browse full wedding stories from venues across Northern Ireland and Ireland.
           </p>
         </div>
 
