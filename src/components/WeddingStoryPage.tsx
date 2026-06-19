@@ -71,11 +71,13 @@ export function WeddingStoryPage() {
             height={1200}
             fetchPriority="high"
             decoding="async"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover brightness-[0.7]"
           />
         ) : null}
 
-     <div className="absolute inset-0 flex items-end">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/20" />
+
+        <div className="absolute inset-0 flex items-end">
   <div className="max-w-5xl mx-auto px-6 pb-16 w-full text-white text-center">
 
     <div className="flex justify-center mb-6">
