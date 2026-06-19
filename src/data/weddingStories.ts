@@ -36,7 +36,7 @@ export const weddingStories: WeddingStory[] = [
       "Following an emotional ceremony, guests enjoyed drinks outdoors while making the most of the exceptional weather. Orange Tree House offers countless opportunities for natural wedding photography, and we took advantage of the golden evening light to create relaxed portraits around the grounds and beside the lough. The speeches brought plenty of laughter and emotion before the celebrations continued late into the evening with dancing and unforgettable moments on the dance floor",
       "For couples planning a wedding at Orange Tree House, it is easy to see why this venue is so highly regarded. Nestled in Greyabbey on the shores of Strangford Lough, it combines breathtaking scenery with a warm and intimate atmosphere. It is a venue that works beautifully for natural, documentary wedding photography and provides the perfect backdrop for a day filled with genuine moments and lasting memories",
     ],
-    seoTitle: "Orange Tree House Wedding Photography | Greyabbey Wedding Photographer | MKB Weddings"",
+    seoTitle: "Orange Tree House Wedding Photography | Greyabbey Wedding Photographer | MKB Weddings",
     seoDescription:
       "View Ian and Bernadette's beautiful Orange Tree House wedding in Greyabbey. Natural, documentary wedding photography capturing genuine moments at one of Northern Ireland's most stunning venues.",
   },
