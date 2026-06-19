@@ -246,7 +246,7 @@ export function Blog() {
                 <div className="aspect-[4/5] overflow-hidden bg-neutral-100">
                   {coverImage ? (
                     <ImageWithFallback
-                      src={coverImage.thumbSrc}
+                      src={coverImage.fullSrc}
                       alt={`${story.couple} wedding at ${story.venue}`}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
