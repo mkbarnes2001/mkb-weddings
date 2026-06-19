@@ -75,42 +75,49 @@ export function WeddingStoryPage() {
           />
         ) : null}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
+     <div className="absolute inset-0 flex items-end">
+  <div className="max-w-5xl mx-auto px-6 pb-16 w-full text-white text-center">
 
-        <div className="absolute inset-0 flex items-end">
-          <div className="max-w-7xl mx-auto px-6 pb-16 w-full text-white">
-            <Link
-              to="/blog"
-              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Back to Wedding Stories
-            </Link>
+    <div className="flex justify-center mb-6">
+      <Link
+        to="/blog"
+        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        Back to Wedding Stories
+      </Link>
+    </div>
 
-            <p className="uppercase tracking-[0.25em] text-xs text-white/70 mb-4">
-              Wedding Story
-            </p>
+    <p className="uppercase tracking-[0.25em] text-xs text-white/70 mb-4">
+      Wedding Story
+    </p>
 
-            <h1 className="text-3xl md:text-5xl mb-6 leading-tight">{story.title}</h1>
+    <h1 className="text-3xl md:text-5xl mb-6 leading-tight">
+      {story.title}
+    </h1>
 
-            <div className="flex flex-wrap gap-6 text-white/90 text-lg">
-              <span className="flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                <Link
-                  to={venueUrl}
-                  className="underline underline-offset-4 hover:text-white transition-colors"
-                >
-                  {story.venue}
-                </Link>
-              </span>
+    <div className="flex flex-wrap justify-center gap-8 text-white/90 text-lg">
 
-              <span className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                {story.weddingDate}
-              </span>
-            </div>
-          </div>
-        </div>
+      <span className="flex items-center gap-2">
+        <MapPin className="w-5 h-5" />
+
+        <Link
+          to={venueUrl}
+          className="underline underline-offset-4 hover:text-white transition-colors"
+        >
+          {story.venue}
+        </Link>
+      </span>
+
+      <span className="flex items-center gap-2">
+        <Calendar className="w-5 h-5" />
+        {story.weddingDate}
+      </span>
+
+    </div>
+
+  </div>
+</div>
       </section>
 
       {/* STORY TEXT */}
