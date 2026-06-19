@@ -89,7 +89,7 @@ export function WeddingStoryPage() {
               Wedding Story
             </p>
 
-            <h1 className="text-5xl md:text-7xl mb-6 leading-tight">{story.title}</h1>
+            <h1 className="text-3xl md:text-5xl mb-6 leading-tight">{story.title}</h1>
 
             <div className="flex flex-wrap gap-6 text-white/90 text-lg">
               <span className="flex items-center gap-2">
@@ -123,7 +123,7 @@ export function WeddingStoryPage() {
       <section className="max-w-7xl mx-auto px-6 pb-20">
         <div className="mb-8 text-center">
           <p className="uppercase tracking-[0.25em] text-xs text-neutral-500 mb-3">Gallery</p>
-          <h2 className="text-4xl md:text-5xl font-serif">The photographs</h2>
+          <h2 className="text-2xl md:text-3xl font-serif">The photographs</h2>
           {images.length > 0 ? (
             <p className="text-neutral-600 mt-3">
               {images.length} {images.length === 1 ? "image" : "images"}
@@ -173,7 +173,7 @@ export function WeddingStoryPage() {
       {/* CTA */}
       <section className="bg-neutral-50 py-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl mb-4 font-serif">Getting married at {story.venue}?</h2>
+          <h2 className="text-2xl md:text-3xl mb-4 font-serif">Getting married at {story.venue}?</h2>
           <p className="text-lg text-neutral-700 mb-8">
             Get in touch to check availability and talk through your wedding plans.
           </p>
