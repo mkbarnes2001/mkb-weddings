@@ -23,21 +23,21 @@ export interface WeddingStory {
 export const weddingStories: WeddingStory[] = [
   {
     slug: "orange-tree-house",
-    title: "A relaxed wedding at Orange Tree House",
-    couple: "Example Couple",
+    title: "A stylish, relaxed wedding at Orange Tree House, Greyabbey",
+    couple: "Ian & Bernadette",
     venue: "Orange Tree House",
-    weddingDate: "Wedding date",
+    weddingDate: "May 2026",
     excerpt:
-      "A short preview of this wedding story. Replace this with a couple of lines about the venue, the atmosphere, and the photographs.",
+      "Ian and Bernadette celebrated their long-awaited wedding at Orange Tree House in Greyabbey, enjoying glorious sunshine, stunning views across Strangford Lough and a relaxed atmosphere surrounded by family and friends",
     intro:
-      "Use this opening paragraph to introduce the couple, the venue, and the feel of the day.",
+      "Some weddings feel effortlessly special from the moment you arrive, and Ian and Bernadette's day at Orange Tree House was certainly one of them. After many years together, they finally said 'I do' in one of Northern Ireland's most sought-after wedding venues, with sunshine, laughter and incredible scenery creating the perfect setting.",
     story: [
-      "Write the first part of the wedding story here. This could cover preparations, the ceremony, the weather, the venue, or the atmosphere of the morning.",
-      "Write the second part here. This could cover portraits, family photographs, candid moments, speeches, or evening images.",
-      "Write the final part here. Mention anything useful for future couples planning a wedding at this venue.",
+      "The day began in a wonderfully relaxed atmosphere as preparations took place at Orange Tree House. With panoramic views across Strangford Lough and beautiful gardens bathed in sunshine, there was an excitement in the air as friends and family gathered to celebrate Ian and Bernadette's long-awaited wedding day. Every detail reflected their personalities – elegant, understated and centred on spending meaningful time with the people they love most.",
+      "Following an emotional ceremony, guests enjoyed drinks outdoors while making the most of the exceptional weather. Orange Tree House offers countless opportunities for natural wedding photography, and we took advantage of the golden evening light to create relaxed portraits around the grounds and beside the lough. The speeches brought plenty of laughter and emotion before the celebrations continued late into the evening with dancing and unforgettable moments on the dance floor",
+      "For couples planning a wedding at Orange Tree House, it is easy to see why this venue is so highly regarded. Nestled in Greyabbey on the shores of Strangford Lough, it combines breathtaking scenery with a warm and intimate atmosphere. It is a venue that works beautifully for natural, documentary wedding photography and provides the perfect backdrop for a day filled with genuine moments and lasting memories",
     ],
-    seoTitle: "Orange Tree House Wedding Photography | MKB Weddings",
+    seoTitle: "Orange Tree House Wedding Photography | Greyabbey Wedding Photographer | MKB Weddings"",
     seoDescription:
-      "A real wedding story from Orange Tree House, photographed by MKB Weddings with natural, candid and documentary wedding photography.",
+      "View Ian and Bernadette's beautiful Orange Tree House wedding in Greyabbey. Natural, documentary wedding photography capturing genuine moments at one of Northern Ireland's most stunning venues.",
   },
 ];
