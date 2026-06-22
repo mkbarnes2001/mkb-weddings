@@ -11,6 +11,8 @@ type GalleryRow = {
   category: string;
   filename: string; // ends in _500.webp
   tags?: string;
+  venuePin?: string;
+  venuePinOrder?: string;
 };
 
 type VenueMetaRow = {
@@ -35,158 +37,6 @@ const FULL_BASE = "https://images.mkbweddings.co.uk/full";
 
 // Primary origin
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
-
-// --- PINNED IMAGES (PER VENUE) ---------------------------------------------
-const PINNED: Record<string, string[]> = {
-  "orange-tree-house": [
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-411_500.webp",
-    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-411_500.webp",
-    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-493_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-1.jpg_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-618_500.webp",
-    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-56_500.webp",
-    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-357_500.webp",
-    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_500.webp",
-  ],
-  "ballyscullion-park": [
-    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ballyscullion-park-belaghy-wedding-photography2_500.webp",
-    "mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-447_500.webp",
-    "mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-460_500.webp",
-    "mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-179_500.webp",
-    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ballyscullion-park-belaghy-wedding-photography8_500.webp",
-    "mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-413_500.webp",
-  ],
-  "killeavy-castle": [
-    "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-160_500.webp",
-    "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_killeavy-castle_Wedding_Photography-462_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-116_500.webp",
-    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography6_500.webp",
-    "MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_500.webp",
-    "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_killeavy-castle_Wedding_Photography-609_500.webp",
-  ],
-  "slieve-donard-hotel": [
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp",
-    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-donard-hotel-newcastle-wedding-photography2_500.webp",
-    "MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-slieve-donard-hotel-newcastle-wedding-photography-191_500.webp",
-    "MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-slieve-donard-hotel-newcastle-wedding-photography-367_500.webp",
-  ],
-  "tullyglass-hotel": [
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-557_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-521_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-hotel-ballymena-wedding-photography-163_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-525_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-596_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-512_500.webp",
-  ],
-  "wool-tower": [
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-417_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-110_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-224_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-412_500.webp",
-  ],
-  "leighinmohr-house-hotel": [
-    "MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Leighinmohr_House_Hotel_Wedding_Photography-Full%20Res-361_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-leighinmohr-house-hotel-ballymena-wedding-photography--355_500.webp",
-    "mkb-weddings-mkb-Photography-northern-ireland-wedding-photographer-LEIGHINMOHR-hotel-ballymena-wedding-photography-10_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-leighinmohr-house-ballymena-wedding-photography-1_500.webp",
-  ],
-  "rabbit-hotel-and-spa": [
-    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography4_500.webp",
-    "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-344_500.webp",
-    "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-406_500.webp",
-    "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-511_500.webp",
-  ],
-  "belmont": [
-    "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-100-1_500.webp",
-    "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-138_500.webp",
-    "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-118_500.webp",
-    "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-259_500.webp",
-  ],
-  "landsdowne-hotel": [
-    "mkb-weddings-landsdowne-hotel-belfast-wedding-photographer-234_500.webp",
-    "mkb-weddings-landsdowne-hotel-belfast-wedding-photographer-226_500.webp",
-    "mkb-weddings-landsdowne-hotel-belfast-wedding-photographer-164_500.webp",
-  ],
-  "beech-hill": [
-    "mkb-weddings-northern-ireland-wedding-photographer-beech-hill-country-house-wedding-photography-9_500.webp",
-    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-Beech-hill-country-house-derry-wedding-photography-FULL-RES-144_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-beech-hill-country-house-wedding-photography-10_500.webp",
-    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-beech-hill-country-house-derry-wedding-photography-Full-res-361_500.webp",
-  ],
-  "la-mon-hotel": [
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-la-mon-hotel-belfast-wedding-photography--394_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-la-mon-hotel-belfast-wedding-photography--412_500.webp",
-  ],
-  larchfields: [
-    "mkb-weddings-northern-ireland-wedding-photographer-larchfields-estate-lisburn-wedding-photography-32_500.webp",
-    "MKB_weddings_MKB_Photography_Ireland_Northen_ireland_Wedding_Photographer_Larchfield_estate_Wedding_Photography-376_500.webp",
-    "MKB_weddings_MKB_Photography_Ireland_Northen_ireland_Wedding_Photographer_Larchfield_estate_Wedding_Photography-421_500.webp",
-  ],
-  "lough-erne-resort": [
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-280_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-277_500.webp",
-    "MKB-weddings-mkb-photography_Northern_Ireland_wedding_photographer_Lough_Erne_Resort_Eniskillen_Wedding_photography-Full%20res-204_500.webp",
-  ],
-  "lusty-beg-island": [
-    "MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Lusty_Beg_Wedding_Photography_Hayley%26Brian-For_print-449_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-lusty-beg-island-eniskillen-wedding-photography-291_500.webp",
-  ],
-  "millbrook-lodge": [
-    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-millbrook-lodge-ballynahinch-wedding-photography3_500.webp",
-    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-millbrook-lodge-ballynahinch-wedding-photography5_500.webp",
-  ],
-  "rocky-mountain-cottage": [
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-rocky-mountain-cottage-newry-wedding-photography-439_500.webp",
-  ],
-  "roe-valley-resort": [
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-419_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-422_500.webp",
-  ],
-  "rossharbour-resort": [
-    "mkb-weddings-rossharbour-resort-wedding-photography-363_500.webp",
-    "mkb-weddings-rossharbour-resort-wedding-photography-704_500.webp",
-    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-harbour-enniskillen-wedding-photography_500.webp",
-    "mkb-weddings-rossharbour-resort-wedding-photography-390_500.webp",
-  ],
-  "shandon-hotel": [
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-shandon-hotel-marble-hill-donegal-wedding-photography-404_500.webp",
-  ],
-  "cavan-crystal": [
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-cavan-crystal-hotel-wedding-photography--7_500.webp",
-    "mkb-weddings-cavan-crystal-hotel-wedding-photographer-431_500.webp",
-  ],
-  "clandeboye-lodge": [
-    "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-383_500.webp",
-    "mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-108_500.webp",
-  ],
-  "corick-house": [
-    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-corrick-house-wedding-photography13_500.webp",
-    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-corrick-house-wedding-photography12_500.webp",
-  ],
-  "darver-castle": [
-    "MKB-photography-Northern-Ireland-wedding-photographer-Irish-Wedding-photography-Darver-castle-wedding-photography-Full%20res-586_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-315_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-142_500.webp",
-  ],
-  dunadry: [
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-dunadry-hotel-belfast-photography-373_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-dunadry-hotel-belfast-photography-530_500.webp",
-  ],
-  galgorm: [
-    "MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Galgorm_Manor_wedding_photography_Galgorm_resort_wedding_photographer-Full-res-256_500.webp",
-    "MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-318_500.webp",
-    "MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-307_500.webp",
-  ],
-  "four-seasons-monaghan": [
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-four-seasons-hotel-monaghan-wedding-photography-334_500.webp",
-  ],
-  "merchant":  [
-    "mkb-weddings-belfast-city-hall-merchant-hotel-wedding-photography-27_500.webp",
-    "mkb-weddings-mkb-Photography-northern-ireland-wedding-photographer-merchant-hotel-belfast-wedding-photography-160_500.webp",
-
-  ],
-};
 
 // --- Ordering helpers -------------------------------------------------------
 function hashString(input: string) {
@@ -216,19 +66,23 @@ function stableShuffle<T>(arr: T[], seed: string) {
   return out;
 }
 
-function applyPinnedOrder(rows: GalleryRow[], venueSlug: string, seed: string): GalleryRow[] {
-  const pinnedFilenames = (PINNED[(venueSlug || "").toLowerCase()] || []).filter(Boolean);
-  if (!pinnedFilenames.length) return stableShuffle(rows, seed);
+function isPinned(row: GalleryRow) {
+  return ["y", "yes", "true", "1", "pin", "pinned"].includes(
+    (row.venuePin || "").trim().toLowerCase()
+  );
+}
 
-  const pinnedSet = new Set(pinnedFilenames);
+function pinOrder(row: GalleryRow) {
+  const value = Number((row.venuePinOrder || "").trim());
+  return Number.isFinite(value) && value > 0 ? value : 9999;
+}
 
-  const pinned: GalleryRow[] = [];
-  for (const fn of pinnedFilenames) {
-    const found = rows.find((r) => r.filename === fn);
-    if (found) pinned.push(found);
-  }
+function applyPinnedOrder(rows: GalleryRow[], seed: string): GalleryRow[] {
+  const pinned = rows
+    .filter(isPinned)
+    .sort((a, b) => pinOrder(a) - pinOrder(b));
 
-  const rest = rows.filter((r) => !pinnedSet.has(r.filename));
+  const rest = rows.filter((row) => !isPinned(row));
   const shuffledRest = stableShuffle(rest, seed);
 
   return [...pinned, ...shuffledRest];
@@ -289,6 +143,8 @@ function parseGalleryCsv(csvText: string): GalleryRow[] {
   const categoryIdx = header.indexOf("category");
   const filenameIdx = header.indexOf("filename");
   const tagsIdx = header.indexOf("tags");
+  const venuePinIdx = header.indexOf("venuepin");
+  const venuePinOrderIdx = header.indexOf("venuepinorder");
 
   if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) return [];
 
@@ -299,6 +155,9 @@ function parseGalleryCsv(csvText: string): GalleryRow[] {
       category: cleanCsvValue(cols[categoryIdx] || ""),
       filename: cleanCsvValue(cols[filenameIdx] || ""),
       tags: tagsIdx >= 0 ? cleanCsvValue(cols[tagsIdx] || "") : undefined,
+      venuePin: venuePinIdx >= 0 ? cleanCsvValue(cols[venuePinIdx] || "") : "",
+      venuePinOrder:
+        venuePinOrderIdx >= 0 ? cleanCsvValue(cols[venuePinOrderIdx] || "") : "",
     }))
     .filter((r) => r.venue && r.category && r.filename);
 }
@@ -398,6 +257,14 @@ function normCountyName(s: string) {
 export function GalleryVenueDetail() {
   const { venueId } = useParams<{ venueId: string }>();
 
+  const [galleryRows, setGalleryRows] = useState<GalleryRow[]>([]);
+  const [venueMetaMap, setVenueMetaMap] = useState<Record<string, VenueMetaRow>>({});
+  const [countyMetaMap, setCountyMetaMap] = useState<Record<string, CountyMeta>>({});
+
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [galleryColumnCount, setGalleryColumnCount] = useState(2);
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [venueId]);
@@ -413,14 +280,6 @@ export function GalleryVenueDetail() {
     window.addEventListener("resize", updateColumns);
     return () => window.removeEventListener("resize", updateColumns);
   }, []);
-
-  const [galleryRows, setGalleryRows] = useState<GalleryRow[]>([]);
-  const [venueMetaMap, setVenueMetaMap] = useState<Record<string, VenueMetaRow>>({});
-  const [countyMetaMap, setCountyMetaMap] = useState<Record<string, CountyMeta>>({});
-
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [galleryColumnCount, setGalleryColumnCount] = useState(2);
 
   useEffect(() => {
     let cancelled = false;
@@ -506,7 +365,7 @@ export function GalleryVenueDetail() {
   const venueRows = useMemo(() => {
     if (!venueRowsRaw.length) return [];
     const seed = `${venueId || ""}:${venueRowsRaw.length}`;
-    return applyPinnedOrder(venueRowsRaw, venueId || "", seed);
+    return applyPinnedOrder(venueRowsRaw, seed);
   }, [venueRowsRaw, venueId]);
 
   const images = useMemo(() => {
@@ -829,7 +688,7 @@ export function GalleryVenueDetail() {
         >
           {images.map((img, idx) => (
             <button
-              key={`${img.full}-${idx}`}
+              key={`${img.thumb}-${idx}`}
               type="button"
               onClick={() => {
                 setLightboxIndex(idx);
@@ -844,7 +703,7 @@ export function GalleryVenueDetail() {
               className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
             >
               <ImageWithFallback
-                src={img.full}
+                src={img.thumb}
                 alt={img.alt}
                 className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
               />
