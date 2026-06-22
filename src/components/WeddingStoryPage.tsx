@@ -1,7 +1,7 @@
 // src/components/WeddingStoryPage.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Calendar, MapPin } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, ChevronRight } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
 import { weddingStories } from "../data/weddingStories";
@@ -121,6 +121,45 @@ export function WeddingStoryPage() {
   </div>
 </div>
       </section>
+
+{/* BREADCRUMBS */}
+<div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
+  <nav aria-label="Breadcrumb" className="flex justify-center">
+    <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
+      <li>
+        <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
+          Home
+        </Link>
+      </li>
+
+      <li className="opacity-60">
+        <ChevronRight className="w-4 h-4" />
+      </li>
+
+      <li>
+        <Link to="/blog" className="hover:text-neutral-900 underline underline-offset-4">
+          Wedding Stories
+        </Link>
+      </li>
+
+      <li className="opacity-60">
+        <ChevronRight className="w-4 h-4" />
+      </li>
+
+      <li>
+        <Link to={venueUrl} className="hover:text-neutral-900 underline underline-offset-4">
+          {story.venue}
+        </Link>
+      </li>
+
+      <li className="opacity-60">
+        <ChevronRight className="w-4 h-4" />
+      </li>
+
+      <li className="text-neutral-900">{story.couple}</li>
+    </ol>
+  </nav>
+</div>
 
       {/* STORY TEXT */}
       <main className="max-w-4xl mx-auto px-6 py-16 text-center">
