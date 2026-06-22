@@ -12,6 +12,8 @@ type CsvRow = {
   category: string;
   filename: string; // ends in _500.webp
   tags?: string;
+  momentPin?: string;
+  momentPinOrder?: string;
 };
 
 type VenueMetaRow = {
@@ -78,6 +80,8 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
   const categoryIdx = header.indexOf("category");
   const filenameIdx = header.indexOf("filename");
   const tagsIdx = header.indexOf("tags"); // optional
+  const momentPinIdx = header.indexOf("momentpin"); // optional
+  const momentPinOrderIdx = header.indexOf("momentpinorder"); // optional
 
   if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) return [];
 
@@ -88,6 +92,8 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
       category: (cols[categoryIdx] || "").trim(),
       filename: (cols[filenameIdx] || "").trim(),
       tags: tagsIdx >= 0 ? (cols[tagsIdx] || "").trim() : "",
+      momentPin: momentPinIdx >= 0 ? (cols[momentPinIdx] || "").trim() : "",
+      momentPinOrder: momentPinOrderIdx >= 0 ? (cols[momentPinOrderIdx] || "").trim() : "",
     }))
     .filter((r) => r.venue && r.category && r.filename);
 }
@@ -143,69 +149,14 @@ function stableShuffle<T>(arr: T[], seed: string, keyFn: (t: T) => string) {
   return copy;
 }
 
-// Optional: pin images to the top PER moment.
-const PINNED: Record<string, string[]> = {
-  "getting-ready": [
-    "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-186_500.webp",
-    "mkb-weddings-mkb-Photography-northern-ireland-wedding-photographer-LEIGHINMOHR-hotel-ballymena-wedding-photography-7_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-100_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-dunadry-hotel-belfast-photography-105_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-wool-tower-broughshane-wedding-photography-153_500.webp",
-    "mkb-weddings-mkb-Photography-northern-ireland-wedding-photographer-merchant-hotel-belfast-wedding-photography-114_500.webp",
-    "MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-67_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-240_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-39_500.webp",
-  ],
+function isPinned(value?: string) {
+  return ["y", "yes", "true", "1", "pin", "pinned"].includes((value || "").trim().toLowerCase());
+}
 
-  ceremony: [
-    "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-100_500.webp",
-    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-164_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-135_500.webp",
-    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-full-res-144_500.webp",
-    "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-416_500.webp",
-    "mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-338_500.webp",
-  ],
-
-  "couple-portraits": [
-    "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-116_500.webp",
-    "MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_500.webp",
-    "MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-318_500.webp",
-    "MKB-photography-Northern-Ireland-wedding-photographer-Irish-Wedding-photography-Darver-castle-wedding-photography-Full%20res-586_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_500.webp",
-    "mkb-weddings-irish-wedding-photographer-bellingham-castle-wedding-photography-7_500.webp",
-    "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-394_500.webp",
-    "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-harbour-enniskillen-wedding-photography_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-12-1_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-larchfields-estate-lisburn-wedding-photography-34_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-beech-hill-country-house-wedding-photography-9_500.webp",
-  ],
-
-  "family-and-bridal-party": [
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-415_500.webp",
-    "MKB-weddings-mkb-photography-NI-wedding-photographer-greenvale-cookstown-wedding-photography-434_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-beech-hill-country-house-wedding-photography-10_500.webp",
-    "mkb-weddings-irish-wedding-photographer-ballyscullion-park-bellaghy-photography-413_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-26-1_500.webp",
-  ],
-
-  "reception-and-party": [
-    "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-189_500.webp",
-    "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_killeavy-castle_Wedding_Photography-609_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-315_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-530_500.webp",
-    "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-397_500.webp",
-    "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-702_500.webp",
-    "MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-slieve-donard-hotel-newcastle-wedding-photography-291_500.webp",
-  ],
-
-  "details-and-decor": [
-    "mkb-weddings-northern-ireland-wedding-photographer-creative-wedding-photography-10_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-edenmore-house-moira-wedding-photography--107_500.webp",
-    "mkb-weddings-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-31_500.webp",
-    "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-shandon-hotel-marble-hill-donegal-wedding-photography-104_500.webp",
-  ],
-};
+function pinOrder(value?: string) {
+  const n = Number((value || "").trim());
+  return Number.isFinite(n) && n > 0 ? n : 999999;
+}
 
 const MOMENT_META: Record<
   string,
@@ -264,10 +215,23 @@ export function GalleryMomentDetail() {
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [galleryColumnCount, setGalleryColumnCount] = useState(2);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [momentId]);
+
+  useEffect(() => {
+    const updateColumns = () => {
+      if (window.innerWidth >= 1280) setGalleryColumnCount(4);
+      else if (window.innerWidth >= 768) setGalleryColumnCount(3);
+      else setGalleryColumnCount(2);
+    };
+
+    updateColumns();
+    window.addEventListener("resize", updateColumns);
+    return () => window.removeEventListener("resize", updateColumns);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -333,15 +297,20 @@ export function GalleryMomentDetail() {
       full: fullUrlFromThumb(r),
       alt: `${r.category} at ${r.venue}${venueCountyMap[r.venue] ? `, ${venueCountyMap[r.venue]}` : ""}`,
       filename: r.filename,
+      momentPin: r.momentPin,
+      momentPinOrder: r.momentPinOrder,
     }));
 
-    const pinnedList = momentId ? PINNED[momentId] || [] : [];
-    const pinnedSet = new Set(pinnedList.map((x) => x.toLowerCase().trim()));
+    const pinned = mapped
+      .filter((m) => isPinned(m.momentPin))
+      .sort((a, b) => {
+        const orderDiff = pinOrder(a.momentPinOrder) - pinOrder(b.momentPinOrder);
+        if (orderDiff !== 0) return orderDiff;
+        return a.filename.localeCompare(b.filename);
+      });
 
-    const pinned = mapped.filter((m) => pinnedSet.has(m.filename.toLowerCase().trim()));
-    const rest = mapped.filter((m) => !pinnedSet.has(m.filename.toLowerCase().trim()));
-
-    const shuffled = stableShuffle(rest, `moment-${momentId || "unknown"}-v1`, (m) => m.filename);
+    const rest = mapped.filter((m) => !isPinned(m.momentPin));
+    const shuffled = stableShuffle(rest, `moment-${momentId || "unknown"}-v2`, (m) => m.filename);
 
     return [...pinned, ...shuffled];
   }, [momentRows, momentId, venueCountyMap]);
@@ -505,7 +474,12 @@ export function GalleryMomentDetail() {
         {images.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">No images found for this moment.</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div
+            style={{
+              columnCount: galleryColumnCount,
+              columnGap: "4px",
+            }}
+          >
             {images.map((img, idx) => (
               <button
                 key={`${img.thumb}-${idx}`}
@@ -514,12 +488,18 @@ export function GalleryMomentDetail() {
                   setLightboxIndex(idx);
                   setLightboxOpen(true);
                 }}
-                className="aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left"
+                style={{
+                  breakInside: "avoid",
+                  marginBottom: "4px",
+                  display: "block",
+                  width: "100%",
+                }}
+                className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
               >
                 <ImageWithFallback
                   src={img.thumb}
                   alt={img.alt}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
                 />
               </button>
             ))}
