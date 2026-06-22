@@ -13,6 +13,7 @@ export function WeddingStoryPage() {
   const [images, setImages] = useState<BlogImage[]>([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [galleryColumnCount, setGalleryColumnCount] = useState(2);
 
   const story = weddingStories.find((item) => item.slug === slug);
   const venueUrl = story ? `/gallery/venue/${story.slug}` : "/gallery/venues";
@@ -20,6 +21,18 @@ export function WeddingStoryPage() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [slug]);
+
+  useEffect(() => {
+    const updateColumns = () => {
+      if (window.innerWidth >= 1280) setGalleryColumnCount(4);
+      else if (window.innerWidth >= 768) setGalleryColumnCount(3);
+      else setGalleryColumnCount(2);
+    };
+
+    updateColumns();
+    window.addEventListener("resize", updateColumns);
+    return () => window.removeEventListener("resize", updateColumns);
+  }, []);
 
   useEffect(() => {
     if (!slug || !story) return;
@@ -180,7 +193,7 @@ export function WeddingStoryPage() {
       </main>
 
       {/* GALLERY */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 pb-20">
+      <section className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 pb-20">
         <div className="mb-8 text-center">
           <p className="uppercase tracking-[0.25em] text-xs text-neutral-500 mb-3">Gallery</p>
           <h2 className="text-2xl md:text-3xl font-serif">The photographs</h2>
@@ -201,25 +214,36 @@ export function WeddingStoryPage() {
             </p>
           </div>
         ) : (
-          <div className="columns-2 md:columns-3 xl:columns-4 gap-1 [column-fill:_balance]">
-  {images.map((image, index) => (
-    <button
-      key={`${image.thumbSrc}-${index}`}
-      type="button"
-      onClick={() => {
-        setLightboxIndex(index);
-        setLightboxOpen(true);
-      }}
-      className="mb-1 block w-full break-inside-avoid overflow-hidden group cursor-pointer text-left bg-neutral-100"
-    >
-      <ImageWithFallback
-        src={image.fullSrc}
-        alt={image.alt}
-        className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
-      />
-    </button>
-  ))}
-</div>
+          <div
+            style={{
+              columnCount: galleryColumnCount,
+              columnGap: "4px",
+            }}
+          >
+            {images.map((image, index) => (
+              <button
+                key={`${image.fullSrc}-${index}`}
+                type="button"
+                onClick={() => {
+                  setLightboxIndex(index);
+                  setLightboxOpen(true);
+                }}
+                style={{
+                  breakInside: "avoid",
+                  marginBottom: "4px",
+                  display: "block",
+                  width: "100%",
+                }}
+                className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
+              >
+                <ImageWithFallback
+                  src={image.fullSrc}
+                  alt={image.alt}
+                  className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
+                />
+              </button>
+            ))}
+          </div>
         )}
       </section>
 
