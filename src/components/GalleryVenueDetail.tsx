@@ -374,18 +374,25 @@ export function GalleryVenueDetail() {
       full: fullUrlFromThumb(r),
       alt: `${r.category} at ${name}${locationLine ? `, ${locationLine}` : ""}`,
       filename: r.filename,
-      isPinned: isPinned(r),
-      pinOrder: pinOrder(r),
     }));
   }, [venueRows, name, locationLine]);
-
-  const pinnedImages = useMemo(() => images.filter((img) => img.isPinned), [images]);
-  const masonryImages = useMemo(() => images.filter((img) => !img.isPinned), [images]);
 
   const heroImage =
     images[0]?.full ||
     images[0]?.thumb ||
     "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
+
+  const imageColumns = useMemo(() => {
+    const count = Math.max(1, galleryColumnCount);
+    const columns: Array<Array<{ image: (typeof images)[number]; originalIndex: number }>> =
+      Array.from({ length: count }, () => []);
+
+    images.forEach((image, index) => {
+      columns[index % count].push({ image, originalIndex: index });
+    });
+
+    return columns;
+  }, [images, galleryColumnCount]);
 
   const moreVenueLinks = useMemo(() => {
     const uniqueVenueNames = Array.from(new Set(galleryRows.map((r) => r.venue))).filter(Boolean);
@@ -685,17 +692,20 @@ export function GalleryVenueDetail() {
 
       {/* GRID */}
       <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 pb-20">
-        {pinnedImages.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-1 mb-1">
-            {pinnedImages.map((img) => {
-              const imageIndex = images.findIndex((image) => image.full === img.full);
-
-              return (
+        <div
+          className="grid gap-1"
+          style={{
+            gridTemplateColumns: `repeat(${galleryColumnCount}, minmax(0, 1fr))`,
+          }}
+        >
+          {imageColumns.map((column, columnIndex) => (
+            <div key={`venue-column-${columnIndex}`} className="flex flex-col gap-1">
+              {column.map(({ image: img, originalIndex }) => (
                 <button
-                  key={`pinned-${img.thumb}`}
+                  key={`${img.thumb}-${originalIndex}`}
                   type="button"
                   onClick={() => {
-                    setLightboxIndex(imageIndex >= 0 ? imageIndex : 0);
+                    setLightboxIndex(originalIndex);
                     setLightboxOpen(true);
                   }}
                   className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
@@ -706,44 +716,9 @@ export function GalleryVenueDetail() {
                     className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
                   />
                 </button>
-              );
-            })}
-          </div>
-        ) : null}
-
-        <div
-          style={{
-            columnCount: galleryColumnCount,
-            columnGap: "4px",
-          }}
-        >
-          {masonryImages.map((img) => {
-            const imageIndex = images.findIndex((image) => image.full === img.full);
-
-            return (
-              <button
-                key={`masonry-${img.thumb}`}
-                type="button"
-                onClick={() => {
-                  setLightboxIndex(imageIndex >= 0 ? imageIndex : 0);
-                  setLightboxOpen(true);
-                }}
-                style={{
-                  breakInside: "avoid",
-                  marginBottom: "4px",
-                  display: "block",
-                  width: "100%",
-                }}
-                className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
-              >
-                <ImageWithFallback
-                  src={img.thumb}
-                  alt={img.alt}
-                  className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
-                />
-              </button>
-            );
-          })}
+              ))}
+            </div>
+          ))}
         </div>
       </div>
 
