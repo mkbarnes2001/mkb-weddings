@@ -9,32 +9,14 @@ type CsvRow = {
   venue: string;
   category: string;
   filename: string; // _500.webp
-  tags?: string; // optional
+  tags?: string;
+  flashPin?: string;
+  flashPinOrder?: string;
 };
 
 // Your R2 public base (same pattern as venues/moments)
 const THUMB_BASE = "https://images.mkbweddings.co.uk/thumb";
 const FULL_BASE = "https://images.mkbweddings.co.uk/full";
-
-/**
- * Put these FIRST. Use filenames exactly as in CSV (the _500.webp names).
- */
-const PINNED: string[] = [
-  "MKB_weddings_mkb_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-killeavy-castle-wedding-photography-100_500.webp",
-  "mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-113_500.webp",
-  "mkb-weddings-irish-wedding-photographer-redcastle-hotel-moville-wedding-photography-24_500.webp",
-  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-112_500.webp",
-  "MKB-weddings-mkb-photography_Northern_Ireland_Wedding_Photography_Lusty_Beg_Wedding_Photography_Hayley%26Brian-For_print-449_500.webp",
-  "mkb-weddings-rossharbour-resort-wedding-photography-704_500.webp",
-  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-brookhall-cottages-lisburn-wedding-photography--1_500.webp",
-  "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballymascanlon-house-hotel-dundalk-wedding-photography-11_500.webp",
-  "mkb-weddings-rossharbour-resort-wedding-photography-363_500.webp",
-  "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-658_500.webp",
-  "MKB-photography-Northern-Ireland-wedding-photographer-Irish-Wedding-photography-Darver-castle-wedding-photography-Full%20res-586_500.webp",
-  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp",
-  "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-la-mon-hotel-belfast-wedding-photography--394_500.webp",
-  "mkb-weddings-mkb-photography-northern-ireland-wedding-photographer-tullyglass-house-hotel-ballymena-wedding-photographer-558_500.webp",
-  ];
 
 /**
  * Optional: adjust hero crop focus.
@@ -62,14 +44,19 @@ function fullFromThumbFilename(filename500: string) {
 
 function thumbUrl(r: CsvRow) {
   return `${THUMB_BASE}/${encSegment(r.venue)}/${encSegment(r.category)}/${encodeURIComponent(
-    r.filename
+    r.filename,
   )}`;
 }
 
 function fullUrl(r: CsvRow) {
   return `${FULL_BASE}/${encSegment(r.venue)}/${encSegment(r.category)}/${encodeURIComponent(
-    fullFromThumbFilename(r.filename)
+    fullFromThumbFilename(r.filename),
   )}`;
+}
+
+function cleanCsvValue(value: string) {
+  const trimmed = (value || "").trim();
+  return trimmed.replace(/^"+|"+$/g, "").replace(/""+/g, '"').replace(/"/g, "").trim();
 }
 
 // tiny CSV parser (handles quotes)
@@ -84,10 +71,19 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
 
     for (let i = 0; i < line.length; i++) {
       const ch = line[i];
+      const next = line[i + 1];
+
+      if (ch === '"' && inQuotes && next === '"') {
+        cur += '"';
+        i += 1;
+        continue;
+      }
+
       if (ch === '"') {
         inQuotes = !inQuotes;
         continue;
       }
+
       if (ch === "," && !inQuotes) {
         out.push(cur.trim());
         cur = "";
@@ -95,6 +91,7 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
         cur += ch;
       }
     }
+
     out.push(cur.trim());
     return out;
   };
@@ -103,23 +100,37 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
   const venueIdx = header.indexOf("venue");
   const categoryIdx = header.indexOf("category");
   const filenameIdx = header.indexOf("filename");
-  const tagsIdx = header.indexOf("tags"); // optional
+  const tagsIdx = header.indexOf("tags");
+  const flashPinIdx = header.indexOf("flashpin");
+  const flashPinOrderIdx = header.indexOf("flashpinorder");
 
   if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) {
-    console.error("CSV header must include: venue,category,filename (optional: tags)");
+    console.error("CSV header must include: venue,category,filename (optional: tags,flashPin,flashPinOrder)");
     return [];
   }
 
   const rows: CsvRow[] = [];
+
   for (let i = 1; i < lines.length; i++) {
     const cols = parseLine(lines[i]);
-    const venue = (cols[venueIdx] || "").trim();
-    const category = (cols[categoryIdx] || "").trim();
-    const filename = (cols[filenameIdx] || "").trim();
-    const tags = tagsIdx >= 0 ? (cols[tagsIdx] || "").trim() : "";
+    const venue = cleanCsvValue(cols[venueIdx] || "");
+    const category = cleanCsvValue(cols[categoryIdx] || "");
+    const filename = cleanCsvValue(cols[filenameIdx] || "");
+    const tags = tagsIdx >= 0 ? cleanCsvValue(cols[tagsIdx] || "") : "";
+    const flashPin = flashPinIdx >= 0 ? cleanCsvValue(cols[flashPinIdx] || "") : "";
+    const flashPinOrder =
+      flashPinOrderIdx >= 0 ? cleanCsvValue(cols[flashPinOrderIdx] || "") : "";
 
     if (!venue || !category || !filename) continue;
-    rows.push({ venue, category, filename, tags });
+
+    rows.push({
+      venue,
+      category,
+      filename,
+      tags,
+      flashPin,
+      flashPinOrder,
+    });
   }
 
   return rows;
@@ -128,7 +139,7 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
 function hasTag(tags: string | undefined, target: string) {
   if (!tags) return false;
   const parts = tags
-    .split(/[,\|]/g)
+    .split(/[,|]/g)
     .map((t) => normalize(t))
     .filter(Boolean);
   return parts.includes(normalize(target));
@@ -154,14 +165,36 @@ function stableShuffle<T>(arr: T[], seed: string, keyFn: (t: T) => string) {
   return copy;
 }
 
+function isPinned(value?: string) {
+  return ["y", "yes", "true", "1", "pin", "pinned"].includes(normalize(value || ""));
+}
+
+function getPinOrder(value?: string) {
+  const parsed = Number(value || "");
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 9999;
+}
+
 // ----------------------- component ------------------------------------------
 
 export function GalleryCreativeFlash() {
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [galleryColumnCount, setGalleryColumnCount] = useState(2);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  useEffect(() => {
+    const updateColumns = () => {
+      if (window.innerWidth >= 1280) setGalleryColumnCount(4);
+      else if (window.innerWidth >= 768) setGalleryColumnCount(3);
+      else setGalleryColumnCount(2);
+    };
+
+    updateColumns();
+    window.addEventListener("resize", updateColumns);
+    return () => window.removeEventListener("resize", updateColumns);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -199,14 +232,17 @@ export function GalleryCreativeFlash() {
       full: fullUrl(r),
       venue: r.venue,
       filename: r.filename,
+      flashPin: r.flashPin,
+      flashPinOrder: r.flashPinOrder,
       alt: `Creative Flash – ${r.venue}`,
     }));
 
-    const pinnedSet = new Set(PINNED.map(normalize));
-    const pinned = mapped.filter((m) => pinnedSet.has(normalize(m.filename)));
-    const rest = mapped.filter((m) => !pinnedSet.has(normalize(m.filename)));
+    const pinned = mapped
+      .filter((m) => isPinned(m.flashPin))
+      .sort((a, b) => getPinOrder(a.flashPinOrder) - getPinOrder(b.flashPinOrder));
 
-    const shuffled = stableShuffle(rest, "creative-flash-v1", (m) => m.filename);
+    const rest = mapped.filter((m) => !isPinned(m.flashPin));
+    const shuffled = stableShuffle(rest, "creative-flash-v2", (m) => m.filename);
 
     return [...pinned, ...shuffled];
   }, [flashRows]);
@@ -236,15 +272,11 @@ export function GalleryCreativeFlash() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-        {/* Bottom-aligned text block (same structure as moment detail) */}
+        {/* Bottom-aligned text block */}
         <div className="absolute inset-0 flex items-end">
           <div className="max-w-7xl mx-auto px-6 pb-16 w-full text-center">
-            {/* Heading size matches GalleryMomentDetail */}
-            <h1 className="text-white text-5xl md:text-6xl mb-4">
-              Creative Flash
-            </h1>
+            <h1 className="text-white text-5xl md:text-6xl mb-4">Creative Flash</h1>
 
-            {/* Optional short subline (keeps it elegant + consistent) */}
             <p className="text-white text-sm md:text-base">
               Bold, dramatic, and unforgettable moments illuminated with expert flash lighting
             </p>
@@ -278,11 +310,15 @@ export function GalleryCreativeFlash() {
 
         {/* GRID */}
         {images.length === 0 ? (
-          <div className="text-center py-20 text-neutral-600">
-            No Creative Flash images found.
-          </div>
+          <div className="text-center py-20 text-neutral-600">No Creative Flash images found.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-16">
+          <div
+            className="pb-16"
+            style={{
+              columnCount: galleryColumnCount,
+              columnGap: "4px",
+            }}
+          >
             {images.map((img, idx) => (
               <button
                 key={`${img.thumb}-${idx}`}
@@ -291,12 +327,18 @@ export function GalleryCreativeFlash() {
                   setLightboxIndex(idx);
                   setLightboxOpen(true);
                 }}
-                className="group relative aspect-[4/3] overflow-hidden rounded-lg text-left"
+                style={{
+                  breakInside: "avoid",
+                  marginBottom: "4px",
+                  display: "block",
+                  width: "100%",
+                }}
+                className="group relative overflow-hidden text-left bg-neutral-100"
               >
                 <ImageWithFallback
                   src={img.thumb}
                   alt={img.alt}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
                   <div className="text-white/95 text-sm tracking-wide">{img.venue}</div>
@@ -310,6 +352,7 @@ export function GalleryCreativeFlash() {
         {lightboxOpen && images.length > 0 && (
           <ImageLightbox
             images={images.map((i) => i.full)}
+            alts={images.map((i) => i.alt)}
             currentIndex={lightboxIndex}
             onClose={() => setLightboxOpen(false)}
             onNavigate={(newIndex) => setLightboxIndex(newIndex)}
