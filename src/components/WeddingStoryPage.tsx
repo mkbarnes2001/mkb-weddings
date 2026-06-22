@@ -208,7 +208,7 @@ export function WeddingStoryPage() {
             </p>
           </div>
         ) : (
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-1 space-y-1">
+          <div className="columns-2 md:columns-3 xl:columns-4 gap-1 space-y-1">
             {images.map((image, index) => {
 
               return (
