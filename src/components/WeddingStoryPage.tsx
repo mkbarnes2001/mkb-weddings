@@ -15,7 +15,6 @@ export function WeddingStoryPage() {
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const story = weddingStories.find((item) => item.slug === slug);
-
   const venueUrl = story ? `/gallery/venue/${story.slug}` : "/gallery/venues";
 
   useEffect(() => {
@@ -78,91 +77,84 @@ export function WeddingStoryPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/20" />
 
         <div className="absolute inset-0 flex items-end">
-  <div className="max-w-5xl mx-auto px-6 pb-16 w-full text-white text-center">
+          <div className="max-w-5xl mx-auto px-6 pb-16 w-full text-white text-center">
+            <div className="flex justify-center mb-6">
+              <Link
+                to="/blog"
+                className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                Back to Wedding Stories
+              </Link>
+            </div>
 
-    <div className="flex justify-center mb-6">
-      <Link
-        to="/blog"
-        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-      >
-        <ArrowLeft className="w-5 h-5" />
-        Back to Wedding Stories
-      </Link>
-    </div>
+            <p className="uppercase tracking-[0.25em] text-xs text-white/70 mb-4">
+              Wedding Story
+            </p>
 
-    <p className="uppercase tracking-[0.25em] text-xs text-white/70 mb-4">
-      Wedding Story
-    </p>
+            <h1 className="text-3xl md:text-5xl mb-6 leading-tight">{story.title}</h1>
 
-    <h1 className="text-3xl md:text-5xl mb-6 leading-tight">
-      {story.title}
-    </h1>
+            <div className="flex flex-wrap justify-center gap-8 text-white/90 text-lg">
+              <span className="flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                <Link
+                  to={venueUrl}
+                  className="underline underline-offset-4 hover:text-white transition-colors"
+                >
+                  {story.venue}
+                </Link>
+              </span>
 
-    <div className="flex flex-wrap justify-center gap-8 text-white/90 text-lg">
-
-      <span className="flex items-center gap-2">
-        <MapPin className="w-5 h-5" />
-
-        <Link
-          to={venueUrl}
-          className="underline underline-offset-4 hover:text-white transition-colors"
-        >
-          {story.venue}
-        </Link>
-      </span>
-
-      <span className="flex items-center gap-2">
-        <Calendar className="w-5 h-5" />
-        {story.weddingDate}
-      </span>
-
-    </div>
-
-  </div>
-</div>
+              <span className="flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                {story.weddingDate}
+              </span>
+            </div>
+          </div>
+        </div>
       </section>
 
-{/* BREADCRUMBS */}
-<div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
-  <nav aria-label="Breadcrumb" className="flex justify-center">
-    <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
-      <li>
-        <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
-          Home
-        </Link>
-      </li>
+      {/* BREADCRUMBS */}
+      <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
+        <nav aria-label="Breadcrumb" className="flex justify-center">
+          <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
+            <li>
+              <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
+                Home
+              </Link>
+            </li>
 
-      <li className="opacity-60">
-        <ChevronRight className="w-4 h-4" />
-      </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
 
-      <li>
-        <Link to="/blog" className="hover:text-neutral-900 underline underline-offset-4">
-          Wedding Stories
-        </Link>
-      </li>
+            <li>
+              <Link to="/blog" className="hover:text-neutral-900 underline underline-offset-4">
+                Wedding Stories
+              </Link>
+            </li>
 
-      <li className="opacity-60">
-        <ChevronRight className="w-4 h-4" />
-      </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
 
-      <li>
-        <Link to={venueUrl} className="hover:text-neutral-900 underline underline-offset-4">
-          {story.venue}
-        </Link>
-      </li>
+            <li>
+              <Link to={venueUrl} className="hover:text-neutral-900 underline underline-offset-4">
+                {story.venue}
+              </Link>
+            </li>
 
-      <li className="opacity-60">
-        <ChevronRight className="w-4 h-4" />
-      </li>
+            <li className="opacity-60">
+              <ChevronRight className="w-4 h-4" />
+            </li>
 
-      <li className="text-neutral-900">{story.couple}</li>
-    </ol>
-  </nav>
-</div>
+            <li className="text-neutral-900">{story.couple}</li>
+          </ol>
+        </nav>
+      </div>
 
       {/* STORY TEXT */}
-      <main className="max-w-4xl mx-auto px-6 py-16 text-center">
+      <main className="max-w-4xl mx-auto px-6 py-10 text-center">
         <p className="text-xl md:text-2xl leading-relaxed text-neutral-800 mb-10 font-serif">
           {story.intro}
         </p>
@@ -187,11 +179,12 @@ export function WeddingStoryPage() {
         </div>
       </main>
 
-      {/* GALLERY - matches venue gallery viewing style */}
-      <section className="max-w-7xl mx-auto px-6 pb-20">
+      {/* GALLERY */}
+      <section className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 pb-20">
         <div className="mb-8 text-center">
           <p className="uppercase tracking-[0.25em] text-xs text-neutral-500 mb-3">Gallery</p>
           <h2 className="text-2xl md:text-3xl font-serif">The photographs</h2>
+
           {images.length > 0 ? (
             <p className="text-neutral-600 mt-3">
               {images.length} {images.length === 1 ? "image" : "images"}
@@ -208,27 +201,24 @@ export function WeddingStoryPage() {
             </p>
           </div>
         ) : (
-          <div className="columns-2 md:columns-3 xl:columns-4 gap-1 space-y-1">
-            {images.map((image, index) => {
-
-              return (
-                <button
-                  key={`${image.thumbSrc}-${index}`}
-                  type="button"
-                  onClick={() => {
-                    setLightboxIndex(index);
-                    setLightboxOpen(true);
-                  }}
-                  className="w-full mb-1 break-inside-avoid overflow-hidden group cursor-pointer text-left bg-neutral-100"
-                >
-                  <ImageWithFallback
-                    src={image.thumbSrc}
-                    alt={image.alt}
-                    className="w-full h-auto block transition-transform duration-700 group-hover:scale-105"
-                  />
-                </button>
-              );
-            })}
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-1">
+            {images.map((image, index) => (
+              <button
+                key={`${image.thumbSrc}-${index}`}
+                type="button"
+                onClick={() => {
+                  setLightboxIndex(index);
+                  setLightboxOpen(true);
+                }}
+                className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
+              >
+                <ImageWithFallback
+                  src={image.thumbSrc}
+                  alt={image.alt}
+                  className="w-full aspect-[3/4] object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              </button>
+            ))}
           </div>
         )}
       </section>
@@ -260,7 +250,7 @@ export function WeddingStoryPage() {
         </div>
       </section>
 
-      {/* LIGHTBOX - same component used by venue galleries */}
+      {/* LIGHTBOX */}
       {lightboxOpen && images.length > 0 ? (
         <ImageLightbox
           images={lightboxImages}
