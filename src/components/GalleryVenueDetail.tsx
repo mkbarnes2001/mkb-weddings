@@ -374,8 +374,13 @@ export function GalleryVenueDetail() {
       full: fullUrlFromThumb(r),
       alt: `${r.category} at ${name}${locationLine ? `, ${locationLine}` : ""}`,
       filename: r.filename,
+      isPinned: isPinned(r),
+      pinOrder: pinOrder(r),
     }));
   }, [venueRows, name, locationLine]);
+
+  const pinnedImages = useMemo(() => images.filter((img) => img.isPinned), [images]);
+  const masonryImages = useMemo(() => images.filter((img) => !img.isPinned), [images]);
 
   const heroImage =
     images[0]?.full ||
@@ -680,35 +685,65 @@ export function GalleryVenueDetail() {
 
       {/* GRID */}
       <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 pb-20">
+        {pinnedImages.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-1 mb-1">
+            {pinnedImages.map((img) => {
+              const imageIndex = images.findIndex((image) => image.full === img.full);
+
+              return (
+                <button
+                  key={`pinned-${img.thumb}`}
+                  type="button"
+                  onClick={() => {
+                    setLightboxIndex(imageIndex >= 0 ? imageIndex : 0);
+                    setLightboxOpen(true);
+                  }}
+                  className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
+                >
+                  <ImageWithFallback
+                    src={img.thumb}
+                    alt={img.alt}
+                    className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
+                  />
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+
         <div
           style={{
             columnCount: galleryColumnCount,
             columnGap: "4px",
           }}
         >
-          {images.map((img, idx) => (
-            <button
-              key={`${img.thumb}-${idx}`}
-              type="button"
-              onClick={() => {
-                setLightboxIndex(idx);
-                setLightboxOpen(true);
-              }}
-              style={{
-                breakInside: "avoid",
-                marginBottom: "4px",
-                display: "block",
-                width: "100%",
-              }}
-              className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
-            >
-              <ImageWithFallback
-                src={img.thumb}
-                alt={img.alt}
-                className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
-              />
-            </button>
-          ))}
+          {masonryImages.map((img) => {
+            const imageIndex = images.findIndex((image) => image.full === img.full);
+
+            return (
+              <button
+                key={`masonry-${img.thumb}`}
+                type="button"
+                onClick={() => {
+                  setLightboxIndex(imageIndex >= 0 ? imageIndex : 0);
+                  setLightboxOpen(true);
+                }}
+                style={{
+                  breakInside: "avoid",
+                  marginBottom: "4px",
+                  display: "block",
+                  width: "100%",
+                }}
+                className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
+              >
+                <ImageWithFallback
+                  src={img.thumb}
+                  alt={img.alt}
+                  className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
+                />
+              </button>
+            );
+          })}
         </div>
       </div>
 
