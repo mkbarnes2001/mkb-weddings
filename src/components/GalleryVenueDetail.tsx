@@ -402,12 +402,25 @@ export function GalleryVenueDetail() {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [venueId]);
 
+  useEffect(() => {
+    const updateColumns = () => {
+      if (window.innerWidth >= 1280) setGalleryColumnCount(4);
+      else if (window.innerWidth >= 768) setGalleryColumnCount(3);
+      else setGalleryColumnCount(2);
+    };
+
+    updateColumns();
+    window.addEventListener("resize", updateColumns);
+    return () => window.removeEventListener("resize", updateColumns);
+  }, []);
+
   const [galleryRows, setGalleryRows] = useState<GalleryRow[]>([]);
   const [venueMetaMap, setVenueMetaMap] = useState<Record<string, VenueMetaRow>>({});
   const [countyMetaMap, setCountyMetaMap] = useState<Record<string, CountyMeta>>({});
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [galleryColumnCount, setGalleryColumnCount] = useState(2);
 
   useEffect(() => {
     let cancelled = false;
@@ -807,33 +820,36 @@ export function GalleryVenueDetail() {
       </section>
 
       {/* GRID */}
-      <div className="max-w-7xl mx-auto px-6 pb-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {images.map((img, idx) => {
-            const remainderLg = images.length % 3;
-            const isLast = idx === images.length - 1;
-            const shouldSpanLg = isLast && remainderLg === 1;
-
-            return (
-              <button
-                key={`${img.thumb}-${idx}`}
-                type="button"
-                onClick={() => {
-                  setLightboxIndex(idx);
-                  setLightboxOpen(true);
-                }}
-                className={`aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left ${
-                  shouldSpanLg ? "lg:col-span-3" : ""
-                }`}
-              >
-                <ImageWithFallback
-                  src={img.thumb}
-                  alt={img.alt}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-              </button>
-            );
-          })}
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 pb-20">
+        <div
+          style={{
+            columnCount: galleryColumnCount,
+            columnGap: "4px",
+          }}
+        >
+          {images.map((img, idx) => (
+            <button
+              key={`${img.full}-${idx}`}
+              type="button"
+              onClick={() => {
+                setLightboxIndex(idx);
+                setLightboxOpen(true);
+              }}
+              style={{
+                breakInside: "avoid",
+                marginBottom: "4px",
+                display: "block",
+                width: "100%",
+              }}
+              className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
+            >
+              <ImageWithFallback
+                src={img.full}
+                alt={img.alt}
+                className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
+              />
+            </button>
+          ))}
         </div>
       </div>
 
