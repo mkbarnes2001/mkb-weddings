@@ -201,25 +201,25 @@ export function WeddingStoryPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-1">
-            {images.map((image, index) => (
-              <button
-                key={`${image.thumbSrc}-${index}`}
-                type="button"
-                onClick={() => {
-                  setLightboxIndex(index);
-                  setLightboxOpen(true);
-                }}
-                className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
-              >
-                <ImageWithFallback
-                  src={image.thumbSrc}
-                  alt={image.alt}
-                  className="w-full aspect-[3/4] object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              </button>
-            ))}
-          </div>
+          <div className="columns-2 md:columns-3 xl:columns-4 gap-1 [column-fill:_balance]">
+  {images.map((image, index) => (
+    <button
+      key={`${image.thumbSrc}-${index}`}
+      type="button"
+      onClick={() => {
+        setLightboxIndex(index);
+        setLightboxOpen(true);
+      }}
+      className="mb-1 block w-full break-inside-avoid overflow-hidden group cursor-pointer text-left bg-neutral-100"
+    >
+      <ImageWithFallback
+        src={image.fullSrc}
+        alt={image.alt}
+        className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
+      />
+    </button>
+  ))}
+</div>
         )}
       </section>
 
