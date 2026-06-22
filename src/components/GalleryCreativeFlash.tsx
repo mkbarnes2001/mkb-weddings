@@ -247,6 +247,19 @@ export function GalleryCreativeFlash() {
     return [...pinned, ...shuffled];
   }, [flashRows]);
 
+  const imageColumns = useMemo(() => {
+    const count = Math.max(1, galleryColumnCount);
+    const columns: Array<Array<{ image: (typeof images)[number]; originalIndex: number }>> =
+      Array.from({ length: count }, () => []);
+
+    images.forEach((image, index) => {
+      columns[index % count].push({ image, originalIndex: index });
+    });
+
+    return columns;
+  }, [images, galleryColumnCount]);
+
+
   if (loadError) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
@@ -313,37 +326,34 @@ export function GalleryCreativeFlash() {
           <div className="text-center py-20 text-neutral-600">No Creative Flash images found.</div>
         ) : (
           <div
-            className="pb-16"
+            className="grid gap-1 pb-16"
             style={{
-              columnCount: galleryColumnCount,
-              columnGap: "4px",
+              gridTemplateColumns: `repeat(${galleryColumnCount}, minmax(0, 1fr))`,
             }}
           >
-            {images.map((img, idx) => (
-              <button
-                key={`${img.thumb}-${idx}`}
-                type="button"
-                onClick={() => {
-                  setLightboxIndex(idx);
-                  setLightboxOpen(true);
-                }}
-                style={{
-                  breakInside: "avoid",
-                  marginBottom: "4px",
-                  display: "block",
-                  width: "100%",
-                }}
-                className="group relative overflow-hidden text-left bg-neutral-100"
-              >
-                <ImageWithFallback
-                  src={img.thumb}
-                  alt={img.alt}
-                  className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
-                  <div className="text-white/95 text-sm tracking-wide">{img.venue}</div>
-                </div>
-              </button>
+            {imageColumns.map((column, columnIndex) => (
+              <div key={`flash-column-${columnIndex}`} className="flex flex-col gap-1">
+                {column.map(({ image: img, originalIndex }) => (
+                  <button
+                    key={`${img.thumb}-${originalIndex}`}
+                    type="button"
+                    onClick={() => {
+                      setLightboxIndex(originalIndex);
+                      setLightboxOpen(true);
+                    }}
+                    className="group relative overflow-hidden text-left bg-neutral-100"
+                  >
+                    <ImageWithFallback
+                      src={img.thumb}
+                      alt={img.alt}
+                      className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
+                      <div className="text-white/95 text-sm tracking-wide">{img.venue}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
             ))}
           </div>
         )}
