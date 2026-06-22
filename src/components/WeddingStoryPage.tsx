@@ -208,11 +208,8 @@ export function WeddingStoryPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-1 space-y-1">
             {images.map((image, index) => {
-              const remainderLg = images.length % 3;
-              const isLast = index === images.length - 1;
-              const shouldSpanLg = isLast && remainderLg === 1;
 
               return (
                 <button
@@ -222,14 +219,12 @@ export function WeddingStoryPage() {
                     setLightboxIndex(index);
                     setLightboxOpen(true);
                   }}
-                  className={`aspect-[4/3] overflow-hidden rounded-lg group cursor-pointer text-left bg-neutral-100 ${
-                    shouldSpanLg ? "lg:col-span-3" : ""
-                  }`}
+                  className="w-full mb-1 break-inside-avoid overflow-hidden group cursor-pointer text-left bg-neutral-100"
                 >
                   <ImageWithFallback
                     src={image.thumbSrc}
                     alt={image.alt}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="w-full h-auto block transition-transform duration-700 group-hover:scale-105"
                   />
                 </button>
               );
