@@ -137,7 +137,7 @@ export function WeddingStoryPage() {
       </section>
 
       {/* BREADCRUMBS */}
-      <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
+      <div className="max-w-7xl mx-auto px-6 pt-8 pb-16">
         <nav aria-label="Breadcrumb" className="flex justify-center">
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
             <li>
@@ -176,12 +176,12 @@ export function WeddingStoryPage() {
       </div>
 
       {/* STORY TEXT */}
-      <main className="max-w-4xl mx-auto px-6 py-10 text-center">
+      <main className="max-w-4xl mx-auto px-6 pt-4 pb-16 text-center">
         <p className="text-xl md:text-2xl leading-relaxed text-neutral-800 mb-10 font-serif">
           {story.intro}
         </p>
 
-        <div className="space-y-6 text-lg leading-relaxed text-neutral-700 text-left">
+        <div className="space-y-8 text-lg leading-relaxed text-neutral-700 text-center max-w-3xl mx-auto">
           {story.story.map((paragraph, index) => (
             <p key={index}>{paragraph}</p>
           ))}
