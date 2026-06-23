@@ -8,6 +8,15 @@ import { weddingStories } from "../data/weddingStories";
 import { getBlogImages, getCoverImage } from "../lib/blogGallery";
 import type { BlogImage } from "../lib/blogGallery";
 
+function slugify(value: string) {
+  return (value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
 export function WeddingStoryPage() {
   const { slug } = useParams();
   const [images, setImages] = useState<BlogImage[]>([]);
@@ -16,7 +25,7 @@ export function WeddingStoryPage() {
   const [galleryColumnCount, setGalleryColumnCount] = useState(2);
 
   const story = weddingStories.find((item) => item.slug === slug);
-  const venueUrl = story ? `/gallery/venue/${story.slug}` : "/gallery/venues";
+  const venueUrl = story ? `/gallery/venue/${slugify(story.venue)}` : "/gallery/venues";
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -39,7 +48,7 @@ export function WeddingStoryPage() {
 
     let cancelled = false;
 
-    fetch("/gallery.csv", { cache: "no-store" })
+    fetch("/blog-gallery.csv", { cache: "no-store" })
       .then((res) => (res.ok ? res.text() : ""))
       .then((csvText) => {
         if (!cancelled) setImages(getBlogImages(csvText, slug, story));
@@ -210,7 +219,7 @@ export function WeddingStoryPage() {
             <h3 className="text-3xl mb-4">No blog images selected yet</h3>
             <p className="text-neutral-700">
               Add this story slug to the <span className="font-mono">blogSlug</span> column in
-              <span className="font-mono"> public/gallery.csv</span>.
+              <span className="font-mono"> public/blog-gallery.csv</span>.
             </p>
           </div>
         ) : (
@@ -222,7 +231,7 @@ export function WeddingStoryPage() {
           >
             {images.map((image, index) => (
               <button
-                key={`${image.fullSrc}-${index}`}
+                key={`${image.thumbSrc}-${index}`}
                 type="button"
                 onClick={() => {
                   setLightboxIndex(index);
@@ -237,7 +246,7 @@ export function WeddingStoryPage() {
                 className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
               >
                 <ImageWithFallback
-                  src={image.fullSrc}
+                  src={image.thumbSrc}
                   alt={image.alt}
                   className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
                 />
