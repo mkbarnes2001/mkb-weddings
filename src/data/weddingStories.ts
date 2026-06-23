@@ -22,7 +22,7 @@ export interface WeddingStory {
 
 export const weddingStories: WeddingStory[] = [
   {
-    slug: "orange-tree-house",
+    slug: "orange-tree-house-summer-wedding-ian-and-bernadette",
     title: "A stylish, relaxed wedding at Orange Tree House, Greyabbey",
     couple: "Ian & Bernadette",
     venue: "Orange Tree House",
