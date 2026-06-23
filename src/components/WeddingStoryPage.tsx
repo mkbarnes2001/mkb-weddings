@@ -253,36 +253,39 @@ export function WeddingStoryPage() {
             </p>
           </div>
         ) : (
+          
           <div
-            style={{
-              columnCount: galleryColumnCount,
-              columnGap: "4px",
-            }}
-          >
-            {orderedImages.map(({ image, originalIndex }) => (
-              <button
-                key={`${image.thumbSrc}-${originalIndex}`}
-                type="button"
-                onClick={() => {
-                  setLightboxIndex(originalIndex);
-                  setLightboxOpen(true);
-                }}
-                style={{
-                  breakInside: "avoid",
-                  marginBottom: "4px",
-                  display: "block",
-                  width: "100%",
-                }}
-                className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
-              >
-                <ImageWithFallback
-                  src={image.thumbSrc}
-                  alt={image.alt}
-                  className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
-                />
-              </button>
-            ))}
-          </div>
+  style={{
+    columnCount: galleryColumnCount,
+    columnGap: "4px",
+  }}
+>
+  {images.map((image, index) => (
+    <button
+      key={`${image.thumbSrc}-${index}`}
+      type="button"
+      onClick={() => {
+        setLightboxIndex(index);
+        setLightboxOpen(true);
+      }}
+      style={{
+        breakInside: "avoid",
+        marginBottom: "4px",
+        display: "block",
+        width: "100%",
+      }}
+      className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
+    >
+      <ImageWithFallback
+        src={image.thumbSrc}
+        alt={image.alt}
+        className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
+      />
+    </button>
+  ))}
+</div>
+
+
         )}
       </section>
 
