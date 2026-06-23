@@ -2,7 +2,7 @@
 // Add the written text for each blog post here.
 // The photo selection is controlled by public/gallery.csv using the same slug.
 
-export const BLOG_IMAGE_BASE_URL = "https://images.mkbweddings.co.uk";
+export const BLOG_IMAGE_BASE_URL = "https://images.mkbweddings.co.uk/blog";
 // Replace the line above with the same public R2 domain your gallery pages use.
 // Example: "https://pub-xxxxxxxx.r2.dev"
 // Do not include a trailing slash.

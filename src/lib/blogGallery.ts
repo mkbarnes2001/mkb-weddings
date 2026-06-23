@@ -2,18 +2,13 @@
 import { BLOG_IMAGE_BASE_URL, WeddingStory } from "../data/weddingStories";
 
 export interface GalleryCsvRow {
-  venue: string;
-  category: string;
-  filename: string;
-  tags?: string;
   blogSlug?: string;
+  filename: string;
   blogOrder?: string;
   blogCover?: string;
 }
 
 export interface BlogImage {
-  venue: string;
-  category: string;
   filename: string;
   blogSlug: string;
   blogOrder: number;
@@ -93,13 +88,7 @@ export function buildImageUrl(size: "thumb" | "full", row: GalleryCsvRow) {
   const base = cleanBaseUrl(BLOG_IMAGE_BASE_URL);
   const filename = size === "full" ? fullFilenameFromThumb(row.filename) : row.filename;
 
-  return [
-    base,
-    size,
-    encodePathPart(row.venue),
-    encodePathPart(row.category),
-    encodePathPart(filename),
-  ]
+  return [base, size, encodePathPart(row.blogSlug || ""), encodePathPart(filename)]
     .filter(Boolean)
     .join("/");
 }
@@ -114,17 +103,13 @@ export function getBlogImages(csvText: string, slug: string, story?: WeddingStor
       );
 
       return {
-        venue: row.venue,
-        category: row.category,
         filename: row.filename,
         blogSlug: slug,
         blogOrder: Number.isFinite(blogOrder) ? blogOrder : index + 1,
         isCover,
         thumbSrc: buildImageUrl("thumb", row),
         fullSrc: buildImageUrl("full", row),
-        alt: story
-          ? `${story.couple} wedding at ${story.venue}`
-          : `${row.venue} wedding photograph`,
+        alt: story ? `${story.couple} wedding at ${story.venue}` : "Wedding photograph",
       };
     })
     .sort((a, b) => a.blogOrder - b.blogOrder);
