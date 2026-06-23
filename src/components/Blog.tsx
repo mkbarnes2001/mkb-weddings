@@ -233,7 +233,7 @@ export function Blog() {
             <h3 className="text-3xl mb-4">No wedding stories selected yet</h3>
             <p className="text-neutral-700 leading-relaxed">
               Add <span className="font-mono">blogSlug</span>, <span className="font-mono">blogOrder</span>,
-              and <span className="font-mono">blogCover</span> values to <span className="font-mono">public/gallery.csv</span>.
+              and <span className="font-mono">blogCover</span> values to <span className="font-mono">public/blog-gallery.csv</span>.
               Any CSV rows with a matching blog slug will appear here automatically.
             </p>
           </div>
