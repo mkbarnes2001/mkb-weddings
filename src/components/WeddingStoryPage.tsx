@@ -67,18 +67,33 @@ export function WeddingStoryPage() {
   const lightboxImages = useMemo(() => images.map((image) => image.fullSrc), [images]);
   const lightboxAlts = useMemo(() => images.map((image) => image.alt), [images]);
 
-  const imageColumns = useMemo(() => {
+  const orderedImages = useMemo(() => {
     const count = Math.max(1, galleryColumnCount);
-    const columns: Array<Array<{ image: BlogImage; originalIndex: number }>> = Array.from(
-      { length: count },
-      () => [],
-    );
 
-    images.forEach((image, index) => {
-      columns[index % count].push({ image, originalIndex: index });
-    });
+    if (images.length <= count) {
+      return images.map((image, index) => ({
+        image,
+        originalIndex: index,
+      }));
+    }
 
-    return columns;
+    const rows = Math.ceil(images.length / count);
+    const reordered: Array<{ image: BlogImage; originalIndex: number }> = [];
+
+    for (let col = 0; col < count; col += 1) {
+      for (let row = 0; row < rows; row += 1) {
+        const index = row * count + col;
+
+        if (index < images.length) {
+          reordered.push({
+            image: images[index],
+            originalIndex: index,
+          });
+        }
+      }
+    }
+
+    return reordered;
   }, [images, galleryColumnCount]);
 
   if (!story) {
@@ -239,31 +254,33 @@ export function WeddingStoryPage() {
           </div>
         ) : (
           <div
-            className="grid gap-1"
             style={{
-              gridTemplateColumns: `repeat(${galleryColumnCount}, minmax(0, 1fr))`,
+              columnCount: galleryColumnCount,
+              columnGap: "4px",
             }}
           >
-            {imageColumns.map((column, columnIndex) => (
-              <div key={`blog-column-${columnIndex}`} className="flex flex-col gap-1">
-                {column.map(({ image, originalIndex }) => (
-                  <button
-                    key={`${image.thumbSrc}-${originalIndex}`}
-                    type="button"
-                    onClick={() => {
-                      setLightboxIndex(originalIndex);
-                      setLightboxOpen(true);
-                    }}
-                    className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
-                  >
-                    <ImageWithFallback
-                      src={image.thumbSrc}
-                      alt={image.alt}
-                      className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
-                    />
-                  </button>
-                ))}
-              </div>
+            {orderedImages.map(({ image, originalIndex }) => (
+              <button
+                key={`${image.thumbSrc}-${originalIndex}`}
+                type="button"
+                onClick={() => {
+                  setLightboxIndex(originalIndex);
+                  setLightboxOpen(true);
+                }}
+                style={{
+                  breakInside: "avoid",
+                  marginBottom: "4px",
+                  display: "block",
+                  width: "100%",
+                }}
+                className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
+              >
+                <ImageWithFallback
+                  src={image.thumbSrc}
+                  alt={image.alt}
+                  className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
+                />
+              </button>
             ))}
           </div>
         )}
