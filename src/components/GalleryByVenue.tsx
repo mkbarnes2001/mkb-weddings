@@ -7,8 +7,10 @@ import { Helmet } from "react-helmet-async";
 type GalleryRow = {
   venue: string;
   category: string;
-  filename: string; // ends in _500.webp
+  filename: string;
   tags?: string;
+  venuePin?: string;
+  venuePinOrder?: string;
 };
 
 type VenueMetaRow = {
@@ -16,10 +18,8 @@ type VenueMetaRow = {
   venueName?: string; // venue-name
 };
 
-const THUMB_BASE =
-  "https://images.mkbweddings.co.uk/thumb";
-const FULL_BASE =
-  "https://images.mkbweddings.co.uk/full";
+const THUMB_BASE = "https://images.mkbweddings.co.uk/thumb";
+const FULL_BASE = "https://images.mkbweddings.co.uk/full";
 
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 
@@ -88,6 +88,8 @@ function parseGalleryCsv(csvText: string): GalleryRow[] {
   const categoryIdx = header.indexOf("category");
   const filenameIdx = header.indexOf("filename");
   const tagsIdx = header.indexOf("tags");
+  const venuePinIdx = header.indexOf("venuepin");
+  const venuePinOrderIdx = header.indexOf("venuepinorder");
 
   if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) return [];
 
@@ -98,6 +100,8 @@ function parseGalleryCsv(csvText: string): GalleryRow[] {
       category: (cols[categoryIdx] || "").trim(),
       filename: (cols[filenameIdx] || "").trim(),
       tags: tagsIdx !== -1 ? (cols[tagsIdx] || "").trim() : "",
+      venuePin: venuePinIdx !== -1 ? (cols[venuePinIdx] || "").trim() : "",
+      venuePinOrder: venuePinOrderIdx !== -1 ? (cols[venuePinOrderIdx] || "").trim() : "",
     }))
     .filter((r) => r.venue && r.category && r.filename);
 }
@@ -208,7 +212,22 @@ export function GalleryByVenue() {
 
     const cards: VenueCard[] = [];
     for (const [venue, rows] of byVenue.entries()) {
-      const coverRow = rows[0];
+      const pinnedCover = rows
+        .filter((row) =>
+          ["y", "yes", "true", "1", "pin", "pinned"].includes(
+            (row.venuePin || "").trim().toLowerCase()
+          )
+        )
+        .sort((a, b) => {
+          const orderA = Number((a.venuePinOrder || "").trim()) || 9999;
+          const orderB = Number((b.venuePinOrder || "").trim()) || 9999;
+
+          if (orderA !== orderB) return orderA - orderB;
+
+          return a.filename.localeCompare(b.filename);
+        })[0];
+
+      const coverRow = pinnedCover || rows[0];
       if (!coverRow) continue;
 
       cards.push({

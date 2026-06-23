@@ -237,9 +237,19 @@ export function GalleryCreativeFlash() {
       alt: `Creative Flash – ${r.venue}`,
     }));
 
-    const pinned = mapped
-      .filter((m) => isPinned(m.flashPin))
-      .sort((a, b) => getPinOrder(a.flashPinOrder) - getPinOrder(b.flashPinOrder));
+   const pinned = mapped
+  .filter((m) => isPinned(m.flashPin))
+  .sort((a, b) => {
+    const orderDiff =
+      getPinOrder(a.flashPinOrder) -
+      getPinOrder(b.flashPinOrder);
+
+    if (orderDiff !== 0) {
+      return orderDiff;
+    }
+
+    return a.filename.localeCompare(b.filename);
+  });
 
     const rest = mapped.filter((m) => !isPinned(m.flashPin));
     const shuffled = stableShuffle(rest, "creative-flash-v2", (m) => m.filename);
