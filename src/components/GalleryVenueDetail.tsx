@@ -80,7 +80,16 @@ function pinOrder(row: GalleryRow) {
 function applyPinnedOrder(rows: GalleryRow[], seed: string): GalleryRow[] {
   const pinned = rows
     .filter(isPinned)
-    .sort((a, b) => pinOrder(a) - pinOrder(b));
+    .sort((a, b) => {
+  const orderA = pinOrder(a);
+  const orderB = pinOrder(b);
+
+  if (orderA !== orderB) {
+    return orderA - orderB;
+  }
+
+  return a.filename.localeCompare(b.filename);
+});
 
   const rest = rows.filter((row) => !isPinned(row));
   const shuffledRest = stableShuffle(rest, seed);
