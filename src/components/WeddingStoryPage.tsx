@@ -67,6 +67,20 @@ export function WeddingStoryPage() {
   const lightboxImages = useMemo(() => images.map((image) => image.fullSrc), [images]);
   const lightboxAlts = useMemo(() => images.map((image) => image.alt), [images]);
 
+  const imageColumns = useMemo(() => {
+    const count = Math.max(1, galleryColumnCount);
+    const columns: Array<Array<{ image: BlogImage; originalIndex: number }>> = Array.from(
+      { length: count },
+      () => [],
+    );
+
+    images.forEach((image, index) => {
+      columns[index % count].push({ image, originalIndex: index });
+    });
+
+    return columns;
+  }, [images, galleryColumnCount]);
+
   if (!story) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
@@ -82,64 +96,60 @@ export function WeddingStoryPage() {
 
   return (
     <div className="min-h-screen bg-white">
-     
-{/* HERO */}
-<section className="relative h-[70vh] min-h-[500px] bg-neutral-200">
-  {cover ? (
-    <ImageWithFallback
-      src={cover.fullSrc}
-      alt={`${story.couple} wedding at ${story.venue}`}
-      width={2000}
-      height={1200}
-      fetchPriority="high"
-      decoding="async"
-      className="w-full h-full object-cover brightness-[0.5] contrast-[1.05]"
-    />
-  ) : null}
+      {/* HERO */}
+      <section className="relative h-[70vh] min-h-[500px] bg-neutral-200">
+        {cover ? (
+          <ImageWithFallback
+            src={cover.fullSrc}
+            alt={`${story.couple} wedding at ${story.venue}`}
+            width={2000}
+            height={1200}
+            fetchPriority="high"
+            decoding="async"
+            className="w-full h-full object-cover brightness-[0.5] contrast-[1.05]"
+          />
+        ) : null}
 
-  {/* Matte dark overlay */}
-  <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/30 to-black/80" />
 
-  {/* Soft cinematic gradient */}
-  <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/30 to-black/80" />
+        <div className="absolute inset-0 flex items-end">
+          <div className="max-w-5xl mx-auto px-6 pb-16 w-full text-white text-center">
+            <div className="flex justify-center mb-6">
+              <Link
+                to="/blog"
+                className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                Back to Wedding Stories
+              </Link>
+            </div>
 
-  <div className="absolute inset-0 flex items-end">
-    <div className="max-w-5xl mx-auto px-6 pb-16 w-full text-white text-center">
-      <div className="flex justify-center mb-6">
-        <Link
-          to="/blog"
-          className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Back to Wedding Stories
-        </Link>
-      </div>
+            <p className="uppercase tracking-[0.25em] text-xs text-white/70 mb-4">
+              Wedding Story
+            </p>
 
-      <p className="uppercase tracking-[0.25em] text-xs text-white/70 mb-4">
-        Wedding Story
-      </p>
+            <h1 className="text-3xl md:text-5xl mb-6 leading-tight">{story.title}</h1>
 
-      <h1 className="text-3xl md:text-5xl mb-6 leading-tight">{story.title}</h1>
+            <div className="flex flex-wrap justify-center gap-8 text-white/90 text-lg">
+              <span className="flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                <Link
+                  to={venueUrl}
+                  className="underline underline-offset-4 hover:text-white transition-colors"
+                >
+                  {story.venue}
+                </Link>
+              </span>
 
-      <div className="flex flex-wrap justify-center gap-8 text-white/90 text-lg">
-        <span className="flex items-center gap-2">
-          <MapPin className="w-5 h-5" />
-          <Link
-            to={venueUrl}
-            className="underline underline-offset-4 hover:text-white transition-colors"
-          >
-            {story.venue}
-          </Link>
-        </span>
-
-        <span className="flex items-center gap-2">
-          <Calendar className="w-5 h-5" />
-          {story.weddingDate}
-        </span>
-      </div>
-    </div>
-  </div>
-</section>
+              <span className="flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                {story.weddingDate}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* BREADCRUMBS */}
       <div className="max-w-7xl mx-auto px-6 pt-8 pb-16">
@@ -223,39 +233,37 @@ export function WeddingStoryPage() {
           <div className="bg-neutral-50 rounded-2xl p-10 text-center">
             <h3 className="text-3xl mb-4">No blog images selected yet</h3>
             <p className="text-neutral-700">
-              Add this story slug to the <span className="font-mono">blogSlug</span> column in
-              <span className="font-mono"> public/blog-gallery.csv</span>.
+              Add this story slug to the <span className="font-mono">blogSlug</span> column in{" "}
+              <span className="font-mono">public/blog-gallery.csv</span>.
             </p>
           </div>
         ) : (
           <div
+            className="grid gap-1"
             style={{
-              columnCount: galleryColumnCount,
-              columnGap: "4px",
+              gridTemplateColumns: `repeat(${galleryColumnCount}, minmax(0, 1fr))`,
             }}
           >
-            {images.map((image, index) => (
-              <button
-                key={`${image.thumbSrc}-${index}`}
-                type="button"
-                onClick={() => {
-                  setLightboxIndex(index);
-                  setLightboxOpen(true);
-                }}
-                style={{
-                  breakInside: "avoid",
-                  marginBottom: "4px",
-                  display: "block",
-                  width: "100%",
-                }}
-                className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
-              >
-                <ImageWithFallback
-                  src={image.thumbSrc}
-                  alt={image.alt}
-                  className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
-                />
-              </button>
+            {imageColumns.map((column, columnIndex) => (
+              <div key={`blog-column-${columnIndex}`} className="flex flex-col gap-1">
+                {column.map(({ image, originalIndex }) => (
+                  <button
+                    key={`${image.thumbSrc}-${originalIndex}`}
+                    type="button"
+                    onClick={() => {
+                      setLightboxIndex(originalIndex);
+                      setLightboxOpen(true);
+                    }}
+                    className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
+                  >
+                    <ImageWithFallback
+                      src={image.thumbSrc}
+                      alt={image.alt}
+                      className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
+                    />
+                  </button>
+                ))}
+              </div>
             ))}
           </div>
         )}
