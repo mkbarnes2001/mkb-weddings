@@ -123,7 +123,9 @@ export function Blog() {
   useEffect(() => {
     let cancelled = false;
 
-    fetch("/gallery.csv")
+   fetch("/blog-gallery.csv", {
+  cache: "no-store",
+})
       .then((res) => (res.ok ? res.text() : ""))
       .then((csvText) => {
         if (!cancelled) setBlogCards(buildBlogCards(csvText, weddingStories));
@@ -252,7 +254,7 @@ export function Blog() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-neutral-500">
-                      Add blog images in gallery.csv
+                      Add blog images in blog-gallery.csv
                     </div>
                   )}
                 </div>
