@@ -82,59 +82,64 @@ export function WeddingStoryPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO */}
-      <section className="relative h-[70vh] min-h-[500px] bg-neutral-200">
-        {cover ? (
-          <ImageWithFallback
-            src={cover.fullSrc}
-            alt={`${story.couple} wedding at ${story.venue}`}
-            width={2000}
-            height={1200}
-            fetchPriority="high"
-            decoding="async"
-            className="w-full h-full object-cover brightness-[0.7]"
-          />
-        ) : null}
+     
+{/* HERO */}
+<section className="relative h-[70vh] min-h-[500px] bg-neutral-200">
+  {cover ? (
+    <ImageWithFallback
+      src={cover.fullSrc}
+      alt={`${story.couple} wedding at ${story.venue}`}
+      width={2000}
+      height={1200}
+      fetchPriority="high"
+      decoding="async"
+      className="w-full h-full object-cover brightness-[0.5] contrast-[1.05]"
+    />
+  ) : null}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/20" />
+  {/* Matte dark overlay */}
+  <div className="absolute inset-0 bg-black/60" />
 
-        <div className="absolute inset-0 flex items-end">
-          <div className="max-w-5xl mx-auto px-6 pb-16 w-full text-white text-center">
-            <div className="flex justify-center mb-6">
-              <Link
-                to="/blog"
-                className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                Back to Wedding Stories
-              </Link>
-            </div>
+  {/* Soft cinematic gradient */}
+  <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/30 to-black/80" />
 
-            <p className="uppercase tracking-[0.25em] text-xs text-white/70 mb-4">
-              Wedding Story
-            </p>
+  <div className="absolute inset-0 flex items-end">
+    <div className="max-w-5xl mx-auto px-6 pb-16 w-full text-white text-center">
+      <div className="flex justify-center mb-6">
+        <Link
+          to="/blog"
+          className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Wedding Stories
+        </Link>
+      </div>
 
-            <h1 className="text-3xl md:text-5xl mb-6 leading-tight">{story.title}</h1>
+      <p className="uppercase tracking-[0.25em] text-xs text-white/70 mb-4">
+        Wedding Story
+      </p>
 
-            <div className="flex flex-wrap justify-center gap-8 text-white/90 text-lg">
-              <span className="flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                <Link
-                  to={venueUrl}
-                  className="underline underline-offset-4 hover:text-white transition-colors"
-                >
-                  {story.venue}
-                </Link>
-              </span>
+      <h1 className="text-3xl md:text-5xl mb-6 leading-tight">{story.title}</h1>
 
-              <span className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                {story.weddingDate}
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+      <div className="flex flex-wrap justify-center gap-8 text-white/90 text-lg">
+        <span className="flex items-center gap-2">
+          <MapPin className="w-5 h-5" />
+          <Link
+            to={venueUrl}
+            className="underline underline-offset-4 hover:text-white transition-colors"
+          >
+            {story.venue}
+          </Link>
+        </span>
+
+        <span className="flex items-center gap-2">
+          <Calendar className="w-5 h-5" />
+          {story.weddingDate}
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* BREADCRUMBS */}
       <div className="max-w-7xl mx-auto px-6 pt-8 pb-16">
