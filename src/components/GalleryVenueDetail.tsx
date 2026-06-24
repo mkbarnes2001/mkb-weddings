@@ -5,6 +5,7 @@ import { ArrowLeft, ExternalLink, MapPin, ChevronRight } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
+import { MasonryGallery } from "./MasonryGallery";
 
 type GalleryRow = {
   venue: string;
@@ -272,23 +273,10 @@ export function GalleryVenueDetail() {
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [galleryColumnCount, setGalleryColumnCount] = useState(2);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [venueId]);
-
-  useEffect(() => {
-    const updateColumns = () => {
-      if (window.innerWidth >= 1280) setGalleryColumnCount(4);
-      else if (window.innerWidth >= 768) setGalleryColumnCount(3);
-      else setGalleryColumnCount(2);
-    };
-
-    updateColumns();
-    window.addEventListener("resize", updateColumns);
-    return () => window.removeEventListener("resize", updateColumns);
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -390,18 +378,6 @@ export function GalleryVenueDetail() {
     images[0]?.full ||
     images[0]?.thumb ||
     "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
-
-  const imageColumns = useMemo(() => {
-    const count = Math.max(1, galleryColumnCount);
-    const columns: Array<Array<{ image: (typeof images)[number]; originalIndex: number }>> =
-      Array.from({ length: count }, () => []);
-
-    images.forEach((image, index) => {
-      columns[index % count].push({ image, originalIndex: index });
-    });
-
-    return columns;
-  }, [images, galleryColumnCount]);
 
   const moreVenueLinks = useMemo(() => {
     const uniqueVenueNames = Array.from(new Set(galleryRows.map((r) => r.venue))).filter(Boolean);
@@ -701,34 +677,17 @@ export function GalleryVenueDetail() {
 
       {/* GRID */}
       <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 pb-20">
-        <div
-          className="grid gap-1"
-          style={{
-            gridTemplateColumns: `repeat(${galleryColumnCount}, minmax(0, 1fr))`,
+        <MasonryGallery
+          images={images.map((img) => ({
+            thumbSrc: img.thumb,
+            fullSrc: img.full,
+            alt: img.alt,
+          }))}
+          onImageClick={(index) => {
+            setLightboxIndex(index);
+            setLightboxOpen(true);
           }}
-        >
-          {imageColumns.map((column, columnIndex) => (
-            <div key={`venue-column-${columnIndex}`} className="flex flex-col gap-1">
-              {column.map(({ image: img, originalIndex }) => (
-                <button
-                  key={`${img.thumb}-${originalIndex}`}
-                  type="button"
-                  onClick={() => {
-                    setLightboxIndex(originalIndex);
-                    setLightboxOpen(true);
-                  }}
-                  className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
-                >
-                  <ImageWithFallback
-                    src={img.thumb}
-                    alt={img.alt}
-                    className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
-                  />
-                </button>
-              ))}
-            </div>
-          ))}
-        </div>
+        />
       </div>
 
       {/* Explore more venues */}
