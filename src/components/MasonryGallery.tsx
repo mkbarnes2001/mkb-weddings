@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
@@ -14,6 +15,7 @@ interface MasonryGalleryProps {
 
 export function MasonryGallery({ images, onImageClick }: MasonryGalleryProps) {
   const [columnCount, setColumnCount] = useState(2);
+  const [ratios, setRatios] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const updateColumns = () => {
@@ -24,9 +26,26 @@ export function MasonryGallery({ images, onImageClick }: MasonryGalleryProps) {
 
     updateColumns();
     window.addEventListener("resize", updateColumns);
-
     return () => window.removeEventListener("resize", updateColumns);
   }, []);
+
+  useEffect(() => {
+    images.forEach((image) => {
+      if (ratios[image.thumbSrc]) return;
+
+      const img = new Image();
+      img.src = image.thumbSrc;
+
+      img.onload = () => {
+        if (!img.naturalWidth || !img.naturalHeight) return;
+
+        setRatios((prev) => ({
+          ...prev,
+          [image.thumbSrc]: img.naturalHeight / img.naturalWidth,
+        }));
+      };
+    });
+  }, [images, ratios]);
 
   const columns = useMemo(() => {
     const cols: Array<Array<{ image: MasonryImage; originalIndex: number }>> =
@@ -42,34 +61,11 @@ export function MasonryGallery({ images, onImageClick }: MasonryGalleryProps) {
         originalIndex: index,
       });
 
-      // Estimate height before image load.
-      // Portrait filenames often naturally make taller cards; this keeps columns more balanced.
-      // The real image still displays at natural ratio.
-      const filename = image.thumbSrc.toLowerCase();
-
-      let estimatedHeight = 1;
-
-      if (
-        filename.includes("portrait") ||
-        filename.includes("bride") ||
-        filename.includes("dress")
-      ) {
-        estimatedHeight = 1.35;
-      }
-
-      if (
-        filename.includes("landscape") ||
-        filename.includes("group") ||
-        filename.includes("ceremony")
-      ) {
-        estimatedHeight = 0.75;
-      }
-
-      heights[shortestColumnIndex] += estimatedHeight;
+      heights[shortestColumnIndex] += ratios[image.thumbSrc] || 0.75;
     });
 
     return cols;
-  }, [images, columnCount]);
+  }, [images, columnCount, ratios]);
 
   return (
     <div
