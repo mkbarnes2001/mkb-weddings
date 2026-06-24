@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Calendar, MapPin, ChevronRight } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
+import { MasonryGallery } from "./MasonryGallery";
 import { weddingStories } from "../data/weddingStories";
 import { getBlogImages, getCoverImage } from "../lib/blogGallery";
 import type { BlogImage } from "../lib/blogGallery";
@@ -22,7 +23,6 @@ export function WeddingStoryPage() {
   const [images, setImages] = useState<BlogImage[]>([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [galleryColumnCount, setGalleryColumnCount] = useState(2);
 
   const story = weddingStories.find((item) => item.slug === slug);
   const venueUrl = story ? `/gallery/venue/${slugify(story.venue)}` : "/gallery/venues";
@@ -30,18 +30,6 @@ export function WeddingStoryPage() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [slug]);
-
-  useEffect(() => {
-    const updateColumns = () => {
-      if (window.innerWidth >= 1280) setGalleryColumnCount(4);
-      else if (window.innerWidth >= 768) setGalleryColumnCount(3);
-      else setGalleryColumnCount(2);
-    };
-
-    updateColumns();
-    window.addEventListener("resize", updateColumns);
-    return () => window.removeEventListener("resize", updateColumns);
-  }, []);
 
   useEffect(() => {
     if (!slug || !story) return;
@@ -66,35 +54,6 @@ export function WeddingStoryPage() {
 
   const lightboxImages = useMemo(() => images.map((image) => image.fullSrc), [images]);
   const lightboxAlts = useMemo(() => images.map((image) => image.alt), [images]);
-
-  const orderedImages = useMemo(() => {
-    const count = Math.max(1, galleryColumnCount);
-
-    if (images.length <= count) {
-      return images.map((image, index) => ({
-        image,
-        originalIndex: index,
-      }));
-    }
-
-    const rows = Math.ceil(images.length / count);
-    const reordered: Array<{ image: BlogImage; originalIndex: number }> = [];
-
-    for (let col = 0; col < count; col += 1) {
-      for (let row = 0; row < rows; row += 1) {
-        const index = row * count + col;
-
-        if (index < images.length) {
-          reordered.push({
-            image: images[index],
-            originalIndex: index,
-          });
-        }
-      }
-    }
-
-    return reordered;
-  }, [images, galleryColumnCount]);
 
   if (!story) {
     return (
@@ -175,31 +134,25 @@ export function WeddingStoryPage() {
                 Home
               </Link>
             </li>
-
             <li className="opacity-60">
               <ChevronRight className="w-4 h-4" />
             </li>
-
             <li>
               <Link to="/blog" className="hover:text-neutral-900 underline underline-offset-4">
                 Wedding Stories
               </Link>
             </li>
-
             <li className="opacity-60">
               <ChevronRight className="w-4 h-4" />
             </li>
-
             <li>
               <Link to={venueUrl} className="hover:text-neutral-900 underline underline-offset-4">
                 {story.venue}
               </Link>
             </li>
-
             <li className="opacity-60">
               <ChevronRight className="w-4 h-4" />
             </li>
-
             <li className="text-neutral-900">{story.couple}</li>
           </ol>
         </nav>
@@ -253,39 +206,17 @@ export function WeddingStoryPage() {
             </p>
           </div>
         ) : (
-          
-          <div
-  style={{
-    columnCount: galleryColumnCount,
-    columnGap: "4px",
-  }}
->
-  {images.map((image, index) => (
-    <button
-      key={`${image.thumbSrc}-${index}`}
-      type="button"
-      onClick={() => {
-        setLightboxIndex(index);
-        setLightboxOpen(true);
-      }}
-      style={{
-        breakInside: "avoid",
-        marginBottom: "4px",
-        display: "block",
-        width: "100%",
-      }}
-      className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
-    >
-      <ImageWithFallback
-        src={image.thumbSrc}
-        alt={image.alt}
-        className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
-      />
-    </button>
-  ))}
-</div>
-
-
+          <MasonryGallery
+            images={images.map((image) => ({
+              thumbSrc: image.thumbSrc,
+              fullSrc: image.fullSrc,
+              alt: image.alt,
+            }))}
+            onImageClick={(index) => {
+              setLightboxIndex(index);
+              setLightboxOpen(true);
+            }}
+          />
         )}
       </section>
 
