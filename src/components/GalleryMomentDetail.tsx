@@ -5,6 +5,7 @@ import { ArrowLeft, ChevronRight } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
+import { MasonryGallery } from "./MasonryGallery";
 
 
 type CsvRow = {
@@ -215,23 +216,10 @@ export function GalleryMomentDetail() {
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [galleryColumnCount, setGalleryColumnCount] = useState(2);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [momentId]);
-
-  useEffect(() => {
-    const updateColumns = () => {
-      if (window.innerWidth >= 1280) setGalleryColumnCount(4);
-      else if (window.innerWidth >= 768) setGalleryColumnCount(3);
-      else setGalleryColumnCount(2);
-    };
-
-    updateColumns();
-    window.addEventListener("resize", updateColumns);
-    return () => window.removeEventListener("resize", updateColumns);
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -315,18 +303,6 @@ export function GalleryMomentDetail() {
     return [...pinned, ...shuffled];
   }, [momentRows, momentId, venueCountyMap]);
 
-
-  const imageColumns = useMemo(() => {
-    const count = Math.max(1, galleryColumnCount);
-    const columns: Array<Array<{ image: (typeof images)[number]; originalIndex: number }>> =
-      Array.from({ length: count }, () => []);
-
-    images.forEach((image, index) => {
-      columns[index % count].push({ image, originalIndex: index });
-    });
-
-    return columns;
-  }, [images, galleryColumnCount]);
 
   const venueCount = useMemo(() => {
     const set = new Set<string>();
@@ -487,34 +463,17 @@ export function GalleryMomentDetail() {
         {images.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">No images found for this moment.</div>
         ) : (
-          <div
-            className="grid gap-1"
-            style={{
-              gridTemplateColumns: `repeat(${galleryColumnCount}, minmax(0, 1fr))`,
+          <MasonryGallery
+            images={images.map((image) => ({
+              thumbSrc: image.thumb,
+              fullSrc: image.full,
+              alt: image.alt,
+            }))}
+            onImageClick={(index) => {
+              setLightboxIndex(index);
+              setLightboxOpen(true);
             }}
-          >
-            {imageColumns.map((column, columnIndex) => (
-              <div key={`moment-column-${columnIndex}`} className="flex flex-col gap-1">
-                {column.map(({ image: img, originalIndex }) => (
-                  <button
-                    key={`${img.thumb}-${originalIndex}`}
-                    type="button"
-                    onClick={() => {
-                      setLightboxIndex(originalIndex);
-                      setLightboxOpen(true);
-                    }}
-                    className="overflow-hidden group cursor-pointer text-left bg-neutral-100"
-                  >
-                    <ImageWithFallback
-                      src={img.thumb}
-                      alt={img.alt}
-                      className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
-                    />
-                  </button>
-                ))}
-              </div>
-            ))}
-          </div>
+          />
         )}
 
         {lightboxOpen && images.length > 0 && (
