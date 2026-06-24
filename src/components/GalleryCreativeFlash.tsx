@@ -1,34 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
+import { MasonryGallery } from "./MasonryGallery";
 
-// Figma hero (already in your project)
 import creativeFlashHero from "figma:asset/4e80a09ae14c9e2aaefa75a7ed64281f0bbc855b.png";
 
 type CsvRow = {
   venue: string;
   category: string;
-  filename: string; // _500.webp
+  filename: string;
   tags?: string;
   flashPin?: string;
   flashPinOrder?: string;
 };
 
-// Your R2 public base (same pattern as venues/moments)
 const THUMB_BASE = "https://images.mkbweddings.co.uk/thumb";
 const FULL_BASE = "https://images.mkbweddings.co.uk/full";
-
-/**
- * Optional: adjust hero crop focus.
- * Examples:
- * "50% 35%" (crop a bit higher)
- * "50% 70%" (crop a bit lower)
- * "30% 50%" (crop left)
- * "70% 50%" (crop right)
- */
 const HERO_FOCUS = "50% 50%";
-
-// ----------------------- helpers --------------------------------------------
 
 function normalize(s: string) {
   return (s || "").trim().toLowerCase();
@@ -59,7 +47,6 @@ function cleanCsvValue(value: string) {
   return trimmed.replace(/^"+|"+$/g, "").replace(/""+/g, '"').replace(/"/g, "").trim();
 }
 
-// tiny CSV parser (handles quotes)
 function parseGalleryCsv(csvText: string): CsvRow[] {
   const lines = csvText.split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return [];
@@ -105,63 +92,60 @@ function parseGalleryCsv(csvText: string): CsvRow[] {
   const flashPinOrderIdx = header.indexOf("flashpinorder");
 
   if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) {
-    console.error("CSV header must include: venue,category,filename (optional: tags,flashPin,flashPinOrder)");
+    console.error(
+      "CSV header must include: venue,category,filename optional: tags,flashPin,flashPinOrder",
+    );
     return [];
   }
 
-  const rows: CsvRow[] = [];
+  return lines
+    .slice(1)
+    .map((line) => {
+      const cols = parseLine(line);
 
-  for (let i = 1; i < lines.length; i++) {
-    const cols = parseLine(lines[i]);
-    const venue = cleanCsvValue(cols[venueIdx] || "");
-    const category = cleanCsvValue(cols[categoryIdx] || "");
-    const filename = cleanCsvValue(cols[filenameIdx] || "");
-    const tags = tagsIdx >= 0 ? cleanCsvValue(cols[tagsIdx] || "") : "";
-    const flashPin = flashPinIdx >= 0 ? cleanCsvValue(cols[flashPinIdx] || "") : "";
-    const flashPinOrder =
-      flashPinOrderIdx >= 0 ? cleanCsvValue(cols[flashPinOrderIdx] || "") : "";
-
-    if (!venue || !category || !filename) continue;
-
-    rows.push({
-      venue,
-      category,
-      filename,
-      tags,
-      flashPin,
-      flashPinOrder,
-    });
-  }
-
-  return rows;
+      return {
+        venue: cleanCsvValue(cols[venueIdx] || ""),
+        category: cleanCsvValue(cols[categoryIdx] || ""),
+        filename: cleanCsvValue(cols[filenameIdx] || ""),
+        tags: tagsIdx >= 0 ? cleanCsvValue(cols[tagsIdx] || "") : "",
+        flashPin: flashPinIdx >= 0 ? cleanCsvValue(cols[flashPinIdx] || "") : "",
+        flashPinOrder:
+          flashPinOrderIdx >= 0 ? cleanCsvValue(cols[flashPinOrderIdx] || "") : "",
+      };
+    })
+    .filter((row) => row.venue && row.category && row.filename);
 }
 
 function hasTag(tags: string | undefined, target: string) {
   if (!tags) return false;
-  const parts = tags
+
+  return tags
     .split(/[,|]/g)
-    .map((t) => normalize(t))
-    .filter(Boolean);
-  return parts.includes(normalize(target));
+    .map((tag) => normalize(tag))
+    .filter(Boolean)
+    .includes(normalize(target));
 }
 
-// Stable “random” order (no new libs)
 function hashStringToInt(str: string) {
   let h = 2166136261;
+
   for (let i = 0; i < str.length; i++) {
     h ^= str.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
+
   return h >>> 0;
 }
 
 function stableShuffle<T>(arr: T[], seed: string, keyFn: (t: T) => string) {
   const copy = [...arr];
+
   copy.sort((a, b) => {
     const ha = hashStringToInt(seed + "|" + keyFn(a));
     const hb = hashStringToInt(seed + "|" + keyFn(b));
     return ha - hb;
   });
+
   return copy;
 }
 
@@ -174,27 +158,12 @@ function getPinOrder(value?: string) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 9999;
 }
 
-// ----------------------- component ------------------------------------------
-
 export function GalleryCreativeFlash() {
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [galleryColumnCount, setGalleryColumnCount] = useState(2);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-
-  useEffect(() => {
-    const updateColumns = () => {
-      if (window.innerWidth >= 1280) setGalleryColumnCount(4);
-      else if (window.innerWidth >= 768) setGalleryColumnCount(3);
-      else setGalleryColumnCount(2);
-    };
-
-    updateColumns();
-    window.addEventListener("resize", updateColumns);
-    return () => window.removeEventListener("resize", updateColumns);
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -202,10 +171,13 @@ export function GalleryCreativeFlash() {
     (async () => {
       try {
         setLoadError(null);
+
         const res = await fetch("/gallery.csv", { cache: "no-store" });
         if (!res.ok) throw new Error(`Failed to load /gallery.csv (${res.status})`);
+
         const text = await res.text();
         const parsed = parseGalleryCsv(text);
+
         if (!cancelled) setRows(parsed);
       } catch (e: any) {
         if (!cancelled) setLoadError(e?.message || "Failed to load gallery.csv");
@@ -218,57 +190,38 @@ export function GalleryCreativeFlash() {
   }, []);
 
   const flashRows = useMemo(() => {
-    // primary: tags column
-    const tagged = rows.filter((r) => hasTag(r.tags, "creative-flash"));
+    const tagged = rows.filter((row) => hasTag(row.tags, "creative-flash"));
     if (tagged.length > 0) return tagged;
 
-    // fallback: category literal match if you ever use it
-    return rows.filter((r) => normalize(r.category) === "creative flash");
+    return rows.filter((row) => normalize(row.category) === "creative flash");
   }, [rows]);
 
   const images = useMemo(() => {
-    const mapped = flashRows.map((r) => ({
-      thumb: thumbUrl(r),
-      full: fullUrl(r),
-      venue: r.venue,
-      filename: r.filename,
-      flashPin: r.flashPin,
-      flashPinOrder: r.flashPinOrder,
-      alt: `Creative Flash – ${r.venue}`,
+    const mapped = flashRows.map((row) => ({
+      thumb: thumbUrl(row),
+      full: fullUrl(row),
+      venue: row.venue,
+      filename: row.filename,
+      flashPin: row.flashPin,
+      flashPinOrder: row.flashPinOrder,
+      alt: `Creative Flash – ${row.venue}`,
     }));
 
-   const pinned = mapped
-  .filter((m) => isPinned(m.flashPin))
-  .sort((a, b) => {
-    const orderDiff =
-      getPinOrder(a.flashPinOrder) -
-      getPinOrder(b.flashPinOrder);
+    const pinned = mapped
+      .filter((image) => isPinned(image.flashPin))
+      .sort((a, b) => {
+        const orderDiff = getPinOrder(a.flashPinOrder) - getPinOrder(b.flashPinOrder);
 
-    if (orderDiff !== 0) {
-      return orderDiff;
-    }
+        if (orderDiff !== 0) return orderDiff;
 
-    return a.filename.localeCompare(b.filename);
-  });
+        return a.filename.localeCompare(b.filename);
+      });
 
-    const rest = mapped.filter((m) => !isPinned(m.flashPin));
-    const shuffled = stableShuffle(rest, "creative-flash-v2", (m) => m.filename);
+    const rest = mapped.filter((image) => !isPinned(image.flashPin));
+    const shuffled = stableShuffle(rest, "creative-flash-v2", (image) => image.filename);
 
     return [...pinned, ...shuffled];
   }, [flashRows]);
-
-  const imageColumns = useMemo(() => {
-    const count = Math.max(1, galleryColumnCount);
-    const columns: Array<Array<{ image: (typeof images)[number]; originalIndex: number }>> =
-      Array.from({ length: count }, () => []);
-
-    images.forEach((image, index) => {
-      columns[index % count].push({ image, originalIndex: index });
-    });
-
-    return columns;
-  }, [images, galleryColumnCount]);
-
 
   if (loadError) {
     return (
@@ -281,21 +234,19 @@ export function GalleryCreativeFlash() {
     );
   }
 
-  const heroImage = creativeFlashHero;
-
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO — match Moment/Venue hero sizing + crop */}
+      {/* HERO */}
       <div className="relative h-[60vh] min-h-[400px]">
         <ImageWithFallback
-          src={heroImage}
+          src={creativeFlashHero}
           alt="Creative Flash Photography"
           className="w-full h-full object-cover"
           style={{ objectPosition: HERO_FOCUS }}
         />
+
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-        {/* Bottom-aligned text block */}
         <div className="absolute inset-0 flex items-end">
           <div className="max-w-7xl mx-auto px-6 pb-16 w-full text-center">
             <h1 className="text-white text-5xl md:text-6xl mb-4">Creative Flash</h1>
@@ -335,44 +286,26 @@ export function GalleryCreativeFlash() {
         {images.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">No Creative Flash images found.</div>
         ) : (
-          <div
-            className="grid gap-1 pb-16"
-            style={{
-              gridTemplateColumns: `repeat(${galleryColumnCount}, minmax(0, 1fr))`,
-            }}
-          >
-            {imageColumns.map((column, columnIndex) => (
-              <div key={`flash-column-${columnIndex}`} className="flex flex-col gap-1">
-                {column.map(({ image: img, originalIndex }) => (
-                  <button
-                    key={`${img.thumb}-${originalIndex}`}
-                    type="button"
-                    onClick={() => {
-                      setLightboxIndex(originalIndex);
-                      setLightboxOpen(true);
-                    }}
-                    className="group relative overflow-hidden text-left bg-neutral-100"
-                  >
-                    <ImageWithFallback
-                      src={img.thumb}
-                      alt={img.alt}
-                      className="block w-full h-auto transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
-                      <div className="text-white/95 text-sm tracking-wide">{img.venue}</div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            ))}
+          <div className="pb-16">
+            <MasonryGallery
+              images={images.map((image) => ({
+                thumbSrc: image.thumb,
+                fullSrc: image.full,
+                alt: image.alt,
+              }))}
+              onImageClick={(index) => {
+                setLightboxIndex(index);
+                setLightboxOpen(true);
+              }}
+            />
           </div>
         )}
 
         {/* LIGHTBOX */}
         {lightboxOpen && images.length > 0 && (
           <ImageLightbox
-            images={images.map((i) => i.full)}
-            alts={images.map((i) => i.alt)}
+            images={images.map((image) => image.full)}
+            alts={images.map((image) => image.alt)}
             currentIndex={lightboxIndex}
             onClose={() => setLightboxOpen(false)}
             onNavigate={(newIndex) => setLightboxIndex(newIndex)}
