@@ -29,13 +29,43 @@ export function MasonryGallery({ images, onImageClick }: MasonryGalleryProps) {
   }, []);
 
   const columns = useMemo(() => {
-    const cols: Array<Array<{ image: MasonryImage; originalIndex: number }>> = Array.from(
-      { length: columnCount },
-      () => [],
-    );
+    const cols: Array<Array<{ image: MasonryImage; originalIndex: number }>> =
+      Array.from({ length: columnCount }, () => []);
+
+    const heights = Array.from({ length: columnCount }, () => 0);
 
     images.forEach((image, index) => {
-      cols[index % columnCount].push({ image, originalIndex: index });
+      const shortestColumnIndex = heights.indexOf(Math.min(...heights));
+
+      cols[shortestColumnIndex].push({
+        image,
+        originalIndex: index,
+      });
+
+      // Estimate height before image load.
+      // Portrait filenames often naturally make taller cards; this keeps columns more balanced.
+      // The real image still displays at natural ratio.
+      const filename = image.thumbSrc.toLowerCase();
+
+      let estimatedHeight = 1;
+
+      if (
+        filename.includes("portrait") ||
+        filename.includes("bride") ||
+        filename.includes("dress")
+      ) {
+        estimatedHeight = 1.35;
+      }
+
+      if (
+        filename.includes("landscape") ||
+        filename.includes("group") ||
+        filename.includes("ceremony")
+      ) {
+        estimatedHeight = 0.75;
+      }
+
+      heights[shortestColumnIndex] += estimatedHeight;
     });
 
     return cols;
