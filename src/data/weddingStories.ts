@@ -70,4 +70,39 @@ export const weddingStories: WeddingStory[] = [
     seoDescription:
       "View Declan and Charlotte's magical autumn wedding at Killeavy Castle, Newry. Natural, documentary wedding photography capturing heartfelt family moments and unforgettable celebrations.",
   },
+
+
+{
+  slug: "ulster-museum-glenn-and-rachel",
+
+  title: "A magical winter wedding at the Ulster Museum, Belfast",
+
+  couple: "Glenn & Rachel",
+
+  venue: "Ulster Museum",
+
+  weddingDate: "December 2025",
+
+  excerpt:
+    "Glenn and Rachel celebrated a truly memorable winter wedding at Belfast's iconic Ulster Museum. From bridal preparations at the AC Hotel Belfast to portraits around Queen's University and an unforgettable evening reception beneath the museum's spectacular architecture, their day was filled with warmth, laughter and festive atmosphere.",
+
+  intro:
+    "Winter weddings have a unique kind of magic, and Glenn and Rachel's celebration at the Ulster Museum captured it perfectly. Surrounded by family and friends who had travelled from across Ireland and beyond, they created a relaxed, joyful day that reflected both their personalities and the city where their story began.",
+
+  story: [
+    "The day began at the AC Hotel Belfast, where Rachel and her bridal party enjoyed a relaxed morning getting ready before making the short journey across the city to the Ulster Museum. Their heartfelt ceremony, led by humanist celebrant Stuart Holden, was full of laughter, emotion and personal touches, with loved ones gathering from near and far to witness the start of their next chapter together.",
+
+    "After the ceremony we walked to the beautiful grounds of Queen's University Belfast, the place where Glenn and Rachel first met. It provided the perfect setting for relaxed portraits, with the impressive architecture adding a timeless backdrop to their photographs. Along the way we were even greeted by a friendly West Highland Terrier — a lovely unexpected moment for two devoted Westie lovers that quickly became one of the day's favourite memories.",
+
+    "The celebrations continued at Molly's Yard, where guests enjoyed fantastic food, heartfelt speeches and a wonderfully relaxed atmosphere. Before returning to the Ulster Museum we slipped away for a few dramatic evening portraits around Belfast, making the most of the festive city lights. The day finished in unforgettable style as the museum's magnificent entrance hall became the dance floor, creating an incredible setting for an evening of celebration that perfectly rounded off a magical winter wedding."
+  ],
+
+  seoTitle:
+    "Ulster Museum Wedding Photography | Belfast Wedding Photographer | Glenn & Rachel | MKB Weddings",
+
+  seoDescription:
+    "Explore Glenn and Rachel's beautiful winter wedding at the Ulster Museum in Belfast. Natural documentary wedding photography featuring Queen's University, Molly's Yard and a stunning evening celebration in one of Belfast's most unique wedding venues.",
+},
+
+
 ];
