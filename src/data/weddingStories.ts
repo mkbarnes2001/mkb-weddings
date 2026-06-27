@@ -75,7 +75,7 @@ export const weddingStories: WeddingStory[] = [
 {
   slug: "ulster-museum-glenn-and-rachel",
 
-  title: "A magical winter wedding at the Ulster Museum, Belfast",
+  title: "A winter wedding at the iconic Ulster Museum, Belfast",
 
   couple: "Glenn & Rachel",
 
@@ -102,6 +102,39 @@ export const weddingStories: WeddingStory[] = [
 
   seoDescription:
     "Explore Glenn and Rachel's beautiful winter wedding at the Ulster Museum in Belfast. Natural documentary wedding photography featuring Queen's University, Molly's Yard and a stunning evening celebration in one of Belfast's most unique wedding venues.",
+},
+
+
+{
+  slug: "slieve-donard-hotel-patrick-and-sarah",
+
+  title: "From torrential rain to sunshine at the Slieve Donard Hotel, Newcastle",
+
+  couple: "Patrick & Sarah",
+
+  venue: "Slieve Donard Hotel",
+
+  weddingDate: "Summer 2025",
+
+  excerpt:
+    "Patrick and Sarah brought together family and friends from Northern Ireland and the United States for a beautiful wedding at the iconic Slieve Donard Hotel. Despite relentless rain for much of the day, the weather delivered an unforgettable finale with sunshine, a spectacular rainbow and an incredible evening celebration.",
+
+  intro:
+    "Set beneath the breathtaking Mourne Mountains, the Slieve Donard Hotel provided the perfect setting for Patrick and Sarah's wedding day. Sarah, originally from Northern Ireland, now lives in the United States with Patrick, who is from Boston, making this wedding a wonderful celebration that reunited loved ones from both sides of the Atlantic. It was a day full of emotion, laughter, unexpected moments and a reminder that even the wettest wedding day can produce the most memorable photographs.",
+
+  story: [
+    "The day began with both bridal preparations and the groom's preparations taking place at the beautiful Slieve Donard Hotel. There was a brilliant atmosphere throughout the morning as excitement built ahead of the ceremony. Guests were also treated to a surprise celebrity sighting when Hollywood legend Bill Murray was spotted enjoying breakfast in the hotel, creating plenty of conversation before the celebrations had even begun. Outside, however, the weather was less cooperative, with heavy rain falling relentlessly across Newcastle.",
+
+    "Fortunately, the church was only a couple of minutes from the hotel, but the rain continued throughout the ceremony, leaving no opportunity for photographs outside afterwards. Everyone made a quick dash back to the warmth and comfort of the Slieve Donard Hotel, accepting that the day might remain a wet one. Then, almost as if on cue, the clouds began to clear. The rain stopped completely, sunshine broke through and we were able to head outside to capture beautiful portraits around the hotel and its stunning grounds with the Mourne Mountains providing a spectacular backdrop.",
+
+    "As the celebrations continued into the evening, nature delivered one final gift. During dinner, a vibrant rainbow appeared across the coastline, creating one of those unforgettable moments that simply can't be planned. We quickly slipped outside to capture some truly unique photographs before returning to an incredible evening reception packed with energy, laughter and dancing. Patrick and Sarah's wedding was proof that unpredictable weather can often create the most memorable stories, and the Slieve Donard Hotel once again demonstrated why it remains one of Northern Ireland's most iconic wedding venues."
+  ],
+
+  seoTitle:
+    "Slieve Donard Hotel Wedding Photography | Newcastle Wedding Photographer | Patrick & Sarah | MKB Weddings",
+
+  seoDescription:
+    "Explore Patrick and Sarah's beautiful wedding at the Slieve Donard Hotel in Newcastle, County Down. Natural documentary wedding photography featuring the Mourne Mountains, dramatic weather, a stunning rainbow and an unforgettable celebration with family from Northern Ireland and the USA.",
 },
 
 
