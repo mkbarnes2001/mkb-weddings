@@ -7,6 +7,13 @@ export const BLOG_IMAGE_BASE_URL = "https://images.mkbweddings.co.uk/blog";
 // Example: "https://pub-xxxxxxxx.r2.dev"
 // Do not include a trailing slash.
 
+export interface WeddingSupplier {
+  role: string;
+  name: string;
+  instagram?: string;
+  website?: string;
+}
+
 export interface WeddingStory {
   slug: string;
   title: string;
@@ -18,6 +25,7 @@ export interface WeddingStory {
   story: string[];
   seoTitle?: string;
   seoDescription?: string;
+  suppliers?: WeddingSupplier[];
 }
 
 
@@ -135,6 +143,55 @@ export const weddingStories: WeddingStory[] = [
 
   seoDescription:
     "Explore Patrick and Sarah's beautiful wedding at the Slieve Donard Hotel in Newcastle, County Down. Natural documentary wedding photography featuring the Mourne Mountains, dramatic weather, a stunning rainbow and an unforgettable celebration with family from Northern Ireland and the USA.",
+},
+
+
+{
+  slug: "millbrook-lodge-ballynahinch-dave-and-siobhan",
+
+  title: "A sunny spring wedding at Millbrook Lodge, Ballynahinch",
+
+  couple: "Dave & Siobhan",
+
+  venue: "Millbrook Lodge",
+
+  weddingDate: "April 2025",
+
+  excerpt:
+    "Dave and Siobhan enjoyed the perfect spring wedding at Millbrook Lodge in Ballynahinch, with glorious sunshine, a beautiful outdoor humanist ceremony, ice cream for guests and an unforgettable evening of music, laughter and celebration.",
+
+  intro:
+    "Some wedding days seem to have everything, and Dave and Siobhan's celebration at Millbrook Lodge was certainly one of them. Blessed with beautiful spring sunshine from start to finish, their day was packed with fun, laughter and thoughtful personal touches that reflected their personalities perfectly. From an outdoor ceremony in the gardens to sunset portraits and an incredible evening party, it was a wedding to remember.",
+
+  story: [
+    "The morning began with Siobhan and her bridesmaids getting ready at Millbrook Lodge, where there was plenty of laughter and excitement throughout the preparations. Outside, the spring sunshine was already making an appearance as Dave and his groomsmen arrived in style in a beautifully polished Porsche. Before the celebrations really began, the boys enjoyed a quick Guinness together while final preparations continued with the bridal party.",
+
+    "With the weather on our side, Millbrook Lodge's beautiful enclosed garden provided the perfect setting for an outdoor ceremony. Humanist celebrant Briege Flood led a wonderfully personal and relaxed ceremony, with the love between Dave and Siobhan evident for everyone to see. One of the lighter moments came during the traditional handfasting, when the first attempt at tying the knot didn't quite go to plan, bringing plenty of laughter from the couple and their guests. After the ceremony everyone was treated to delicious ice cream from Moon Gelato in Moira, one of Dave and Siobhan's favourite places and a brilliant surprise that proved a huge hit on such a warm spring afternoon.",
+
+    "The sunshine stayed with us all day, allowing plenty of time to explore the beautiful grounds of Millbrook Lodge for relaxed portraits before creating some atmospheric low-light images later in the evening. Guests were brilliantly entertained by Alex the Great Hypnotist, whose hilarious performance had members of the bridal party doing all sorts of unexpected and unforgettable things. As night fell, DJ Greener kept the dance floor packed from start to finish, bringing the perfect ending to a wedding day filled with sunshine, laughter, family and memories that Dave and Siobhan will treasure for years to come."
+  ],
+suppliers: [
+  { role: "Photography", name: "MKB Weddings", instagram: "mkbweddings", website: "https://www.mkbweddings.co.uk" },
+  { role: "Venue", name: "Millbrook Lodge", instagram: "millbrooklodge" },
+  { role: "Hair", name: "Mandy's Upstyles", instagram: "mandys_upstyles_" },
+  { role: "Make-up", name: "Artistic Makeup by Leah", instagram: "artisticmakeupbyleah" },
+  { role: "Flowers", name: "Petals & Blooms Weddings", instagram: "petals_and_blooms_weddings" },
+  { role: "Celebrant", name: "Briege Flood", instagram: "celebrantbriegeflood" },
+  { role: "Dress", name: "Wed2B", instagram: "wed2b" },
+  { role: "Seamstress", name: "Kelly Black Design", instagram: "kellyblackdesign" },
+  { role: "Videographer", name: "Purple Box Studios", instagram: "purpleboxstudios" },
+  { role: "Content Creator", name: "Content by Shan", instagram: "content_by_shan" },
+  { role: "Entertainment", name: "Alex the Great Hypnotist", instagram: "alexthegreathypno" },
+  { role: "DJ", name: "DJ Greener", instagram: "dj_greener" },
+  { role: "Ice Cream", name: "Moon Gelato", instagram: "moongelato" },
+  { role: "Suits", name: "House of Cavani", instagram: "houseofcavani" },
+  { role: "Menswear", name: "Collar & Tie Lisburn", instagram: "collarandtielisburn" },
+],
+  seoTitle:
+    "Millbrook Lodge Wedding Photography | Ballynahinch Wedding Photographer | Dave & Siobhan | MKB Weddings",
+
+  seoDescription:
+    "View Dave and Siobhan's beautiful spring wedding at Millbrook Lodge, Ballynahinch. Natural documentary wedding photography featuring an outdoor humanist ceremony, Moon Gelato, stunning sunset portraits and an unforgettable evening celebration in County Down.",
 },
 
 

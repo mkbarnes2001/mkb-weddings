@@ -220,6 +220,66 @@ export function WeddingStoryPage() {
         )}
       </section>
 
+
+      {story.suppliers && story.suppliers.length > 0 && (
+  <section className="max-w-6xl mx-auto px-6 py-20">
+    <div className="border-t border-neutral-200 pt-14">
+      <div className="text-center mb-12">
+        <p className="uppercase tracking-[0.25em] text-xs text-neutral-500 mb-3">
+          Wedding Suppliers
+        </p>
+
+        <h2 className="text-3xl md:text-4xl font-serif mb-4">
+          Meet the Team Behind the Day
+        </h2>
+
+        <p className="text-neutral-600 max-w-2xl mx-auto">
+          Every wedding is brought to life by a brilliant team of suppliers. These are the people who helped make {story.couple}'s day so special.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {story.suppliers.map((supplier) => (
+          <div
+            key={`${supplier.role}-${supplier.name}`}
+            className="rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-shadow duration-300"
+          >
+            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">
+              {supplier.role}
+            </p>
+
+            <h3 className="font-serif text-xl mb-4">{supplier.name}</h3>
+
+            <div className="flex flex-wrap gap-4 text-sm">
+              {supplier.website && (
+                <a
+                  href={supplier.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-4 hover:text-black"
+                >
+                  Website
+                </a>
+              )}
+
+              {supplier.instagram && (
+                <a
+                  href={`https://instagram.com/${supplier.instagram}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-4 hover:text-black"
+                >
+                  @{supplier.instagram}
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+  
       {/* CTA */}
       <section className="bg-neutral-50 py-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
