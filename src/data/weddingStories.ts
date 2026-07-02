@@ -118,6 +118,23 @@ suppliers: [
       "Following an emotional ceremony, guests enjoyed drinks outdoors while making the most of the exceptional weather...",
       "For couples planning a wedding at Orange Tree House, it is easy to see why this venue is so highly regarded.",
     ],
+
+      facts: {
+    season: "Spring",
+    ceremonyType: "Religious Ceremony",
+    ceremonyLocation: "Orange Tree House",
+    receptionLocation: "Orange Tree House",
+    celebrant: "Briege Flood",
+    photographer: "MKB Weddings",
+  },
+
+suppliers: [
+  { role: "Photography", name: "MKB Weddings", instagram: "mkbweddings", website: "https://www.mkbweddings.co.uk" },
+  { role: "Venue", name: "Orange Tree House", instagram: "orangetreeweddings" },
+  { role: "Flowers", name: "Chelseas creations", instagram: "chelseascreationsni" },
+  { role: "Decor", name: "Chelseas creations", instagram: "chelseascreationsni" },
+
+],
     seoTitle:
       "Orange Tree House Wedding Photography | Greyabbey Wedding Photographer | MKB Weddings",
     seoDescription:
@@ -145,6 +162,24 @@ suppliers: [
       "Killeavy Castle is one of Northern Ireland's most beautiful wedding venues, offering elegant interiors, stunning grounds and views across the surrounding countryside. Combined with a couple as lovely as Declan and Charlotte and a family I was delighted to photograph once again, it created a wedding day full of genuine moments and beautiful memories.",
     ],
 
+    facts: {
+    season: "Autumn",
+    ceremonyType: "Church Ceremony",
+    ceremonyLocation: "Castlewellan",
+    receptionLocation: "Killeavy Castle",
+    photographer: "MKB Weddings",
+    },
+
+    suppliers: [
+  { role: "Photography", name: "MKB Weddings", instagram: "mkbweddings", website: "https://www.mkbweddings.co.uk" },
+  { role: "Venue", name: "Killeavy Castle", instagram: "killeavycastle" },
+  { role: "Hair", name: "Blondie Hair Salon", instagram: "blondieshairsalon87" },
+  { role: "Dress", name: "Fairy Tale Design", instagram: "fairytaledesigncouture" },
+  { role: "Make-up", name: "The look Beauty Salon", instagram: "thelookbeautysalon" },
+  { role: "Videographer", name: "Chapter ii", instagram: "chapterii.ni" },
+  { role: "Flowers", name: "Charlottes Web Floral Studio", instagram: "charlotteswebfloralstudio" },
+
+  ],
     seoTitle:
       "Killeavy Castle Wedding Photography | Declan & Charlotte | MKB Weddings",
 
@@ -171,12 +206,31 @@ suppliers: [
     "Winter weddings have a unique kind of magic, and Glenn and Rachel's celebration at the Ulster Museum captured it perfectly. Surrounded by family and friends who had travelled from across Ireland and beyond, they created a relaxed, joyful day that reflected both their personalities and the city where their story began.",
 
   story: [
-    "The day began at the AC Hotel Belfast, where Rachel and her bridal party enjoyed a relaxed morning getting ready before making the short journey across the city to the Ulster Museum. Their heartfelt ceremony, led by humanist celebrant Stuart Holden, was full of laughter, emotion and personal touches, with loved ones gathering from near and far to witness the start of their next chapter together.",
+    "The day began at the AC Hotel Belfast, where Rachel and her bridal party enjoyed a relaxed morning getting ready before making the short journey across the city to the Ulster Museum. Their heartfelt ceremony, led by humanist celebrant Stewart Holden, was full of laughter, emotion and personal touches, with loved ones gathering from near and far to witness the start of their next chapter together.",
 
     "After the ceremony we walked to the beautiful grounds of Queen's University Belfast, the place where Glenn and Rachel first met. It provided the perfect setting for relaxed portraits, with the impressive architecture adding a timeless backdrop to their photographs. Along the way we were even greeted by a friendly West Highland Terrier — a lovely unexpected moment for two devoted Westie lovers that quickly became one of the day's favourite memories.",
 
     "The celebrations continued at Molly's Yard, where guests enjoyed fantastic food, heartfelt speeches and a wonderfully relaxed atmosphere. Before returning to the Ulster Museum we slipped away for a few dramatic evening portraits around Belfast, making the most of the festive city lights. The day finished in unforgettable style as the museum's magnificent entrance hall became the dance floor, creating an incredible setting for an evening of celebration that perfectly rounded off a magical winter wedding."
   ],
+
+    facts: {
+    season: "Winter",
+    ceremonyType: "Humanist Ceremony",
+    ceremonyLocation: "Ulster Museum",
+    receptionLocation: "Ulster Museum",
+    celebrant: "Stewart Holden",
+    photographer: "MKB Weddings",
+    },
+
+    suppliers: [
+  { role: "Photography", name: "MKB Weddings", instagram: "mkbweddings", website: "https://www.mkbweddings.co.uk" },
+  { role: "Venue", name: "Ulster Museum", instagram: "ulstermuseum_events" },
+  { role: "Hair", name: "Mags Mallon Hair", instagram: "magsmallonhairstyling" },
+  { role: "Make-up", name: "Stephanie Hair and Makeup", instagram: "stephaniehairandmakeup" },
+  { role: "Celebrant", name: "Stewart Holden", instagram: "stewartholdenhumanistcelebrant" },
+  { role: "Content Creator", name: "Grianghraif Megan", instagram: "grianghraif.megan" },
+  { role: "DJ", name: "DJ Greener", instagram: "dj_greener" },
+    ],
 
   seoTitle:
     "Ulster Museum Wedding Photography | Belfast Wedding Photographer | Glenn & Rachel | MKB Weddings",
@@ -210,6 +264,22 @@ suppliers: [
 
     "As the celebrations continued into the evening, nature delivered one final gift. During dinner, a vibrant rainbow appeared across the coastline, creating one of those unforgettable moments that simply can't be planned. We quickly slipped outside to capture some truly unique photographs before returning to an incredible evening reception packed with energy, laughter and dancing. Patrick and Sarah's wedding was proof that unpredictable weather can often create the most memorable stories, and the Slieve Donard Hotel once again demonstrated why it remains one of Northern Ireland's most iconic wedding venues."
   ],
+
+  facts: {
+    season: "Summer",
+    ceremonyType: "Church Ceremony",
+    ceremonyLocation: "Newcastle",
+    receptionLocation: "Slieve Donard Hotel",
+    photographer: "MKB Weddings",
+  },
+
+  suppliers: [
+  { role: "Photography", name: "MKB Weddings", instagram: "mkbweddings", website: "https://www.mkbweddings.co.uk" },
+  { role: "Venue", name: "Slieve Donard", instagram: "marineandlawn" },
+  { role: "Make-up", name: "Make up by Kerri", instagram: "bykerribridalmakeup" },
+  { role: "Videographer", name: "Keepsake Videography", instagram: "keepsake_videography " },
+
+],
 
   seoTitle:
     "Slieve Donard Hotel Wedding Photography | Newcastle Wedding Photographer | Patrick & Sarah | MKB Weddings",
