@@ -158,6 +158,68 @@ export function WeddingStoryPage() {
         </nav>
       </div>
 
+{story.facts && (
+  <section className="max-w-6xl mx-auto px-6 pb-16">
+    <div className="border-y border-neutral-200 py-10">
+      <div className="text-center mb-10">
+        <p className="uppercase tracking-[0.25em] text-xs text-neutral-500 mb-3">
+          Wedding at a Glance
+        </p>
+        <h2 className="text-2xl md:text-3xl font-serif">
+          {story.couple} at {story.venue}
+        </h2>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
+        {story.facts.season && (
+          <div>
+            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Season</p>
+            <p className="text-lg font-serif">{story.facts.season}</p>
+          </div>
+        )}
+
+        {story.facts.ceremonyType && (
+          <div>
+            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Ceremony</p>
+            <p className="text-lg font-serif">{story.facts.ceremonyType}</p>
+          </div>
+        )}
+
+        {story.facts.ceremonyLocation && (
+          <div>
+            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">
+              Ceremony Location
+            </p>
+            <p className="text-lg font-serif">{story.facts.ceremonyLocation}</p>
+          </div>
+        )}
+
+        {story.facts.receptionLocation && (
+          <div>
+            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Reception</p>
+            <p className="text-lg font-serif">{story.facts.receptionLocation}</p>
+          </div>
+        )}
+
+        {story.facts.celebrant && (
+          <div>
+            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Celebrant</p>
+            <p className="text-lg font-serif">{story.facts.celebrant}</p>
+          </div>
+        )}
+
+        {story.facts.photographer && (
+          <div>
+            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Photography</p>
+            <p className="text-lg font-serif">{story.facts.photographer}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+)}
+
+
       {/* STORY TEXT */}
       <main className="max-w-4xl mx-auto px-6 pt-4 pb-16 text-center">
         <p className="text-xl md:text-2xl leading-relaxed text-neutral-800 mb-10 font-serif">

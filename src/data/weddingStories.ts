@@ -14,20 +14,32 @@ export interface WeddingSupplier {
   website?: string;
 }
 
+export interface WeddingFacts {
+  season?: string;
+  ceremonyType?: string;
+  ceremonyLocation?: string;
+  receptionLocation?: string;
+  celebrant?: string;
+  photographer?: string;
+}
+
 export interface WeddingStory {
   slug: string;
   title: string;
   couple: string;
   venue: string;
   weddingDate: string;
+
   excerpt: string;
   intro: string;
   story: string[];
+
   seoTitle?: string;
   seoDescription?: string;
+
+  facts?: WeddingFacts;
   suppliers?: WeddingSupplier[];
 }
-
 
 export const weddingStories: WeddingStory[] = [
 
@@ -55,6 +67,16 @@ export const weddingStories: WeddingStory[] = [
 
     "The sunshine stayed with us all day, allowing plenty of time to explore the beautiful grounds of Millbrook Lodge for relaxed portraits before creating some atmospheric low-light images later in the evening. Guests were brilliantly entertained by Alex the Great Hypnotist, whose hilarious performance had members of the bridal party doing all sorts of unexpected and unforgettable things. As night fell, DJ Greener kept the dance floor packed from start to finish, bringing the perfect ending to a wedding day filled with sunshine, laughter, family and memories that Dave and Siobhan will treasure for years to come."
   ],
+
+   facts: {
+    season: "Spring",
+    ceremonyType: "Outdoor Humanist Ceremony",
+    ceremonyLocation: "Millbrook Lodge Gardens",
+    receptionLocation: "Millbrook Lodge",
+    celebrant: "Briege Flood",
+    photographer: "MKB Weddings",
+  },
+
 suppliers: [
   { role: "Photography", name: "MKB Weddings", instagram: "mkbweddings", website: "https://www.mkbweddings.co.uk" },
   { role: "Venue", name: "Millbrook Lodge", instagram: "millbrooklodge" },
