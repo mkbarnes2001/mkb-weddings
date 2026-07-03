@@ -4,22 +4,11 @@ import path from "node:path";
 
 const SITE = "https://www.mkbweddings.co.uk";
 
-// CSV paths
 const GALLERY_CSV_PATH = path.join(process.cwd(), "public", "gallery.csv");
-const VENUE_DETAILS_CSV_PATH = path.join(
-  process.cwd(),
-  "public",
-  "galleryvenuedesc.csv"
-);
+const VENUE_DETAILS_CSV_PATH = path.join(process.cwd(), "public", "galleryvenuedesc.csv");
+const COUNTY_META_PATH = path.join(process.cwd(), "public", "county-meta.json");
+const WEDDING_STORIES_PATH = path.join(process.cwd(), "src", "data", "weddingStories.ts");
 
-// County JSON
-const COUNTY_META_PATH = path.join(
-  process.cwd(),
-  "public",
-  "county-meta.json"
-);
-
-// Output
 const OUT_PATH = path.join(process.cwd(), "public", "sitemap.xml");
 
 // ------------------ HELPERS ------------------
@@ -46,7 +35,12 @@ function parseCsv(text) {
       const ch = line[i];
 
       if (ch === '"') {
-        inQuotes = !inQuotes;
+        if (line[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
         continue;
       }
 
@@ -75,7 +69,7 @@ function parseCsv(text) {
   return { header, rows };
 }
 
-function readCsvIfExists(filePath) {
+function readTextIfExists(filePath) {
   if (!fs.existsSync(filePath)) return null;
   return fs.readFileSync(filePath, "utf8");
 }
@@ -104,6 +98,23 @@ function urlEntry(loc) {
   </url>`;
 }
 
+function extractWeddingStorySlugs(fileText) {
+  if (!fileText) return [];
+
+  const slugs = new Set();
+
+  // Matches: slug: "orange-tree-house"
+  const slugRegex = /slug\s*:\s*["'`]([^"'`]+)["'`]/g;
+
+  let match;
+  while ((match = slugRegex.exec(fileText)) !== null) {
+    const slug = match[1]?.trim();
+    if (slug) slugs.add(slug);
+  }
+
+  return Array.from(slugs);
+}
+
 // ------------------ MAIN ------------------
 
 const urls = new Set();
@@ -119,9 +130,16 @@ const urls = new Set();
   "/contact",
 ].forEach((p) => urls.add(`${SITE}${p}`));
 
-// ----- Venue Pages -----
+// ----- Wedding Story / Blog Pages -----
+const weddingStoriesText = readTextIfExists(WEDDING_STORIES_PATH);
+const weddingStorySlugs = extractWeddingStorySlugs(weddingStoriesText);
 
-const galleryText = readCsvIfExists(GALLERY_CSV_PATH);
+for (const slug of weddingStorySlugs) {
+  urls.add(`${SITE}/blog/${slug}`);
+}
+
+// ----- Venue Pages -----
+const galleryText = readTextIfExists(GALLERY_CSV_PATH);
 if (!galleryText) {
   console.error(`ERROR: Missing ${GALLERY_CSV_PATH}`);
   process.exit(1);
@@ -129,9 +147,9 @@ if (!galleryText) {
 
 const { rows: galleryRows } = parseCsv(galleryText);
 
-let venueNames = new Set();
+const venueNames = new Set();
 
-const venueDetailsText = readCsvIfExists(VENUE_DETAILS_CSV_PATH);
+const venueDetailsText = readTextIfExists(VENUE_DETAILS_CSV_PATH);
 if (venueDetailsText) {
   const { rows: venueRows } = parseCsv(venueDetailsText);
   for (const r of venueRows) {
@@ -150,7 +168,6 @@ for (const v of venueNames) {
 }
 
 // ----- Moment Pages -----
-
 const momentNames = new Set();
 
 for (const r of galleryRows) {
@@ -181,7 +198,6 @@ if (countyMeta) {
 }
 
 // ----- Build XML -----
-
 const xml =
   `<?xml version="1.0" encoding="UTF-8"?>\n` +
   `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
@@ -198,5 +214,6 @@ console.log(
    URLs: ${urls.size}
    Venues: ${venueNames.size}
    Moments: ${momentNames.size}
-   Counties: ${countyMeta ? Object.keys(countyMeta).length : 0}`
+   Counties: ${countyMeta ? Object.keys(countyMeta).length : 0}
+   Wedding stories: ${weddingStorySlugs.length}`
 );
