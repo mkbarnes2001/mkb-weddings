@@ -1,3 +1,4 @@
+import "dotenv/config";
 import fs from "node:fs";
 import path from "node:path";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
@@ -5,11 +6,13 @@ import { parse } from "csv-parse/sync";
 import { stringify } from "csv-stringify/sync";
 
 /**
- * SAFE GALLERY SYNC (R2 -> gallery.csv)
- * - Reads existing CSV and PRESERVES it exactly (including tags)
- * - Appends only genuinely new images
- * - Blocks duplicates by filename globally (prevents Stormont/Glenavon mis-assignments)
- * - Default scans thumb/ (because gallery.csv uses _500.webp)
+ * FUTURE-SAFE GALLERY SYNC
+ * - Scans R2 thumb/
+ * - Appends only new images
+ * - Preserves every existing CSV column automatically
+ * - Preserves all manual work: tags, venue pins, moment pins, flash pins, blog columns, etc.
+ * - Creates a timestamped backup before writing
+ * - Blocks duplicate filenames globally
  */
 
 const {
@@ -27,23 +30,88 @@ if (!R2_BUCKET || !R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) 
   process.exit(1);
 }
 
+const REQUIRED_COLUMNS = ["venue", "category", "filename"];
+const DEFAULT_EXTRA_COLUMNS = [
+  "tags",
+  "blogSlug",
+  "blogOrder",
+  "blogCover",
+  "venuePin",
+  "venuePinOrder",
+  "momentPin",
+  "momentPinOrder",
+  "flashPin",
+  "flashPinOrder",
+];
+
 const VALID_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
 
-const normalize = (v) =>
-  (v ?? "").toString().toLowerCase().replace(/\s+/g, " ").trim();
+const normalize = (value) =>
+  (value ?? "").toString().toLowerCase().replace(/\s+/g, " ").trim();
 
 function readCsv(file) {
-  if (!fs.existsSync(file)) return [];
+  if (!fs.existsSync(file)) {
+    return { rows: [], columns: [...REQUIRED_COLUMNS, ...DEFAULT_EXTRA_COLUMNS] };
+  }
+
   const raw = fs.readFileSync(file, "utf8");
-  if (!raw.trim()) return [];
-  return parse(raw, { columns: true, skip_empty_lines: true });
+
+  if (!raw.trim()) {
+    return { rows: [], columns: [...REQUIRED_COLUMNS, ...DEFAULT_EXTRA_COLUMNS] };
+  }
+
+  const records = parse(raw, {
+    columns: true,
+    skip_empty_lines: true,
+  });
+
+  const headerLine = raw.split(/\r?\n/)[0] || "";
+  const columns = headerLine
+    .split(",")
+    .map((column) => column.trim().replace(/^"+|"+$/g, ""))
+    .filter(Boolean);
+
+  const finalColumns = Array.from(
+    new Set([...REQUIRED_COLUMNS, ...columns, ...DEFAULT_EXTRA_COLUMNS]),
+  );
+
+  return {
+    rows: records,
+    columns: finalColumns,
+  };
 }
 
-function writeCsv(file, rows) {
-  const out = stringify(rows, {
-    header: true,
-    columns: ["venue", "category", "filename", "tags"], // IMPORTANT: tags plural
+function createBackup(file) {
+  if (!fs.existsSync(file)) return;
+
+  const timestamp = new Date()
+    .toISOString()
+    .replace(/[:.]/g, "-")
+    .replace("T", "_")
+    .replace("Z", "");
+
+  const backupPath = file.replace(/\.csv$/i, `.backup-${timestamp}.csv`);
+
+  fs.copyFileSync(file, backupPath);
+  console.log(`🧯 Backup created: ${backupPath}`);
+}
+
+function writeCsv(file, rows, columns) {
+  const safeRows = rows.map((row) => {
+    const safeRow = {};
+
+    for (const column of columns) {
+      safeRow[column] = row[column] ?? "";
+    }
+
+    return safeRow;
   });
+
+  const out = stringify(safeRows, {
+    header: true,
+    columns,
+  });
+
   fs.writeFileSync(file, out, "utf8");
 }
 
@@ -66,7 +134,7 @@ async function listAllKeys(prefix) {
         Bucket: R2_BUCKET,
         Prefix: prefix,
         ContinuationToken: token,
-      })
+      }),
     );
 
     for (const obj of res.Contents ?? []) {
@@ -79,11 +147,12 @@ async function listAllKeys(prefix) {
   return keys;
 }
 
-function keyToCandidateRow(key, prefix) {
+function keyToCandidateRow(key, prefix, columns) {
   if (!key.startsWith(prefix)) return null;
 
-  const rel = key.slice(prefix.length); // Venue/Category/filename
+  const rel = key.slice(prefix.length);
   const parts = rel.split("/").filter(Boolean);
+
   if (parts.length < 3) return null;
 
   const filename = parts.pop();
@@ -95,89 +164,109 @@ function keyToCandidateRow(key, prefix) {
   const ext = path.extname(filename).toLowerCase();
   if (!VALID_EXT.has(ext)) return null;
 
-  return { venue, category, filename, tags: "" };
+  const row = {};
+
+  for (const column of columns) {
+    row[column] = "";
+  }
+
+  row.venue = venue;
+  row.category = category;
+  row.filename = filename;
+
+  return row;
 }
 
 async function main() {
-  // 1) Read existing rows as-is (preserve tags)
-  const existingRaw = readCsv(GALLERY_CSV);
+  const { rows: existingRaw, columns } = readCsv(GALLERY_CSV);
 
-  // Defensive: ensure existing rows have the expected shape, but DO NOT change tag values
-  const existingRows = existingRaw.map((r) => ({
-    venue: (r.venue ?? "").toString(),
-    category: (r.category ?? "").toString(),
-    filename: (r.filename ?? "").toString(),
-    tags: (r.tags ?? "").toString(), // IMPORTANT
-  }));
+  const existingRows = existingRaw.map((row) => {
+    const safeRow = {};
 
-  // 2) Build global filename index to prevent duplicates anywhere
-  // filenameKey -> { venue, category } for warnings
+    for (const column of columns) {
+      safeRow[column] = row[column] ?? "";
+    }
+
+    return safeRow;
+  });
+
   const filenameIndex = new Map();
-  for (const r of existingRows) {
-    const fKey = normalize(r.filename);
-    if (!fKey) continue;
-    if (!filenameIndex.has(fKey)) {
-      filenameIndex.set(fKey, { venue: r.venue, category: r.category });
+
+  for (const row of existingRows) {
+    const filenameKey = normalize(row.filename);
+    if (!filenameKey) continue;
+
+    if (!filenameIndex.has(filenameKey)) {
+      filenameIndex.set(filenameKey, {
+        venue: row.venue,
+        category: row.category,
+      });
     }
   }
 
-  // 3) Scan R2 keys
   const prefix = R2_PREFIX.replace(/^\/+/, "");
   const keys = await listAllKeys(prefix);
 
   const additions = [];
-  let skippedSameVenue = 0;
-  let skippedDifferentVenue = 0;
+  let skippedSameFolder = 0;
+  let skippedDifferentFolder = 0;
 
   for (const key of keys) {
-    const candidate = keyToCandidateRow(key, prefix);
+    const candidate = keyToCandidateRow(key, prefix, columns);
     if (!candidate) continue;
 
-    const fKey = normalize(candidate.filename);
-    if (!fKey) continue;
+    const filenameKey = normalize(candidate.filename);
+    if (!filenameKey) continue;
 
-    // If filename already exists anywhere, skip (prevents Glenavon/Stormont duplication)
-    if (filenameIndex.has(fKey)) {
-      const original = filenameIndex.get(fKey);
+    if (filenameIndex.has(filenameKey)) {
+      const original = filenameIndex.get(filenameKey);
 
-      const sameVenue =
+      const sameFolder =
         normalize(original.venue) === normalize(candidate.venue) &&
         normalize(original.category) === normalize(candidate.category);
 
-      if (sameVenue) {
-        skippedSameVenue++;
+      if (sameFolder) {
+        skippedSameFolder++;
       } else {
-        skippedDifferentVenue++;
+        skippedDifferentFolder++;
         console.warn(
-          `⚠️ Duplicate filename found under different folder in R2, skipping:\n` +
+          `⚠️ Duplicate filename found under a different R2 folder, skipping:\n` +
             `   ${candidate.filename}\n` +
             `   CSV already has: "${original.venue}" / "${original.category}"\n` +
-            `   R2 key suggests: "${candidate.venue}" / "${candidate.category}"`
+            `   R2 key suggests: "${candidate.venue}" / "${candidate.category}"`,
         );
       }
+
       continue;
     }
 
     additions.push(candidate);
-    filenameIndex.set(fKey, { venue: candidate.venue, category: candidate.category });
+    filenameIndex.set(filenameKey, {
+      venue: candidate.venue,
+      category: candidate.category,
+    });
   }
 
   if (additions.length === 0) {
-    console.log(`✅ No new images found (scanned prefix: ${prefix})`);
-    console.log(`ℹ️ Skipped existing (same folder): ${skippedSameVenue}`);
-    console.log(`ℹ️ Skipped duplicates (different folder): ${skippedDifferentVenue}`);
+    console.log(`✅ No new images found`);
+    console.log(`📂 Scanned prefix: ${prefix}`);
+    console.log(`ℹ️ Skipped existing same-folder files: ${skippedSameFolder}`);
+    console.log(`ℹ️ Skipped duplicate different-folder files: ${skippedDifferentFolder}`);
+    console.log(`🛡️ No CSV changes made`);
     return;
   }
 
-  // 4) Append only. Never rewrite/normalize existing rows.
+  createBackup(GALLERY_CSV);
+
   const merged = existingRows.concat(additions);
-  writeCsv(GALLERY_CSV, merged);
+
+  writeCsv(GALLERY_CSV, merged, columns);
 
   console.log(`✅ Added ${additions.length} new row(s) to ${GALLERY_CSV}`);
   console.log(`📂 Scanned prefix: ${prefix}`);
-  console.log(`ℹ️ Skipped existing (same folder): ${skippedSameVenue}`);
-  console.log(`ℹ️ Skipped duplicates (different folder): ${skippedDifferentVenue}`);
-  console.log(`🛡️ Existing "tags" values were preserved; new rows have tags=""`);
+  console.log(`ℹ️ Skipped existing same-folder files: ${skippedSameFolder}`);
+  console.log(`ℹ️ Skipped duplicate different-folder files: ${skippedDifferentFolder}`);
+  console.log(`🛡️ Preserved columns: ${columns.join(", ")}`);
 }
 
 main().catch((err) => {
