@@ -1,129 +1,24 @@
+// src/components/GalleryCreativeFlash.tsx
 import { useEffect, useMemo, useState } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
 import { MasonryGallery } from "./MasonryGallery";
+import {
+  fetchGalleryRows,
+  thumbUrl,
+  fullUrlFromThumb,
+  imageAlt,
+  imageCaption,
+  hasTag,
+  type CsvRow,
+} from "../lib/galleryCsv";
 
 import creativeFlashHero from "figma:asset/4e80a09ae14c9e2aaefa75a7ed64281f0bbc855b.png";
 
-type CsvRow = {
-  venue: string;
-  category: string;
-  filename: string;
-  tags?: string;
-  flashPin?: string;
-  flashPinOrder?: string;
-};
-
-const THUMB_BASE = "https://images.mkbweddings.co.uk/thumb";
-const FULL_BASE = "https://images.mkbweddings.co.uk/full";
 const HERO_FOCUS = "50% 50%";
 
 function normalize(s: string) {
   return (s || "").trim().toLowerCase();
-}
-
-function encSegment(s: string) {
-  return encodeURIComponent(s);
-}
-
-function fullFromThumbFilename(filename500: string) {
-  return filename500.replace(/_500\.webp$/i, "_2000.webp");
-}
-
-function thumbUrl(r: CsvRow) {
-  return `${THUMB_BASE}/${encSegment(r.venue)}/${encSegment(r.category)}/${encodeURIComponent(
-    r.filename,
-  )}`;
-}
-
-function fullUrl(r: CsvRow) {
-  return `${FULL_BASE}/${encSegment(r.venue)}/${encSegment(r.category)}/${encodeURIComponent(
-    fullFromThumbFilename(r.filename),
-  )}`;
-}
-
-function cleanCsvValue(value: string) {
-  const trimmed = (value || "").trim();
-  return trimmed.replace(/^"+|"+$/g, "").replace(/""+/g, '"').replace(/"/g, "").trim();
-}
-
-function parseGalleryCsv(csvText: string): CsvRow[] {
-  const lines = csvText.split(/\r?\n/).filter(Boolean);
-  if (lines.length < 2) return [];
-
-  const parseLine = (line: string) => {
-    const out: string[] = [];
-    let cur = "";
-    let inQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      const next = line[i + 1];
-
-      if (ch === '"' && inQuotes && next === '"') {
-        cur += '"';
-        i += 1;
-        continue;
-      }
-
-      if (ch === '"') {
-        inQuotes = !inQuotes;
-        continue;
-      }
-
-      if (ch === "," && !inQuotes) {
-        out.push(cur.trim());
-        cur = "";
-      } else {
-        cur += ch;
-      }
-    }
-
-    out.push(cur.trim());
-    return out;
-  };
-
-  const header = parseLine(lines[0]).map((h) => normalize(h));
-  const venueIdx = header.indexOf("venue");
-  const categoryIdx = header.indexOf("category");
-  const filenameIdx = header.indexOf("filename");
-  const tagsIdx = header.indexOf("tags");
-  const flashPinIdx = header.indexOf("flashpin");
-  const flashPinOrderIdx = header.indexOf("flashpinorder");
-
-  if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) {
-    console.error(
-      "CSV header must include: venue,category,filename optional: tags,flashPin,flashPinOrder",
-    );
-    return [];
-  }
-
-  return lines
-    .slice(1)
-    .map((line) => {
-      const cols = parseLine(line);
-
-      return {
-        venue: cleanCsvValue(cols[venueIdx] || ""),
-        category: cleanCsvValue(cols[categoryIdx] || ""),
-        filename: cleanCsvValue(cols[filenameIdx] || ""),
-        tags: tagsIdx >= 0 ? cleanCsvValue(cols[tagsIdx] || "") : "",
-        flashPin: flashPinIdx >= 0 ? cleanCsvValue(cols[flashPinIdx] || "") : "",
-        flashPinOrder:
-          flashPinOrderIdx >= 0 ? cleanCsvValue(cols[flashPinOrderIdx] || "") : "",
-      };
-    })
-    .filter((row) => row.venue && row.category && row.filename);
-}
-
-function hasTag(tags: string | undefined, target: string) {
-  if (!tags) return false;
-
-  return tags
-    .split(/[,|]/g)
-    .map((tag) => normalize(tag))
-    .filter(Boolean)
-    .includes(normalize(target));
 }
 
 function hashStringToInt(str: string) {
@@ -171,16 +66,15 @@ export function GalleryCreativeFlash() {
     (async () => {
       try {
         setLoadError(null);
+        const parsed = await fetchGalleryRows();
 
-        const res = await fetch("/gallery.csv", { cache: "no-store" });
-        if (!res.ok) throw new Error(`Failed to load /gallery.csv (${res.status})`);
-
-        const text = await res.text();
-        const parsed = parseGalleryCsv(text);
-
-        if (!cancelled) setRows(parsed);
+        if (!cancelled) {
+          setRows(parsed);
+        }
       } catch (e: any) {
-        if (!cancelled) setLoadError(e?.message || "Failed to load gallery.csv");
+        if (!cancelled) {
+          setLoadError(e?.message || "Failed to load gallery data");
+        }
       }
     })();
 
@@ -190,7 +84,7 @@ export function GalleryCreativeFlash() {
   }, []);
 
   const flashRows = useMemo(() => {
-    const tagged = rows.filter((row) => hasTag(row.tags, "creative-flash"));
+    const tagged = rows.filter((row) => hasTag(row, "creative-flash"));
     if (tagged.length > 0) return tagged;
 
     return rows.filter((row) => normalize(row.category) === "creative flash");
@@ -199,12 +93,13 @@ export function GalleryCreativeFlash() {
   const images = useMemo(() => {
     const mapped = flashRows.map((row) => ({
       thumb: thumbUrl(row),
-      full: fullUrl(row),
+      full: fullUrlFromThumb(row),
       venue: row.venue,
       filename: row.filename,
       flashPin: row.flashPin,
       flashPinOrder: row.flashPinOrder,
-      alt: `Creative Flash – ${row.venue}`,
+      alt: imageAlt(row),
+      caption: imageCaption(row),
     }));
 
     const pinned = mapped
@@ -240,7 +135,7 @@ export function GalleryCreativeFlash() {
       <div className="relative h-[60vh] min-h-[400px]">
         <ImageWithFallback
           src={creativeFlashHero}
-          alt="Creative Flash Photography"
+          alt="Creative flash wedding photography"
           className="w-full h-full object-cover"
           style={{ objectPosition: HERO_FOCUS }}
         />
