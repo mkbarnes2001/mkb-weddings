@@ -1,13 +1,41 @@
 // src/lib/galleryCsv.ts
+
 export type CsvRow = {
+  imageId?: string;
   venue: string;
   category: string;
-  filename: string; // _500.webp
-  tags?: string; // optional: comma-separated
+  filename: string;
+  tags?: string;
+
+  blogSlug?: string;
+  blogOrder?: string;
+  blogCover?: string;
+
+  venuePin?: string;
+  venuePinOrder?: string;
+
+  momentPin?: string;
+  momentPinOrder?: string;
+
+  flashPin?: string;
+  flashPinOrder?: string;
+
+  aiTags?: string;
+  aiAlt?: string;
+  aiCaption?: string;
+};
+
+export type GalleryAiRow = {
+  imageId: string;
+  filename?: string;
+  aiTags?: string;
+  aiAlt?: string;
+  aiCaption?: string;
 };
 
 export const THUMB_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
+
 export const FULL_BASE =
   "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
 
@@ -24,76 +52,141 @@ export function encSegment(s: string) {
   return encodeURIComponent(s);
 }
 
-// CSV line parser (supports quoted cells)
 function parseLine(line: string) {
   const out: string[] = [];
   let cur = "";
   let inQuotes = false;
 
-  for (let i = 0; i < line.length; i++) {
+  for (let i = 0; i < line.length; i += 1) {
     const ch = line[i];
-    if (ch === '"') {
+    const next = line[i + 1];
+
+    if (ch === '"' && inQuotes && next === '"') {
+      cur += '"';
+      i += 1;
+    } else if (ch === '"') {
       inQuotes = !inQuotes;
-      continue;
-    }
-    if (ch === "," && !inQuotes) {
+    } else if (ch === "," && !inQuotes) {
       out.push(cur.trim());
       cur = "";
     } else {
       cur += ch;
     }
   }
+
   out.push(cur.trim());
   return out;
 }
 
-export function parseGalleryCsv(csvText: string): CsvRow[] {
+function parseCsvToObjects(csvText: string): Record<string, string>[] {
   const lines = csvText.split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return [];
 
-  const header = parseLine(lines[0]).map((h) => h.toLowerCase());
-  const venueIdx = header.indexOf("venue");
-  const categoryIdx = header.indexOf("category");
-  const filenameIdx = header.indexOf("filename");
-  const tagsIdx = header.indexOf("tags"); // optional
+  const headers = parseLine(lines[0]).map((h) => h.trim());
 
-  if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) {
-    console.error("gallery.csv must include: venue,category,filename (tags optional)");
-    return [];
-  }
+  return lines.slice(1).map((line) => {
+    const cols = parseLine(line);
+    const row: Record<string, string> = {};
 
-  const rows: CsvRow[] = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cols = parseLine(lines[i]);
-    const venue = (cols[venueIdx] || "").trim();
-    const category = (cols[categoryIdx] || "").trim();
-    const filename = (cols[filenameIdx] || "").trim();
-    const tags = tagsIdx !== -1 ? (cols[tagsIdx] || "").trim() : "";
+    headers.forEach((header, index) => {
+      row[header] = cols[index] || "";
+    });
 
-    if (!venue || !category || !filename) continue;
-    rows.push({ venue, category, filename, tags });
-  }
+    return row;
+  });
+}
 
-  return rows;
+export function parseGalleryCsv(csvText: string): CsvRow[] {
+  return parseCsvToObjects(csvText)
+    .map((row) => ({
+      imageId: row.imageId || "",
+      venue: row.venue || "",
+      category: row.category || "",
+      filename: row.filename || "",
+      tags: row.tags || "",
+
+      blogSlug: row.blogSlug || "",
+      blogOrder: row.blogOrder || "",
+      blogCover: row.blogCover || "",
+
+      venuePin: row.venuePin || "",
+      venuePinOrder: row.venuePinOrder || "",
+
+      momentPin: row.momentPin || "",
+      momentPinOrder: row.momentPinOrder || "",
+
+      flashPin: row.flashPin || "",
+      flashPinOrder: row.flashPinOrder || "",
+    }))
+    .filter((row) => row.venue && row.category && row.filename);
+}
+
+export function parseGalleryAiCsv(csvText: string): GalleryAiRow[] {
+  return parseCsvToObjects(csvText)
+    .map((row) => ({
+      imageId: row.imageId || "",
+      filename: row.filename || "",
+      aiTags: row.aiTags || "",
+      aiAlt: row.aiAlt || "",
+      aiCaption: row.aiCaption || "",
+    }))
+    .filter((row) => row.imageId || row.filename);
 }
 
 export async function fetchGalleryRows(): Promise<CsvRow[]> {
-  const res = await fetch("/gallery.csv", { cache: "no-store" });
-  if (!res.ok) throw new Error(`Failed to load /gallery.csv (${res.status})`);
-  const text = await res.text();
-  return parseGalleryCsv(text);
+  const galleryRes = await fetch("/gallery.csv", { cache: "no-store" });
+
+  if (!galleryRes.ok) {
+    throw new Error(`Failed to load /gallery.csv (${galleryRes.status})`);
+  }
+
+  const galleryText = await galleryRes.text();
+  const galleryRows = parseGalleryCsv(galleryText);
+
+  try {
+    const aiRes = await fetch("/gallery-ai.csv", { cache: "no-store" });
+
+    if (!aiRes.ok) return galleryRows;
+
+    const aiText = await aiRes.text();
+    const aiRows = parseGalleryAiCsv(aiText);
+
+    const aiByImageId = new Map(
+      aiRows.filter((row) => row.imageId).map((row) => [row.imageId, row]),
+    );
+
+    const aiByFilename = new Map(
+      aiRows.filter((row) => row.filename).map((row) => [row.filename, row]),
+    );
+
+    return galleryRows.map((row) => {
+      const ai =
+        (row.imageId && aiByImageId.get(row.imageId)) ||
+        aiByFilename.get(row.filename);
+
+      return {
+        ...row,
+        aiTags: ai?.aiTags || "",
+        aiAlt: ai?.aiAlt || "",
+        aiCaption: ai?.aiCaption || "",
+      };
+    });
+  } catch {
+    return galleryRows;
+  }
 }
 
 export function thumbUrl(r: CsvRow) {
   return `${THUMB_BASE}/${encSegment(r.venue)}/${encSegment(
-    r.category
+    r.category,
   )}/${encodeURIComponent(r.filename)}`;
 }
 
 export function fullUrlFromThumb(r: CsvRow) {
   const filename2000 = r.filename.replace(/_500\.webp$/i, "_2000.webp");
+
   return `${FULL_BASE}/${encSegment(r.venue)}/${encSegment(
-    r.category
+    r.category,
   )}/${encodeURIComponent(filename2000)}`;
 }
 
@@ -104,7 +197,28 @@ export function splitTags(row: CsvRow) {
     .filter(Boolean);
 }
 
+export function splitAiTags(row: CsvRow) {
+  return (row.aiTags || "")
+    .split("|")
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
+
+export function imageAlt(row: CsvRow) {
+  return (
+    row.aiAlt ||
+    `${row.venue} wedding photography - ${row.category}`
+  );
+}
+
+export function imageCaption(row: CsvRow) {
+  return row.aiCaption || "";
+}
+
 export function hasTag(row: CsvRow, tag: string) {
   const want = slugify(tag);
-  return splitTags(row).some((t) => slugify(t) === want);
+
+  return [...splitTags(row), ...splitAiTags(row)].some(
+    (t) => slugify(t) === want,
+  );
 }

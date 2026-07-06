@@ -6,14 +6,21 @@ import { Helmet } from "react-helmet-async";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
 import { MasonryGallery } from "./MasonryGallery";
+import { fetchGalleryRows, imageAlt, imageCaption } from "../lib/galleryCsv";
 
 type GalleryRow = {
+  imageId?: string;
   venue: string;
   category: string;
   filename: string; // ends in _500.webp
   tags?: string;
   venuePin?: string;
   venuePinOrder?: string;
+
+  // AI metadata from public/gallery-ai.csv via src/lib/galleryCsv.ts
+  aiTags?: string;
+  aiAlt?: string;
+  aiCaption?: string;
 };
 
 type VenueMetaRow = {
@@ -283,14 +290,13 @@ export function GalleryVenueDetail() {
 
     (async () => {
       try {
-        const [galleryRes, venueRes, countyRes] = await Promise.all([
-          fetch("/gallery.csv", { cache: "no-store" }),
+        const [galleryData, venueRes, countyRes] = await Promise.all([
+          fetchGalleryRows(),
           fetch("/galleryvenuedesc.csv", { cache: "no-store" }),
           fetch("/county-meta.json", { cache: "no-store" }),
         ]);
 
-        const galleryText = await galleryRes.text();
-        if (!cancelled) setGalleryRows(parseGalleryCsv(galleryText));
+        if (!cancelled) setGalleryRows(galleryData);
 
         if (venueRes.ok) {
           const venueText = await venueRes.text();
@@ -369,15 +375,20 @@ export function GalleryVenueDetail() {
     return venueRows.map((r) => ({
       thumb: thumbUrl(r),
       full: fullUrlFromThumb(r),
-      alt: `${r.category} at ${name}${locationLine ? `, ${locationLine}` : ""}`,
+      alt: imageAlt(r),
+      caption: imageCaption(r),
       filename: r.filename,
     }));
-  }, [venueRows, name, locationLine]);
+  }, [venueRows]);
 
   const heroImage =
     images[0]?.full ||
     images[0]?.thumb ||
     "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
+
+  const heroAlt =
+    images[0]?.alt ||
+    `${name}${locationLine ? `, ${locationLine}` : ""} wedding photography`;
 
   const moreVenueLinks = useMemo(() => {
     const uniqueVenueNames = Array.from(new Set(galleryRows.map((r) => r.venue))).filter(Boolean);
@@ -462,7 +473,7 @@ export function GalleryVenueDetail() {
     "@id": `${canonical}#primaryimage`,
     contentUrl: heroImage,
     url: heroImage,
-    caption: `${name}${locationLine ? `, ${locationLine}` : ""} wedding photography`,
+    caption: heroAlt,
     representativeOfPage: true,
   };
 
@@ -471,7 +482,7 @@ export function GalleryVenueDetail() {
     "@id": `${canonical}#image-${idx + 1}`,
     contentUrl: img.full,
     url: img.full,
-    caption: img.alt,
+    caption: img.caption || img.alt,
   }));
 
   const venuePlaceJsonLd = {
@@ -541,7 +552,7 @@ export function GalleryVenueDetail() {
       <div className="relative h-[60vh] min-h-[420px]">
         <ImageWithFallback
           src={heroImage}
-          alt={`${name}${locationLine ? `, ${locationLine}` : ""} wedding photography`}
+          alt={heroAlt}
           width={2000}
           height={1200}
           fetchPriority="high"
