@@ -85,7 +85,7 @@ export function GalleryLanding() {
       <div className="relative h-[60vh] min-h-[420px]">
         <ImageWithFallback
           src={HERO_IMAGE}
-          alt="Wedding photography gallery across Northern Ireland and Ireland"
+          alt="Wedding photography gallery showcasing weddings across Northern Ireland and Ireland"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -134,7 +134,7 @@ export function GalleryLanding() {
             >
               <ImageWithFallback
                 src={tile.image}
-                alt={tile.title}
+                alt={`${tile.title} wedding photography gallery`}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
 
