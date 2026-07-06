@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { fetchGalleryRows, imageAlt } from "../lib/galleryCsv";
 import { ImageLightbox } from "./ImageLightbox";
 import { MasonryGallery } from "./MasonryGallery";
 
@@ -227,10 +228,7 @@ export function GalleryMomentDetail() {
     (async () => {
       try {
         setLoadError(null);
-        const res = await fetch("/gallery.csv", { cache: "no-store" });
-        if (!res.ok) throw new Error(`Failed to load /gallery.csv (${res.status})`);
-        const text = await res.text();
-        const parsed = parseGalleryCsv(text);
+        const parsed = await fetchGalleryRows();
         if (!cancelled) setRows(parsed);
       } catch (e: any) {
         if (!cancelled) setLoadError(e?.message || "Failed to load gallery.csv");
@@ -283,7 +281,7 @@ export function GalleryMomentDetail() {
     const mapped = momentRows.map((r) => ({
       thumb: thumbUrl(r),
       full: fullUrlFromThumb(r),
-      alt: `${r.category} at ${r.venue}${venueCountyMap[r.venue] ? `, ${venueCountyMap[r.venue]}` : ""}`,
+      alt: imageAlt(r),
       filename: r.filename,
       momentPin: r.momentPin,
       momentPinOrder: r.momentPinOrder,
