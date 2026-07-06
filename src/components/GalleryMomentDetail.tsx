@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { fetchGalleryRows, imageAlt } from "../lib/galleryCsv";
+import { fetchGalleryRows, imageAlt, imageCaption } from "../lib/galleryCsv";
 import { ImageLightbox } from "./ImageLightbox";
 import { MasonryGallery } from "./MasonryGallery";
 
@@ -282,6 +282,7 @@ export function GalleryMomentDetail() {
       thumb: thumbUrl(r),
       full: fullUrlFromThumb(r),
       alt: imageAlt(r),
+      caption: imageCaption(r),
       filename: r.filename,
       momentPin: r.momentPin,
       momentPinOrder: r.momentPinOrder,
@@ -358,6 +359,74 @@ export function GalleryMomentDetail() {
     momentDescription ||
     `Browse ${momentName.toLowerCase()} wedding photography across Northern Ireland and Ireland — real moments, real weddings, captured by MKB Weddings.`;
 
+  const galleryImageObjects = images.slice(0, 24).map((img, idx) => ({
+    "@type": "ImageObject",
+    "@id": `${canonical}#image-${idx + 1}`,
+    contentUrl: img.full,
+    url: img.full,
+    thumbnailUrl: img.thumb,
+    name: img.alt,
+    description: img.alt,
+    caption: img.caption || img.alt,
+    representativeOfPage: idx === 0,
+    creator: {
+      "@type": "Person",
+      name: "Mark Barnes",
+    },
+    copyrightHolder: {
+      "@type": "Organization",
+      name: "MKB Weddings",
+    },
+    creditText: "MKB Weddings",
+    acquireLicensePage: "https://www.mkbweddings.co.uk",
+    isPartOf: {
+      "@id": `${canonical}#webpage`,
+    },
+  }));
+
+  const heroImageObject = {
+    "@type": "ImageObject",
+    "@id": `${canonical}#primaryimage`,
+    contentUrl: heroImage,
+    url: heroImage,
+    name: `${momentName} wedding photography`,
+    description: `${momentName} wedding photography by MKB Weddings`,
+    caption: `${momentName} wedding photography by MKB Weddings`,
+    representativeOfPage: true,
+    creator: {
+      "@type": "Person",
+      name: "Mark Barnes",
+    },
+    copyrightHolder: {
+      "@type": "Organization",
+      name: "MKB Weddings",
+    },
+    creditText: "MKB Weddings",
+  };
+
+  const pageJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_ORIGIN}/#website`,
+        url: `${SITE_ORIGIN}/`,
+        name: "MKB Weddings",
+      },
+      heroImageObject,
+      {
+        "@type": "CollectionPage",
+        "@id": `${canonical}#webpage`,
+        url: canonical,
+        name: metaTitle,
+        description: metaDescription,
+        isPartOf: { "@id": `${SITE_ORIGIN}/#website` },
+        primaryImageOfPage: { "@id": `${canonical}#primaryimage` },
+        hasPart: galleryImageObjects,
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
@@ -376,6 +445,8 @@ export function GalleryMomentDetail() {
         <meta property="og:description" content={metaDescription} />
         <meta property="og:image" content={heroImage} />
         <meta property="og:type" content="website" />
+
+        <script type="application/ld+json">{JSON.stringify(pageJsonLd)}</script>
       </Helmet>
 
       {/* HERO */}
