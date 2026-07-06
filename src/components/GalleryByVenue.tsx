@@ -3,23 +3,21 @@ import { Link } from "react-router-dom";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import {
+  fetchGalleryRows,
+  fullUrlFromThumb,
+  imageAlt,
+  slugify,
+  thumbUrl,
+  type CsvRow,
+} from "../lib/galleryCsv";
 
-type GalleryRow = {
-  venue: string;
-  category: string;
-  filename: string;
-  tags?: string;
-  venuePin?: string;
-  venuePinOrder?: string;
-};
+type GalleryRow = CsvRow;
 
 type VenueMetaRow = {
   venue: string; // must match gallery.csv venue EXACTLY
   venueName?: string; // venue-name
 };
-
-const THUMB_BASE = "https://images.mkbweddings.co.uk/thumb";
-const FULL_BASE = "https://images.mkbweddings.co.uk/full";
 
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
 
@@ -39,19 +37,6 @@ const PINNED_VENUES: string[] = [
   "beech hill",
 ];
 
-function slugify(s: string) {
-  return s
-    .trim()
-    .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function encSegment(s: string) {
-  return encodeURIComponent(s);
-}
-
 function parseCsvLines(csvText: string): string[][] {
   const lines = csvText.split(/\r?\n/).filter(Boolean);
 
@@ -60,11 +45,21 @@ function parseCsvLines(csvText: string): string[][] {
     let cur = "";
     let inQuotes = false;
 
-    for (const ch of line) {
+    for (let i = 0; i < line.length; i += 1) {
+      const ch = line[i];
+      const next = line[i + 1];
+
+      if (ch === '"' && inQuotes && next === '"') {
+        cur += '"';
+        i += 1;
+        continue;
+      }
+
       if (ch === '"') {
         inQuotes = !inQuotes;
         continue;
       }
+
       if (ch === "," && !inQuotes) {
         out.push(cur.trim());
         cur = "";
@@ -72,38 +67,12 @@ function parseCsvLines(csvText: string): string[][] {
         cur += ch;
       }
     }
+
     out.push(cur.trim());
     return out;
   };
 
   return lines.map(parseLine);
-}
-
-function parseGalleryCsv(csvText: string): GalleryRow[] {
-  const rows = parseCsvLines(csvText);
-  if (rows.length < 2) return [];
-
-  const header = rows[0].map((h) => h.toLowerCase());
-  const venueIdx = header.indexOf("venue");
-  const categoryIdx = header.indexOf("category");
-  const filenameIdx = header.indexOf("filename");
-  const tagsIdx = header.indexOf("tags");
-  const venuePinIdx = header.indexOf("venuepin");
-  const venuePinOrderIdx = header.indexOf("venuepinorder");
-
-  if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) return [];
-
-  return rows
-    .slice(1)
-    .map((cols) => ({
-      venue: (cols[venueIdx] || "").trim(),
-      category: (cols[categoryIdx] || "").trim(),
-      filename: (cols[filenameIdx] || "").trim(),
-      tags: tagsIdx !== -1 ? (cols[tagsIdx] || "").trim() : "",
-      venuePin: venuePinIdx !== -1 ? (cols[venuePinIdx] || "").trim() : "",
-      venuePinOrder: venuePinOrderIdx !== -1 ? (cols[venuePinOrderIdx] || "").trim() : "",
-    }))
-    .filter((r) => r.venue && r.category && r.filename);
 }
 
 function parseVenueMetaCsv(csvText: string): VenueMetaRow[] {
@@ -125,27 +94,26 @@ function parseVenueMetaCsv(csvText: string): VenueMetaRow[] {
     .filter((v) => v.venue);
 }
 
-function thumbUrl(r: GalleryRow) {
-  return `${THUMB_BASE}/${encSegment(r.venue)}/${encSegment(
-    r.category
-  )}/${encodeURIComponent(r.filename)}`;
-}
-
-function fullUrlFromThumb(r: GalleryRow) {
-  const filename2000 = r.filename.replace(/_500\.webp$/i, "_2000.webp");
-  return `${FULL_BASE}/${encSegment(r.venue)}/${encSegment(
-    r.category
-  )}/${encodeURIComponent(filename2000)}`;
-}
-
 type VenueCard = {
   venue: string; // raw
   venueId: string; // slug
   displayName: string; // venue-name or fallback
   coverThumb: string;
   coverFull: string;
+  coverRow: GalleryRow;
   count: number;
 };
+
+function isVenuePinned(row: GalleryRow) {
+  return ["y", "yes", "true", "1", "pin", "pinned"].includes(
+    (row.venuePin || "").trim().toLowerCase(),
+  );
+}
+
+function venuePinOrder(row: GalleryRow) {
+  const value = Number((row.venuePinOrder || "").trim());
+  return Number.isFinite(value) && value > 0 ? value : 9999;
+}
 
 export function GalleryByVenue() {
   const [galleryRows, setGalleryRows] = useState<GalleryRow[]>([]);
@@ -162,13 +130,10 @@ export function GalleryByVenue() {
     (async () => {
       try {
         setLoadError(null);
-        const res = await fetch("/gallery.csv", { cache: "no-store" });
-        if (!res.ok) throw new Error("Failed to load gallery.csv");
-        const text = await res.text();
-        const parsed = parseGalleryCsv(text);
-        if (!cancelled) setGalleryRows(parsed);
+        const rows = await fetchGalleryRows();
+        if (!cancelled) setGalleryRows(rows);
       } catch (e: any) {
-        if (!cancelled) setLoadError(e?.message || "Failed to load gallery.csv");
+        if (!cancelled) setLoadError(e?.message || "Failed to load gallery data");
       }
     })();
 
@@ -204,23 +169,21 @@ export function GalleryByVenue() {
 
   const venueCards = useMemo((): VenueCard[] => {
     const byVenue = new Map<string, GalleryRow[]>();
-    for (const r of galleryRows) {
-      const arr = byVenue.get(r.venue) ?? [];
-      arr.push(r);
-      byVenue.set(r.venue, arr);
+
+    for (const row of galleryRows) {
+      const arr = byVenue.get(row.venue) ?? [];
+      arr.push(row);
+      byVenue.set(row.venue, arr);
     }
 
     const cards: VenueCard[] = [];
+
     for (const [venue, rows] of byVenue.entries()) {
       const pinnedCover = rows
-        .filter((row) =>
-          ["y", "yes", "true", "1", "pin", "pinned"].includes(
-            (row.venuePin || "").trim().toLowerCase()
-          )
-        )
+        .filter(isVenuePinned)
         .sort((a, b) => {
-          const orderA = Number((a.venuePinOrder || "").trim()) || 9999;
-          const orderB = Number((b.venuePinOrder || "").trim()) || 9999;
+          const orderA = venuePinOrder(a);
+          const orderB = venuePinOrder(b);
 
           if (orderA !== orderB) return orderA - orderB;
 
@@ -236,15 +199,19 @@ export function GalleryByVenue() {
         displayName: venueNameMap[venue] || venue,
         coverThumb: thumbUrl(coverRow),
         coverFull: fullUrlFromThumb(coverRow),
+        coverRow,
         count: rows.length,
       });
     }
 
-    const pinnedSet = new Set(PINNED_VENUES.map((v) => v.toLowerCase()));
+    const pinnedSet = new Set(PINNED_VENUES.map((venue) => venue.toLowerCase()));
+
     return cards.sort((a, b) => {
-      const ap = pinnedSet.has(a.venue.toLowerCase()) ? 0 : 1;
-      const bp = pinnedSet.has(b.venue.toLowerCase()) ? 0 : 1;
-      if (ap !== bp) return ap - bp;
+      const aPinned = pinnedSet.has(a.venue.toLowerCase()) ? 0 : 1;
+      const bPinned = pinnedSet.has(b.venue.toLowerCase()) ? 0 : 1;
+
+      if (aPinned !== bPinned) return aPinned - bPinned;
+
       return a.displayName.localeCompare(b.displayName);
     });
   }, [galleryRows, venueNameMap]);
@@ -255,10 +222,7 @@ export function GalleryByVenue() {
   const metaDescription =
     "Browse real wedding photography by venue across Northern Ireland and Ireland. Explore venue galleries, style inspiration, and full wedding stories by MKB Weddings.";
 
-  const ogImage =
-    venueCards[0]?.coverFull ||
-    venueCards[0]?.coverThumb ||
-    HERO_IMAGE;
+  const ogImage = venueCards[0]?.coverFull || venueCards[0]?.coverThumb || HERO_IMAGE;
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -278,7 +242,12 @@ export function GalleryByVenue() {
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_ORIGIN}/` },
           { "@type": "ListItem", position: 2, name: "Gallery", item: `${SITE_ORIGIN}/gallery` },
-          { "@type": "ListItem", position: 3, name: "Counties", item: `${SITE_ORIGIN}/wedding-photographer` },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: "Counties",
+            item: `${SITE_ORIGIN}/wedding-photographer`,
+          },
           { "@type": "ListItem", position: 4, name: "Venues", item: canonical },
         ],
       },
@@ -328,7 +297,7 @@ export function GalleryByVenue() {
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
-      {/* HERO (CountyPage style) */}
+      {/* HERO */}
       <div className="relative h-[60vh] min-h-[420px]">
         <ImageWithFallback
           src={HERO_IMAGE}
@@ -358,7 +327,7 @@ export function GalleryByVenue() {
         </div>
       </div>
 
-      {/* BREADCRUMBS (now safely below hero, not under nav) */}
+      {/* BREADCRUMBS */}
       <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
         <nav aria-label="Breadcrumb" className="flex justify-center">
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
@@ -394,13 +363,12 @@ export function GalleryByVenue() {
         </nav>
       </div>
 
-      {/* INTRO (same vibe as your other pages) */}
+      {/* INTRO */}
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-20 text-center">
         <p className="text-neutral-700 text-lg md:text-xl leading-relaxed">
-          Browse real wedding photography by venue across{" "}
-          <strong>Northern Ireland</strong> and <strong>Ireland</strong>. Use these galleries to
-          see how a venue photographs in different seasons, light and weather — and to find
-          inspiration for your own day.
+          Browse real wedding photography by venue across <strong>Northern Ireland</strong> and{" "}
+          <strong>Ireland</strong>. Use these galleries to see how a venue photographs in different
+          seasons, light and weather — and to find inspiration for your own day.
         </p>
       </section>
 
@@ -410,22 +378,22 @@ export function GalleryByVenue() {
           <div className="text-center py-20 text-neutral-600">No venues found yet.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {venueCards.map((v) => (
+            {venueCards.map((venue) => (
               <Link
-                key={v.venueId}
-                to={`/gallery/venue/${v.venueId}`}
+                key={venue.venueId}
+                to={`/gallery/venue/${venue.venueId}`}
                 className="group relative aspect-[4/3] overflow-hidden rounded-lg"
               >
                 <ImageWithFallback
-                  src={v.coverThumb}
-                  alt={`${v.displayName} wedding photography venue gallery`}
+                  src={venue.coverThumb}
+                  alt={imageAlt(venue.coverRow)}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                 <div className="absolute inset-0 flex flex-col justify-end p-6">
-                  <h2 className="text-white text-2xl mb-2 font-serif">{v.displayName}</h2>
+                  <h2 className="text-white text-2xl mb-2 font-serif">{venue.displayName}</h2>
                   <p className="text-white/85 text-sm mb-3">
-                    {v.count} image{v.count !== 1 ? "s" : ""}
+                    {venue.count} image{venue.count !== 1 ? "s" : ""}
                   </p>
                   <div className="flex items-center text-white">
                     <span className="text-sm uppercase tracking-wider">Explore</span>
