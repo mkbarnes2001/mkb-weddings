@@ -33,11 +33,8 @@ export type GalleryAiRow = {
   aiCaption?: string;
 };
 
-export const THUMB_BASE =
-  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/thumb";
-
-export const FULL_BASE =
-  "https://pub-396aa8eae3b14a459d2cebca6fe95f55.r2.dev/full";
+export const THUMB_BASE = "https://images.mkbweddings.co.uk/thumb";
+export const FULL_BASE = "https://images.mkbweddings.co.uk/full";
 
 export function slugify(s: string) {
   return (s || "")
