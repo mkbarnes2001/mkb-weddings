@@ -473,16 +473,45 @@ export function GalleryVenueDetail() {
     "@id": `${canonical}#primaryimage`,
     contentUrl: heroImage,
     url: heroImage,
-    caption: heroAlt,
+    thumbnailUrl: images[0]?.thumb,
+    name: heroAlt,
+    description: heroAlt,
+    caption: images[0]?.caption || heroAlt,
     representativeOfPage: true,
+    creator: {
+      "@type": "Person",
+      name: "Mark Barnes",
+    },
+    copyrightHolder: {
+      "@type": "Organization",
+      name: "MKB Weddings",
+    },
+    creditText: "MKB Weddings",
   };
 
-  const galleryImageObjects = images.slice(0, 12).map((img, idx) => ({
+  const galleryImageObjects = images.slice(0, 24).map((img, idx) => ({
     "@type": "ImageObject",
     "@id": `${canonical}#image-${idx + 1}`,
     contentUrl: img.full,
     url: img.full,
+    thumbnailUrl: img.thumb,
+    name: img.alt,
+    description: img.alt,
     caption: img.caption || img.alt,
+    representativeOfPage: idx === 0,
+    creator: {
+      "@type": "Person",
+      name: "Mark Barnes",
+    },
+    copyrightHolder: {
+      "@type": "Organization",
+      name: "MKB Weddings",
+    },
+    creditText: "MKB Weddings",
+    acquireLicensePage: "https://www.mkbweddings.co.uk",
+    isPartOf: {
+      "@id": `${canonical}#webpage`,
+    },
   }));
 
   const venuePlaceJsonLd = {
