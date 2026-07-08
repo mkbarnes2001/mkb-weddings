@@ -6,8 +6,7 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
 import { MasonryGallery } from "./MasonryGallery";
 import { weddingStories } from "../data/weddingStories";
-import { getBlogImages, getCoverImage } from "../lib/blogGallery";
-import type { BlogImage } from "../lib/blogGallery";
+import { loadMkbIntelligence, type BlogImage } from "../lib/intelligence";
 
 function slugify(value: string) {
   return (value || "")
@@ -32,25 +31,26 @@ export function WeddingStoryPage() {
   }, [slug]);
 
   useEffect(() => {
-    if (!slug || !story) return;
+  if (!slug || !story) return;
 
-    let cancelled = false;
+  let cancelled = false;
 
-    fetch("/blog-gallery.csv", { cache: "no-store" })
-      .then((res) => (res.ok ? res.text() : ""))
-      .then((csvText) => {
-        if (!cancelled) setImages(getBlogImages(csvText, slug, story));
-      })
-      .catch(() => {
-        if (!cancelled) setImages([]);
-      });
+  loadMkbIntelligence()
+    .then((intelligence) => {
+      if (!cancelled) {
+        setImages(intelligence.getBlogImages(slug, story));
+      }
+    })
+    .catch(() => {
+      if (!cancelled) setImages([]);
+    });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [slug, story]);
+  return () => {
+    cancelled = true;
+  };
+}, [slug, story]);
 
-  const cover = getCoverImage(images);
+  const cover = useMemo(() => images.find((image) => image.isCover) || images[0], [images]);
 
   const lightboxImages = useMemo(() => images.map((image) => image.fullSrc), [images]);
   const lightboxAlts = useMemo(() => images.map((image) => image.alt), [images]);
@@ -75,7 +75,7 @@ export function WeddingStoryPage() {
         {cover ? (
           <ImageWithFallback
             src={cover.fullSrc}
-            alt={`${story.couple} wedding at ${story.venue}`}
+            alt={cover.alt}
             width={2000}
             height={1200}
             fetchPriority="high"

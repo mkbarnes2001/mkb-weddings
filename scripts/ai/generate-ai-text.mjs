@@ -14,13 +14,30 @@ const {
 
 const APPLY = process.argv.includes("--apply");
 const FORCE = process.argv.includes("--force");
-const LIMIT_ARG = process.argv.find((arg) => arg.startsWith("--limit="));
-const LIMIT = LIMIT_ARG ? Number(LIMIT_ARG.split("=")[1]) : 25;
-const DELAY_MS = Number(OPENAI_REQUEST_DELAY_MS || 22000);
 const STATUS = process.argv.includes("--status");
 
+const LIMIT_ARG = process.argv.find((arg) => arg.startsWith("--limit="));
+const LIMIT = LIMIT_ARG ? Number(LIMIT_ARG.split("=")[1]) : 25;
+
+const SOURCE_ARG = process.argv.find((arg) => arg.startsWith("--source="));
+const SOURCE_FILTER = SOURCE_ARG ? SOURCE_ARG.split("=")[1].trim().toLowerCase() : "";
+
+const BLOG_ARG = process.argv.find((arg) => arg.startsWith("--blog="));
+const BLOG_FILTER = BLOG_ARG ? BLOG_ARG.split("=")[1].trim().toLowerCase() : "";
+
+const DELAY_MS = Number(OPENAI_REQUEST_DELAY_MS || 22000);
+
 const AI_COLUMNS = [
+  "source",
   "imageId",
+  "blogSlug",
+  "blogOrder",
+  "blogCover",
+  "blogTitle",
+  "blogCouple",
+  "blogVenue",
+  "blogWeddingDate",
+  "blogExcerpt",
   "venue",
   "category",
   "filename",
@@ -36,6 +53,10 @@ const AI_COLUMNS = [
 if (!OPENAI_API_KEY) {
   console.error("Missing OPENAI_API_KEY in .env");
   process.exit(1);
+}
+
+function normalise(value) {
+  return String(value || "").trim().toLowerCase();
 }
 
 function cleanSentence(value, maxLength = 260) {
@@ -59,6 +80,13 @@ function needsText(aiRow) {
   );
 }
 
+function passesFilters(aiRow) {
+  const source = normalise(aiRow.source || "gallery");
+  if (SOURCE_FILTER && source !== SOURCE_FILTER) return false;
+  if (BLOG_FILTER && normalise(aiRow.blogSlug) !== BLOG_FILTER) return false;
+  return true;
+}
+
 function ensureAiRow(row, aiById, aiRows, aiColumns) {
   let ai = aiById.get(row.imageId);
 
@@ -70,6 +98,7 @@ function ensureAiRow(row, aiById, aiRows, aiColumns) {
     aiRows.push(ai);
   }
 
+  ai.source = ai.source || "gallery";
   ai.venue = row.venue || ai.venue || "";
   ai.category = row.category || ai.category || "";
   ai.filename = row.filename || ai.filename || "";
@@ -80,9 +109,12 @@ function ensureAiRow(row, aiById, aiRows, aiColumns) {
 }
 
 function buildPrompt(row, aiRow, context) {
+  const source = normalise(aiRow.source || "gallery");
+  const isBlog = source === "blog";
+
   return [
     "You are writing SEO-friendly image alt text and short captions for MKB Weddings, a Northern Ireland wedding photographer.",
-    "Use the supplied venue, category, county, town and AI tags. Do not invent details that are not supported.",
+    "Use the supplied source, venue, category, county, town, blog story context and AI tags. Do not invent details that are not supported.",
     "Return ONLY valid JSON in this exact shape:",
     '{"alt":"alt text here","caption":"caption here"}',
     "",
@@ -90,19 +122,33 @@ function buildPrompt(row, aiRow, context) {
     "- Alt text must be natural, specific and under 160 characters.",
     "- Caption should be one natural sentence, under 240 characters.",
     "- Write in the MKB Weddings style: relaxed, documentary, warm, modern and natural.",
+    "- Avoid repeating the same phrase across a gallery.",
+    "- Avoid generic phrases like 'documentary wedding moment' unless there is no better supported detail.",
     "- Avoid cheesy words like magical, fairytale, perfect, breathtaking, unforgettable unless genuinely justified.",
     "- Focus on real moments, emotion, light, setting and atmosphere.",
     "- Do not identify real people.",
-    "- Do not use personal names.",
+    "- Do not use personal names from the couple field.",
     "- Do not mention filename.",
     "- Do not keyword stuff.",
     "- Include venue, town or county only when it reads naturally.",
     "- Keep it polished but not over-written.",
+    isBlog
+      ? "- This image is part of a wedding story/blog gallery. Use the blog title, venue, date, excerpt and order to make the caption feel connected to the story."
+      : "- This image is part of the main website gallery.",
     "",
     "Known context:",
-    `venue=${row.venue}`,
-    `category=${row.category}`,
-    `filename=${row.filename}`,
+    `source=${aiRow.source || "gallery"}`,
+    `blogSlug=${aiRow.blogSlug || ""}`,
+    `blogOrder=${aiRow.blogOrder || ""}`,
+    `blogCover=${aiRow.blogCover || ""}`,
+    `blogTitle=${aiRow.blogTitle || ""}`,
+    `blogCouple=${aiRow.blogCouple || ""}`,
+    `blogVenue=${aiRow.blogVenue || ""}`,
+    `blogWeddingDate=${aiRow.blogWeddingDate || ""}`,
+    `blogExcerpt=${aiRow.blogExcerpt || ""}`,
+    `venue=${row.venue || aiRow.venue || ""}`,
+    `category=${row.category || aiRow.category || ""}`,
+    `filename=${row.filename || aiRow.filename || ""}`,
     `aiTags=${aiRow.aiTags || ""}`,
     `town=${context.town || ""}`,
     `county=${context.county || ""}`,
@@ -134,29 +180,25 @@ async function generateText({ row, aiRow, context }) {
   return parseJsonOutput(text);
 }
 
-
 function getTextStatus(aiRows) {
+  const filteredRows = aiRows.filter(passesFilters);
+
   let complete = 0;
   let missingAltOnly = 0;
   let missingCaptionOnly = 0;
   let missingBoth = 0;
 
-  for (const row of aiRows) {
+  for (const row of filteredRows) {
     const hasAlt = (row.aiAlt || "").trim();
     const hasCaption = (row.aiCaption || "").trim();
 
-    if (hasAlt && hasCaption) {
-      complete += 1;
-    } else if (!hasAlt && !hasCaption) {
-      missingBoth += 1;
-    } else if (!hasAlt) {
-      missingAltOnly += 1;
-    } else if (!hasCaption) {
-      missingCaptionOnly += 1;
-    }
+    if (hasAlt && hasCaption) complete += 1;
+    else if (!hasAlt && !hasCaption) missingBoth += 1;
+    else if (!hasAlt) missingAltOnly += 1;
+    else if (!hasCaption) missingCaptionOnly += 1;
   }
 
-  const total = aiRows.length;
+  const total = filteredRows.length;
   const remaining = total - complete;
   const percentage = total > 0 ? ((complete / total) * 100).toFixed(1) : "0.0";
 
@@ -174,16 +216,15 @@ function getTextStatus(aiRows) {
 function printTextStatus(status) {
   console.log("\nAI Alt Text / Caption Status");
   console.log("--------------------------------");
-  console.log(`Total rows:          ${status.total}`);
-  console.log(`Completed:           ${status.complete}`);
-  console.log(`Remaining:           ${status.remaining}`);
-  console.log(`Completion:          ${status.percentage}%`);
+  console.log(`Total rows:           ${status.total}`);
+  console.log(`Completed:            ${status.complete}`);
+  console.log(`Remaining:            ${status.remaining}`);
+  console.log(`Completion:           ${status.percentage}%`);
   console.log("");
-  console.log(`Missing alt only:    ${status.missingAltOnly}`);
-  console.log(`Missing caption only:${status.missingCaptionOnly}`);
-  console.log(`Missing both:        ${status.missingBoth}`);
+  console.log(`Missing alt only:     ${status.missingAltOnly}`);
+  console.log(`Missing caption only: ${status.missingCaptionOnly}`);
+  console.log(`Missing both:         ${status.missingBoth}`);
 }
-
 
 async function generateWithRetry(args) {
   const maxAttempts = 6;
@@ -193,15 +234,10 @@ async function generateWithRetry(args) {
       return await generateText(args);
     } catch (err) {
       const retryable = err.status === 429 || err.status >= 500;
-
       if (!retryable) throw err;
 
       const waitMs = err.retryAfter || Math.min(90000, DELAY_MS * attempt);
-
-      console.warn(
-        `Rate limited/server busy. Waiting ${Math.round(waitMs / 1000)}s before retry ${attempt}/${maxAttempts}...`,
-      );
-
+      console.warn(`Rate limited/server busy. Waiting ${Math.round(waitMs / 1000)}s before retry ${attempt}/${maxAttempts}...`);
       await sleep(waitMs);
     }
   }
@@ -220,42 +256,50 @@ async function main() {
   const { rows: aiRows, columns: existingAiColumns } = readCsv(GALLERY_AI_CSV, AI_COLUMNS);
   const aiColumns = Array.from(new Set([...AI_COLUMNS, ...existingAiColumns]));
 
-  const textStatus = getTextStatus(aiRows);
-
-if (STATUS) {
-  printTextStatus(textStatus);
-  return;
-}
-  const aiById = new Map(
-    aiRows.filter((row) => row.imageId).map((row) => [row.imageId, row]),
-  );
-
+  const aiById = new Map(aiRows.filter((row) => row.imageId).map((row) => [row.imageId, row]));
   const venueMap = loadCountyContext(COUNTY_META_JSON);
-
-  const candidates = [];
 
   for (const row of galleryRows) {
     if (!row.imageId) continue;
-
-    const aiRow = ensureAiRow(row, aiById, aiRows, aiColumns);
-
-    if (needsText(aiRow)) {
-      candidates.push({ row, aiRow });
-    }
+    ensureAiRow(row, aiById, aiRows, aiColumns);
   }
+
+  const textStatus = getTextStatus(aiRows);
+
+  if (STATUS) {
+    printTextStatus(textStatus);
+    return;
+  }
+
+  const candidates = aiRows
+    .filter((aiRow) => passesFilters(aiRow))
+    .filter((aiRow) => needsText(aiRow))
+    .map((aiRow) => ({
+      row: {
+        imageId: aiRow.imageId,
+        venue: aiRow.venue || aiRow.blogVenue || "",
+        category: aiRow.category || "blog",
+        filename: aiRow.filename || "",
+      },
+      aiRow,
+    }));
 
   const runItems = candidates.slice(0, LIMIT);
 
   console.log("MKB AI Text Generator");
   console.log(`Gallery rows: ${galleryRows.length}`);
+  console.log(`AI rows: ${aiRows.length}`);
   console.log(`Rows needing alt/caption: ${candidates.length}`);
   console.log(`This run limit: ${runItems.length}`);
+  console.log(`Source filter: ${SOURCE_FILTER || "all"}`);
+  console.log(`Blog filter: ${BLOG_FILTER || "none"}`);
   console.log(`Model: ${OPENAI_MODEL}`);
   console.log(`Delay between requests: ${DELAY_MS}ms`);
 
   if (!APPLY) {
     console.log("Dry run only. Nothing changed.");
     console.log("Run: node scripts/ai/generate-ai-text.mjs --apply --limit=25");
+    console.log("Blog only: node scripts/ai/generate-ai-text.mjs --apply --source=blog --limit=25");
     return;
   }
 
@@ -270,13 +314,11 @@ if (STATUS) {
     try {
       const context = getContextForRow(row, venueMap);
 
-      console.log(`\nGenerating: ${row.venue} / ${row.category} / ${row.filename}`);
+      console.log(
+        `\nGenerating: ${aiRow.source || "gallery"} / ${aiRow.blogSlug || ""} / ${row.venue || ""} / ${row.category || ""} / ${row.filename || ""}`,
+      );
 
-      const result = await generateWithRetry({
-        row,
-        aiRow,
-        context,
-      });
+      const result = await generateWithRetry({ row, aiRow, context });
 
       aiRow.aiAlt = cleanSentence(result.alt, 160);
       aiRow.aiCaption = cleanSentence(result.caption, 240);
