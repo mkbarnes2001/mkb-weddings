@@ -1,0 +1,2477 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_a9eefd14-7825-40da-87a4-540551f9ff30",
+  "slug": "rabbit-hotel-and-spa",
+  "name": "Rabbit hotel and spa",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "The Rabbit Hotel & Retreat has a relaxed, contemporary feel that immediately sets the tone for an easy, enjoyable wedding day. From a Northern Ireland wedding photographer’s perspective, it’s a venue that encourages people to slow down, settle in and genuinely enjoy the experience, without anything feeling rushed or overly formal. The outdoor spaces, including the stunning outdoor spa really come into their own for photography. The gardens and surrounding countryside offer a soft, natural backdrop that works beautifully for relaxed portraits and unforced group shots.  Indoors, the modern design, warm textures and natural light create clean, timeless settings that photograph effortlessly in all conditions.  Located just outside Belfast, The Rabbit Hotel & Retreat offers a wedding day that feels connected and unhurried. From morning preparations through to evening celebrations, everything happens within a close, cohesive setting. From a photography point of view, it’s a venue that supports real moments, gentle transitions and a laid-back pace, allowing the story of the day to unfold naturally and honestly.",
+  "heroImageId": "legacy_4b52f916f14638ea48a6cb76",
+  "status": "published",
+  "links": {
+    "website": "https://www.rabbithotel.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.728Z",
+  "updatedAt": "2026-07-13T07:52:28.339Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.339Z",
+    "heroAssetId": "legacy_4b52f916f14638ea48a6cb76",
+    "images": [
+      {
+        "assetId": "legacy_4b52f916f14638ea48a6cb76",
+        "imageId": "MKB001219",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-317_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "bride",
+          "groom",
+          "indoor ceremony",
+          "wedding vows",
+          "bouquet",
+          "fairy lights",
+          "rustic decor",
+          "natural light",
+          "romantic mood",
+          "rabbit hotel and spa",
+          "aisle moment"
+        ],
+        "aiTags": [
+          "ceremony",
+          "bride",
+          "groom",
+          "indoor ceremony",
+          "wedding vows",
+          "bouquet",
+          "fairy lights",
+          "rustic decor",
+          "natural light",
+          "romantic mood",
+          "rabbit hotel and spa",
+          "aisle moment"
+        ],
+        "aiAlt": "Bride and groom sharing vows during an indoor ceremony at Rabbit Hotel and Spa, Templepatrick, with fairy lights and rustic decor",
+        "aiCaption": "A quiet ceremony moment at Rabbit Hotel and Spa in Templepatrick, captured with natural light, soft fairy lights and a relaxed documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/ceremony/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-317_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/ceremony/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-317_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1220,
+          "venue": "Rabbit hotel and spa",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_a1b6c60b128c8b26eb4b31ce",
+        "imageId": "MKB001220",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-344_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "indoor ceremony",
+          "bride and groom",
+          "wedding vows",
+          "guests seated",
+          "rustic decor",
+          "fairy lights",
+          "natural light",
+          "romantic mood",
+          "aisle view",
+          "floral ceremony",
+          "rabbit hotel and spa"
+        ],
+        "aiTags": [
+          "ceremony",
+          "indoor ceremony",
+          "bride and groom",
+          "wedding vows",
+          "guests seated",
+          "rustic decor",
+          "fairy lights",
+          "natural light",
+          "romantic mood",
+          "aisle view",
+          "floral ceremony",
+          "rabbit hotel and spa"
+        ],
+        "aiAlt": "Indoor wedding ceremony at Rabbit Hotel and Spa, Templepatrick, with a couple exchanging vows under soft lights and floral decor",
+        "aiCaption": "A relaxed aisle view of the ceremony at Rabbit Hotel and Spa in Templepatrick, with guests gathered, soft light and rustic floral details framing the vows.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/ceremony/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-344_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/ceremony/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-344_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1221,
+          "venue": "Rabbit hotel and spa",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_a3c81a523547c5bc9463f7ac",
+        "imageId": "MKB001221",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-388_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "indoor ceremony",
+          "bride and groom",
+          "wedding vows",
+          "guests",
+          "bridesmaids",
+          "rustic decor",
+          "floral arch",
+          "natural light",
+          "romantic mood",
+          "rabbit hotel and spa",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "ceremony",
+          "indoor ceremony",
+          "bride and groom",
+          "wedding vows",
+          "guests",
+          "bridesmaids",
+          "rustic decor",
+          "floral arch",
+          "natural light",
+          "romantic mood",
+          "rabbit hotel and spa",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Indoor wedding vows at Rabbit Hotel and Spa in Templepatrick, with guests gathered beneath a floral arch",
+        "aiCaption": "A quiet ceremony moment at Rabbit Hotel and Spa, Templepatrick, framed by soft natural light, rustic decor and close family watching on.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/ceremony/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-388_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/ceremony/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-388_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1222,
+          "venue": "Rabbit hotel and spa",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_35d30bf8e4671e7016d47b33",
+        "imageId": "MKB001222",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-212_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "aisle walk",
+          "bride",
+          "father of bride",
+          "indoor ceremony",
+          "wedding guests",
+          "warm lighting",
+          "greenery decor",
+          "emotional moment",
+          "processional",
+          "rabbit hotel",
+          "romantic"
+        ],
+        "aiTags": [
+          "ceremony",
+          "aisle walk",
+          "bride",
+          "father of bride",
+          "indoor ceremony",
+          "wedding guests",
+          "warm lighting",
+          "greenery decor",
+          "emotional moment",
+          "processional",
+          "rabbit hotel",
+          "romantic"
+        ],
+        "aiAlt": "Bride walking down the aisle with her father during a warm indoor ceremony at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A quiet, emotional aisle walk at Rabbit Hotel and Spa in Templepatrick, with warm light, greenery and guests gathered close.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/ceremony/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-212_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/ceremony/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-212_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1223,
+          "venue": "Rabbit hotel and spa",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_4813151296e73b9590bc37be",
+        "imageId": "MKB001223",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-265_500.webp",
+        "order": 5,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "first kiss",
+          "bride and groom",
+          "wedding guests",
+          "indoor ceremony",
+          "floral decor",
+          "aisle",
+          "warm lighting",
+          "romantic",
+          "joyful",
+          "rabbit hotel and spa",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "ceremony",
+          "first kiss",
+          "bride and groom",
+          "wedding guests",
+          "indoor ceremony",
+          "floral decor",
+          "aisle",
+          "warm lighting",
+          "romantic",
+          "joyful",
+          "rabbit hotel and spa",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "First kiss during an indoor ceremony at Rabbit Hotel and Spa in Templepatrick, with guests watching in warm light.",
+        "aiCaption": "A joyful first kiss at Rabbit Hotel and Spa in Templepatrick, captured naturally during a warm indoor ceremony surrounded by guests.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/ceremony/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-265_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/ceremony/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-265_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1224,
+          "venue": "Rabbit hotel and spa",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_dd85a071cd96b9425f175152",
+        "imageId": "MKB001224",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography4_500.webp",
+        "order": 6,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "balcony portrait",
+          "rabbit hotel and spa",
+          "evening light",
+          "romantic mood",
+          "wedding portraits",
+          "templepatrick wedding",
+          "outdoor portrait",
+          "creative composition"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "balcony portrait",
+          "rabbit hotel and spa",
+          "evening light",
+          "romantic mood",
+          "wedding portraits",
+          "templepatrick wedding",
+          "outdoor portrait",
+          "creative composition"
+        ],
+        "aiAlt": "Bride and groom on a balcony at Rabbit Hotel and Spa in Templepatrick, photographed in soft evening light",
+        "aiCaption": "A relaxed balcony portrait at Rabbit Hotel and Spa, Templepatrick, with the couple framed in soft evening light and a quiet romantic mood.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography4_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography4_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1225,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_e2e6665afe60b0fa5686667e",
+        "imageId": "MKB001225",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-511_500.webp",
+        "order": 7,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "stone archway",
+          "garden portrait",
+          "moody lighting",
+          "backlit",
+          "romantic",
+          "intimate moment",
+          "wedding dress",
+          "groom suit",
+          "outdoor wedding",
+          "rabbit hotel and spa"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "stone archway",
+          "garden portrait",
+          "moody lighting",
+          "backlit",
+          "romantic",
+          "intimate moment",
+          "wedding dress",
+          "groom suit",
+          "outdoor wedding",
+          "rabbit hotel and spa"
+        ],
+        "aiAlt": "Bride and groom sharing a quiet portrait beneath a stone archway at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A relaxed couple portrait in the gardens at Rabbit Hotel and Spa, with soft backlight and the stone archway adding a calm, intimate feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-511_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-511_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1226,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_e285b521cbd29c4528e16329",
+        "imageId": "MKB001226",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-513_500.webp",
+        "order": 8,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "stone archway",
+          "outdoor portrait",
+          "black and white",
+          "romantic",
+          "elegant",
+          "soft light",
+          "wedding dress",
+          "groom suit",
+          "rabbit hotel",
+          "wedding day"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "stone archway",
+          "outdoor portrait",
+          "black and white",
+          "romantic",
+          "elegant",
+          "soft light",
+          "wedding dress",
+          "groom suit",
+          "rabbit hotel",
+          "wedding day"
+        ],
+        "aiAlt": "Black and white couple portrait under a stone archway at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A quiet black and white portrait under the stone archway at Rabbit Hotel and Spa in Templepatrick, with soft light and a relaxed wedding-day feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-513_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-513_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1227,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_04560e5aa03ff5671cac4ded",
+        "imageId": "MKB001227",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-517_500.webp",
+        "order": 9,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "golden hour",
+          "romantic",
+          "intimate embrace",
+          "wedding dress",
+          "groom suit",
+          "autumn backdrop",
+          "soft bokeh",
+          "rabbit hotel and spa",
+          "newlyweds"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "golden hour",
+          "romantic",
+          "intimate embrace",
+          "wedding dress",
+          "groom suit",
+          "autumn backdrop",
+          "soft bokeh",
+          "rabbit hotel and spa",
+          "newlyweds"
+        ],
+        "aiAlt": "Bride and groom embracing outdoors at Rabbit Hotel and Spa, Templepatrick, in soft golden hour light",
+        "aiCaption": "A relaxed couple portrait at Rabbit Hotel and Spa in Templepatrick, with the newlyweds wrapped up together in warm autumn light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-517_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-517_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1228,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_cb88c125d6bfbd7456e8e62c",
+        "imageId": "MKB001228",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-527_500.webp",
+        "order": 10,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "garden portraits",
+          "outdoor wedding",
+          "golden hour",
+          "romantic",
+          "candid moment",
+          "walking together",
+          "wedding dress",
+          "black suit",
+          "rabbit hotel spa",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "garden portraits",
+          "outdoor wedding",
+          "golden hour",
+          "romantic",
+          "candid moment",
+          "walking together",
+          "wedding dress",
+          "black suit",
+          "rabbit hotel spa",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom walking through the gardens at Rabbit Hotel and Spa, Templepatrick, during golden hour portraits",
+        "aiCaption": "A relaxed golden hour walk in the gardens at Rabbit Hotel and Spa, Templepatrick, captured with a natural documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-527_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-527_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1229,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_489d52e97aec8445c5d07550",
+        "imageId": "MKB001229",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-532_500.webp",
+        "order": 11,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "garden setting",
+          "lakeside",
+          "golden hour",
+          "natural light",
+          "romantic",
+          "joyful",
+          "candid moment",
+          "wedding day",
+          "summer wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "garden setting",
+          "lakeside",
+          "golden hour",
+          "natural light",
+          "romantic",
+          "joyful",
+          "candid moment",
+          "wedding day",
+          "summer wedding"
+        ],
+        "aiAlt": "Bride and groom laughing by the lake at Rabbit Hotel and Spa in Templepatrick during golden hour portraits",
+        "aiCaption": "A relaxed lakeside portrait at Rabbit Hotel and Spa, with the couple enjoying soft golden hour light in Templepatrick.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-532_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-532_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1230,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_fa7c1e09cbab61a1f1f4c03d",
+        "imageId": "MKB001230",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-618_500.webp",
+        "order": 12,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "indoor portrait",
+          "warm lighting",
+          "moody atmosphere",
+          "romantic",
+          "seated couple",
+          "floral decor",
+          "wedding reception",
+          "candid moment",
+          "rabbit hotel and spa"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "indoor portrait",
+          "warm lighting",
+          "moody atmosphere",
+          "romantic",
+          "seated couple",
+          "floral decor",
+          "wedding reception",
+          "candid moment",
+          "rabbit hotel and spa"
+        ],
+        "aiAlt": "Seated bride and groom in warm light at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A quiet indoor portrait at Rabbit Hotel and Spa, with the couple seated together in warm reception light and floral surroundings.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-618_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-618_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1231,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_2e9896f4829d1766ef197226",
+        "imageId": "MKB001231",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-736_500.webp",
+        "order": 13,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "night portrait",
+          "dramatic lighting",
+          "red lights",
+          "romantic mood",
+          "wedding dress",
+          "black tie",
+          "outdoor terrace",
+          "palm plants",
+          "rabbit hotel and spa",
+          "evening wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "night portrait",
+          "dramatic lighting",
+          "red lights",
+          "romantic mood",
+          "wedding dress",
+          "black tie",
+          "outdoor terrace",
+          "palm plants",
+          "rabbit hotel and spa",
+          "evening wedding"
+        ],
+        "aiAlt": "Bride and groom in a night portrait with red terrace lighting at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A relaxed evening couple portrait on the terrace at Rabbit Hotel and Spa in Templepatrick, with dramatic red light and a quiet modern feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-736_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-736_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1232,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_4fc03584e982062abeacfece",
+        "imageId": "MKB001232",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-738_500.webp",
+        "order": 14,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "night portrait",
+          "flash photography",
+          "moody lighting",
+          "red lights",
+          "romantic mood",
+          "wedding portraits",
+          "evening wedding",
+          "rabbit hotel and spa"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "night portrait",
+          "flash photography",
+          "moody lighting",
+          "red lights",
+          "romantic mood",
+          "wedding portraits",
+          "evening wedding",
+          "rabbit hotel and spa"
+        ],
+        "aiAlt": "Bride and groom in a moody night portrait with red lights at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A relaxed evening portrait at Rabbit Hotel and Spa in Templepatrick, with soft flash, red light and a quiet moment between the couple.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-738_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-738_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1233,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_055e51a7fed1907258c64384",
+        "imageId": "MKB001233",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-740_500.webp",
+        "order": 15,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "night portrait",
+          "black and white",
+          "balcony",
+          "romantic",
+          "dramatic lighting",
+          "reflection",
+          "intimate moment",
+          "wedding kiss",
+          "rabbit hotel and spa"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "night portrait",
+          "black and white",
+          "balcony",
+          "romantic",
+          "dramatic lighting",
+          "reflection",
+          "intimate moment",
+          "wedding kiss",
+          "rabbit hotel and spa"
+        ],
+        "aiAlt": "Black and white night portrait of a bride and groom kissing on a balcony at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A quiet balcony kiss at Rabbit Hotel and Spa in Templepatrick, captured in black and white with dramatic night light and a soft reflection.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-740_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-740_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1234,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_190bee1343ddda53c259e622",
+        "imageId": "MKB001234",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-742_500.webp",
+        "order": 16,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "rabbit hotel and spa",
+          "night portrait",
+          "red lighting",
+          "dramatic lighting",
+          "romantic mood",
+          "seated pose",
+          "wedding dress",
+          "groom suit",
+          "disco ball",
+          "evening wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "rabbit hotel and spa",
+          "night portrait",
+          "red lighting",
+          "dramatic lighting",
+          "romantic mood",
+          "seated pose",
+          "wedding dress",
+          "groom suit",
+          "disco ball",
+          "evening wedding"
+        ],
+        "aiAlt": "Bride and groom seated for a red-lit night portrait at Rabbit Hotel and Spa in Templepatrick",
+        "aiCaption": "A relaxed evening couple portrait at Rabbit Hotel and Spa, with red lighting and a disco ball adding a modern mood.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-742_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-742_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1235,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_779338f151170cf8ae5ee750",
+        "imageId": "MKB001235",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-159_500.webp",
+        "order": 17,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "night portrait",
+          "vehicle portrait",
+          "truck cab",
+          "dramatic lighting",
+          "moody",
+          "fun couple",
+          "wedding portraits",
+          "rabbit hotel and spa",
+          "templepatrick wedding",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "night portrait",
+          "vehicle portrait",
+          "truck cab",
+          "dramatic lighting",
+          "moody",
+          "fun couple",
+          "wedding portraits",
+          "rabbit hotel and spa",
+          "templepatrick wedding",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom share a fun night portrait beside a truck cab at Rabbit Hotel and Spa in Templepatrick",
+        "aiCaption": "A relaxed couple portrait at Rabbit Hotel and Spa, with dramatic night lighting and a playful moment beside the truck cab.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-159_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-159_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1236,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_dab4c503264b123f04e83649",
+        "imageId": "MKB001236",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-172_500.webp",
+        "order": 18,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "night portrait",
+          "flash photography",
+          "dramatic lighting",
+          "moody wedding",
+          "outdoor portrait",
+          "water feature",
+          "evening wedding",
+          "romantic portrait",
+          "rabbit hotel",
+          "wedding photography"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "night portrait",
+          "flash photography",
+          "dramatic lighting",
+          "moody wedding",
+          "outdoor portrait",
+          "water feature",
+          "evening wedding",
+          "romantic portrait",
+          "rabbit hotel",
+          "wedding photography"
+        ],
+        "aiAlt": "Bride and groom night portrait by the water at Rabbit Hotel and Spa, Templepatrick, with soft flash lighting",
+        "aiCaption": "A relaxed evening portrait at Rabbit Hotel and Spa in Templepatrick, using gentle flash and the water feature for a modern, moody feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-172_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-172_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1237,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_be232651a2b27312854d138c",
+        "imageId": "MKB001237",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-322_500.webp",
+        "order": 19,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portrait",
+          "bride and groom",
+          "stone archway",
+          "outdoor wedding",
+          "natural light",
+          "romantic",
+          "joyful",
+          "wedding bouquet",
+          "rabbit hotel and spa",
+          "templepatrick wedding",
+          "northern ireland wedding",
+          "wedding portraits"
+        ],
+        "aiTags": [
+          "couple portrait",
+          "bride and groom",
+          "stone archway",
+          "outdoor wedding",
+          "natural light",
+          "romantic",
+          "joyful",
+          "wedding bouquet",
+          "rabbit hotel and spa",
+          "templepatrick wedding",
+          "northern ireland wedding",
+          "wedding portraits"
+        ],
+        "aiAlt": "Bride and groom sharing a joyful portrait by the stone archway at Rabbit Hotel and Spa in Templepatrick",
+        "aiCaption": "A relaxed couple portrait in natural light by the stone archway at Rabbit Hotel and Spa, Templepatrick.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-322_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-322_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1238,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_e4c9c437dbfa4e0025018ab6",
+        "imageId": "MKB001238",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-368_500.webp",
+        "order": 20,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "black and white",
+          "romantic",
+          "intimate",
+          "window light",
+          "floral decor",
+          "garden backdrop",
+          "wedding dress",
+          "groom suit",
+          "rabbit hotel and spa",
+          "wedding portrait"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "black and white",
+          "romantic",
+          "intimate",
+          "window light",
+          "floral decor",
+          "garden backdrop",
+          "wedding dress",
+          "groom suit",
+          "rabbit hotel and spa",
+          "wedding portrait"
+        ],
+        "aiAlt": "Black and white couple portrait by window light at Rabbit Hotel and Spa in Templepatrick",
+        "aiCaption": "A quiet black and white portrait at Rabbit Hotel and Spa, with soft window light and floral details framing the couple.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-368_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-368_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1239,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_4dfabddbb4adb935dc786583",
+        "imageId": "MKB001239",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-402_500.webp",
+        "order": 21,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "garden portraits",
+          "golden hour",
+          "natural light",
+          "romantic",
+          "relaxed",
+          "walking together",
+          "wedding bouquet",
+          "rabbit hotel and spa",
+          "templepatrick wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "garden portraits",
+          "golden hour",
+          "natural light",
+          "romantic",
+          "relaxed",
+          "walking together",
+          "wedding bouquet",
+          "rabbit hotel and spa",
+          "templepatrick wedding"
+        ],
+        "aiAlt": "Bride and groom walking through the gardens at Rabbit Hotel and Spa in Templepatrick during golden hour",
+        "aiCaption": "A relaxed couple portrait in the gardens at Rabbit Hotel and Spa, with soft golden light and a natural walk together in Templepatrick.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-402_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-402_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1240,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_d8eeb092103712e2a4519be2",
+        "imageId": "MKB001240",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-406_500.webp",
+        "order": 22,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "golden hour",
+          "romantic",
+          "holding hands",
+          "wedding bouquet",
+          "garden portraits",
+          "festoon lights",
+          "rabbit hotel wedding",
+          "natural light",
+          "wedding day"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "golden hour",
+          "romantic",
+          "holding hands",
+          "wedding bouquet",
+          "garden portraits",
+          "festoon lights",
+          "rabbit hotel wedding",
+          "natural light",
+          "wedding day"
+        ],
+        "aiAlt": "Couple holding hands during golden hour garden portraits at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A relaxed couple portrait in the gardens at Rabbit Hotel and Spa, with soft golden light and festoon lights adding to the evening atmosphere.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-406_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-406_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1241,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_4dbec2898898c557eac3a586",
+        "imageId": "MKB001241",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-412_500.webp",
+        "order": 23,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "garden portrait",
+          "stone arch",
+          "golden hour",
+          "warm light",
+          "romantic",
+          "wedding bouquet",
+          "rabbit hotel wedding",
+          "templepatrick wedding",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "garden portrait",
+          "stone arch",
+          "golden hour",
+          "warm light",
+          "romantic",
+          "wedding bouquet",
+          "rabbit hotel wedding",
+          "templepatrick wedding",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom portrait by a stone arch in warm evening light at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A relaxed garden portrait at Rabbit Hotel and Spa in Templepatrick, with the couple framed by stonework and warm golden-hour light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-412_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-412_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1242,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_f111feda448add529411012f",
+        "imageId": "MKB001242",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-446_500.webp",
+        "order": 24,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "indoor wedding",
+          "chandelier",
+          "warm lighting",
+          "romantic",
+          "elegant decor",
+          "wedding dress",
+          "veil",
+          "intimate moment",
+          "rabbit hotel and spa",
+          "templepatrick wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "indoor wedding",
+          "chandelier",
+          "warm lighting",
+          "romantic",
+          "elegant decor",
+          "wedding dress",
+          "veil",
+          "intimate moment",
+          "rabbit hotel and spa",
+          "templepatrick wedding"
+        ],
+        "aiAlt": "Bride and groom sharing a quiet indoor portrait under warm chandelier light at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A relaxed couple portrait at Rabbit Hotel and Spa in Templepatrick, with warm indoor light and elegant decor adding to the intimate atmosphere.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-446_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-446_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1243,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_bd4a5a02c9ef613614f82ed3",
+        "imageId": "MKB001243",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-455_500.webp",
+        "order": 25,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "wedding portrait",
+          "black and white",
+          "indoor portrait",
+          "dramatic lighting",
+          "romantic mood",
+          "seated pose",
+          "bridal bouquet",
+          "intimate moment",
+          "rabbit hotel and spa",
+          "wedding day"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "wedding portrait",
+          "black and white",
+          "indoor portrait",
+          "dramatic lighting",
+          "romantic mood",
+          "seated pose",
+          "bridal bouquet",
+          "intimate moment",
+          "rabbit hotel and spa",
+          "wedding day"
+        ],
+        "aiAlt": "Black and white seated portrait of a bride and groom with bouquet at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A quiet indoor couple portrait at Rabbit Hotel and Spa in Templepatrick, with soft dramatic light and a relaxed wedding day mood.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-455_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-455_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1244,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_9a2c3ee0a1c443b1ae265d88",
+        "imageId": "MKB001244",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography1_500.webp",
+        "order": 26,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "indoor wedding",
+          "bar portrait",
+          "chandelier",
+          "ambient lighting",
+          "romantic",
+          "intimate moment",
+          "wedding kiss",
+          "evening reception",
+          "rabbit hotel and spa",
+          "templepatrick wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "indoor wedding",
+          "bar portrait",
+          "chandelier",
+          "ambient lighting",
+          "romantic",
+          "intimate moment",
+          "wedding kiss",
+          "evening reception",
+          "rabbit hotel and spa",
+          "templepatrick wedding"
+        ],
+        "aiAlt": "Bride and groom sharing a quiet kiss in the bar at Rabbit Hotel and Spa, Templepatrick, under warm chandelier light",
+        "aiCaption": "A relaxed evening portrait at Rabbit Hotel and Spa in Templepatrick, with the couple sharing a quiet moment in the warm bar light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography1_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography1_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1245,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_78a0e51e3b5aa45ac547fe0a",
+        "imageId": "MKB001245",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography5_500.webp",
+        "order": 27,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "stone archway",
+          "outdoor portrait",
+          "wedding bouquet",
+          "dramatic lighting",
+          "moody",
+          "romantic",
+          "evening light",
+          "garden setting",
+          "wedding day",
+          "rabbit hotel and spa"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "stone archway",
+          "outdoor portrait",
+          "wedding bouquet",
+          "dramatic lighting",
+          "moody",
+          "romantic",
+          "evening light",
+          "garden setting",
+          "wedding day",
+          "rabbit hotel and spa"
+        ],
+        "aiAlt": "Bride and groom portrait beneath a stone archway at Rabbit Hotel and Spa in Templepatrick, with evening light and bouquet.",
+        "aiCaption": "A relaxed couple portrait at Rabbit Hotel and Spa, Templepatrick, framed by the stone archway and soft evening light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography5_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography5_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1246,
+          "venue": "Rabbit hotel and spa",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_bc810567ec727f00afadbac6",
+        "imageId": "MKB001246",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-142_500.webp",
+        "order": 28,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "details-and-decor"
+        ],
+        "tags": [
+          "wedding decor",
+          "reception room",
+          "hanging greenery",
+          "fairy lights",
+          "warm lighting",
+          "table settings",
+          "long tables",
+          "rustic decor",
+          "romantic mood",
+          "venue details",
+          "rabbit hotel spa",
+          "wedding reception"
+        ],
+        "aiTags": [
+          "wedding decor",
+          "reception room",
+          "hanging greenery",
+          "fairy lights",
+          "warm lighting",
+          "table settings",
+          "long tables",
+          "rustic decor",
+          "romantic mood",
+          "venue details",
+          "rabbit hotel spa",
+          "wedding reception"
+        ],
+        "aiAlt": "Warm wedding reception decor at Rabbit Hotel and Spa in Templepatrick, with long tables, hanging greenery and soft fairy lights",
+        "aiCaption": "Long tables, warm light and greenery set a relaxed atmosphere for a wedding reception at Rabbit Hotel and Spa in County Antrim.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/details%20and%20decor/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-142_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/details%20and%20decor/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-142_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1247,
+          "venue": "Rabbit hotel and spa",
+          "category": "details and decor"
+        }
+      },
+      {
+        "assetId": "legacy_27d97ac27ac92f580f7b13fa",
+        "imageId": "MKB001247",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-and-spa-templepatrick_Wedding_Photography_D&L-105_2000_500.webp",
+        "order": 29,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "details-and-decor"
+        ],
+        "tags": [
+          "bridal shoes",
+          "wedding details",
+          "bridal accessories",
+          "white heels",
+          "feather decor",
+          "soft light",
+          "elegant mood",
+          "morning prep",
+          "detail shot",
+          "luxury wedding",
+          "rabbit hotel spa"
+        ],
+        "aiTags": [
+          "bridal shoes",
+          "wedding details",
+          "bridal accessories",
+          "white heels",
+          "feather decor",
+          "soft light",
+          "elegant mood",
+          "morning prep",
+          "detail shot",
+          "luxury wedding",
+          "rabbit hotel spa"
+        ],
+        "aiAlt": "White bridal heels with feather detail in soft morning light at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "Soft morning light catches the bridal heels and feather details during wedding prep at Rabbit Hotel and Spa in Templepatrick.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/details%20and%20decor/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-and-spa-templepatrick_Wedding_Photography_D%26L-105_2000_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/details%20and%20decor/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-and-spa-templepatrick_Wedding_Photography_D%26L-105_2000_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1248,
+          "venue": "Rabbit hotel and spa",
+          "category": "details and decor"
+        }
+      },
+      {
+        "assetId": "legacy_e0cf7637a4047644acdf9c5c",
+        "imageId": "MKB001248",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-497_500.webp",
+        "order": 30,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "bridal party",
+          "bride",
+          "bridesmaids",
+          "bouquets",
+          "stone arch",
+          "outdoor portraits",
+          "natural light",
+          "joyful",
+          "celebration",
+          "magenta dresses",
+          "wedding party",
+          "group portrait"
+        ],
+        "aiTags": [
+          "bridal party",
+          "bride",
+          "bridesmaids",
+          "bouquets",
+          "stone arch",
+          "outdoor portraits",
+          "natural light",
+          "joyful",
+          "celebration",
+          "magenta dresses",
+          "wedding party",
+          "group portrait"
+        ],
+        "aiAlt": "Bride and bridesmaids with bouquets at the stone arch at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A joyful bridal party portrait in natural light at Rabbit Hotel and Spa in Templepatrick, with magenta dresses adding colour to the celebration.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/family%20and%20bridal%20party/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-497_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/family%20and%20bridal%20party/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-497_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1249,
+          "venue": "Rabbit hotel and spa",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_c39822807fca6794a8c68ef9",
+        "imageId": "MKB001249",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-108_500.webp",
+        "order": 31,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bridal details",
+          "wedding bouquet",
+          "ring box",
+          "flat lay",
+          "soft window light",
+          "moody",
+          "romantic",
+          "floral details",
+          "wedding accessories",
+          "rabbit hotel and spa"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bridal details",
+          "wedding bouquet",
+          "ring box",
+          "flat lay",
+          "soft window light",
+          "moody",
+          "romantic",
+          "floral details",
+          "wedding accessories",
+          "rabbit hotel and spa"
+        ],
+        "aiAlt": "Wedding bouquet and ring box in soft window light during getting ready at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A quiet getting ready detail at Rabbit Hotel and Spa, with floral touches and a ring box photographed in soft window light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/getting%20ready/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-108_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/getting%20ready/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-108_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1250,
+          "venue": "Rabbit hotel and spa",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_8b4f458e84ba7fdbc8333124",
+        "imageId": "MKB001250",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-186_500.webp",
+        "order": 32,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bridal prep",
+          "bridesmaids",
+          "pajamas",
+          "hotel room",
+          "flash lighting",
+          "fun moment",
+          "candid",
+          "celebration",
+          "morning preparations",
+          "rabbit hotel spa",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bridal prep",
+          "bridesmaids",
+          "pajamas",
+          "hotel room",
+          "flash lighting",
+          "fun moment",
+          "candid",
+          "celebration",
+          "morning preparations",
+          "rabbit hotel spa",
+          "wedding morning"
+        ],
+        "aiAlt": "Bridesmaids in pajamas share a fun candid moment during wedding morning prep at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A relaxed wedding morning at Rabbit Hotel and Spa in Templepatrick, with bridesmaids enjoying a candid moment during bridal prep.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/getting%20ready/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-186_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/getting%20ready/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-186_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1251,
+          "venue": "Rabbit hotel and spa",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_27eeb04f72d017d8a0761dac",
+        "imageId": "MKB001251",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-103_500.webp",
+        "order": 33,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "wedding dress",
+          "bridal gown",
+          "getting ready",
+          "bridal details",
+          "dress hanging",
+          "indoor scene",
+          "natural light",
+          "calm mood",
+          "elegant style",
+          "no people",
+          "rabbit hotel and spa"
+        ],
+        "aiTags": [
+          "wedding dress",
+          "bridal gown",
+          "getting ready",
+          "bridal details",
+          "dress hanging",
+          "indoor scene",
+          "natural light",
+          "calm mood",
+          "elegant style",
+          "no people",
+          "rabbit hotel and spa"
+        ],
+        "aiAlt": "Wedding dress hanging in natural light during bridal prep at Rabbit Hotel and Spa, Templepatrick",
+        "aiCaption": "A quiet getting ready detail at Rabbit Hotel and Spa in Templepatrick, with the bridal gown hanging in soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/getting%20ready/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-103_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/getting%20ready/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-103_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1252,
+          "venue": "Rabbit hotel and spa",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_3c47eb24cd8a92b0759c7e10",
+        "imageId": "MKB001252",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-143_500.webp",
+        "order": 34,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bridal prep",
+          "the loft",
+          "rabbit hotel",
+          "detail shot",
+          "indoor",
+          "warm light",
+          "morning prep",
+          "makeup station",
+          "relaxed mood",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bridal prep",
+          "the loft",
+          "rabbit hotel",
+          "detail shot",
+          "indoor",
+          "warm light",
+          "morning prep",
+          "makeup station",
+          "relaxed mood",
+          "wedding morning"
+        ],
+        "aiAlt": "Warm wedding morning detail at Rabbit Hotel and Spa, Templepatrick, with makeup station set for relaxed bridal prep",
+        "aiCaption": "A quiet getting-ready detail from The Loft at Rabbit Hotel and Spa in Templepatrick, photographed in warm light before the day began.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/getting%20ready/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-143_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/getting%20ready/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-143_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1253,
+          "venue": "Rabbit hotel and spa",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_13326cb1da218d59cbbcf758",
+        "imageId": "MKB001253",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography6_500.webp",
+        "order": 35,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bride tribe",
+          "bridesmaids",
+          "bridal pajamas",
+          "champagne toast",
+          "outdoor portraits",
+          "sunny light",
+          "candid laughter",
+          "relaxed mood",
+          "morning prep",
+          "rabbit hotel spa",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bride tribe",
+          "bridesmaids",
+          "bridal pajamas",
+          "champagne toast",
+          "outdoor portraits",
+          "sunny light",
+          "candid laughter",
+          "relaxed mood",
+          "morning prep",
+          "rabbit hotel spa",
+          "wedding morning"
+        ],
+        "aiAlt": "Bride and bridesmaids in bridal pyjamas sharing a champagne toast outside Rabbit Hotel and Spa in Templepatrick",
+        "aiCaption": "A relaxed wedding morning at Rabbit Hotel and Spa, with the bridal party laughing together in the sunshine during getting ready.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/getting%20ready/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography6_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/getting%20ready/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography6_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1254,
+          "venue": "Rabbit hotel and spa",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_c4d92d0326a1e7a9947d2df6",
+        "imageId": "MKB001254",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-627_500.webp",
+        "order": 36,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "wedding reception",
+          "bride and groom",
+          "grand entrance",
+          "guests clapping",
+          "indoor ceremony",
+          "black and white",
+          "romantic mood",
+          "celebration",
+          "ambient lighting",
+          "rabbit hotel and spa",
+          "wedding aisle",
+          "party atmosphere"
+        ],
+        "aiTags": [
+          "wedding reception",
+          "bride and groom",
+          "grand entrance",
+          "guests clapping",
+          "indoor ceremony",
+          "black and white",
+          "romantic mood",
+          "celebration",
+          "ambient lighting",
+          "rabbit hotel and spa",
+          "wedding aisle",
+          "party atmosphere"
+        ],
+        "aiAlt": "Black and white photo of a couple making their entrance to applause at Rabbit Hotel and Spa in Templepatrick",
+        "aiCaption": "A relaxed reception entrance at Rabbit Hotel and Spa, with guests clapping as the couple walk in together.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/reception%20and%20party/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-627_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/reception%20and%20party/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-627_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1255,
+          "venue": "Rabbit hotel and spa",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_1b1648dbb584a659ce6a5446",
+        "imageId": "MKB001255",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D&L-660_500.webp",
+        "order": 37,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "reception",
+          "wedding speeches",
+          "top table",
+          "bride and groom",
+          "wedding guests",
+          "microphone speech",
+          "floral decor",
+          "candlelight",
+          "warm lighting",
+          "joyful mood",
+          "indoor reception",
+          "rabbit hotel and spa"
+        ],
+        "aiTags": [
+          "reception",
+          "wedding speeches",
+          "top table",
+          "bride and groom",
+          "wedding guests",
+          "microphone speech",
+          "floral decor",
+          "candlelight",
+          "warm lighting",
+          "joyful mood",
+          "indoor reception",
+          "rabbit hotel and spa"
+        ],
+        "aiAlt": "Wedding speeches at the top table in Rabbit Hotel and Spa, Templepatrick, with warm candlelight and guests looking on.",
+        "aiCaption": "A relaxed reception moment at Rabbit Hotel and Spa in Templepatrick, with speeches, candlelight and a warm room full of happy guests.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/reception%20and%20party/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-660_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/reception%20and%20party/MKB_weddings_mkb-photography-Ireland_Northen_ireland_Wedding_Photography_Rabbit-hotel-and-spa-templepatrick_Wedding_Photography_D%26L-660_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1256,
+          "venue": "Rabbit hotel and spa",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_53c70875f9d0aa43a9399923",
+        "imageId": "MKB001256",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-496_500.webp",
+        "order": 38,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "reception",
+          "party",
+          "couple entrance",
+          "bride and groom",
+          "guests cheering",
+          "indoor wedding",
+          "warm lighting",
+          "candid moment",
+          "celebration",
+          "romantic mood",
+          "rabbit hotel and spa",
+          "wedding reception"
+        ],
+        "aiTags": [
+          "reception",
+          "party",
+          "couple entrance",
+          "bride and groom",
+          "guests cheering",
+          "indoor wedding",
+          "warm lighting",
+          "candid moment",
+          "celebration",
+          "romantic mood",
+          "rabbit hotel and spa",
+          "wedding reception"
+        ],
+        "aiAlt": "Couple enter their wedding reception at Rabbit Hotel and Spa, Templepatrick, as guests cheer in warm indoor light",
+        "aiCaption": "A relaxed reception entrance at Rabbit Hotel and Spa in Templepatrick, with guests cheering the couple into the evening celebrations.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/reception%20and%20party/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-496_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/reception%20and%20party/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-496_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1257,
+          "venue": "Rabbit hotel and spa",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_7af8ee1087fcf8c16fe9db49",
+        "imageId": "MKB001257",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-500_500.webp",
+        "order": 39,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "reception",
+          "party entrance",
+          "bride and groom",
+          "wedding guests",
+          "indoor venue",
+          "greenery decor",
+          "warm lighting",
+          "celebration",
+          "candid",
+          "joyful",
+          "aisle walk",
+          "rabbit hotel and spa"
+        ],
+        "aiTags": [
+          "reception",
+          "party entrance",
+          "bride and groom",
+          "wedding guests",
+          "indoor venue",
+          "greenery decor",
+          "warm lighting",
+          "celebration",
+          "candid",
+          "joyful",
+          "aisle walk",
+          "rabbit hotel and spa"
+        ],
+        "aiAlt": "Couple entering their Rabbit Hotel and Spa reception in Templepatrick as guests cheer under warm indoor lighting",
+        "aiCaption": "A relaxed reception entrance at Rabbit Hotel and Spa in Templepatrick, with guests gathered close and the room full of warm, celebratory energy.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/reception%20and%20party/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-500_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/reception%20and%20party/mkb-weddings-mkb-photography-northerin-ireland-wedding-photographer-ni-wedding-supplier-rabbit-hotel-and-spa-templepatrick-wedding-photography-500_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1258,
+          "venue": "Rabbit hotel and spa",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_a5dcb1b2ff1239b80cebf822",
+        "imageId": "MKB001258",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography2_500.webp",
+        "order": 40,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "sparkler exit",
+          "night reception",
+          "bride and groom",
+          "wedding guests",
+          "black and white",
+          "dramatic lighting",
+          "backlit",
+          "celebration",
+          "romantic mood",
+          "party moment",
+          "outdoor wedding",
+          "rabbit hotel and spa"
+        ],
+        "aiTags": [
+          "sparkler exit",
+          "night reception",
+          "bride and groom",
+          "wedding guests",
+          "black and white",
+          "dramatic lighting",
+          "backlit",
+          "celebration",
+          "romantic mood",
+          "party moment",
+          "outdoor wedding",
+          "rabbit hotel and spa"
+        ],
+        "aiAlt": "Black and white sparkler exit at Rabbit Hotel and Spa in Templepatrick, with the couple surrounded by wedding guests at night",
+        "aiCaption": "A lively night reception moment at Rabbit Hotel and Spa, with sparklers, guests and dramatic backlit atmosphere in Templepatrick.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/reception%20and%20party/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography2_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/reception%20and%20party/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography2_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1259,
+          "venue": "Rabbit hotel and spa",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_4b55ea483f4ebdc0e088294b",
+        "imageId": "MKB001259",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography3_500.webp",
+        "order": 41,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "reception",
+          "bouquet toss",
+          "bride",
+          "wedding guests",
+          "party",
+          "black and white",
+          "low light",
+          "candid",
+          "celebration",
+          "fun moment",
+          "rabbit hotel",
+          "evening"
+        ],
+        "aiTags": [
+          "reception",
+          "bouquet toss",
+          "bride",
+          "wedding guests",
+          "party",
+          "black and white",
+          "low light",
+          "candid",
+          "celebration",
+          "fun moment",
+          "rabbit hotel",
+          "evening"
+        ],
+        "aiAlt": "Black and white candid of a bouquet toss during the evening reception at Rabbit Hotel and Spa, Templepatrick.",
+        "aiCaption": "A fun bouquet toss moment at Rabbit Hotel and Spa in Templepatrick, captured naturally as guests celebrate on the dance floor.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/reception%20and%20party/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography3_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/reception%20and%20party/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-rabbit-hotel-and-spa-templepatrick-wedding-photography3_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1260,
+          "venue": "Rabbit hotel and spa",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_4d98116aaa5dd1b092fc20fd",
+        "imageId": "MKB001260",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-rabbit-hotel-templepatrick-wedding-photography-5_500.webp",
+        "order": 42,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "reception",
+          "bride",
+          "wedding guests",
+          "bouquet",
+          "black and white",
+          "low light",
+          "dramatic lighting",
+          "candid",
+          "emotional",
+          "evening celebration",
+          "party entrance",
+          "rabbit hotel and spa"
+        ],
+        "aiTags": [
+          "reception",
+          "bride",
+          "wedding guests",
+          "bouquet",
+          "black and white",
+          "low light",
+          "dramatic lighting",
+          "candid",
+          "emotional",
+          "evening celebration",
+          "party entrance",
+          "rabbit hotel and spa"
+        ],
+        "aiAlt": "Black and white candid of the bride entering the reception at Rabbit Hotel and Spa, Templepatrick, bouquet in hand as guests look on",
+        "aiCaption": "A relaxed evening reception moment at Rabbit Hotel and Spa, with the bride arriving through dramatic low light as guests gather around.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Rabbit%20hotel%20and%20spa/reception%20and%20party/mkb-weddings-northern-ireland-wedding-photographer-rabbit-hotel-templepatrick-wedding-photography-5_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Rabbit%20hotel%20and%20spa/reception%20and%20party/mkb-weddings-northern-ireland-wedding-photographer-rabbit-hotel-templepatrick-wedding-photography-5_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1261,
+          "venue": "Rabbit hotel and spa",
+          "category": "reception and party"
+        }
+      }
+    ]
+  }
+}

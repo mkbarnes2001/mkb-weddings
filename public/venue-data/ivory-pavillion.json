@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_31cb1c0a-ad80-46db-81b0-7e192cb5e6af",
+  "slug": "ivory-pavillion",
+  "name": "Ivory Pavillion",
+  "town": "",
+  "county": "",
+  "country": "Northern Ireland",
+  "intro": "",
+  "description": "",
+  "status": "published",
+  "updatedAt": "2026-07-13T07:52:28.329Z",
+  "links": {
+    "website": "",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.329Z",
+    "heroAssetId": "legacy_27b0abd662e27a1a67b6cc6c",
+    "images": [
+      {
+        "assetId": "legacy_27b0abd662e27a1a67b6cc6c",
+        "imageId": "MKB000710",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Ivory_pavillion-ballymena_Wedding_Photography_Helen_and_Karl-400_500.webp",
+        "order": 1,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "umbrella",
+          "rainy wedding",
+          "outdoor portraits",
+          "romantic",
+          "embrace",
+          "wedding veil",
+          "garden path",
+          "string lights",
+          "soft light",
+          "ivory pavillion"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "umbrella",
+          "rainy wedding",
+          "outdoor portraits",
+          "romantic",
+          "embrace",
+          "wedding veil",
+          "garden path",
+          "string lights",
+          "soft light",
+          "ivory pavillion"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ivory%20Pavillion/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Ivory_pavillion-ballymena_Wedding_Photography_Helen_and_Karl-400_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ivory%20Pavillion/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Ivory_pavillion-ballymena_Wedding_Photography_Helen_and_Karl-400_2000.webp",
+        "alt": "Bride and groom shelter under an umbrella for rainy couple portraits at Ivory Pavillion in Galgorm",
+        "caption": "A quiet rainy moment on the garden path at Ivory Pavillion, with soft light, string lights and the couple tucked close under an umbrella."
+      }
+    ]
+  }
+}

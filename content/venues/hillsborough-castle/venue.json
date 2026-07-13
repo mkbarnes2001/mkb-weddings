@@ -1,0 +1,689 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_de17ebc7-5330-46d8-b49b-2bdbcc4673d8",
+  "slug": "hillsborough-castle",
+  "name": "Hillsborough Castle",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_34106f4bab85cbe4d6539c24",
+  "status": "published",
+  "links": {
+    "website": "https://www.hrp.org.uk/hillsborough-castle/",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.779Z",
+  "updatedAt": "2026-07-13T07:52:28.328Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.328Z",
+    "heroAssetId": "legacy_34106f4bab85cbe4d6539c24",
+    "images": [
+      {
+        "assetId": "legacy_34106f4bab85cbe4d6539c24",
+        "imageId": "MKB000699",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-134_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "hillsborough castle",
+          "ceremony",
+          "bride and groom",
+          "wedding aisle",
+          "processional",
+          "castle interior",
+          "black and white",
+          "natural light",
+          "candid",
+          "elegant",
+          "joyful",
+          "guests"
+        ],
+        "aiTags": [
+          "hillsborough castle",
+          "ceremony",
+          "bride and groom",
+          "wedding aisle",
+          "processional",
+          "castle interior",
+          "black and white",
+          "natural light",
+          "candid",
+          "elegant",
+          "joyful",
+          "guests"
+        ],
+        "aiAlt": "Black and white ceremony moment as the couple walk down the aisle inside Hillsborough Castle, surrounded by smiling guests.",
+        "aiCaption": "A relaxed processional inside Hillsborough Castle in Hillsborough, with natural light, happy guests and a quiet documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Hillsborough%20Castle/ceremony/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-134_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Hillsborough%20Castle/ceremony/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-134_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 700,
+          "venue": "Hillsborough Castle",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_76d61b3e44e2c46d991fe820",
+        "imageId": "MKB000700",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-178_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "hillsborough castle",
+          "ceremony",
+          "wedding register",
+          "bride and groom",
+          "signing documents",
+          "castle interior",
+          "chandelier light",
+          "warm lighting",
+          "formal portraits",
+          "intimate moment",
+          "historic room",
+          "table reflection"
+        ],
+        "aiTags": [
+          "hillsborough castle",
+          "ceremony",
+          "wedding register",
+          "bride and groom",
+          "signing documents",
+          "castle interior",
+          "chandelier light",
+          "warm lighting",
+          "formal portraits",
+          "intimate moment",
+          "historic room",
+          "table reflection"
+        ],
+        "aiAlt": "Bride and groom signing the wedding register inside Hillsborough Castle, County Down, under warm chandelier light.",
+        "aiCaption": "A quiet ceremony moment at Hillsborough Castle as the couple sign the register in the warm light of the historic room.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Hillsborough%20Castle/ceremony/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-178_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Hillsborough%20Castle/ceremony/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-178_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 701,
+          "venue": "Hillsborough Castle",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_4acf120b8a2c27ac7a03e313",
+        "imageId": "MKB000701",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-100-2_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "staircase",
+          "chandelier",
+          "black and white",
+          "window light",
+          "elegant",
+          "romantic",
+          "castle interior",
+          "wedding portraits",
+          "dramatic light"
+        ],
+        "aiTags": [
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "staircase",
+          "chandelier",
+          "black and white",
+          "window light",
+          "elegant",
+          "romantic",
+          "castle interior",
+          "wedding portraits",
+          "dramatic light"
+        ],
+        "aiAlt": "Black and white couple portrait on the staircase at Hillsborough Castle, with window light and a chandelier above",
+        "aiCaption": "A quiet portrait on the staircase at Hillsborough Castle, using soft window light and the calm elegance of the castle interior.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-100-2_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-100-2_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 702,
+          "venue": "Hillsborough Castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_6d214d7aa301f9d1988398db",
+        "imageId": "MKB000702",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-121_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "hillsborough castle",
+          "couple portrait",
+          "bride and groom",
+          "castle doorway",
+          "red carpet",
+          "wedding bouquet",
+          "black tie",
+          "soft natural light",
+          "elegant",
+          "romantic",
+          "formal portrait",
+          "wedding day"
+        ],
+        "aiTags": [
+          "hillsborough castle",
+          "couple portrait",
+          "bride and groom",
+          "castle doorway",
+          "red carpet",
+          "wedding bouquet",
+          "black tie",
+          "soft natural light",
+          "elegant",
+          "romantic",
+          "formal portrait",
+          "wedding day"
+        ],
+        "aiAlt": "Bride and groom portrait in the castle doorway at Hillsborough Castle, with a red carpet and soft natural light",
+        "aiCaption": "A relaxed couple portrait at Hillsborough Castle in Hillsborough, framed by the doorway, red carpet and soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-121_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-121_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 703,
+          "venue": "Hillsborough Castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_71fbe003ec4b642e833877f5",
+        "imageId": "MKB000703",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-255_500.webp",
+        "order": 5,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "castle entrance",
+          "stone columns",
+          "red carpet",
+          "natural light",
+          "romantic",
+          "elegant",
+          "wedding portrait",
+          "formal attire",
+          "historic backdrop"
+        ],
+        "aiTags": [
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "castle entrance",
+          "stone columns",
+          "red carpet",
+          "natural light",
+          "romantic",
+          "elegant",
+          "wedding portrait",
+          "formal attire",
+          "historic backdrop"
+        ],
+        "aiAlt": "Bride and groom portrait at the stone entrance of Hillsborough Castle in County Down, with soft natural light and a red carpet.",
+        "aiCaption": "A relaxed couple portrait at Hillsborough Castle, using the historic stone entrance and natural light for an elegant County Down wedding moment.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-255_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-255_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 704,
+          "venue": "Hillsborough Castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_157285b08e83c0d09373e119",
+        "imageId": "MKB000704",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-266_500.webp",
+        "order": 6,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "romantic kiss",
+          "castle gardens",
+          "tree lined path",
+          "wedding bouquet",
+          "soft light",
+          "intimate moment",
+          "elegant wedding",
+          "outdoor portraits"
+        ],
+        "aiTags": [
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "romantic kiss",
+          "castle gardens",
+          "tree lined path",
+          "wedding bouquet",
+          "soft light",
+          "intimate moment",
+          "elegant wedding",
+          "outdoor portraits"
+        ],
+        "aiAlt": "Bride and groom share a quiet kiss on a tree-lined path in the gardens at Hillsborough Castle",
+        "aiCaption": "A relaxed couple portrait in the gardens at Hillsborough Castle, with soft light and a quiet moment on the tree-lined path.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-266_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-266_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 705,
+          "venue": "Hillsborough Castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_9b0d168a074da7dfc00f08a0",
+        "imageId": "MKB000705",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-273_500.webp",
+        "order": 7,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "garden walkway",
+          "hand in hand",
+          "wedding bouquet",
+          "soft natural light",
+          "romantic",
+          "elegant",
+          "outdoor portraits",
+          "wedding day",
+          "classic style"
+        ],
+        "aiTags": [
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "garden walkway",
+          "hand in hand",
+          "wedding bouquet",
+          "soft natural light",
+          "romantic",
+          "elegant",
+          "outdoor portraits",
+          "wedding day",
+          "classic style"
+        ],
+        "aiAlt": "Bride and groom walking hand in hand along a garden walkway at Hillsborough Castle, with bouquet and soft natural light.",
+        "aiCaption": "A relaxed couple portrait at Hillsborough Castle in County Down, with the bride and groom walking hand in hand through the gardens.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-273_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-273_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 706,
+          "venue": "Hillsborough Castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_9d7940972e4d89ce17062807",
+        "imageId": "MKB000706",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-281_500.webp",
+        "order": 8,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "castle exterior",
+          "garden lawn",
+          "historic architecture",
+          "soft natural light",
+          "romantic",
+          "elegant",
+          "outdoor portraits",
+          "wedding portraits",
+          "overcast"
+        ],
+        "aiTags": [
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "castle exterior",
+          "garden lawn",
+          "historic architecture",
+          "soft natural light",
+          "romantic",
+          "elegant",
+          "outdoor portraits",
+          "wedding portraits",
+          "overcast"
+        ],
+        "aiAlt": "Bride and groom portrait on the garden lawn outside Hillsborough Castle in soft overcast light",
+        "aiCaption": "A relaxed couple portrait on the lawns at Hillsborough Castle, with historic architecture and soft County Down light setting the scene.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-281_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-281_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 707,
+          "venue": "Hillsborough Castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_d8883edefcb85d1e874b31d0",
+        "imageId": "MKB000707",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-288_500.webp",
+        "order": 9,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "castle exterior",
+          "garden steps",
+          "natural light",
+          "romantic",
+          "elegant",
+          "outdoor portraits",
+          "wedding day",
+          "newlyweds",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "castle exterior",
+          "garden steps",
+          "natural light",
+          "romantic",
+          "elegant",
+          "outdoor portraits",
+          "wedding day",
+          "newlyweds",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom on garden steps outside Hillsborough Castle in natural light, County Down wedding portrait",
+        "aiCaption": "A quiet couple portrait on the garden steps at Hillsborough Castle, with soft natural light and an elegant County Down setting.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-288_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-288_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 708,
+          "venue": "Hillsborough Castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_e0ace1bbfd87dd9306f4aac6",
+        "imageId": "MKB000708",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-293_500.webp",
+        "order": 10,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "castle steps",
+          "historic estate",
+          "outdoor portrait",
+          "overcast light",
+          "dramatic sky",
+          "romantic mood",
+          "formal wedding",
+          "wedding attire",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "hillsborough castle",
+          "couple portraits",
+          "bride and groom",
+          "castle steps",
+          "historic estate",
+          "outdoor portrait",
+          "overcast light",
+          "dramatic sky",
+          "romantic mood",
+          "formal wedding",
+          "wedding attire",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom portrait on the steps of Hillsborough Castle in County Down under a soft, dramatic sky",
+        "aiCaption": "A quiet couple portrait on the castle steps at Hillsborough Castle, with soft overcast light and the historic estate setting the tone.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-293_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Hillsborough%20Castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-293_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 709,
+          "venue": "Hillsborough Castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_0b26bb89dbf6f7ae83b2ae79",
+        "imageId": "MKB000709",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-100_500.webp",
+        "order": 11,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "family portrait",
+          "groomsmen",
+          "page boys",
+          "formalwear",
+          "indoor portrait",
+          "hillsborough castle",
+          "art gallery",
+          "dramatic lighting",
+          "classic style",
+          "wedding party",
+          "posed portrait",
+          "elegant mood"
+        ],
+        "aiTags": [
+          "family portrait",
+          "groomsmen",
+          "page boys",
+          "formalwear",
+          "indoor portrait",
+          "hillsborough castle",
+          "art gallery",
+          "dramatic lighting",
+          "classic style",
+          "wedding party",
+          "posed portrait",
+          "elegant mood"
+        ],
+        "aiAlt": "Groomsmen and page boys in formalwear posed indoors at Hillsborough Castle, County Down, with dramatic gallery lighting",
+        "aiCaption": "A calm, classic wedding party portrait at Hillsborough Castle in Hillsborough, with groomsmen and page boys gathered in soft gallery light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Hillsborough%20Castle/family%20and%20bridal%20party/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-100_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Hillsborough%20Castle/family%20and%20bridal%20party/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_Hillsborough-castle-_Wedding_Photography-100_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 710,
+          "venue": "Hillsborough Castle",
+          "category": "family and bridal party"
+        }
+      }
+    ]
+  }
+}

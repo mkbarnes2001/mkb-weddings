@@ -1,0 +1,340 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_f2b9ece4-50c8-47c3-8ae9-cbd437f5dbd2",
+  "slug": "field-of-dreams",
+  "name": "Field of dreams",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_2d185efbb8edda5bf739d3fb",
+  "status": "published",
+  "links": {
+    "website": "https://www.fieldofdreamsni.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.697Z",
+  "updatedAt": "2026-07-13T07:52:28.325Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.325Z",
+    "heroAssetId": "legacy_2d185efbb8edda5bf739d3fb",
+    "images": [
+      {
+        "assetId": "legacy_2d185efbb8edda5bf739d3fb",
+        "imageId": "MKB000566",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--388_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "outdoor wedding",
+          "natural light",
+          "backlit",
+          "romantic",
+          "relaxed",
+          "holding hands",
+          "wedding portraits",
+          "field of dreams",
+          "summer wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "outdoor wedding",
+          "natural light",
+          "backlit",
+          "romantic",
+          "relaxed",
+          "holding hands",
+          "wedding portraits",
+          "field of dreams",
+          "summer wedding"
+        ],
+        "aiAlt": "Bride and groom holding hands in backlit woodland at Field of Dreams, Bangor",
+        "aiCaption": "A relaxed summer couple portrait at Field of Dreams in Bangor, with the bride and groom walking hand in hand through soft woodland light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Field%20of%20dreams/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--388_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Field%20of%20dreams/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--388_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 567,
+          "venue": "Field of dreams",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_b883023b28166cba739c9981",
+        "imageId": "MKB000567",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--393_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "woodland portrait",
+          "autumn wedding",
+          "dappled light",
+          "romantic",
+          "outdoor wedding",
+          "field of dreams",
+          "wedding dress",
+          "groom suit",
+          "natural light",
+          "intimate moment"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "woodland portrait",
+          "autumn wedding",
+          "dappled light",
+          "romantic",
+          "outdoor wedding",
+          "field of dreams",
+          "wedding dress",
+          "groom suit",
+          "natural light",
+          "intimate moment"
+        ],
+        "aiAlt": "Bride and groom share a quiet woodland portrait in dappled light at Field of Dreams, Bangor",
+        "aiCaption": "A relaxed couple portrait among the trees at Field of Dreams in Bangor, with soft autumn light and a calm, natural feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Field%20of%20dreams/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--393_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Field%20of%20dreams/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--393_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 568,
+          "venue": "Field of dreams",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_1356a91814727305af476631",
+        "imageId": "MKB000568",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--515_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "woodland path",
+          "field of dreams",
+          "soft light",
+          "romantic",
+          "intimate",
+          "autumn tones",
+          "framed by foliage",
+          "wedding portraits",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "woodland path",
+          "field of dreams",
+          "soft light",
+          "romantic",
+          "intimate",
+          "autumn tones",
+          "framed by foliage",
+          "wedding portraits",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom on a woodland path at Field of Dreams, Bangor, framed by foliage in soft autumn light",
+        "aiCaption": "A quiet couple portrait at Field of Dreams in Bangor, with soft light, autumn tones and a relaxed woodland feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Field%20of%20dreams/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--515_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Field%20of%20dreams/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--515_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 569,
+          "venue": "Field of dreams",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_63c6db79d0640309fedfc946",
+        "imageId": "MKB000569",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--76_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "groom",
+          "getting ready",
+          "window light",
+          "blue suit",
+          "orange tie",
+          "buttonhole",
+          "portrait",
+          "indoor",
+          "calm moment",
+          "wedding morning",
+          "field of dreams"
+        ],
+        "aiTags": [
+          "groom",
+          "getting ready",
+          "window light",
+          "blue suit",
+          "orange tie",
+          "buttonhole",
+          "portrait",
+          "indoor",
+          "calm moment",
+          "wedding morning",
+          "field of dreams"
+        ],
+        "aiAlt": "Groom in a blue suit and orange tie by window light during wedding morning preparations at Field of Dreams, Bangor",
+        "aiCaption": "A calm getting-ready portrait at Field of Dreams in Bangor, with soft window light catching the groom’s blue suit, orange tie and buttonhole.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Field%20of%20dreams/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--76_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Field%20of%20dreams/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--76_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 570,
+          "venue": "Field of dreams",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_6508418b029320196b17d6fc",
+        "imageId": "MKB000570",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--482_500.webp",
+        "order": 5,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "reception",
+          "wedding speech",
+          "groom speech",
+          "seated guests",
+          "rustic barn",
+          "bunting decor",
+          "daylight",
+          "candid laughter",
+          "warm atmosphere",
+          "wedding party",
+          "field of dreams",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "reception",
+          "wedding speech",
+          "groom speech",
+          "seated guests",
+          "rustic barn",
+          "bunting decor",
+          "daylight",
+          "candid laughter",
+          "warm atmosphere",
+          "wedding party",
+          "field of dreams",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Groom speech during a relaxed reception at Field of Dreams in Bangor, with seated guests laughing beneath rustic bunting.",
+        "aiCaption": "A warm reception moment at Field of Dreams, Bangor, as guests laugh along during the speeches in the rustic barn setting.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Field%20of%20dreams/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--482_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Field%20of%20dreams/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-field-of-dreams-bangor-wedding-photography--482_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 571,
+          "venue": "Field of dreams",
+          "category": "reception and party"
+        }
+      }
+    ]
+  }
+}

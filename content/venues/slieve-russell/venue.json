@@ -1,0 +1,1494 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_a908b463-5b84-42ac-8363-e2b21baf5d92",
+  "slug": "slieve-russell",
+  "name": "Slieve Russell",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_670a6097c1da18f1c1e1bbcf",
+  "status": "published",
+  "links": {
+    "website": "https://www.slieverussell.ie",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.724Z",
+  "updatedAt": "2026-07-13T07:52:28.343Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.343Z",
+    "heroAssetId": "legacy_670a6097c1da18f1c1e1bbcf",
+    "images": [
+      {
+        "assetId": "legacy_670a6097c1da18f1c1e1bbcf",
+        "imageId": "MKB001510",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-308_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "slieve russell",
+          "ceremony",
+          "bride and groom",
+          "indoor ceremony",
+          "black and white",
+          "candid moment",
+          "low light",
+          "romantic mood",
+          "emotional",
+          "wedding vows",
+          "documentary style",
+          "intimate"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "ceremony",
+          "bride and groom",
+          "indoor ceremony",
+          "black and white",
+          "candid moment",
+          "low light",
+          "romantic mood",
+          "emotional",
+          "wedding vows",
+          "documentary style",
+          "intimate"
+        ],
+        "aiAlt": "Black and white candid of a couple sharing vows during an intimate indoor ceremony at Slieve Russell",
+        "aiCaption": "A quiet ceremony moment at Slieve Russell in Ballyconnell, photographed in a relaxed documentary style as the couple exchange vows.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/ceremony/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-308_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/ceremony/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-308_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1511,
+          "venue": "Slieve Russell",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_b1a1693111a746aa9545ee9f",
+        "imageId": "MKB001511",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-353_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "sunset",
+          "golden hour",
+          "outdoor portraits",
+          "romantic",
+          "wedding dress",
+          "bridal bouquet",
+          "dramatic sky",
+          "evening light",
+          "wedding portraits"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "sunset",
+          "golden hour",
+          "outdoor portraits",
+          "romantic",
+          "wedding dress",
+          "bridal bouquet",
+          "dramatic sky",
+          "evening light",
+          "wedding portraits"
+        ],
+        "aiAlt": "Bride and groom portrait at Slieve Russell in golden evening light under a dramatic County Cavan sky",
+        "aiCaption": "A relaxed golden hour portrait at Slieve Russell, Ballyconnell, with soft evening light, open skies and a quiet moment together.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-353_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-353_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1512,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_631df6a2d53b228c87ca1a17",
+        "imageId": "MKB001512",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-358_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "golden hour",
+          "sunset light",
+          "romantic",
+          "intimate moment",
+          "wedding day",
+          "embrace",
+          "garden setting",
+          "elegant style"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "golden hour",
+          "sunset light",
+          "romantic",
+          "intimate moment",
+          "wedding day",
+          "embrace",
+          "garden setting",
+          "elegant style"
+        ],
+        "aiAlt": "Bride and groom embracing in golden hour light during couple portraits at Slieve Russell, County Cavan",
+        "aiCaption": "A quiet golden hour embrace in the gardens at Slieve Russell, Ballyconnell, captured in a relaxed documentary style.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-358_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-358_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1513,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_78da1413cdbae2f679801295",
+        "imageId": "MKB001513",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-367_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "sunset",
+          "golden hour",
+          "backlit",
+          "outdoor",
+          "walking",
+          "romantic",
+          "lawn",
+          "wedding portraits",
+          "evening light"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "sunset",
+          "golden hour",
+          "backlit",
+          "outdoor",
+          "walking",
+          "romantic",
+          "lawn",
+          "wedding portraits",
+          "evening light"
+        ],
+        "aiAlt": "Bride and groom walking on the lawn at Slieve Russell in golden evening light",
+        "aiCaption": "A relaxed couple portrait at Slieve Russell, with the bride and groom walking together through warm golden hour light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-367_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-367_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1514,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_3dccdec8213d83ec503d0f3c",
+        "imageId": "MKB001514",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-371_500.webp",
+        "order": 5,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "garden portraits",
+          "golden hour",
+          "romantic",
+          "holding hands",
+          "wedding bouquet",
+          "elegant style",
+          "sunset light",
+          "wedding portraits"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "garden portraits",
+          "golden hour",
+          "romantic",
+          "holding hands",
+          "wedding bouquet",
+          "elegant style",
+          "sunset light",
+          "wedding portraits"
+        ],
+        "aiAlt": "Bride and groom holding hands during golden hour garden portraits at Slieve Russell in County Cavan",
+        "aiCaption": "A relaxed couple portrait in the gardens at Slieve Russell, with soft evening light and a quiet moment between the bride and groom.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-371_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-371_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1515,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_e613619ffe5b19a3e1a2270f",
+        "imageId": "MKB001515",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-381_500.webp",
+        "order": 6,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "golden hour",
+          "romantic",
+          "wedding bouquet",
+          "candid moment",
+          "intimate",
+          "wedding day"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "golden hour",
+          "romantic",
+          "wedding bouquet",
+          "candid moment",
+          "intimate",
+          "wedding day"
+        ],
+        "aiAlt": "Bride and groom share a quiet golden hour moment outdoors at Slieve Russell, Ballyconnell, with bouquet in hand.",
+        "aiCaption": "A relaxed couple portrait at Slieve Russell in County Cavan, captured in warm evening light with a natural, intimate feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-381_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-381_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1516,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_a675d97129b2c8cf23175a83",
+        "imageId": "MKB001516",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-390_500.webp",
+        "order": 7,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "sunset",
+          "golden hour",
+          "silhouette",
+          "outdoor portrait",
+          "romantic",
+          "dramatic sky",
+          "wedding day",
+          "slieve russell",
+          "landscape",
+          "intimate moment"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "sunset",
+          "golden hour",
+          "silhouette",
+          "outdoor portrait",
+          "romantic",
+          "dramatic sky",
+          "wedding day",
+          "slieve russell",
+          "landscape",
+          "intimate moment"
+        ],
+        "aiAlt": "Bride and groom silhouetted at sunset during couple portraits at Slieve Russell in County Cavan",
+        "aiCaption": "A quiet golden hour portrait at Slieve Russell, with the couple silhouetted against a dramatic County Cavan sky.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-390_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-390_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1517,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_16ff8cecc2e58a64eebf79fd",
+        "imageId": "MKB001517",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-392_500.webp",
+        "order": 8,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "sunset",
+          "silhouette",
+          "lakeside",
+          "golden hour",
+          "romantic",
+          "veil",
+          "holding hands",
+          "wedding portraits",
+          "outdoor"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "sunset",
+          "silhouette",
+          "lakeside",
+          "golden hour",
+          "romantic",
+          "veil",
+          "holding hands",
+          "wedding portraits",
+          "outdoor"
+        ],
+        "aiAlt": "Bride and groom silhouetted by the lakeside at sunset during Slieve Russell wedding portraits in County Cavan",
+        "aiCaption": "A quiet golden hour moment by the lake at Slieve Russell, with the couple holding hands in soft sunset light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-392_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-392_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1518,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_ac0bd3619f1c2b2e00a661f9",
+        "imageId": "MKB001518",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-394_500.webp",
+        "order": 9,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "sunset",
+          "lakeside",
+          "golden hour",
+          "romantic",
+          "outdoor portraits",
+          "wedding dress",
+          "groom suit",
+          "evening light",
+          "wedding portraits"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "sunset",
+          "lakeside",
+          "golden hour",
+          "romantic",
+          "outdoor portraits",
+          "wedding dress",
+          "groom suit",
+          "evening light",
+          "wedding portraits"
+        ],
+        "aiAlt": "Bride and groom by the lake at Slieve Russell in Ballyconnell during golden hour",
+        "aiCaption": "A relaxed couple portrait by the lakeside at Slieve Russell, with warm evening light bringing a natural feel to the wedding day.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-394_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-394_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1519,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_0e675c4e56e93f31134eb0e2",
+        "imageId": "MKB001519",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-395_500.webp",
+        "order": 10,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "sunset light",
+          "lakeside",
+          "romantic",
+          "candid smile",
+          "close embrace",
+          "wedding portrait",
+          "golden hour"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "sunset light",
+          "lakeside",
+          "romantic",
+          "candid smile",
+          "close embrace",
+          "wedding portrait",
+          "golden hour"
+        ],
+        "aiAlt": "Bride and groom share a close embrace in golden sunset light by the lake at Slieve Russell, Ballyconnell",
+        "aiCaption": "A relaxed lakeside portrait at Slieve Russell in County Cavan, with the couple wrapped up together in soft golden hour light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-395_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-395_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1520,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_fd308626717041b1953c629d",
+        "imageId": "MKB001520",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography2_500.webp",
+        "order": 11,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "wedding portrait",
+          "stone arch",
+          "wooden door",
+          "outdoor wedding",
+          "natural light",
+          "romantic",
+          "elegant",
+          "bridal bouquet",
+          "rustic backdrop"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "wedding portrait",
+          "stone arch",
+          "wooden door",
+          "outdoor wedding",
+          "natural light",
+          "romantic",
+          "elegant",
+          "bridal bouquet",
+          "rustic backdrop"
+        ],
+        "aiAlt": "Bride and groom portrait by a stone arch and wooden door at Slieve Russell in Ballyconnell, lit with soft natural light.",
+        "aiCaption": "A relaxed couple portrait at Slieve Russell, using the stone arch, rustic wooden door and natural light for a warm wedding moment.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography2_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography2_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1521,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_d952db4db4c95a580054a825",
+        "imageId": "MKB001521",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography3_500.webp",
+        "order": 12,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "outdoor wedding",
+          "natural light",
+          "romantic",
+          "intimate moment",
+          "autumn foliage",
+          "wedding bouquet",
+          "classic wedding",
+          "soft mood"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "outdoor wedding",
+          "natural light",
+          "romantic",
+          "intimate moment",
+          "autumn foliage",
+          "wedding bouquet",
+          "classic wedding",
+          "soft mood"
+        ],
+        "aiAlt": "Bride and groom share a quiet garden portrait at Slieve Russell, Ballyconnell, with autumn foliage and soft natural light",
+        "aiCaption": "A relaxed couple portrait in the gardens at Slieve Russell, with soft autumn colour and an intimate, natural feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography3_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography3_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1522,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_9724f4a2dd8e436bc20cbaa8",
+        "imageId": "MKB001522",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography4_500.webp",
+        "order": 13,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "slieve russell",
+          "couple portrait",
+          "bride and groom",
+          "outdoor wedding",
+          "brick archway",
+          "greenery",
+          "soft light",
+          "romantic",
+          "wedding bouquet",
+          "black tie",
+          "intimate moment",
+          "wedding portraits"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portrait",
+          "bride and groom",
+          "outdoor wedding",
+          "brick archway",
+          "greenery",
+          "soft light",
+          "romantic",
+          "wedding bouquet",
+          "black tie",
+          "intimate moment",
+          "wedding portraits"
+        ],
+        "aiAlt": "Bride and groom portrait under a brick archway with greenery at Slieve Russell, Ballyconnell",
+        "aiCaption": "A relaxed couple portrait at Slieve Russell, with soft light, greenery and a quiet moment together after the ceremony.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography4_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography4_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1523,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_1cffec20e4ba347034db70b2",
+        "imageId": "MKB001523",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography5_500.webp",
+        "order": 14,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "autumn colours",
+          "soft light",
+          "romantic",
+          "happy couple",
+          "wedding bouquet",
+          "garden setting",
+          "wedding day",
+          "elegant wedding"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "autumn colours",
+          "soft light",
+          "romantic",
+          "happy couple",
+          "wedding bouquet",
+          "garden setting",
+          "wedding day",
+          "elegant wedding"
+        ],
+        "aiAlt": "Bride and groom portrait in the gardens at Slieve Russell, Ballyconnell, with autumn colour and soft wedding day light",
+        "aiCaption": "A relaxed couple portrait at Slieve Russell in Ballyconnell, with soft light, autumn tones and a natural garden setting.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography5_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography5_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1524,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_2d2c381bc59aa49e9855d507",
+        "imageId": "MKB001524",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography6_500.webp",
+        "order": 15,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "slieve russell",
+          "couple portrait",
+          "bride and groom",
+          "autumn foliage",
+          "outdoor portrait",
+          "romantic",
+          "soft light",
+          "wedding bouquet",
+          "garden setting",
+          "natural framing",
+          "elegant",
+          "wedding day"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portrait",
+          "bride and groom",
+          "autumn foliage",
+          "outdoor portrait",
+          "romantic",
+          "soft light",
+          "wedding bouquet",
+          "garden setting",
+          "natural framing",
+          "elegant",
+          "wedding day"
+        ],
+        "aiAlt": "Bride and groom portrait in soft autumn light at Slieve Russell, Ballyconnell, with foliage and bouquet in a garden setting.",
+        "aiCaption": "A relaxed couple portrait at Slieve Russell in Ballyconnell, framed by autumn foliage and soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography6_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography6_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1525,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_a5d5612ef8fdc4719216c146",
+        "imageId": "MKB001525",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography7_500.webp",
+        "order": 16,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "autumn foliage",
+          "outdoor portrait",
+          "soft light",
+          "romantic",
+          "elegant wedding",
+          "bridal bouquet",
+          "black tie groom",
+          "wedding dress",
+          "wedding day portraits"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "couple portraits",
+          "bride and groom",
+          "autumn foliage",
+          "outdoor portrait",
+          "soft light",
+          "romantic",
+          "elegant wedding",
+          "bridal bouquet",
+          "black tie groom",
+          "wedding dress",
+          "wedding day portraits"
+        ],
+        "aiAlt": "Bride and groom portrait at Slieve Russell with autumn foliage, soft light and a bridal bouquet",
+        "aiCaption": "A relaxed couple portrait at Slieve Russell in Ballyconnell, with soft autumn light, elegant black tie styling and a natural documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography7_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography7_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1526,
+          "venue": "Slieve Russell",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_356ae7e18a67218acfcafe43",
+        "imageId": "MKB001526",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography1_500.webp",
+        "order": 17,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "slieve russell",
+          "bridal party",
+          "wedding party",
+          "bride",
+          "groomsmen",
+          "bridesmaids",
+          "outdoor portraits",
+          "fountain",
+          "autumn wedding",
+          "formal attire",
+          "natural light",
+          "joyful"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "bridal party",
+          "wedding party",
+          "bride",
+          "groomsmen",
+          "bridesmaids",
+          "outdoor portraits",
+          "fountain",
+          "autumn wedding",
+          "formal attire",
+          "natural light",
+          "joyful"
+        ],
+        "aiAlt": "Bridal party portraits by the fountain at Slieve Russell in Ballyconnell during an autumn wedding",
+        "aiCaption": "A relaxed bridal party moment at Slieve Russell, Ballyconnell, with soft natural light and autumn colour around the fountain.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/family%20and%20bridal%20party/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography1_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/family%20and%20bridal%20party/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography1_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1527,
+          "venue": "Slieve Russell",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_9c4594f24ff94c03f849b39e",
+        "imageId": "MKB001527",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-113_500.webp",
+        "order": 18,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "wedding morning",
+          "bride",
+          "bridal prep",
+          "hammock",
+          "pajamas",
+          "orange juice",
+          "window light",
+          "relaxed",
+          "candid",
+          "slieve russell",
+          "indoor"
+        ],
+        "aiTags": [
+          "getting ready",
+          "wedding morning",
+          "bride",
+          "bridal prep",
+          "hammock",
+          "pajamas",
+          "orange juice",
+          "window light",
+          "relaxed",
+          "candid",
+          "slieve russell",
+          "indoor"
+        ],
+        "aiAlt": "Bride relaxing in pajamas on a hammock with orange juice during wedding morning prep at Slieve Russell, County Cavan",
+        "aiCaption": "A relaxed wedding morning at Slieve Russell, with soft window light, orange juice and a quiet moment before getting ready begins.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/getting%20ready/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-113_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/getting%20ready/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-113_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1528,
+          "venue": "Slieve Russell",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_40e56f3d2262dd267024fe0e",
+        "imageId": "MKB001528",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-131_500.webp",
+        "order": 19,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bridesmaids",
+          "matching pyjamas",
+          "champagne toast",
+          "bridal party",
+          "christmas wedding",
+          "indoor",
+          "warm lighting",
+          "joyful",
+          "candid moment",
+          "slieve russell",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bridesmaids",
+          "matching pyjamas",
+          "champagne toast",
+          "bridal party",
+          "christmas wedding",
+          "indoor",
+          "warm lighting",
+          "joyful",
+          "candid moment",
+          "slieve russell",
+          "wedding morning"
+        ],
+        "aiAlt": "Bridesmaids in matching pyjamas share a champagne toast during wedding morning preparations at Slieve Russell.",
+        "aiCaption": "A relaxed wedding morning at Slieve Russell in Ballyconnell, with the bridal party toasting in warm indoor light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/getting%20ready/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-131_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/getting%20ready/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-131_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1529,
+          "venue": "Slieve Russell",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_1eb15ac13c345f5d041f1575",
+        "imageId": "MKB001529",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-145_500.webp",
+        "order": 20,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "slieve russell",
+          "getting ready",
+          "bride",
+          "bridal robe",
+          "veil",
+          "window light",
+          "warm light",
+          "quiet moment",
+          "bridal portrait",
+          "indoor portrait",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "getting ready",
+          "bride",
+          "bridal robe",
+          "veil",
+          "window light",
+          "warm light",
+          "quiet moment",
+          "bridal portrait",
+          "indoor portrait",
+          "wedding morning"
+        ],
+        "aiAlt": "Bride in a robe and veil by warm window light during wedding morning preparations at Slieve Russell, Ballyconnell",
+        "aiCaption": "A quiet getting ready moment at Slieve Russell, with soft window light and a relaxed feel before the ceremony.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/getting%20ready/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-145_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/getting%20ready/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-145_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1530,
+          "venue": "Slieve Russell",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_606f5b0db075b1c14c4f6423",
+        "imageId": "MKB001530",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography8_500.webp",
+        "order": 21,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "slieve russell",
+          "getting ready",
+          "bride",
+          "veil",
+          "family reveal",
+          "parents",
+          "hallway",
+          "staircase",
+          "black and white",
+          "emotional",
+          "window light",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "getting ready",
+          "bride",
+          "veil",
+          "family reveal",
+          "parents",
+          "hallway",
+          "staircase",
+          "black and white",
+          "emotional",
+          "window light",
+          "wedding morning"
+        ],
+        "aiAlt": "Black and white moment as a bride in her veil is seen by her parents on the stairs at Slieve Russell.",
+        "aiCaption": "A quiet family reveal on the wedding morning at Slieve Russell, with soft window light and the emotion of getting ready.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/getting%20ready/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography8_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/getting%20ready/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography8_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1531,
+          "venue": "Slieve Russell",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_3f7399edf8f16206e11373b4",
+        "imageId": "MKB001531",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography9_500.webp",
+        "order": 22,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "wedding morning",
+          "pajamas",
+          "gift opening",
+          "candid",
+          "natural light",
+          "happy moments",
+          "indoor",
+          "slieve russell"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "wedding morning",
+          "pajamas",
+          "gift opening",
+          "candid",
+          "natural light",
+          "happy moments",
+          "indoor",
+          "slieve russell"
+        ],
+        "aiAlt": "Bride and bridesmaids opening gifts in pajamas during wedding morning preparations at Slieve Russell, Ballyconnell",
+        "aiCaption": "A relaxed wedding morning at Slieve Russell in Ballyconnell, with the bridal party sharing happy gift-opening moments in soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/getting%20ready/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography9_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/getting%20ready/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-slieve-russell-wedding-photography9_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1532,
+          "venue": "Slieve Russell",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_859216246a75d6017ef4aee5",
+        "imageId": "MKB001532",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-463_500.webp",
+        "order": 23,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "slieve russell",
+          "wedding reception",
+          "party props",
+          "guest portrait",
+          "funny sign",
+          "indoor scene",
+          "spotlight",
+          "playful mood",
+          "candid moment",
+          "wedding entertainment",
+          "evening party"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "wedding reception",
+          "party props",
+          "guest portrait",
+          "funny sign",
+          "indoor scene",
+          "spotlight",
+          "playful mood",
+          "candid moment",
+          "wedding entertainment",
+          "evening party"
+        ],
+        "aiAlt": "Guest posing with a funny party sign during the evening reception at Slieve Russell in County Cavan",
+        "aiCaption": "A playful guest portrait from the Slieve Russell evening reception, capturing the relaxed fun of the party in Ballyconnell.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/reception%20and%20party/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-463_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/reception%20and%20party/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-463_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1533,
+          "venue": "Slieve Russell",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_01eea668f117d5631d982583",
+        "imageId": "MKB001533",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-515_500.webp",
+        "order": 24,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "slieve russell",
+          "wedding reception",
+          "speech",
+          "groom speech",
+          "top table",
+          "wedding guests",
+          "bride",
+          "floral decor",
+          "indoor lighting",
+          "candid moment",
+          "celebration",
+          "evening reception"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "wedding reception",
+          "speech",
+          "groom speech",
+          "top table",
+          "wedding guests",
+          "bride",
+          "floral decor",
+          "indoor lighting",
+          "candid moment",
+          "celebration",
+          "evening reception"
+        ],
+        "aiAlt": "Groom giving a speech at the top table during a Slieve Russell wedding reception in Ballyconnell",
+        "aiCaption": "A relaxed speech moment at the Slieve Russell in Ballyconnell, with guests gathered around the top table during the evening reception.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/reception%20and%20party/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-515_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/reception%20and%20party/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-515_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1534,
+          "venue": "Slieve Russell",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_1494762e303c5c93c98ddeff",
+        "imageId": "MKB001534",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-573_500.webp",
+        "order": 25,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "slieve russell",
+          "wedding reception",
+          "dance floor",
+          "bride and groom",
+          "wedding guests",
+          "party dancing",
+          "warm lighting",
+          "candid moment",
+          "joyful mood",
+          "evening celebration",
+          "reception party",
+          "irish wedding"
+        ],
+        "aiTags": [
+          "slieve russell",
+          "wedding reception",
+          "dance floor",
+          "bride and groom",
+          "wedding guests",
+          "party dancing",
+          "warm lighting",
+          "candid moment",
+          "joyful mood",
+          "evening celebration",
+          "reception party",
+          "irish wedding"
+        ],
+        "aiAlt": "Bride and groom dancing with guests at their Slieve Russell wedding reception in County Cavan, with warm light and a lively dance floor",
+        "aiCaption": "A relaxed evening reception at Slieve Russell in Ballyconnell, with the couple and guests filling the dance floor in warm, candid party light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Slieve%20Russell/reception%20and%20party/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-573_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Slieve%20Russell/reception%20and%20party/mkb-weddings-mkb-photography-ireland-northern-ireland-wedding-photographer-slieve-russell-wedding-photography-573_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1535,
+          "venue": "Slieve Russell",
+          "category": "reception and party"
+        }
+      }
+    ]
+  }
+}

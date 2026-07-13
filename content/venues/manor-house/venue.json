@@ -1,0 +1,340 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_aeb18ec7-84de-4795-92a6-86ca39321395",
+  "slug": "manor-house",
+  "name": "Manor House",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_f70782b2f2df5b1de63c202d",
+  "status": "published",
+  "links": {
+    "website": "https://www.manorhousecountryhotel.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.718Z",
+  "updatedAt": "2026-07-13T07:52:28.333Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.333Z",
+    "heroAssetId": "legacy_f70782b2f2df5b1de63c202d",
+    "images": [
+      {
+        "assetId": "legacy_f70782b2f2df5b1de63c202d",
+        "imageId": "MKB000965",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-manor-house-hotel-wedding-photography-379_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "lakeside",
+          "stormy sky",
+          "overcast light",
+          "dramatic mood",
+          "romantic portrait",
+          "wedding day",
+          "outdoor portraits",
+          "waterfront",
+          "manor house",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "lakeside",
+          "stormy sky",
+          "overcast light",
+          "dramatic mood",
+          "romantic portrait",
+          "wedding day",
+          "outdoor portraits",
+          "waterfront",
+          "manor house",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom portraits by the lakeside at Manor House, Lough Erne, under a stormy overcast sky",
+        "aiCaption": "A quiet lakeside portrait at Manor House in County Fermanagh, with soft overcast light and a dramatic sky adding atmosphere to the moment.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Manor%20House/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-manor-house-hotel-wedding-photography-379_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Manor%20House/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-manor-house-hotel-wedding-photography-379_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 966,
+          "venue": "Manor House",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_4c3339089726d9109a29bc53",
+        "imageId": "MKB000966",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-manor-house-hotel-enniskillen-wedding-photography-5_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "lakeside",
+          "dock",
+          "boat",
+          "dramatic sky",
+          "storm clouds",
+          "moody",
+          "natural light",
+          "romantic",
+          "wedding portraits",
+          "manor house"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "lakeside",
+          "dock",
+          "boat",
+          "dramatic sky",
+          "storm clouds",
+          "moody",
+          "natural light",
+          "romantic",
+          "wedding portraits",
+          "manor house"
+        ],
+        "aiAlt": "Bride and groom portraits on a dock by Lough Erne at Manor House, with a boat and storm clouds over the lake",
+        "aiCaption": "A quiet couple portrait by the water at Manor House, Lough Erne, with natural light and moody skies adding to the relaxed atmosphere.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Manor%20House/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-manor-house-hotel-enniskillen-wedding-photography-5_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Manor%20House/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-manor-house-hotel-enniskillen-wedding-photography-5_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 967,
+          "venue": "Manor House",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_0d813acd84b9bbebc0952efa",
+        "imageId": "MKB000967",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-manor-house-hotel-wedding-photography-120_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bridal prep",
+          "bride",
+          "bridesmaid",
+          "wedding morning",
+          "robes",
+          "hair rollers",
+          "reading note",
+          "manor house",
+          "soft window light",
+          "candid moment",
+          "relaxed mood"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bridal prep",
+          "bride",
+          "bridesmaid",
+          "wedding morning",
+          "robes",
+          "hair rollers",
+          "reading note",
+          "manor house",
+          "soft window light",
+          "candid moment",
+          "relaxed mood"
+        ],
+        "aiAlt": "Bride in robes reading a note during wedding morning prep at Manor House, Lough Erne, with soft window light",
+        "aiCaption": "A quiet wedding morning moment at Manor House in Lough Erne, with the bride reading a note as the room settles into a relaxed pace.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Manor%20House/getting%20ready/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-manor-house-hotel-wedding-photography-120_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Manor%20House/getting%20ready/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-manor-house-hotel-wedding-photography-120_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 968,
+          "venue": "Manor House",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_43d87994fb15fb66148147cc",
+        "imageId": "MKB000968",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-manor-house-hotel-wedding-photography-130_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bridal prep",
+          "wedding dress",
+          "bride",
+          "manor house",
+          "black and white",
+          "soft light",
+          "elegant",
+          "calm moment",
+          "dress details",
+          "indoor scene"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bridal prep",
+          "wedding dress",
+          "bride",
+          "manor house",
+          "black and white",
+          "soft light",
+          "elegant",
+          "calm moment",
+          "dress details",
+          "indoor scene"
+        ],
+        "aiAlt": "Black and white bridal prep at Manor House, with soft light on the wedding dress during a calm getting ready moment.",
+        "aiCaption": "A quiet getting ready moment at Manor House in County Fermanagh, photographed in soft black and white with a focus on the dress details.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Manor%20House/getting%20ready/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-manor-house-hotel-wedding-photography-130_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Manor%20House/getting%20ready/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-manor-house-hotel-wedding-photography-130_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 969,
+          "venue": "Manor House",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_6fe29e4652d8db61939654b9",
+        "imageId": "MKB000969",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-manor-house-hotel-wedding-photography-632_500.webp",
+        "order": 5,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "wedding reception",
+          "live music",
+          "bride",
+          "violin",
+          "banjo",
+          "party",
+          "indoor",
+          "warm lighting",
+          "evening celebration",
+          "musicians",
+          "manor house",
+          "joyful mood"
+        ],
+        "aiTags": [
+          "wedding reception",
+          "live music",
+          "bride",
+          "violin",
+          "banjo",
+          "party",
+          "indoor",
+          "warm lighting",
+          "evening celebration",
+          "musicians",
+          "manor house",
+          "joyful mood"
+        ],
+        "aiAlt": "Live musicians playing violin and banjo during a warm evening wedding reception at Manor House, Lough Erne.",
+        "aiCaption": "A relaxed evening reception at Manor House, Lough Erne, with live music bringing warmth and energy to the party.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Manor%20House/reception%20and%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-manor-house-hotel-wedding-photography-632_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Manor%20House/reception%20and%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-manor-house-hotel-wedding-photography-632_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 970,
+          "venue": "Manor House",
+          "category": "reception and party"
+        }
+      }
+    ]
+  }
+}

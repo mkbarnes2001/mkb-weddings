@@ -1,0 +1,2141 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_202c6ae1-e0bf-4e99-885c-32f85b1b2e6b",
+  "slug": "belmont",
+  "name": "Belmont",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "The Belmont House Hotel in Banbridge has a calm, welcoming family style atmosphere that really helps wedding days feel settled and unhurried.  It’s a venue where things tend to flow naturally, without needing much intervention. The spaces are well connected, so guests move easily through the day, which keeps the energy relaxed and sociable from start to finish.  Light is reliable and flexible here, which makes a big difference when documenting moments as they happen. Indoors, the rooms are bright and evenly lit, ideal for preparations, ceremonies and speeches without constantly chasing the best corner of the room. It allows photographs to feel natural and true to the moment rather than overly styled. Outside, there are simple, tidy surroundings that work well for portraits, especially when time is limited and the priority is staying close to the celebration.  Located in Banbridge, Belmont Hotel suits couples who want a wedding day that feels straightforward and comfortable. From a photography point of view, Belmont Hotel supports genuine interactions and an easy pace, letting the focus stay on people, connection and the story of the day as it unfolds.",
+  "heroImageId": "legacy_674531d64732e637520a348f",
+  "status": "published",
+  "links": {
+    "website": "https://www.belmontbanbridge.co.uk",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.720Z",
+  "updatedAt": "2026-07-13T07:52:28.320Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.320Z",
+    "heroAssetId": "legacy_674531d64732e637520a348f",
+    "images": [
+      {
+        "assetId": "legacy_674531d64732e637520a348f",
+        "imageId": "MKB000214",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-101_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "belmont",
+          "ceremony exit",
+          "confetti",
+          "bride and groom",
+          "wedding guests",
+          "flower petals",
+          "daylight",
+          "joyful",
+          "newlyweds",
+          "bouquet",
+          "celebration",
+          "outdoor ceremony"
+        ],
+        "aiTags": [
+          "belmont",
+          "ceremony exit",
+          "confetti",
+          "bride and groom",
+          "wedding guests",
+          "flower petals",
+          "daylight",
+          "joyful",
+          "newlyweds",
+          "bouquet",
+          "celebration",
+          "outdoor ceremony"
+        ],
+        "aiAlt": "Newlyweds exit their Belmont ceremony in Banbridge as guests shower them with confetti in soft daylight",
+        "aiCaption": "A relaxed ceremony exit at Belmont in Banbridge, with flower petals in the air and guests gathered close around the newlyweds.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/ceremony/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-101_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/ceremony/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-101_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 215,
+          "venue": "Belmont",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_aadc020a6b2912dace668377",
+        "imageId": "MKB000215",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-177_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "belmont",
+          "ceremony exit",
+          "bride and groom",
+          "indoor ceremony",
+          "aisle walk",
+          "guest celebration",
+          "confetti alternative",
+          "waving napkins",
+          "natural light",
+          "joyful moment",
+          "wedding reception room",
+          "candid wedding"
+        ],
+        "aiTags": [
+          "belmont",
+          "ceremony exit",
+          "bride and groom",
+          "indoor ceremony",
+          "aisle walk",
+          "guest celebration",
+          "confetti alternative",
+          "waving napkins",
+          "natural light",
+          "joyful moment",
+          "wedding reception room",
+          "candid wedding"
+        ],
+        "aiAlt": "Newlyweds walking down the aisle at Belmont in Banbridge as guests wave napkins in celebration",
+        "aiCaption": "A joyful ceremony exit at Belmont in Banbridge, with guests waving napkins as the couple make their way down the aisle.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/ceremony/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-177_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/ceremony/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-177_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 216,
+          "venue": "Belmont",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_846048be301b8baec977428e",
+        "imageId": "MKB000216",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-243_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "belmont wedding",
+          "aisle walk",
+          "bride entrance",
+          "groom waiting",
+          "wedding guests",
+          "black and white",
+          "indoor ceremony",
+          "emotional moment",
+          "documentary style",
+          "soft light",
+          "formal wedding"
+        ],
+        "aiTags": [
+          "ceremony",
+          "belmont wedding",
+          "aisle walk",
+          "bride entrance",
+          "groom waiting",
+          "wedding guests",
+          "black and white",
+          "indoor ceremony",
+          "emotional moment",
+          "documentary style",
+          "soft light",
+          "formal wedding"
+        ],
+        "aiAlt": "Black and white ceremony moment at Belmont, Banbridge, as the bride walks the aisle with the groom waiting.",
+        "aiCaption": "A quiet, emotional aisle walk during an indoor ceremony at Belmont in Banbridge, captured in a relaxed documentary style.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/ceremony/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-243_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/ceremony/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-243_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 217,
+          "venue": "Belmont",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_e10aaf561d5fd046381f6a9f",
+        "imageId": "MKB000217",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-259_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "belmont",
+          "ceremony",
+          "bride and groom",
+          "indoor ceremony",
+          "wedding vows",
+          "seated couple",
+          "natural light",
+          "romantic",
+          "joyful",
+          "candid moment",
+          "wedding guests",
+          "veil"
+        ],
+        "aiTags": [
+          "belmont",
+          "ceremony",
+          "bride and groom",
+          "indoor ceremony",
+          "wedding vows",
+          "seated couple",
+          "natural light",
+          "romantic",
+          "joyful",
+          "candid moment",
+          "wedding guests",
+          "veil"
+        ],
+        "aiAlt": "Bride and groom seated during their indoor ceremony at Belmont in Banbridge, with soft natural light and guests gathered around.",
+        "aiCaption": "A quiet ceremony moment at Belmont in Banbridge, captured naturally as the couple sit together with guests nearby and soft light across the room.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/ceremony/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-259_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/ceremony/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-259_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 218,
+          "venue": "Belmont",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_c9dc762609c82bf26135882c",
+        "imageId": "MKB000218",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-405_500.webp",
+        "order": 5,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "first kiss",
+          "bride and groom",
+          "indoor ceremony",
+          "wedding guests",
+          "applause",
+          "aisle",
+          "warm lighting",
+          "joyful",
+          "romantic",
+          "belmont",
+          "floral decor"
+        ],
+        "aiTags": [
+          "ceremony",
+          "first kiss",
+          "bride and groom",
+          "indoor ceremony",
+          "wedding guests",
+          "applause",
+          "aisle",
+          "warm lighting",
+          "joyful",
+          "romantic",
+          "belmont",
+          "floral decor"
+        ],
+        "aiAlt": "First kiss during an indoor wedding ceremony at Belmont in Banbridge, with guests applauding under warm light",
+        "aiCaption": "A joyful first kiss at Belmont in Banbridge, captured naturally as guests applaud during the ceremony.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/ceremony/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-405_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/ceremony/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-405_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 219,
+          "venue": "Belmont",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_8c5529e1e7a9ca662ad20e22",
+        "imageId": "MKB000219",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-416_500.webp",
+        "order": 6,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "belmont wedding",
+          "ceremony kiss",
+          "newlyweds",
+          "aisle exit",
+          "indoor ceremony",
+          "guest applause",
+          "bright light",
+          "joyful moment",
+          "romantic dip",
+          "wedding guests",
+          "celebration",
+          "ceremony"
+        ],
+        "aiTags": [
+          "belmont wedding",
+          "ceremony kiss",
+          "newlyweds",
+          "aisle exit",
+          "indoor ceremony",
+          "guest applause",
+          "bright light",
+          "joyful moment",
+          "romantic dip",
+          "wedding guests",
+          "celebration",
+          "ceremony"
+        ],
+        "aiAlt": "Newlyweds share a joyful ceremony kiss at Belmont in Banbridge as guests applaud in bright indoor light.",
+        "aiCaption": "A relaxed ceremony moment at Belmont in Banbridge, with the newlyweds kissing in the aisle as guests cheer them on.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/ceremony/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-416_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/ceremony/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-416_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 220,
+          "venue": "Belmont",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_434880e40bf099262624c283",
+        "imageId": "MKB000220",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-107-2_500.webp",
+        "order": 7,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "belmont",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "tree backdrop",
+          "spring blossoms",
+          "natural light",
+          "romantic",
+          "intimate",
+          "wedding kiss",
+          "bridal bouquet",
+          "garden wedding"
+        ],
+        "aiTags": [
+          "belmont",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "tree backdrop",
+          "spring blossoms",
+          "natural light",
+          "romantic",
+          "intimate",
+          "wedding kiss",
+          "bridal bouquet",
+          "garden wedding"
+        ],
+        "aiAlt": "Bride and groom share a quiet kiss in natural light among spring blossoms at Belmont, Banbridge.",
+        "aiCaption": "A relaxed couple portrait at Belmont in Banbridge, with spring blossom, soft light and a quiet wedding-day kiss.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-107-2_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-107-2_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 221,
+          "venue": "Belmont",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_8282b6fb56e4fe0f08cd2fd0",
+        "imageId": "MKB000221",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-109_500.webp",
+        "order": 8,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "belmont wedding",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "natural light",
+          "romantic",
+          "wedding day",
+          "bridal bouquet",
+          "long veil",
+          "black tie",
+          "historic backdrop",
+          "garden portrait"
+        ],
+        "aiTags": [
+          "belmont wedding",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "natural light",
+          "romantic",
+          "wedding day",
+          "bridal bouquet",
+          "long veil",
+          "black tie",
+          "historic backdrop",
+          "garden portrait"
+        ],
+        "aiAlt": "Bride and groom in a garden portrait at Belmont, Banbridge, with a long veil, bouquet and soft natural light",
+        "aiCaption": "A relaxed outdoor couple portrait at Belmont in Banbridge, with soft light, a historic backdrop and the quiet warmth of the wedding day.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-109_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-109_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 222,
+          "venue": "Belmont",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_06e4b1b4169ad412fdd05613",
+        "imageId": "MKB000222",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-118_500.webp",
+        "order": 9,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "belmont wedding",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "tree backdrop",
+          "soft daylight",
+          "romantic mood",
+          "wedding bouquet",
+          "bridal veil",
+          "black tie groom",
+          "newlyweds",
+          "wedding portraits"
+        ],
+        "aiTags": [
+          "belmont wedding",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "tree backdrop",
+          "soft daylight",
+          "romantic mood",
+          "wedding bouquet",
+          "bridal veil",
+          "black tie groom",
+          "newlyweds",
+          "wedding portraits"
+        ],
+        "aiAlt": "Bride and groom portrait at Belmont in Banbridge, standing by trees in soft daylight with bouquet and veil.",
+        "aiCaption": "A relaxed couple portrait at Belmont in Banbridge, with soft daylight, a leafy backdrop and a quiet moment together after the ceremony.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-118_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-118_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 223,
+          "venue": "Belmont",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_a58d28c2d4d0d864db579f7a",
+        "imageId": "MKB000223",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-119_500.webp",
+        "order": 10,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "belmont",
+          "couple portraits",
+          "bride and groom",
+          "indoor portrait",
+          "mirror reflection",
+          "window light",
+          "moody lighting",
+          "romantic mood",
+          "intimate moment",
+          "wedding dress",
+          "veil",
+          "classic wedding"
+        ],
+        "aiTags": [
+          "belmont",
+          "couple portraits",
+          "bride and groom",
+          "indoor portrait",
+          "mirror reflection",
+          "window light",
+          "moody lighting",
+          "romantic mood",
+          "intimate moment",
+          "wedding dress",
+          "veil",
+          "classic wedding"
+        ],
+        "aiAlt": "Bride and groom in a moody mirror reflection during indoor portraits at Belmont, Banbridge",
+        "aiCaption": "A quiet indoor couple portrait at Belmont in Banbridge, using mirror reflection and soft window light for a relaxed, intimate feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-119_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-119_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 224,
+          "venue": "Belmont",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_b2fb700cc91d449b1dacbf46",
+        "imageId": "MKB000224",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-122_500.webp",
+        "order": 11,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "belmont",
+          "couple portraits",
+          "bride and groom",
+          "wedding drinks",
+          "bar portrait",
+          "indoor wedding",
+          "soft window light",
+          "intimate moment",
+          "romantic mood",
+          "champagne toast",
+          "candid portrait",
+          "wedding veil"
+        ],
+        "aiTags": [
+          "belmont",
+          "couple portraits",
+          "bride and groom",
+          "wedding drinks",
+          "bar portrait",
+          "indoor wedding",
+          "soft window light",
+          "intimate moment",
+          "romantic mood",
+          "champagne toast",
+          "candid portrait",
+          "wedding veil"
+        ],
+        "aiAlt": "Bride and groom sharing a quiet champagne toast in soft window light at Belmont, Banbridge",
+        "aiCaption": "A relaxed indoor portrait at Belmont in Banbridge, with the couple pausing by the bar for a quiet toast in soft window light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-122_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-122_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 225,
+          "venue": "Belmont",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_0caa8ea8261815a65031c241",
+        "imageId": "MKB000225",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-123_500.webp",
+        "order": 12,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "belmont",
+          "couple portraits",
+          "bride and groom",
+          "indoor portrait",
+          "bar scene",
+          "wedding drinks",
+          "toast",
+          "moody lighting",
+          "romantic",
+          "candid moment",
+          "veil",
+          "wedding reception"
+        ],
+        "aiTags": [
+          "belmont",
+          "couple portraits",
+          "bride and groom",
+          "indoor portrait",
+          "bar scene",
+          "wedding drinks",
+          "toast",
+          "moody lighting",
+          "romantic",
+          "candid moment",
+          "veil",
+          "wedding reception"
+        ],
+        "aiAlt": "Bride and groom sharing a toast at the bar during their Belmont wedding reception in Banbridge",
+        "aiCaption": "A relaxed indoor couple portrait at Belmont, with soft bar light and a quiet toast bringing a warm documentary feel to the reception.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-123_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-123_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 226,
+          "venue": "Belmont",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_43393c6367d798a4f769e3d9",
+        "imageId": "MKB000226",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-124-1_500.webp",
+        "order": 13,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "belmont",
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "outdoor wedding",
+          "natural light",
+          "romantic",
+          "elegant",
+          "wedding dress",
+          "black tie",
+          "bridal bouquet",
+          "veil"
+        ],
+        "aiTags": [
+          "belmont",
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "outdoor wedding",
+          "natural light",
+          "romantic",
+          "elegant",
+          "wedding dress",
+          "black tie",
+          "bridal bouquet",
+          "veil"
+        ],
+        "aiAlt": "Bride and groom in black tie during woodland couple portraits at Belmont in Banbridge",
+        "aiCaption": "A quiet outdoor portrait at Belmont, Banbridge, with soft natural light, woodland greenery and a relaxed documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-124-1_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-124-1_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 227,
+          "venue": "Belmont",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_6dae9583c9e72007c0ff050c",
+        "imageId": "MKB000227",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-126_500.webp",
+        "order": 14,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "belmont wedding",
+          "couple portraits",
+          "bride and groom",
+          "bar scene",
+          "indoor wedding",
+          "candid moment",
+          "drinks toast",
+          "soft indoor light",
+          "fun mood",
+          "relaxed portraits",
+          "wedding reception",
+          "romantic candid"
+        ],
+        "aiTags": [
+          "belmont wedding",
+          "couple portraits",
+          "bride and groom",
+          "bar scene",
+          "indoor wedding",
+          "candid moment",
+          "drinks toast",
+          "soft indoor light",
+          "fun mood",
+          "relaxed portraits",
+          "wedding reception",
+          "romantic candid"
+        ],
+        "aiAlt": "Bride and groom sharing a relaxed toast at the bar during their Belmont wedding in Banbridge",
+        "aiCaption": "A relaxed couple portrait at Belmont in Banbridge, with the bride and groom sharing a toast in soft indoor light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-126_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-126_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 228,
+          "venue": "Belmont",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_98500d1ad75697ddbbbefd6e",
+        "imageId": "MKB000228",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-128_500.webp",
+        "order": 15,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "tree blossoms",
+          "romantic kiss",
+          "moody lighting",
+          "wedding bouquet",
+          "bridal veil",
+          "wedding dress",
+          "black tie groom",
+          "belmont wedding",
+          "intimate moment"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "tree blossoms",
+          "romantic kiss",
+          "moody lighting",
+          "wedding bouquet",
+          "bridal veil",
+          "wedding dress",
+          "black tie groom",
+          "belmont wedding",
+          "intimate moment"
+        ],
+        "aiAlt": "Bride and groom sharing a quiet kiss under blossom trees at Belmont in Banbridge, with moody light and a bridal bouquet",
+        "aiCaption": "A relaxed couple portrait at Belmont, Banbridge, with soft blossom, moody light and a quiet moment between the bride and groom.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-128_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-128_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 229,
+          "venue": "Belmont",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_a5c59143513986dce8dc1ee5",
+        "imageId": "MKB000229",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-138_500.webp",
+        "order": 16,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "belmont",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "rustic backdrop",
+          "long veil",
+          "wedding bouquet",
+          "soft daylight",
+          "romantic",
+          "elegant",
+          "wedding day",
+          "newlyweds"
+        ],
+        "aiTags": [
+          "belmont",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "rustic backdrop",
+          "long veil",
+          "wedding bouquet",
+          "soft daylight",
+          "romantic",
+          "elegant",
+          "wedding day",
+          "newlyweds"
+        ],
+        "aiAlt": "Bride and groom with a long veil and bouquet during outdoor couple portraits at Belmont in Banbridge",
+        "aiCaption": "Soft daylight and a rustic backdrop gave these Belmont couple portraits in Banbridge a relaxed, natural feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-138_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-138_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 230,
+          "venue": "Belmont",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_07c4aaedde1b0b0adb702dcd",
+        "imageId": "MKB000230",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-365_500.webp",
+        "order": 17,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "indoor portrait",
+          "editorial style",
+          "playful pose",
+          "dip kiss",
+          "bride and groom",
+          "wedding day",
+          "romantic mood",
+          "soft indoor light",
+          "belmont wedding",
+          "magazine backdrop",
+          "fun moment"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "indoor portrait",
+          "editorial style",
+          "playful pose",
+          "dip kiss",
+          "bride and groom",
+          "wedding day",
+          "romantic mood",
+          "soft indoor light",
+          "belmont wedding",
+          "magazine backdrop",
+          "fun moment"
+        ],
+        "aiAlt": "Playful dip kiss couple portrait indoors at Belmont in Banbridge, with soft light and a relaxed editorial feel",
+        "aiCaption": "A fun indoor couple portrait at Belmont in Banbridge, capturing a relaxed dip kiss with soft light and a modern documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-365_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/couple%20portraits/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-365_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 231,
+          "venue": "Belmont",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_039f99190796f9bfa25fe1b2",
+        "imageId": "MKB000231",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-120_500.webp",
+        "order": 18,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "details-and-decor"
+        ],
+        "tags": [
+          "belmont",
+          "chair decor",
+          "red rose",
+          "aisle decor",
+          "wedding flowers",
+          "greenery",
+          "ceremony details",
+          "indoor wedding",
+          "soft light",
+          "romantic",
+          "no people",
+          "decor details"
+        ],
+        "aiTags": [
+          "belmont",
+          "chair decor",
+          "red rose",
+          "aisle decor",
+          "wedding flowers",
+          "greenery",
+          "ceremony details",
+          "indoor wedding",
+          "soft light",
+          "romantic",
+          "no people",
+          "decor details"
+        ],
+        "aiAlt": "Red rose and greenery chair decor lining the indoor ceremony aisle at Belmont in Banbridge",
+        "aiCaption": "Soft light catches the red rose and greenery aisle decor at Belmont, bringing a warm, natural feel to the indoor ceremony setting.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/details%20and%20decor/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-120_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/details%20and%20decor/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-120_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 232,
+          "venue": "Belmont",
+          "category": "details and decor"
+        }
+      },
+      {
+        "assetId": "legacy_a785b8896c6b4226ce503eab",
+        "imageId": "MKB000232",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-124_500.webp",
+        "order": 19,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "details-and-decor"
+        ],
+        "tags": [
+          "belmont wedding",
+          "ceremony decor",
+          "wedding chairs",
+          "aisle decor",
+          "floral details",
+          "red roses",
+          "empty ceremony room",
+          "indoor ceremony",
+          "soft natural light",
+          "romantic decor",
+          "wedding setup",
+          "details and decor"
+        ],
+        "aiTags": [
+          "belmont wedding",
+          "ceremony decor",
+          "wedding chairs",
+          "aisle decor",
+          "floral details",
+          "red roses",
+          "empty ceremony room",
+          "indoor ceremony",
+          "soft natural light",
+          "romantic decor",
+          "wedding setup",
+          "details and decor"
+        ],
+        "aiAlt": "Empty indoor ceremony room at Belmont, Banbridge, with white chairs, aisle flowers and red rose decor in soft natural light",
+        "aiCaption": "A quiet look at the ceremony setup at Belmont in Banbridge, with soft natural light, simple aisle details and red roses adding warmth to the room.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/details%20and%20decor/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-124_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/details%20and%20decor/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-124_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 233,
+          "venue": "Belmont",
+          "category": "details and decor"
+        }
+      },
+      {
+        "assetId": "legacy_f05c5d1f71a490be89a546b3",
+        "imageId": "MKB000233",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-100-1_500.webp",
+        "order": 20,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "belmont",
+          "getting ready",
+          "bride",
+          "wedding veil",
+          "bridal portrait",
+          "black and white",
+          "window light",
+          "dramatic",
+          "staircase",
+          "elegant",
+          "quiet moment",
+          "bridal prep"
+        ],
+        "aiTags": [
+          "belmont",
+          "getting ready",
+          "bride",
+          "wedding veil",
+          "bridal portrait",
+          "black and white",
+          "window light",
+          "dramatic",
+          "staircase",
+          "elegant",
+          "quiet moment",
+          "bridal prep"
+        ],
+        "aiAlt": "Black and white bridal portrait by the staircase at Belmont in Banbridge, with soft window light on the wedding veil",
+        "aiCaption": "A quiet getting ready moment at Belmont, Banbridge, with window light catching the bride's veil in a natural black and white frame.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-100-1_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-100-1_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 234,
+          "venue": "Belmont",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_227e425b7a65e2e662c4ed14",
+        "imageId": "MKB000234",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-100_500.webp",
+        "order": 21,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "belmont",
+          "getting ready",
+          "bridal details",
+          "wedding flat lay",
+          "wedding shoes",
+          "wedding rings",
+          "bridal bouquet",
+          "perfume",
+          "invitation suite",
+          "natural light",
+          "elegant",
+          "romantic"
+        ],
+        "aiTags": [
+          "belmont",
+          "getting ready",
+          "bridal details",
+          "wedding flat lay",
+          "wedding shoes",
+          "wedding rings",
+          "bridal bouquet",
+          "perfume",
+          "invitation suite",
+          "natural light",
+          "elegant",
+          "romantic"
+        ],
+        "aiAlt": "Bridal detail flat lay at Belmont, Banbridge with wedding shoes, rings, bouquet, perfume and invitations in soft natural light",
+        "aiCaption": "A relaxed getting ready detail scene at Belmont in Banbridge, with bridal accessories gathered beautifully in natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-100_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-100_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 235,
+          "venue": "Belmont",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_3f0987a10c36e337f17f68eb",
+        "imageId": "MKB000235",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-102_500.webp",
+        "order": 22,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bride",
+          "makeup",
+          "lipstick",
+          "bridal prep",
+          "close up",
+          "soft light",
+          "smiling",
+          "beauty",
+          "morning prep",
+          "belmont",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bride",
+          "makeup",
+          "lipstick",
+          "bridal prep",
+          "close up",
+          "soft light",
+          "smiling",
+          "beauty",
+          "morning prep",
+          "belmont",
+          "wedding morning"
+        ],
+        "aiAlt": "Bride smiling during a lipstick touch-up in soft light at Belmont in Banbridge",
+        "aiCaption": "A relaxed wedding morning moment at Belmont, Banbridge, as the bride has her lipstick finished in soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-102_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-102_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 236,
+          "venue": "Belmont",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_9cb6e78f718681cda5de2aef",
+        "imageId": "MKB000236",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-103_500.webp",
+        "order": 23,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "wedding rings",
+          "ring detail",
+          "wooden ring box",
+          "getting ready",
+          "wedding details",
+          "bridal accessories",
+          "soft light",
+          "romantic mood",
+          "flat lay",
+          "belmont wedding",
+          "ceremony prep",
+          "no people"
+        ],
+        "aiTags": [
+          "wedding rings",
+          "ring detail",
+          "wooden ring box",
+          "getting ready",
+          "wedding details",
+          "bridal accessories",
+          "soft light",
+          "romantic mood",
+          "flat lay",
+          "belmont wedding",
+          "ceremony prep",
+          "no people"
+        ],
+        "aiAlt": "Wedding rings in a wooden ring box during getting ready at Belmont in Banbridge",
+        "aiCaption": "A quiet getting-ready detail at Belmont in Banbridge, with the wedding rings resting in soft light before the ceremony.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-103_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-103_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 237,
+          "venue": "Belmont",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_834014f983df0d1515279b37",
+        "imageId": "MKB000237",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-104_500.webp",
+        "order": 24,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "belmont",
+          "getting ready",
+          "bride",
+          "bridal robe",
+          "champagne",
+          "window light",
+          "candid portrait",
+          "smiling",
+          "relaxed",
+          "morning preparations",
+          "bridal suite",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "belmont",
+          "getting ready",
+          "bride",
+          "bridal robe",
+          "champagne",
+          "window light",
+          "candid portrait",
+          "smiling",
+          "relaxed",
+          "morning preparations",
+          "bridal suite",
+          "wedding morning"
+        ],
+        "aiAlt": "Bride in a bridal robe smiling with champagne in window light during getting ready at Belmont, Banbridge",
+        "aiCaption": "A relaxed wedding morning moment at Belmont in Banbridge, with soft window light, champagne and a natural smile during bridal preparations.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-104_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-104_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 238,
+          "venue": "Belmont",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_ee32c7d463fad2e893032db8",
+        "imageId": "MKB000238",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-107_500.webp",
+        "order": 25,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "belmont",
+          "getting ready",
+          "bride",
+          "earrings",
+          "mirror reflection",
+          "bridal prep",
+          "indoor light",
+          "soft lighting",
+          "calm mood",
+          "wedding morning",
+          "bridal robe",
+          "candid moment"
+        ],
+        "aiTags": [
+          "belmont",
+          "getting ready",
+          "bride",
+          "earrings",
+          "mirror reflection",
+          "bridal prep",
+          "indoor light",
+          "soft lighting",
+          "calm mood",
+          "wedding morning",
+          "bridal robe",
+          "candid moment"
+        ],
+        "aiAlt": "Bride putting on earrings in a mirror reflection during calm wedding morning prep at Belmont, Banbridge",
+        "aiCaption": "Soft indoor light and a quiet mirror moment during bridal prep at Belmont in Banbridge, captured in a relaxed documentary style.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-107_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-107_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 239,
+          "venue": "Belmont",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_ad14486d812cfbf610998f6b",
+        "imageId": "MKB000239",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-107-1_500.webp",
+        "order": 26,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "champagne toast",
+          "window light",
+          "morning preparations",
+          "candid",
+          "joyful",
+          "bridal robe",
+          "belmont wedding",
+          "indoor"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "champagne toast",
+          "window light",
+          "morning preparations",
+          "candid",
+          "joyful",
+          "bridal robe",
+          "belmont wedding",
+          "indoor"
+        ],
+        "aiAlt": "Bride and bridesmaids sharing a champagne toast in soft window light during morning preparations at Belmont, Banbridge.",
+        "aiCaption": "A relaxed getting ready moment at Belmont in Banbridge, with the bridal party sharing a champagne toast in soft morning light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-107-1_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-107-1_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 240,
+          "venue": "Belmont",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_9cbab06272451c49575f1ef6",
+        "imageId": "MKB000240",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-114_500.webp",
+        "order": 27,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "wedding dress",
+          "bridal gown",
+          "getting ready",
+          "bridal prep",
+          "dress hanging",
+          "lace dress",
+          "soft light",
+          "natural light",
+          "romantic",
+          "elegant details",
+          "belmont",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "wedding dress",
+          "bridal gown",
+          "getting ready",
+          "bridal prep",
+          "dress hanging",
+          "lace dress",
+          "soft light",
+          "natural light",
+          "romantic",
+          "elegant details",
+          "belmont",
+          "wedding morning"
+        ],
+        "aiAlt": "Lace wedding dress hanging in soft natural light during bridal prep at Belmont, Banbridge",
+        "aiCaption": "A quiet wedding morning detail at Belmont in Banbridge, with the bridal gown hanging in soft natural light before the day begins.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-114_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-114_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 241,
+          "venue": "Belmont",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_40a05c73636972da24dcebcf",
+        "imageId": "MKB000241",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-130_500.webp",
+        "order": 28,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "belmont",
+          "getting ready",
+          "bride",
+          "mother of bride",
+          "wedding dress",
+          "bridal prep",
+          "veil",
+          "buttoning dress",
+          "natural light",
+          "emotional",
+          "candid",
+          "indoor"
+        ],
+        "aiTags": [
+          "belmont",
+          "getting ready",
+          "bride",
+          "mother of bride",
+          "wedding dress",
+          "bridal prep",
+          "veil",
+          "buttoning dress",
+          "natural light",
+          "emotional",
+          "candid",
+          "indoor"
+        ],
+        "aiAlt": "Bride having her wedding dress buttoned during bridal prep at Belmont in Banbridge",
+        "aiCaption": "A quiet getting ready moment at Belmont in Banbridge, with natural light and a gentle hand helping fasten the bride’s dress.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-130_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-130_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 242,
+          "venue": "Belmont",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_d2eaaabf87ab4e9eff1bc36c",
+        "imageId": "MKB000242",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-132_500.webp",
+        "order": 29,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "belmont",
+          "getting ready",
+          "bride",
+          "bridal portrait",
+          "wedding dress",
+          "long veil",
+          "window light",
+          "backlit",
+          "elegant",
+          "quiet moment",
+          "indoor",
+          "lace details"
+        ],
+        "aiTags": [
+          "belmont",
+          "getting ready",
+          "bride",
+          "bridal portrait",
+          "wedding dress",
+          "long veil",
+          "window light",
+          "backlit",
+          "elegant",
+          "quiet moment",
+          "indoor",
+          "lace details"
+        ],
+        "aiAlt": "Bride in a lace wedding dress and long veil by window light during getting ready at Belmont, Banbridge",
+        "aiCaption": "A quiet getting-ready portrait at Belmont in Banbridge, with soft window light catching the bride’s veil and lace dress.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-132_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-132_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 243,
+          "venue": "Belmont",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_a9550cc7cc6ab91ec4c93ace",
+        "imageId": "MKB000243",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-205_500.webp",
+        "order": 30,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "belmont",
+          "getting ready",
+          "bride",
+          "staircase",
+          "bridal portrait",
+          "wedding dress",
+          "long veil",
+          "bouquet",
+          "natural light",
+          "elegant",
+          "romantic",
+          "before ceremony"
+        ],
+        "aiTags": [
+          "belmont",
+          "getting ready",
+          "bride",
+          "staircase",
+          "bridal portrait",
+          "wedding dress",
+          "long veil",
+          "bouquet",
+          "natural light",
+          "elegant",
+          "romantic",
+          "before ceremony"
+        ],
+        "aiAlt": "Bride on the staircase at Belmont in Banbridge, holding her bouquet as natural light falls across her long veil",
+        "aiCaption": "A quiet getting-ready portrait at Belmont in Banbridge, with soft natural light, a long veil and a calm moment before the ceremony.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-205_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/getting%20ready/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-205_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 244,
+          "venue": "Belmont",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_841464c5f0ba6d6694560d6b",
+        "imageId": "MKB000244",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-300_500.webp",
+        "order": 31,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "belmont",
+          "wedding reception",
+          "party",
+          "groom",
+          "wedding guests",
+          "dance floor",
+          "indoor",
+          "bright lighting",
+          "candid",
+          "cheering",
+          "celebration",
+          "fun"
+        ],
+        "aiTags": [
+          "belmont",
+          "wedding reception",
+          "party",
+          "groom",
+          "wedding guests",
+          "dance floor",
+          "indoor",
+          "bright lighting",
+          "candid",
+          "cheering",
+          "celebration",
+          "fun"
+        ],
+        "aiAlt": "Groom and wedding guests cheering on the dance floor during a lively Belmont reception in Banbridge",
+        "aiCaption": "A relaxed, candid moment from the Belmont dance floor in Banbridge, with guests cheering and enjoying the evening celebrations.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-300_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-300_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 245,
+          "venue": "Belmont",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_8ca1ebd33176dca7508ed7cc",
+        "imageId": "MKB000245",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-340_500.webp",
+        "order": 32,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "belmont reception",
+          "wedding party",
+          "dancing guests",
+          "celebration",
+          "indoor reception",
+          "bright lighting",
+          "joyful mood",
+          "group toast",
+          "evening party",
+          "wedding guests",
+          "dance floor",
+          "reception moment"
+        ],
+        "aiTags": [
+          "belmont reception",
+          "wedding party",
+          "dancing guests",
+          "celebration",
+          "indoor reception",
+          "bright lighting",
+          "joyful mood",
+          "group toast",
+          "evening party",
+          "wedding guests",
+          "dance floor",
+          "reception moment"
+        ],
+        "aiAlt": "Wedding guests toasting and dancing during an indoor reception at Belmont in Banbridge",
+        "aiCaption": "A lively reception moment at Belmont in Banbridge, with guests gathered on the dance floor enjoying the evening celebration.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-340_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-340_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 246,
+          "venue": "Belmont",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_adcac8c8d35d32df5f422456",
+        "imageId": "MKB000246",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-351_500.webp",
+        "order": 33,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "belmont",
+          "wedding reception",
+          "dance floor",
+          "party",
+          "guests dancing",
+          "celebration",
+          "evening reception",
+          "lively mood",
+          "indoor venue",
+          "flash lighting",
+          "wedding guests",
+          "reception fun"
+        ],
+        "aiTags": [
+          "belmont",
+          "wedding reception",
+          "dance floor",
+          "party",
+          "guests dancing",
+          "celebration",
+          "evening reception",
+          "lively mood",
+          "indoor venue",
+          "flash lighting",
+          "wedding guests",
+          "reception fun"
+        ],
+        "aiAlt": "Wedding guests dancing during the evening reception at Belmont in Banbridge",
+        "aiCaption": "A lively dance floor moment at Belmont in Banbridge, captured with natural documentary energy as guests enjoy the evening reception.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-351_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-351_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 247,
+          "venue": "Belmont",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_e9ec482583e2f63e4b34db35",
+        "imageId": "MKB000247",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-397_500.webp",
+        "order": 34,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "belmont",
+          "reception",
+          "first dance",
+          "bride and groom",
+          "dance floor",
+          "sparkler fountains",
+          "indoor wedding",
+          "evening party",
+          "romantic",
+          "celebration",
+          "guests watching",
+          "dramatic lighting"
+        ],
+        "aiTags": [
+          "belmont",
+          "reception",
+          "first dance",
+          "bride and groom",
+          "dance floor",
+          "sparkler fountains",
+          "indoor wedding",
+          "evening party",
+          "romantic",
+          "celebration",
+          "guests watching",
+          "dramatic lighting"
+        ],
+        "aiAlt": "First dance at Belmont in Banbridge with sparkler fountains lighting the dance floor as guests watch the evening celebration",
+        "aiCaption": "A warm evening reception at Belmont in Banbridge, with the couple on the dance floor, guests gathered close and sparkler fountains adding drama to the moment.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-397_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-397_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 248,
+          "venue": "Belmont",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_a0630468f2448cde436ebfe8",
+        "imageId": "MKB000248",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-400_500.webp",
+        "order": 35,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "belmont wedding",
+          "reception",
+          "dance floor",
+          "first dance",
+          "bride and groom",
+          "wedding guests",
+          "party",
+          "flash lighting",
+          "romantic",
+          "joyful",
+          "evening reception",
+          "celebration"
+        ],
+        "aiTags": [
+          "belmont wedding",
+          "reception",
+          "dance floor",
+          "first dance",
+          "bride and groom",
+          "wedding guests",
+          "party",
+          "flash lighting",
+          "romantic",
+          "joyful",
+          "evening reception",
+          "celebration"
+        ],
+        "aiAlt": "Couple share their first dance at Belmont in Banbridge, surrounded by guests and warm flash-lit evening atmosphere",
+        "aiCaption": "A relaxed first dance at Belmont, Banbridge, with guests gathered close and the evening reception moving into full party mode.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-400_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-400_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 249,
+          "venue": "Belmont",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_9924e8954cc01f454645c550",
+        "imageId": "MKB000249",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-424_500.webp",
+        "order": 36,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "belmont wedding",
+          "reception party",
+          "dance floor",
+          "group photo",
+          "wedding guests",
+          "bride and groom",
+          "flash lighting",
+          "celebration",
+          "joyful mood",
+          "evening reception",
+          "party moment",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "belmont wedding",
+          "reception party",
+          "dance floor",
+          "group photo",
+          "wedding guests",
+          "bride and groom",
+          "flash lighting",
+          "celebration",
+          "joyful mood",
+          "evening reception",
+          "party moment",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Wedding guests celebrating on the dance floor at Belmont in Banbridge during the evening reception",
+        "aiCaption": "A lively evening reception moment at Belmont in Banbridge, with guests gathered on the dance floor and the party in full swing.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-424_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-424_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 250,
+          "venue": "Belmont",
+          "category": "reception and party"
+        }
+      }
+    ]
+  }
+}

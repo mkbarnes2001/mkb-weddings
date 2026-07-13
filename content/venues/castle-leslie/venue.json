@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_dc234a2f-8435-4e88-8daa-90abe9edaeac",
+  "slug": "castle-leslie",
+  "name": "Castle Leslie",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_849bff2916ec0fca5264504b",
+  "status": "published",
+  "links": {
+    "website": "https://www.castleleslie.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.682Z",
+  "updatedAt": "2026-07-13T07:52:28.321Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.321Z",
+    "heroAssetId": "legacy_849bff2916ec0fca5264504b",
+    "images": [
+      {
+        "assetId": "legacy_849bff2916ec0fca5264504b",
+        "imageId": "MKB000288",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_castle-leslie_Wedding_Photography-378_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "castle leslie",
+          "bridal party",
+          "family portraits",
+          "bride and groom",
+          "stone arches",
+          "outdoor portraits",
+          "natural light",
+          "romantic",
+          "formal wedding",
+          "wedding party",
+          "elegant",
+          "group portrait"
+        ],
+        "aiTags": [
+          "castle leslie",
+          "bridal party",
+          "family portraits",
+          "bride and groom",
+          "stone arches",
+          "outdoor portraits",
+          "natural light",
+          "romantic",
+          "formal wedding",
+          "wedding party",
+          "elegant",
+          "group portrait"
+        ],
+        "aiAlt": "Bridal party and family portraits under the stone arches at Castle Leslie in Glaslough",
+        "aiCaption": "A relaxed set of family and bridal party portraits in natural light beneath Castle Leslie’s stone arches in Glaslough.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Castle%20Leslie/family%20and%20bridal%20party/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_castle-leslie_Wedding_Photography-378_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Castle%20Leslie/family%20and%20bridal%20party/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_castle-leslie_Wedding_Photography-378_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 289,
+          "venue": "Castle Leslie",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_1c2d3d2881c49cf9fe792d57",
+        "imageId": "MKB000289",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_castle-leslie_Wedding_Photography-100_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "wedding dress",
+          "bridesmaid dresses",
+          "bridal details",
+          "dress hanging",
+          "window light",
+          "soft light",
+          "romantic mood",
+          "morning prep",
+          "castle leslie",
+          "indoor scene",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "getting ready",
+          "wedding dress",
+          "bridesmaid dresses",
+          "bridal details",
+          "dress hanging",
+          "window light",
+          "soft light",
+          "romantic mood",
+          "morning prep",
+          "castle leslie",
+          "indoor scene",
+          "wedding morning"
+        ],
+        "aiAlt": "Wedding dress and bridesmaid dresses hanging in soft window light during morning prep at Castle Leslie",
+        "aiCaption": "Soft window light falls across the dresses at Castle Leslie, setting a calm, natural tone for the wedding morning in Glaslough.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Castle%20Leslie/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_castle-leslie_Wedding_Photography-100_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Castle%20Leslie/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_castle-leslie_Wedding_Photography-100_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 290,
+          "venue": "Castle Leslie",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_f9902b80bbab29f5e600ebe6",
+        "imageId": "MKB000290",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_castle-leslie_Wedding_Photography-117_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "castle leslie",
+          "getting ready",
+          "bride",
+          "bridal prep",
+          "earrings",
+          "mirror reflection",
+          "bridal hair",
+          "tiara",
+          "natural light",
+          "soft mood",
+          "morning preparations",
+          "wedding details"
+        ],
+        "aiTags": [
+          "castle leslie",
+          "getting ready",
+          "bride",
+          "bridal prep",
+          "earrings",
+          "mirror reflection",
+          "bridal hair",
+          "tiara",
+          "natural light",
+          "soft mood",
+          "morning preparations",
+          "wedding details"
+        ],
+        "aiAlt": "Bride fastening earrings in a mirror during bridal prep at Castle Leslie, Glaslough, with soft natural light and a calm morning mood",
+        "aiCaption": "A quiet getting-ready moment at Castle Leslie in Glaslough, with bridal details, soft light and the calm anticipation of the morning.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Castle%20Leslie/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_castle-leslie_Wedding_Photography-117_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Castle%20Leslie/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_castle-leslie_Wedding_Photography-117_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 291,
+          "venue": "Castle Leslie",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_ffffc207afcfd39958f04dc7",
+        "imageId": "MKB000291",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_castle-leslie_Wedding_Photography-140_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "castle leslie",
+          "getting ready",
+          "bride portrait",
+          "bridal gown",
+          "black and white",
+          "window light",
+          "dramatic lighting",
+          "elegant",
+          "quiet moment",
+          "wedding morning",
+          "lace sleeves",
+          "indoor portrait"
+        ],
+        "aiTags": [
+          "castle leslie",
+          "getting ready",
+          "bride portrait",
+          "bridal gown",
+          "black and white",
+          "window light",
+          "dramatic lighting",
+          "elegant",
+          "quiet moment",
+          "wedding morning",
+          "lace sleeves",
+          "indoor portrait"
+        ],
+        "aiAlt": "Black and white bridal portrait in window light at Castle Leslie, Glaslough, during a quiet wedding morning moment",
+        "aiCaption": "A quiet getting ready portrait at Castle Leslie in Glaslough, with soft window light and a calm documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Castle%20Leslie/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_castle-leslie_Wedding_Photography-140_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Castle%20Leslie/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding_Photography_castle-leslie_Wedding_Photography-140_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 292,
+          "venue": "Castle Leslie",
+          "category": "getting ready"
+        }
+      }
+    ]
+  }
+}

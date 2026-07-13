@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_72cf1a2f-d33e-4c4b-99a8-2ff181a97256",
+  "slug": "ghan-house",
+  "name": "Ghan House",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_d3ea1d6024b7912759a9ea0d",
+  "status": "published",
+  "links": {
+    "website": "https://ghanhouse.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.740Z",
+  "updatedAt": "2026-07-13T07:52:28.326Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.326Z",
+    "heroAssetId": "legacy_d3ea1d6024b7912759a9ea0d",
+    "images": [
+      {
+        "assetId": "legacy_d3ea1d6024b7912759a9ea0d",
+        "imageId": "MKB000610",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ghan-house-carlingford-wedding-photography-3_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ghan house",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "wedding bouquet",
+          "natural light",
+          "romantic",
+          "joyful",
+          "candid laughter",
+          "wedding day",
+          "rustic backdrop",
+          "carlingford wedding"
+        ],
+        "aiTags": [
+          "ghan house",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "wedding bouquet",
+          "natural light",
+          "romantic",
+          "joyful",
+          "candid laughter",
+          "wedding day",
+          "rustic backdrop",
+          "carlingford wedding"
+        ],
+        "aiAlt": "Bride and groom laughing together during outdoor portraits at Ghan House in Carlingford, with a bouquet and rustic backdrop.",
+        "aiCaption": "A relaxed couple portrait at Ghan House in Carlingford, full of natural light, candid laughter and the easy warmth of the wedding day.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ghan%20House/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ghan-house-carlingford-wedding-photography-3_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ghan%20House/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ghan-house-carlingford-wedding-photography-3_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 611,
+          "venue": "Ghan House",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_98840f42b8de407159792c08",
+        "imageId": "MKB000611",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ghan-house-carlingford-wedding-photography-4_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "ghan house",
+          "couple portraits",
+          "bride and groom",
+          "dramatic sky",
+          "mountain backdrop",
+          "castle ruins",
+          "outdoor portrait",
+          "moody lighting",
+          "romantic",
+          "wedding dress",
+          "bridal bouquet",
+          "evening portrait"
+        ],
+        "aiTags": [
+          "ghan house",
+          "couple portraits",
+          "bride and groom",
+          "dramatic sky",
+          "mountain backdrop",
+          "castle ruins",
+          "outdoor portrait",
+          "moody lighting",
+          "romantic",
+          "wedding dress",
+          "bridal bouquet",
+          "evening portrait"
+        ],
+        "aiAlt": "Bride and groom portrait at Ghan House in Carlingford with castle ruins, mountains and a dramatic evening sky",
+        "aiCaption": "A relaxed couple portrait at Ghan House in Carlingford, with soft evening light, castle ruins and the mountains setting the scene.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ghan%20House/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ghan-house-carlingford-wedding-photography-4_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ghan%20House/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ghan-house-carlingford-wedding-photography-4_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 612,
+          "venue": "Ghan House",
+          "category": "couple portraits"
+        }
+      }
+    ]
+  }
+}

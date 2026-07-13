@@ -1,0 +1,464 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_85d9ff30-a92e-48b6-9763-03aae489a2ab",
+  "slug": "ballygally",
+  "name": "Ballygally",
+  "town": "",
+  "county": "",
+  "country": "Northern Ireland",
+  "intro": "",
+  "description": "",
+  "status": "published",
+  "updatedAt": "2026-07-13T07:52:28.315Z",
+  "links": {
+    "website": "https://www.ballygallycastlehotel.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.315Z",
+    "heroAssetId": "legacy_ec259529eb1c5944c6909b44",
+    "images": [
+      {
+        "assetId": "legacy_ec259529eb1c5944c6909b44",
+        "imageId": "MKB000001",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full res-351_500.webp",
+        "order": 1,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ballygally wedding",
+          "couple portraits",
+          "bride and groom",
+          "coastal portrait",
+          "rocky shoreline",
+          "romantic embrace",
+          "soft natural light",
+          "happy couple",
+          "wedding day",
+          "outdoor portraits",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "ballygally wedding",
+          "couple portraits",
+          "bride and groom",
+          "coastal portrait",
+          "rocky shoreline",
+          "romantic embrace",
+          "soft natural light",
+          "happy couple",
+          "wedding day",
+          "outdoor portraits",
+          "northern ireland wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballygally/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-351_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballygally/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-351_2000.webp",
+        "alt": "Bride and groom embracing on the rocky shoreline at Ballygally in soft natural light",
+        "caption": "A relaxed coastal portrait at Ballygally, with the couple wrapped up together on the County Antrim shoreline."
+      },
+      {
+        "assetId": "legacy_dc9a643d6f1222b8756515fe",
+        "imageId": "MKB000002",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full res-433_500.webp",
+        "order": 2,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ballygally wedding",
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "outdoor wedding",
+          "soft natural light",
+          "romantic mood",
+          "intimate moment",
+          "wedding bouquet",
+          "veil portrait",
+          "lush greenery",
+          "castle wedding"
+        ],
+        "aiTags": [
+          "ballygally wedding",
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "outdoor wedding",
+          "soft natural light",
+          "romantic mood",
+          "intimate moment",
+          "wedding bouquet",
+          "veil portrait",
+          "lush greenery",
+          "castle wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballygally/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-433_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballygally/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-433_2000.webp",
+        "alt": "Bride and groom in soft natural light during a garden portrait at Ballygally, County Antrim",
+        "caption": "A quiet couple portrait at Ballygally, with soft light, lush greenery and a relaxed moment between the bride and groom."
+      },
+      {
+        "assetId": "legacy_b6445d83db086ccac5f15c74",
+        "imageId": "MKB000003",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full res-437_500.webp",
+        "order": 3,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ballygally wedding",
+          "couple portraits",
+          "bride and groom",
+          "stone arch",
+          "garden backdrop",
+          "natural light",
+          "romantic mood",
+          "intimate portrait",
+          "wedding veil",
+          "groom boutonniere",
+          "castle wedding",
+          "newlyweds"
+        ],
+        "aiTags": [
+          "ballygally wedding",
+          "couple portraits",
+          "bride and groom",
+          "stone arch",
+          "garden backdrop",
+          "natural light",
+          "romantic mood",
+          "intimate portrait",
+          "wedding veil",
+          "groom boutonniere",
+          "castle wedding",
+          "newlyweds"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballygally/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-437_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballygally/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-437_2000.webp",
+        "alt": "Newlyweds beneath a stone arch at Ballygally, with a soft garden backdrop and natural light for relaxed couple portraits",
+        "caption": "A quiet couple portrait at Ballygally in County Antrim, framed by the stone arch, soft greenery and natural light."
+      },
+      {
+        "assetId": "legacy_afb4cbfce527491670bb7b16",
+        "imageId": "MKB000004",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full res-14_500.webp",
+        "order": 4,
+        "rating": 0,
+        "moments": [
+          "details-and-decor"
+        ],
+        "tags": [
+          "ballygally wedding",
+          "wedding dress",
+          "bridesmaid dresses",
+          "bridal details",
+          "wedding shoes",
+          "getting ready",
+          "bridal suite",
+          "floral decor",
+          "window light",
+          "elegant decor",
+          "calm mood",
+          "pre-ceremony"
+        ],
+        "aiTags": [
+          "ballygally wedding",
+          "wedding dress",
+          "bridesmaid dresses",
+          "bridal details",
+          "wedding shoes",
+          "getting ready",
+          "bridal suite",
+          "floral decor",
+          "window light",
+          "elegant decor",
+          "calm mood",
+          "pre-ceremony"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballygally/details%20and%20decor/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-14_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballygally/details%20and%20decor/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-14_2000.webp",
+        "alt": "Wedding dress, bridesmaid dresses and shoes laid out in soft window light at Ballygally, County Antrim",
+        "caption": "A calm pre-ceremony scene at Ballygally, with bridal details gathered in natural window light before the day begins."
+      },
+      {
+        "assetId": "legacy_9d4449a28de817d0eff31ee5",
+        "imageId": "MKB000005",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full res-461_500.webp",
+        "order": 5,
+        "rating": 0,
+        "moments": [
+          "details-and-decor"
+        ],
+        "tags": [
+          "ballygally wedding",
+          "reception details",
+          "table decor",
+          "wedding breakfast",
+          "floral centerpiece",
+          "place settings",
+          "candles",
+          "summer drinks",
+          "soft light",
+          "romantic decor",
+          "guest seating",
+          "elegant reception"
+        ],
+        "aiTags": [
+          "ballygally wedding",
+          "reception details",
+          "table decor",
+          "wedding breakfast",
+          "floral centerpiece",
+          "place settings",
+          "candles",
+          "summer drinks",
+          "soft light",
+          "romantic decor",
+          "guest seating",
+          "elegant reception"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballygally/details%20and%20decor/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-461_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballygally/details%20and%20decor/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-461_2000.webp",
+        "alt": "Soft candlelit reception table decor with flowers and place settings at a Ballygally wedding in County Antrim",
+        "caption": "Candlelight, florals and neatly set tables bring a warm, relaxed feel to this Ballygally wedding reception in County Antrim."
+      },
+      {
+        "assetId": "legacy_a59be6e95af4f2eab86f98b4",
+        "imageId": "MKB000006",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full res-392_500.webp",
+        "order": 6,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "ballygally wedding",
+          "bridal party",
+          "family portraits",
+          "bride and groom",
+          "bridesmaid",
+          "groomsman",
+          "garden portrait",
+          "castle grounds",
+          "overcast light",
+          "romantic",
+          "formal group",
+          "wedding flowers"
+        ],
+        "aiTags": [
+          "ballygally wedding",
+          "bridal party",
+          "family portraits",
+          "bride and groom",
+          "bridesmaid",
+          "groomsman",
+          "garden portrait",
+          "castle grounds",
+          "overcast light",
+          "romantic",
+          "formal group",
+          "wedding flowers"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballygally/family%20and%20bridal%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-392_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballygally/family%20and%20bridal%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-392_2000.webp",
+        "alt": "Bride, groom and bridal party gathered for portraits in the castle grounds at Ballygally, County Antrim",
+        "caption": "A relaxed bridal party portrait in the grounds at Ballygally, with soft overcast light and a natural County Antrim wedding feel."
+      },
+      {
+        "assetId": "legacy_5fb014d81cf9d11ebbb7cd24",
+        "imageId": "MKB000007",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full res-420_500.webp",
+        "order": 7,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "ballygally wedding",
+          "group portrait",
+          "wedding guests",
+          "family photos",
+          "bridal party",
+          "bride and groom",
+          "outdoor wedding",
+          "coastal backdrop",
+          "overcast light",
+          "celebration",
+          "cheering guests",
+          "wedding reception"
+        ],
+        "aiTags": [
+          "ballygally wedding",
+          "group portrait",
+          "wedding guests",
+          "family photos",
+          "bridal party",
+          "bride and groom",
+          "outdoor wedding",
+          "coastal backdrop",
+          "overcast light",
+          "celebration",
+          "cheering guests",
+          "wedding reception"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballygally/family%20and%20bridal%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-420_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballygally/family%20and%20bridal%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-420_2000.webp",
+        "alt": "Bride, groom and bridal party celebrating outdoors at Ballygally, County Antrim, with a soft coastal backdrop",
+        "caption": "A relaxed bridal party moment at Ballygally in County Antrim, with guests cheering together in soft overcast coastal light."
+      },
+      {
+        "assetId": "legacy_dae7283fa55b2908a490d4b5",
+        "imageId": "MKB000008",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full res-424_500.webp",
+        "order": 8,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "ballygally wedding",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "bouquets",
+          "outdoor portraits",
+          "coastal backdrop",
+          "garden setting",
+          "soft light",
+          "joyful",
+          "pastel dresses",
+          "wedding portraits"
+        ],
+        "aiTags": [
+          "ballygally wedding",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "bouquets",
+          "outdoor portraits",
+          "coastal backdrop",
+          "garden setting",
+          "soft light",
+          "joyful",
+          "pastel dresses",
+          "wedding portraits"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballygally/family%20and%20bridal%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-424_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballygally/family%20and%20bridal%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-424_2000.webp",
+        "alt": "Bride and bridesmaids holding bouquets in soft light during outdoor portraits at Ballygally, County Antrim",
+        "caption": "A relaxed bridal party portrait in the gardens at Ballygally, with pastel dresses, bouquets and the County Antrim coast nearby."
+      },
+      {
+        "assetId": "legacy_9ebd41770c6b56820b1185c4",
+        "imageId": "MKB000009",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full res-53_500.webp",
+        "order": 9,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "ballygally",
+          "getting ready",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "robes",
+          "gift exchange",
+          "morning prep",
+          "indoor",
+          "natural light",
+          "relaxed",
+          "joyful"
+        ],
+        "aiTags": [
+          "ballygally",
+          "getting ready",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "robes",
+          "gift exchange",
+          "morning prep",
+          "indoor",
+          "natural light",
+          "relaxed",
+          "joyful"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballygally/getting%20ready/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-53_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballygally/getting%20ready/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-53_2000.webp",
+        "alt": "Bride and bridesmaids in robes sharing a relaxed gift exchange during morning prep at Ballygally in County Antrim",
+        "caption": "A joyful getting ready moment at Ballygally, with the bridal party gathered in soft natural light for a relaxed gift exchange."
+      },
+      {
+        "assetId": "legacy_8fe19047878d53a6b29da9bc",
+        "imageId": "MKB000010",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full res-67_500.webp",
+        "order": 10,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "ballygally",
+          "getting ready",
+          "bride",
+          "wedding card",
+          "bridal prep",
+          "morning details",
+          "soft light",
+          "intimate moment",
+          "emotional",
+          "wedding morning",
+          "close up"
+        ],
+        "aiTags": [
+          "ballygally",
+          "getting ready",
+          "bride",
+          "wedding card",
+          "bridal prep",
+          "morning details",
+          "soft light",
+          "intimate moment",
+          "emotional",
+          "wedding morning",
+          "close up"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballygally/getting%20ready/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-67_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballygally/getting%20ready/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballygalley-castle-wedding-photography-full%20res-67_2000.webp",
+        "alt": "Bride reading a wedding card during getting ready at Ballygally, County Antrim, in soft morning light",
+        "caption": "A quiet wedding morning moment at Ballygally, with the bride taking in a card during bridal prep."
+      }
+    ]
+  }
+}

@@ -1,0 +1,2082 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_96932a4a-f44a-492e-8adc-cea096492458",
+  "slug": "darver-castle",
+  "name": "Darver castle",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_20776750d0df985c6131b9f6",
+  "status": "published",
+  "links": {
+    "website": "https://darvercastle.ie",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.775Z",
+  "updatedAt": "2026-07-13T07:52:28.323Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.323Z",
+    "heroAssetId": "legacy_20776750d0df985c6131b9f6",
+    "images": [
+      {
+        "assetId": "legacy_20776750d0df985c6131b9f6",
+        "imageId": "MKB000382",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-137_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "darver castle",
+          "ceremony",
+          "bride and groom",
+          "first kiss",
+          "wedding vows",
+          "indoor ceremony",
+          "floral decor",
+          "warm lighting",
+          "guests",
+          "romantic",
+          "joyful",
+          "aisle flowers"
+        ],
+        "aiTags": [
+          "darver castle",
+          "ceremony",
+          "bride and groom",
+          "first kiss",
+          "wedding vows",
+          "indoor ceremony",
+          "floral decor",
+          "warm lighting",
+          "guests",
+          "romantic",
+          "joyful",
+          "aisle flowers"
+        ],
+        "aiAlt": "Bride and groom share their first kiss during a warm indoor ceremony at Darver Castle, with aisle flowers and guests looking on",
+        "aiCaption": "A joyful first kiss at Darver Castle in County Louth, captured naturally amid warm light, floral decor and the quiet reactions of guests.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/ceremony/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-137_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/ceremony/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-137_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 383,
+          "venue": "Darver castle",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_bd1f6239bfbbd3b262a92230",
+        "imageId": "MKB000383",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-160_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "darver castle",
+          "wedding ceremony",
+          "bride and groom",
+          "indoor ceremony",
+          "wedding guests",
+          "natural light",
+          "floral decor",
+          "chandelier",
+          "joyful moment",
+          "vows",
+          "ireland wedding",
+          "castle wedding"
+        ],
+        "aiTags": [
+          "darver castle",
+          "wedding ceremony",
+          "bride and groom",
+          "indoor ceremony",
+          "wedding guests",
+          "natural light",
+          "floral decor",
+          "chandelier",
+          "joyful moment",
+          "vows",
+          "ireland wedding",
+          "castle wedding"
+        ],
+        "aiAlt": "Bride and groom share a joyful moment during their indoor ceremony at Darver Castle, with guests, florals and chandelier light.",
+        "aiCaption": "A warm ceremony moment at Darver Castle in County Louth, with natural light, floral decor and guests gathered close.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/ceremony/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-160_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/ceremony/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-160_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 384,
+          "venue": "Darver castle",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_936100e6510d7f6305c0c614",
+        "imageId": "MKB000384",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-173_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "darver castle",
+          "ceremony",
+          "ring exchange",
+          "wedding rings",
+          "bride and groom",
+          "hands close up",
+          "black and white",
+          "emotional moment",
+          "intimate",
+          "soft light",
+          "wedding vows"
+        ],
+        "aiTags": [
+          "darver castle",
+          "ceremony",
+          "ring exchange",
+          "wedding rings",
+          "bride and groom",
+          "hands close up",
+          "black and white",
+          "emotional moment",
+          "intimate",
+          "soft light",
+          "wedding vows"
+        ],
+        "aiAlt": "Black and white close-up of the ring exchange during a Darver Castle wedding ceremony in County Louth",
+        "aiCaption": "A quiet close-up from the ceremony at Darver Castle, capturing the ring exchange with soft light and a natural documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/ceremony/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-173_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/ceremony/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-173_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 385,
+          "venue": "Darver castle",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_7c23a0f4b85d58c03893c27c",
+        "imageId": "MKB000385",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-179_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "darver castle",
+          "ceremony",
+          "bride and groom",
+          "indoor ceremony",
+          "floral arch",
+          "candlelight",
+          "warm lighting",
+          "romantic",
+          "intimate moment",
+          "wedding vows",
+          "elegant wedding",
+          "ireland wedding"
+        ],
+        "aiTags": [
+          "darver castle",
+          "ceremony",
+          "bride and groom",
+          "indoor ceremony",
+          "floral arch",
+          "candlelight",
+          "warm lighting",
+          "romantic",
+          "intimate moment",
+          "wedding vows",
+          "elegant wedding",
+          "ireland wedding"
+        ],
+        "aiAlt": "Bride and groom exchanging vows beneath a floral arch during a candlelit ceremony at Darver Castle",
+        "aiCaption": "A warm indoor ceremony at Darver Castle, with candlelight, flowers and a quiet moment as the couple exchange their vows.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/ceremony/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-179_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/ceremony/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-179_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 386,
+          "venue": "Darver castle",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_b77e3c136af3cb7e4b6ea885",
+        "imageId": "MKB000386",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-255_500.webp",
+        "order": 5,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "darver castle",
+          "ceremony",
+          "bride entrance",
+          "walking down aisle",
+          "bride",
+          "father of bride",
+          "wedding guests",
+          "floral decor",
+          "indoor ceremony",
+          "natural light",
+          "emotional moment",
+          "church aisle"
+        ],
+        "aiTags": [
+          "darver castle",
+          "ceremony",
+          "bride entrance",
+          "walking down aisle",
+          "bride",
+          "father of bride",
+          "wedding guests",
+          "floral decor",
+          "indoor ceremony",
+          "natural light",
+          "emotional moment",
+          "church aisle"
+        ],
+        "aiAlt": "Bride walking down the aisle with her father during an indoor ceremony at Darver Castle, County Louth",
+        "aiCaption": "A quiet, emotional aisle moment at Darver Castle as the bride enters the ceremony surrounded by guests, flowers and soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/ceremony/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-255_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/ceremony/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-255_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 387,
+          "venue": "Darver castle",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_bae6e6940cd91d99a2b33e8a",
+        "imageId": "MKB000387",
+        "weddingSlug": "",
+        "filename": "MKB-photography-Northern-Ireland-wedding-photographer-Irish-Wedding-photography-Darver-castle-wedding-photography-Full res-586_500.webp",
+        "order": 6,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "night portrait",
+          "rain",
+          "backlit",
+          "romantic",
+          "kiss",
+          "castle gates",
+          "dramatic lighting",
+          "wedding portraits",
+          "irish wedding"
+        ],
+        "aiTags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "night portrait",
+          "rain",
+          "backlit",
+          "romantic",
+          "kiss",
+          "castle gates",
+          "dramatic lighting",
+          "wedding portraits",
+          "irish wedding"
+        ],
+        "aiAlt": "Backlit night portrait of a bride and groom kissing in the rain by the gates at Darver Castle, County Louth",
+        "aiCaption": "A quiet rain-soaked moment at Darver Castle in County Louth, with the couple backlit by the castle gates for a relaxed night portrait.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/MKB-photography-Northern-Ireland-wedding-photographer-Irish-Wedding-photography-Darver-castle-wedding-photography-Full%20res-586_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/MKB-photography-Northern-Ireland-wedding-photographer-Irish-Wedding-photography-Darver-castle-wedding-photography-Full%20res-586_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 388,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_aa8ad590808135823623f26d",
+        "imageId": "MKB000388",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-324_500.webp",
+        "order": 7,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "golden hour",
+          "sunlit field",
+          "romantic",
+          "countryside wedding",
+          "wedding bouquet",
+          "intimate moment",
+          "natural light",
+          "ireland wedding"
+        ],
+        "aiTags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "golden hour",
+          "sunlit field",
+          "romantic",
+          "countryside wedding",
+          "wedding bouquet",
+          "intimate moment",
+          "natural light",
+          "ireland wedding"
+        ],
+        "aiAlt": "Bride and groom in a sunlit field during golden hour couple portraits at Darver Castle, County Louth",
+        "aiCaption": "A quiet golden hour moment in the fields at Darver Castle, with relaxed couple portraits shaped by soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-324_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-324_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 389,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_c0f3b5e8ec85b7137c259a4e",
+        "imageId": "MKB000389",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-336_500.webp",
+        "order": 8,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "golden hour",
+          "romantic",
+          "intimate moment",
+          "wedding bouquet",
+          "candid embrace",
+          "irish wedding",
+          "sunlit",
+          "wedding day"
+        ],
+        "aiTags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "golden hour",
+          "romantic",
+          "intimate moment",
+          "wedding bouquet",
+          "candid embrace",
+          "irish wedding",
+          "sunlit",
+          "wedding day"
+        ],
+        "aiAlt": "Bride and groom embrace in golden hour light during couple portraits at Darver Castle, County Louth",
+        "aiCaption": "A quiet golden hour embrace at Darver Castle, with the bouquet in hand and the evening light keeping the portraits relaxed and natural.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-336_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-336_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 390,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_b8d322f1fae9faae38a7c5a7",
+        "imageId": "MKB000390",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-462_500.webp",
+        "order": 9,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "darver castle",
+          "couple portrait",
+          "bride and groom",
+          "stone archway",
+          "castle gates",
+          "black and white",
+          "soft light",
+          "romantic",
+          "elegant",
+          "wedding portraits",
+          "outdoor portrait",
+          "irish wedding"
+        ],
+        "aiTags": [
+          "darver castle",
+          "couple portrait",
+          "bride and groom",
+          "stone archway",
+          "castle gates",
+          "black and white",
+          "soft light",
+          "romantic",
+          "elegant",
+          "wedding portraits",
+          "outdoor portrait",
+          "irish wedding"
+        ],
+        "aiAlt": "Black and white couple portrait at Darver Castle, with the bride and groom framed by a stone archway in soft light",
+        "aiCaption": "A relaxed black and white wedding portrait at Darver Castle in Readypenny, with soft light and the old stone archway adding a quiet sense of place.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-462_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-462_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 391,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_e76d8f41b3a961c29054bc86",
+        "imageId": "MKB000391",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-104_500.webp",
+        "order": 10,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "field portraits",
+          "outdoor wedding",
+          "golden hour",
+          "natural light",
+          "romantic",
+          "walking together",
+          "holding hands",
+          "bridal bouquet",
+          "summer wedding"
+        ],
+        "aiTags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "field portraits",
+          "outdoor wedding",
+          "golden hour",
+          "natural light",
+          "romantic",
+          "walking together",
+          "holding hands",
+          "bridal bouquet",
+          "summer wedding"
+        ],
+        "aiAlt": "Bride and groom holding hands in a golden hour field portrait at Darver Castle, County Louth",
+        "aiCaption": "A relaxed couple portrait at Darver Castle in County Louth, with the bride and groom walking hand in hand through soft summer light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-104_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-104_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 392,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_33978af66541fc13d8585dab",
+        "imageId": "MKB000392",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-121_500.webp",
+        "order": 11,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "walking together",
+          "field",
+          "golden hour",
+          "backlit",
+          "romantic",
+          "outdoor wedding",
+          "hand in hand",
+          "summer wedding",
+          "wedding portraits"
+        ],
+        "aiTags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "walking together",
+          "field",
+          "golden hour",
+          "backlit",
+          "romantic",
+          "outdoor wedding",
+          "hand in hand",
+          "summer wedding",
+          "wedding portraits"
+        ],
+        "aiAlt": "Bride and groom walking hand in hand through a field at golden hour near Darver Castle, County Louth",
+        "aiCaption": "A relaxed golden hour portrait of the couple walking together through the fields at Darver Castle in County Louth.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-121_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-121_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 393,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_cf6ddedd3a7713eb97eee4ca",
+        "imageId": "MKB000393",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-125_500.webp",
+        "order": 12,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "summer wedding",
+          "golden hour",
+          "sunlit field",
+          "romantic",
+          "relaxed",
+          "wedding bouquet",
+          "candid moment",
+          "countryside"
+        ],
+        "aiTags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "summer wedding",
+          "golden hour",
+          "sunlit field",
+          "romantic",
+          "relaxed",
+          "wedding bouquet",
+          "candid moment",
+          "countryside"
+        ],
+        "aiAlt": "Bride and groom in a sunlit field at Darver Castle, County Louth, sharing a relaxed golden hour portrait with bouquet",
+        "aiCaption": "A relaxed golden hour couple portrait in the countryside at Darver Castle, with soft summer light and a quiet candid feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-125_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-125_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 394,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_439edfc829c7175d090ef2e6",
+        "imageId": "MKB000394",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-131_500.webp",
+        "order": 13,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "wedding portrait",
+          "field",
+          "golden hour",
+          "natural light",
+          "romantic",
+          "joyful",
+          "bouquet",
+          "outdoor wedding",
+          "candid moment"
+        ],
+        "aiTags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "wedding portrait",
+          "field",
+          "golden hour",
+          "natural light",
+          "romantic",
+          "joyful",
+          "bouquet",
+          "outdoor wedding",
+          "candid moment"
+        ],
+        "aiAlt": "Bride and groom share a joyful golden hour portrait in a field at Darver Castle, County Louth",
+        "aiCaption": "A relaxed couple portrait in the fields at Darver Castle, with soft golden hour light and a natural, joyful feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-131_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-131_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 395,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_4ab1ae35aff3efcf249ce9e2",
+        "imageId": "MKB000395",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-139-1_500.webp",
+        "order": 14,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "golden light",
+          "romantic",
+          "intimate embrace",
+          "wedding dress",
+          "veil",
+          "close up",
+          "sunlit",
+          "wedding day"
+        ],
+        "aiTags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "golden light",
+          "romantic",
+          "intimate embrace",
+          "wedding dress",
+          "veil",
+          "close up",
+          "sunlit",
+          "wedding day"
+        ],
+        "aiAlt": "Bride and groom sharing a close embrace in golden light during couple portraits at Darver Castle, County Louth",
+        "aiCaption": "A quiet sunlit moment at Darver Castle, with the couple held close during relaxed outdoor portraits in County Louth.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-139-1_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-139-1_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 396,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_09a37f4a97a11dd0cfdab9a1",
+        "imageId": "MKB000396",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-142_500.webp",
+        "order": 15,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "sunlit",
+          "romantic",
+          "intimate",
+          "wedding day",
+          "garden path",
+          "veil",
+          "summer wedding",
+          "happy couple"
+        ],
+        "aiTags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "sunlit",
+          "romantic",
+          "intimate",
+          "wedding day",
+          "garden path",
+          "veil",
+          "summer wedding",
+          "happy couple"
+        ],
+        "aiAlt": "Bride and groom sharing a sunlit moment on a garden path at Darver Castle, County Louth",
+        "aiCaption": "A warm, relaxed portrait on the garden path at Darver Castle, capturing the couple together in soft summer light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-142_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-142_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 397,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_d307fbd9b90a6b49c5c47042",
+        "imageId": "MKB000397",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-154_500.webp",
+        "order": 16,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "castle archway",
+          "outdoor portrait",
+          "golden light",
+          "romantic",
+          "joyful",
+          "holding hands",
+          "wedding dress",
+          "groom suit",
+          "wedding day"
+        ],
+        "aiTags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "castle archway",
+          "outdoor portrait",
+          "golden light",
+          "romantic",
+          "joyful",
+          "holding hands",
+          "wedding dress",
+          "groom suit",
+          "wedding day"
+        ],
+        "aiAlt": "Bride and groom holding hands in golden light beneath a castle archway at Darver Castle, County Louth",
+        "aiCaption": "A relaxed couple portrait at Darver Castle in County Louth, with soft golden light and an easy wedding day moment beneath the archway.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-154_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-154_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 398,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_f77e891f994a4be695748f27",
+        "imageId": "MKB000398",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-162_500.webp",
+        "order": 17,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "stone archway",
+          "outdoor portrait",
+          "natural light",
+          "backlit",
+          "romantic",
+          "elegant",
+          "wedding day",
+          "castle wedding",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "stone archway",
+          "outdoor portrait",
+          "natural light",
+          "backlit",
+          "romantic",
+          "elegant",
+          "wedding day",
+          "castle wedding",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom portrait under a stone archway at Darver Castle, County Louth, softly backlit in natural light.",
+        "aiCaption": "A relaxed couple portrait at Darver Castle in County Louth, with soft backlight and the castle stonework adding a natural, elegant feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-162_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-162_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 399,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_197b1201cf5504e119bbcfc1",
+        "imageId": "MKB000399",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-178_500.webp",
+        "order": 18,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "golden hour",
+          "tree framed",
+          "romantic",
+          "intimate moment",
+          "wedding dress",
+          "black tie",
+          "soft light",
+          "castle wedding"
+        ],
+        "aiTags": [
+          "darver castle",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "golden hour",
+          "tree framed",
+          "romantic",
+          "intimate moment",
+          "wedding dress",
+          "black tie",
+          "soft light",
+          "castle wedding"
+        ],
+        "aiAlt": "Bride and groom share a quiet golden hour portrait beneath trees at Darver Castle in County Louth",
+        "aiCaption": "A relaxed couple portrait at Darver Castle, framed by trees and soft golden hour light in the County Louth countryside.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-178_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-178_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 400,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_70bf8e9de9629fec7dc75e27",
+        "imageId": "MKB000400",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-443_500.webp",
+        "order": 19,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "darver castle",
+          "bridal portrait",
+          "bride",
+          "floral arch",
+          "wedding bouquet",
+          "castle doorway",
+          "natural light",
+          "romantic",
+          "elegant",
+          "wedding dress",
+          "solo portrait",
+          "couple portraits"
+        ],
+        "aiTags": [
+          "darver castle",
+          "bridal portrait",
+          "bride",
+          "floral arch",
+          "wedding bouquet",
+          "castle doorway",
+          "natural light",
+          "romantic",
+          "elegant",
+          "wedding dress",
+          "solo portrait",
+          "couple portraits"
+        ],
+        "aiAlt": "Bride holding her bouquet in natural light beneath the floral arch at Darver Castle, Readypenny",
+        "aiCaption": "A quiet bridal portrait at Darver Castle in County Louth, framed by the castle doorway, soft light and seasonal florals.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-443_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-443_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 401,
+          "venue": "Darver castle",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_7d4902e3c5cf4edfb842127c",
+        "imageId": "MKB000401",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-128_500.webp",
+        "order": 20,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "details-and-decor"
+        ],
+        "tags": [
+          "darver castle",
+          "reception decor",
+          "wedding breakfast",
+          "table settings",
+          "floral arch",
+          "wedding cake",
+          "neon sign",
+          "fairy lights",
+          "chandelier lighting",
+          "rustic decor",
+          "romantic mood",
+          "no people"
+        ],
+        "aiTags": [
+          "darver castle",
+          "reception decor",
+          "wedding breakfast",
+          "table settings",
+          "floral arch",
+          "wedding cake",
+          "neon sign",
+          "fairy lights",
+          "chandelier lighting",
+          "rustic decor",
+          "romantic mood",
+          "no people"
+        ],
+        "aiAlt": "Reception table settings, floral arch and neon sign at Darver Castle in County Louth",
+        "aiCaption": "Warm fairy lights, rustic decor and soft chandelier light set the scene for a relaxed wedding breakfast at Darver Castle.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/details%20and%20decor/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-128_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/details%20and%20decor/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-128_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 402,
+          "venue": "Darver castle",
+          "category": "details and decor"
+        }
+      },
+      {
+        "assetId": "legacy_2fbe484d9525d5bf1b5d5583",
+        "imageId": "MKB000402",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-316_500.webp",
+        "order": 21,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "darver castle",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "outdoor portrait",
+          "garden path",
+          "bouquets",
+          "soft sunlight",
+          "summer wedding",
+          "elegant",
+          "joyful",
+          "pre ceremony"
+        ],
+        "aiTags": [
+          "darver castle",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "outdoor portrait",
+          "garden path",
+          "bouquets",
+          "soft sunlight",
+          "summer wedding",
+          "elegant",
+          "joyful",
+          "pre ceremony"
+        ],
+        "aiAlt": "Bride and bridesmaids with bouquets on a garden path at Darver Castle, County Louth, in soft summer sunlight",
+        "aiCaption": "A relaxed pre-ceremony moment with the bridal party along the garden path at Darver Castle, County Louth, full of soft light and easy joy.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/family%20and%20bridal%20party/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-316_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/family%20and%20bridal%20party/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-316_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 403,
+          "venue": "Darver castle",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_59ae53684a1f691d17377d80",
+        "imageId": "MKB000403",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-147_500.webp",
+        "order": 22,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "darver castle",
+          "outdoor wedding",
+          "bride and groom",
+          "bridal party",
+          "sunny light",
+          "golden hour",
+          "celebration",
+          "joyful",
+          "candid moment",
+          "wedding portraits",
+          "castle gardens",
+          "confetti exit"
+        ],
+        "aiTags": [
+          "darver castle",
+          "outdoor wedding",
+          "bride and groom",
+          "bridal party",
+          "sunny light",
+          "golden hour",
+          "celebration",
+          "joyful",
+          "candid moment",
+          "wedding portraits",
+          "castle gardens",
+          "confetti exit"
+        ],
+        "aiAlt": "Bride and groom with their bridal party enjoying a sunny confetti exit in the gardens at Darver Castle, County Louth",
+        "aiCaption": "A joyful confetti moment with the bridal party in the sunny gardens at Darver Castle, captured in a relaxed documentary style.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/family%20and%20bridal%20party/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-147_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/family%20and%20bridal%20party/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-147_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 404,
+          "venue": "Darver castle",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_0e5dd47362d05dea5c739e47",
+        "imageId": "MKB000404",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-234_500.webp",
+        "order": 23,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "darver castle",
+          "bridal party",
+          "bride",
+          "bridesmaids",
+          "floral arch",
+          "castle doorway",
+          "bouquets",
+          "green dresses",
+          "natural light",
+          "joyful",
+          "wedding portraits",
+          "family and bridal party"
+        ],
+        "aiTags": [
+          "darver castle",
+          "bridal party",
+          "bride",
+          "bridesmaids",
+          "floral arch",
+          "castle doorway",
+          "bouquets",
+          "green dresses",
+          "natural light",
+          "joyful",
+          "wedding portraits",
+          "family and bridal party"
+        ],
+        "aiAlt": "Bride and bridesmaids with bouquets by the floral arch at Darver Castle, Readypenny, in soft natural light",
+        "aiCaption": "A relaxed bridal party portrait at Darver Castle in County Louth, with green dresses, bouquets and easy laughter by the castle doorway.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/family%20and%20bridal%20party/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-234_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/family%20and%20bridal%20party/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-234_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 405,
+          "venue": "Darver castle",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_7ab9910920eed3f13dea673d",
+        "imageId": "MKB000405",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-2_500.webp",
+        "order": 24,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "darver castle",
+          "getting ready",
+          "bride",
+          "bridal makeup",
+          "makeup artist",
+          "close up",
+          "soft light",
+          "natural light",
+          "happy",
+          "elegant",
+          "morning prep",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "darver castle",
+          "getting ready",
+          "bride",
+          "bridal makeup",
+          "makeup artist",
+          "close up",
+          "soft light",
+          "natural light",
+          "happy",
+          "elegant",
+          "morning prep",
+          "wedding morning"
+        ],
+        "aiAlt": "Bride having makeup applied in soft natural light during wedding morning prep at Darver Castle, County Louth",
+        "aiCaption": "A calm wedding morning at Darver Castle, with soft light and a relaxed moment as bridal makeup is carefully finished.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-2_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-2_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 406,
+          "venue": "Darver castle",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_d428395dba12867a1e4bb94e",
+        "imageId": "MKB000406",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-20_500.webp",
+        "order": 25,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "darver castle",
+          "getting ready",
+          "groom prep",
+          "adjusting tie",
+          "mirror portrait",
+          "groom",
+          "indoor",
+          "window light",
+          "moody",
+          "candid",
+          "wedding morning",
+          "formalwear"
+        ],
+        "aiTags": [
+          "darver castle",
+          "getting ready",
+          "groom prep",
+          "adjusting tie",
+          "mirror portrait",
+          "groom",
+          "indoor",
+          "window light",
+          "moody",
+          "candid",
+          "wedding morning",
+          "formalwear"
+        ],
+        "aiAlt": "Groom adjusting his tie in window light during wedding morning prep at Darver Castle",
+        "aiCaption": "A quiet groom prep moment at Darver Castle in County Louth, with soft window light and a mirror framing the morning.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-20_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-20_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 407,
+          "venue": "Darver castle",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_bac8166b68ca6d30de803ae8",
+        "imageId": "MKB000407",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-26_500.webp",
+        "order": 26,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "groom party",
+          "groomsmen",
+          "bar scene",
+          "darver castle",
+          "indoor",
+          "warm lighting",
+          "candid",
+          "relaxed mood",
+          "wedding toast",
+          "black tie",
+          "pre ceremony"
+        ],
+        "aiTags": [
+          "getting ready",
+          "groom party",
+          "groomsmen",
+          "bar scene",
+          "darver castle",
+          "indoor",
+          "warm lighting",
+          "candid",
+          "relaxed mood",
+          "wedding toast",
+          "black tie",
+          "pre ceremony"
+        ],
+        "aiAlt": "Groomsmen share a relaxed pre-ceremony toast in the bar at Darver Castle, County Louth, in warm indoor light",
+        "aiCaption": "A candid getting-ready moment at Darver Castle, with the groom party easing into the day over a quiet toast before the ceremony.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-26_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-26_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 408,
+          "venue": "Darver castle",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_3a5c9d605dca9866b5832712",
+        "imageId": "MKB000408",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-58_500.webp",
+        "order": 27,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "darver castle",
+          "getting ready",
+          "bride",
+          "bridesmaids",
+          "bridal robes",
+          "champagne toast",
+          "outdoor",
+          "natural light",
+          "candid",
+          "joyful",
+          "morning prep",
+          "wedding party"
+        ],
+        "aiTags": [
+          "darver castle",
+          "getting ready",
+          "bride",
+          "bridesmaids",
+          "bridal robes",
+          "champagne toast",
+          "outdoor",
+          "natural light",
+          "candid",
+          "joyful",
+          "morning prep",
+          "wedding party"
+        ],
+        "aiAlt": "Bride and bridesmaids in robes sharing a champagne toast during morning prep at Darver Castle, County Louth",
+        "aiCaption": "A relaxed getting ready moment at Darver Castle, with the wedding party enjoying a candid champagne toast in natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-58_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-58_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 409,
+          "venue": "Darver castle",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_34dfa7cd02e05d9880a798d2",
+        "imageId": "MKB000409",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-80_500.webp",
+        "order": 28,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "darver castle",
+          "getting ready",
+          "bride",
+          "wedding dress",
+          "bridal portrait",
+          "mirror reflection",
+          "natural light",
+          "soft light",
+          "elegant",
+          "calm moment",
+          "indoor",
+          "bridal prep"
+        ],
+        "aiTags": [
+          "darver castle",
+          "getting ready",
+          "bride",
+          "wedding dress",
+          "bridal portrait",
+          "mirror reflection",
+          "natural light",
+          "soft light",
+          "elegant",
+          "calm moment",
+          "indoor",
+          "bridal prep"
+        ],
+        "aiAlt": "Bride in her wedding dress reflected in a mirror during calm bridal prep at Darver Castle",
+        "aiCaption": "A quiet getting-ready moment at Darver Castle, with soft natural light and a gentle mirror reflection during bridal prep.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-80_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/getting%20ready/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-80_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 410,
+          "venue": "Darver castle",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_2e3694c9f58b5d4a99d119c5",
+        "imageId": "MKB000410",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-100_500.webp",
+        "order": 29,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "darver castle",
+          "getting ready",
+          "bridesmaids",
+          "bride tribe",
+          "outdoor garden",
+          "champagne spray",
+          "matching pajamas",
+          "sunny light",
+          "fun moments",
+          "candid laughter",
+          "wedding morning",
+          "celebration"
+        ],
+        "aiTags": [
+          "darver castle",
+          "getting ready",
+          "bridesmaids",
+          "bride tribe",
+          "outdoor garden",
+          "champagne spray",
+          "matching pajamas",
+          "sunny light",
+          "fun moments",
+          "candid laughter",
+          "wedding morning",
+          "celebration"
+        ],
+        "aiAlt": "Bridesmaids in matching pyjamas laughing during a champagne spray at Darver Castle in County Louth",
+        "aiCaption": "A relaxed wedding morning moment at Darver Castle, with bridesmaids in matching pyjamas enjoying champagne, sunshine and plenty of candid laughter.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/getting%20ready/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-100_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/getting%20ready/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-100_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 411,
+          "venue": "Darver castle",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_3b430d7d42b937f24e3b77c3",
+        "imageId": "MKB000411",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-123_500.webp",
+        "order": 30,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "darver castle",
+          "getting ready",
+          "groom prep",
+          "groom",
+          "bow tie",
+          "mirror reflection",
+          "indoor",
+          "natural light",
+          "elegant",
+          "calm",
+          "wedding morning",
+          "black tuxedo"
+        ],
+        "aiTags": [
+          "darver castle",
+          "getting ready",
+          "groom prep",
+          "groom",
+          "bow tie",
+          "mirror reflection",
+          "indoor",
+          "natural light",
+          "elegant",
+          "calm",
+          "wedding morning",
+          "black tuxedo"
+        ],
+        "aiAlt": "Groom adjusting his bow tie in a mirror during wedding morning prep at Darver Castle",
+        "aiCaption": "A calm wedding morning moment at Darver Castle, with the groom getting ready in natural light before the day begins.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/getting%20ready/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-123_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/getting%20ready/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-123_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 412,
+          "venue": "Darver castle",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_25a616af6801aee6f7547fc2",
+        "imageId": "MKB000412",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-139_500.webp",
+        "order": 31,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "darver castle",
+          "getting ready",
+          "bride",
+          "bridal prep",
+          "champagne",
+          "bridal pajamas",
+          "celebration",
+          "indoor",
+          "natural light",
+          "joyful",
+          "wedding morning",
+          "candid"
+        ],
+        "aiTags": [
+          "darver castle",
+          "getting ready",
+          "bride",
+          "bridal prep",
+          "champagne",
+          "bridal pajamas",
+          "celebration",
+          "indoor",
+          "natural light",
+          "joyful",
+          "wedding morning",
+          "candid"
+        ],
+        "aiAlt": "Bride in bridal pyjamas raising champagne during morning prep at Darver Castle in County Louth",
+        "aiCaption": "A relaxed wedding morning at Darver Castle, with champagne, natural light and joyful bridal prep moments captured candidly.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/getting%20ready/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-139_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/getting%20ready/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-139_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 413,
+          "venue": "Darver castle",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_35d57d5dad9cb36b297410f2",
+        "imageId": "MKB000413",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-484_500.webp",
+        "order": 32,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "darver castle",
+          "reception",
+          "first dance",
+          "bride and groom",
+          "wedding guests",
+          "dance floor",
+          "warm lighting",
+          "dramatic flash",
+          "romantic mood",
+          "evening celebration",
+          "party",
+          "castle wedding"
+        ],
+        "aiTags": [
+          "darver castle",
+          "reception",
+          "first dance",
+          "bride and groom",
+          "wedding guests",
+          "dance floor",
+          "warm lighting",
+          "dramatic flash",
+          "romantic mood",
+          "evening celebration",
+          "party",
+          "castle wedding"
+        ],
+        "aiAlt": "First dance at Darver Castle, with the couple surrounded by guests under warm evening light on the dance floor",
+        "aiCaption": "A relaxed first dance at Darver Castle in County Louth, captured with warm light, dramatic flash and guests gathered close around the dance floor.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/reception%20and%20party/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-484_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/reception%20and%20party/MKB_weddings_Ireland_Northen_ireland_Wedding-wedding-photographer_darver-castle_Wedding_Photography-484_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 414,
+          "venue": "Darver castle",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_a67bf8aebcf6b354156a7793",
+        "imageId": "MKB000414",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-189_500.webp",
+        "order": 33,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "darver castle",
+          "wedding reception",
+          "dance floor",
+          "party dancing",
+          "female guests",
+          "dj lighting",
+          "warm lights",
+          "celebration",
+          "fun moments",
+          "night reception",
+          "candid photo",
+          "wedding party"
+        ],
+        "aiTags": [
+          "darver castle",
+          "wedding reception",
+          "dance floor",
+          "party dancing",
+          "female guests",
+          "dj lighting",
+          "warm lights",
+          "celebration",
+          "fun moments",
+          "night reception",
+          "candid photo",
+          "wedding party"
+        ],
+        "aiAlt": "Guests dancing under warm DJ lights during a Darver Castle wedding reception in County Louth",
+        "aiCaption": "A lively night reception at Darver Castle, with guests filling the dance floor under warm DJ lights.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/reception%20and%20party/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-189_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/reception%20and%20party/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-189_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 415,
+          "venue": "Darver castle",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_4d82a20fcae564cf571d2a92",
+        "imageId": "MKB000415",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-310_500.webp",
+        "order": 34,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "darver castle",
+          "wedding reception",
+          "dance floor",
+          "bride dancing",
+          "wedding guests",
+          "party",
+          "confetti",
+          "indoor reception",
+          "warm lighting",
+          "joyful mood",
+          "evening celebration",
+          "candid moment"
+        ],
+        "aiTags": [
+          "darver castle",
+          "wedding reception",
+          "dance floor",
+          "bride dancing",
+          "wedding guests",
+          "party",
+          "confetti",
+          "indoor reception",
+          "warm lighting",
+          "joyful mood",
+          "evening celebration",
+          "candid moment"
+        ],
+        "aiAlt": "Bride dancing through confetti on the Darver Castle reception dance floor, surrounded by guests and warm evening light",
+        "aiCaption": "A candid reception moment at Darver Castle in County Louth, with the dance floor full, confetti in the air and the evening party well underway.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/reception%20and%20party/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-310_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/reception%20and%20party/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-310_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 416,
+          "venue": "Darver castle",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_e755c0ed2673afd6484be980",
+        "imageId": "MKB000416",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-315_500.webp",
+        "order": 35,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "darver castle",
+          "wedding reception",
+          "first dance",
+          "bride and groom",
+          "dance floor",
+          "party guests",
+          "fairy lights",
+          "warm lighting",
+          "celebration",
+          "joyful",
+          "evening reception",
+          "wedding party"
+        ],
+        "aiTags": [
+          "darver castle",
+          "wedding reception",
+          "first dance",
+          "bride and groom",
+          "dance floor",
+          "party guests",
+          "fairy lights",
+          "warm lighting",
+          "celebration",
+          "joyful",
+          "evening reception",
+          "wedding party"
+        ],
+        "aiAlt": "Couple sharing their first dance at Darver Castle, surrounded by guests, fairy lights and warm evening reception light",
+        "aiCaption": "A relaxed first dance at Darver Castle in County Louth, with guests gathered around the dance floor and warm fairy lights adding to the evening atmosphere.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Darver%20castle/reception%20and%20party/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-315_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Darver%20castle/reception%20and%20party/mkb-weddings-northern-ireland-wedding-photographer-ni-wedding-photography-darver-castle-wedding-photography-315_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 417,
+          "venue": "Darver castle",
+          "category": "reception and party"
+        }
+      }
+    ]
+  }
+}

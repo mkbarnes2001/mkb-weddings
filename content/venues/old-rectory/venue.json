@@ -1,0 +1,802 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_dd1c4de4-e310-43a0-9518-22ea7dddcb3b",
+  "slug": "old-rectory",
+  "name": "Old Rectory",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_dfc1015d2935f3c79ac74e4c",
+  "status": "published",
+  "links": {
+    "website": "https://www.oldrectorykillyman.co.uk",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.678Z",
+  "updatedAt": "2026-07-13T07:52:28.336Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.336Z",
+    "heroAssetId": "legacy_dfc1015d2935f3c79ac74e4c",
+    "images": [
+      {
+        "assetId": "legacy_dfc1015d2935f3c79ac74e4c",
+        "imageId": "MKB001019",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-130_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "old rectory",
+          "outdoor ceremony",
+          "bride and groom",
+          "wedding vows",
+          "officiant",
+          "guests",
+          "flower girl",
+          "garden wedding",
+          "sunny light",
+          "romantic",
+          "emotional moment",
+          "ceremony seating"
+        ],
+        "aiTags": [
+          "old rectory",
+          "outdoor ceremony",
+          "bride and groom",
+          "wedding vows",
+          "officiant",
+          "guests",
+          "flower girl",
+          "garden wedding",
+          "sunny light",
+          "romantic",
+          "emotional moment",
+          "ceremony seating"
+        ],
+        "aiAlt": "Bride and groom share vows during an outdoor ceremony at Old Rectory, Killyman, with guests watching in sunny garden light",
+        "aiCaption": "A relaxed outdoor ceremony at Old Rectory in Killyman, with vows shared in warm sunlight surrounded by guests in the garden.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Old%20Rectory/ceremony/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-130_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Old%20Rectory/ceremony/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-130_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1020,
+          "venue": "Old Rectory",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_ac4bd763e3dc4f05d5612a7a",
+        "imageId": "MKB001020",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-141_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "old rectory",
+          "outdoor ceremony",
+          "bride and groom",
+          "ceremony exit",
+          "cheering guests",
+          "applause",
+          "sunlit garden",
+          "joyful moment",
+          "wedding dress",
+          "aisle view",
+          "summer wedding",
+          "candid ceremony"
+        ],
+        "aiTags": [
+          "old rectory",
+          "outdoor ceremony",
+          "bride and groom",
+          "ceremony exit",
+          "cheering guests",
+          "applause",
+          "sunlit garden",
+          "joyful moment",
+          "wedding dress",
+          "aisle view",
+          "summer wedding",
+          "candid ceremony"
+        ],
+        "aiAlt": "Bride and groom exit their outdoor ceremony at Old Rectory in Killyman as guests cheer in the sunlit garden",
+        "aiCaption": "A joyful ceremony exit at Old Rectory, Killyman, with warm summer light and guests applauding along the garden aisle.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Old%20Rectory/ceremony/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-141_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Old%20Rectory/ceremony/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-141_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1021,
+          "venue": "Old Rectory",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_5ee1ea8ca9bafcbc74f118c7",
+        "imageId": "MKB001021",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-old-rectory-killyman-wedding-photography-1_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "old rectory",
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "outdoor wedding",
+          "golden hour",
+          "backlit",
+          "romantic",
+          "intimate moment",
+          "wedding dress",
+          "groom suit",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "old rectory",
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "outdoor wedding",
+          "golden hour",
+          "backlit",
+          "romantic",
+          "intimate moment",
+          "wedding dress",
+          "groom suit",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom in a backlit garden portrait at Old Rectory, Killyman during golden hour",
+        "aiCaption": "A quiet golden hour moment in the gardens at Old Rectory, Killyman, captured with a relaxed and natural feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Old%20Rectory/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-old-rectory-killyman-wedding-photography-1_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Old%20Rectory/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-old-rectory-killyman-wedding-photography-1_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1022,
+          "venue": "Old Rectory",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_0e840582a36659b46a976a35",
+        "imageId": "MKB001022",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-old-rectory-killyman-wedding-photography-4_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "old rectory",
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "romantic",
+          "intimate",
+          "soft light",
+          "natural light",
+          "embrace",
+          "wedding portraits",
+          "outdoor",
+          "northern ireland"
+        ],
+        "aiTags": [
+          "old rectory",
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "romantic",
+          "intimate",
+          "soft light",
+          "natural light",
+          "embrace",
+          "wedding portraits",
+          "outdoor",
+          "northern ireland"
+        ],
+        "aiAlt": "Bride and groom embracing in soft woodland light at Old Rectory, Killyman",
+        "aiCaption": "A quiet couple portrait in the woodland at Old Rectory, Killyman, captured with soft natural light and a relaxed documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Old%20Rectory/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-old-rectory-killyman-wedding-photography-4_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Old%20Rectory/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-old-rectory-killyman-wedding-photography-4_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1023,
+          "venue": "Old Rectory",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_18e92ada7aa3532ce83a4499",
+        "imageId": "MKB001023",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-267_500.webp",
+        "order": 5,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "old rectory",
+          "couple portraits",
+          "bride and groom",
+          "stone wall",
+          "holding hands",
+          "natural light",
+          "romantic",
+          "elegant",
+          "outdoor portraits",
+          "wedding day",
+          "bridal cape",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "old rectory",
+          "couple portraits",
+          "bride and groom",
+          "stone wall",
+          "holding hands",
+          "natural light",
+          "romantic",
+          "elegant",
+          "outdoor portraits",
+          "wedding day",
+          "bridal cape",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom holding hands by the stone wall at Old Rectory, Killyman, in soft natural light",
+        "aiCaption": "A relaxed couple portrait at Old Rectory in Killyman, with the bride’s cape catching the light beside the old stone wall.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Old%20Rectory/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-267_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Old%20Rectory/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-267_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1024,
+          "venue": "Old Rectory",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_c0c16ed23ef5f757a3b7e17a",
+        "imageId": "MKB001024",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-283_500.webp",
+        "order": 6,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "old rectory",
+          "couple portraits",
+          "bride and groom",
+          "garden portraits",
+          "outdoor wedding",
+          "floral foreground",
+          "natural light",
+          "romantic",
+          "intimate moment",
+          "holding hands",
+          "greenery",
+          "wedding portraits"
+        ],
+        "aiTags": [
+          "old rectory",
+          "couple portraits",
+          "bride and groom",
+          "garden portraits",
+          "outdoor wedding",
+          "floral foreground",
+          "natural light",
+          "romantic",
+          "intimate moment",
+          "holding hands",
+          "greenery",
+          "wedding portraits"
+        ],
+        "aiAlt": "Bride and groom holding hands in the gardens at Old Rectory, Killyman, framed by soft floral foreground",
+        "aiCaption": "A quiet garden portrait at Old Rectory in Killyman, with the couple holding hands among soft greenery and natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Old%20Rectory/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-283_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Old%20Rectory/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-283_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1025,
+          "venue": "Old Rectory",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_af9ce20ed44c7d3cad41d41d",
+        "imageId": "MKB001025",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-288_500.webp",
+        "order": 7,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "old rectory",
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "outdoor wedding",
+          "golden hour",
+          "soft light",
+          "romantic",
+          "intimate moment",
+          "wedding dress",
+          "navy suit",
+          "natural greenery"
+        ],
+        "aiTags": [
+          "old rectory",
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "outdoor wedding",
+          "golden hour",
+          "soft light",
+          "romantic",
+          "intimate moment",
+          "wedding dress",
+          "navy suit",
+          "natural greenery"
+        ],
+        "aiAlt": "Bride and groom sharing a quiet golden hour portrait in the gardens at Old Rectory, Killyman",
+        "aiCaption": "A relaxed couple portrait in the soft evening light at Old Rectory, Killyman, surrounded by natural greenery.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Old%20Rectory/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-288_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Old%20Rectory/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-288_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1026,
+          "venue": "Old Rectory",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_22629e787cc705446acc1c84",
+        "imageId": "MKB001026",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-299_500.webp",
+        "order": 8,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "soft light",
+          "romantic",
+          "intimate",
+          "embrace",
+          "wedding portraits",
+          "natural backdrop",
+          "golden hour"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "soft light",
+          "romantic",
+          "intimate",
+          "embrace",
+          "wedding portraits",
+          "natural backdrop",
+          "golden hour"
+        ],
+        "aiAlt": "Bride and groom embracing in soft woodland light during couple portraits at Old Rectory, Killyman",
+        "aiCaption": "A quiet golden-hour embrace in the woodland at Old Rectory, Killyman, captured with a relaxed documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Old%20Rectory/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-299_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Old%20Rectory/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-299_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1027,
+          "venue": "Old Rectory",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_490c4dd3b16a0e55c9441fdf",
+        "imageId": "MKB001027",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-313_500.webp",
+        "order": 9,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "old rectory",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "willow trees",
+          "greenery",
+          "natural light",
+          "joyful",
+          "candid laughter",
+          "romantic",
+          "wedding day",
+          "relaxed"
+        ],
+        "aiTags": [
+          "old rectory",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "willow trees",
+          "greenery",
+          "natural light",
+          "joyful",
+          "candid laughter",
+          "romantic",
+          "wedding day",
+          "relaxed"
+        ],
+        "aiAlt": "Bride and groom laughing together under willow trees at Old Rectory in Killyman, surrounded by soft greenery and natural light.",
+        "aiCaption": "A relaxed couple portrait at Old Rectory in Killyman, with candid laughter, soft light and the calm greenery of the gardens.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Old%20Rectory/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-313_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Old%20Rectory/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-313_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1028,
+          "venue": "Old Rectory",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_7008968d9260b9bec85cafdf",
+        "imageId": "MKB001028",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-261_500.webp",
+        "order": 10,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "old rectory",
+          "flower girl",
+          "page boy",
+          "children portrait",
+          "bridal party",
+          "family photos",
+          "brick backdrop",
+          "rustic setting",
+          "soft light",
+          "sweet moment",
+          "wedding portraits",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "old rectory",
+          "flower girl",
+          "page boy",
+          "children portrait",
+          "bridal party",
+          "family photos",
+          "brick backdrop",
+          "rustic setting",
+          "soft light",
+          "sweet moment",
+          "wedding portraits",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Flower girl and page boy portrait against the brick backdrop at Old Rectory, Killyman in soft natural light",
+        "aiCaption": "A quiet children’s portrait at Old Rectory in Killyman, with the flower girl and page boy framed by warm brick and soft wedding day light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Old%20Rectory/family%20and%20bridal%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-261_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Old%20Rectory/family%20and%20bridal%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-261_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1029,
+          "venue": "Old Rectory",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_e7654ba318ad07a75f39cd67",
+        "imageId": "MKB001029",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-97_500.webp",
+        "order": 11,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "old rectory",
+          "bridal party",
+          "bride",
+          "bridesmaids",
+          "flower girls",
+          "group portrait",
+          "doorway steps",
+          "red door",
+          "natural light",
+          "elegant",
+          "family portraits",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "old rectory",
+          "bridal party",
+          "bride",
+          "bridesmaids",
+          "flower girls",
+          "group portrait",
+          "doorway steps",
+          "red door",
+          "natural light",
+          "elegant",
+          "family portraits",
+          "wedding morning"
+        ],
+        "aiAlt": "Bride, bridesmaids and flower girls on the doorway steps at Old Rectory, Killyman, gathered by the red door in natural light",
+        "aiCaption": "A relaxed bridal party portrait on the steps of the Old Rectory in Killyman, with soft natural light and the red door framing the wedding morning.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Old%20Rectory/family%20and%20bridal%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-97_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Old%20Rectory/family%20and%20bridal%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-97_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1030,
+          "venue": "Old Rectory",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_405aa532647a87d7cfdf3b28",
+        "imageId": "MKB001030",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-76_500.webp",
+        "order": 12,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bridal prep",
+          "bride",
+          "bridesmaid",
+          "bracelet fastening",
+          "wedding morning",
+          "soft window light",
+          "calm moments",
+          "elegant details",
+          "old rectory",
+          "indoor portraits",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bridal prep",
+          "bride",
+          "bridesmaid",
+          "bracelet fastening",
+          "wedding morning",
+          "soft window light",
+          "calm moments",
+          "elegant details",
+          "old rectory",
+          "indoor portraits",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bridesmaid fastening the bride’s bracelet during bridal prep at Old Rectory, Killyman in soft window light",
+        "aiCaption": "A calm wedding morning moment at Old Rectory in Killyman, with a bridesmaid helping fasten the bride’s bracelet in soft window light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Old%20Rectory/getting%20ready/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-76_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Old%20Rectory/getting%20ready/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-76_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1031,
+          "venue": "Old Rectory",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_6a08964e83e49c6b4955ba2c",
+        "imageId": "MKB001031",
+        "weddingSlug": "",
+        "filename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-336_500.webp",
+        "order": 13,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "reception entrance",
+          "bride and groom",
+          "cheering guests",
+          "marquee reception",
+          "fairy lights",
+          "celebration",
+          "joyful",
+          "party atmosphere",
+          "wedding reception",
+          "grand entrance",
+          "candid moment",
+          "indoor wedding"
+        ],
+        "aiTags": [
+          "reception entrance",
+          "bride and groom",
+          "cheering guests",
+          "marquee reception",
+          "fairy lights",
+          "celebration",
+          "joyful",
+          "party atmosphere",
+          "wedding reception",
+          "grand entrance",
+          "candid moment",
+          "indoor wedding"
+        ],
+        "aiAlt": "Couple entering their marquee reception at Old Rectory, Killyman, as guests cheer beneath warm fairy lights",
+        "aiCaption": "A relaxed grand entrance at Old Rectory in Killyman, with cheering guests, fairy lights and a joyful reception atmosphere.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Old%20Rectory/reception%20and%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-336_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Old%20Rectory/reception%20and%20party/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-the-old-rectory-killyman-wedding-photography-full-res-336_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 1032,
+          "venue": "Old Rectory",
+          "category": "reception and party"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,552 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_0a376e42-9552-4e06-abd3-2a142a54ca79",
+  "slug": "roe-valley-resort",
+  "name": "Roe valley resort",
+  "town": "",
+  "county": "",
+  "country": "Northern Ireland",
+  "intro": "",
+  "description": "",
+  "status": "published",
+  "updatedAt": "2026-07-13T07:52:28.340Z",
+  "links": {
+    "website": "https://www.roevalleyresort.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.340Z",
+    "heroAssetId": "legacy_f425e37b24bd8e5ba1ce7d2e",
+    "images": [
+      {
+        "assetId": "legacy_f425e37b24bd8e5ba1ce7d2e",
+        "imageId": "MKB001311",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-photographer_northern-ireland_Wedding_Photography-roe-park-hotel-limavady-wedding-photography-391_500.webp",
+        "order": 1,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "roe valley resort",
+          "couple portraits",
+          "bride and groom",
+          "riverside",
+          "woodland",
+          "natural light",
+          "romantic",
+          "kissing",
+          "wedding bouquet",
+          "veil",
+          "outdoor portraits",
+          "intimate moment"
+        ],
+        "aiTags": [
+          "roe valley resort",
+          "couple portraits",
+          "bride and groom",
+          "riverside",
+          "woodland",
+          "natural light",
+          "romantic",
+          "kissing",
+          "wedding bouquet",
+          "veil",
+          "outdoor portraits",
+          "intimate moment"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Roe%20valley%20resort/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding-photographer_northern-ireland_Wedding_Photography-roe-park-hotel-limavady-wedding-photography-391_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Roe%20valley%20resort/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding-photographer_northern-ireland_Wedding_Photography-roe-park-hotel-limavady-wedding-photography-391_2000.webp",
+        "alt": "Bride and groom kissing by the riverside woodland at Roe Valley Resort in Limavady, with bouquet and veil in natural light",
+        "caption": "A quiet riverside portrait at Roe Valley Resort, Limavady, with the couple tucked into the woodland light for a natural moment together."
+      },
+      {
+        "assetId": "legacy_72faf037134f37f304e2a487",
+        "imageId": "MKB001312",
+        "weddingSlug": "",
+        "filename": "MKB_weddings_Ireland_Northen_ireland_Wedding-photographer_northern-ireland_Wedding_Photography-roe-park-hotel-limavady-wedding-photography-404_500.webp",
+        "order": 2,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "black and white",
+          "dramatic light",
+          "romantic",
+          "intimate",
+          "wedding portrait",
+          "veil",
+          "outdoor",
+          "roe valley resort"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "black and white",
+          "dramatic light",
+          "romantic",
+          "intimate",
+          "wedding portrait",
+          "veil",
+          "outdoor",
+          "roe valley resort"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Roe%20valley%20resort/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding-photographer_northern-ireland_Wedding_Photography-roe-park-hotel-limavady-wedding-photography-404_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Roe%20valley%20resort/couple%20portraits/MKB_weddings_Ireland_Northen_ireland_Wedding-photographer_northern-ireland_Wedding_Photography-roe-park-hotel-limavady-wedding-photography-404_2000.webp",
+        "alt": "Black and white couple portrait in woodland at Roe Valley Resort, Limavady, with the bride’s veil catching the light.",
+        "caption": "A quiet woodland portrait at Roe Valley Resort in Limavady, with soft dramatic light and a relaxed moment between the couple."
+      },
+      {
+        "assetId": "legacy_699b4864b992e350a2223037",
+        "imageId": "MKB001313",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-366_500.webp",
+        "order": 3,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portrait",
+          "bride and groom",
+          "floral arch",
+          "church doorway",
+          "wedding flowers",
+          "natural light",
+          "romantic",
+          "joyful",
+          "wedding dress",
+          "black tuxedo",
+          "roe valley resort",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "couple portrait",
+          "bride and groom",
+          "floral arch",
+          "church doorway",
+          "wedding flowers",
+          "natural light",
+          "romantic",
+          "joyful",
+          "wedding dress",
+          "black tuxedo",
+          "roe valley resort",
+          "northern ireland wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-366_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-366_2000.webp",
+        "alt": "Bride and groom couple portrait beneath a floral arch at a church doorway in Limavady",
+        "caption": "A relaxed couple portrait in natural light, framed by wedding flowers at a church doorway during a Roe Valley Resort wedding in Limavady."
+      },
+      {
+        "assetId": "legacy_c1467ca7277676e7af8476b7",
+        "imageId": "MKB001314",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-415_500.webp",
+        "order": 4,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "roe valley resort",
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "forest steps",
+          "natural light",
+          "romantic",
+          "intimate",
+          "wedding portraits",
+          "bridal veil",
+          "autumn",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "roe valley resort",
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "forest steps",
+          "natural light",
+          "romantic",
+          "intimate",
+          "wedding portraits",
+          "bridal veil",
+          "autumn",
+          "northern ireland wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-415_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-415_2000.webp",
+        "alt": "Bride and groom on woodland steps at Roe Valley Resort in Limavady during autumn couple portraits",
+        "caption": "A quiet moment on the woodland steps at Roe Valley Resort, with natural light and an easy, intimate feel to the portraits."
+      },
+      {
+        "assetId": "legacy_e037ba07eab8b7b3535a6d92",
+        "imageId": "MKB001315",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-418_500.webp",
+        "order": 5,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "forest path",
+          "natural light",
+          "romantic",
+          "moody",
+          "wedding portraits",
+          "roe valley resort",
+          "northern ireland wedding",
+          "bridal gown",
+          "intimate"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "forest path",
+          "natural light",
+          "romantic",
+          "moody",
+          "wedding portraits",
+          "roe valley resort",
+          "northern ireland wedding",
+          "bridal gown",
+          "intimate"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-418_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-418_2000.webp",
+        "alt": "Bride and groom on a woodland path at Roe Valley Resort in Limavady, photographed in soft natural light",
+        "caption": "A quiet couple portrait at Roe Valley Resort, with the bride and groom surrounded by woodland and soft natural light in Limavady."
+      },
+      {
+        "assetId": "legacy_99ed4df0f1a9ec918d65ae89",
+        "imageId": "MKB001316",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-419_500.webp",
+        "order": 6,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "autumn leaves",
+          "roe valley resort",
+          "natural light",
+          "dramatic lighting",
+          "romantic",
+          "intimate",
+          "wedding portraits",
+          "bridal bouquet",
+          "outdoor wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "autumn leaves",
+          "roe valley resort",
+          "natural light",
+          "dramatic lighting",
+          "romantic",
+          "intimate",
+          "wedding portraits",
+          "bridal bouquet",
+          "outdoor wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-419_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-419_2000.webp",
+        "alt": "Bride and groom portraits in autumn woodland at Roe Valley Resort, Limavady, with soft natural light and a bridal bouquet.",
+        "caption": "A relaxed couple portrait among the autumn leaves at Roe Valley Resort in Limavady, keeping the focus on natural light, closeness and the quiet setting."
+      },
+      {
+        "assetId": "legacy_cbe3313a9be074564cf376c9",
+        "imageId": "MKB001317",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-420_500.webp",
+        "order": 7,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "roe valley resort",
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "autumn leaves",
+          "natural light",
+          "romantic",
+          "intimate",
+          "wedding bouquet",
+          "bridal veil",
+          "outdoor portraits",
+          "wedding day"
+        ],
+        "aiTags": [
+          "roe valley resort",
+          "couple portraits",
+          "bride and groom",
+          "woodland",
+          "autumn leaves",
+          "natural light",
+          "romantic",
+          "intimate",
+          "wedding bouquet",
+          "bridal veil",
+          "outdoor portraits",
+          "wedding day"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-420_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-420_2000.webp",
+        "alt": "Bride and groom in woodland at Roe Valley Resort, Limavady, surrounded by autumn leaves and soft natural light",
+        "caption": "A quiet couple portrait at Roe Valley Resort in Limavady, with autumn leaves, soft natural light and an easy wedding day atmosphere."
+      },
+      {
+        "assetId": "legacy_5e809b080b13ad7578e292a9",
+        "imageId": "MKB001318",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-421_500.webp",
+        "order": 8,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "rustic wall",
+          "natural light",
+          "romantic",
+          "moody",
+          "holding hands",
+          "wedding dress",
+          "bridal veil",
+          "wedding bouquet",
+          "roe valley resort"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "rustic wall",
+          "natural light",
+          "romantic",
+          "moody",
+          "holding hands",
+          "wedding dress",
+          "bridal veil",
+          "wedding bouquet",
+          "roe valley resort"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-421_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-421_2000.webp",
+        "alt": "Bride and groom holding hands beside a rustic wall at Roe Valley Resort in Limavady, captured in soft natural light.",
+        "caption": "A relaxed couple portrait at Roe Valley Resort in Limavady, with soft light, a rustic backdrop and a quiet hand-in-hand moment."
+      },
+      {
+        "assetId": "legacy_fd23462cdd5130e245ceae9f",
+        "imageId": "MKB001319",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-422_500.webp",
+        "order": 9,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "roe valley resort",
+          "couple portraits",
+          "bride and groom",
+          "riverside",
+          "woodland",
+          "outdoor wedding",
+          "natural light",
+          "romantic",
+          "intimate moment",
+          "wedding portraits",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "roe valley resort",
+          "couple portraits",
+          "bride and groom",
+          "riverside",
+          "woodland",
+          "outdoor wedding",
+          "natural light",
+          "romantic",
+          "intimate moment",
+          "wedding portraits",
+          "northern ireland wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-422_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Roe%20valley%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-422_2000.webp",
+        "alt": "Bride and groom sharing a quiet riverside portrait at Roe Valley Resort in Limavady, surrounded by woodland and natural light",
+        "caption": "A relaxed couple portrait by the riverside at Roe Valley Resort, with soft natural light and woodland bringing a calm feel to the moment."
+      },
+      {
+        "assetId": "legacy_8a51f5f68bffd912176177db",
+        "imageId": "MKB001320",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-104_500.webp",
+        "order": 10,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "bridal shoes",
+          "wedding details",
+          "getting ready",
+          "black and white",
+          "soft light",
+          "romantic mood",
+          "bridal accessories",
+          "pearl details",
+          "wedding morning",
+          "roe valley resort"
+        ],
+        "aiTags": [
+          "bridal shoes",
+          "wedding details",
+          "getting ready",
+          "black and white",
+          "soft light",
+          "romantic mood",
+          "bridal accessories",
+          "pearl details",
+          "wedding morning",
+          "roe valley resort"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Roe%20valley%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-104_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Roe%20valley%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-104_2000.webp",
+        "alt": "Black and white bridal shoes and pearl details during wedding morning preparations at Roe Valley Resort, Limavady",
+        "caption": "A quiet wedding morning detail at Roe Valley Resort in Limavady, with bridal shoes and pearls photographed in soft black and white."
+      },
+      {
+        "assetId": "legacy_07aae684680a7cf59fea1bc7",
+        "imageId": "MKB001321",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-159_500.webp",
+        "order": 11,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bride",
+          "mother of bride",
+          "wedding dress",
+          "buttoning dress",
+          "bridal prep",
+          "window light",
+          "soft light",
+          "emotional moment",
+          "roe valley resort",
+          "veil",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bride",
+          "mother of bride",
+          "wedding dress",
+          "buttoning dress",
+          "bridal prep",
+          "window light",
+          "soft light",
+          "emotional moment",
+          "roe valley resort",
+          "veil",
+          "northern ireland wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Roe%20valley%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-159_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Roe%20valley%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-159_2000.webp",
+        "alt": "Bride having her wedding dress buttoned in soft window light at Roe Valley Resort, Limavady",
+        "caption": "A quiet getting-ready moment at Roe Valley Resort in Limavady, with soft window light as the wedding dress is buttoned."
+      },
+      {
+        "assetId": "legacy_3a98d1a65cf133519a3c1607",
+        "imageId": "MKB001322",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-164_500.webp",
+        "order": 12,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bride",
+          "wedding dress",
+          "lace detail",
+          "veil",
+          "bridal portrait",
+          "soft light",
+          "window light",
+          "romantic",
+          "elegant",
+          "roe valley resort",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bride",
+          "wedding dress",
+          "lace detail",
+          "veil",
+          "bridal portrait",
+          "soft light",
+          "window light",
+          "romantic",
+          "elegant",
+          "roe valley resort",
+          "wedding morning"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Roe%20valley%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-164_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Roe%20valley%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-roe-valley-resort-limavady-wedding-photography-164_2000.webp",
+        "alt": "Bride in lace wedding dress and veil by soft window light during morning prep at Roe Valley Resort, Limavady",
+        "caption": "Soft window light and quiet bridal prep at Roe Valley Resort in Limavady, captured in a relaxed documentary style."
+      }
+    ]
+  }
+}

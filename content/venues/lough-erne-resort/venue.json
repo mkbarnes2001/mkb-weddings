@@ -1,0 +1,1552 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_296da3a7-9896-4daf-8e55-26b1c6622c86",
+  "slug": "lough-erne-resort",
+  "name": "Lough Erne resort",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_6a17333da691ec277f8f7ac6",
+  "status": "published",
+  "links": {
+    "website": "https://www.lougherneresort.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.771Z",
+  "updatedAt": "2026-07-13T07:52:28.333Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.333Z",
+    "heroAssetId": "legacy_6a17333da691ec277f8f7ac6",
+    "images": [
+      {
+        "assetId": "legacy_6a17333da691ec277f8f7ac6",
+        "imageId": "MKB000927",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-150_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "indoor wedding",
+          "bride and groom",
+          "officiant",
+          "wedding vows",
+          "aisle",
+          "floral arch",
+          "guests",
+          "chandelier lighting",
+          "romantic",
+          "lough erne resort",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "ceremony",
+          "indoor wedding",
+          "bride and groom",
+          "officiant",
+          "wedding vows",
+          "aisle",
+          "floral arch",
+          "guests",
+          "chandelier lighting",
+          "romantic",
+          "lough erne resort",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Indoor wedding ceremony at Lough Erne Resort, with a couple exchanging vows beneath a floral arch as guests look on",
+        "aiCaption": "A calm indoor ceremony at Lough Erne Resort, with soft chandelier light, a floral arch and guests gathered close for the vows.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/ceremony/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-150_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/ceremony/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-150_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 928,
+          "venue": "Lough Erne resort",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_7c779229f3bd05e1ad335236",
+        "imageId": "MKB000928",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-167_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "ring exchange",
+          "wedding rings",
+          "bride and groom",
+          "hands closeup",
+          "lace sleeve",
+          "soft light",
+          "romantic",
+          "intimate moment",
+          "lough erne resort",
+          "wedding vows",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "ceremony",
+          "ring exchange",
+          "wedding rings",
+          "bride and groom",
+          "hands closeup",
+          "lace sleeve",
+          "soft light",
+          "romantic",
+          "intimate moment",
+          "lough erne resort",
+          "wedding vows",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Close-up of a ring exchange during a wedding ceremony at Lough Erne Resort, with soft light on lace sleeves and joined hands",
+        "aiCaption": "A quiet ceremony moment at Lough Erne Resort as the rings are exchanged, captured in soft light with a calm, documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/ceremony/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-167_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/ceremony/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-167_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 929,
+          "venue": "Lough Erne resort",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_52f301d66168e663ff161401",
+        "imageId": "MKB000929",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography_Northern_Ireland_wedding_photographer_Lough_Erne_Resort_Eniskillen_Wedding_photography-Full res-204_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "lough erne resort",
+          "twinkle lights",
+          "romantic",
+          "evening light",
+          "wedding bouquet",
+          "winter wedding",
+          "newlyweds",
+          "garden setting",
+          "elegant wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "lough erne resort",
+          "twinkle lights",
+          "romantic",
+          "evening light",
+          "wedding bouquet",
+          "winter wedding",
+          "newlyweds",
+          "garden setting",
+          "elegant wedding"
+        ],
+        "aiAlt": "Bride and groom portrait under twinkle lights at Lough Erne Resort, with a bouquet and soft winter evening light.",
+        "aiCaption": "A relaxed couple portrait at Lough Erne Resort in County Fermanagh, with twinkle lights and soft evening light bringing a warm winter feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/couple%20portraits/MKB-weddings-mkb-photography_Northern_Ireland_wedding_photographer_Lough_Erne_Resort_Eniskillen_Wedding_photography-Full%20res-204_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/couple%20portraits/MKB-weddings-mkb-photography_Northern_Ireland_wedding_photographer_Lough_Erne_Resort_Eniskillen_Wedding_photography-Full%20res-204_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 930,
+          "venue": "Lough Erne resort",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_65ef2cf4fba7b47936db6a35",
+        "imageId": "MKB000930",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-258_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "wedding kiss",
+          "arched corridor",
+          "indoor portrait",
+          "natural light",
+          "romantic",
+          "elegant",
+          "soft light",
+          "wedding bouquet",
+          "lough erne resort",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "wedding kiss",
+          "arched corridor",
+          "indoor portrait",
+          "natural light",
+          "romantic",
+          "elegant",
+          "soft light",
+          "wedding bouquet",
+          "lough erne resort",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom share a kiss in a softly lit arched corridor at Lough Erne Resort, County Fermanagh",
+        "aiCaption": "A quiet couple portrait in the arched corridor at Lough Erne Resort, with soft natural light and an easy, intimate feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-258_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-258_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 931,
+          "venue": "Lough Erne resort",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_d9edeab2cee63416fb73ab74",
+        "imageId": "MKB000931",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-267_500.webp",
+        "order": 5,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "lough erne resort",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "tree canopy",
+          "soft natural light",
+          "romantic",
+          "joyful",
+          "wedding dress",
+          "bridal bouquet",
+          "black tie",
+          "wedding portraits"
+        ],
+        "aiTags": [
+          "lough erne resort",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "tree canopy",
+          "soft natural light",
+          "romantic",
+          "joyful",
+          "wedding dress",
+          "bridal bouquet",
+          "black tie",
+          "wedding portraits"
+        ],
+        "aiAlt": "Bride and groom sharing a joyful outdoor portrait beneath the trees at Lough Erne Resort, County Fermanagh",
+        "aiCaption": "A relaxed couple portrait under the tree canopy at Lough Erne Resort, with soft natural light and a quiet, joyful feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-267_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-267_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 932,
+          "venue": "Lough Erne resort",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_81e72493532ea0c20c04c527",
+        "imageId": "MKB000932",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-276_500.webp",
+        "order": 6,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "covered walkway",
+          "arched corridor",
+          "natural light",
+          "romantic",
+          "elegant",
+          "walking together",
+          "holding hands",
+          "wedding portraits",
+          "lough erne resort",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "covered walkway",
+          "arched corridor",
+          "natural light",
+          "romantic",
+          "elegant",
+          "walking together",
+          "holding hands",
+          "wedding portraits",
+          "lough erne resort",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom holding hands in the arched walkway at Lough Erne Resort, County Fermanagh",
+        "aiCaption": "A quiet couple portrait at Lough Erne Resort, with the bride and groom walking hand in hand through soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-276_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-276_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 933,
+          "venue": "Lough Erne resort",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_6a14425012e301ff1c757d3c",
+        "imageId": "MKB000933",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-277_500.webp",
+        "order": 7,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "lough erne resort",
+          "couple portraits",
+          "bride and groom",
+          "wedding arch",
+          "natural light",
+          "romantic",
+          "soft focus",
+          "bridal bouquet",
+          "elegant wedding",
+          "happy bride",
+          "groom portrait",
+          "wedding day"
+        ],
+        "aiTags": [
+          "lough erne resort",
+          "couple portraits",
+          "bride and groom",
+          "wedding arch",
+          "natural light",
+          "romantic",
+          "soft focus",
+          "bridal bouquet",
+          "elegant wedding",
+          "happy bride",
+          "groom portrait",
+          "wedding day"
+        ],
+        "aiAlt": "Bride and groom portrait under a wedding arch at Lough Erne Resort, County Fermanagh, in soft natural light",
+        "aiCaption": "A relaxed couple portrait at Lough Erne Resort, with soft natural light, the wedding arch and bouquet adding to the calm wedding day atmosphere.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-277_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-277_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 934,
+          "venue": "Lough Erne resort",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_82447110c82a824ddb7bf245",
+        "imageId": "MKB000934",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-280_500.webp",
+        "order": 8,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "lough erne resort",
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "woodland portraits",
+          "golden light",
+          "backlit",
+          "romantic",
+          "summer wedding",
+          "wedding bouquet",
+          "elegant",
+          "newlyweds"
+        ],
+        "aiTags": [
+          "lough erne resort",
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "woodland portraits",
+          "golden light",
+          "backlit",
+          "romantic",
+          "summer wedding",
+          "wedding bouquet",
+          "elegant",
+          "newlyweds"
+        ],
+        "aiAlt": "Bride and groom in golden backlight during woodland couple portraits at Lough Erne Resort, County Fermanagh",
+        "aiCaption": "A quiet summer moment in the woodland at Lough Erne Resort, with the newlyweds framed by warm evening light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-280_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-280_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 935,
+          "venue": "Lough Erne resort",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_937735b32b550cdd43089ed3",
+        "imageId": "MKB000935",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-285_500.webp",
+        "order": 9,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "woodland portraits",
+          "golden grass",
+          "natural light",
+          "dappled light",
+          "romantic",
+          "elegant",
+          "walking together",
+          "lough erne resort",
+          "wedding day"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "woodland portraits",
+          "golden grass",
+          "natural light",
+          "dappled light",
+          "romantic",
+          "elegant",
+          "walking together",
+          "lough erne resort",
+          "wedding day"
+        ],
+        "aiAlt": "Bride and groom walking through golden grass in dappled light during couple portraits at Lough Erne Resort",
+        "aiCaption": "A relaxed couple portrait at Lough Erne Resort, with the bride and groom walking together through soft woodland light and golden grass.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-285_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-285_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 936,
+          "venue": "Lough Erne resort",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_d2e7dd9877711f88ecc8d39e",
+        "imageId": "MKB000936",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-121_500.webp",
+        "order": 10,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "lough erne resort",
+          "bride",
+          "flower girls",
+          "bridal party",
+          "family portraits",
+          "indoor portraits",
+          "window light",
+          "soft light",
+          "white dresses",
+          "bouquets",
+          "joyful",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "lough erne resort",
+          "bride",
+          "flower girls",
+          "bridal party",
+          "family portraits",
+          "indoor portraits",
+          "window light",
+          "soft light",
+          "white dresses",
+          "bouquets",
+          "joyful",
+          "wedding morning"
+        ],
+        "aiAlt": "Bride with flower girls and bridal party in soft window light at Lough Erne Resort, County Fermanagh",
+        "aiCaption": "A relaxed wedding morning portrait at Lough Erne Resort, with the bride, flower girls and bridal party gathered in soft window light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-121_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-121_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 937,
+          "venue": "Lough Erne resort",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_cba4dc30e21473fae13c1f98",
+        "imageId": "MKB000937",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-251_500.webp",
+        "order": 11,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "family portraits",
+          "bridal party",
+          "group photo",
+          "bride and groom",
+          "wedding guests",
+          "outdoor portrait",
+          "archway",
+          "natural light",
+          "formal attire",
+          "classic wedding",
+          "joyful mood",
+          "lough erne resort"
+        ],
+        "aiTags": [
+          "family portraits",
+          "bridal party",
+          "group photo",
+          "bride and groom",
+          "wedding guests",
+          "outdoor portrait",
+          "archway",
+          "natural light",
+          "formal attire",
+          "classic wedding",
+          "joyful mood",
+          "lough erne resort"
+        ],
+        "aiAlt": "Bride, groom and bridal party in a relaxed group portrait under an archway at Lough Erne Resort, County Fermanagh",
+        "aiCaption": "A relaxed bridal party portrait at Lough Erne Resort, with family and friends gathered in soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-251_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-251_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 938,
+          "venue": "Lough Erne resort",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_a4518bed53387a56a94331ac",
+        "imageId": "MKB000938",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-107_500.webp",
+        "order": 12,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "bridal portrait",
+          "bride",
+          "getting ready",
+          "wedding dress",
+          "lace gown",
+          "window light",
+          "soft light",
+          "elegant",
+          "romantic",
+          "indoor portrait",
+          "bridal prep",
+          "lough erne resort"
+        ],
+        "aiTags": [
+          "bridal portrait",
+          "bride",
+          "getting ready",
+          "wedding dress",
+          "lace gown",
+          "window light",
+          "soft light",
+          "elegant",
+          "romantic",
+          "indoor portrait",
+          "bridal prep",
+          "lough erne resort"
+        ],
+        "aiAlt": "Bride in a lace wedding dress by soft window light during bridal prep at Lough Erne Resort, County Fermanagh",
+        "aiCaption": "A quiet getting-ready portrait at Lough Erne Resort, with soft window light and the detail of a lace gown setting a calm, natural tone.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-107_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-107_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 939,
+          "venue": "Lough Erne resort",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_6ab6d576206076903e6d6c2a",
+        "imageId": "MKB000939",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-111_500.webp",
+        "order": 13,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bride",
+          "bridesmaids",
+          "pink bridesmaid dresses",
+          "bouquets",
+          "window light",
+          "bright airy",
+          "joyful",
+          "bridal party",
+          "pre ceremony",
+          "lough erne resort",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bride",
+          "bridesmaids",
+          "pink bridesmaid dresses",
+          "bouquets",
+          "window light",
+          "bright airy",
+          "joyful",
+          "bridal party",
+          "pre ceremony",
+          "lough erne resort",
+          "wedding morning"
+        ],
+        "aiAlt": "Bride and bridesmaids in pink dresses with bouquets by soft window light at Lough Erne Resort",
+        "aiCaption": "A relaxed wedding morning at Lough Erne Resort, with the bridal party gathered in soft window light before the ceremony.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-111_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-111_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 940,
+          "venue": "Lough Erne resort",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_f8e11cee33b2ec29b2c689b0",
+        "imageId": "MKB000940",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-118_500.webp",
+        "order": 14,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "lough erne resort",
+          "bride",
+          "bridesmaids",
+          "family",
+          "flower girl",
+          "black and white",
+          "indoor",
+          "natural light",
+          "emotional",
+          "bridal reveal",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "getting ready",
+          "lough erne resort",
+          "bride",
+          "bridesmaids",
+          "family",
+          "flower girl",
+          "black and white",
+          "indoor",
+          "natural light",
+          "emotional",
+          "bridal reveal",
+          "wedding morning"
+        ],
+        "aiAlt": "Black and white bridal reveal with bridesmaids and family during the wedding morning at Lough Erne Resort",
+        "aiCaption": "A quiet, emotional bridal reveal at Lough Erne Resort, captured in natural light as family and bridesmaids gather on the wedding morning.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-118_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-118_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 941,
+          "venue": "Lough Erne resort",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_980d9b816b967dd186be8062",
+        "imageId": "MKB000941",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-37_500.webp",
+        "order": 15,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "wedding rings",
+          "ring detail",
+          "getting ready",
+          "bridal details",
+          "flat lay",
+          "invitation suite",
+          "soft light",
+          "romantic",
+          "close up",
+          "wedding morning",
+          "lough erne resort"
+        ],
+        "aiTags": [
+          "wedding rings",
+          "ring detail",
+          "getting ready",
+          "bridal details",
+          "flat lay",
+          "invitation suite",
+          "soft light",
+          "romantic",
+          "close up",
+          "wedding morning",
+          "lough erne resort"
+        ],
+        "aiAlt": "Wedding rings and invitation suite in soft light during getting ready at Lough Erne Resort",
+        "aiCaption": "A quiet wedding morning detail at Lough Erne Resort, with rings and stationery photographed in soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-37_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-37_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 942,
+          "venue": "Lough Erne resort",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_c46c85af475831b7573432f4",
+        "imageId": "MKB000942",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-39_500.webp",
+        "order": 16,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "groom prep",
+          "bow tie",
+          "mirror reflection",
+          "black tuxedo",
+          "indoor portrait",
+          "natural light",
+          "focused mood",
+          "wedding morning",
+          "lough erne resort"
+        ],
+        "aiTags": [
+          "getting ready",
+          "groom prep",
+          "bow tie",
+          "mirror reflection",
+          "black tuxedo",
+          "indoor portrait",
+          "natural light",
+          "focused mood",
+          "wedding morning",
+          "lough erne resort"
+        ],
+        "aiAlt": "Groom adjusting his bow tie in a mirror during wedding morning prep at Lough Erne Resort, County Fermanagh",
+        "aiCaption": "A quiet groom prep moment at Lough Erne Resort, with natural light and a mirror reflection adding to the calm wedding morning atmosphere.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-39_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-39_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 943,
+          "venue": "Lough Erne resort",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_17c26878ecf7049fe3a3801d",
+        "imageId": "MKB000943",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-41_500.webp",
+        "order": 17,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "groom",
+          "groom prep",
+          "tuxedo",
+          "cufflinks",
+          "boutonniere",
+          "black tie",
+          "close up",
+          "indoor light",
+          "elegant",
+          "wedding morning",
+          "lough erne"
+        ],
+        "aiTags": [
+          "getting ready",
+          "groom",
+          "groom prep",
+          "tuxedo",
+          "cufflinks",
+          "boutonniere",
+          "black tie",
+          "close up",
+          "indoor light",
+          "elegant",
+          "wedding morning",
+          "lough erne"
+        ],
+        "aiAlt": "Groom fastening cufflinks in a black tie suit during morning prep at Lough Erne Resort, County Fermanagh",
+        "aiCaption": "A quiet groom prep moment at Lough Erne Resort, with black tie details and soft indoor light setting the tone for the day.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-41_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-41_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 944,
+          "venue": "Lough Erne resort",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_e1deda5691b41a8e3b18ec47",
+        "imageId": "MKB000944",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-48_500.webp",
+        "order": 18,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "groom party",
+          "groomsmen",
+          "black tuxedos",
+          "getting ready",
+          "outdoor portraits",
+          "lough erne resort",
+          "overcast light",
+          "candid walking",
+          "relaxed mood",
+          "wedding morning",
+          "northern ireland wedding",
+          "formalwear"
+        ],
+        "aiTags": [
+          "groom party",
+          "groomsmen",
+          "black tuxedos",
+          "getting ready",
+          "outdoor portraits",
+          "lough erne resort",
+          "overcast light",
+          "candid walking",
+          "relaxed mood",
+          "wedding morning",
+          "northern ireland wedding",
+          "formalwear"
+        ],
+        "aiAlt": "Groom party in black tuxedos walking outdoors at Lough Erne Resort on a relaxed wedding morning in County Fermanagh",
+        "aiCaption": "A relaxed moment with the groom party in black tuxedos, walking outdoors at Lough Erne Resort in soft overcast light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-48_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-48_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 945,
+          "venue": "Lough Erne resort",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_36bdad29b189d772c3497030",
+        "imageId": "MKB000945",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-80_500.webp",
+        "order": 19,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bride",
+          "earrings",
+          "bridal prep",
+          "mirror reflection",
+          "soft window light",
+          "white robe",
+          "calm mood",
+          "wedding morning",
+          "lough erne resort"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bride",
+          "earrings",
+          "bridal prep",
+          "mirror reflection",
+          "soft window light",
+          "white robe",
+          "calm mood",
+          "wedding morning",
+          "lough erne resort"
+        ],
+        "aiAlt": "Bride in a white robe fastening earrings by a mirror in soft window light at Lough Erne Resort",
+        "aiCaption": "A quiet wedding morning at Lough Erne Resort, with soft window light and a calm moment of bridal prep before the day begins.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-80_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-80_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 946,
+          "venue": "Lough Erne resort",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_d548e5ac7f924e61832d4e82",
+        "imageId": "MKB000946",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-97_500.webp",
+        "order": 20,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "lough erne resort",
+          "getting ready",
+          "bride",
+          "wedding dress",
+          "dress fastening",
+          "bridal prep",
+          "mother of bride",
+          "indoor",
+          "natural light",
+          "elegant",
+          "emotional",
+          "morning preparations"
+        ],
+        "aiTags": [
+          "lough erne resort",
+          "getting ready",
+          "bride",
+          "wedding dress",
+          "dress fastening",
+          "bridal prep",
+          "mother of bride",
+          "indoor",
+          "natural light",
+          "elegant",
+          "emotional",
+          "morning preparations"
+        ],
+        "aiAlt": "Bride having her wedding dress fastened during morning prep at Lough Erne Resort in County Fermanagh",
+        "aiCaption": "A quiet getting ready moment at Lough Erne Resort, with the bride’s dress being fastened in soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-97_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-97_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 947,
+          "venue": "Lough Erne resort",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_493109c8b55dde27a3f96cb7",
+        "imageId": "MKB000947",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-386_500.webp",
+        "order": 21,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "lough erne resort",
+          "wedding reception",
+          "best man speech",
+          "top table",
+          "bride and groom",
+          "groom laughing",
+          "indoor reception",
+          "natural light",
+          "joyful moment",
+          "wedding speeches",
+          "candid photography",
+          "party atmosphere"
+        ],
+        "aiTags": [
+          "lough erne resort",
+          "wedding reception",
+          "best man speech",
+          "top table",
+          "bride and groom",
+          "groom laughing",
+          "indoor reception",
+          "natural light",
+          "joyful moment",
+          "wedding speeches",
+          "candid photography",
+          "party atmosphere"
+        ],
+        "aiAlt": "Groom laughing at the top table during wedding speeches at Lough Erne Resort in County Fermanagh",
+        "aiCaption": "A relaxed reception moment at Lough Erne Resort, with the groom laughing as the speeches bring the room to life.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-386_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-386_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 948,
+          "venue": "Lough Erne resort",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_28d283797303402ed2a88274",
+        "imageId": "MKB000948",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-460_500.webp",
+        "order": 22,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "lough erne resort",
+          "wedding reception",
+          "first dance",
+          "bride and groom",
+          "dance floor",
+          "guests cheering",
+          "chandelier lighting",
+          "indoor reception",
+          "party atmosphere",
+          "evening celebration",
+          "romantic moment",
+          "flash photography"
+        ],
+        "aiTags": [
+          "lough erne resort",
+          "wedding reception",
+          "first dance",
+          "bride and groom",
+          "dance floor",
+          "guests cheering",
+          "chandelier lighting",
+          "indoor reception",
+          "party atmosphere",
+          "evening celebration",
+          "romantic moment",
+          "flash photography"
+        ],
+        "aiAlt": "Newlyweds share their first dance at Lough Erne Resort as guests cheer under warm chandelier light.",
+        "aiCaption": "A relaxed first dance at Lough Erne Resort, with guests gathered close and the evening reception full of warm energy.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-460_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-460_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 949,
+          "venue": "Lough Erne resort",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_a36ba2cd2fbcfcbb9101b29a",
+        "imageId": "MKB000949",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-462_500.webp",
+        "order": 23,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "lough erne resort",
+          "reception",
+          "first dance",
+          "bride and groom",
+          "dance floor",
+          "wedding guests",
+          "chandeliers",
+          "flash lighting",
+          "celebration",
+          "party",
+          "elegant ballroom",
+          "joyful mood"
+        ],
+        "aiTags": [
+          "lough erne resort",
+          "reception",
+          "first dance",
+          "bride and groom",
+          "dance floor",
+          "wedding guests",
+          "chandeliers",
+          "flash lighting",
+          "celebration",
+          "party",
+          "elegant ballroom",
+          "joyful mood"
+        ],
+        "aiAlt": "First dance at Lough Erne Resort in County Fermanagh, with guests gathered beneath chandeliers on the ballroom dance floor",
+        "aiCaption": "A joyful first dance at Lough Erne Resort, surrounded by guests and soft flash-lit movement on the ballroom floor.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-462_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-462_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 950,
+          "venue": "Lough Erne resort",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_836744130786b8a5370b86eb",
+        "imageId": "MKB000950",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-483_500.webp",
+        "order": 24,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "lough erne resort",
+          "reception",
+          "first dance",
+          "bride and groom",
+          "indoor celebration",
+          "sparkler fountain",
+          "chandelier",
+          "guests watching",
+          "dramatic lighting",
+          "romantic mood",
+          "evening party",
+          "dance floor"
+        ],
+        "aiTags": [
+          "lough erne resort",
+          "reception",
+          "first dance",
+          "bride and groom",
+          "indoor celebration",
+          "sparkler fountain",
+          "chandelier",
+          "guests watching",
+          "dramatic lighting",
+          "romantic mood",
+          "evening party",
+          "dance floor"
+        ],
+        "aiAlt": "First dance at Lough Erne Resort with sparkler fountains, chandelier light and guests gathered around the dance floor",
+        "aiCaption": "A relaxed evening reception at Lough Erne Resort, with guests watching the first dance under chandelier light and sparkler fountains.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-483_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-483_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 951,
+          "venue": "Lough Erne resort",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_999d7931a2044b82b988fe31",
+        "imageId": "MKB000951",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-530_500.webp",
+        "order": 25,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "wedding fireworks",
+          "night portrait",
+          "bride and groom",
+          "reception celebration",
+          "sparkler backdrop",
+          "dramatic lighting",
+          "romantic moment",
+          "outdoor wedding",
+          "party atmosphere",
+          "evening reception",
+          "lough erne resort",
+          "joyful couple"
+        ],
+        "aiTags": [
+          "wedding fireworks",
+          "night portrait",
+          "bride and groom",
+          "reception celebration",
+          "sparkler backdrop",
+          "dramatic lighting",
+          "romantic moment",
+          "outdoor wedding",
+          "party atmosphere",
+          "evening reception",
+          "lough erne resort",
+          "joyful couple"
+        ],
+        "aiAlt": "Couple outside Lough Erne Resort at night with fireworks and sparklers during their wedding reception",
+        "aiCaption": "An evening reception moment at Lough Erne Resort, with the couple framed by sparklers, fireworks and the warm energy of the party.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-530_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-530_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 952,
+          "venue": "Lough Erne resort",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_75e9053ad565d1ea5de43dc5",
+        "imageId": "MKB000952",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-532_500.webp",
+        "order": 26,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "lough erne resort",
+          "wedding reception",
+          "fireworks",
+          "night portrait",
+          "bride and groom",
+          "evening celebration",
+          "romantic moment",
+          "party atmosphere",
+          "outdoor wedding",
+          "dramatic lighting",
+          "wedding dress",
+          "couple dancing"
+        ],
+        "aiTags": [
+          "lough erne resort",
+          "wedding reception",
+          "fireworks",
+          "night portrait",
+          "bride and groom",
+          "evening celebration",
+          "romantic moment",
+          "party atmosphere",
+          "outdoor wedding",
+          "dramatic lighting",
+          "wedding dress",
+          "couple dancing"
+        ],
+        "aiAlt": "Couple sharing a night portrait with fireworks during their wedding reception at Lough Erne Resort, County Fermanagh",
+        "aiCaption": "Fireworks and dramatic evening light bring a relaxed party atmosphere to this wedding reception at Lough Erne Resort.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Lough%20Erne%20resort/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-532_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Lough%20Erne%20resort/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-lough-erne-resort-eniskillen-wedding-photography-532_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 953,
+          "venue": "Lough Erne resort",
+          "category": "reception and party"
+        }
+      }
+    ]
+  }
+}

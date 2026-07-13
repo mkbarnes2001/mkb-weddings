@@ -23,6 +23,8 @@ import { GalleryFeaturedStories } from "./components/GalleryFeaturedStories";
 import { GalleryStoryDetail } from "./components/GalleryStoryDetail";
 import { GalleryCreativeFlash } from "./components/GalleryCreativeFlash";
 
+import { AdminApp } from "./admin/app/AdminApp";
+
 import WeddingPackages from "./components/WeddingPackages";
 import { ThankYou } from "./components/ThankYou";
 import { CountyPage } from "./components/CountyPage";
@@ -65,7 +67,7 @@ export default function App() {
       <div className="min-h-screen bg-white">
         <Routes>
           {/* -------- Admin routes: no nav/footer -------- */}
-          <Route path="/admin" element={<BlogAdmin />} />
+          <Route path="/admin/*" element={<AdminApp />} />
           <Route path="/gallery-admin" element={<GalleryAdmin />} />
 
           {/* -------- Public site routes -------- */}

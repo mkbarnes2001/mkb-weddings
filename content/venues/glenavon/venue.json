@@ -1,0 +1,806 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_6068c067-0119-416c-833e-c81d324f5785",
+  "slug": "glenavon",
+  "name": "Glenavon",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_b0ab31247b152d4efaf4a634",
+  "status": "published",
+  "links": {
+    "website": "https://glenavonhotel.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.758Z",
+  "updatedAt": "2026-07-13T07:52:28.327Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.327Z",
+    "heroAssetId": "legacy_b0ab31247b152d4efaf4a634",
+    "images": [
+      {
+        "assetId": "legacy_b0ab31247b152d4efaf4a634",
+        "imageId": "MKB000612",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-473_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "glenavon",
+          "couple portraits",
+          "bride and groom",
+          "indoor portrait",
+          "seated pose",
+          "warm lighting",
+          "romantic mood",
+          "wedding dress",
+          "veil",
+          "groom suit",
+          "intimate moment",
+          "classic wedding"
+        ],
+        "aiTags": [
+          "glenavon",
+          "couple portraits",
+          "bride and groom",
+          "indoor portrait",
+          "seated pose",
+          "warm lighting",
+          "romantic mood",
+          "wedding dress",
+          "veil",
+          "groom suit",
+          "intimate moment",
+          "classic wedding"
+        ],
+        "aiAlt": "Seated bride and groom portrait in warm indoor light at Glenavon, Cookstown",
+        "aiCaption": "A quiet seated couple portrait at Glenavon in Cookstown, captured with warm indoor light and a relaxed documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Glenavon/couple%20portraits/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-473_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Glenavon/couple%20portraits/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-473_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 613,
+          "venue": "Glenavon",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_70fa7b6e5c69c8f66f637f75",
+        "imageId": "MKB000613",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-484_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "glenavon",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "sunny light",
+          "romantic",
+          "classic wedding",
+          "wedding dress",
+          "black suit",
+          "bridal bouquet",
+          "mr and mrs sign",
+          "wedding day"
+        ],
+        "aiTags": [
+          "glenavon",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "sunny light",
+          "romantic",
+          "classic wedding",
+          "wedding dress",
+          "black suit",
+          "bridal bouquet",
+          "mr and mrs sign",
+          "wedding day"
+        ],
+        "aiAlt": "Bride and groom portrait outdoors at Glenavon in Cookstown, with sunny light, bouquet and Mr and Mrs sign",
+        "aiCaption": "A relaxed couple portrait at Glenavon, Cookstown, with soft sunny light, a bridal bouquet and simple Mr and Mrs styling.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Glenavon/couple%20portraits/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-484_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Glenavon/couple%20portraits/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-484_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 614,
+          "venue": "Glenavon",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_53fd0535a77d90f0ce059171",
+        "imageId": "MKB000614",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-488_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "glenavon",
+          "couple portraits",
+          "bride and groom",
+          "stone arches",
+          "outdoor portrait",
+          "natural light",
+          "sunlit",
+          "romantic",
+          "elegant",
+          "wedding bouquet",
+          "wedding dress",
+          "newlyweds"
+        ],
+        "aiTags": [
+          "glenavon",
+          "couple portraits",
+          "bride and groom",
+          "stone arches",
+          "outdoor portrait",
+          "natural light",
+          "sunlit",
+          "romantic",
+          "elegant",
+          "wedding bouquet",
+          "wedding dress",
+          "newlyweds"
+        ],
+        "aiAlt": "Bride and groom portrait beneath stone arches at Glenavon in Cookstown, with bouquet and soft natural light",
+        "aiCaption": "A relaxed newlywed portrait at Glenavon in Cookstown, framed by stone arches and warm natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Glenavon/couple%20portraits/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-488_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Glenavon/couple%20portraits/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-488_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 615,
+          "venue": "Glenavon",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_dc05dc0e4525ff704a20afea",
+        "imageId": "MKB000615",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-492_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "glenavon",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "holding hands",
+          "wedding dress",
+          "groom suit",
+          "bridal bouquet",
+          "natural light",
+          "romantic",
+          "sunlit",
+          "wedding day"
+        ],
+        "aiTags": [
+          "glenavon",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "holding hands",
+          "wedding dress",
+          "groom suit",
+          "bridal bouquet",
+          "natural light",
+          "romantic",
+          "sunlit",
+          "wedding day"
+        ],
+        "aiAlt": "Bride and groom holding hands during sunlit outdoor portraits at Glenavon, Cookstown",
+        "aiCaption": "A relaxed couple portrait at Glenavon in Cookstown, with soft natural light and an easy wedding day moment.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Glenavon/couple%20portraits/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-492_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Glenavon/couple%20portraits/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-492_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 616,
+          "venue": "Glenavon",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_73789a434b9c46527a16257a",
+        "imageId": "MKB000616",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-510_500.webp",
+        "order": 5,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portrait",
+          "bride and groom",
+          "woodland",
+          "outdoor",
+          "golden light",
+          "romantic",
+          "natural light",
+          "wedding dress",
+          "groom suit",
+          "bridal bouquet",
+          "glenavon",
+          "wedding portraits"
+        ],
+        "aiTags": [
+          "couple portrait",
+          "bride and groom",
+          "woodland",
+          "outdoor",
+          "golden light",
+          "romantic",
+          "natural light",
+          "wedding dress",
+          "groom suit",
+          "bridal bouquet",
+          "glenavon",
+          "wedding portraits"
+        ],
+        "aiAlt": "Bride and groom in golden woodland light during couple portraits at Glenavon, Cookstown",
+        "aiCaption": "A relaxed outdoor portrait at Glenavon in Cookstown, with soft golden light and a quiet woodland feel around the couple.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Glenavon/couple%20portraits/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-510_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Glenavon/couple%20portraits/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-510_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 617,
+          "venue": "Glenavon",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_97e63bae84108021718e5d0d",
+        "imageId": "MKB000617",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-109_500.webp",
+        "order": 6,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "bridal details",
+          "wedding invitation",
+          "wedding shoes",
+          "bridal accessories",
+          "perfume",
+          "floral details",
+          "getting ready",
+          "flat lay",
+          "soft light",
+          "romantic",
+          "glenavon",
+          "detail shot"
+        ],
+        "aiTags": [
+          "bridal details",
+          "wedding invitation",
+          "wedding shoes",
+          "bridal accessories",
+          "perfume",
+          "floral details",
+          "getting ready",
+          "flat lay",
+          "soft light",
+          "romantic",
+          "glenavon",
+          "detail shot"
+        ],
+        "aiAlt": "Bridal details flat lay with wedding shoes, invitation, perfume and florals at Glenavon in Cookstown",
+        "aiCaption": "Soft getting ready details at Glenavon in Cookstown, with bridal accessories, shoes and florals photographed in a natural documentary style.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Glenavon/getting%20ready/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-109_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Glenavon/getting%20ready/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-109_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 618,
+          "venue": "Glenavon",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_979a2599e034bd6ca3316fc0",
+        "imageId": "MKB000618",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-138_500.webp",
+        "order": 7,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bridal portrait",
+          "bride",
+          "mirror reflection",
+          "wedding morning",
+          "soft light",
+          "calm mood",
+          "bridal robe",
+          "indoor",
+          "glenavon",
+          "hair and makeup",
+          "candid"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bridal portrait",
+          "bride",
+          "mirror reflection",
+          "wedding morning",
+          "soft light",
+          "calm mood",
+          "bridal robe",
+          "indoor",
+          "glenavon",
+          "hair and makeup",
+          "candid"
+        ],
+        "aiAlt": "Bride in a robe seen in a mirror during calm wedding morning preparations at Glenavon, Cookstown",
+        "aiCaption": "A quiet getting-ready moment at Glenavon in Cookstown, with soft light and a relaxed wedding morning feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Glenavon/getting%20ready/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-138_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Glenavon/getting%20ready/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-138_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 619,
+          "venue": "Glenavon",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_f63594212f26e77e06f8921e",
+        "imageId": "MKB000619",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-149_500.webp",
+        "order": 8,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "glenavon",
+          "getting ready",
+          "bride prep",
+          "champagne",
+          "bridal pajamas",
+          "morning preparations",
+          "natural light",
+          "relaxed mood",
+          "wedding morning",
+          "indoor",
+          "celebration",
+          "candid"
+        ],
+        "aiTags": [
+          "glenavon",
+          "getting ready",
+          "bride prep",
+          "champagne",
+          "bridal pajamas",
+          "morning preparations",
+          "natural light",
+          "relaxed mood",
+          "wedding morning",
+          "indoor",
+          "celebration",
+          "candid"
+        ],
+        "aiAlt": "Bride prep at Glenavon in Cookstown, with champagne and bridal pyjamas during a relaxed wedding morning",
+        "aiCaption": "A relaxed getting ready moment at Glenavon, Cookstown, with champagne, natural light and an easy wedding morning atmosphere.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Glenavon/getting%20ready/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-149_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Glenavon/getting%20ready/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-149_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 620,
+          "venue": "Glenavon",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_3a1c7a7d5e5b5de2dbde1bc5",
+        "imageId": "MKB000620",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-162_500.webp",
+        "order": 9,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "glenavon",
+          "getting ready",
+          "bridesmaids",
+          "bridal party",
+          "pajamas",
+          "champagne toast",
+          "candid",
+          "morning prep",
+          "soft light",
+          "joyful",
+          "outdoor doorway",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "glenavon",
+          "getting ready",
+          "bridesmaids",
+          "bridal party",
+          "pajamas",
+          "champagne toast",
+          "candid",
+          "morning prep",
+          "soft light",
+          "joyful",
+          "outdoor doorway",
+          "wedding morning"
+        ],
+        "aiAlt": "Bridal party in pajamas sharing a champagne toast during morning prep at Glenavon in Cookstown",
+        "aiCaption": "A relaxed wedding morning at Glenavon in Cookstown, with the bridal party sharing a joyful champagne toast in soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Glenavon/getting%20ready/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-162_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Glenavon/getting%20ready/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-162_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 621,
+          "venue": "Glenavon",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_03b7971bf0cbdbe929cfe5ef",
+        "imageId": "MKB000621",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-181_500.webp",
+        "order": 10,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "glenavon",
+          "getting ready",
+          "bride",
+          "bridal prep",
+          "wedding dress",
+          "veil",
+          "vanity mirror",
+          "black and white",
+          "window light",
+          "quiet moment",
+          "candid",
+          "morning prep"
+        ],
+        "aiTags": [
+          "glenavon",
+          "getting ready",
+          "bride",
+          "bridal prep",
+          "wedding dress",
+          "veil",
+          "vanity mirror",
+          "black and white",
+          "window light",
+          "quiet moment",
+          "candid",
+          "morning prep"
+        ],
+        "aiAlt": "Black and white bridal prep at Glenavon in Cookstown, with the bride by a vanity mirror in soft window light.",
+        "aiCaption": "A quiet getting ready moment at Glenavon, Cookstown, captured in soft window light during the wedding morning.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Glenavon/getting%20ready/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-181_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Glenavon/getting%20ready/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-181_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 622,
+          "venue": "Glenavon",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_d1767b4eda870c86959beedd",
+        "imageId": "MKB000622",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-455_500.webp",
+        "order": 11,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "glenavon",
+          "wedding reception",
+          "bride and groom",
+          "bar scene",
+          "pouring pints",
+          "party moments",
+          "indoor lighting",
+          "warm lighting",
+          "candid laughter",
+          "celebration",
+          "floral bouquet",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "glenavon",
+          "wedding reception",
+          "bride and groom",
+          "bar scene",
+          "pouring pints",
+          "party moments",
+          "indoor lighting",
+          "warm lighting",
+          "candid laughter",
+          "celebration",
+          "floral bouquet",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom laughing at the bar during their Glenavon wedding reception in Cookstown",
+        "aiCaption": "A relaxed reception moment at Glenavon in Cookstown, with the bride and groom sharing a laugh while pouring pints at the bar.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Glenavon/reception%20and%20party/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-455_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Glenavon/reception%20and%20party/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-455_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 623,
+          "venue": "Glenavon",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_d7ce13ddd025b99efa345070",
+        "imageId": "MKB000623",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-463_500.webp",
+        "order": 12,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "glenavon",
+          "reception",
+          "wedding party",
+          "bride and groom",
+          "indoor",
+          "bar setting",
+          "drinks",
+          "warm lighting",
+          "candid",
+          "relaxed",
+          "celebration",
+          "party"
+        ],
+        "aiTags": [
+          "glenavon",
+          "reception",
+          "wedding party",
+          "bride and groom",
+          "indoor",
+          "bar setting",
+          "drinks",
+          "warm lighting",
+          "candid",
+          "relaxed",
+          "celebration",
+          "party"
+        ],
+        "aiAlt": "Bride and groom enjoying drinks at the Glenavon reception in Cookstown, captured candidly in warm indoor bar light",
+        "aiCaption": "A relaxed reception moment at Glenavon in Cookstown, with the couple and wedding party sharing drinks in warm bar light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Glenavon/reception%20and%20party/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-463_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Glenavon/reception%20and%20party/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-463_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 624,
+          "venue": "Glenavon",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_a07b12621158f74fdb44735e",
+        "imageId": "MKB000624",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-466_500.webp",
+        "order": 13,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "glenavon",
+          "wedding reception",
+          "bar scene",
+          "bride and groom",
+          "wedding party",
+          "candid moment",
+          "black and white",
+          "moody lighting",
+          "indoor reception",
+          "relaxed atmosphere",
+          "party guests",
+          "documentary style"
+        ],
+        "aiTags": [
+          "glenavon",
+          "wedding reception",
+          "bar scene",
+          "bride and groom",
+          "wedding party",
+          "candid moment",
+          "black and white",
+          "moody lighting",
+          "indoor reception",
+          "relaxed atmosphere",
+          "party guests",
+          "documentary style"
+        ],
+        "aiAlt": "Black and white candid of the bride and groom with guests at the Glenavon wedding reception bar in Cookstown",
+        "aiCaption": "A relaxed bar moment during a Glenavon wedding reception in Cookstown, captured in a natural documentary style.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Glenavon/reception%20and%20party/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-466_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Glenavon/reception%20and%20party/MKB-weddings-MKB-photography-Northern-Ireland-wedding-photographer-Northern-ireland-Wedding-photography_Glenavon_hotel_cookstown_Wedding_photography_cookstown_wedding_photographer-466_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 625,
+          "venue": "Glenavon",
+          "category": "reception and party"
+        }
+      }
+    ]
+  }
+}

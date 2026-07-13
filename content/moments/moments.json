@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-07-12T10:06:55.631Z",
+  "moments": [
+    {
+      "id": "moment_edffdd52-974f-4060-922a-b54db6129b3a",
+      "name": "Getting ready",
+      "slug": "getting-ready",
+      "description": "",
+      "availableForAssignment": true,
+      "showOnMomentsLanding": true,
+      "cardImageId": "",
+      "sortOrder": 1,
+      "status": "active"
+    },
+    {
+      "id": "moment_a02c25b9-6b64-4b9f-ab76-b98824806dfc",
+      "name": "Ceremony",
+      "slug": "ceremony",
+      "description": "",
+      "availableForAssignment": true,
+      "showOnMomentsLanding": true,
+      "cardImageId": "",
+      "sortOrder": 2,
+      "status": "active"
+    },
+    {
+      "id": "moment_2915099e-2723-4f30-bc17-c2af99d4220e",
+      "name": "Details and decor",
+      "slug": "details-and-decor",
+      "description": "",
+      "availableForAssignment": true,
+      "showOnMomentsLanding": true,
+      "cardImageId": "",
+      "sortOrder": 3,
+      "status": "active"
+    },
+    {
+      "id": "moment_0481926f-5aa0-4488-9667-7317943b15c4",
+      "name": "Family and bridal party",
+      "slug": "family-and-bridal-party",
+      "description": "",
+      "availableForAssignment": true,
+      "showOnMomentsLanding": true,
+      "cardImageId": "",
+      "sortOrder": 4,
+      "status": "active"
+    },
+    {
+      "id": "moment_0da033c1-3f26-440e-b3ff-aacb50b88aac",
+      "name": "Couple portraits",
+      "slug": "couple-portraits",
+      "description": "",
+      "availableForAssignment": true,
+      "showOnMomentsLanding": true,
+      "cardImageId": "",
+      "sortOrder": 5,
+      "status": "active"
+    },
+    {
+      "id": "moment_bae7fcc1-efff-4afe-bde0-a1c97c039b12",
+      "name": "Reception and party",
+      "slug": "reception-and-party",
+      "description": "",
+      "availableForAssignment": true,
+      "showOnMomentsLanding": true,
+      "cardImageId": "",
+      "sortOrder": 6,
+      "status": "active"
+    }
+  ]
+}

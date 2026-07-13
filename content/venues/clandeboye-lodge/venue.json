@@ -1,0 +1,1431 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_ca3c9127-07bc-4375-b34e-df1eeac82886",
+  "slug": "clandeboye-lodge",
+  "name": "Clandeboye lodge",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_7c8d925104fec60343302d0b",
+  "status": "published",
+  "links": {
+    "website": "https://www.clandeboyelodge.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.752Z",
+  "updatedAt": "2026-07-13T07:52:28.322Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.322Z",
+    "heroAssetId": "legacy_7c8d925104fec60343302d0b",
+    "images": [
+      {
+        "assetId": "legacy_7c8d925104fec60343302d0b",
+        "imageId": "MKB000310",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-169_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "wedding ceremony",
+          "indoor ceremony",
+          "groom waiting",
+          "wedding guests",
+          "black and white",
+          "natural light",
+          "arched window",
+          "brick interior",
+          "emotional moment",
+          "intimate ceremony",
+          "documentary wedding"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "wedding ceremony",
+          "indoor ceremony",
+          "groom waiting",
+          "wedding guests",
+          "black and white",
+          "natural light",
+          "arched window",
+          "brick interior",
+          "emotional moment",
+          "intimate ceremony",
+          "documentary wedding"
+        ],
+        "aiAlt": "Black and white ceremony moment at Clandeboye Lodge, Bangor, with the groom waiting beside guests in soft window light",
+        "aiCaption": "A quiet documentary moment during an indoor ceremony at Clandeboye Lodge, with soft natural light and guests gathered close.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/ceremony/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-169_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/ceremony/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-169_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 311,
+          "venue": "Clandeboye lodge",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_2dafe6f470f78685055af6b6",
+        "imageId": "MKB000311",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-283_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "ceremony",
+          "bride and groom",
+          "wedding kiss",
+          "aisle moment",
+          "black and white",
+          "romantic",
+          "natural light",
+          "wedding guests",
+          "floral decor",
+          "indoor ceremony",
+          "candid"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "ceremony",
+          "bride and groom",
+          "wedding kiss",
+          "aisle moment",
+          "black and white",
+          "romantic",
+          "natural light",
+          "wedding guests",
+          "floral decor",
+          "indoor ceremony",
+          "candid"
+        ],
+        "aiAlt": "Black and white ceremony kiss at Clandeboye Lodge in Bangor, with guests watching from the aisle.",
+        "aiCaption": "A quiet aisle moment during an indoor ceremony at Clandeboye Lodge, captured naturally as the couple share a kiss among family and friends.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/ceremony/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-283_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/ceremony/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-283_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 312,
+          "venue": "Clandeboye lodge",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_66a56dd5ce754926e507efc5",
+        "imageId": "MKB000312",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-207_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "aisle walk",
+          "bride entrance",
+          "groom waiting",
+          "wedding guests",
+          "indoor ceremony",
+          "natural light",
+          "rustic beams",
+          "emotional moment",
+          "bridal bouquet",
+          "clandeboye lodge",
+          "candid wedding"
+        ],
+        "aiTags": [
+          "ceremony",
+          "aisle walk",
+          "bride entrance",
+          "groom waiting",
+          "wedding guests",
+          "indoor ceremony",
+          "natural light",
+          "rustic beams",
+          "emotional moment",
+          "bridal bouquet",
+          "clandeboye lodge",
+          "candid wedding"
+        ],
+        "aiAlt": "Bride walking down the aisle during an indoor ceremony at Clandeboye Lodge, Bangor, as the groom waits beside rustic beams",
+        "aiCaption": "A quiet, emotional aisle walk at Clandeboye Lodge in Bangor, with natural light, close family and the relaxed atmosphere of an indoor ceremony.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/ceremony/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-207_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/ceremony/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-207_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 313,
+          "venue": "Clandeboye lodge",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_8519e542595b9ffa3af4544a",
+        "imageId": "MKB000313",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-277_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "first kiss",
+          "bride and groom",
+          "indoor wedding",
+          "clandeboye lodge",
+          "guests applauding",
+          "rustic ceremony",
+          "natural light",
+          "joyful moment",
+          "floral decor",
+          "wedding aisle",
+          "romantic"
+        ],
+        "aiTags": [
+          "ceremony",
+          "first kiss",
+          "bride and groom",
+          "indoor wedding",
+          "clandeboye lodge",
+          "guests applauding",
+          "rustic ceremony",
+          "natural light",
+          "joyful moment",
+          "floral decor",
+          "wedding aisle",
+          "romantic"
+        ],
+        "aiAlt": "First kiss during an indoor wedding ceremony at Clandeboye Lodge, Bangor, with guests applauding beside floral aisle decor",
+        "aiCaption": "A joyful first kiss at Clandeboye Lodge in Bangor, captured naturally as guests applaud in the soft indoor ceremony light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/ceremony/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-277_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/ceremony/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-277_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 314,
+          "venue": "Clandeboye lodge",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_14f8e2d7152234d764a090e3",
+        "imageId": "MKB000314",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-286_500.webp",
+        "order": 5,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "ceremony",
+          "indoor ceremony",
+          "bride and groom",
+          "wedding vows",
+          "officiant",
+          "guests",
+          "black and white",
+          "natural light",
+          "romantic",
+          "candlelight",
+          "floral decor"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "ceremony",
+          "indoor ceremony",
+          "bride and groom",
+          "wedding vows",
+          "officiant",
+          "guests",
+          "black and white",
+          "natural light",
+          "romantic",
+          "candlelight",
+          "floral decor"
+        ],
+        "aiAlt": "Black and white ceremony at Clandeboye Lodge in Bangor, with the couple sharing vows by candlelight in front of guests",
+        "aiCaption": "A quiet ceremony moment at Clandeboye Lodge, Bangor, as vows are shared in soft natural light with candles and floral decor.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/ceremony/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-286_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/ceremony/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-286_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 315,
+          "venue": "Clandeboye lodge",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_ae4991396ef856c903f2b427",
+        "imageId": "MKB000315",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-383_500.webp",
+        "order": 6,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "outdoor wedding",
+          "tree canopy",
+          "dappled light",
+          "romantic",
+          "intimate moment",
+          "wedding bouquet",
+          "summer wedding",
+          "natural light"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "outdoor wedding",
+          "tree canopy",
+          "dappled light",
+          "romantic",
+          "intimate moment",
+          "wedding bouquet",
+          "summer wedding",
+          "natural light"
+        ],
+        "aiAlt": "Bride and groom portrait under the tree canopy at Clandeboye Lodge, Bangor, with soft dappled summer light.",
+        "aiCaption": "A quiet couple portrait at Clandeboye Lodge in Bangor, with natural light filtering through the trees and a relaxed summer feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/couple%20portraits/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-383_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/couple%20portraits/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-383_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 316,
+          "venue": "Clandeboye lodge",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_68ba9dd95e16398d736305a5",
+        "imageId": "MKB000316",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-307_500.webp",
+        "order": 7,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "couple portraits",
+          "bride and groom",
+          "wedding dog",
+          "garden portrait",
+          "outdoor wedding",
+          "sunlit",
+          "romantic",
+          "relaxed",
+          "bridal bouquet",
+          "wedding attire",
+          "summer wedding"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "couple portraits",
+          "bride and groom",
+          "wedding dog",
+          "garden portrait",
+          "outdoor wedding",
+          "sunlit",
+          "romantic",
+          "relaxed",
+          "bridal bouquet",
+          "wedding attire",
+          "summer wedding"
+        ],
+        "aiAlt": "Bride and groom with their dog in a sunlit garden portrait at Clandeboye Lodge, Bangor",
+        "aiCaption": "A relaxed couple portrait with their wedding dog in the gardens at Clandeboye Lodge, full of warm summer light and easy natural smiles.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/couple%20portraits/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-307_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/couple%20portraits/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-307_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 317,
+          "venue": "Clandeboye lodge",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_9272686007c5988aa68b3e13",
+        "imageId": "MKB000317",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-326_500.webp",
+        "order": 8,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "couple portraits",
+          "bride and groom",
+          "wedding dog",
+          "garden path",
+          "outdoor wedding",
+          "sunny portraits",
+          "romantic",
+          "elegant",
+          "bridal bouquet",
+          "wedding portrait",
+          "natural light"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "couple portraits",
+          "bride and groom",
+          "wedding dog",
+          "garden path",
+          "outdoor wedding",
+          "sunny portraits",
+          "romantic",
+          "elegant",
+          "bridal bouquet",
+          "wedding portrait",
+          "natural light"
+        ],
+        "aiAlt": "Bride and groom with their dog on a sunny garden path at Clandeboye Lodge in Bangor",
+        "aiCaption": "A relaxed couple portrait with the wedding dog on the garden path at Clandeboye Lodge, captured in natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/couple%20portraits/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-326_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/couple%20portraits/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-326_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 318,
+          "venue": "Clandeboye lodge",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_f3a63f2cc1818b14bc4ad5e4",
+        "imageId": "MKB000318",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-364_500.webp",
+        "order": 9,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "greenery",
+          "brick wall",
+          "dappled light",
+          "romantic",
+          "intimate",
+          "wedding bouquet",
+          "summer wedding",
+          "wedding day"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "greenery",
+          "brick wall",
+          "dappled light",
+          "romantic",
+          "intimate",
+          "wedding bouquet",
+          "summer wedding",
+          "wedding day"
+        ],
+        "aiAlt": "Bride and groom share a quiet garden portrait by the brick wall at Clandeboye Lodge, Bangor, in soft dappled light",
+        "aiCaption": "A relaxed couple portrait in the gardens at Clandeboye Lodge, with soft greenery, warm brick and dappled summer light around the newlyweds.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/couple%20portraits/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-364_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/couple%20portraits/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-364_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 319,
+          "venue": "Clandeboye lodge",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_37902cfdfd6009cba8af08ab",
+        "imageId": "MKB000319",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-372_500.webp",
+        "order": 10,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "green backdrop",
+          "natural light",
+          "romantic",
+          "elegant",
+          "wedding bouquet",
+          "formal pose",
+          "summer wedding",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "green backdrop",
+          "natural light",
+          "romantic",
+          "elegant",
+          "wedding bouquet",
+          "formal pose",
+          "summer wedding",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom portrait outdoors at Clandeboye Lodge, Bangor, with a soft green backdrop and natural summer light.",
+        "aiCaption": "A relaxed couple portrait at Clandeboye Lodge in Bangor, framed by greenery and soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/couple%20portraits/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-372_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/couple%20portraits/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-372_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 320,
+          "venue": "Clandeboye lodge",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_0d99d57d59af2846cac77b3b",
+        "imageId": "MKB000320",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-404_500.webp",
+        "order": 11,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "bridal portrait",
+          "bride",
+          "wedding dress",
+          "lace gown",
+          "black and white",
+          "outdoor portrait",
+          "soft light",
+          "romantic mood",
+          "couple portraits",
+          "wedding day",
+          "elegant"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "bridal portrait",
+          "bride",
+          "wedding dress",
+          "lace gown",
+          "black and white",
+          "outdoor portrait",
+          "soft light",
+          "romantic mood",
+          "couple portraits",
+          "wedding day",
+          "elegant"
+        ],
+        "aiAlt": "Black and white bridal portrait in soft outdoor light at Clandeboye Lodge, Bangor, with a lace wedding dress and relaxed mood",
+        "aiCaption": "A quiet outdoor wedding portrait at Clandeboye Lodge in Bangor, photographed in soft light with a natural, documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/couple%20portraits/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-404_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/couple%20portraits/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-404_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 321,
+          "venue": "Clandeboye lodge",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_0f4220a0973c216a127de2ad",
+        "imageId": "MKB000321",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-103_500.webp",
+        "order": 12,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "garden setting",
+          "natural light",
+          "romantic",
+          "joyful",
+          "wedding bouquet",
+          "candid moment",
+          "soft greenery",
+          "irish wedding"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "couple portraits",
+          "bride and groom",
+          "outdoor portrait",
+          "garden setting",
+          "natural light",
+          "romantic",
+          "joyful",
+          "wedding bouquet",
+          "candid moment",
+          "soft greenery",
+          "irish wedding"
+        ],
+        "aiAlt": "Bride and groom share a joyful outdoor portrait in the gardens at Clandeboye Lodge, Bangor, with soft greenery and natural light",
+        "aiCaption": "A relaxed couple portrait at Clandeboye Lodge in Bangor, with soft garden light, greenery and an easy candid moment between the bride and groom.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/couple%20portraits/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-103_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/couple%20portraits/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-103_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 322,
+          "venue": "Clandeboye lodge",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_16768abe40767d927d45fe44",
+        "imageId": "MKB000322",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-108_500.webp",
+        "order": 13,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "tree framed",
+          "natural light",
+          "romantic",
+          "wedding day",
+          "outdoor wedding",
+          "embrace",
+          "clandeboye lodge",
+          "intimate moment",
+          "lush greenery"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "garden portrait",
+          "tree framed",
+          "natural light",
+          "romantic",
+          "wedding day",
+          "outdoor wedding",
+          "embrace",
+          "clandeboye lodge",
+          "intimate moment",
+          "lush greenery"
+        ],
+        "aiAlt": "Bride and groom embracing in lush greenery during couple portraits at Clandeboye Lodge, Bangor",
+        "aiCaption": "A quiet garden portrait at Clandeboye Lodge in Bangor, with the couple framed by trees and soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/couple%20portraits/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-108_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/couple%20portraits/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-108_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 323,
+          "venue": "Clandeboye lodge",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_57d4874a112c7607804b62ae",
+        "imageId": "MKB000323",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-400_500.webp",
+        "order": 14,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "clandeboye lodge",
+          "brick wall",
+          "natural light",
+          "romantic",
+          "intimate",
+          "wedding bouquet",
+          "embrace",
+          "classic wedding",
+          "irish wedding",
+          "newlyweds"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "clandeboye lodge",
+          "brick wall",
+          "natural light",
+          "romantic",
+          "intimate",
+          "wedding bouquet",
+          "embrace",
+          "classic wedding",
+          "irish wedding",
+          "newlyweds"
+        ],
+        "aiAlt": "Bride and groom sharing a quiet embrace by the brick wall at Clandeboye Lodge in Bangor",
+        "aiCaption": "A relaxed couple portrait at Clandeboye Lodge, with soft natural light, a wedding bouquet and a quiet moment together in Bangor.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/couple%20portraits/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-400_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/couple%20portraits/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-400_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 324,
+          "venue": "Clandeboye lodge",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_0fb953a6d416cc1a100f8e2f",
+        "imageId": "MKB000324",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-108_500.webp",
+        "order": 15,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "getting ready",
+          "wedding dress",
+          "bridal details",
+          "dress hanging",
+          "ceremony room",
+          "rustic interior",
+          "window light",
+          "moody lighting",
+          "romantic mood",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "getting ready",
+          "wedding dress",
+          "bridal details",
+          "dress hanging",
+          "ceremony room",
+          "rustic interior",
+          "window light",
+          "moody lighting",
+          "romantic mood",
+          "wedding morning"
+        ],
+        "aiAlt": "Wedding dress hanging in soft window light at Clandeboye Lodge, Bangor, during the wedding morning.",
+        "aiCaption": "A quiet wedding morning detail at Clandeboye Lodge, with the dress hanging in soft light before the day begins.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/getting%20ready/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-108_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/getting%20ready/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-108_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 325,
+          "venue": "Clandeboye lodge",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_1e01f20c9d2d86e6fd59b02e",
+        "imageId": "MKB000325",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-117_500.webp",
+        "order": 16,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bridal prep",
+          "bride",
+          "mirror portrait",
+          "wedding morning",
+          "pajamas",
+          "soft window light",
+          "calm mood",
+          "hair and makeup",
+          "indoor scene",
+          "clandeboye lodge"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bridal prep",
+          "bride",
+          "mirror portrait",
+          "wedding morning",
+          "pajamas",
+          "soft window light",
+          "calm mood",
+          "hair and makeup",
+          "indoor scene",
+          "clandeboye lodge"
+        ],
+        "aiAlt": "Bride in soft window light during wedding morning prep at Clandeboye Lodge in Bangor",
+        "aiCaption": "A calm getting ready moment at Clandeboye Lodge, with soft window light and a relaxed start to the wedding morning.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/getting%20ready/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-117_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/getting%20ready/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-117_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 326,
+          "venue": "Clandeboye lodge",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_0227192e2fc80ee6e277fe18",
+        "imageId": "MKB000326",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-145_500.webp",
+        "order": 17,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "getting ready",
+          "groom prep",
+          "groom",
+          "cufflinks",
+          "window light",
+          "black and white",
+          "moody",
+          "portrait",
+          "wedding morning",
+          "suit details"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "getting ready",
+          "groom prep",
+          "groom",
+          "cufflinks",
+          "window light",
+          "black and white",
+          "moody",
+          "portrait",
+          "wedding morning",
+          "suit details"
+        ],
+        "aiAlt": "Groom fastening cufflinks in window light during wedding morning preparations at Clandeboye Lodge, Bangor",
+        "aiCaption": "A quiet black and white moment from groom prep at Clandeboye Lodge, with window light catching the suit details.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/getting%20ready/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-145_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/getting%20ready/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-145_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 327,
+          "venue": "Clandeboye lodge",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_d6c21ac5b953f469c7c76452",
+        "imageId": "MKB000327",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-168_500.webp",
+        "order": 18,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "getting ready",
+          "groom portrait",
+          "black and white",
+          "indoor",
+          "doorway",
+          "suit",
+          "dramatic light",
+          "moody",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "getting ready",
+          "groom portrait",
+          "black and white",
+          "indoor",
+          "doorway",
+          "suit",
+          "dramatic light",
+          "moody",
+          "wedding morning"
+        ],
+        "aiAlt": "Black and white groom portrait in a doorway at Clandeboye Lodge, Bangor, during the wedding morning preparations.",
+        "aiCaption": "A quiet groom portrait at Clandeboye Lodge in Bangor, using soft doorway light for a relaxed documentary feel on the wedding morning.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/getting%20ready/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-168_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/getting%20ready/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-168_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 328,
+          "venue": "Clandeboye lodge",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_29ab7da8745512d2816cbada",
+        "imageId": "MKB000328",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-113_500.webp",
+        "order": 19,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "getting ready",
+          "bride portrait",
+          "bridal prep",
+          "makeup moment",
+          "window light",
+          "soft light",
+          "candid",
+          "emotional",
+          "morning preparations",
+          "wedding details",
+          "bridal beauty"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "getting ready",
+          "bride portrait",
+          "bridal prep",
+          "makeup moment",
+          "window light",
+          "soft light",
+          "candid",
+          "emotional",
+          "morning preparations",
+          "wedding details",
+          "bridal beauty"
+        ],
+        "aiAlt": "Bride having makeup touched up in soft window light during bridal prep at Clandeboye Lodge, Bangor",
+        "aiCaption": "A quiet getting ready moment at Clandeboye Lodge, with soft window light and a relaxed start to the wedding morning.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/getting%20ready/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-113_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/getting%20ready/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-113_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 329,
+          "venue": "Clandeboye lodge",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_2912fdd122973895adbc313b",
+        "imageId": "MKB000329",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-124_500.webp",
+        "order": 20,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "getting ready",
+          "bride prep",
+          "bridal robe",
+          "mirror reflection",
+          "hair styling",
+          "bridesmaid",
+          "indoor light",
+          "warm lighting",
+          "calm moment",
+          "wedding morning",
+          "candid"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "getting ready",
+          "bride prep",
+          "bridal robe",
+          "mirror reflection",
+          "hair styling",
+          "bridesmaid",
+          "indoor light",
+          "warm lighting",
+          "calm moment",
+          "wedding morning",
+          "candid"
+        ],
+        "aiAlt": "Bride prep at Clandeboye Lodge in Bangor, with hair styling reflected in the mirror during a calm wedding morning.",
+        "aiCaption": "A quiet getting ready moment at Clandeboye Lodge, with warm indoor light and the bridal prep unfolding naturally in Bangor.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/getting%20ready/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-124_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/getting%20ready/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-124_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 330,
+          "venue": "Clandeboye lodge",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_790f028ea85d8c318d858f0e",
+        "imageId": "MKB000330",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-161_500.webp",
+        "order": 21,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "getting ready",
+          "bride",
+          "father of the bride",
+          "bridesmaid",
+          "hotel room",
+          "warm indoor light",
+          "emotional moment",
+          "wedding morning",
+          "family hug",
+          "candid",
+          "joyful"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "getting ready",
+          "bride",
+          "father of the bride",
+          "bridesmaid",
+          "hotel room",
+          "warm indoor light",
+          "emotional moment",
+          "wedding morning",
+          "family hug",
+          "candid",
+          "joyful"
+        ],
+        "aiAlt": "Bride sharing a warm family hug during wedding morning preparations at Clandeboye Lodge in Bangor",
+        "aiCaption": "A relaxed wedding morning moment at Clandeboye Lodge, with warm indoor light and family close by as the day begins.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/getting%20ready/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-161_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/getting%20ready/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-161_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 331,
+          "venue": "Clandeboye lodge",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_29aa1ac7d5ef422a0fa2dacb",
+        "imageId": "MKB000331",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-353_500.webp",
+        "order": 22,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "clandeboye lodge wedding",
+          "wedding reception",
+          "bride and groom",
+          "dog at wedding",
+          "marquee reception",
+          "string lights",
+          "candid moment",
+          "joyful",
+          "guest reactions",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "clandeboye lodge wedding",
+          "wedding reception",
+          "bride and groom",
+          "dog at wedding",
+          "marquee reception",
+          "string lights",
+          "candid moment",
+          "joyful",
+          "guest reactions",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom share a joyful reception moment with their dog under string lights at Clandeboye Lodge, Bangor",
+        "aiCaption": "A relaxed reception moment at Clandeboye Lodge in Bangor, with the couple, their dog and guests enjoying the warm glow of the marquee lights.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/reception%20and%20party/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-353_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/reception%20and%20party/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-353_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 332,
+          "venue": "Clandeboye lodge",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_746a9fee7b8bcd418719971c",
+        "imageId": "MKB000332",
+        "weddingSlug": "",
+        "filename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-487_500.webp",
+        "order": 23,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "wedding reception",
+          "speeches",
+          "groom speech",
+          "top table",
+          "wedding guests",
+          "laughter",
+          "indoor lighting",
+          "warm mood",
+          "stone wall",
+          "floral decor",
+          "party atmosphere"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "wedding reception",
+          "speeches",
+          "groom speech",
+          "top table",
+          "wedding guests",
+          "laughter",
+          "indoor lighting",
+          "warm mood",
+          "stone wall",
+          "floral decor",
+          "party atmosphere"
+        ],
+        "aiAlt": "Groom giving a speech at the Clandeboye Lodge wedding reception in Bangor as guests laugh around the top table",
+        "aiCaption": "Warm speeches and easy laughter at Clandeboye Lodge in Bangor, with guests gathered around the top table during the reception.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/reception%20and%20party/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-487_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/reception%20and%20party/MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-487_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 333,
+          "venue": "Clandeboye lodge",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_169cf53607cbdf73ad7ad01f",
+        "imageId": "MKB000333",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-159_500.webp",
+        "order": 24,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "clandeboye lodge",
+          "wedding reception",
+          "wedding speeches",
+          "top table",
+          "bride laughing",
+          "groom speech",
+          "indoor reception",
+          "stone wall",
+          "floral centrepieces",
+          "candid moment",
+          "joyful atmosphere",
+          "natural light"
+        ],
+        "aiTags": [
+          "clandeboye lodge",
+          "wedding reception",
+          "wedding speeches",
+          "top table",
+          "bride laughing",
+          "groom speech",
+          "indoor reception",
+          "stone wall",
+          "floral centrepieces",
+          "candid moment",
+          "joyful atmosphere",
+          "natural light"
+        ],
+        "aiAlt": "Bride laughing at the top table during wedding speeches at Clandeboye Lodge in Bangor",
+        "aiCaption": "A relaxed reception moment at Clandeboye Lodge, with laughter around the top table during the wedding speeches.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Clandeboye%20lodge/reception%20and%20party/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-159_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Clandeboye%20lodge/reception%20and%20party/mkb-weddings-irish-wedding-photographer-clandeboye-lodge-bangor-photography-159_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 334,
+          "venue": "Clandeboye lodge",
+          "category": "reception and party"
+        }
+      }
+    ]
+  }
+}

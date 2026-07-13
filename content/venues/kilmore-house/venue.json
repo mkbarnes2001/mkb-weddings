@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_435b67d8-d5b0-4096-bc35-8d23f734ffd2",
+  "slug": "kilmore-house",
+  "name": "Kilmore house",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_37928b36b8ea0c6455b11aef",
+  "status": "published",
+  "links": {
+    "website": "https://kilmorecountryhouse.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.694Z",
+  "updatedAt": "2026-07-13T07:52:28.330Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.330Z",
+    "heroAssetId": "legacy_37928b36b8ea0c6455b11aef",
+    "images": [
+      {
+        "assetId": "legacy_37928b36b8ea0c6455b11aef",
+        "imageId": "MKB000798",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-kilmore-house-cookstown-wedding-photography-10_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "kilmore house",
+          "couple portraits",
+          "bride and groom",
+          "coastal wedding",
+          "dramatic sky",
+          "moody lighting",
+          "romantic portrait",
+          "wedding dress",
+          "groom suit",
+          "bouquet",
+          "shoreline",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "kilmore house",
+          "couple portraits",
+          "bride and groom",
+          "coastal wedding",
+          "dramatic sky",
+          "moody lighting",
+          "romantic portrait",
+          "wedding dress",
+          "groom suit",
+          "bouquet",
+          "shoreline",
+          "northern ireland wedding"
+        ],
+        "aiAlt": "Bride and groom portrait on the shoreline near Kilmore House, County Antrim, with a dramatic sky and moody natural light.",
+        "aiCaption": "A relaxed couple portrait near Kilmore House, with the shoreline, soft moody light and County Antrim sky adding to the atmosphere.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Kilmore%20house/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-kilmore-house-cookstown-wedding-photography-10_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Kilmore%20house/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-kilmore-house-cookstown-wedding-photography-10_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 799,
+          "venue": "Kilmore house",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_6622a8752f874d59cb76c574",
+        "imageId": "MKB000799",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-kilmore-house-glenarif-wedding-photography-1_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "kilmore house",
+          "couple portraits",
+          "bride and groom",
+          "coastal portrait",
+          "beach wedding",
+          "dramatic sky",
+          "natural light",
+          "romantic",
+          "moody",
+          "mountain backdrop",
+          "wedding portraits",
+          "northern ireland"
+        ],
+        "aiTags": [
+          "kilmore house",
+          "couple portraits",
+          "bride and groom",
+          "coastal portrait",
+          "beach wedding",
+          "dramatic sky",
+          "natural light",
+          "romantic",
+          "moody",
+          "mountain backdrop",
+          "wedding portraits",
+          "northern ireland"
+        ],
+        "aiAlt": "Bride and groom coastal portrait near Kilmore House in Glenariff with a dramatic sky and mountain backdrop",
+        "aiCaption": "A relaxed couple portrait near Kilmore House in Glenariff, with soft natural light, moody skies and the County Antrim coast setting the scene.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Kilmore%20house/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-kilmore-house-glenarif-wedding-photography-1_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Kilmore%20house/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-kilmore-house-glenarif-wedding-photography-1_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 800,
+          "venue": "Kilmore house",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_0fb684292a2fc8509951a8a5",
+        "imageId": "MKB000800",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-kilmore-house-glenarif-wedding-photography-2_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "mountain backdrop",
+          "outdoor wedding",
+          "kilmore house",
+          "soft light",
+          "romantic",
+          "scenic landscape",
+          "intimate moment",
+          "wedding portraits",
+          "northern ireland",
+          "countryside"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "mountain backdrop",
+          "outdoor wedding",
+          "kilmore house",
+          "soft light",
+          "romantic",
+          "scenic landscape",
+          "intimate moment",
+          "wedding portraits",
+          "northern ireland",
+          "countryside"
+        ],
+        "aiAlt": "Bride and groom portrait at Kilmore House in Glenariff, with soft light and the County Antrim mountains behind them",
+        "aiCaption": "A quiet couple portrait at Kilmore House, Glenariff, framed by soft light and the County Antrim countryside.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Kilmore%20house/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-kilmore-house-glenarif-wedding-photography-2_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Kilmore%20house/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-kilmore-house-glenarif-wedding-photography-2_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 801,
+          "venue": "Kilmore house",
+          "category": "couple portraits"
+        }
+      }
+    ]
+  }
+}

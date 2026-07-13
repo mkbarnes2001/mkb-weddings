@@ -1,0 +1,2141 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_131a2b50-097a-46af-afe1-0506230ff632",
+  "slug": "harveys-point",
+  "name": "Harveys point",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_296889fea055647aaf230320",
+  "status": "published",
+  "links": {
+    "website": "https://www.harveyspoint.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.738Z",
+  "updatedAt": "2026-07-13T07:52:28.327Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.327Z",
+    "heroAssetId": "legacy_296889fea055647aaf230320",
+    "images": [
+      {
+        "assetId": "legacy_296889fea055647aaf230320",
+        "imageId": "MKB000642",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-148_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "harveys point",
+          "outdoor ceremony",
+          "lakeside wedding",
+          "wedding guests",
+          "ceremony aisle",
+          "floral arch",
+          "overcast light",
+          "dramatic sky",
+          "romantic mood",
+          "waterfront",
+          "donegal wedding",
+          "ceremony decor"
+        ],
+        "aiTags": [
+          "harveys point",
+          "outdoor ceremony",
+          "lakeside wedding",
+          "wedding guests",
+          "ceremony aisle",
+          "floral arch",
+          "overcast light",
+          "dramatic sky",
+          "romantic mood",
+          "waterfront",
+          "donegal wedding",
+          "ceremony decor"
+        ],
+        "aiAlt": "Outdoor lakeside ceremony at Harvey’s Point in Lough Eske, with guests facing a floral arch under soft overcast skies",
+        "aiCaption": "A relaxed outdoor ceremony by the water at Harvey’s Point, with soft Donegal light, a floral arch and guests gathered along the aisle.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-148_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-148_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 643,
+          "venue": "Harveys point",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_a5d373a7e2ae51462bb4fd2e",
+        "imageId": "MKB000643",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-184_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "harveys point",
+          "ceremony",
+          "outdoor ceremony",
+          "bride",
+          "aisle walk",
+          "processional",
+          "wedding guests",
+          "father of bride",
+          "floral aisle",
+          "natural light",
+          "joyful",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "harveys point",
+          "ceremony",
+          "outdoor ceremony",
+          "bride",
+          "aisle walk",
+          "processional",
+          "wedding guests",
+          "father of bride",
+          "floral aisle",
+          "natural light",
+          "joyful",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride walking down the floral aisle with her father at an outdoor ceremony at Harveys Point, County Donegal",
+        "aiCaption": "A joyful aisle walk in natural light during an outdoor ceremony at Harveys Point in Lough Eske, surrounded by wedding guests.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-184_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-184_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 644,
+          "venue": "Harveys point",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_3732fb5336da925f023688c7",
+        "imageId": "MKB000644",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-212_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "harveys point",
+          "ceremony",
+          "bride entrance",
+          "outdoor wedding",
+          "wedding aisle",
+          "bride and escort",
+          "guests",
+          "natural light",
+          "joyful",
+          "floral bouquets",
+          "donegal wedding",
+          "processional"
+        ],
+        "aiTags": [
+          "harveys point",
+          "ceremony",
+          "bride entrance",
+          "outdoor wedding",
+          "wedding aisle",
+          "bride and escort",
+          "guests",
+          "natural light",
+          "joyful",
+          "floral bouquets",
+          "donegal wedding",
+          "processional"
+        ],
+        "aiAlt": "Bride walking down the outdoor aisle with her escort during a ceremony at Harveys Point, Lough Eske",
+        "aiCaption": "A relaxed outdoor ceremony moment at Harveys Point, with the bride making her entrance in soft natural light as guests look on.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-212_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-212_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 645,
+          "venue": "Harveys point",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_5bbc1835ee23a9473494e902",
+        "imageId": "MKB000645",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-239_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "harveys point",
+          "ceremony",
+          "hand holding",
+          "close up",
+          "bride",
+          "wedding vows",
+          "intimate moment",
+          "soft light",
+          "romantic",
+          "emotional",
+          "wedding details",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "harveys point",
+          "ceremony",
+          "hand holding",
+          "close up",
+          "bride",
+          "wedding vows",
+          "intimate moment",
+          "soft light",
+          "romantic",
+          "emotional",
+          "wedding details",
+          "donegal wedding"
+        ],
+        "aiAlt": "Close-up of a couple holding hands during their ceremony at Harveys Point, Lough Eske, in soft natural light",
+        "aiCaption": "A quiet hand-holding moment during the ceremony at Harveys Point, with soft light and all the emotion of the vows.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-239_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-239_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 646,
+          "venue": "Harveys point",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_b6a2ef4f03455ae3c844a2f0",
+        "imageId": "MKB000646",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-250_500.webp",
+        "order": 5,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "harveys point",
+          "outdoor ceremony",
+          "same sex wedding",
+          "brides",
+          "wedding guests",
+          "bridal party",
+          "daylight",
+          "romantic",
+          "joyful",
+          "vow exchange",
+          "aisle view",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "harveys point",
+          "outdoor ceremony",
+          "same sex wedding",
+          "brides",
+          "wedding guests",
+          "bridal party",
+          "daylight",
+          "romantic",
+          "joyful",
+          "vow exchange",
+          "aisle view",
+          "donegal wedding"
+        ],
+        "aiAlt": "Two brides exchange vows during an outdoor ceremony at Harveys Point, Lough Eske, with guests gathered in daylight",
+        "aiCaption": "A relaxed aisle view of two brides sharing their vows outdoors at Harveys Point in County Donegal, surrounded by guests and soft daylight.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-250_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-250_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 647,
+          "venue": "Harveys point",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_477a6bbb17c729c898038bd3",
+        "imageId": "MKB000647",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-281_500.webp",
+        "order": 6,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "harveys point",
+          "outdoor ceremony",
+          "brides",
+          "wedding vows",
+          "ceremony flowers",
+          "guests",
+          "daylight",
+          "romantic",
+          "emotional",
+          "garden wedding",
+          "donegal wedding",
+          "aisle moment"
+        ],
+        "aiTags": [
+          "harveys point",
+          "outdoor ceremony",
+          "brides",
+          "wedding vows",
+          "ceremony flowers",
+          "guests",
+          "daylight",
+          "romantic",
+          "emotional",
+          "garden wedding",
+          "donegal wedding",
+          "aisle moment"
+        ],
+        "aiAlt": "Outdoor wedding vows at Harveys Point in Lough Eske, with brides, ceremony flowers and guests gathered in daylight.",
+        "aiCaption": "A relaxed outdoor ceremony at Harveys Point in County Donegal, with vows shared among flowers, guests and soft daylight.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-281_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-281_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 648,
+          "venue": "Harveys point",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_8b70087e9735ce9884a41208",
+        "imageId": "MKB000648",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-303_500.webp",
+        "order": 7,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "harveys point",
+          "outdoor wedding",
+          "brides",
+          "same sex wedding",
+          "vows",
+          "ring exchange",
+          "natural light",
+          "joyful",
+          "emotional",
+          "lakeside",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ceremony",
+          "harveys point",
+          "outdoor wedding",
+          "brides",
+          "same sex wedding",
+          "vows",
+          "ring exchange",
+          "natural light",
+          "joyful",
+          "emotional",
+          "lakeside",
+          "donegal wedding"
+        ],
+        "aiAlt": "Two brides exchanging rings during an outdoor ceremony at Harveys Point, Lough Eske",
+        "aiCaption": "A joyful lakeside ceremony at Harveys Point in Lough Eske, with two brides sharing vows and a ring exchange in soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-303_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-303_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 649,
+          "venue": "Harveys point",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_8ca95e4ccf83b8d8d6f443f7",
+        "imageId": "MKB000649",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-338_500.webp",
+        "order": 8,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "harveys point",
+          "ceremony",
+          "outdoor ceremony",
+          "brides",
+          "same-sex wedding",
+          "forehead kiss",
+          "wedding vows",
+          "guests",
+          "natural light",
+          "romantic",
+          "emotional moment",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "harveys point",
+          "ceremony",
+          "outdoor ceremony",
+          "brides",
+          "same-sex wedding",
+          "forehead kiss",
+          "wedding vows",
+          "guests",
+          "natural light",
+          "romantic",
+          "emotional moment",
+          "donegal wedding"
+        ],
+        "aiAlt": "Two brides share a forehead kiss during their outdoor ceremony at Harvey's Point, Lough Eske.",
+        "aiCaption": "A quiet forehead kiss during outdoor vows at Harvey's Point in County Donegal, surrounded by guests and soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-338_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-338_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 650,
+          "venue": "Harveys point",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_f4916582279e6ab9f2f60bf5",
+        "imageId": "MKB000650",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-493_500.webp",
+        "order": 9,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "brides",
+          "same sex wedding",
+          "outdoor ceremony",
+          "sunlit",
+          "intimate moment",
+          "emotional",
+          "wedding vows",
+          "veil",
+          "bridal dress",
+          "romantic",
+          "harveys point"
+        ],
+        "aiTags": [
+          "ceremony",
+          "brides",
+          "same sex wedding",
+          "outdoor ceremony",
+          "sunlit",
+          "intimate moment",
+          "emotional",
+          "wedding vows",
+          "veil",
+          "bridal dress",
+          "romantic",
+          "harveys point"
+        ],
+        "aiAlt": "Two brides sharing emotional vows during a sunlit outdoor ceremony at Harveys Point, Lough Eske",
+        "aiCaption": "A quiet, emotional ceremony moment as two brides exchange vows in the soft outdoor light at Harveys Point in County Donegal.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-493_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/ceremony/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-493_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 651,
+          "venue": "Harveys point",
+          "category": "ceremony"
+        }
+      },
+      {
+        "assetId": "legacy_fe6da10642f1072b44b7be56",
+        "imageId": "MKB000651",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-448_500.webp",
+        "order": 10,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "harveys point",
+          "couple portraits",
+          "two brides",
+          "same sex wedding",
+          "lakeside portrait",
+          "bridal bouquets",
+          "soft light",
+          "romantic mood",
+          "wedding dresses",
+          "outdoor portraits",
+          "donegal wedding",
+          "newlyweds"
+        ],
+        "aiTags": [
+          "harveys point",
+          "couple portraits",
+          "two brides",
+          "same sex wedding",
+          "lakeside portrait",
+          "bridal bouquets",
+          "soft light",
+          "romantic mood",
+          "wedding dresses",
+          "outdoor portraits",
+          "donegal wedding",
+          "newlyweds"
+        ],
+        "aiAlt": "Two brides with bouquets during a soft lakeside couple portrait at Harveys Point, Lough Eske",
+        "aiCaption": "A quiet lakeside portrait at Harveys Point in Lough Eske, with two brides sharing a relaxed moment in soft Donegal light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-448_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-448_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 652,
+          "venue": "Harveys point",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_9b7371dc4479c32e9559774a",
+        "imageId": "MKB000652",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-503_500.webp",
+        "order": 11,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "harveys point",
+          "couple portraits",
+          "two brides",
+          "lakeside",
+          "outdoor portraits",
+          "golden hour",
+          "soft light",
+          "joyful",
+          "romantic",
+          "wedding dresses",
+          "bride portraits",
+          "wedding day"
+        ],
+        "aiTags": [
+          "harveys point",
+          "couple portraits",
+          "two brides",
+          "lakeside",
+          "outdoor portraits",
+          "golden hour",
+          "soft light",
+          "joyful",
+          "romantic",
+          "wedding dresses",
+          "bride portraits",
+          "wedding day"
+        ],
+        "aiAlt": "Two brides share a joyful lakeside portrait at Harveys Point, Lough Eske, in soft golden hour light.",
+        "aiCaption": "A relaxed couple portrait by the lake at Harveys Point, with two brides enjoying the soft evening light in County Donegal.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-503_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-503_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 653,
+          "venue": "Harveys point",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_3418afb9aa5cfc100f3cb8ed",
+        "imageId": "MKB000653",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-508_500.webp",
+        "order": 12,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "harveys point",
+          "couple portraits",
+          "two brides",
+          "bridge portrait",
+          "lakeside",
+          "outdoor wedding",
+          "natural light",
+          "romantic",
+          "scenic",
+          "wedding dress",
+          "bouquet",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "harveys point",
+          "couple portraits",
+          "two brides",
+          "bridge portrait",
+          "lakeside",
+          "outdoor wedding",
+          "natural light",
+          "romantic",
+          "scenic",
+          "wedding dress",
+          "bouquet",
+          "donegal wedding"
+        ],
+        "aiAlt": "Two brides share a quiet portrait on the bridge by Lough Eske at Harveys Point, County Donegal",
+        "aiCaption": "A relaxed lakeside couple portrait at Harveys Point in Lough Eske, with two brides on the bridge in soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-508_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-508_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 654,
+          "venue": "Harveys point",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_386bb0ecbc56306d60a071ad",
+        "imageId": "MKB000654",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-510_500.webp",
+        "order": 13,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "harveys point wedding",
+          "couple portraits",
+          "brides",
+          "woodland",
+          "outdoor portrait",
+          "dappled light",
+          "romantic",
+          "wedding bouquets",
+          "white dresses",
+          "garden path",
+          "intimate moment",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "harveys point wedding",
+          "couple portraits",
+          "brides",
+          "woodland",
+          "outdoor portrait",
+          "dappled light",
+          "romantic",
+          "wedding bouquets",
+          "white dresses",
+          "garden path",
+          "intimate moment",
+          "donegal wedding"
+        ],
+        "aiAlt": "Two brides share a quiet moment on a woodland path at Harveys Point, Lough Eske, with bouquets and soft dappled light.",
+        "aiCaption": "A relaxed couple portrait at Harveys Point in County Donegal, with two brides pausing together on a garden path in gentle woodland light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-510_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-510_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 655,
+          "venue": "Harveys point",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_0bd6fc59c46d4241bd360f5a",
+        "imageId": "MKB000655",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-517_500.webp",
+        "order": 14,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "harveys point",
+          "couple portraits",
+          "two brides",
+          "same sex wedding",
+          "outdoor portrait",
+          "natural light",
+          "romantic",
+          "intimate embrace",
+          "bridal veil",
+          "garden setting",
+          "wedding dress",
+          "tender moment"
+        ],
+        "aiTags": [
+          "harveys point",
+          "couple portraits",
+          "two brides",
+          "same sex wedding",
+          "outdoor portrait",
+          "natural light",
+          "romantic",
+          "intimate embrace",
+          "bridal veil",
+          "garden setting",
+          "wedding dress",
+          "tender moment"
+        ],
+        "aiAlt": "Two brides share a quiet embrace in the garden at Harveys Point, Lough Eske, in soft natural light.",
+        "aiCaption": "A relaxed couple portrait at Harveys Point in County Donegal, with two brides wrapped in a tender garden moment.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-517_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-517_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 656,
+          "venue": "Harveys point",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_aa3a445b2412144a4c709cc5",
+        "imageId": "MKB000656",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-524_500.webp",
+        "order": 15,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "harveys point",
+          "couple portraits",
+          "bride and bride",
+          "wedding dresses",
+          "walking portrait",
+          "garden path",
+          "sunlit",
+          "backlit",
+          "romantic",
+          "candid moment",
+          "bouquet",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "harveys point",
+          "couple portraits",
+          "bride and bride",
+          "wedding dresses",
+          "walking portrait",
+          "garden path",
+          "sunlit",
+          "backlit",
+          "romantic",
+          "candid moment",
+          "bouquet",
+          "donegal wedding"
+        ],
+        "aiAlt": "Two brides in wedding dresses walk along a sunlit garden path at Harvey's Point, Lough Eske, one carrying a bouquet.",
+        "aiCaption": "A relaxed walking portrait of two brides on the garden path at Harvey's Point in County Donegal, caught in soft backlit sunshine.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-524_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-524_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 657,
+          "venue": "Harveys point",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_8918facc649bc018adfc0260",
+        "imageId": "MKB000657",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-658_500.webp",
+        "order": 16,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "harveys point",
+          "couple portraits",
+          "brides",
+          "lakeside",
+          "sunset",
+          "golden hour",
+          "romantic",
+          "scenic landscape",
+          "wedding dresses",
+          "donegal wedding",
+          "reflections",
+          "intimate moment"
+        ],
+        "aiTags": [
+          "harveys point",
+          "couple portraits",
+          "brides",
+          "lakeside",
+          "sunset",
+          "golden hour",
+          "romantic",
+          "scenic landscape",
+          "wedding dresses",
+          "donegal wedding",
+          "reflections",
+          "intimate moment"
+        ],
+        "aiAlt": "Two brides in wedding dresses by the lake at Harveys Point, Lough Eske, during golden hour couple portraits",
+        "aiCaption": "A quiet lakeside moment at Harveys Point in County Donegal, with soft golden hour light and reflections adding to the relaxed feel of the portraits.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-658_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-658_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 658,
+          "venue": "Harveys point",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_273c6c75fcadac0d2c6cba56",
+        "imageId": "MKB000658",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-663_500.webp",
+        "order": 17,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "harveys point",
+          "couple portraits",
+          "two brides",
+          "lakeside",
+          "sunset light",
+          "golden hour",
+          "romantic",
+          "holding hands",
+          "wedding portraits",
+          "donegal wedding",
+          "evening sky",
+          "outdoor portraits"
+        ],
+        "aiTags": [
+          "harveys point",
+          "couple portraits",
+          "two brides",
+          "lakeside",
+          "sunset light",
+          "golden hour",
+          "romantic",
+          "holding hands",
+          "wedding portraits",
+          "donegal wedding",
+          "evening sky",
+          "outdoor portraits"
+        ],
+        "aiAlt": "Two brides holding hands by the lake at Harveys Point, Lough Eske, in soft golden hour light",
+        "aiCaption": "A relaxed lakeside portrait at Harveys Point, with two brides holding hands as the evening light settles over Lough Eske.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-663_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-663_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 659,
+          "venue": "Harveys point",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_0047d719cf006f39fda4fc42",
+        "imageId": "MKB000659",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-664_500.webp",
+        "order": 18,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "two brides",
+          "same sex wedding",
+          "lakeside",
+          "golden hour",
+          "romantic",
+          "outdoor portraits",
+          "wedding dress",
+          "veil",
+          "intimate moment",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "two brides",
+          "same sex wedding",
+          "lakeside",
+          "golden hour",
+          "romantic",
+          "outdoor portraits",
+          "wedding dress",
+          "veil",
+          "intimate moment",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiAlt": "Two brides share a quiet lakeside portrait at Harveys Point in Lough Eske during golden hour",
+        "aiCaption": "A relaxed golden hour couple portrait by the lake at Harveys Point, Lough Eske, with two brides sharing a quiet moment together.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-664_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-664_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 660,
+          "venue": "Harveys point",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_995de8f8696beaaf8b9fe04f",
+        "imageId": "MKB000660",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-667_500.webp",
+        "order": 19,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "harveys point",
+          "couple portraits",
+          "lakeside",
+          "bride and groom",
+          "outdoor wedding",
+          "golden hour",
+          "romantic",
+          "soft light",
+          "natural scenery",
+          "donegal wedding",
+          "wedding portraits",
+          "intimate moment"
+        ],
+        "aiTags": [
+          "harveys point",
+          "couple portraits",
+          "lakeside",
+          "bride and groom",
+          "outdoor wedding",
+          "golden hour",
+          "romantic",
+          "soft light",
+          "natural scenery",
+          "donegal wedding",
+          "wedding portraits",
+          "intimate moment"
+        ],
+        "aiAlt": "Bride and groom in soft golden hour light by the lake at Harvey's Point, Lough Eske, County Donegal",
+        "aiCaption": "A quiet lakeside couple portrait at Harvey's Point in Lough Eske, with soft golden hour light and the Donegal scenery around them.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-667_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/couple%20portraits/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-667_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 661,
+          "venue": "Harveys point",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_4b1fcfd641d4a44a4e876ecd",
+        "imageId": "MKB000661",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-477_500.webp",
+        "order": 20,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "details-and-decor"
+        ],
+        "tags": [
+          "wedding details",
+          "table decor",
+          "floral centerpiece",
+          "table number",
+          "candles",
+          "reception styling",
+          "warm light",
+          "romantic mood",
+          "place setting",
+          "wedding stationery",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "wedding details",
+          "table decor",
+          "floral centerpiece",
+          "table number",
+          "candles",
+          "reception styling",
+          "warm light",
+          "romantic mood",
+          "place setting",
+          "wedding stationery",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiAlt": "Warm candlelit table decor with floral centrepiece and stationery at Harveys Point, Lough Eske",
+        "aiCaption": "Soft candlelight, florals and simple stationery set a warm reception atmosphere at Harveys Point in County Donegal.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/details%20and%20decor/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-477_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/details%20and%20decor/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-477_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 662,
+          "venue": "Harveys point",
+          "category": "details and decor"
+        }
+      },
+      {
+        "assetId": "legacy_3e4d2c84eddd5876b18562d9",
+        "imageId": "MKB000662",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-137_500.webp",
+        "order": 21,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "harveys point",
+          "bride",
+          "parents",
+          "family portrait",
+          "bridal party",
+          "indoor wedding",
+          "cheek kiss",
+          "wedding bouquet",
+          "soft lighting",
+          "joyful moment",
+          "formalwear",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "harveys point",
+          "bride",
+          "parents",
+          "family portrait",
+          "bridal party",
+          "indoor wedding",
+          "cheek kiss",
+          "wedding bouquet",
+          "soft lighting",
+          "joyful moment",
+          "formalwear",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride sharing a cheek kiss with her parents during an indoor family portrait at Harveys Point, Lough Eske",
+        "aiCaption": "A warm family moment indoors at Harveys Point, with soft light, formalwear and an easy bit of joy around the bride.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/family%20and%20bridal%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-137_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/family%20and%20bridal%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-137_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 663,
+          "venue": "Harveys point",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_93f55b3492dcd5575a4f5a02",
+        "imageId": "MKB000663",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-100_500.webp",
+        "order": 22,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "harveys point",
+          "getting ready",
+          "bride portrait",
+          "bridal robe",
+          "window light",
+          "soft light",
+          "happy bride",
+          "morning prep",
+          "wedding makeup",
+          "elegant",
+          "indoor portrait",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "harveys point",
+          "getting ready",
+          "bride portrait",
+          "bridal robe",
+          "window light",
+          "soft light",
+          "happy bride",
+          "morning prep",
+          "wedding makeup",
+          "elegant",
+          "indoor portrait",
+          "donegal wedding"
+        ],
+        "aiAlt": "Happy bride in a bridal robe getting ready by soft window light at Harveys Point, Lough Eske",
+        "aiCaption": "A relaxed morning portrait at Harveys Point in Lough Eske, with soft window light and a quiet getting ready moment before the ceremony.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-100_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-100_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 664,
+          "venue": "Harveys point",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_f0b635d1492da52579967e6a",
+        "imageId": "MKB000664",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-121_500.webp",
+        "order": 23,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bride",
+          "father of bride",
+          "first look",
+          "wedding dress",
+          "veil",
+          "tuxedo",
+          "emotional moment",
+          "indoor",
+          "soft flash",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bride",
+          "father of bride",
+          "first look",
+          "wedding dress",
+          "veil",
+          "tuxedo",
+          "emotional moment",
+          "indoor",
+          "soft flash",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride and father share an emotional first look indoors at Harveys Point in County Donegal",
+        "aiCaption": "A quiet getting-ready moment at Harveys Point, as the bride and her father share a warm first look before the ceremony.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-121_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-121_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 665,
+          "venue": "Harveys point",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_af19296c1aab734365e613b6",
+        "imageId": "MKB000665",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-124_500.webp",
+        "order": 24,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "harveys point",
+          "getting ready",
+          "bride",
+          "parents",
+          "dress adjustment",
+          "black and white",
+          "indoor",
+          "emotional",
+          "candid",
+          "soft lighting",
+          "wedding morning",
+          "family moment"
+        ],
+        "aiTags": [
+          "harveys point",
+          "getting ready",
+          "bride",
+          "parents",
+          "dress adjustment",
+          "black and white",
+          "indoor",
+          "emotional",
+          "candid",
+          "soft lighting",
+          "wedding morning",
+          "family moment"
+        ],
+        "aiAlt": "Black and white wedding morning moment at Harveys Point as parents help the bride adjust her dress",
+        "aiCaption": "A quiet getting ready moment at Harveys Point, with parents helping the bride into her dress in soft indoor light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-124_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-124_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 666,
+          "venue": "Harveys point",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_bd39b5a92e316ab808e792f2",
+        "imageId": "MKB000666",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-4_500.webp",
+        "order": 25,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "harveys point",
+          "bridal prep",
+          "bridesmaids",
+          "hotel room",
+          "morning preparations",
+          "candid",
+          "natural light",
+          "relaxed mood",
+          "wedding morning",
+          "hair and makeup",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "getting ready",
+          "harveys point",
+          "bridal prep",
+          "bridesmaids",
+          "hotel room",
+          "morning preparations",
+          "candid",
+          "natural light",
+          "relaxed mood",
+          "wedding morning",
+          "hair and makeup",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bridal prep at Harveys Point in Lough Eske, with bridesmaids getting ready in soft natural light",
+        "aiCaption": "A relaxed wedding morning at Harveys Point, Lough Eske, with bridal prep unfolding naturally in the hotel room.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-4_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-4_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 667,
+          "venue": "Harveys point",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_0dc99a6d27c0b0b1b029c01f",
+        "imageId": "MKB000667",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-59_500.webp",
+        "order": 26,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "harveys point",
+          "getting ready",
+          "bride",
+          "bridal prep",
+          "earrings",
+          "mirror reflection",
+          "wedding morning",
+          "soft light",
+          "intimate moment",
+          "calm mood",
+          "bridal robe",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "harveys point",
+          "getting ready",
+          "bride",
+          "bridal prep",
+          "earrings",
+          "mirror reflection",
+          "wedding morning",
+          "soft light",
+          "intimate moment",
+          "calm mood",
+          "bridal robe",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride fastening earrings in a mirror during calm wedding morning prep at Harvey's Point, County Donegal",
+        "aiCaption": "A quiet getting-ready moment at Harvey's Point in County Donegal, with soft light and mirror reflections setting a relaxed tone.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-59_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-59_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 668,
+          "venue": "Harveys point",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_653924beab5e8012e920d263",
+        "imageId": "MKB000668",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-61_500.webp",
+        "order": 27,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "harveys point",
+          "getting ready",
+          "bride",
+          "mirror reflection",
+          "bridal prep",
+          "wedding morning",
+          "black and white",
+          "soft light",
+          "quiet moment",
+          "bridal robe",
+          "jewellery",
+          "documentary"
+        ],
+        "aiTags": [
+          "harveys point",
+          "getting ready",
+          "bride",
+          "mirror reflection",
+          "bridal prep",
+          "wedding morning",
+          "black and white",
+          "soft light",
+          "quiet moment",
+          "bridal robe",
+          "jewellery",
+          "documentary"
+        ],
+        "aiAlt": "Black and white bridal prep reflection at Harveys Point, with a bride in a robe during a quiet wedding morning moment",
+        "aiCaption": "A quiet getting ready moment at Harveys Point in Lough Eske, photographed in soft black and white as the bride prepares with jewellery nearby.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-61_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-61_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 669,
+          "venue": "Harveys point",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_9209f215ea461616b0bf7bd5",
+        "imageId": "MKB000669",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-8_500.webp",
+        "order": 28,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bridal suite",
+          "bride",
+          "bridesmaids",
+          "hair and makeup",
+          "accordion",
+          "candid",
+          "natural light",
+          "joyful",
+          "hotel room",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bridal suite",
+          "bride",
+          "bridesmaids",
+          "hair and makeup",
+          "accordion",
+          "candid",
+          "natural light",
+          "joyful",
+          "hotel room",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride and bridesmaids laughing during hair and makeup in the bridal suite at Harveys Point, Lough Eske",
+        "aiCaption": "A relaxed getting ready moment with the bride and bridesmaids enjoying the morning light at Harveys Point in County Donegal.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-8_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-8_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 670,
+          "venue": "Harveys point",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_cdd80a2e4936a0cfb7564a41",
+        "imageId": "MKB000670",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-95_500.webp",
+        "order": 29,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bridal makeup",
+          "bride",
+          "makeup artist",
+          "window light",
+          "natural light",
+          "calm moment",
+          "wedding morning",
+          "beauty prep",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bridal makeup",
+          "bride",
+          "makeup artist",
+          "window light",
+          "natural light",
+          "calm moment",
+          "wedding morning",
+          "beauty prep",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride having makeup applied in soft window light during wedding morning prep at Harveys Point, Lough Eske",
+        "aiCaption": "A calm wedding morning moment at Harveys Point, with bridal makeup finished in natural window light before the day begins.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-95_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/getting%20ready/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-95_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 671,
+          "venue": "Harveys point",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_8369009fffd51264ec2c0266",
+        "imageId": "MKB000671",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-532_500.webp",
+        "order": 30,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "harveys point",
+          "outdoor reception",
+          "brides dancing",
+          "same sex wedding",
+          "live music",
+          "string quartet",
+          "patio",
+          "golden light",
+          "joyful",
+          "wedding party",
+          "summer wedding",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "harveys point",
+          "outdoor reception",
+          "brides dancing",
+          "same sex wedding",
+          "live music",
+          "string quartet",
+          "patio",
+          "golden light",
+          "joyful",
+          "wedding party",
+          "summer wedding",
+          "donegal wedding"
+        ],
+        "aiAlt": "Brides dancing on the patio at Harveys Point in Lough Eske, with live music and warm golden light during an outdoor reception",
+        "aiCaption": "A joyful outdoor reception at Harveys Point, Lough Eske, with the brides dancing on the patio as live music fills the summer evening.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-532_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-532_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 672,
+          "venue": "Harveys point",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_9546d118134f56c19853ddae",
+        "imageId": "MKB000672",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-582_500.webp",
+        "order": 31,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "reception",
+          "party",
+          "bride",
+          "wedding guests",
+          "bouquet toss",
+          "napkin waving",
+          "indoor reception",
+          "bright lighting",
+          "celebration",
+          "joyful",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "reception",
+          "party",
+          "bride",
+          "wedding guests",
+          "bouquet toss",
+          "napkin waving",
+          "indoor reception",
+          "bright lighting",
+          "celebration",
+          "joyful",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bouquet toss during a lively indoor reception at Harveys Point, Lough Eske, with wedding guests cheering and waving napkins",
+        "aiCaption": "A joyful bouquet toss at Harveys Point in Lough Eske, with guests gathered close, napkins in the air and the reception full of energy.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-582_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-582_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 673,
+          "venue": "Harveys point",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_77b754a38231c165d8645b2a",
+        "imageId": "MKB000673",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-585_500.webp",
+        "order": 32,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "reception",
+          "party",
+          "harveys point",
+          "bride and groom",
+          "wedding kiss",
+          "top table",
+          "guests cheering",
+          "indoor reception",
+          "bright light",
+          "celebration",
+          "joyful",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "reception",
+          "party",
+          "harveys point",
+          "bride and groom",
+          "wedding kiss",
+          "top table",
+          "guests cheering",
+          "indoor reception",
+          "bright light",
+          "celebration",
+          "joyful",
+          "donegal wedding"
+        ],
+        "aiAlt": "Couple sharing a kiss at the top table as guests cheer during a bright wedding reception at Harveys Point, Lough Eske",
+        "aiCaption": "A joyful top table kiss with guests cheering during a relaxed reception at Harveys Point in County Donegal.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-585_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-585_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 674,
+          "venue": "Harveys point",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_dfdac86e02e5c92e7dcfa131",
+        "imageId": "MKB000674",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-688_500.webp",
+        "order": 33,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "harveys point",
+          "reception",
+          "party",
+          "sparkler exit",
+          "bride",
+          "wedding couple",
+          "guests",
+          "evening",
+          "dramatic lighting",
+          "celebration",
+          "joyful",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "harveys point",
+          "reception",
+          "party",
+          "sparkler exit",
+          "bride",
+          "wedding couple",
+          "guests",
+          "evening",
+          "dramatic lighting",
+          "celebration",
+          "joyful",
+          "donegal wedding"
+        ],
+        "aiAlt": "Wedding couple enjoying a sparkler exit with guests at Harveys Point, Lough Eske",
+        "aiCaption": "A joyful sparkler exit at Harveys Point in Lough Eske, with guests gathered around the couple in warm evening light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-688_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-688_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 675,
+          "venue": "Harveys point",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_a3d06046f957745dc174fccf",
+        "imageId": "MKB000675",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-702_500.webp",
+        "order": 34,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "harveys point",
+          "wedding reception",
+          "dance floor",
+          "brides dancing",
+          "first dance",
+          "guests applauding",
+          "indoor reception",
+          "chandelier lighting",
+          "warm light",
+          "celebration",
+          "joyful moment",
+          "party"
+        ],
+        "aiTags": [
+          "harveys point",
+          "wedding reception",
+          "dance floor",
+          "brides dancing",
+          "first dance",
+          "guests applauding",
+          "indoor reception",
+          "chandelier lighting",
+          "warm light",
+          "celebration",
+          "joyful moment",
+          "party"
+        ],
+        "aiAlt": "Brides dancing on the reception floor at Harveys Point, Lough Eske, as guests applaud under warm chandelier light",
+        "aiCaption": "A joyful reception moment at Harveys Point in County Donegal, with the dance floor full of warmth, applause and natural celebration.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-702_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-702_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 676,
+          "venue": "Harveys point",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_5615ed15c688e091af66411e",
+        "imageId": "MKB000676",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-726_500.webp",
+        "order": 35,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "wedding reception",
+          "live band",
+          "guitarist",
+          "party music",
+          "indoor stage",
+          "evening reception",
+          "warm lighting",
+          "celebration",
+          "dance floor",
+          "entertainment",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "wedding reception",
+          "live band",
+          "guitarist",
+          "party music",
+          "indoor stage",
+          "evening reception",
+          "warm lighting",
+          "celebration",
+          "dance floor",
+          "entertainment",
+          "harveys point",
+          "donegal wedding"
+        ],
+        "aiAlt": "A guitarist performing with a live band during an evening wedding reception at Harveys Point, Lough Eske",
+        "aiCaption": "Warm stage light and live music set the tone for a relaxed evening reception at Harveys Point in County Donegal.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-726_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-726_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 677,
+          "venue": "Harveys point",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_b681c2865a64462ab9aa70ec",
+        "imageId": "MKB000677",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-730_500.webp",
+        "order": 36,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "harveys point",
+          "wedding reception",
+          "dance floor",
+          "live band",
+          "bride and groom",
+          "wedding guests",
+          "party atmosphere",
+          "indoor lighting",
+          "chandelier",
+          "celebration",
+          "dancing",
+          "evening reception"
+        ],
+        "aiTags": [
+          "harveys point",
+          "wedding reception",
+          "dance floor",
+          "live band",
+          "bride and groom",
+          "wedding guests",
+          "party atmosphere",
+          "indoor lighting",
+          "chandelier",
+          "celebration",
+          "dancing",
+          "evening reception"
+        ],
+        "aiAlt": "Bride, groom and guests dancing to a live band at Harveys Point in Lough Eske, with warm chandelier light over the reception floor.",
+        "aiCaption": "A lively evening reception at Harveys Point in Lough Eske, with guests gathered on the dance floor as the band keeps the party moving.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-730_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Harveys%20point/reception%20and%20party/mkb-weddings-mkb-photography-donegal-wedding-photography-harveys-point-hotel-donegal-wedding-photography-730_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 678,
+          "venue": "Harveys point",
+          "category": "reception and party"
+        }
+      }
+    ]
+  }
+}

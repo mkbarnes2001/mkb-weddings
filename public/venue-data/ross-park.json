@@ -1,0 +1,256 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_810e632a-5bdb-43a9-85c0-7d719222ac56",
+  "slug": "ross-park",
+  "name": "Ross Park",
+  "town": "",
+  "county": "",
+  "country": "Northern Ireland",
+  "intro": "",
+  "description": "",
+  "status": "published",
+  "updatedAt": "2026-07-13T07:52:28.341Z",
+  "links": {
+    "website": "https://rosspark.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.341Z",
+    "heroAssetId": "legacy_67a80539ca5941b440a3cc84",
+    "images": [
+      {
+        "assetId": "legacy_67a80539ca5941b440a3cc84",
+        "imageId": "MKB001323",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography1_500.webp",
+        "order": 1,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "coastal portrait",
+          "dramatic sky",
+          "moody light",
+          "romantic",
+          "holding hands",
+          "wedding portraits",
+          "outdoor wedding",
+          "storm clouds",
+          "elegant attire",
+          "ross park"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "coastal portrait",
+          "dramatic sky",
+          "moody light",
+          "romantic",
+          "holding hands",
+          "wedding portraits",
+          "outdoor wedding",
+          "storm clouds",
+          "elegant attire",
+          "ross park"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ross%20Park/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography1_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ross%20Park/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography1_2000.webp",
+        "alt": "Bride and groom holding hands during outdoor couple portraits at Ross Park, Ballymena, under a dramatic cloudy sky.",
+        "caption": "A relaxed Ross Park couple portrait in Ballymena, with soft moody light, stormy skies and a quiet hand-in-hand moment."
+      },
+      {
+        "assetId": "legacy_b2e76db26afa25bc40eb6463",
+        "imageId": "MKB001324",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography2_500.webp",
+        "order": 2,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "ross park",
+          "woodland",
+          "bride and groom",
+          "outdoor portraits",
+          "natural light",
+          "romantic",
+          "holding hands",
+          "forest",
+          "intimate moment",
+          "wedding portraits",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "ross park",
+          "woodland",
+          "bride and groom",
+          "outdoor portraits",
+          "natural light",
+          "romantic",
+          "holding hands",
+          "forest",
+          "intimate moment",
+          "wedding portraits",
+          "northern ireland wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ross%20Park/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography2_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ross%20Park/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography2_2000.webp",
+        "alt": "Bride and groom holding hands during natural light woodland portraits at Ross Park, Ballymena",
+        "caption": "A quiet woodland moment at Ross Park in Ballymena, with the couple relaxed together in soft natural light."
+      },
+      {
+        "assetId": "legacy_f25ef55cbc622f24079f8f39",
+        "imageId": "MKB001325",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography3_500.webp",
+        "order": 3,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "rocky shore",
+          "seaside",
+          "outdoor portraits",
+          "natural light",
+          "romantic",
+          "happy couple",
+          "wedding dress",
+          "bridal bouquet",
+          "coastal wedding",
+          "post ceremony"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "rocky shore",
+          "seaside",
+          "outdoor portraits",
+          "natural light",
+          "romantic",
+          "happy couple",
+          "wedding dress",
+          "bridal bouquet",
+          "coastal wedding",
+          "post ceremony"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ross%20Park/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography3_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ross%20Park/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography3_2000.webp",
+        "alt": "Bride and groom sharing relaxed coastal couple portraits in natural light after their Ross Park wedding in County Antrim",
+        "caption": "A relaxed post-ceremony portrait with the bride and groom on the rocky shore, bringing a natural coastal feel to their Ross Park wedding in County Antrim."
+      },
+      {
+        "assetId": "legacy_1c446a77df81f91f84024288",
+        "imageId": "MKB001326",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography4_500.webp",
+        "order": 4,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "ross park",
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "holding hands",
+          "sunset light",
+          "romantic",
+          "intimate moment",
+          "wedding portraits",
+          "soft sky",
+          "evening portraits",
+          "elegant wedding"
+        ],
+        "aiTags": [
+          "ross park",
+          "couple portraits",
+          "bride and groom",
+          "outdoor wedding",
+          "holding hands",
+          "sunset light",
+          "romantic",
+          "intimate moment",
+          "wedding portraits",
+          "soft sky",
+          "evening portraits",
+          "elegant wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ross%20Park/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography4_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ross%20Park/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography4_2000.webp",
+        "alt": "Bride and groom holding hands in soft sunset light during couple portraits at Ross Park, Ballymena",
+        "caption": "A quiet evening portrait at Ross Park in Ballymena, with the couple holding hands in soft light and a relaxed, natural atmosphere."
+      },
+      {
+        "assetId": "legacy_dc9b5c21ae0460fed43dd8f2",
+        "imageId": "MKB001327",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography5_500.webp",
+        "order": 5,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "creative-flash",
+          "couple portraits",
+          "bride and groom",
+          "coastal portrait",
+          "rocky shore",
+          "dramatic sky",
+          "moody lighting",
+          "romantic",
+          "wedding portraits",
+          "outdoor wedding",
+          "seaside wedding",
+          "storm clouds",
+          "ross park"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "coastal portrait",
+          "rocky shore",
+          "dramatic sky",
+          "moody lighting",
+          "romantic",
+          "wedding portraits",
+          "outdoor wedding",
+          "seaside wedding",
+          "storm clouds",
+          "ross park"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ross%20Park/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography5_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ross%20Park/couple%20portraits/MKB-weddings-mkb-photography-northern-ireland-wedding-photographer-ross-park-ballymena-wedding-photography5_2000.webp",
+        "alt": "Bride and groom on a rocky shore under dramatic storm clouds for Ross Park wedding portraits",
+        "caption": "A relaxed seaside portrait with the bride and groom framed by moody light and storm clouds during their Ross Park wedding in County Antrim."
+      }
+    ]
+  }
+}

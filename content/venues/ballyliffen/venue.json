@@ -1,0 +1,2134 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_b468f579-bfd0-4aaf-9b37-6ca7e15a640d",
+  "slug": "ballyliffen",
+  "name": "Ballyliffen",
+  "county": "",
+  "town": "",
+  "intro": "",
+  "description": "",
+  "heroImageId": "legacy_91a681b5bcd40d2215915b56",
+  "status": "published",
+  "links": {
+    "website": "https://www.ballyliffinlodge.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "coordinatorName": "",
+    "coordinatorEmail": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "notes": {
+    "general": "",
+    "portraitLocations": "",
+    "rainBackup": "",
+    "sunsetNotes": "",
+    "restrictions": ""
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "createdAt": "2026-07-12T09:18:54.769Z",
+  "updatedAt": "2026-07-13T07:52:28.316Z",
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.316Z",
+    "heroAssetId": "legacy_91a681b5bcd40d2215915b56",
+    "images": [
+      {
+        "assetId": "legacy_91a681b5bcd40d2215915b56",
+        "imageId": "MKB000011",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--10_500.webp",
+        "order": 1,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ballyliffen",
+          "couple portraits",
+          "beach wedding",
+          "coastal portraits",
+          "bride and groom",
+          "overcast sky",
+          "romantic mood",
+          "windswept",
+          "donegal wedding",
+          "seaside",
+          "wedding dress",
+          "groom suit"
+        ],
+        "aiTags": [
+          "ballyliffen",
+          "couple portraits",
+          "beach wedding",
+          "coastal portraits",
+          "bride and groom",
+          "overcast sky",
+          "romantic mood",
+          "windswept",
+          "donegal wedding",
+          "seaside",
+          "wedding dress",
+          "groom suit"
+        ],
+        "aiAlt": "Windswept couple portraits on the coast at Ballyliffen, County Donegal, with the bride and groom under an overcast sky",
+        "aiCaption": "A relaxed coastal portrait at Ballyliffen in County Donegal, with soft overcast light and a windswept seaside feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--10_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--10_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 12,
+          "venue": "Ballyliffen",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_d4c686f078e73206dd8d074b",
+        "imageId": "MKB000012",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--11_500.webp",
+        "order": 2,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "beach portrait",
+          "bride and groom",
+          "couple portraits",
+          "ocean backdrop",
+          "rocky shoreline",
+          "overcast light",
+          "romantic",
+          "intimate",
+          "wedding kiss",
+          "coastal wedding",
+          "donegal wedding",
+          "ballyliffen"
+        ],
+        "aiTags": [
+          "beach portrait",
+          "bride and groom",
+          "couple portraits",
+          "ocean backdrop",
+          "rocky shoreline",
+          "overcast light",
+          "romantic",
+          "intimate",
+          "wedding kiss",
+          "coastal wedding",
+          "donegal wedding",
+          "ballyliffen"
+        ],
+        "aiAlt": "Bride and groom sharing a kiss on the rocky shoreline at Ballyliffen, with the ocean behind them in soft overcast light.",
+        "aiCaption": "A quiet coastal portrait at Ballyliffen in County Donegal, with the couple framed by the rocky shore, calm sea and soft natural light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--11_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--11_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 13,
+          "venue": "Ballyliffen",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_2d4a97bdc08f239094f23a8b",
+        "imageId": "MKB000013",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--12_500.webp",
+        "order": 3,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "beach wedding",
+          "ballyliffen",
+          "coastal portraits",
+          "overcast sky",
+          "flash lighting",
+          "romantic",
+          "joyful",
+          "wedding day",
+          "winter wedding",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "beach wedding",
+          "ballyliffen",
+          "coastal portraits",
+          "overcast sky",
+          "flash lighting",
+          "romantic",
+          "joyful",
+          "wedding day",
+          "winter wedding",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride and groom on the beach in Ballyliffen, County Donegal, with soft flash lighting under an overcast winter sky",
+        "aiCaption": "A relaxed coastal portrait in Ballyliffen, with the couple enjoying a quiet moment on the beach beneath soft Donegal winter skies.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--12_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--12_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 14,
+          "venue": "Ballyliffen",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_27a17c6029238bd407e7f0fa",
+        "imageId": "MKB000014",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--13_500.webp",
+        "order": 4,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ballyliffen",
+          "beach portraits",
+          "bride and groom",
+          "couple portraits",
+          "coastal wedding",
+          "overcast sky",
+          "soft light",
+          "romantic",
+          "windswept",
+          "wedding dress",
+          "black tie",
+          "newlyweds"
+        ],
+        "aiTags": [
+          "ballyliffen",
+          "beach portraits",
+          "bride and groom",
+          "couple portraits",
+          "coastal wedding",
+          "overcast sky",
+          "soft light",
+          "romantic",
+          "windswept",
+          "wedding dress",
+          "black tie",
+          "newlyweds"
+        ],
+        "aiAlt": "Newlyweds in black tie and wedding dress during windswept beach portraits near Ballyliffen, County Donegal",
+        "aiCaption": "A relaxed coastal couple portrait near Ballyliffen, with soft overcast light and the Donegal breeze adding a natural feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--13_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--13_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 15,
+          "venue": "Ballyliffen",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_1a64ed6bfa81610d33cf6ef5",
+        "imageId": "MKB000015",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--14_500.webp",
+        "order": 5,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ballyliffen",
+          "couple portraits",
+          "bride and groom",
+          "beach wedding",
+          "coastal portraits",
+          "wedding car",
+          "overcast light",
+          "romantic",
+          "windswept",
+          "donegal wedding",
+          "newlyweds",
+          "shoreline"
+        ],
+        "aiTags": [
+          "ballyliffen",
+          "couple portraits",
+          "bride and groom",
+          "beach wedding",
+          "coastal portraits",
+          "wedding car",
+          "overcast light",
+          "romantic",
+          "windswept",
+          "donegal wedding",
+          "newlyweds",
+          "shoreline"
+        ],
+        "aiAlt": "Bride and groom beside their wedding car on the windswept shoreline at Ballyliffen, County Donegal",
+        "aiCaption": "A relaxed coastal portrait in Ballyliffen, with the newlyweds taking in the soft overcast light along the Donegal shoreline.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--14_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--14_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 16,
+          "venue": "Ballyliffen",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_26f1b58d0710cdeacacbb930",
+        "imageId": "MKB000016",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--15_500.webp",
+        "order": 6,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portrait",
+          "bride and groom",
+          "beach wedding",
+          "coastal portrait",
+          "ballyliffen",
+          "donegal wedding",
+          "overcast light",
+          "romantic",
+          "elegant",
+          "wedding dress",
+          "black tie",
+          "seaside"
+        ],
+        "aiTags": [
+          "couple portrait",
+          "bride and groom",
+          "beach wedding",
+          "coastal portrait",
+          "ballyliffen",
+          "donegal wedding",
+          "overcast light",
+          "romantic",
+          "elegant",
+          "wedding dress",
+          "black tie",
+          "seaside"
+        ],
+        "aiAlt": "Bride and groom in black tie for a coastal portrait on the beach at Ballyliffen, County Donegal, in soft overcast light",
+        "aiCaption": "A relaxed Ballyliffen couple portrait on the Donegal coast, with soft overcast light and the seaside bringing a calm, natural feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--15_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--15_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 17,
+          "venue": "Ballyliffen",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_c5e688ad2c4b50644a33dd93",
+        "imageId": "MKB000017",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--16_500.webp",
+        "order": 7,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ballyliffen",
+          "couple portraits",
+          "wedding car",
+          "newlyweds",
+          "kiss",
+          "romantic",
+          "silhouette",
+          "warm light",
+          "intimate moment",
+          "car ribbon",
+          "bride and groom",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ballyliffen",
+          "couple portraits",
+          "wedding car",
+          "newlyweds",
+          "kiss",
+          "romantic",
+          "silhouette",
+          "warm light",
+          "intimate moment",
+          "car ribbon",
+          "bride and groom",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride and groom sharing a warm silhouette kiss beside their ribboned wedding car in Ballyliffen, County Donegal",
+        "aiCaption": "A quiet couple portrait in Ballyliffen, with warm evening light, a ribboned wedding car and a relaxed kiss between the bride and groom.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--16_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--16_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 18,
+          "venue": "Ballyliffen",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_0c009354913722a56437fa9e",
+        "imageId": "MKB000018",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--19_500.webp",
+        "order": 8,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ballyliffen",
+          "couple portraits",
+          "bride and groom",
+          "indoor portrait",
+          "christmas decor",
+          "doorway portrait",
+          "soft lighting",
+          "romantic",
+          "elegant",
+          "wedding dress",
+          "black tie",
+          "newlyweds"
+        ],
+        "aiTags": [
+          "ballyliffen",
+          "couple portraits",
+          "bride and groom",
+          "indoor portrait",
+          "christmas decor",
+          "doorway portrait",
+          "soft lighting",
+          "romantic",
+          "elegant",
+          "wedding dress",
+          "black tie",
+          "newlyweds"
+        ],
+        "aiAlt": "Bride and groom in a softly lit doorway with Christmas decor at Ballyliffen, County Donegal",
+        "aiCaption": "A relaxed indoor couple portrait at Ballyliffen in Inishowen, with soft light, black tie style and subtle Christmas decor.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--19_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--19_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 19,
+          "venue": "Ballyliffen",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_a7899de37b9edcd51168edc4",
+        "imageId": "MKB000019",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--21_500.webp",
+        "order": 9,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ballyliffen",
+          "bridal portrait",
+          "bride",
+          "staircase",
+          "wedding dress",
+          "bridal bouquet",
+          "chandelier",
+          "indoor",
+          "dramatic lighting",
+          "elegant",
+          "romantic",
+          "couple portraits"
+        ],
+        "aiTags": [
+          "ballyliffen",
+          "bridal portrait",
+          "bride",
+          "staircase",
+          "wedding dress",
+          "bridal bouquet",
+          "chandelier",
+          "indoor",
+          "dramatic lighting",
+          "elegant",
+          "romantic",
+          "couple portraits"
+        ],
+        "aiAlt": "Bride on a staircase at Ballyliffen, holding her bouquet beneath a chandelier in soft dramatic light",
+        "aiCaption": "A quiet bridal portrait at Ballyliffen in County Donegal, with soft indoor light, elegant stairs and a relaxed documentary feel.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--21_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--21_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 20,
+          "venue": "Ballyliffen",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_c9c1976dcf73531d07c31618",
+        "imageId": "MKB000020",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--22_500.webp",
+        "order": 10,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ballyliffen",
+          "bride portrait",
+          "wedding dress",
+          "bridal bouquet",
+          "indoor portrait",
+          "staircase",
+          "soft lighting",
+          "joyful",
+          "elegant",
+          "romantic",
+          "bridal moment",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ballyliffen",
+          "bride portrait",
+          "wedding dress",
+          "bridal bouquet",
+          "indoor portrait",
+          "staircase",
+          "soft lighting",
+          "joyful",
+          "elegant",
+          "romantic",
+          "bridal moment",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride holding her bouquet on an indoor staircase at Ballyliffen, County Donegal, in soft natural light",
+        "aiCaption": "A relaxed bridal portrait on the staircase at Ballyliffen, with soft light and a joyful pause in the day.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--22_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--22_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 21,
+          "venue": "Ballyliffen",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_ffda15659d3f13db6bcdc075",
+        "imageId": "MKB000021",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--31_500.webp",
+        "order": 11,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ballyliffen",
+          "couple portrait",
+          "bride and groom",
+          "wedding embrace",
+          "indoor portrait",
+          "fairy lights",
+          "warm lighting",
+          "romantic mood",
+          "evening portrait",
+          "wedding dress",
+          "groom suit",
+          "intimate moment"
+        ],
+        "aiTags": [
+          "ballyliffen",
+          "couple portrait",
+          "bride and groom",
+          "wedding embrace",
+          "indoor portrait",
+          "fairy lights",
+          "warm lighting",
+          "romantic mood",
+          "evening portrait",
+          "wedding dress",
+          "groom suit",
+          "intimate moment"
+        ],
+        "aiAlt": "Bride and groom share a quiet indoor embrace under warm fairy lights at Ballyliffen, County Donegal",
+        "aiCaption": "A relaxed evening couple portrait at Ballyliffen, with warm light and fairy lights adding to the intimate atmosphere.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--31_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/couple%20portraits/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--31_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 22,
+          "venue": "Ballyliffen",
+          "category": "couple portraits"
+        }
+      },
+      {
+        "assetId": "legacy_3be7f3307a5128d7a5ca827a",
+        "imageId": "MKB000022",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--17_500.webp",
+        "order": 12,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "details-and-decor"
+        ],
+        "tags": [
+          "wedding reception",
+          "reception decor",
+          "ballyliffen wedding",
+          "floral garland",
+          "top table",
+          "banquet room",
+          "round tables",
+          "elegant decor",
+          "soft indoor light",
+          "romantic mood",
+          "table settings",
+          "wedding details"
+        ],
+        "aiTags": [
+          "wedding reception",
+          "reception decor",
+          "ballyliffen wedding",
+          "floral garland",
+          "top table",
+          "banquet room",
+          "round tables",
+          "elegant decor",
+          "soft indoor light",
+          "romantic mood",
+          "table settings",
+          "wedding details"
+        ],
+        "aiAlt": "Top table with floral garland and soft reception decor at a Ballyliffen wedding in County Donegal",
+        "aiCaption": "Soft indoor light, floral garlands and elegant table settings brought a relaxed warmth to this Ballyliffen reception in Inishowen.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/details%20and%20decor/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--17_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/details%20and%20decor/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--17_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 23,
+          "venue": "Ballyliffen",
+          "category": "details and decor"
+        }
+      },
+      {
+        "assetId": "legacy_c65cd46432bb6b68b8f17e03",
+        "imageId": "MKB000023",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--1_500.webp",
+        "order": 13,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "details-and-decor"
+        ],
+        "tags": [
+          "wedding dress",
+          "bridal details",
+          "dress hanging",
+          "staircase",
+          "window light",
+          "backlit",
+          "elegant decor",
+          "romantic mood",
+          "wedding morning",
+          "ballyliffen",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "wedding dress",
+          "bridal details",
+          "dress hanging",
+          "staircase",
+          "window light",
+          "backlit",
+          "elegant decor",
+          "romantic mood",
+          "wedding morning",
+          "ballyliffen",
+          "donegal wedding"
+        ],
+        "aiAlt": "Wedding dress hanging by a staircase in soft window light at Ballyliffen, County Donegal",
+        "aiCaption": "A quiet wedding morning detail in Ballyliffen, with the dress hanging in soft window light beside the staircase.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/details%20and%20decor/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--1_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/details%20and%20decor/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--1_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 24,
+          "venue": "Ballyliffen",
+          "category": "details and decor"
+        }
+      },
+      {
+        "assetId": "legacy_2694fe5161b8769a4bd4e59a",
+        "imageId": "MKB000024",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--18_500.webp",
+        "order": 14,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "ballyliffen wedding",
+          "family portrait",
+          "groom",
+          "grandmother",
+          "wedding hug",
+          "indoor reception",
+          "christmas decor",
+          "warm lighting",
+          "joyful moment",
+          "candid portrait",
+          "bridal party",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ballyliffen wedding",
+          "family portrait",
+          "groom",
+          "grandmother",
+          "wedding hug",
+          "indoor reception",
+          "christmas decor",
+          "warm lighting",
+          "joyful moment",
+          "candid portrait",
+          "bridal party",
+          "donegal wedding"
+        ],
+        "aiAlt": "Groom sharing a warm hug with his grandmother during an indoor Ballyliffen wedding reception in County Donegal",
+        "aiCaption": "A joyful family moment at Ballyliffen in County Donegal, with warm reception light and Christmas decor adding to the relaxed atmosphere.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--18_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--18_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 25,
+          "venue": "Ballyliffen",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_c6e4ae087333bdaa4245037f",
+        "imageId": "MKB000025",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--20_500.webp",
+        "order": 15,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "family portrait",
+          "bride and groom",
+          "parents",
+          "bridal party",
+          "indoor wedding",
+          "formal portrait",
+          "soft flash",
+          "happy mood",
+          "wedding reception",
+          "ballyliffen wedding",
+          "classic style",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "family portrait",
+          "bride and groom",
+          "parents",
+          "bridal party",
+          "indoor wedding",
+          "formal portrait",
+          "soft flash",
+          "happy mood",
+          "wedding reception",
+          "ballyliffen wedding",
+          "classic style",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride and groom with parents and bridal party during an indoor wedding portrait at Ballyliffen, County Donegal",
+        "aiCaption": "A relaxed family and bridal party portrait at Ballyliffen, with soft flash and plenty of warmth during the wedding reception.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--20_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--20_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 26,
+          "venue": "Ballyliffen",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_997234f450f923297b6e4a29",
+        "imageId": "MKB000026",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--23_500.webp",
+        "order": 16,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "ballyliffen wedding",
+          "bridal party",
+          "bride and groom",
+          "family portraits",
+          "indoor wedding",
+          "christmas decor",
+          "formal portrait",
+          "moody lighting",
+          "elegant",
+          "festive",
+          "wedding reception",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ballyliffen wedding",
+          "bridal party",
+          "bride and groom",
+          "family portraits",
+          "indoor wedding",
+          "christmas decor",
+          "formal portrait",
+          "moody lighting",
+          "elegant",
+          "festive",
+          "wedding reception",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride and groom with family and bridal party indoors at Ballyliffen, with festive decor and moody reception light",
+        "aiCaption": "A relaxed indoor family and bridal party portrait at Ballyliffen in County Donegal, framed by warm festive decor and soft, moody light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--23_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--23_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 27,
+          "venue": "Ballyliffen",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_aa5677a82b30a69f52238374",
+        "imageId": "MKB000027",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--24_500.webp",
+        "order": 17,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "ballyliffen wedding",
+          "bridal party",
+          "bride and groom",
+          "group portrait",
+          "indoor portrait",
+          "christmas decor",
+          "formalwear",
+          "soft lighting",
+          "elegant mood",
+          "wedding reception",
+          "family photos",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ballyliffen wedding",
+          "bridal party",
+          "bride and groom",
+          "group portrait",
+          "indoor portrait",
+          "christmas decor",
+          "formalwear",
+          "soft lighting",
+          "elegant mood",
+          "wedding reception",
+          "family photos",
+          "donegal wedding"
+        ],
+        "aiAlt": "Wedding party and family gathered for an indoor portrait at Ballyliffen, County Donegal, with soft light and Christmas décor.",
+        "aiCaption": "A relaxed family and bridal party portrait at Ballyliffen in County Donegal, framed by soft indoor light and subtle Christmas décor.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--24_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--24_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 28,
+          "venue": "Ballyliffen",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_3a49e64958d917e7dfa9b1b7",
+        "imageId": "MKB000028",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--7_500.webp",
+        "order": 18,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "ballyliffen wedding",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "outdoor portraits",
+          "bouquets",
+          "white wraps",
+          "overcast light",
+          "winter wedding",
+          "joyful",
+          "wedding morning",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ballyliffen wedding",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "outdoor portraits",
+          "bouquets",
+          "white wraps",
+          "overcast light",
+          "winter wedding",
+          "joyful",
+          "wedding morning",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride and bridesmaids with bouquets and white wraps during outdoor winter portraits at Ballyliffen in County Donegal",
+        "aiCaption": "Soft overcast light and a relaxed bridal party moment at Ballyliffen, with winter wraps, bouquets and plenty of easy joy.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--7_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--7_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 29,
+          "venue": "Ballyliffen",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_14419254535deca4d7c89c6f",
+        "imageId": "MKB000029",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--8_500.webp",
+        "order": 19,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "ballyliffen wedding",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "bouquets",
+          "stone wall",
+          "outdoor portraits",
+          "soft natural light",
+          "elegant",
+          "joyful",
+          "wedding party",
+          "emerald dresses"
+        ],
+        "aiTags": [
+          "ballyliffen wedding",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "bouquets",
+          "stone wall",
+          "outdoor portraits",
+          "soft natural light",
+          "elegant",
+          "joyful",
+          "wedding party",
+          "emerald dresses"
+        ],
+        "aiAlt": "Bride and bridesmaids in emerald dresses holding bouquets by a stone wall at Ballyliffen in County Donegal",
+        "aiCaption": "A relaxed bridal party portrait at Ballyliffen, with emerald dresses, bouquets and soft Donegal light by the stone wall.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--8_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--8_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 30,
+          "venue": "Ballyliffen",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_eebc72517f0d4db783762db1",
+        "imageId": "MKB000030",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--9_500.webp",
+        "order": 20,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "ballyliffen",
+          "bridal party",
+          "family portraits",
+          "church exterior",
+          "bride and groom",
+          "outdoor wedding",
+          "natural light",
+          "candid moment",
+          "wedding party",
+          "joyful",
+          "dress moment",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ballyliffen",
+          "bridal party",
+          "family portraits",
+          "church exterior",
+          "bride and groom",
+          "outdoor wedding",
+          "natural light",
+          "candid moment",
+          "wedding party",
+          "joyful",
+          "dress moment",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride, groom and bridal party sharing a candid moment outside a church in Ballyliffen, County Donegal",
+        "aiCaption": "A relaxed bridal party moment in natural light outside the church at Ballyliffen, with family close by and plenty of easy joy.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--9_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/family%20and%20bridal%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--9_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 31,
+          "venue": "Ballyliffen",
+          "category": "family and bridal party"
+        }
+      },
+      {
+        "assetId": "legacy_d925fa6699a3c6069c2db5ca",
+        "imageId": "MKB000031",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--2_500.webp",
+        "order": 21,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bride prep",
+          "bridal makeup",
+          "lipstick",
+          "makeup artist",
+          "soft light",
+          "close up",
+          "calm mood",
+          "wedding morning",
+          "beauty details",
+          "ballyliffen",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bride prep",
+          "bridal makeup",
+          "lipstick",
+          "makeup artist",
+          "soft light",
+          "close up",
+          "calm mood",
+          "wedding morning",
+          "beauty details",
+          "ballyliffen",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride having lipstick applied during calm wedding morning prep at Ballyliffen in County Donegal",
+        "aiCaption": "Soft light and quiet beauty details during bridal prep at Ballyliffen, captured in a relaxed documentary style.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/getting%20ready/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--2_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/getting%20ready/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--2_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 32,
+          "venue": "Ballyliffen",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_5d8abd7a298dd9ad76e4ec27",
+        "imageId": "MKB000032",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--3_500.webp",
+        "order": 22,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "ballyliffen wedding",
+          "getting ready",
+          "bride",
+          "bridal robe",
+          "mirror portrait",
+          "bridal prep",
+          "soft window light",
+          "happy bride",
+          "morning preparations",
+          "wedding makeup",
+          "elegant details",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ballyliffen wedding",
+          "getting ready",
+          "bride",
+          "bridal robe",
+          "mirror portrait",
+          "bridal prep",
+          "soft window light",
+          "happy bride",
+          "morning preparations",
+          "wedding makeup",
+          "elegant details",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride in a robe smiling by the mirror during morning preparations at Ballyliffen in County Donegal",
+        "aiCaption": "Soft window light and a quiet smile during bridal prep in Ballyliffen, County Donegal, captured in a relaxed documentary style.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/getting%20ready/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--3_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/getting%20ready/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--3_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 33,
+          "venue": "Ballyliffen",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_e2125396cc668788aa92248d",
+        "imageId": "MKB000033",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--4_500.webp",
+        "order": 23,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bride",
+          "mirror portrait",
+          "black and white",
+          "bridal robe",
+          "soft lighting",
+          "morning prep",
+          "candid moment",
+          "wedding morning",
+          "intimate mood",
+          "indoor scene",
+          "ballyliffen"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bride",
+          "mirror portrait",
+          "black and white",
+          "bridal robe",
+          "soft lighting",
+          "morning prep",
+          "candid moment",
+          "wedding morning",
+          "intimate mood",
+          "indoor scene",
+          "ballyliffen"
+        ],
+        "aiAlt": "Black and white mirror portrait of a bride in a robe during morning prep at Ballyliffen, County Donegal",
+        "aiCaption": "A quiet black and white getting ready moment in Ballyliffen, with soft light and a relaxed wedding morning atmosphere.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/getting%20ready/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--4_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/getting%20ready/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--4_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 34,
+          "venue": "Ballyliffen",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_518ba1fa7cd0b33c3de86e96",
+        "imageId": "MKB000034",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--5_500.webp",
+        "order": 24,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "ballyliffen",
+          "getting ready",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "champagne toast",
+          "morning preparations",
+          "window light",
+          "joyful",
+          "robes",
+          "candid",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "ballyliffen",
+          "getting ready",
+          "bride",
+          "bridesmaids",
+          "bridal party",
+          "champagne toast",
+          "morning preparations",
+          "window light",
+          "joyful",
+          "robes",
+          "candid",
+          "wedding morning"
+        ],
+        "aiAlt": "Bride and bridesmaids in robes sharing a champagne toast during wedding morning preparations at Ballyliffen, County Donegal",
+        "aiCaption": "A relaxed champagne toast in soft window light as the bridal party gets ready at Ballyliffen in Inishowen.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/getting%20ready/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--5_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/getting%20ready/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--5_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 35,
+          "venue": "Ballyliffen",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_7481e13be7bb6002e378d9ca",
+        "imageId": "MKB000035",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--6_500.webp",
+        "order": 25,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "ballyliffen wedding",
+          "getting ready",
+          "groom prep",
+          "bow tie",
+          "mirror reflection",
+          "black tuxedo",
+          "hotel room",
+          "natural light",
+          "candid moment",
+          "happy groom",
+          "wedding morning",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ballyliffen wedding",
+          "getting ready",
+          "groom prep",
+          "bow tie",
+          "mirror reflection",
+          "black tuxedo",
+          "hotel room",
+          "natural light",
+          "candid moment",
+          "happy groom",
+          "wedding morning",
+          "donegal wedding"
+        ],
+        "aiAlt": "Groom adjusting his bow tie in a mirror during wedding morning prep at Ballyliffen, County Donegal",
+        "aiCaption": "A relaxed groom prep moment in Ballyliffen, with natural light and a mirror reflection capturing the calm of the wedding morning.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/getting%20ready/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--6_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/getting%20ready/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--6_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 36,
+          "venue": "Ballyliffen",
+          "category": "getting ready"
+        }
+      },
+      {
+        "assetId": "legacy_641e0c8239dd6b204eaa2bff",
+        "imageId": "MKB000036",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--25_500.webp",
+        "order": 26,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "ballyliffen wedding",
+          "reception entrance",
+          "bride and groom",
+          "wedding party",
+          "fairy lights",
+          "white draping",
+          "joyful moment",
+          "evening reception",
+          "grand entrance",
+          "celebration",
+          "indoor wedding",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ballyliffen wedding",
+          "reception entrance",
+          "bride and groom",
+          "wedding party",
+          "fairy lights",
+          "white draping",
+          "joyful moment",
+          "evening reception",
+          "grand entrance",
+          "celebration",
+          "indoor wedding",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride and groom making a joyful reception entrance under fairy lights and white draping at Ballyliffen in County Donegal",
+        "aiCaption": "A relaxed evening reception entrance at Ballyliffen, with the wedding party cheering beneath soft fairy lights and white draping.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--25_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--25_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 37,
+          "venue": "Ballyliffen",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_6a2bfa2c5d3abac62ddbe052",
+        "imageId": "MKB000037",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--26_500.webp",
+        "order": 27,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "ballyliffen",
+          "reception",
+          "wedding party",
+          "bride and groom",
+          "first dance",
+          "dance floor",
+          "guests cheering",
+          "napkin wave",
+          "indoor reception",
+          "warm lighting",
+          "candid",
+          "joyful"
+        ],
+        "aiTags": [
+          "ballyliffen",
+          "reception",
+          "wedding party",
+          "bride and groom",
+          "first dance",
+          "dance floor",
+          "guests cheering",
+          "napkin wave",
+          "indoor reception",
+          "warm lighting",
+          "candid",
+          "joyful"
+        ],
+        "aiAlt": "Bride and groom on the dance floor at Ballyliffen as guests cheer and wave napkins during the reception",
+        "aiCaption": "A joyful first dance at Ballyliffen in County Donegal, with warm indoor light and guests cheering around the dance floor.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--26_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--26_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 38,
+          "venue": "Ballyliffen",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_73dacff498b538c41bf63b79",
+        "imageId": "MKB000038",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--27_500.webp",
+        "order": 28,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "reception",
+          "party",
+          "bride and groom",
+          "dance floor",
+          "grand entrance",
+          "black and white",
+          "indoor lighting",
+          "joyful",
+          "celebration",
+          "wedding guests",
+          "evening reception",
+          "ballyliffen"
+        ],
+        "aiTags": [
+          "reception",
+          "party",
+          "bride and groom",
+          "dance floor",
+          "grand entrance",
+          "black and white",
+          "indoor lighting",
+          "joyful",
+          "celebration",
+          "wedding guests",
+          "evening reception",
+          "ballyliffen"
+        ],
+        "aiAlt": "Black and white photo of a couple making their grand entrance to the Ballyliffen reception dance floor in County Donegal",
+        "aiCaption": "A joyful evening reception moment in Ballyliffen, with guests gathered around the dance floor as the couple step into the party.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--27_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--27_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 39,
+          "venue": "Ballyliffen",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_d4f272999ccf3cb9786d4f10",
+        "imageId": "MKB000039",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--28_500.webp",
+        "order": 29,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "wedding reception",
+          "top table",
+          "groom speech",
+          "wedding toast",
+          "bride and groom",
+          "bridal party",
+          "indoor reception",
+          "warm lighting",
+          "celebration",
+          "candid moment",
+          "ballyliffen wedding",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "wedding reception",
+          "top table",
+          "groom speech",
+          "wedding toast",
+          "bride and groom",
+          "bridal party",
+          "indoor reception",
+          "warm lighting",
+          "celebration",
+          "candid moment",
+          "ballyliffen wedding",
+          "donegal wedding"
+        ],
+        "aiAlt": "Groom giving a speech at a warm indoor wedding reception in Ballyliffen, with the top table and bridal party listening",
+        "aiCaption": "A relaxed reception moment in Ballyliffen as the groom’s speech brings everyone together around the top table.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--28_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--28_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 40,
+          "venue": "Ballyliffen",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_fd4b47df5c1a4d0f2fdb78e9",
+        "imageId": "MKB000040",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--29_500.webp",
+        "order": 30,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "ballyliffen wedding",
+          "reception party",
+          "bride and groom",
+          "sparkler exit",
+          "night celebration",
+          "wedding guests",
+          "dramatic lighting",
+          "joyful moment",
+          "evening wedding",
+          "party atmosphere"
+        ],
+        "aiTags": [
+          "ballyliffen wedding",
+          "reception party",
+          "bride and groom",
+          "sparkler exit",
+          "night celebration",
+          "wedding guests",
+          "dramatic lighting",
+          "joyful moment",
+          "evening wedding",
+          "party atmosphere"
+        ],
+        "aiAlt": "Bride and groom enjoying a sparkler exit with guests at Ballyliffen in County Donegal",
+        "aiCaption": "A joyful night-time sparkler exit at Ballyliffen, with guests gathered close and warm documentary energy across the evening celebration.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--29_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--29_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 41,
+          "venue": "Ballyliffen",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_cbb8dfb392eb6fa03c6d80eb",
+        "imageId": "MKB000041",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--30_500.webp",
+        "order": 31,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "ballyliffen",
+          "wedding reception",
+          "sparkler exit",
+          "bride",
+          "groom",
+          "guests",
+          "night portrait",
+          "black and white",
+          "celebration",
+          "romantic mood",
+          "party",
+          "candid moment"
+        ],
+        "aiTags": [
+          "ballyliffen",
+          "wedding reception",
+          "sparkler exit",
+          "bride",
+          "groom",
+          "guests",
+          "night portrait",
+          "black and white",
+          "celebration",
+          "romantic mood",
+          "party",
+          "candid moment"
+        ],
+        "aiAlt": "Black and white sparkler exit at a Ballyliffen wedding reception, with the couple surrounded by cheering guests at night",
+        "aiCaption": "A relaxed sparkler exit in Ballyliffen, County Donegal, captured in black and white as guests gather around the couple after dark.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--30_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--30_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 42,
+          "venue": "Ballyliffen",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_7d10a8e98f9106854e5f95ab",
+        "imageId": "MKB000042",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--32_500.webp",
+        "order": 32,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "ballyliffen wedding",
+          "reception party",
+          "wedding guests",
+          "dance floor",
+          "evening reception",
+          "celebration",
+          "candid moments",
+          "party atmosphere",
+          "indoor reception",
+          "flash lighting",
+          "joyful guests",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ballyliffen wedding",
+          "reception party",
+          "wedding guests",
+          "dance floor",
+          "evening reception",
+          "celebration",
+          "candid moments",
+          "party atmosphere",
+          "indoor reception",
+          "flash lighting",
+          "joyful guests",
+          "donegal wedding"
+        ],
+        "aiAlt": "Wedding guests dancing at the evening reception in Ballyliffen, County Donegal, with a lively flash-lit party atmosphere",
+        "aiCaption": "A relaxed flash-lit moment from the Ballyliffen evening reception, with guests filling the dance floor and keeping the celebration moving.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--32_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--32_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 43,
+          "venue": "Ballyliffen",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_4e1f97bb7de6a045343c6b5c",
+        "imageId": "MKB000043",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--33_500.webp",
+        "order": 33,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "reception",
+          "wedding party",
+          "bride and groom",
+          "grand entrance",
+          "dance floor",
+          "guests clapping",
+          "indoor reception",
+          "spotlight",
+          "celebration",
+          "joyful",
+          "ballyliffen wedding",
+          "party atmosphere"
+        ],
+        "aiTags": [
+          "reception",
+          "wedding party",
+          "bride and groom",
+          "grand entrance",
+          "dance floor",
+          "guests clapping",
+          "indoor reception",
+          "spotlight",
+          "celebration",
+          "joyful",
+          "ballyliffen wedding",
+          "party atmosphere"
+        ],
+        "aiAlt": "Bride and groom make their grand entrance to the Ballyliffen reception as guests clap around the dance floor",
+        "aiCaption": "A joyful reception entrance in Ballyliffen, with guests gathered around the dance floor and the room full of warm party energy.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--33_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--33_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 44,
+          "venue": "Ballyliffen",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_4dee0646cd9c43cc70975e29",
+        "imageId": "MKB000044",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--34_500.webp",
+        "order": 34,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "ballyliffen",
+          "wedding reception",
+          "first dance",
+          "bride and groom",
+          "dance floor",
+          "wedding guests",
+          "evening party",
+          "indoor lighting",
+          "romantic moment",
+          "celebration",
+          "candid reactions",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ballyliffen",
+          "wedding reception",
+          "first dance",
+          "bride and groom",
+          "dance floor",
+          "wedding guests",
+          "evening party",
+          "indoor lighting",
+          "romantic moment",
+          "celebration",
+          "candid reactions",
+          "donegal wedding"
+        ],
+        "aiAlt": "Couple share their first dance at a Ballyliffen wedding reception in County Donegal, surrounded by guests and warm indoor light",
+        "aiCaption": "A relaxed first dance at Ballyliffen in Inishowen, with guests gathered close and the evening party starting to build.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--34_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--34_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 45,
+          "venue": "Ballyliffen",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_dfc6948436ddd756a3ae3655",
+        "imageId": "MKB000045",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--35_500.webp",
+        "order": 35,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "reception",
+          "first dance",
+          "bride and groom",
+          "wedding guests",
+          "dance floor",
+          "indoor wedding",
+          "chandelier",
+          "black and white",
+          "dramatic lighting",
+          "romantic",
+          "celebration",
+          "ballyliffen"
+        ],
+        "aiTags": [
+          "reception",
+          "first dance",
+          "bride and groom",
+          "wedding guests",
+          "dance floor",
+          "indoor wedding",
+          "chandelier",
+          "black and white",
+          "dramatic lighting",
+          "romantic",
+          "celebration",
+          "ballyliffen"
+        ],
+        "aiAlt": "Black and white first dance at Ballyliffen, with guests gathered around the dance floor under chandelier light.",
+        "aiCaption": "A relaxed first dance moment at Ballyliffen in County Donegal, surrounded by guests and soft indoor light.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--35_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--35_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 46,
+          "venue": "Ballyliffen",
+          "category": "reception and party"
+        }
+      },
+      {
+        "assetId": "legacy_c96a6b8f8364ae8053dc278a",
+        "imageId": "MKB000046",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--36_500.webp",
+        "order": 36,
+        "included": true,
+        "hidden": false,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "ballyliffen wedding",
+          "reception party",
+          "dance floor",
+          "bride dancing",
+          "groom dancing",
+          "wedding guests",
+          "evening reception",
+          "flash lighting",
+          "celebration",
+          "joyful mood",
+          "party moment",
+          "donegal wedding"
+        ],
+        "aiTags": [
+          "ballyliffen wedding",
+          "reception party",
+          "dance floor",
+          "bride dancing",
+          "groom dancing",
+          "wedding guests",
+          "evening reception",
+          "flash lighting",
+          "celebration",
+          "joyful mood",
+          "party moment",
+          "donegal wedding"
+        ],
+        "aiAlt": "Bride and groom dancing with guests at a lively Ballyliffen wedding reception in County Donegal",
+        "aiCaption": "A joyful dance floor moment from an evening wedding reception in Ballyliffen, County Donegal, captured with relaxed flash-lit energy.",
+        "display": {
+          "venue": true,
+          "moments": true,
+          "blog": false,
+          "homepage": false,
+          "portfolio": false
+        },
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--36_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ballyliffen/reception%20and%20party/mkb-weddings-ballyliffen-lodge-hotel-donegal-wedding-photographer--36_2000.webp",
+        "source": {
+          "type": "legacy-gallery-csv",
+          "csvRow": 47,
+          "venue": "Ballyliffen",
+          "category": "reception and party"
+        }
+      }
+    ]
+  }
+}

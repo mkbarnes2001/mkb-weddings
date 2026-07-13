@@ -1,0 +1,378 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_163ef1d4-1a79-44b8-b910-d27f31b48bdb",
+  "slug": "scrabo-golf-course",
+  "name": "Scrabo golf course",
+  "town": "",
+  "county": "",
+  "country": "Northern Ireland",
+  "intro": "",
+  "description": "",
+  "status": "published",
+  "updatedAt": "2026-07-13T07:52:28.342Z",
+  "links": {
+    "website": "https://www.scrabogolfclubni.com",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.342Z",
+    "heroAssetId": "legacy_1fc4cd33608f77bf592323d6",
+    "images": [
+      {
+        "assetId": "legacy_1fc4cd33608f77bf592323d6",
+        "imageId": "MKB001384",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-231_500.webp",
+        "order": 1,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "church ceremony",
+          "flower girl",
+          "groom",
+          "wedding kiss",
+          "bridal party",
+          "red bridesmaid dresses",
+          "sunflower bouquet",
+          "indoor wedding",
+          "natural light",
+          "emotional moment",
+          "scrabo golf course"
+        ],
+        "aiTags": [
+          "ceremony",
+          "church ceremony",
+          "flower girl",
+          "groom",
+          "wedding kiss",
+          "bridal party",
+          "red bridesmaid dresses",
+          "sunflower bouquet",
+          "indoor wedding",
+          "natural light",
+          "emotional moment",
+          "scrabo golf course"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Scrabo%20golf%20course/ceremony/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-231_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Scrabo%20golf%20course/ceremony/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-231_2000.webp",
+        "alt": "Wedding kiss during an indoor ceremony at Scrabo Golf Course, Newtownards, with red bridesmaid dresses and sunflower bouquets",
+        "caption": "A warm ceremony moment at Scrabo Golf Course in Newtownards, with natural light, sunflower bouquets and the bridal party gathered close."
+      },
+      {
+        "assetId": "legacy_28b3c247e280db7608cea8dd",
+        "imageId": "MKB001385",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-436_500.webp",
+        "order": 2,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "bride and groom",
+          "indoor ceremony",
+          "church interior",
+          "natural light",
+          "romantic",
+          "joyful",
+          "wedding vows",
+          "scrabo golf course",
+          "northern ireland wedding",
+          "altar",
+          "candid moment"
+        ],
+        "aiTags": [
+          "ceremony",
+          "bride and groom",
+          "indoor ceremony",
+          "church interior",
+          "natural light",
+          "romantic",
+          "joyful",
+          "wedding vows",
+          "scrabo golf course",
+          "northern ireland wedding",
+          "altar",
+          "candid moment"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Scrabo%20golf%20course/ceremony/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-436_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Scrabo%20golf%20course/ceremony/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-436_2000.webp",
+        "alt": "Bride and groom share a joyful moment during their indoor ceremony at Scrabo Golf Course, Newtownards",
+        "caption": "A relaxed ceremony moment at Scrabo Golf Course in Newtownards, with natural light and quiet joy around the vows."
+      },
+      {
+        "assetId": "legacy_7b081911f92284235ed701f8",
+        "imageId": "MKB001386",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-509_500.webp",
+        "order": 3,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "wedding day",
+          "blue door",
+          "historic doorway",
+          "natural light",
+          "romantic",
+          "joyful",
+          "holding hands",
+          "bridal bouquet",
+          "sunflowers",
+          "scrabo golf course"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "wedding day",
+          "blue door",
+          "historic doorway",
+          "natural light",
+          "romantic",
+          "joyful",
+          "holding hands",
+          "bridal bouquet",
+          "sunflowers",
+          "scrabo golf course"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Scrabo%20golf%20course/couple%20portraits/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-509_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Scrabo%20golf%20course/couple%20portraits/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-509_2000.webp",
+        "alt": "Bride and groom holding hands by a blue historic doorway at Scrabo Golf Course, Newtownards, with a sunflower bouquet",
+        "caption": "A relaxed couple portrait at Scrabo Golf Course in Newtownards, with soft natural light, a blue doorway and a bright sunflower bouquet."
+      },
+      {
+        "assetId": "legacy_0ed76dd20cd3a7f4d3d45b07",
+        "imageId": "MKB001387",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-565_500.webp",
+        "order": 4,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "golf course",
+          "scrabo golf course",
+          "outdoor wedding",
+          "historic tower",
+          "overcast light",
+          "romantic",
+          "dramatic sky",
+          "wedding portraits",
+          "northern ireland",
+          "countryside"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "golf course",
+          "scrabo golf course",
+          "outdoor wedding",
+          "historic tower",
+          "overcast light",
+          "romantic",
+          "dramatic sky",
+          "wedding portraits",
+          "northern ireland",
+          "countryside"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Scrabo%20golf%20course/couple%20portraits/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-565_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Scrabo%20golf%20course/couple%20portraits/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-565_2000.webp",
+        "alt": "Bride and groom portraits on Scrabo Golf Course in Newtownards with the historic tower and dramatic overcast sky behind them",
+        "caption": "A relaxed couple portrait at Scrabo Golf Course in Newtownards, with soft overcast light, open countryside and the tower in the distance."
+      },
+      {
+        "assetId": "legacy_4e4699e40616b7850143ee38",
+        "imageId": "MKB001388",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-574_500.webp",
+        "order": 5,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portrait",
+          "bride and groom",
+          "outdoor wedding",
+          "golf course",
+          "scrabo golf course",
+          "daylight",
+          "romantic",
+          "joyful",
+          "wedding bouquet",
+          "sunflowers",
+          "tower backdrop",
+          "northern ireland wedding"
+        ],
+        "aiTags": [
+          "couple portrait",
+          "bride and groom",
+          "outdoor wedding",
+          "golf course",
+          "scrabo golf course",
+          "daylight",
+          "romantic",
+          "joyful",
+          "wedding bouquet",
+          "sunflowers",
+          "tower backdrop",
+          "northern ireland wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Scrabo%20golf%20course/couple%20portraits/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-574_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Scrabo%20golf%20course/couple%20portraits/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-574_2000.webp",
+        "alt": "Bride and groom portrait at Scrabo Golf Course in Newtownards, with sunflowers and the tower backdrop in soft daylight",
+        "caption": "A relaxed couple portrait at Scrabo Golf Course, Newtownards, with sunflowers, open daylight and the tower sitting quietly in the background."
+      },
+      {
+        "assetId": "legacy_98f46f8b09983fa68d28670b",
+        "imageId": "MKB001389",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-585_500.webp",
+        "order": 6,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "scrabo golf course",
+          "tree lined",
+          "natural light",
+          "romantic",
+          "intimate kiss",
+          "wedding dress",
+          "sunflower bouquet",
+          "garden setting",
+          "soft focus"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "outdoor portraits",
+          "scrabo golf course",
+          "tree lined",
+          "natural light",
+          "romantic",
+          "intimate kiss",
+          "wedding dress",
+          "sunflower bouquet",
+          "garden setting",
+          "soft focus"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Scrabo%20golf%20course/couple%20portraits/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-585_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Scrabo%20golf%20course/couple%20portraits/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-585_2000.webp",
+        "alt": "Bride and groom share a quiet kiss under trees at Scrabo Golf Course, Newtownards, with a sunflower bouquet in natural light.",
+        "caption": "A relaxed couple portrait at Scrabo Golf Course in Newtownards, with soft natural light, tree-lined greenery and a sunflower bouquet adding warmth."
+      },
+      {
+        "assetId": "legacy_522ffc9d20aa87cb151be198",
+        "imageId": "MKB001390",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-109_500.webp",
+        "order": 7,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "wedding dress",
+          "bridal gown",
+          "getting ready",
+          "bridal prep",
+          "dress details",
+          "window light",
+          "sunflowers",
+          "indoor scene",
+          "quiet moment",
+          "romantic mood",
+          "scrabo golf course",
+          "wedding morning"
+        ],
+        "aiTags": [
+          "wedding dress",
+          "bridal gown",
+          "getting ready",
+          "bridal prep",
+          "dress details",
+          "window light",
+          "sunflowers",
+          "indoor scene",
+          "quiet moment",
+          "romantic mood",
+          "scrabo golf course",
+          "wedding morning"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Scrabo%20golf%20course/getting%20ready/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-109_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Scrabo%20golf%20course/getting%20ready/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-109_2000.webp",
+        "alt": "Wedding dress hanging in window light with sunflowers during bridal prep at Scrabo Golf Course, Newtownards",
+        "caption": "A quiet wedding morning detail at Scrabo Golf Course in Newtownards, with the bridal gown and sunflowers caught in soft window light."
+      },
+      {
+        "assetId": "legacy_82abd0547e4249dd82e0e240",
+        "imageId": "MKB001391",
+        "weddingSlug": "",
+        "filename": "MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-188_500.webp",
+        "order": 8,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bride",
+          "mirror portrait",
+          "wedding dress",
+          "bridal prep",
+          "soft window light",
+          "happy bride",
+          "romantic mood",
+          "indoor portrait",
+          "scrabo golf course"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bride",
+          "mirror portrait",
+          "wedding dress",
+          "bridal prep",
+          "soft window light",
+          "happy bride",
+          "romantic mood",
+          "indoor portrait",
+          "scrabo golf course"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Scrabo%20golf%20course/getting%20ready/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-188_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Scrabo%20golf%20course/getting%20ready/MKB-weddings-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-scrabo-golf-course-newtownards-wedding-photography-188_2000.webp",
+        "alt": "Bride smiling in her wedding dress during bridal prep in soft window light at Scrabo Golf Course, Newtownards",
+        "caption": "A relaxed bridal prep moment at Scrabo Golf Course in Newtownards, with soft window light and a quiet smile before the day begins."
+      }
+    ]
+  }
+}

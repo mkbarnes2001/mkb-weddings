@@ -1,0 +1,552 @@
+{
+  "schemaVersion": 1,
+  "id": "venue_4b2e4ae2-5016-479d-947a-c89db7e1c34c",
+  "slug": "ten-square",
+  "name": "Ten Square",
+  "town": "",
+  "county": "",
+  "country": "Northern Ireland",
+  "intro": "",
+  "description": "",
+  "status": "published",
+  "updatedAt": "2026-07-13T07:52:28.345Z",
+  "links": {
+    "website": "https://www.tensquare.co.uk",
+    "instagram": "",
+    "facebook": "",
+    "googleMaps": ""
+  },
+  "practical": {
+    "address": "",
+    "parking": "",
+    "accommodation": "",
+    "ceremonyTypes": "",
+    "capacity": "",
+    "outdoorCeremony": false
+  },
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "gallery": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-07-13T07:52:28.345Z",
+    "heroAssetId": "legacy_c1712902f36d98a74698d11d",
+    "images": [
+      {
+        "assetId": "legacy_c1712902f36d98a74698d11d",
+        "imageId": "MKB001615",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--111_500.webp",
+        "order": 1,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "bride and groom",
+          "aisle exit",
+          "newlyweds",
+          "guest applause",
+          "indoor wedding",
+          "black and white",
+          "joyful",
+          "natural light",
+          "wedding bouquet",
+          "celebration",
+          "hotel wedding"
+        ],
+        "aiTags": [
+          "ceremony",
+          "bride and groom",
+          "aisle exit",
+          "newlyweds",
+          "guest applause",
+          "indoor wedding",
+          "black and white",
+          "joyful",
+          "natural light",
+          "wedding bouquet",
+          "celebration",
+          "hotel wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ten%20Square/ceremony/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--111_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ten%20Square/ceremony/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--111_2000.webp",
+        "alt": "Black and white ceremony aisle exit at Ten Square Belfast, with newlyweds smiling as guests applaud.",
+        "caption": "A joyful aisle exit at Ten Square in Belfast, captured in a relaxed documentary style as guests celebrate the newlyweds."
+      },
+      {
+        "assetId": "legacy_d91af2c9dd7922e137504ba4",
+        "imageId": "MKB001616",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--77_500.webp",
+        "order": 2,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ceremony",
+          "ring bearer",
+          "page boy",
+          "wedding rings",
+          "indoor ceremony",
+          "ten square",
+          "belfast wedding",
+          "natural light",
+          "candid moment",
+          "family",
+          "guests",
+          "emotional"
+        ],
+        "aiTags": [
+          "ceremony",
+          "ring bearer",
+          "page boy",
+          "wedding rings",
+          "indoor ceremony",
+          "ten square",
+          "belfast wedding",
+          "natural light",
+          "candid moment",
+          "family",
+          "guests",
+          "emotional"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ten%20Square/ceremony/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--77_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ten%20Square/ceremony/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--77_2000.webp",
+        "alt": "Page boy carrying wedding rings during an indoor ceremony at Ten Square in Belfast",
+        "caption": "A quiet candid moment as the page boy brings the rings forward during a warm indoor ceremony at Ten Square, Belfast."
+      },
+      {
+        "assetId": "legacy_84795c818d7870a703541d12",
+        "imageId": "MKB001617",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--86_500.webp",
+        "order": 3,
+        "rating": 0,
+        "moments": [
+          "ceremony"
+        ],
+        "tags": [
+          "ten square",
+          "ceremony",
+          "first kiss",
+          "bride and groom",
+          "wedding vows",
+          "indoor ceremony",
+          "natural light",
+          "guests",
+          "child attendant",
+          "romantic",
+          "joyful",
+          "belfast wedding"
+        ],
+        "aiTags": [
+          "ten square",
+          "ceremony",
+          "first kiss",
+          "bride and groom",
+          "wedding vows",
+          "indoor ceremony",
+          "natural light",
+          "guests",
+          "child attendant",
+          "romantic",
+          "joyful",
+          "belfast wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ten%20Square/ceremony/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--86_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ten%20Square/ceremony/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--86_2000.webp",
+        "alt": "Couple sharing their first kiss during an indoor ceremony at Ten Square in Belfast, with guests looking on.",
+        "caption": "A warm, natural moment from a Ten Square ceremony in Belfast as the couple share their first kiss surrounded by family and friends."
+      },
+      {
+        "assetId": "legacy_032c678871d11b7235411d8a",
+        "imageId": "MKB001618",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--182_500.webp",
+        "order": 4,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "rooftop",
+          "city backdrop",
+          "bouquet",
+          "soft daylight",
+          "romantic",
+          "elegant",
+          "wedding portraits",
+          "belfast wedding",
+          "ten square",
+          "newlyweds"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "rooftop",
+          "city backdrop",
+          "bouquet",
+          "soft daylight",
+          "romantic",
+          "elegant",
+          "wedding portraits",
+          "belfast wedding",
+          "ten square",
+          "newlyweds"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ten%20Square/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--182_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ten%20Square/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--182_2000.webp",
+        "alt": "Newlyweds on the rooftop at Ten Square Belfast, with bouquet and soft daylight over the city backdrop",
+        "caption": "A relaxed rooftop portrait at Ten Square in Belfast, capturing the couple together in soft daylight with the city behind them."
+      },
+      {
+        "assetId": "legacy_859cf620d63925d05c8ec326",
+        "imageId": "MKB001619",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--184_500.webp",
+        "order": 5,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "rooftop",
+          "city backdrop",
+          "overcast light",
+          "romantic",
+          "elegant",
+          "wedding bouquet",
+          "urban wedding",
+          "belfast",
+          "ten square",
+          "just married"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "rooftop",
+          "city backdrop",
+          "overcast light",
+          "romantic",
+          "elegant",
+          "wedding bouquet",
+          "urban wedding",
+          "belfast",
+          "ten square",
+          "just married"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ten%20Square/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--184_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ten%20Square/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--184_2000.webp",
+        "alt": "Bride and groom on the rooftop at Ten Square, Belfast, with a city backdrop and soft overcast light",
+        "caption": "A relaxed rooftop portrait at Ten Square in Belfast, with the couple framed by the city skyline and soft overcast light."
+      },
+      {
+        "assetId": "legacy_a423527e87f1c46df1706da9",
+        "imageId": "MKB001620",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--29_500.webp",
+        "order": 6,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ten square",
+          "couple portraits",
+          "bride and groom",
+          "rooftop",
+          "belfast cityscape",
+          "wedding veil",
+          "overcast light",
+          "romantic",
+          "urban wedding",
+          "holding hands",
+          "wedding portraits"
+        ],
+        "aiTags": [
+          "ten square",
+          "couple portraits",
+          "bride and groom",
+          "rooftop",
+          "belfast cityscape",
+          "wedding veil",
+          "overcast light",
+          "romantic",
+          "urban wedding",
+          "holding hands",
+          "wedding portraits"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ten%20Square/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--29_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ten%20Square/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--29_2000.webp",
+        "alt": "Bride and groom holding hands on the Ten Square rooftop with Belfast cityscape behind them in soft overcast light",
+        "caption": "A relaxed rooftop portrait at Ten Square in Belfast, with the couple taking a quiet moment together against the city skyline."
+      },
+      {
+        "assetId": "legacy_bdc88a9a6f8a885dfe8819f6",
+        "imageId": "MKB001621",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--30_500.webp",
+        "order": 7,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "ten square",
+          "couple portraits",
+          "bride and groom",
+          "romantic kiss",
+          "close up",
+          "soft light",
+          "veil portrait",
+          "wedding flowers",
+          "joyful",
+          "intimate moment",
+          "belfast wedding",
+          "wedding day"
+        ],
+        "aiTags": [
+          "ten square",
+          "couple portraits",
+          "bride and groom",
+          "romantic kiss",
+          "close up",
+          "soft light",
+          "veil portrait",
+          "wedding flowers",
+          "joyful",
+          "intimate moment",
+          "belfast wedding",
+          "wedding day"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ten%20Square/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--30_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ten%20Square/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--30_2000.webp",
+        "alt": "Bride and groom sharing a soft kiss under the veil at Ten Square, Belfast, with wedding flowers close by",
+        "caption": "A quiet couple portrait at Ten Square in Belfast, with soft light, flowers and a relaxed kiss beneath the veil."
+      },
+      {
+        "assetId": "legacy_5c4392ef8e0b19c168e24e75",
+        "imageId": "MKB001622",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-northern-ireland-wedding-photographer-belfast-wedding-photography-10_500.webp",
+        "order": 8,
+        "rating": 0,
+        "moments": [
+          "couple-portraits"
+        ],
+        "tags": [
+          "couple portraits",
+          "bride and groom",
+          "wedding portraits",
+          "outdoor portraits",
+          "brick wall",
+          "tree framed",
+          "natural light",
+          "moody lighting",
+          "romantic",
+          "intimate",
+          "belfast wedding",
+          "wedding day"
+        ],
+        "aiTags": [
+          "couple portraits",
+          "bride and groom",
+          "wedding portraits",
+          "outdoor portraits",
+          "brick wall",
+          "tree framed",
+          "natural light",
+          "moody lighting",
+          "romantic",
+          "intimate",
+          "belfast wedding",
+          "wedding day"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ten%20Square/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-belfast-wedding-photography-10_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ten%20Square/couple%20portraits/mkb-weddings-northern-ireland-wedding-photographer-belfast-wedding-photography-10_2000.webp",
+        "alt": "Bride and groom portrait outdoors by a brick wall near Ten Square in Belfast, framed by trees in soft natural light.",
+        "caption": "A relaxed couple portrait near Ten Square in Belfast, with soft light, brick textures and tree cover giving the moment a quiet city feel."
+      },
+      {
+        "assetId": "legacy_1a5b681e087fac97f2ffe3fe",
+        "imageId": "MKB001623",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--163_500.webp",
+        "order": 9,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "ten square",
+          "rooftop terrace",
+          "bride",
+          "bridesmaid",
+          "bridal party",
+          "bouquets",
+          "city backdrop",
+          "natural light",
+          "overcast",
+          "joyful",
+          "wedding portraits",
+          "belfast wedding"
+        ],
+        "aiTags": [
+          "ten square",
+          "rooftop terrace",
+          "bride",
+          "bridesmaid",
+          "bridal party",
+          "bouquets",
+          "city backdrop",
+          "natural light",
+          "overcast",
+          "joyful",
+          "wedding portraits",
+          "belfast wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ten%20Square/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--163_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ten%20Square/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--163_2000.webp",
+        "alt": "Bride and bridesmaids with bouquets on Ten Square rooftop terrace in Belfast, with a soft city backdrop",
+        "caption": "A relaxed bridal party portrait on the rooftop terrace at Ten Square, Belfast, with natural light, bouquets and the city behind them."
+      },
+      {
+        "assetId": "legacy_b6d1c2ea1e9d4ecf3933edde",
+        "imageId": "MKB001624",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--8_500.webp",
+        "order": 10,
+        "rating": 0,
+        "moments": [
+          "family-and-bridal-party"
+        ],
+        "tags": [
+          "ten square",
+          "bridal party",
+          "family portrait",
+          "bride",
+          "indoor portrait",
+          "bride balloons",
+          "natural light",
+          "joyful",
+          "getting ready",
+          "wedding morning",
+          "group photo",
+          "belfast wedding"
+        ],
+        "aiTags": [
+          "ten square",
+          "bridal party",
+          "family portrait",
+          "bride",
+          "indoor portrait",
+          "bride balloons",
+          "natural light",
+          "joyful",
+          "getting ready",
+          "wedding morning",
+          "group photo",
+          "belfast wedding"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ten%20Square/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--8_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ten%20Square/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--8_2000.webp",
+        "alt": "Joyful bridal party and family portrait indoors at Ten Square, Belfast, during the wedding morning",
+        "caption": "A relaxed wedding morning group portrait at Ten Square in Belfast, with family and the bridal party gathered in soft natural light."
+      },
+      {
+        "assetId": "legacy_bde5d2165a4cd7615ef0e86b",
+        "imageId": "MKB001625",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--6_500.webp",
+        "order": 11,
+        "rating": 0,
+        "moments": [
+          "getting-ready"
+        ],
+        "tags": [
+          "getting ready",
+          "bride",
+          "bridal portrait",
+          "wedding dress",
+          "veil",
+          "mirror reflection",
+          "hotel room",
+          "natural light",
+          "soft light",
+          "calm mood",
+          "pre ceremony",
+          "ten square"
+        ],
+        "aiTags": [
+          "getting ready",
+          "bride",
+          "bridal portrait",
+          "wedding dress",
+          "veil",
+          "mirror reflection",
+          "hotel room",
+          "natural light",
+          "soft light",
+          "calm mood",
+          "pre ceremony",
+          "ten square"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ten%20Square/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--6_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ten%20Square/getting%20ready/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--6_2000.webp",
+        "alt": "Bride in her wedding dress and veil reflected in a mirror while getting ready at Ten Square, Belfast",
+        "caption": "A quiet getting ready moment at Ten Square in Belfast, with soft natural light and a calm reflection before the ceremony."
+      },
+      {
+        "assetId": "legacy_04d94f59517cb58b741def02",
+        "imageId": "MKB001626",
+        "weddingSlug": "",
+        "filename": "mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--299_500.webp",
+        "order": 12,
+        "rating": 0,
+        "moments": [
+          "reception-and-party"
+        ],
+        "tags": [
+          "ten square",
+          "wedding reception",
+          "groom speech",
+          "top table",
+          "bride and groom",
+          "wedding guests",
+          "bright lighting",
+          "happy mood",
+          "speeches",
+          "reception decor",
+          "table florals",
+          "party moments"
+        ],
+        "aiTags": [
+          "ten square",
+          "wedding reception",
+          "groom speech",
+          "top table",
+          "bride and groom",
+          "wedding guests",
+          "bright lighting",
+          "happy mood",
+          "speeches",
+          "reception decor",
+          "table florals",
+          "party moments"
+        ],
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Ten%20Square/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--299_500.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/Ten%20Square/reception%20and%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-ten-square-hotel-belfast-wedding-photography--299_2000.webp",
+        "alt": "Groom giving his speech at the top table during a bright Ten Square wedding reception in Belfast",
+        "caption": "A relaxed speech moment at Ten Square in Belfast, with the couple and guests sharing the warmth of the wedding reception."
+      }
+    ]
+  }
+}

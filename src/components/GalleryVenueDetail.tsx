@@ -1,113 +1,83 @@
-// src/components/GalleryVenueDetail.tsx
-import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ExternalLink, MapPin, ChevronRight } from "lucide-react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import {
+  Link,
+  useParams,
+} from "react-router-dom";
+import {
+  ArrowLeft,
+  ChevronRight,
+  ExternalLink,
+  MapPin,
+} from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
 import { MasonryGallery } from "./MasonryGallery";
-import { fetchGalleryRows, imageAlt, imageCaption } from "../lib/galleryCsv";
-
-type GalleryRow = {
-  imageId?: string;
-  venue: string;
-  category: string;
-  filename: string; // ends in _500.webp
-  tags?: string;
-  venuePin?: string;
-  venuePinOrder?: string;
-
-  // AI metadata from public/gallery-ai.csv via src/lib/galleryCsv.ts
-  aiTags?: string;
-  aiAlt?: string;
-  aiCaption?: string;
-};
-
-type VenueMetaRow = {
-  venue: string;
-  venueName?: string;
-  venueLocation?: string; // Town
-  venueRegion?: string; // County
-  venueCountry?: string; // Northern Ireland | Ireland
-  venueWebsite?: string;
-  venueDescription?: string;
-};
+import {
+  PublicVenueService,
+  type PublicVenueDocument,
+  type PublicVenueIndexItem,
+} from "../services/PublicVenueService";
 
 type CountyMeta = {
   slug: string;
-  county: string; // e.g. "County Down"
+  county: string;
   country?: string;
 };
 
-// R2 base URLs
-const THUMB_BASE = "https://images.mkbweddings.co.uk/thumb";
-const FULL_BASE = "https://images.mkbweddings.co.uk/full";
+const SITE_ORIGIN =
+  "https://www.mkbweddings.co.uk";
 
-// Primary origin
-const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
-
-// --- Ordering helpers -------------------------------------------------------
 function hashString(input: string) {
-  let h = 2166136261;
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i);
-    h = Math.imul(h, 16777619);
+  let hash = 2166136261;
+
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
   }
-  return h >>> 0;
+
+  return hash >>> 0;
 }
 
-function stableShuffle<T>(arr: T[], seed: string) {
-  const out = [...arr];
-  let s = hashString(seed) || 1;
+function stableShuffle<T>(
+  values: T[],
+  seed: string,
+) {
+  const output = [...values];
+  let state = hashString(seed) || 1;
 
-  const rand = () => {
-    s ^= s << 13;
-    s ^= s >>> 17;
-    s ^= s << 5;
-    return (s >>> 0) / 4294967296;
+  const random = () => {
+    state ^= state << 13;
+    state ^= state >>> 17;
+    state ^= state << 5;
+
+    return (state >>> 0) / 4294967296;
   };
 
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
+  for (
+    let index = output.length - 1;
+    index > 0;
+    index -= 1
+  ) {
+    const target = Math.floor(
+      random() * (index + 1),
+    );
 
-function isPinned(row: GalleryRow) {
-  return ["y", "yes", "true", "1", "pin", "pinned"].includes(
-    (row.venuePin || "").trim().toLowerCase()
-  );
-}
-
-function pinOrder(row: GalleryRow) {
-  const value = Number((row.venuePinOrder || "").trim());
-  return Number.isFinite(value) && value > 0 ? value : 9999;
-}
-
-function applyPinnedOrder(rows: GalleryRow[], seed: string): GalleryRow[] {
-  const pinned = rows
-    .filter(isPinned)
-    .sort((a, b) => {
-  const orderA = pinOrder(a);
-  const orderB = pinOrder(b);
-
-  if (orderA !== orderB) {
-    return orderA - orderB;
+    [output[index], output[target]] = [
+      output[target],
+      output[index],
+    ];
   }
 
-  return a.filename.localeCompare(b.filename);
-});
-
-  const rest = rows.filter((row) => !isPinned(row));
-  const shuffledRest = stableShuffle(rest, seed);
-
-  return [...pinned, ...shuffledRest];
+  return output;
 }
 
-// --- CSV helpers ------------------------------------------------------------
-function slugify(s: string) {
-  return s
+function slugify(value: string) {
+  return String(value || "")
     .trim()
     .toLowerCase()
     .replace(/&/g, "and")
@@ -115,318 +85,310 @@ function slugify(s: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-function encSegment(s: string) {
-  return encodeURIComponent(s);
-}
+function safeExternalUrl(input: string) {
+  const raw = String(input || "").trim();
 
-function cleanCsvValue(v: string) {
-  const t = (v || "").trim();
-  return t.replace(/^"+|"+$/g, "").replace(/""+/g, '"').replace(/"/g, "").trim();
-}
-
-function parseCsvLines(csvText: string): string[][] {
-  const lines = csvText.split(/\r?\n/).filter(Boolean);
-
-  const parseLine = (line: string) => {
-    const out: string[] = [];
-    let cur = "";
-    let inQuotes = false;
-
-    for (const ch of line) {
-      if (ch === '"') {
-        inQuotes = !inQuotes;
-        continue;
-      }
-      if (ch === "," && !inQuotes) {
-        out.push(cur.trim());
-        cur = "";
-      } else {
-        cur += ch;
-      }
-    }
-    out.push(cur.trim());
-    return out;
-  };
-
-  return lines.map(parseLine);
-}
-
-function parseGalleryCsv(csvText: string): GalleryRow[] {
-  const rows = parseCsvLines(csvText);
-  if (rows.length < 2) return [];
-
-  const header = rows[0].map((h) => h.toLowerCase());
-  const venueIdx = header.indexOf("venue");
-  const categoryIdx = header.indexOf("category");
-  const filenameIdx = header.indexOf("filename");
-  const tagsIdx = header.indexOf("tags");
-  const venuePinIdx = header.indexOf("venuepin");
-  const venuePinOrderIdx = header.indexOf("venuepinorder");
-
-  if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) return [];
-
-  return rows
-    .slice(1)
-    .map((cols) => ({
-      venue: cleanCsvValue(cols[venueIdx] || ""),
-      category: cleanCsvValue(cols[categoryIdx] || ""),
-      filename: cleanCsvValue(cols[filenameIdx] || ""),
-      tags: tagsIdx >= 0 ? cleanCsvValue(cols[tagsIdx] || "") : undefined,
-      venuePin: venuePinIdx >= 0 ? cleanCsvValue(cols[venuePinIdx] || "") : "",
-      venuePinOrder:
-        venuePinOrderIdx >= 0 ? cleanCsvValue(cols[venuePinOrderIdx] || "") : "",
-    }))
-    .filter((r) => r.venue && r.category && r.filename);
-}
-
-function parseVenueMetaCsv(csvText: string): VenueMetaRow[] {
-  const rows = parseCsvLines(csvText);
-  if (rows.length < 2) return [];
-
-  const header = rows[0].map((h) => h.toLowerCase());
-  const venueIdx = header.indexOf("venue");
-  const nameIdx = header.indexOf("venue-name");
-  const locIdx = header.indexOf("venue-location");
-  const regionIdx = header.indexOf("venue-region");
-  const countryIdx = header.indexOf("venue-country");
-  const webIdx = header.indexOf("venue-website");
-  const descIdx = header.indexOf("venue-description");
-
-  if (venueIdx === -1) return [];
-
-  return rows
-    .slice(1)
-    .map((cols) => ({
-      venue: cleanCsvValue(cols[venueIdx] || ""),
-      venueName: nameIdx >= 0 ? cleanCsvValue(cols[nameIdx] || "") : "",
-      venueLocation: locIdx >= 0 ? cleanCsvValue(cols[locIdx] || "") : "",
-      venueRegion: regionIdx >= 0 ? cleanCsvValue(cols[regionIdx] || "") : "",
-      venueCountry: countryIdx >= 0 ? cleanCsvValue(cols[countryIdx] || "") : "",
-      venueWebsite: webIdx >= 0 ? cleanCsvValue(cols[webIdx] || "") : "",
-      venueDescription: descIdx >= 0 ? cleanCsvValue(cols[descIdx] || "") : "",
-    }))
-    .filter((v) => v.venue);
-}
-
-// --- URL builders -----------------------------------------------------------
-function thumbUrl(r: GalleryRow) {
-  return `${THUMB_BASE}/${encSegment(r.venue)}/${encSegment(r.category)}/${encodeURIComponent(
-    r.filename
-  )}`;
-}
-
-function fullUrlFromThumb(r: GalleryRow) {
-  return `${FULL_BASE}/${encSegment(r.venue)}/${encSegment(r.category)}/${encodeURIComponent(
-    r.filename.replace(/_500\.webp$/i, "_2000.webp")
-  )}`;
-}
-
-function safeExternalUrl(input: string): string {
-  const raw = (input || "").trim();
   if (!raw) return "";
+
   try {
-    const u = new URL(raw);
-    return u.href;
+    return new URL(raw).href;
   } catch {
     try {
-      const u = new URL(`https://${raw.replace(/^\/+/, "")}`);
-      return u.href;
+      return new URL(
+        `https://${raw.replace(/^\/+/, "")}`,
+      ).href;
     } catch {
       return "";
     }
   }
 }
 
-function countryCodeFromVenueCountry(countryRaw: string): "GB" | "IE" | undefined {
-  const c = (countryRaw || "").trim().toLowerCase();
-  if (!c) return undefined;
-  if (c === "ireland" || c === "republic of ireland" || c === "roi") return "IE";
-  if (c === "northern ireland" || c === "ni") return "GB";
+function countryCodeFromVenueCountry(
+  countryRaw: string,
+): "GB" | "IE" | undefined {
+  const country = String(countryRaw || "")
+    .trim()
+    .toLowerCase();
+
+  if (!country) return undefined;
+
+  if (
+    country === "ireland" ||
+    country === "republic of ireland" ||
+    country === "roi"
+  ) {
+    return "IE";
+  }
+
+  if (
+    country === "northern ireland" ||
+    country === "ni"
+  ) {
+    return "GB";
+  }
+
   return undefined;
 }
 
-function makeLocationLine(town: string, region: string, country: string) {
-  return [town, region, country].filter(Boolean).join(", ");
+function makeLocationLine(
+  town: string,
+  region: string,
+  country: string,
+) {
+  return [town, region, country]
+    .filter(Boolean)
+    .join(", ");
 }
 
 function getFallbackVenueDescription(
   venueName: string,
   town?: string,
   region?: string,
-  country?: string
+  country?: string,
 ) {
-  const locLine = makeLocationLine(town || "", region || "", country || "");
-  const locText = locLine ? ` in ${locLine}` : "";
-  return `Wedding photography at ${venueName}${locText}. I photograph weddings here in a relaxed, documentary style — capturing genuine moments, natural emotion, and the atmosphere of the day as it unfolds. Couples receive authentic storytelling with a creative edge, plus confident direction when it matters.`;
+  const location = makeLocationLine(
+    town || "",
+    region || "",
+    country || "",
+  );
+
+  return `Wedding photography at ${venueName}${
+    location ? ` in ${location}` : ""
+  }. I photograph weddings here in a relaxed, documentary style — capturing genuine moments, natural emotion, and the atmosphere of the day as it unfolds. Couples receive authentic storytelling with a creative edge, plus confident direction when it matters.`;
 }
 
-// County matching helpers
-function normCountyName(s: string) {
-  return (s || "")
+function normaliseCountyName(value: string) {
+  return String(value || "")
     .trim()
     .toLowerCase()
     .replace(/^county\s+/i, "")
-    .replace(/\s+/g, " ")
-    .trim();
+    .replace(/\s+/g, " ");
 }
 
-// ----------------------------------------------------------------------------
 export function GalleryVenueDetail() {
-  const { venueId } = useParams<{ venueId: string }>();
+  const { venueId = "" } = useParams<{
+    venueId: string;
+  }>();
 
-  const [galleryRows, setGalleryRows] = useState<GalleryRow[]>([]);
-  const [venueMetaMap, setVenueMetaMap] = useState<Record<string, VenueMetaRow>>({});
-  const [countyMetaMap, setCountyMetaMap] = useState<Record<string, CountyMeta>>({});
-
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [venue, setVenue] =
+    useState<PublicVenueDocument | null>(null);
+  const [allVenues, setAllVenues] = useState<
+    PublicVenueIndexItem[]
+  >([]);
+  const [countyMetaMap, setCountyMetaMap] =
+    useState<Record<string, CountyMeta>>({});
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [lightboxOpen, setLightboxOpen] =
+    useState(false);
+  const [lightboxIndex, setLightboxIndex] =
+    useState(0);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "auto" });
+    window.scrollTo({
+      top: 0,
+      behavior: "auto",
+    });
   }, [venueId]);
 
   useEffect(() => {
     let cancelled = false;
 
-    (async () => {
-      try {
-        const [galleryData, venueRes, countyRes] = await Promise.all([
-          fetchGalleryRows(),
-          fetch("/galleryvenuedesc.csv", { cache: "no-store" }),
-          fetch("/county-meta.json", { cache: "no-store" }),
-        ]);
+    setLoading(true);
+    setLoadError("");
 
-        if (!cancelled) setGalleryRows(galleryData);
+    Promise.all([
+      PublicVenueService.loadVenue(venueId),
+      PublicVenueService.loadIndex(),
+      fetch("/county-meta.json", {
+        cache: "no-store",
+      })
+        .then((response) =>
+          response.ok ? response.json() : {},
+        )
+        .catch(() => ({})),
+    ])
+      .then(
+        ([
+          loadedVenue,
+          index,
+          countyDocument,
+        ]) => {
+          if (cancelled) return;
 
-        if (venueRes.ok) {
-          const venueText = await venueRes.text();
-          const parsed = parseVenueMetaCsv(venueText);
-          const map: Record<string, VenueMetaRow> = {};
-          parsed.forEach((v) => (map[v.venue] = v));
-          if (!cancelled) setVenueMetaMap(map);
-        }
+          setVenue(loadedVenue);
+          setAllVenues(index.venues);
+          setCountyMetaMap(
+            countyDocument as Record<
+              string,
+              CountyMeta
+            >,
+          );
+        },
+      )
+      .catch((error) => {
+        if (cancelled) return;
 
-        if (countyRes.ok) {
-          const cm = (await countyRes.json()) as Record<string, CountyMeta>;
-          if (!cancelled) setCountyMetaMap(cm || {});
-        }
-      } catch {
-        // silent
-      }
-    })();
+        setLoadError(
+          error instanceof Error
+            ? error.message
+            : "Unable to load venue gallery.",
+        );
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  const venueRowsRaw = useMemo(() => {
-    if (!venueId) return [];
-    return galleryRows.filter((r) => slugify(r.venue) === venueId);
-  }, [galleryRows, venueId]);
-
-  const rawVenue = venueRowsRaw[0]?.venue || "";
-  const meta = rawVenue ? venueMetaMap[rawVenue] : undefined;
-
-  const possibleName = (meta?.venueName || "").trim();
-  const possibleTown = (meta?.venueLocation || "").trim();
-  const name =
-    possibleName && possibleName.toLowerCase() !== possibleTown.toLowerCase()
-      ? possibleName
-      : rawVenue;
-
-  const town = (meta?.venueLocation || "").trim();
-  const region = (meta?.venueRegion || "").trim();
-  const country = (meta?.venueCountry || "").trim();
-  const locationLine = makeLocationLine(town, region, country);
-
-  const websiteRaw = (meta?.venueWebsite || "").trim();
-  const safeWebsite = safeExternalUrl(websiteRaw);
-
-  const descriptionFromCsv = (meta?.venueDescription || "").trim();
-  const description =
-    descriptionFromCsv || getFallbackVenueDescription(name || rawVenue, town, region, country);
-
-  const introLine = `Wedding photography at ${name}${locationLine ? `, ${locationLine}` : ""}`;
-
-  const { countySlug, countyName } = useMemo(() => {
-    const regionNorm = normCountyName(region);
-    if (!regionNorm) return { countySlug: "", countyName: "" };
-
-    const entries = Object.entries(countyMetaMap || {});
-    for (const [slug, c] of entries) {
-      const cName = (c?.county || slug || "").toString();
-      if (normCountyName(cName) === regionNorm) {
-        return { countySlug: slug, countyName: cName };
-      }
-    }
-
-    const fallbackSlug = slugify(region);
-    return { countySlug: fallbackSlug, countyName: region };
-  }, [countyMetaMap, region]);
-
-  const venueRows = useMemo(() => {
-    if (!venueRowsRaw.length) return [];
-    const seed = `${venueId || ""}:${venueRowsRaw.length}`;
-    return applyPinnedOrder(venueRowsRaw, seed);
-  }, [venueRowsRaw, venueId]);
+  }, [venueId]);
 
   const images = useMemo(() => {
-    return venueRows.map((r) => ({
-      thumb: thumbUrl(r),
-      full: fullUrlFromThumb(r),
-      alt: imageAlt(r),
-      caption: imageCaption(r),
-      filename: r.filename,
-    }));
-  }, [venueRows]);
+    if (!venue) return [];
 
-  const heroImage =
-    images[0]?.full ||
-    images[0]?.thumb ||
-    "https://images.unsplash.com/photo-1519167758481-83f29da8c9b1?w=1600&q=80";
+    return [...venue.gallery.images]
+      .sort((a, b) => a.order - b.order)
+      .map((image) => ({
+        assetId: image.assetId,
+        thumb: image.thumbSrc,
+        full: image.fullSrc,
+        alt:
+          image.alt ||
+          `${venue.name} wedding photography`,
+        caption: image.caption || "",
+        filename: image.filename,
+      }));
+  }, [venue]);
 
-  const heroAlt =
-    images[0]?.alt ||
-    `${name}${locationLine ? `, ${locationLine}` : ""} wedding photography`;
+  const hero = useMemo(() => {
+    if (!venue || !images.length) {
+      return null;
+    }
+
+    return (
+      images.find(
+        (image) =>
+          image.assetId ===
+          venue.gallery.heroAssetId,
+      ) || images[0]
+    );
+  }, [venue, images]);
+
+  const { countySlug, countyName } =
+    useMemo(() => {
+      const region = venue?.county || "";
+      const regionNormalised =
+        normaliseCountyName(region);
+
+      if (!regionNormalised) {
+        return {
+          countySlug: "",
+          countyName: "",
+        };
+      }
+
+      for (const [
+        slug,
+        county,
+      ] of Object.entries(
+        countyMetaMap || {},
+      )) {
+        const candidate = String(
+          county?.county || slug,
+        );
+
+        if (
+          normaliseCountyName(candidate) ===
+          regionNormalised
+        ) {
+          return {
+            countySlug: slug,
+            countyName: candidate,
+          };
+        }
+      }
+
+      return {
+        countySlug: slugify(region),
+        countyName: region,
+      };
+    }, [countyMetaMap, venue?.county]);
 
   const moreVenueLinks = useMemo(() => {
-    const uniqueVenueNames = Array.from(new Set(galleryRows.map((r) => r.venue))).filter(Boolean);
+    if (!venue) return [];
 
-    const all = uniqueVenueNames
-      .map((venue) => {
-        const m = venueMetaMap[venue];
-        const displayName = (m?.venueName || "").trim() || venue;
-        const t = (m?.venueLocation || "").trim();
-        const r = (m?.venueRegion || "").trim();
-        const c = (m?.venueCountry || "").trim();
-        const locLine = makeLocationLine(t, r, c);
-        const slug = slugify(venue);
-        return { venue, slug, displayName, locLine, country: c };
-      })
-      .filter((v) => v.slug && v.slug !== (venueId || ""));
-
-    const sameCountry = all.filter(
-      (v) => country && v.country && v.country.toLowerCase() === country.toLowerCase()
-    );
-    const otherCountry = all.filter(
-      (v) => !country || !v.country || v.country.toLowerCase() !== country.toLowerCase()
+    const sameCountry = allVenues.filter(
+      (item) =>
+        item.slug !== venue.slug &&
+        item.country &&
+        venue.country &&
+        item.country.toLowerCase() ===
+          venue.country.toLowerCase(),
     );
 
-    const mixed = [
-      ...stableShuffle(sameCountry, `more:same:${venueId || ""}:${sameCountry.length}`),
-      ...stableShuffle(otherCountry, `more:other:${venueId || ""}:${otherCountry.length}`),
-    ];
+    const otherCountry = allVenues.filter(
+      (item) =>
+        item.slug !== venue.slug &&
+        (!item.country ||
+          !venue.country ||
+          item.country.toLowerCase() !==
+            venue.country.toLowerCase()),
+    );
 
-    return mixed.slice(0, 6);
-  }, [galleryRows, venueMetaMap, venueId, country]);
+    return [
+      ...stableShuffle(
+        sameCountry,
+        `more:same:${venue.slug}:${sameCountry.length}`,
+      ),
+      ...stableShuffle(
+        otherCountry,
+        `more:other:${venue.slug}:${otherCountry.length}`,
+      ),
+    ].slice(0, 6);
+  }, [allVenues, venue]);
 
-  if (!venueRowsRaw.length) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6 text-neutral-600">
+        Loading venue gallery…
+      </div>
+    );
+  }
+
+  if (
+    loadError ||
+    !venue ||
+    !images.length ||
+    !hero
+  ) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
         <div className="text-center">
-          <h1 className="text-3xl mb-3">Venue not found</h1>
-          <Link to="/gallery/venues" className="text-neutral-600 hover:text-neutral-900">
+          <Helmet>
+            <title>
+              Venue not found | MKB Weddings
+            </title>
+            <meta
+              name="robots"
+              content="noindex"
+            />
+          </Helmet>
+
+          <h1 className="text-3xl mb-3">
+            Venue not found
+          </h1>
+
+          {loadError ? (
+            <p className="mb-5 text-neutral-600">
+              {loadError}
+            </p>
+          ) : null}
+
+          <Link
+            to="/gallery/venues"
+            className="text-neutral-600 hover:text-neutral-900"
+          >
             Back to Venues
           </Link>
         </div>
@@ -434,49 +396,108 @@ export function GalleryVenueDetail() {
     );
   }
 
-  const safeVenueId = (venueId || "").replace(/\/+$/, "");
-  const canonical = `${SITE_ORIGIN}/gallery/venue/${encodeURIComponent(safeVenueId)}`;
+  const name = venue.name;
+  const town = venue.town;
+  const region = venue.county;
+  const country = venue.country;
 
-  const metaTitle = `${name} Wedding Photography${region ? ` | ${region}` : ""}${
-    country ? `, ${country}` : ""
-  } | MKB Weddings`;
+  const locationLine = makeLocationLine(
+    town,
+    region,
+    country,
+  );
+
+  const safeWebsite = safeExternalUrl(
+    venue.links.website,
+  );
+
+  const description =
+    venue.description ||
+    getFallbackVenueDescription(
+      name,
+      town,
+      region,
+      country,
+    );
+
+  const introLine =
+    venue.intro ||
+    `Wedding photography at ${name}${
+      locationLine ? `, ${locationLine}` : ""
+    }`;
+
+  const safeVenueId = venue.slug.replace(
+    /\/+$/,
+    "",
+  );
+
+  const canonical =
+    `${SITE_ORIGIN}/gallery/venue/` +
+    encodeURIComponent(safeVenueId);
+
+  const metaTitle =
+    venue.seo.title ||
+    `${name} Wedding Photography${
+      region ? ` | ${region}` : ""
+    }${
+      country ? `, ${country}` : ""
+    } | MKB Weddings`;
 
   const metaDescription =
+    venue.seo.description ||
     description ||
     `Natural, documentary wedding photography at ${name}${
       locationLine ? ` in ${locationLine}` : ""
     }. View real weddings and venue galleries by MKB Weddings.`;
 
   const breadcrumbItems = [
-    { name: "Home", item: `${SITE_ORIGIN}/` },
-    { name: "Gallery", item: `${SITE_ORIGIN}/gallery` },
-    { name: "Counties", item: `${SITE_ORIGIN}/wedding-photographer` },
+    {
+      name: "Home",
+      item: `${SITE_ORIGIN}/`,
+    },
+    {
+      name: "Gallery",
+      item: `${SITE_ORIGIN}/gallery`,
+    },
+    {
+      name: "Counties",
+      item:
+        `${SITE_ORIGIN}/wedding-photographer`,
+    },
     ...(countyName
       ? [
           {
             name: countyName,
-            item: `${SITE_ORIGIN}/wedding-photographer/${encodeURIComponent(countySlug)}`,
+            item:
+              `${SITE_ORIGIN}/wedding-photographer/` +
+              encodeURIComponent(countySlug),
           },
         ]
       : []),
-    { name: "Venues", item: `${SITE_ORIGIN}/gallery/venues` },
-    { name, item: canonical },
-  ].map((x, idx) => ({
+    {
+      name: "Venues",
+      item: `${SITE_ORIGIN}/gallery/venues`,
+    },
+    {
+      name,
+      item: canonical,
+    },
+  ].map((item, index) => ({
     "@type": "ListItem",
-    position: idx + 1,
-    name: x.name,
-    item: x.item,
+    position: index + 1,
+    name: item.name,
+    item: item.item,
   }));
 
   const heroImageObject = {
     "@type": "ImageObject",
     "@id": `${canonical}#primaryimage`,
-    contentUrl: heroImage,
-    url: heroImage,
-    thumbnailUrl: images[0]?.thumb,
-    name: heroAlt,
-    description: heroAlt,
-    caption: images[0]?.caption || heroAlt,
+    contentUrl: hero.full,
+    url: hero.full,
+    thumbnailUrl: hero.thumb,
+    name: hero.alt,
+    description: hero.alt,
+    caption: hero.caption || hero.alt,
     representativeOfPage: true,
     creator: {
       "@type": "Person",
@@ -489,42 +510,59 @@ export function GalleryVenueDetail() {
     creditText: "MKB Weddings",
   };
 
-  const galleryImageObjects = images.slice(0, 24).map((img, idx) => ({
-    "@type": "ImageObject",
-    "@id": `${canonical}#image-${idx + 1}`,
-    contentUrl: img.full,
-    url: img.full,
-    thumbnailUrl: img.thumb,
-    name: img.alt,
-    description: img.alt,
-    caption: img.caption || img.alt,
-    representativeOfPage: idx === 0,
-    creator: {
-      "@type": "Person",
-      name: "Mark Barnes",
-    },
-    copyrightHolder: {
-      "@type": "Organization",
-      name: "MKB Weddings",
-    },
-    creditText: "MKB Weddings",
-    acquireLicensePage: "https://www.mkbweddings.co.uk",
-    isPartOf: {
-      "@id": `${canonical}#webpage`,
-    },
-  }));
+  const galleryImageObjects = images
+    .slice(0, 24)
+    .map((image, index) => ({
+      "@type": "ImageObject",
+      "@id":
+        `${canonical}#image-${index + 1}`,
+      contentUrl: image.full,
+      url: image.full,
+      thumbnailUrl: image.thumb,
+      name: image.alt,
+      description: image.alt,
+      caption:
+        image.caption || image.alt,
+      representativeOfPage:
+        image.assetId === hero.assetId,
+      creator: {
+        "@type": "Person",
+        name: "Mark Barnes",
+      },
+      copyrightHolder: {
+        "@type": "Organization",
+        name: "MKB Weddings",
+      },
+      creditText: "MKB Weddings",
+      acquireLicensePage:
+        "https://www.mkbweddings.co.uk",
+      isPartOf: {
+        "@id": `${canonical}#webpage`,
+      },
+    }));
 
   const venuePlaceJsonLd = {
-    "@type": ["Place", "EventVenue"],
+    "@type": [
+      "Place",
+      "EventVenue",
+    ],
     "@id": `${canonical}#venue`,
     name,
     url: canonical,
-    sameAs: safeWebsite ? [safeWebsite] : undefined,
+    sameAs: safeWebsite
+      ? [safeWebsite]
+      : undefined,
     address: {
       "@type": "PostalAddress",
+      streetAddress:
+        venue.practical.address ||
+        undefined,
       addressLocality: town || undefined,
       addressRegion: region || undefined,
-      addressCountry: countryCodeFromVenueCountry(country),
+      addressCountry:
+        countryCodeFromVenueCountry(
+          country,
+        ),
     },
   };
 
@@ -550,10 +588,18 @@ export function GalleryVenueDetail() {
         url: canonical,
         name: metaTitle,
         description: metaDescription,
-        isPartOf: { "@id": `${SITE_ORIGIN}/#website` },
-        breadcrumb: { "@id": `${canonical}#breadcrumb` },
-        primaryImageOfPage: { "@id": `${canonical}#primaryimage` },
-        about: { "@id": `${canonical}#venue` },
+        isPartOf: {
+          "@id": `${SITE_ORIGIN}/#website`,
+        },
+        breadcrumb: {
+          "@id": `${canonical}#breadcrumb`,
+        },
+        primaryImageOfPage: {
+          "@id": `${canonical}#primaryimage`,
+        },
+        about: {
+          "@id": `${canonical}#venue`,
+        },
         hasPart: galleryImageObjects,
       },
     ],
@@ -563,25 +609,52 @@ export function GalleryVenueDetail() {
     <div className="min-h-screen bg-white">
       <Helmet>
         <title>{metaTitle}</title>
-        <meta name="description" content={metaDescription} />
+        <meta
+          name="description"
+          content={metaDescription}
+        />
 
-        <link rel="canonical" href={canonical} />
-        <link rel="preload" as="image" href={heroImage} fetchpriority="high" />
+        <link
+          rel="canonical"
+          href={canonical}
+        />
+        <link
+          rel="preload"
+          as="image"
+          href={hero.full}
+          fetchpriority="high"
+        />
 
-        <meta property="og:url" content={canonical} />
-        <meta property="og:title" content={metaTitle} />
-        <meta property="og:description" content={metaDescription} />
-        <meta property="og:image" content={heroImage} />
-        <meta property="og:type" content="website" />
+        <meta
+          property="og:url"
+          content={canonical}
+        />
+        <meta
+          property="og:title"
+          content={metaTitle}
+        />
+        <meta
+          property="og:description"
+          content={metaDescription}
+        />
+        <meta
+          property="og:image"
+          content={hero.full}
+        />
+        <meta
+          property="og:type"
+          content="website"
+        />
 
-        <script type="application/ld+json">{JSON.stringify(pageJsonLd)}</script>
+        <script type="application/ld+json">
+          {JSON.stringify(pageJsonLd)}
+        </script>
       </Helmet>
 
-      {/* HERO */}
       <div className="relative h-[60vh] min-h-[420px]">
         <ImageWithFallback
-          src={heroImage}
-          alt={heroAlt}
+          src={hero.full}
+          alt={hero.alt}
           width={2000}
           height={1200}
           fetchPriority="high"
@@ -600,30 +673,42 @@ export function GalleryVenueDetail() {
               Back to Venues
             </Link>
 
-            <h1 className="text-white text-5xl md:text-6xl mb-4">{name}</h1>
+            <h1 className="text-white text-5xl md:text-6xl mb-4">
+              {name}
+            </h1>
 
             <div className="flex flex-col items-center gap-2 text-white/90">
               {locationLine ? (
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4" />
-                  <span>{locationLine}</span>
+                  <span>
+                    {locationLine}
+                  </span>
                 </div>
               ) : null}
 
               <div className="text-white/85 text-sm">
-                {images.length} {images.length === 1 ? "image" : "images"}
+                {images.length}{" "}
+                {images.length === 1
+                  ? "image"
+                  : "images"}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* BREADCRUMBS */}
       <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
-        <nav aria-label="Breadcrumb" className="flex justify-center">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex justify-center"
+        >
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
             <li>
-              <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
+              <Link
+                to="/"
+                className="hover:text-neutral-900 underline underline-offset-4"
+              >
                 Home
               </Link>
             </li>
@@ -633,7 +718,10 @@ export function GalleryVenueDetail() {
             </li>
 
             <li>
-              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
+              <Link
+                to="/gallery"
+                className="hover:text-neutral-900 underline underline-offset-4"
+              >
                 Gallery
               </Link>
             </li>
@@ -658,7 +746,9 @@ export function GalleryVenueDetail() {
                 </li>
                 <li>
                   <Link
-                    to={`/wedding-photographer/${encodeURIComponent(countySlug)}`}
+                    to={`/wedding-photographer/${encodeURIComponent(
+                      countySlug,
+                    )}`}
                     className="hover:text-neutral-900 underline underline-offset-4"
                   >
                     {countyName}
@@ -684,14 +774,17 @@ export function GalleryVenueDetail() {
               <ChevronRight className="w-4 h-4" />
             </li>
 
-            <li className="text-neutral-900">{name}</li>
+            <li className="text-neutral-900">
+              {name}
+            </li>
           </ol>
         </nav>
       </div>
 
-      {/* VENUE INFO */}
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
-        <p className="text-neutral-900 text-2xl md:text-4xl font-serif mb-10">{introLine}</p>
+        <p className="text-neutral-900 text-2xl md:text-4xl font-serif mb-10">
+          {introLine}
+        </p>
 
         {safeWebsite ? (
           <div className="mb-10">
@@ -701,27 +794,29 @@ export function GalleryVenueDetail() {
               rel="nofollow noopener noreferrer"
               className="inline-flex items-center gap-2 text-neutral-900 hover:text-neutral-700 underline underline-offset-4 justify-center"
             >
-              Visit venue website <ExternalLink className="w-4 h-4" />
+              Visit venue website
+              <ExternalLink className="w-4 h-4" />
             </a>
           </div>
         ) : null}
 
-        {description ? (
-          <div className="text-neutral-700 leading-relaxed text-lg space-y-5 mb-10">
-            {description.split(/\n{2,}/).map((p, i) => (
-              <p key={i}>{p}</p>
+        <div className="text-neutral-700 leading-relaxed text-lg space-y-5 mb-10">
+          {description
+            .split(/\n{2,}/)
+            .map((paragraph, index) => (
+              <p key={index}>
+                {paragraph}
+              </p>
             ))}
-          </div>
-        ) : null}
+        </div>
       </section>
 
-      {/* GRID */}
       <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 pb-20">
         <MasonryGallery
-          images={images.map((img) => ({
-            thumbSrc: img.thumb,
-            fullSrc: img.full,
-            alt: img.alt,
+          images={images.map((image) => ({
+            thumbSrc: image.thumb,
+            fullSrc: image.full,
+            alt: image.alt,
           }))}
           onImageClick={(index) => {
             setLightboxIndex(index);
@@ -730,14 +825,14 @@ export function GalleryVenueDetail() {
         />
       </div>
 
-      {/* Explore more venues */}
       <section className="max-w-5xl mx-auto px-6 pb-40 text-center">
         <div className="pt-10 border-t border-neutral-200">
           <h2 className="text-neutral-900 text-2xl md:text-3xl font-serif mb-4">
             Explore more venues
           </h2>
           <p className="text-neutral-600 mb-6">
-            Browse more real wedding galleries across Northern Ireland and Ireland.
+            Browse more real wedding galleries across
+            Northern Ireland and Ireland.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
@@ -755,33 +850,56 @@ export function GalleryVenueDetail() {
             </Link>
           </div>
 
-          {moreVenueLinks.length > 0 ? (
+          {moreVenueLinks.length ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-left">
-              {moreVenueLinks.map((v) => (
-                <Link
-                  key={v.slug}
-                  to={`/gallery/venue/${v.slug}`}
-                  className="rounded-lg border border-neutral-200 p-4 hover:border-neutral-300 hover:bg-neutral-50 transition-colors"
-                >
-                  <div className="text-neutral-900 font-medium">{v.displayName}</div>
-                  {v.locLine ? <div className="text-neutral-600 text-sm mt-1">{v.locLine}</div> : null}
-                </Link>
-              ))}
+              {moreVenueLinks.map((item) => {
+                const location = [
+                  item.town,
+                  item.county,
+                  item.country,
+                ]
+                  .filter(Boolean)
+                  .join(", ");
+
+                return (
+                  <Link
+                    key={item.slug}
+                    to={`/gallery/venue/${item.slug}`}
+                    className="rounded-lg border border-neutral-200 p-4 hover:border-neutral-300 hover:bg-neutral-50 transition-colors"
+                  >
+                    <div className="text-neutral-900 font-medium">
+                      {item.name}
+                    </div>
+                    {location ? (
+                      <div className="text-neutral-600 text-sm mt-1">
+                        {location}
+                      </div>
+                    ) : null}
+                  </Link>
+                );
+              })}
             </div>
           ) : null}
         </div>
       </section>
 
-      {/* LIGHTBOX */}
-      {lightboxOpen && images.length > 0 && (
+      {lightboxOpen && images.length > 0 ? (
         <ImageLightbox
-          images={images.map((i) => i.full)}
-          alts={images.map((i) => i.alt)}
+          images={images.map(
+            (image) => image.full,
+          )}
+          alts={images.map(
+            (image) => image.alt,
+          )}
           currentIndex={lightboxIndex}
-          onClose={() => setLightboxOpen(false)}
-          onNavigate={(newIndex) => setLightboxIndex(newIndex)}
+          onClose={() =>
+            setLightboxOpen(false)
+          }
+          onNavigate={(newIndex) =>
+            setLightboxIndex(newIndex)
+          }
         />
-      )}
+      ) : null}
     </div>
   );
 }
