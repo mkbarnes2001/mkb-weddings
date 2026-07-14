@@ -7,6 +7,8 @@ import { createMomentEndpoint } from "./moment-endpoint.mjs";
 import { createUploadEndpoint } from "./upload-endpoint.mjs";
 import { createGalleryMigrationEndpoint } from "./gallery-migration-endpoint.mjs";
 import { createPublicVenuePublisher } from "./public-venue-publisher.mjs";
+import { createImageLifecycleEndpoint } from "./image-lifecycle-endpoint.mjs";
+import { createVenuePublishEndpoint } from "./venue-publish-endpoint.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -87,8 +89,32 @@ const publicVenuePublisher =
   createPublicVenuePublisher({
     projectRoot: PROJECT_ROOT,
     venuesRoot: VENUES_ROOT,
+    weddingsRoot: WEDDINGS_ROOT,
     publicDataRoot:
       PUBLIC_VENUE_DATA_ROOT,
+  });
+
+const imageLifecycleEndpoint =
+  createImageLifecycleEndpoint({
+    projectRoot: PROJECT_ROOT,
+    weddingsRoot: WEDDINGS_ROOT,
+    venuesRoot: VENUES_ROOT,
+    backupDir: BACKUP_DIR,
+    assertSafeSlug,
+    publicVenuePublisher,
+  });
+
+const venuePublishEndpoint =
+  createVenuePublishEndpoint({
+    projectRoot: PROJECT_ROOT,
+    venuesRoot: VENUES_ROOT,
+    publicDataRoot:
+      PUBLIC_VENUE_DATA_ROOT,
+    assertSafeSlug,
+    publicVenuePublisher,
+    publicImageBaseUrl:
+      process.env.R2_PUBLIC_BASE_URL ||
+      "https://images.mkbweddings.co.uk",
   });
 
 async function readJsonBody(req) {
@@ -207,41 +233,176 @@ function validateImageDocument(slug, document) {
   return errors;
 }
 
-async function saveWeddingImagesDocument(slug, incomingDocument) {
+async function saveWeddingImagesDocument(
+  slug,
+  incomingDocument,
+) {
+  const existingDocument =
+    (await readWeddingImagesDocument(slug)) || {
+      schemaVersion: 1,
+      weddingSlug: slug,
+      updatedAt: "",
+      images: [],
+    };
+
+  const existingImages = Array.isArray(
+    existingDocument.images,
+  )
+    ? existingDocument.images
+    : [];
+
+  const existingById = new Map(
+    existingImages.map((image) => [
+      String(image.id || "").trim(),
+      image,
+    ]),
+  );
+
+  const existingByFilename = new Map(
+    existingImages.map((image) => [
+      normalise(image.filename),
+      image,
+    ]),
+  );
+
   const document = {
     schemaVersion: 1,
     weddingSlug: slug,
     updatedAt: new Date().toISOString(),
     images: Array.isArray(incomingDocument?.images)
-      ? incomingDocument.images.map((image, index) => ({
-          id: String(image.id || "").trim(),
-          filename: String(image.filename || "").trim(),
-          order: Number(image.order || index + 1),
-          isCover: Boolean(image.isCover),
-          hidden: Boolean(image.hidden),
-          rating: Math.max(0, Math.min(5, Number(image.rating || 0))),
-          collections: Array.isArray(image.collections)
-            ? [...new Set(image.collections.map((value) => String(value || "").trim()).filter(Boolean))]
-            : [],
-        }))
+      ? incomingDocument.images.map(
+          (image, index) => {
+            const id = String(
+              image.id || "",
+            ).trim();
+
+            const filename = String(
+              image.filename || "",
+            ).trim();
+
+            const existing =
+              existingById.get(id) ||
+              existingByFilename.get(
+                normalise(filename),
+              ) ||
+              {};
+
+            return {
+              ...existing,
+              id,
+              filename,
+              order: Number(
+                image.order || index + 1,
+              ),
+              isCover: Boolean(image.isCover),
+              hidden: Boolean(image.hidden),
+              rating: Math.max(
+                0,
+                Math.min(
+                  5,
+                  Number(image.rating || 0),
+                ),
+              ),
+              collections: Array.isArray(
+                image.collections,
+              )
+                ? [
+                    ...new Set(
+                      image.collections
+                        .map((value) =>
+                          String(
+                            value || "",
+                          ).trim(),
+                        )
+                        .filter(Boolean),
+                    ),
+                  ]
+                : Array.isArray(
+                      existing.collections,
+                    )
+                  ? existing.collections
+                  : [],
+              thumbSrc:
+                image.thumbSrc ??
+                existing.thumbSrc,
+              fullSrc:
+                image.fullSrc ??
+                existing.fullSrc,
+              aiTags: Array.isArray(
+                image.aiTags,
+              )
+                ? image.aiTags
+                : Array.isArray(
+                      existing.aiTags,
+                    )
+                  ? existing.aiTags
+                  : [],
+              aiAlt:
+                image.aiAlt ??
+                existing.aiAlt ??
+                "",
+              aiCaption:
+                image.aiCaption ??
+                existing.aiCaption ??
+                "",
+              source:
+                image.source ??
+                existing.source,
+            };
+          },
+        )
       : [],
   };
-  const errors = validateImageDocument(slug, document);
+
+  const errors = validateImageDocument(
+    slug,
+    document,
+  );
+
   if (errors.length) {
-    const error = new Error("Image document validation failed.");
+    const error = new Error(
+      "Image document validation failed.",
+    );
     error.statusCode = 400;
     error.details = errors;
     throw error;
   }
-  const covers = document.images.filter((image) => image.isCover);
+
+  const covers = document.images.filter(
+    (image) => image.isCover,
+  );
+
   if (covers.length > 1) {
     const keepId = covers[0].id;
-    document.images = document.images.map((image) => ({ ...image, isCover: image.id === keepId }));
+
+    document.images = document.images.map(
+      (image) => ({
+        ...image,
+        isCover: image.id === keepId,
+      }),
+    );
   }
-  const imagesPath = path.join(await ensureWeddingFolder(slug), "images.json");
-  const backupPath = await createBackup(imagesPath, `${slug}-images`);
-  await fs.writeFile(imagesPath, `${JSON.stringify(document, null, 2)}\n`, "utf8");
-  return { savedImages: document.images.length, backupPath };
+
+  const imagesPath = path.join(
+    await ensureWeddingFolder(slug),
+    "images.json",
+  );
+
+  const backupPath = await createBackup(
+    imagesPath,
+    `${slug}-images`,
+  );
+
+  await fs.writeFile(
+    imagesPath,
+    `${JSON.stringify(document, null, 2)}\n`,
+    "utf8",
+  );
+
+  return {
+    savedImages: document.images.length,
+    backupPath,
+  };
 }
 
 async function createWeddingFiles(incomingWedding) {
@@ -538,6 +699,28 @@ async function handleRequest(req, res) {
     });
   }
 
+  const venuePublishMatch =
+    pathname.match(
+      /^\/api\/venues\/([^/]+)\/publish$/,
+    );
+
+  if (
+    venuePublishMatch &&
+    req.method === "POST"
+  ) {
+    const venueSlug = decodeURIComponent(
+      venuePublishMatch[1],
+    );
+
+    return sendJson(res, 200, {
+      ok: true,
+      publish:
+        await venuePublishEndpoint.publishVenue(
+          venueSlug,
+        ),
+    });
+  }
+
   const venueMatch = pathname.match(/^\/api\/venues\/([^/]+)$/);
 
   if (venueMatch && req.method === "GET") {
@@ -589,6 +772,37 @@ async function handleRequest(req, res) {
     return sendJson(res, 201, { ok: true, ...(await createWeddingFiles(body.wedding)) });
   }
   if (req.method === "POST" && pathname === "/api/weddings/published-index") return sendJson(res, 200, { ok: true, index: await generatePublishedWeddingIndex() });
+
+  const imageDeleteMatch =
+    pathname.match(
+      /^\/api\/weddings\/([^/]+)\/images\/([^/]+)$/,
+    );
+
+  if (
+    imageDeleteMatch &&
+    req.method === "DELETE"
+  ) {
+    const weddingSlug = decodeURIComponent(
+      imageDeleteMatch[1],
+    );
+
+    const imageId = decodeURIComponent(
+      imageDeleteMatch[2],
+    );
+
+    const venueSlug =
+      url.searchParams.get("venueSlug") || "";
+
+    return sendJson(res, 200, {
+      ok: true,
+      deletion:
+        await imageLifecycleEndpoint.deleteImage({
+          weddingSlug,
+          imageId,
+          venueSlug,
+        }),
+    });
+  }
 
   const imagesMatch = pathname.match(/^\/api\/weddings\/([^/]+)\/images$/);
   if (imagesMatch && req.method === "GET") {
