@@ -5,8 +5,11 @@ import { ArrowLeft, Calendar, MapPin, ChevronRight } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ImageLightbox } from "./ImageLightbox";
 import { MasonryGallery } from "./MasonryGallery";
-import { weddingStories } from "../data/weddingStories";
 import { loadMkbIntelligence, type BlogImage } from "../lib/intelligence";
+import {
+  loadWedding,
+  type WeddingDocument,
+} from "../lib/weddingEngine";
 
 function slugify(value: string) {
   return (value || "")
@@ -19,41 +22,106 @@ function slugify(value: string) {
 
 export function WeddingStoryPage() {
   const { slug } = useParams();
+  const [story, setStory] = useState<WeddingDocument | undefined>();
+  const [storyLoading, setStoryLoading] = useState(true);
   const [images, setImages] = useState<BlogImage[]>([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  const story = weddingStories.find((item) => item.slug === slug);
-  const venueUrl = story ? `/gallery/venue/${slugify(story.venue)}` : "/gallery/venues";
+  const venueUrl = story
+    ? `/gallery/venue/${slugify(story.venue)}`
+    : "/gallery/venues";
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [slug]);
 
   useEffect(() => {
-  if (!slug || !story) return;
+    let cancelled = false;
+    setStoryLoading(true);
+    setStory(undefined);
 
-  let cancelled = false;
+    if (!slug) {
+      setStoryLoading(false);
+      return;
+    }
 
-  loadMkbIntelligence()
-    .then((intelligence) => {
-      if (!cancelled) {
-        setImages(intelligence.getBlogImages(slug, story));
-      }
-    })
-    .catch(() => {
-      if (!cancelled) setImages([]);
-    });
+    loadWedding(slug)
+      .then((loadedStory) => {
+        if (!cancelled) setStory(loadedStory);
+      })
+      .catch(() => {
+        if (!cancelled) setStory(undefined);
+      })
+      .finally(() => {
+        if (!cancelled) setStoryLoading(false);
+      });
 
-  return () => {
-    cancelled = true;
-  };
-}, [slug, story]);
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
 
-  const cover = useMemo(() => images.find((image) => image.isCover) || images[0], [images]);
+  useEffect(() => {
+    if (!slug || !story) {
+      setImages([]);
+      return;
+    }
 
-  const lightboxImages = useMemo(() => images.map((image) => image.fullSrc), [images]);
-  const lightboxAlts = useMemo(() => images.map((image) => image.alt), [images]);
+    let cancelled = false;
+
+    loadMkbIntelligence()
+      .then((intelligence) => {
+        if (!cancelled) {
+          setImages(
+            intelligence.getBlogImages(slug, {
+              slug: story.slug,
+              title: story.title,
+              couple: story.couple,
+              venue: story.venue,
+              weddingDate: story.weddingDate,
+              excerpt: story.excerpt,
+              intro: story.intro,
+              story: story.story,
+              facts: story.facts,
+              suppliers: story.suppliers,
+              seoTitle: story.seo?.title,
+              seoDescription: story.seo?.description,
+            }),
+          );
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setImages([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, story]);
+
+  const cover = useMemo(
+    () => images.find((image) => image.isCover) || images[0],
+    [images],
+  );
+
+  const lightboxImages = useMemo(
+    () => images.map((image) => image.fullSrc),
+    [images],
+  );
+
+  const lightboxAlts = useMemo(
+    () => images.map((image) => image.alt),
+    [images],
+  );
+
+  if (storyLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+        <p className="text-neutral-600">Loading wedding story…</p>
+      </div>
+    );
+  }
 
   if (!story) {
     return (
@@ -70,7 +138,6 @@ export function WeddingStoryPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO */}
       <section className="relative h-[70vh] min-h-[500px] bg-neutral-200">
         {cover ? (
           <ImageWithFallback
@@ -103,7 +170,9 @@ export function WeddingStoryPage() {
               Wedding Story
             </p>
 
-            <h1 className="text-3xl md:text-5xl mb-6 leading-tight">{story.title}</h1>
+            <h1 className="text-3xl md:text-5xl mb-6 leading-tight">
+              {story.title}
+            </h1>
 
             <div className="flex flex-wrap justify-center gap-8 text-white/90 text-lg">
               <span className="flex items-center gap-2">
@@ -125,7 +194,6 @@ export function WeddingStoryPage() {
         </div>
       </section>
 
-      {/* BREADCRUMBS */}
       <div className="max-w-7xl mx-auto px-6 pt-8 pb-16">
         <nav aria-label="Breadcrumb" className="flex justify-center">
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
@@ -158,69 +226,73 @@ export function WeddingStoryPage() {
         </nav>
       </div>
 
-{story.facts && (
-  <section className="max-w-6xl mx-auto px-6 pb-16">
-    <div className="border-y border-neutral-200 py-10">
-      <div className="text-center mb-10">
-        <p className="uppercase tracking-[0.25em] text-xs text-neutral-500 mb-3">
-          Wedding at a Glance
-        </p>
-        <h2 className="text-2xl md:text-3xl font-serif">
-          {story.couple} at {story.venue}
-        </h2>
-      </div>
+      {story.facts ? (
+        <section className="max-w-6xl mx-auto px-6 pb-16">
+          <div className="border-y border-neutral-200 py-10">
+            <div className="text-center mb-10">
+              <p className="uppercase tracking-[0.25em] text-xs text-neutral-500 mb-3">
+                Wedding at a Glance
+              </p>
+              <h2 className="text-2xl md:text-3xl font-serif">
+                {story.couple} at {story.venue}
+              </h2>
+            </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
-        {story.facts.season && (
-          <div>
-            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Season</p>
-            <p className="text-lg font-serif">{story.facts.season}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
+              {story.facts.season ? (
+                <div>
+                  <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Season</p>
+                  <p className="text-lg font-serif">{story.facts.season}</p>
+                </div>
+              ) : null}
+
+              {story.facts.ceremonyType ? (
+                <div>
+                  <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Ceremony</p>
+                  <p className="text-lg font-serif">{story.facts.ceremonyType}</p>
+                </div>
+              ) : null}
+
+              {story.facts.ceremonyLocation ? (
+                <div>
+                  <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">
+                    Ceremony Location
+                  </p>
+                  <p className="text-lg font-serif">
+                    {story.facts.ceremonyLocation}
+                  </p>
+                </div>
+              ) : null}
+
+              {story.facts.receptionLocation ? (
+                <div>
+                  <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Reception</p>
+                  <p className="text-lg font-serif">
+                    {story.facts.receptionLocation}
+                  </p>
+                </div>
+              ) : null}
+
+              {story.facts.celebrant ? (
+                <div>
+                  <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Celebrant</p>
+                  <p className="text-lg font-serif">{story.facts.celebrant}</p>
+                </div>
+              ) : null}
+
+              {story.facts.photographer ? (
+                <div>
+                  <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Photography</p>
+                  <p className="text-lg font-serif">
+                    {story.facts.photographer}
+                  </p>
+                </div>
+              ) : null}
+            </div>
           </div>
-        )}
+        </section>
+      ) : null}
 
-        {story.facts.ceremonyType && (
-          <div>
-            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Ceremony</p>
-            <p className="text-lg font-serif">{story.facts.ceremonyType}</p>
-          </div>
-        )}
-
-        {story.facts.ceremonyLocation && (
-          <div>
-            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">
-              Ceremony Location
-            </p>
-            <p className="text-lg font-serif">{story.facts.ceremonyLocation}</p>
-          </div>
-        )}
-
-        {story.facts.receptionLocation && (
-          <div>
-            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Reception</p>
-            <p className="text-lg font-serif">{story.facts.receptionLocation}</p>
-          </div>
-        )}
-
-        {story.facts.celebrant && (
-          <div>
-            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Celebrant</p>
-            <p className="text-lg font-serif">{story.facts.celebrant}</p>
-          </div>
-        )}
-
-        {story.facts.photographer && (
-          <div>
-            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">Photography</p>
-            <p className="text-lg font-serif">{story.facts.photographer}</p>
-          </div>
-        )}
-      </div>
-    </div>
-  </section>
-)}
-
-
-      {/* STORY TEXT */}
       <main className="max-w-4xl mx-auto px-6 pt-4 pb-16 text-center">
         <p className="text-xl md:text-2xl leading-relaxed text-neutral-800 mb-10 font-serif">
           {story.intro}
@@ -246,7 +318,6 @@ export function WeddingStoryPage() {
         </div>
       </main>
 
-      {/* GALLERY */}
       <section className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 pb-20">
         <div className="mb-8 text-center">
           <p className="uppercase tracking-[0.25em] text-xs text-neutral-500 mb-3">Gallery</p>
@@ -282,67 +353,66 @@ export function WeddingStoryPage() {
         )}
       </section>
 
+      {story.suppliers && story.suppliers.length > 0 ? (
+        <section className="max-w-6xl mx-auto px-6 py-20">
+          <div className="border-t border-neutral-200 pt-14">
+            <div className="text-center mb-12">
+              <p className="uppercase tracking-[0.25em] text-xs text-neutral-500 mb-3">
+                Wedding Suppliers
+              </p>
 
-      {story.suppliers && story.suppliers.length > 0 && (
-  <section className="max-w-6xl mx-auto px-6 py-20">
-    <div className="border-t border-neutral-200 pt-14">
-      <div className="text-center mb-12">
-        <p className="uppercase tracking-[0.25em] text-xs text-neutral-500 mb-3">
-          Wedding Suppliers
-        </p>
+              <h2 className="text-3xl md:text-4xl font-serif mb-4">
+                Meet the Team Behind the Day
+              </h2>
 
-        <h2 className="text-3xl md:text-4xl font-serif mb-4">
-          Meet the Team Behind the Day
-        </h2>
+              <p className="text-neutral-600 max-w-2xl mx-auto">
+                Every wedding is brought to life by a brilliant team of suppliers.
+                These are the people who helped make {story.couple}'s day so special.
+              </p>
+            </div>
 
-        <p className="text-neutral-600 max-w-2xl mx-auto">
-          Every wedding is brought to life by a brilliant team of suppliers. These are the people who helped make {story.couple}'s day so special.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {story.suppliers.map((supplier) => (
-          <div
-            key={`${supplier.role}-${supplier.name}`}
-            className="rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-shadow duration-300"
-          >
-            <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">
-              {supplier.role}
-            </p>
-
-            <h3 className="font-serif text-xl mb-4">{supplier.name}</h3>
-
-            <div className="flex flex-wrap gap-4 text-sm">
-              {supplier.website && (
-                <a
-                  href={supplier.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline underline-offset-4 hover:text-black"
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {story.suppliers.map((supplier) => (
+                <div
+                  key={`${supplier.role}-${supplier.name}`}
+                  className="rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-shadow duration-300"
                 >
-                  Website
-                </a>
-              )}
+                  <p className="uppercase tracking-widest text-xs text-neutral-500 mb-2">
+                    {supplier.role}
+                  </p>
 
-              {supplier.instagram && (
-                <a
-                  href={`https://instagram.com/${supplier.instagram}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline underline-offset-4 hover:text-black"
-                >
-                  @{supplier.instagram}
-                </a>
-              )}
+                  <h3 className="font-serif text-xl mb-4">{supplier.name}</h3>
+
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    {supplier.website ? (
+                      <a
+                        href={supplier.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline underline-offset-4 hover:text-black"
+                      >
+                        Website
+                      </a>
+                    ) : null}
+
+                    {supplier.instagram ? (
+                      <a
+                        href={`https://instagram.com/${supplier.instagram}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline underline-offset-4 hover:text-black"
+                      >
+                        @{supplier.instagram}
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  </section>
-)}
-  
-      {/* CTA */}
+        </section>
+      ) : null}
+
       <section className="bg-neutral-50 py-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl mb-4 font-serif">
@@ -369,7 +439,6 @@ export function WeddingStoryPage() {
         </div>
       </section>
 
-      {/* LIGHTBOX */}
       {lightboxOpen && images.length > 0 ? (
         <ImageLightbox
           images={lightboxImages}

@@ -81,9 +81,9 @@ export function WeddingCollections() {
       <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
         <h2 className="text-3xl font-serif mb-4">Collection model</h2>
         <p className="text-neutral-600 max-w-3xl leading-relaxed">
-          This is the first version of the wedding asset model. The same wedding can have different
-          image sets for the blog, venue pages, portfolio, homepage and social media. Later, images
-          will be assignable to multiple collections without duplicating AI metadata.
+          Each uploaded image belongs to one wedding and can be assigned to multiple destinations:
+          the optional wedding story, the linked venue gallery, moments and future portfolio or social
+          collections. The same R2 asset and AI metadata are reused without duplicating the image.
         </p>
       </section>
     </div>

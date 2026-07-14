@@ -25,7 +25,13 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export type SupplierSaveResult = { ok: true; blogSlug: string; savedRows: number; totalRows: number; backupPath: string | null };
 export type EditableStory = { slug: string; title: string; excerpt: string; intro: string; paragraphs: string[]; facts: StoryFact[]; updatedAt?: string };
-export type StorySaveResult = { ok: true; slug: string; story: EditableStory; backupPath: string | null };
+export type StorySaveResult = {
+  ok: true;
+  slug: string;
+  story: EditableStory;
+  backupPath: string | null;
+  weddingBackupPath?: string | null;
+};
 export type WeddingCreateResult = { ok: true; slug: string; weddingPath: string; createdFiles: string[] };
 export type StoredWeddingDocument = WeddingDocument & { storage: "json"; weddingPath: string };
 export type WeddingImagesSaveResult = { ok: true; slug: string; savedImages: number; backupPath: string | null };
@@ -33,6 +39,105 @@ export type MomentSaveResult = { ok: true; document: MomentRepositoryDocument; b
 export type WeddingUpdateResult = { ok: true; wedding: StoredWeddingDocument; backupPath: string | null };
 export type VenueUpdateResult = { ok: true; venue: VenueSummary; backupPath: string | null };
 export type VenueCreateResult = { ok: true; venue: VenueSummary };
+
+export type ImageDeleteResult = {
+  ok: true;
+  deletion: {
+    imageId: string;
+    weddingSlug: string;
+    venueSlug: string;
+    filename: string;
+    storage: "r2" | "local";
+    removedFromVenues: number;
+    backups: string[];
+    storageWarnings: string[];
+    publicVenueData: {
+      generatedAt: string;
+      venueCount: number;
+      imageCount: number;
+      outputPath: string;
+      indexPath: string;
+    };
+  };
+};
+
+export type VenuePublishResult = {
+  ok: true;
+  publish: {
+    venueSlug: string;
+    venueName: string;
+    branch: string;
+    noChanges: boolean;
+    commit: string;
+    pushed: boolean;
+    publicImageCount: number;
+    stagedPaths: string[];
+    publicVenueData: {
+      generatedAt: string;
+      venueCount: number;
+      imageCount: number;
+      outputPath: string;
+      indexPath: string;
+    };
+  };
+};
+
+export type WeddingPublishCheck = {
+  id: string;
+  label: string;
+  detail: string;
+  passed: boolean;
+  severity: "required" | "recommended";
+};
+
+export type WeddingPublishPreview = {
+  slug: string;
+  wedding: WeddingDocument;
+  storyEnabled: boolean;
+  storyStatus: "draft" | "published" | "archived";
+  action: "publish" | "unpublish";
+  readyToPublish: boolean;
+  checks: WeddingPublishCheck[];
+  requiredPassed: number;
+  requiredTotal: number;
+  recommendedPassed: number;
+  recommendedTotal: number;
+  imageCount: number;
+  coverImage: {
+    id: string;
+    filename: string;
+    thumbSrc: string;
+    fullSrc: string;
+    alt: string;
+  } | null;
+};
+
+export type WeddingPublishResult = {
+  ok: true;
+  publish: {
+    weddingSlug: string;
+    weddingTitle: string;
+    storyEnabled: boolean;
+    storyStatus: "draft" | "published";
+    action: "published" | "unpublished";
+    branch: string;
+    noChanges: boolean;
+    commit: string;
+    pushed: boolean;
+    publicImageCount: number;
+    stagedPaths: string[];
+    backupPath: string | null;
+    publicWeddingData: {
+      generatedAt: string;
+      weddingCount: number;
+      imageCount: number;
+      outputPath: string;
+      indexPath: string;
+      legacyIndexPath: string;
+      managedSlugs: string[];
+    };
+  };
+};
 
 export type VenueGalleryMigrationVenuePreview = {
   sourceVenue: string;
@@ -99,6 +204,76 @@ export type VenueGalleryMigrationResult = {
 
 
 export class AdminApiService {
+
+
+  static async getWeddingPublishPreview(
+    slug: string,
+  ) {
+    const result = await request<{
+      ok: true;
+      preview: WeddingPublishPreview;
+    }>(
+      `/api/weddings/${encodeURIComponent(
+        slug,
+      )}/publish`,
+    );
+
+    return result.preview;
+  }
+
+  static async publishWedding(
+    slug: string,
+    storyEnabled: boolean,
+  ) {
+    return request<WeddingPublishResult>(
+      `/api/weddings/${encodeURIComponent(
+        slug,
+      )}/publish`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          storyEnabled,
+        }),
+      },
+    );
+  }
+
+
+  static async publishVenue(slug: string) {
+    return request<VenuePublishResult>(
+      `/api/venues/${encodeURIComponent(
+        slug,
+      )}/publish`,
+      {
+        method: "POST",
+      },
+    );
+  }
+
+  static async deleteWeddingImage({
+    weddingSlug,
+    imageId,
+    venueSlug,
+  }: {
+    weddingSlug: string;
+    imageId: string;
+    venueSlug: string;
+  }) {
+    const query = new URLSearchParams({
+      venueSlug,
+    });
+
+    return request<ImageDeleteResult>(
+      `/api/weddings/${encodeURIComponent(
+        weddingSlug,
+      )}/images/${encodeURIComponent(
+        imageId,
+      )}?${query.toString()}`,
+      {
+        method: "DELETE",
+      },
+    );
+  }
 
 
   static async syncPublicVenueData() {

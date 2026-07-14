@@ -26,6 +26,57 @@ function moveItem<T>(items: T[], from: number, to: number) {
   return next;
 }
 
+function weddingFactsToRows(
+  facts:
+    | {
+        season?: string;
+        ceremonyType?: string;
+        ceremonyLocation?: string;
+        receptionLocation?: string;
+        celebrant?: string;
+        photographer?: string;
+      }
+    | undefined,
+): StoryFact[] {
+  const rows: StoryFact[] = [
+    {
+      label: "Season",
+      value: facts?.season || "",
+    },
+    {
+      label: "Ceremony",
+      value:
+        facts?.ceremonyType || "",
+    },
+    {
+      label: "Ceremony Location",
+      value:
+        facts?.ceremonyLocation ||
+        "",
+    },
+    {
+      label: "Reception Location",
+      value:
+        facts?.receptionLocation ||
+        "",
+    },
+    {
+      label: "Celebrant",
+      value:
+        facts?.celebrant || "",
+    },
+    {
+      label: "Photography",
+      value:
+        facts?.photographer || "",
+    },
+  ];
+
+  return rows.filter(
+    (row) => row.value.trim(),
+  );
+}
+
 export function WeddingStoryEditor() {
   const { slug } = useParams();
   const [weddings, setWeddings] = useState<WeddingRecord[]>([]);
@@ -36,32 +87,105 @@ export function WeddingStoryEditor() {
   const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
-    WeddingService.load().then((service) => setWeddings(service.getWeddings()));
+    let cancelled = false;
+
+    WeddingService.load()
+      .then((service) => {
+        if (!cancelled) {
+          setWeddings(
+            service.getWeddings(),
+          );
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setWeddings([]);
+        }
+      });
 
     async function loadStory() {
-      const baseStory = await new StoryService().getStory(slug || "");
-      const apiStory = await AdminApiService.getWeddingStory(slug || "").catch(
-        () => null,
-      );
+      const [
+        repositoryWedding,
+        baseStory,
+        apiStory,
+      ] = await Promise.all([
+        AdminApiService.getJsonWedding(
+          slug || "",
+        ).catch(() => null),
+        new StoryService()
+          .getStory(slug || "")
+          .catch(() => undefined),
+        AdminApiService.getWeddingStory(
+          slug || "",
+        ).catch(() => null),
+      ]);
 
-      if (baseStory) {
-        setStory({
-          slug: baseStory.slug,
-          title: apiStory?.title || baseStory.title,
-          excerpt: apiStory?.excerpt ?? baseStory.excerpt ?? "",
-          intro: apiStory?.intro ?? baseStory.intro ?? "",
-          paragraphs: apiStory?.paragraphs ?? baseStory.paragraphs,
-          facts: apiStory?.facts ?? baseStory.facts,
-          updatedAt: apiStory?.updatedAt,
-        });
-      }
+      if (cancelled) return;
+
+      const sourceSlug =
+        repositoryWedding?.slug ||
+        baseStory?.slug ||
+        slug ||
+        "";
+
+      if (!sourceSlug) return;
+
+      setStory({
+        slug: sourceSlug,
+        title:
+          apiStory?.title ||
+          repositoryWedding?.title ||
+          baseStory?.title ||
+          "",
+        excerpt:
+          apiStory?.excerpt ??
+          repositoryWedding?.excerpt ??
+          baseStory?.excerpt ??
+          "",
+        intro:
+          apiStory?.intro ??
+          repositoryWedding?.intro ??
+          baseStory?.intro ??
+          "",
+        paragraphs:
+          apiStory?.paragraphs ??
+          repositoryWedding?.story ??
+          baseStory?.paragraphs ??
+          [],
+        facts:
+          apiStory?.facts ??
+          (
+            weddingFactsToRows(
+              repositoryWedding?.facts,
+            ).length
+              ? weddingFactsToRows(
+                  repositoryWedding?.facts,
+                )
+              : baseStory?.facts || []
+          ),
+        updatedAt:
+          apiStory?.updatedAt ??
+          repositoryWedding?.updatedAt,
+      });
     }
 
     loadStory();
 
     AdminApiService.health()
-      .then(() => setApiOnline(true))
-      .catch(() => setApiOnline(false));
+      .then(() => {
+        if (!cancelled) {
+          setApiOnline(true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setApiOnline(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   const wedding = useMemo(
@@ -195,8 +319,8 @@ export function WeddingStoryEditor() {
               {wedding.couple}
             </h1>
             <p className="text-white/65">
-              Saved edits override weddingStories.ts through
-              wedding-stories-admin.json.
+              Story edits are saved into the wedding repository.
+              Legacy override files are retained temporarily for compatibility.
             </p>
           </div>
 

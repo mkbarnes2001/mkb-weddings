@@ -10,6 +10,7 @@ import type {
   WeddingStorage,
 } from "../types/wedding";
 import type { WeddingDocument } from "../../lib/weddingEngine";
+import type { ImageManagerDocument } from "../types/imageManager";
 
 type BlogGalleryRow = {
   blogSlug?: string;
@@ -31,6 +32,21 @@ type AiRow = {
 type WeddingSource = WeddingDocument & {
   storage: WeddingStorage;
 };
+
+type StoredWeddingImage =
+  ImageManagerDocument["images"][number] & {
+    thumbSrc?: string;
+    fullSrc?: string;
+    aiTags?: string[];
+    aiAlt?: string;
+    aiCaption?: string;
+    source?: {
+      thumbPath?: string;
+      fullPath?: string;
+      storage?: string;
+      [key: string]: unknown;
+    };
+  };
 
 async function fetchText(path: string) {
   const res = await fetch(path, { cache: "no-store" });
@@ -109,6 +125,8 @@ function legacyWeddingSources(): WeddingSource[] {
       description: story.seoDescription,
     },
     status: "published",
+    storyEnabled: true,
+    storyStatus: "published",
     storage: "legacy",
   }));
 }
@@ -131,18 +149,28 @@ export class WeddingService {
   private blogRows: BlogGalleryRow[];
   private blogAiByKey: Map<string, AiRow>;
   private weddingSources: WeddingSource[];
+  private jsonImagesByWedding: Map<
+    string,
+    ImageManagerDocument
+  >;
 
   constructor({
     blogRows,
     aiRows,
     weddingSources,
+    jsonImagesByWedding,
   }: {
     blogRows: BlogGalleryRow[];
     aiRows: AiRow[];
     weddingSources: WeddingSource[];
+    jsonImagesByWedding: Map<
+      string,
+      ImageManagerDocument
+    >;
   }) {
     this.blogRows = blogRows;
     this.weddingSources = weddingSources;
+    this.jsonImagesByWedding = jsonImagesByWedding;
     this.blogAiByKey = new Map();
 
     aiRows
@@ -165,6 +193,28 @@ export class WeddingService {
       storage: "json",
     }));
 
+    const imageDocuments = await Promise.all(
+      jsonWeddings.map(async (wedding) => {
+        const document =
+          await AdminApiService.getWeddingImages(
+            wedding.slug,
+          ).catch(() => null);
+
+        return [wedding.slug, document] as const;
+      }),
+    );
+
+    const jsonImagesByWedding = new Map<
+      string,
+      ImageManagerDocument
+    >();
+
+    imageDocuments.forEach(([slug, document]) => {
+      if (document) {
+        jsonImagesByWedding.set(slug, document);
+      }
+    });
+
     return new WeddingService({
       blogRows: parseCsv<BlogGalleryRow>(blogGalleryText),
       aiRows: parseCsv<AiRow>(aiText),
@@ -172,6 +222,7 @@ export class WeddingService {
         legacyWeddingSources(),
         jsonSources,
       ),
+      jsonImagesByWedding,
     });
   }
 
@@ -200,36 +251,111 @@ export class WeddingService {
           Number(b.blogOrder || 0),
       );
 
-    const images: WeddingImage[] = rows.map((row, index) => {
-      const filename = row.filename || "";
-      const ai = this.blogAiByKey.get(
-        aiKey(source.slug, filename),
-      );
-      const order = Number(row.blogOrder || index + 1);
-      const isCover = ["true", "yes", "1", "cover"].includes(
-        normalise(row.blogCover),
+    const legacyImages: WeddingImage[] = rows.map(
+      (row, index) => {
+        const filename = row.filename || "";
+        const ai = this.blogAiByKey.get(
+          aiKey(source.slug, filename),
+        );
+        const order = Number(
+          row.blogOrder || index + 1,
+        );
+        const isCover = [
+          "true",
+          "yes",
+          "1",
+          "cover",
+        ].includes(normalise(row.blogCover));
+
+        return {
+          filename,
+          slug: source.slug,
+          order: Number.isFinite(order)
+            ? order
+            : index + 1,
+          isCover,
+          thumbSrc: buildImageUrl(
+            "thumb",
+            source.slug,
+            filename,
+          ),
+          fullSrc: buildImageUrl(
+            "full",
+            source.slug,
+            filename,
+          ),
+          aiTags: splitTags(ai?.aiTags),
+          aiAlt: ai?.aiAlt || "",
+          aiCaption: ai?.aiCaption || "",
+        };
+      },
+    );
+
+    const jsonDocument =
+      this.jsonImagesByWedding.get(source.slug);
+
+    const jsonImages: WeddingImage[] = (
+      (jsonDocument?.images || []) as StoredWeddingImage[]
+    )
+      .map((image, index) => {
+        const filename = String(
+          image.filename || "",
+        ).trim();
+
+        const thumbSrc =
+          String(image.thumbSrc || "").trim() ||
+          String(image.source?.thumbPath || "").trim();
+
+        const fullSrc =
+          String(image.fullSrc || "").trim() ||
+          String(image.source?.fullPath || "").trim();
+
+        return {
+          filename,
+          slug: source.slug,
+          order: Number(
+            image.order || index + 1,
+          ),
+          isCover: Boolean(image.isCover),
+          thumbSrc: thumbSrc || fullSrc,
+          fullSrc: fullSrc || thumbSrc,
+          aiTags: Array.isArray(image.aiTags)
+            ? image.aiTags
+                .map((tag) => String(tag || "").trim())
+                .filter(Boolean)
+            : [],
+          aiAlt: String(image.aiAlt || ""),
+          aiCaption: String(
+            image.aiCaption || "",
+          ),
+        };
+      })
+      .filter(
+        (image) =>
+          image.filename &&
+          (image.thumbSrc || image.fullSrc),
       );
 
-      return {
-        filename,
-        slug: source.slug,
-        order: Number.isFinite(order) ? order : index + 1,
-        isCover,
-        thumbSrc: buildImageUrl(
-          "thumb",
-          source.slug,
-          filename,
-        ),
-        fullSrc: buildImageUrl(
-          "full",
-          source.slug,
-          filename,
-        ),
-        aiTags: splitTags(ai?.aiTags),
-        aiAlt: ai?.aiAlt || "",
-        aiCaption: ai?.aiCaption || "",
-      };
+    const imageByFilename =
+      new Map<string, WeddingImage>();
+
+    legacyImages.forEach((image) => {
+      imageByFilename.set(
+        normaliseFilename(image.filename),
+        image,
+      );
     });
+
+    jsonImages.forEach((image) => {
+      imageByFilename.set(
+        normaliseFilename(image.filename),
+        image,
+      );
+    });
+
+    const images = Array.from(
+      imageByFilename.values(),
+    ).sort((a, b) => a.order - b.order);
 
     const aiRowsForImages = images
       .map((image) =>
@@ -262,10 +388,22 @@ export class WeddingService {
           ? "warning"
           : "ready";
 
+    const storyEnabled =
+      source.storage === "legacy"
+        ? true
+        : source.storyEnabled === true;
+
+    const storyStatus =
+      source.storage === "legacy"
+        ? "published"
+        : source.storyStatus ||
+          "draft";
+
     const publicationStatus: WeddingPublicationStatus =
-      source.status === "archived"
+      storyStatus === "archived"
         ? "archived"
-        : source.status === "published"
+        : storyEnabled &&
+            storyStatus === "published"
           ? "published"
           : "draft";
 
@@ -277,7 +415,12 @@ export class WeddingService {
       weddingDate: source.weddingDate,
       intro: source.intro,
       imageCount,
-      aiRows: aiRowsForImages.length,
+      aiRows: images.filter(
+        (image) =>
+          image.aiTags.length > 0 ||
+          image.aiAlt.trim() ||
+          image.aiCaption.trim(),
+      ).length,
       tagsComplete,
       altComplete,
       captionComplete,
@@ -285,7 +428,10 @@ export class WeddingService {
       status,
       publicationStatus,
       storage: source.storage,
-      latestAiUpdate: latestDate(aiRowsForImages),
+      latestAiUpdate:
+        latestDate(aiRowsForImages) ||
+        jsonDocument?.updatedAt ||
+        "",
       images,
     };
   }

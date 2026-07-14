@@ -9,6 +9,8 @@ import { createGalleryMigrationEndpoint } from "./gallery-migration-endpoint.mjs
 import { createPublicVenuePublisher } from "./public-venue-publisher.mjs";
 import { createImageLifecycleEndpoint } from "./image-lifecycle-endpoint.mjs";
 import { createVenuePublishEndpoint } from "./venue-publish-endpoint.mjs";
+import { createPublicWeddingPublisher } from "./public-wedding-publisher.mjs";
+import { createWeddingPublishEndpoint } from "./wedding-publish-endpoint.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,6 +24,7 @@ const MOMENTS_PATH = path.join(PROJECT_ROOT, "content", "moments", "moments.json
 const GALLERY_CSV_PATH = path.join(PUBLIC_ROOT, "gallery.csv");
 const GALLERY_AI_CSV_PATH = path.join(PUBLIC_ROOT, "gallery-ai.csv");
 const PUBLIC_VENUE_DATA_ROOT = path.join(PUBLIC_ROOT, "venue-data");
+const PUBLIC_WEDDING_DATA_ROOT = path.join(PUBLIC_ROOT, "wedding-data");
 const SUPPLIERS_PATH = path.join(PUBLIC_ROOT, "blog-suppliers.csv");
 const STORIES_PATH = path.join(PUBLIC_ROOT, "wedding-stories-admin.json");
 const PUBLISHED_INDEX_PATH = path.join(PUBLIC_ROOT, "weddings-index.json");
@@ -89,7 +92,6 @@ const publicVenuePublisher =
   createPublicVenuePublisher({
     projectRoot: PROJECT_ROOT,
     venuesRoot: VENUES_ROOT,
-    weddingsRoot: WEDDINGS_ROOT,
     publicDataRoot:
       PUBLIC_VENUE_DATA_ROOT,
   });
@@ -108,6 +110,7 @@ const venuePublishEndpoint =
   createVenuePublishEndpoint({
     projectRoot: PROJECT_ROOT,
     venuesRoot: VENUES_ROOT,
+    weddingsRoot: WEDDINGS_ROOT,
     publicDataRoot:
       PUBLIC_VENUE_DATA_ROOT,
     assertSafeSlug,
@@ -115,6 +118,37 @@ const venuePublishEndpoint =
     publicImageBaseUrl:
       process.env.R2_PUBLIC_BASE_URL ||
       "https://images.mkbweddings.co.uk",
+  });
+
+const publicWeddingPublisher =
+  createPublicWeddingPublisher({
+    projectRoot: PROJECT_ROOT,
+    weddingsRoot: WEDDINGS_ROOT,
+    venuesRoot: VENUES_ROOT,
+    publicDataRoot:
+      PUBLIC_WEDDING_DATA_ROOT,
+    legacyIndexPath:
+      PUBLISHED_INDEX_PATH,
+    suppliersPath: SUPPLIERS_PATH,
+    storiesPath: STORIES_PATH,
+    publicImageBaseUrl:
+      process.env.R2_PUBLIC_BASE_URL ||
+      "https://images.mkbweddings.co.uk",
+  });
+
+const weddingPublishEndpoint =
+  createWeddingPublishEndpoint({
+    projectRoot: PROJECT_ROOT,
+    weddingsRoot: WEDDINGS_ROOT,
+    publicDataRoot:
+      PUBLIC_WEDDING_DATA_ROOT,
+    legacyIndexPath:
+      PUBLISHED_INDEX_PATH,
+    suppliersPath: SUPPLIERS_PATH,
+    storiesPath: STORIES_PATH,
+    backupDir: BACKUP_DIR,
+    assertSafeSlug,
+    publicWeddingPublisher,
   });
 
 async function readJsonBody(req) {
@@ -191,6 +225,187 @@ async function getJsonWedding(slug) {
     if (error?.code === "ENOENT") return null;
     throw error;
   }
+}
+
+async function saveWeddingDocument(
+  routeSlug,
+  incomingWedding,
+) {
+  assertSafeSlug(routeSlug);
+
+  const existing =
+    await getJsonWedding(routeSlug);
+
+  if (!existing) {
+    const error = new Error(
+      "Wedding JSON not found.",
+    );
+    error.statusCode = 404;
+    throw error;
+  }
+
+  delete existing.storage;
+  delete existing.weddingPath;
+
+  const cleanIncoming = {
+    ...incomingWedding,
+  };
+
+  delete cleanIncoming.storage;
+  delete cleanIncoming.weddingPath;
+
+  const wedding = {
+    ...existing,
+    ...cleanIncoming,
+    schemaVersion: 1,
+    slug: routeSlug,
+    title: String(
+      cleanIncoming.title ??
+        existing.title ??
+        "",
+    ).trim(),
+    couple: String(
+      cleanIncoming.couple ??
+        existing.couple ??
+        "",
+    ).trim(),
+    venue: String(
+      cleanIncoming.venue ??
+        existing.venue ??
+        "",
+    ).trim(),
+    venueSlug: String(
+      cleanIncoming.venueSlug ??
+        existing.venueSlug ??
+        "",
+    ).trim(),
+    venueId: String(
+      cleanIncoming.venueId ??
+        existing.venueId ??
+        "",
+    ).trim(),
+    weddingDate: String(
+      cleanIncoming.weddingDate ??
+        existing.weddingDate ??
+        "",
+    ).trim(),
+    excerpt: String(
+      cleanIncoming.excerpt ??
+        existing.excerpt ??
+        "",
+    ),
+    intro: String(
+      cleanIncoming.intro ??
+        existing.intro ??
+        "",
+    ),
+    story: Array.isArray(
+      cleanIncoming.story,
+    )
+      ? cleanIncoming.story
+          .map((paragraph) =>
+            String(
+              paragraph || "",
+            ).trim(),
+          )
+          .filter(Boolean)
+      : Array.isArray(existing.story)
+        ? existing.story
+        : [],
+    suppliers: Array.isArray(
+      cleanIncoming.suppliers,
+    )
+      ? cleanIncoming.suppliers
+      : Array.isArray(
+          existing.suppliers,
+        )
+        ? existing.suppliers
+        : [],
+    facts:
+      cleanIncoming.facts &&
+      typeof cleanIncoming.facts ===
+        "object"
+        ? cleanIncoming.facts
+        : existing.facts &&
+            typeof existing.facts ===
+              "object"
+          ? existing.facts
+          : {},
+    seo:
+      cleanIncoming.seo &&
+      typeof cleanIncoming.seo ===
+        "object"
+        ? cleanIncoming.seo
+        : existing.seo &&
+            typeof existing.seo ===
+              "object"
+          ? existing.seo
+          : {},
+    status:
+      cleanIncoming.status ||
+      existing.status ||
+      "draft",
+    storyEnabled:
+      typeof cleanIncoming.storyEnabled ===
+      "boolean"
+        ? cleanIncoming.storyEnabled
+        : typeof existing.storyEnabled ===
+            "boolean"
+          ? existing.storyEnabled
+          : false,
+    storyStatus:
+      cleanIncoming.storyStatus ||
+      existing.storyStatus ||
+      "draft",
+    updatedAt:
+      new Date().toISOString(),
+  };
+
+  const errors =
+    validateWeddingDocument(wedding);
+
+  if (errors.length) {
+    const error = new Error(
+      "Wedding validation failed.",
+    );
+    error.statusCode = 400;
+    error.details = errors;
+    throw error;
+  }
+
+  const weddingPath = path.join(
+    WEDDINGS_ROOT,
+    routeSlug,
+    "wedding.json",
+  );
+
+  const backupPath =
+    await createBackup(
+      weddingPath,
+      `${routeSlug}-wedding`,
+    );
+
+  await fs.writeFile(
+    weddingPath,
+    `${JSON.stringify(
+      wedding,
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
+
+  return {
+    wedding: {
+      ...wedding,
+      storage: "json",
+      weddingPath: path.relative(
+        PROJECT_ROOT,
+        weddingPath,
+      ),
+    },
+    backupPath,
+  };
 }
 
 async function ensureWeddingFolder(slug) {
@@ -421,6 +636,10 @@ async function createWeddingFiles(incomingWedding) {
     facts: incomingWedding?.facts && typeof incomingWedding.facts === "object" ? incomingWedding.facts : {},
     seo: incomingWedding?.seo && typeof incomingWedding.seo === "object" ? incomingWedding.seo : {},
     status: incomingWedding?.status || "draft",
+    storyEnabled:
+      incomingWedding?.storyEnabled === true,
+    storyStatus:
+      incomingWedding?.storyStatus || "draft",
     updatedAt: new Date().toISOString(),
   };
   assertSafeSlug(wedding.slug);
@@ -461,25 +680,7 @@ async function createWeddingFiles(incomingWedding) {
 }
 
 async function generatePublishedWeddingIndex() {
-  const weddings = await listJsonWeddings();
-  const published = weddings
-    .filter((wedding) => wedding.status === "published")
-    .map((wedding) => ({
-      schemaVersion: 1,
-      slug: wedding.slug,
-      title: wedding.title,
-      couple: wedding.couple,
-      venue: wedding.venue,
-      weddingDate: wedding.weddingDate,
-      excerpt: wedding.excerpt || "",
-      intro: wedding.intro || "",
-      seo: wedding.seo || {},
-      status: wedding.status,
-      updatedAt: wedding.updatedAt || null,
-    }));
-  const document = { schemaVersion: 1, generatedAt: new Date().toISOString(), count: published.length, weddings: published };
-  await fs.writeFile(PUBLISHED_INDEX_PATH, `${JSON.stringify(document, null, 2)}\n`, "utf8");
-  return document;
+  return publicWeddingPublisher.publishAll();
 }
 
 function csvEscape(value = "") {
@@ -546,6 +747,60 @@ async function readStoriesDocument() {
   return { stories: parsed && typeof parsed.stories === "object" && parsed.stories ? parsed.stories : {} };
 }
 
+function storyFactsToObject(
+  rows,
+  existing = {},
+) {
+  const facts = {
+    ...(existing &&
+    typeof existing === "object"
+      ? existing
+      : {}),
+  };
+
+  const keyByLabel = new Map([
+    ["season", "season"],
+    ["ceremony", "ceremonyType"],
+    ["ceremony type", "ceremonyType"],
+    [
+      "ceremony location",
+      "ceremonyLocation",
+    ],
+    ["reception", "receptionLocation"],
+    [
+      "reception location",
+      "receptionLocation",
+    ],
+    ["celebrant", "celebrant"],
+    ["photography", "photographer"],
+    ["photographer", "photographer"],
+  ]);
+
+  for (const row of Array.isArray(rows)
+    ? rows
+    : []) {
+    const key = keyByLabel.get(
+      normalise(row?.label).replace(
+        /\s+/g,
+        " ",
+      ),
+    );
+
+    if (
+      key &&
+      String(
+        row?.value || "",
+      ).trim()
+    ) {
+      facts[key] = String(
+        row.value,
+      ).trim();
+    }
+  }
+
+  return facts;
+}
+
 async function saveWeddingSuppliers(blogSlug, incomingRows) {
   const rows = Array.isArray(incomingRows) ? incomingRows : [];
   const cleanedRows = rows.map((row, index) => ({
@@ -556,12 +811,63 @@ async function saveWeddingSuppliers(blogSlug, incomingRows) {
     instagram: String(row.instagram || "").trim().replace(/^@/, ""),
     sortOrder: String(row.sortOrder || index + 1),
   }));
+
   const allRows = await readSuppliers();
-  const retainedRows = allRows.filter((row) => normalise(row.blogSlug) !== normalise(blogSlug));
-  const backupPath = await createBackup(SUPPLIERS_PATH, "blog-suppliers");
-  const combinedRows = [...retainedRows, ...cleanedRows];
-  await fs.writeFile(SUPPLIERS_PATH, suppliersToCsv(combinedRows), "utf8");
-  return { savedRows: cleanedRows.length, totalRows: combinedRows.length, backupPath };
+  const retainedRows = allRows.filter(
+    (row) =>
+      normalise(row.blogSlug) !==
+      normalise(blogSlug),
+  );
+
+  const backupPath = await createBackup(
+    SUPPLIERS_PATH,
+    "blog-suppliers",
+  );
+
+  const combinedRows = [
+    ...retainedRows,
+    ...cleanedRows,
+  ];
+
+  await fs.writeFile(
+    SUPPLIERS_PATH,
+    suppliersToCsv(combinedRows),
+    "utf8",
+  );
+
+  const wedding =
+    await getJsonWedding(blogSlug);
+
+  let weddingBackupPath = null;
+
+  if (wedding) {
+    const result =
+      await saveWeddingDocument(
+        blogSlug,
+        {
+          ...wedding,
+          suppliers: cleanedRows.map(
+            (row) => ({
+              role: row.role,
+              name: row.name,
+              website: row.website,
+              instagram:
+                row.instagram,
+            }),
+          ),
+        },
+      );
+
+    weddingBackupPath =
+      result.backupPath;
+  }
+
+  return {
+    savedRows: cleanedRows.length,
+    totalRows: combinedRows.length,
+    backupPath,
+    weddingBackupPath,
+  };
 }
 
 function cleanStory(slug, incoming) {
@@ -577,12 +883,67 @@ function cleanStory(slug, incoming) {
 }
 
 async function saveWeddingStory(slug, incomingStory) {
-  const story = cleanStory(slug, incomingStory || {});
-  const document = await readStoriesDocument();
-  const backupPath = await createBackup(STORIES_PATH, "wedding-stories-admin");
+  const story = cleanStory(
+    slug,
+    incomingStory || {},
+  );
+
+  const document =
+    await readStoriesDocument();
+
+  const backupPath =
+    await createBackup(
+      STORIES_PATH,
+      "wedding-stories-admin",
+    );
+
   document.stories[slug] = story;
-  await fs.writeFile(STORIES_PATH, `${JSON.stringify(document, null, 2)}\n`, "utf8");
-  return { story, backupPath };
+
+  await fs.writeFile(
+    STORIES_PATH,
+    `${JSON.stringify(
+      document,
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
+
+  const wedding =
+    await getJsonWedding(slug);
+
+  let weddingBackupPath = null;
+
+  if (wedding) {
+    const result =
+      await saveWeddingDocument(
+        slug,
+        {
+          ...wedding,
+          title:
+            story.title ||
+            wedding.title,
+          excerpt: story.excerpt,
+          intro: story.intro,
+          story:
+            story.paragraphs,
+          facts:
+            storyFactsToObject(
+              story.facts,
+              wedding.facts,
+            ),
+        },
+      );
+
+    weddingBackupPath =
+      result.backupPath;
+  }
+
+  return {
+    story,
+    backupPath,
+    weddingBackupPath,
+  };
 }
 
 async function handleRequest(req, res) {
@@ -771,7 +1132,58 @@ async function handleRequest(req, res) {
     const body = await readJsonBody(req);
     return sendJson(res, 201, { ok: true, ...(await createWeddingFiles(body.wedding)) });
   }
-  if (req.method === "POST" && pathname === "/api/weddings/published-index") return sendJson(res, 200, { ok: true, index: await generatePublishedWeddingIndex() });
+  if (req.method === "POST" && pathname === "/api/weddings/published-index") {
+    return sendJson(res, 200, {
+      ok: true,
+      index: await generatePublishedWeddingIndex(),
+    });
+  }
+
+  const weddingPublishMatch =
+    pathname.match(
+      /^\/api\/weddings\/([^/]+)\/publish$/,
+    );
+
+  if (
+    weddingPublishMatch &&
+    req.method === "GET"
+  ) {
+    const slug = decodeURIComponent(
+      weddingPublishMatch[1],
+    );
+
+    return sendJson(res, 200, {
+      ok: true,
+      preview:
+        await weddingPublishEndpoint.getPreview(
+          slug,
+        ),
+    });
+  }
+
+  if (
+    weddingPublishMatch &&
+    req.method === "POST"
+  ) {
+    const slug = decodeURIComponent(
+      weddingPublishMatch[1],
+    );
+
+    const body =
+      await readJsonBody(req);
+
+    return sendJson(res, 200, {
+      ok: true,
+      publish:
+        await weddingPublishEndpoint.publishWedding(
+          slug,
+          {
+            storyEnabled:
+              body.storyEnabled,
+          },
+        ),
+    });
+  }
 
   const imageDeleteMatch =
     pathname.match(
@@ -820,6 +1232,26 @@ async function handleRequest(req, res) {
     const slug = decodeURIComponent(weddingMatch[1]);
     const wedding = await getJsonWedding(slug);
     return wedding ? sendJson(res, 200, { ok: true, wedding }) : sendJson(res, 404, { ok: false, error: "Wedding JSON not found." });
+  }
+
+  if (
+    weddingMatch &&
+    req.method === "PUT"
+  ) {
+    const slug = decodeURIComponent(
+      weddingMatch[1],
+    );
+
+    const body =
+      await readJsonBody(req);
+
+    return sendJson(res, 200, {
+      ok: true,
+      ...(await saveWeddingDocument(
+        slug,
+        body.wedding,
+      )),
+    });
   }
 
   if (req.method === "GET" && pathname === "/api/suppliers") return sendJson(res, 200, { ok: true, rows: await readSuppliers() });
@@ -879,6 +1311,21 @@ try {
 } catch (error) {
   console.error(
     "Unable to generate public venue data.",
+    error,
+  );
+}
+
+try {
+  const publicWeddingData =
+    await publicWeddingPublisher.publishAll();
+
+  console.log(
+    `Published ${publicWeddingData.weddingCount} wedding stories ` +
+      `with ${publicWeddingData.imageCount} images.`,
+  );
+} catch (error) {
+  console.error(
+    "Unable to generate public wedding data.",
     error,
   );
 }

@@ -6,7 +6,10 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { motion, AnimatePresence } from "motion/react";
 import { weddingStories } from "../data/weddingStories";
 import { buildBlogCards } from "../lib/blogGallery";
-import type { BlogCard } from "../lib/blogGallery";
+import {
+  PublicWeddingRepository,
+  type PublicWeddingSummary,
+} from "../lib/weddingEngine/PublicWeddingRepository";
 
 // Reuse the SAME hero images you already use in WeddingPackages.tsx
 import heroImage1 from "figma:asset/03addbb5f7743f01a58fb3d5a7dc0a04d8a597ea.png";
@@ -19,6 +22,24 @@ interface Testimonial {
   name: string;
   review: string;
 }
+
+type DisplayBlogCard = {
+  story: Pick<
+    PublicWeddingSummary,
+    | "slug"
+    | "title"
+    | "couple"
+    | "venue"
+    | "weddingDate"
+    | "excerpt"
+  >;
+  coverImage?: {
+    fullSrc: string;
+    thumbSrc?: string;
+    alt?: string;
+  };
+  imageCount: number;
+};
 
 const testimonials: Testimonial[] = [
   {
@@ -98,7 +119,7 @@ const testimonials: Testimonial[] = [
 export function Blog() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [scrollPosition, setScrollPosition] = useState(0);
-  const [blogCards, setBlogCards] = useState<BlogCard[]>([]);
+  const [blogCards, setBlogCards] = useState<DisplayBlogCard[]>([]);
 
   const heroCarouselImages = [heroImage1, heroImage2, heroImage3, heroImage4];
 
@@ -119,19 +140,117 @@ export function Blog() {
     return () => clearInterval(interval);
   }, []);
 
-  // Load the CSV and build wedding story cards from rows with a blogSlug.
+  /*
+   * JSON wedding stories are the primary source.
+   * Legacy weddingStories.ts/blog-gallery.csv cards remain available until
+   * each existing story is deliberately migrated.
+   */
   useEffect(() => {
     let cancelled = false;
 
-   fetch("/blog-gallery.csv", {
-  cache: "no-store",
-})
-      .then((res) => (res.ok ? res.text() : ""))
-      .then((csvText) => {
-        if (!cancelled) setBlogCards(buildBlogCards(csvText, weddingStories));
+    Promise.all([
+      fetch("/blog-gallery.csv", {
+        cache: "no-store",
+      })
+        .then((response) =>
+          response.ok
+            ? response.text()
+            : "",
+        )
+        .catch(() => ""),
+      new PublicWeddingRepository()
+        .getPublishedState(),
+    ])
+      .then(([csvText, state]) => {
+        if (cancelled) return;
+
+        const managed = new Set(
+          state.managedSlugs,
+        );
+
+        const legacyCards =
+          buildBlogCards(
+            csvText,
+            weddingStories,
+          ).filter(
+            (card) =>
+              !managed.has(
+                card.story.slug,
+              ),
+          );
+
+        const bySlug = new Map<
+          string,
+          DisplayBlogCard
+        >();
+
+        legacyCards.forEach((card) => {
+          bySlug.set(card.story.slug, {
+            story: card.story,
+            coverImage:
+              card.coverImage,
+            imageCount:
+              card.imageCount,
+          });
+        });
+
+        state.weddings.forEach(
+          (summary) => {
+            const existing =
+              bySlug.get(
+                summary.slug,
+              );
+
+            bySlug.set(
+              summary.slug,
+              {
+                story: summary,
+                coverImage:
+                  summary.coverImage
+                    ? {
+                        fullSrc:
+                          summary
+                            .coverImage
+                            .fullSrc,
+                        thumbSrc:
+                          summary
+                            .coverImage
+                            .thumbSrc,
+                        alt:
+                          summary
+                            .coverImage
+                            .alt,
+                      }
+                    : existing?.coverImage,
+                imageCount:
+                  summary.imageCount ||
+                  existing?.imageCount ||
+                  0,
+              },
+            );
+          },
+        );
+
+        const ordered =
+          state.weddings
+            .map((summary) =>
+              bySlug.get(
+                summary.slug,
+              ),
+            )
+            .filter(
+              (
+                card,
+              ): card is DisplayBlogCard =>
+                Boolean(card),
+            );
+
+        setBlogCards(ordered);
       })
       .catch(() => {
-        if (!cancelled) setBlogCards([]);
+        if (!cancelled) {
+          setBlogCards([]);
+        }
       });
 
     return () => {
@@ -232,9 +351,8 @@ export function Blog() {
           <div className="text-center bg-neutral-50 rounded-2xl p-10 max-w-3xl mx-auto">
             <h3 className="text-3xl mb-4">No wedding stories selected yet</h3>
             <p className="text-neutral-700 leading-relaxed">
-              Add <span className="font-mono">blogSlug</span>, <span className="font-mono">blogOrder</span>,
-              and <span className="font-mono">blogCover</span> values to <span className="font-mono">public/blog-gallery.csv</span>.
-              Any CSV rows with a matching blog slug will appear here automatically.
+              Wedding stories will appear here after they are enabled and
+              published from Photography Intelligence.
             </p>
           </div>
         ) : (
@@ -249,12 +367,12 @@ export function Blog() {
                   {coverImage ? (
                     <ImageWithFallback
                       src={coverImage.fullSrc}
-                      alt={`${story.couple} wedding at ${story.venue}`}
+                      alt={coverImage.alt || `${story.couple} wedding at ${story.venue}`}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-neutral-500">
-                      Add blog images in blog-gallery.csv
+                      Select a cover image in the wedding manager
                     </div>
                   )}
                 </div>
