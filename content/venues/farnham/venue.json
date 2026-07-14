@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "venue_cc9666c5-ee80-44a3-8d37-775c3144486a",
   "slug": "farnham",
-  "name": "Farnham",
+  "name": "Farnham Estate",
   "county": "",
   "town": "",
   "intro": "",
@@ -4852,5 +4852,5 @@
     ]
   },
   "createdAt": "2026-07-12T09:18:54.796Z",
-  "updatedAt": "2026-07-14T12:36:30.586Z"
+  "updatedAt": "2026-07-14T12:36:59.320Z"
 }
