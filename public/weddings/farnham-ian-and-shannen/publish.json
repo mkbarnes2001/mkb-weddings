@@ -1,6 +1,22 @@
 {
   "schemaVersion": 1,
   "weddingSlug": "farnham-ian-and-shannen",
-  "status": "draft",
-  "checks": {}
+  "storyEnabled": true,
+  "status": "published",
+  "publishedAt": "2026-07-14T19:20:11.823Z",
+  "checks": {
+    "venue-link": true,
+    "title": true,
+    "excerpt": true,
+    "intro": true,
+    "paragraphs": true,
+    "blog-images": true,
+    "cover": true,
+    "public-images": true,
+    "alt-text": true,
+    "captions": false,
+    "seo": false,
+    "suppliers": true
+  },
+  "updatedAt": "2026-07-14T19:20:11.823Z"
 }

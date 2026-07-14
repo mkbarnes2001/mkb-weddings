@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "weddingSlug": "farnham-ian-and-shannen",
-  "updatedAt": "2026-07-14T12:36:30.585Z",
+  "updatedAt": "2026-07-14T19:19:59.381Z",
   "images": [
     {
       "id": "image_62647fa2-22bc-4af2-97ec-bced62956a09",
@@ -66,9 +66,7 @@
       "isCover": false,
       "hidden": false,
       "rating": 0,
-      "collections": [
-        "venue"
-      ],
+      "collections": [],
       "source": {
         "type": "r2-processed-upload",
         "originalFilename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-383.jpg",
@@ -85,6 +83,126 @@
       },
       "fullSrc": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-3-b3166ebc.webp",
       "thumbSrc": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-3-b3166ebc.webp",
+      "aiAlt": "",
+      "aiCaption": "",
+      "aiTags": []
+    },
+    {
+      "id": "image_6533fa53-f3c7-47ed-bd5b-42e08afa67e4",
+      "filename": "farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-9-8afa67e4.webp",
+      "order": 4,
+      "isCover": false,
+      "hidden": false,
+      "rating": 0,
+      "collections": [
+        "blog"
+      ],
+      "source": {
+        "type": "r2-processed-upload",
+        "originalFilename": "mkb-weddings-orange-tree-house-wedding-photographer-9.jpg",
+        "originalMimeType": "image/jpeg",
+        "venueSlug": "farnham",
+        "storage": "r2",
+        "fullKey": "full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-9-8afa67e4.webp",
+        "thumbKey": "thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-9-8afa67e4.webp",
+        "fullPath": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-9-8afa67e4.webp",
+        "thumbPath": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-9-8afa67e4.webp",
+        "width": 3675,
+        "height": 5512,
+        "orientation": "portrait"
+      },
+      "fullSrc": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-9-8afa67e4.webp",
+      "thumbSrc": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-9-8afa67e4.webp",
+      "aiAlt": "",
+      "aiCaption": "",
+      "aiTags": []
+    },
+    {
+      "id": "image_ac1cd239-a038-4215-9478-6c9709d0e44a",
+      "filename": "farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-11-09d0e44a.webp",
+      "order": 5,
+      "isCover": false,
+      "hidden": false,
+      "rating": 0,
+      "collections": [
+        "blog"
+      ],
+      "source": {
+        "type": "r2-processed-upload",
+        "originalFilename": "mkb-weddings-orange-tree-house-wedding-photographer-11.jpg",
+        "originalMimeType": "image/jpeg",
+        "venueSlug": "farnham",
+        "storage": "r2",
+        "fullKey": "full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-11-09d0e44a.webp",
+        "thumbKey": "thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-11-09d0e44a.webp",
+        "fullPath": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-11-09d0e44a.webp",
+        "thumbPath": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-11-09d0e44a.webp",
+        "width": 5391,
+        "height": 3594,
+        "orientation": "landscape"
+      },
+      "fullSrc": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-11-09d0e44a.webp",
+      "thumbSrc": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-11-09d0e44a.webp",
+      "aiAlt": "",
+      "aiCaption": "",
+      "aiTags": []
+    },
+    {
+      "id": "image_a4a1a41b-8a00-4f1e-a09e-44df39c2b131",
+      "filename": "farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-13-39c2b131.webp",
+      "order": 6,
+      "isCover": false,
+      "hidden": false,
+      "rating": 0,
+      "collections": [
+        "blog"
+      ],
+      "source": {
+        "type": "r2-processed-upload",
+        "originalFilename": "mkb-weddings-orange-tree-house-wedding-photographer-13.jpg",
+        "originalMimeType": "image/jpeg",
+        "venueSlug": "farnham",
+        "storage": "r2",
+        "fullKey": "full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-13-39c2b131.webp",
+        "thumbKey": "thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-13-39c2b131.webp",
+        "fullPath": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-13-39c2b131.webp",
+        "thumbPath": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-13-39c2b131.webp",
+        "width": 4747,
+        "height": 3165,
+        "orientation": "landscape"
+      },
+      "fullSrc": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-13-39c2b131.webp",
+      "thumbSrc": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-13-39c2b131.webp",
+      "aiAlt": "",
+      "aiCaption": "",
+      "aiTags": []
+    },
+    {
+      "id": "image_527d2329-9e5c-4423-9290-5ec913d01181",
+      "filename": "farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-15-1-13d01181.webp",
+      "order": 7,
+      "isCover": true,
+      "hidden": false,
+      "rating": 0,
+      "collections": [
+        "blog"
+      ],
+      "source": {
+        "type": "r2-processed-upload",
+        "originalFilename": "mkb-weddings-orange-tree-house-wedding-photographer-15-1.jpg",
+        "originalMimeType": "image/jpeg",
+        "venueSlug": "farnham",
+        "storage": "r2",
+        "fullKey": "full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-15-1-13d01181.webp",
+        "thumbKey": "thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-15-1-13d01181.webp",
+        "fullPath": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-15-1-13d01181.webp",
+        "thumbPath": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-15-1-13d01181.webp",
+        "width": 5631,
+        "height": 3754,
+        "orientation": "landscape"
+      },
+      "fullSrc": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-15-1-13d01181.webp",
+      "thumbSrc": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-15-1-13d01181.webp",
       "aiAlt": "",
       "aiCaption": "",
       "aiTags": []

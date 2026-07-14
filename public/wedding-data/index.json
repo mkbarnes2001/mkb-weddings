@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T19:20:11.825Z",
+  "count": 1,
+  "managedSlugs": [
+    "farnham-ian-and-shannen"
+  ],
+  "weddings": [
+    {
+      "slug": "farnham-ian-and-shannen",
+      "title": "Ian and Shannen's wedding at Farnham",
+      "couple": "Ian and Shannen",
+      "venue": "Farnham",
+      "venueSlug": "farnham",
+      "weddingDate": "Dec 2026",
+      "excerpt": "TEST",
+      "intro": "TEST",
+      "seo": {
+        "title": "",
+        "description": ""
+      },
+      "updatedAt": "2026-07-14T19:20:11.823Z",
+      "storyEnabled": true,
+      "storyStatus": "published",
+      "storyPublishedAt": "2026-07-14T19:20:11.823Z",
+      "imageCount": 4,
+      "coverImage": {
+        "id": "image_527d2329-9e5c-4423-9290-5ec913d01181",
+        "filename": "farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-15-1-13d01181.webp",
+        "order": 7,
+        "thumbSrc": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-15-1-13d01181.webp",
+        "fullSrc": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-15-1-13d01181.webp",
+        "alt": "Ian and Shannen wedding at Farnham",
+        "caption": "",
+        "tags": [],
+        "isCover": true
+      }
+    }
+  ]
+}

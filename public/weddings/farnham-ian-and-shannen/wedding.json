@@ -7,11 +7,19 @@
   "venueSlug": "farnham",
   "venueId": "venue_cc9666c5-ee80-44a3-8d37-775c3144486a",
   "weddingDate": "Dec 2026",
-  "excerpt": "",
-  "intro": "",
-  "story": [],
+  "excerpt": "TEST",
+  "intro": "TEST",
+  "story": [
+    "test",
+    "test",
+    "test"
+  ],
   "facts": {
-    "photographer": "MKB Weddings"
+    "photographer": "MKB Weddings",
+    "season": "Winter",
+    "ceremonyType": "Celebrant",
+    "ceremonyLocation": "Farnham Estate",
+    "receptionLocation": "Farnham Estate"
   },
   "suppliers": [
     {
@@ -30,5 +38,8 @@
     "description": ""
   },
   "status": "draft",
-  "updatedAt": "2026-07-13T19:25:43.704Z"
+  "updatedAt": "2026-07-14T19:20:11.823Z",
+  "storyEnabled": true,
+  "storyStatus": "published",
+  "storyPublishedAt": "2026-07-14T19:20:11.823Z"
 }

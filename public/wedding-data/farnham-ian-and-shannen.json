@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "slug": "farnham-ian-and-shannen",
+  "title": "Ian and Shannen's wedding at Farnham",
+  "couple": "Ian and Shannen",
+  "venue": "Farnham",
+  "venueSlug": "farnham",
+  "venueId": "venue_cc9666c5-ee80-44a3-8d37-775c3144486a",
+  "weddingDate": "Dec 2026",
+  "excerpt": "TEST",
+  "intro": "TEST",
+  "story": [
+    "test",
+    "test",
+    "test"
+  ],
+  "facts": {
+    "photographer": "MKB Weddings",
+    "season": "Winter",
+    "ceremonyType": "Celebrant",
+    "ceremonyLocation": "Farnham Estate",
+    "receptionLocation": "Farnham Estate"
+  },
+  "suppliers": [
+    {
+      "role": "Photography",
+      "name": "MKB Weddings",
+      "instagram": "mkbweddings",
+      "website": "https://www.mkbweddings.co.uk"
+    },
+    {
+      "role": "Venue",
+      "name": "Farnham"
+    }
+  ],
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "status": "draft",
+  "storyEnabled": true,
+  "storyStatus": "published",
+  "storyPublishedAt": "2026-07-14T19:20:11.823Z",
+  "updatedAt": "2026-07-14T19:20:11.823Z",
+  "images": [
+    {
+      "id": "image_6533fa53-f3c7-47ed-bd5b-42e08afa67e4",
+      "filename": "farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-9-8afa67e4.webp",
+      "order": 4,
+      "thumbSrc": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-9-8afa67e4.webp",
+      "fullSrc": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-9-8afa67e4.webp",
+      "alt": "Ian and Shannen wedding at Farnham",
+      "caption": "",
+      "tags": [],
+      "isCover": false
+    },
+    {
+      "id": "image_ac1cd239-a038-4215-9478-6c9709d0e44a",
+      "filename": "farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-11-09d0e44a.webp",
+      "order": 5,
+      "thumbSrc": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-11-09d0e44a.webp",
+      "fullSrc": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-11-09d0e44a.webp",
+      "alt": "Ian and Shannen wedding at Farnham",
+      "caption": "",
+      "tags": [],
+      "isCover": false
+    },
+    {
+      "id": "image_a4a1a41b-8a00-4f1e-a09e-44df39c2b131",
+      "filename": "farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-13-39c2b131.webp",
+      "order": 6,
+      "thumbSrc": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-13-39c2b131.webp",
+      "fullSrc": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-13-39c2b131.webp",
+      "alt": "Ian and Shannen wedding at Farnham",
+      "caption": "",
+      "tags": [],
+      "isCover": false
+    },
+    {
+      "id": "image_527d2329-9e5c-4423-9290-5ec913d01181",
+      "filename": "farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-15-1-13d01181.webp",
+      "order": 7,
+      "thumbSrc": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-15-1-13d01181.webp",
+      "fullSrc": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-orange-tree-house-wedding-photographer-15-1-13d01181.webp",
+      "alt": "Ian and Shannen wedding at Farnham",
+      "caption": "",
+      "tags": [],
+      "isCover": true
+    }
+  ]
+}
