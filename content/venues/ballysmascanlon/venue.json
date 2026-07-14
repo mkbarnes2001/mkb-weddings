@@ -3,8 +3,8 @@
   "id": "venue_e5dd8234-7025-4f06-b904-0660e1d7f9b3",
   "slug": "ballysmascanlon",
   "name": "Ballysmascanlon",
-  "county": "",
-  "town": "",
+  "county": "Co. Louth",
+  "town": "Dundalk",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_50c658d8f76206bb8ee5f9dd",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.747Z",
-  "updatedAt": "2026-07-13T07:52:28.317Z",
+  "updatedAt": "2026-07-14T13:04:50.141Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.317Z",
@@ -683,5 +683,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

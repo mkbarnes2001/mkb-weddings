@@ -3,8 +3,8 @@
   "id": "venue_84e5b71d-a5f0-4a29-a3c1-8dd16c6061ad",
   "slug": "rocky-mountain-cottage",
   "name": "Rocky mountain cottage",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Newry",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_fdafb9cc82fc832d9a2458fa",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.708Z",
-  "updatedAt": "2026-07-13T07:52:28.340Z",
+  "updatedAt": "2026-07-14T13:04:50.173Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.340Z",
@@ -2133,5 +2133,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

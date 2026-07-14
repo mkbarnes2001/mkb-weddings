@@ -3,8 +3,8 @@
   "id": "venue_202c6ae1-e0bf-4e99-885c-32f85b1b2e6b",
   "slug": "belmont",
   "name": "Belmont",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Banbridge",
   "intro": "",
   "description": "The Belmont House Hotel in Banbridge has a calm, welcoming family style atmosphere that really helps wedding days feel settled and unhurried.  It’s a venue where things tend to flow naturally, without needing much intervention. The spaces are well connected, so guests move easily through the day, which keeps the energy relaxed and sociable from start to finish.  Light is reliable and flexible here, which makes a big difference when documenting moments as they happen. Indoors, the rooms are bright and evenly lit, ideal for preparations, ceremonies and speeches without constantly chasing the best corner of the room. It allows photographs to feel natural and true to the moment rather than overly styled. Outside, there are simple, tidy surroundings that work well for portraits, especially when time is limited and the priority is staying close to the celebration.  Located in Banbridge, Belmont Hotel suits couples who want a wedding day that feels straightforward and comfortable. From a photography point of view, Belmont Hotel supports genuine interactions and an easy pace, letting the focus stay on people, connection and the story of the day as it unfolds.",
   "heroImageId": "legacy_674531d64732e637520a348f",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.720Z",
-  "updatedAt": "2026-07-13T07:52:28.320Z",
+  "updatedAt": "2026-07-14T13:04:50.145Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.320Z",
@@ -2137,5 +2137,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

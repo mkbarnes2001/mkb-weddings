@@ -3,8 +3,8 @@
   "id": "venue_96932a4a-f44a-492e-8adc-cea096492458",
   "slug": "darver-castle",
   "name": "Darver castle",
-  "county": "",
-  "town": "",
+  "county": "Co. Louth",
+  "town": "Readypenny",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_20776750d0df985c6131b9f6",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.775Z",
-  "updatedAt": "2026-07-13T07:52:28.323Z",
+  "updatedAt": "2026-07-14T13:04:50.149Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.323Z",
@@ -2078,5 +2078,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

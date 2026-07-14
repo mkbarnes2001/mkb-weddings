@@ -3,8 +3,8 @@
   "id": "venue_5e2e2db1-2d0d-49b3-99d0-47fa540f6753",
   "slug": "belfast-castle",
   "name": "Belfast Castle",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Belfast",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_7f08d38445981b147df7b806",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.756Z",
-  "updatedAt": "2026-07-13T07:52:28.319Z",
+  "updatedAt": "2026-07-14T13:04:50.143Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.319Z",
@@ -283,5 +283,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

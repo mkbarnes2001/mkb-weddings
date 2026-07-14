@@ -3,8 +3,8 @@
   "id": "venue_aeb18ec7-84de-4795-92a6-86ca39321395",
   "slug": "manor-house",
   "name": "Manor House",
-  "county": "",
-  "town": "",
+  "county": "Co. Fermanagh",
+  "town": "Lough Erne",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_f70782b2f2df5b1de63c202d",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.718Z",
-  "updatedAt": "2026-07-13T07:52:28.333Z",
+  "updatedAt": "2026-07-14T13:04:50.165Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.333Z",
@@ -336,5 +336,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

@@ -3,8 +3,8 @@
   "id": "venue_31cb1c0a-ad80-46db-81b0-7e192cb5e6af",
   "slug": "ivory-pavillion",
   "name": "Ivory Pavillion",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Galgorm",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_27b0abd662e27a1a67b6cc6c",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.743Z",
-  "updatedAt": "2026-07-13T07:52:28.329Z",
+  "updatedAt": "2026-07-14T13:04:50.158Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.329Z",
@@ -106,5 +106,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

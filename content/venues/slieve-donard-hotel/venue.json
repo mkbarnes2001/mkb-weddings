@@ -3,8 +3,8 @@
   "id": "venue_22a3c0b1-6cda-4cdd-a9c3-44b47f1fe2da",
   "slug": "slieve-donard-hotel",
   "name": "Slieve donard hotel",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Newcastle",
   "intro": "",
   "description": "Slieve Donard Hotel is an iconic hotel in Northern Ireland, set along the coast in Newcastle, alongside the Mourne Mountains.  It’s a venue where the surrounding landscape or rolling mountains and the Irish Sea does a lot of the work, allowing the day to unfold without feeling overly directed. The layout  inside the hotel makes it easy for guests to move naturally between moments, which helps keep the energy relaxed and sociable throughout.  One of the standout features is the light. Large windows bring the outside in, changing gently as the day goes on and adding variety without ever feeling distracting. Morning preparations benefit from bright, open rooms, while later in the day the light becomes softer and more directional, ideal for capturing quieter moments and natural portraits. Step outside and you’re immediately met with space, sea air and dramatic surroundings that give photographs a real sense of place.  Set in Newcastle, Slieve Donard Hotel offers views across the beach and towards the Mourne Mountains, which adds a timeless backdrop without pulling focus from the people in front of the camera. Slieve Donard Hotel suits couples who want a day that feels classic but unforced, where the setting supports the story rather than competing with it.",
   "heroImageId": "legacy_066a3eee7aa8396382d4e042",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.765Z",
-  "updatedAt": "2026-07-13T07:52:28.342Z",
+  "updatedAt": "2026-07-14T13:04:50.177Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.342Z",
@@ -6233,5 +6233,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

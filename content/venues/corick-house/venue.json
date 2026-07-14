@@ -3,8 +3,8 @@
   "id": "venue_24a45ba0-08e9-4ee0-b9b8-6e14404cda58",
   "slug": "corick-house",
   "name": "Corick house",
-  "county": "",
-  "town": "",
+  "county": "Co. Tyrone",
+  "town": "Clogher",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_36a363850b83ad4a48362233",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.692Z",
-  "updatedAt": "2026-07-13T07:52:28.322Z",
+  "updatedAt": "2026-07-14T13:04:50.148Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.322Z",
@@ -1784,5 +1784,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

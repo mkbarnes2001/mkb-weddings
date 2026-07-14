@@ -3,8 +3,8 @@
   "id": "venue_85f0291b-5259-4265-b9bf-917f2d0ed249",
   "slug": "edenmore",
   "name": "Edenmore",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Moira",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_0220c4b1ded5584e4388d8ca",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.670Z",
-  "updatedAt": "2026-07-13T07:52:28.324Z",
+  "updatedAt": "2026-07-14T13:04:50.151Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.324Z",
@@ -2599,5 +2599,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

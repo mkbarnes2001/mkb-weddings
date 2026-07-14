@@ -3,8 +3,8 @@
   "id": "venue_4b2e4ae2-5016-479d-947a-c89db7e1c34c",
   "slug": "ten-square",
   "name": "Ten Square",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Belfast",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_c1712902f36d98a74698d11d",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.726Z",
-  "updatedAt": "2026-07-13T07:52:28.345Z",
+  "updatedAt": "2026-07-14T13:04:50.180Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.345Z",
@@ -742,5 +742,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

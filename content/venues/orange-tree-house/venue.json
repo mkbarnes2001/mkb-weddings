@@ -3,8 +3,8 @@
   "id": "venue_75fc265c-5621-4a4a-b3f1-5c9e3e647a5a",
   "slug": "orange-tree-house",
   "name": "Orange tree house",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Greyabbey",
   "intro": "",
   "description": "Orange Tree House has an intimate family vibe that really sets the tone for a wedding day. From a Northern Ireland wedding photographer’s perspective, it’s the kind of place where everything just works. The management at Orange Tree House are amazing at keeping the day flow smoothly all day, keeping things moving and ensuring the guests are looked after. The layout of Orange Tree House allows for great indoor and outdoor space, ideal for quiet moments and natural, unposed photographs. Inside, the venue features a rustic barn room which is ideal for the ceremony and reception.  On the outside, the venue features one of the best views in Northern Ireland,  being set on the banks of Strangford Lough which really adds something special. As the evening draws in, the sunsets are incredible, casting warm, gentle light that’s perfect for portraits without pulling couples away from the celebration for long. Located in Greyabbey, Orange Tree House suits couples who want something elegant but laid-back. From morning preparations through to golden hour by the water, Orange Tree House quietly supports the story of the day, letting real moments take centre stage.",
   "heroImageId": "legacy_3486abdb1b279e7cf08657c3",
@@ -12739,5 +12739,6 @@
     ]
   },
   "createdAt": "2026-07-12T09:18:54.733Z",
-  "updatedAt": "2026-07-13T08:48:51.880Z"
+  "updatedAt": "2026-07-14T13:04:50.170Z",
+  "country": "Northern Ireland"
 }

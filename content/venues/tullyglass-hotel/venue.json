@@ -3,8 +3,8 @@
   "id": "venue_b97959bf-cb29-4edf-917e-50d2019a2aec",
   "slug": "tullyglass-hotel",
   "name": "Tullyglass hotel",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Ballymena",
   "intro": "",
   "description": "Tullyglass Hotel has a welcoming, easygoing atmosphere that helps wedding days feel relaxed and well organised from the outset. From a Northern Ireland wedding photographer’s perspective, it’s a venue where everything runs smoothly without feeling rigid, allowing couples and guests to settle into the day and enjoy it as it unfolds. The layout works well for keeping the flow of the day connected, with minimal downtime and plenty of natural movement between spaces.  The light here is practical and consistent, which makes a real difference when photographing moments as they happen. Indoors, the rooms are bright and balanced, ideal for preparations, the ceremony and speeches without needing to interrupt or restage anything. Outside, the grounds provide a simple, green backdrop that suits natural portraits, especially when time is limited and the focus is on staying close to the celebration rather than disappearing for long periods. Located in Ballymena, Tullyglass Hotel is well suited to couples who want a sociable, relaxed wedding day. From a photography point of view, Tullyglass Hotel allows the emphasis to stay on real moments, interactions and the overall feel of the day, rather than the setting demanding attention.",
   "heroImageId": "legacy_21b948ef51793ad39905f620",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.750Z",
-  "updatedAt": "2026-07-13T07:52:28.345Z",
+  "updatedAt": "2026-07-14T13:04:50.181Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.345Z",
@@ -4250,5 +4250,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

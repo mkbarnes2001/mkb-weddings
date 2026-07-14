@@ -3,8 +3,8 @@
   "id": "venue_ba0d1050-4391-4203-b1f3-ecfc0c4e5522",
   "slug": "larchfields",
   "name": "Larchfields",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Lisburn",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_d11dc8c18b0801bcea73df99",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.699Z",
-  "updatedAt": "2026-07-13T07:52:28.332Z",
+  "updatedAt": "2026-07-14T13:04:50.162Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.332Z",
@@ -1615,5 +1615,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

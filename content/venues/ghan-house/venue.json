@@ -3,8 +3,8 @@
   "id": "venue_72cf1a2f-d33e-4c4b-99a8-2ff181a97256",
   "slug": "ghan-house",
   "name": "Ghan House",
-  "county": "",
-  "town": "",
+  "county": "Co. Louth",
+  "town": "Carlingford",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_d3ea1d6024b7912759a9ea0d",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.740Z",
-  "updatedAt": "2026-07-13T07:52:28.326Z",
+  "updatedAt": "2026-07-14T13:04:50.154Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.326Z",
@@ -165,5 +165,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

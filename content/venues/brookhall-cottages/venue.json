@@ -3,8 +3,8 @@
   "id": "venue_7ad79ddd-0c59-486e-80a3-00360e1eddc2",
   "slug": "brookhall-cottages",
   "name": "Brookhall cottages",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Lisburn",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_db5c5c28c3160d3c0d990f38",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.735Z",
-  "updatedAt": "2026-07-13T07:52:28.320Z",
+  "updatedAt": "2026-07-14T13:04:50.146Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.320Z",
@@ -2256,5 +2256,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

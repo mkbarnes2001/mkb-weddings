@@ -3,13 +3,13 @@
   "id": "venue_5e2e2db1-2d0d-49b3-99d0-47fa540f6753",
   "slug": "belfast-castle",
   "name": "Belfast Castle",
-  "town": "",
-  "county": "",
+  "town": "Belfast",
+  "county": "Co. Antrim",
   "country": "Northern Ireland",
   "intro": "",
   "description": "",
   "status": "published",
-  "updatedAt": "2026-07-13T07:52:28.319Z",
+  "updatedAt": "2026-07-14T13:04:50.143Z",
   "links": {
     "website": "https://www.belfastcity.gov.uk/belfastcastle/home",
     "instagram": "",
@@ -58,24 +58,9 @@
           "historic stonework",
           "northern ireland wedding"
         ],
-        "aiTags": [
-          "belfast castle",
-          "couple portraits",
-          "bride and groom",
-          "stone steps",
-          "castle gardens",
-          "holding hands",
-          "moody light",
-          "romantic",
-          "wedding portraits",
-          "outdoor wedding",
-          "historic stonework",
-          "northern ireland wedding"
-        ],
         "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belfast%20Castle/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-landsdowne-hotel-belfast-wedding-photography--4_500.webp",
         "fullSrc": "https://images.mkbweddings.co.uk/full/Belfast%20Castle/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-landsdowne-hotel-belfast-wedding-photography--4_2000.webp",
-        "alt": "Bride and groom holding hands on the stone steps in the gardens at Belfast Castle, Belfast, in soft moody light.",
-        "caption": "A relaxed couple portrait on the historic stone steps at Belfast Castle, with the gardens and soft Northern Ireland light adding a natural, romantic feel."
+        "alt": "Belfast Castle wedding photography – couple portraits"
       },
       {
         "assetId": "legacy_2b517acb020bb364c1e965ef",
@@ -102,24 +87,9 @@
           "bridal bouquet",
           "northern ireland wedding"
         ],
-        "aiTags": [
-          "belfast castle",
-          "couple portraits",
-          "bride and groom",
-          "outdoor wedding",
-          "garden portrait",
-          "evergreen trees",
-          "soft natural light",
-          "romantic mood",
-          "wedding dress",
-          "black tie groom",
-          "bridal bouquet",
-          "northern ireland wedding"
-        ],
         "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belfast%20Castle/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-landsdowne-hotel-belfast-wedding-photography--5_500.webp",
         "fullSrc": "https://images.mkbweddings.co.uk/full/Belfast%20Castle/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-landsdowne-hotel-belfast-wedding-photography--5_2000.webp",
-        "alt": "Bride and groom portrait in the gardens at Belfast Castle, with evergreen trees and soft natural light.",
-        "caption": "A relaxed couple portrait at Belfast Castle in Belfast, surrounded by greenery and soft natural light."
+        "alt": "Belfast Castle wedding photography – couple portraits"
       },
       {
         "assetId": "legacy_3d25f6b78805d964d7248c10",
@@ -145,24 +115,9 @@
           "wedding bouquet",
           "just married"
         ],
-        "aiTags": [
-          "belfast castle",
-          "couple portraits",
-          "bride and groom",
-          "outdoor portrait",
-          "castle grounds",
-          "water view",
-          "overcast sky",
-          "soft light",
-          "romantic",
-          "elegant",
-          "wedding bouquet",
-          "just married"
-        ],
         "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belfast%20Castle/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-landsdowne-hotel-belfast-wedding-photography--6_500.webp",
         "fullSrc": "https://images.mkbweddings.co.uk/full/Belfast%20Castle/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-landsdowne-hotel-belfast-wedding-photography--6_2000.webp",
-        "alt": "Bride and groom portrait in the grounds of Belfast Castle, with a water view and soft overcast light.",
-        "caption": "A relaxed couple portrait at Belfast Castle in Belfast, framed by soft light, castle grounds and a quiet view across the water."
+        "alt": "Belfast Castle wedding photography – couple portraits"
       },
       {
         "assetId": "legacy_cc2ce8d00d9d5589bf1fea85",
@@ -189,24 +144,9 @@
           "intimate moment",
           "northern ireland wedding"
         ],
-        "aiTags": [
-          "belfast castle",
-          "couple portraits",
-          "bride and groom",
-          "castle staircase",
-          "dramatic lighting",
-          "romantic mood",
-          "evening portrait",
-          "wedding dress",
-          "groom suit",
-          "historic architecture",
-          "intimate moment",
-          "northern ireland wedding"
-        ],
         "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Belfast%20Castle/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-landsdowne-hotel-belfast-wedding-photography--7_500.webp",
         "fullSrc": "https://images.mkbweddings.co.uk/full/Belfast%20Castle/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-landsdowne-hotel-belfast-wedding-photography--7_2000.webp",
-        "alt": "Bride and groom on the castle staircase at Belfast Castle, lit with dramatic evening light for a relaxed couple portrait.",
-        "caption": "A quiet evening portrait on the staircase at Belfast Castle, with soft drama, historic architecture and a natural moment between the couple."
+        "alt": "Belfast Castle wedding photography – couple portraits"
       }
     ]
   }

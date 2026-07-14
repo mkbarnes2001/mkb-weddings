@@ -3,8 +3,8 @@
   "id": "venue_ca3c9127-07bc-4375-b34e-df1eeac82886",
   "slug": "clandeboye-lodge",
   "name": "Clandeboye lodge",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Bangor",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_7c8d925104fec60343302d0b",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.752Z",
-  "updatedAt": "2026-07-13T07:52:28.322Z",
+  "updatedAt": "2026-07-14T13:04:50.147Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.322Z",
@@ -1427,5 +1427,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

@@ -3,8 +3,8 @@
   "id": "venue_6068c067-0119-416c-833e-c81d324f5785",
   "slug": "glenavon",
   "name": "Glenavon",
-  "county": "",
-  "town": "",
+  "county": "Co. Tyrone",
+  "town": "Cookstown",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_b0ab31247b152d4efaf4a634",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.758Z",
-  "updatedAt": "2026-07-13T07:52:28.327Z",
+  "updatedAt": "2026-07-14T13:04:50.155Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.327Z",
@@ -802,5 +802,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

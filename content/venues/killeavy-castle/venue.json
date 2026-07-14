@@ -3,8 +3,8 @@
   "id": "venue_692e9da5-90a7-49ab-b4b5-b113be5fadf8",
   "slug": "killeavy-castle",
   "name": "Killeavy castle",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Newry",
   "intro": "",
   "description": "Killeavy Castle Estate has a private, peaceful feel that really shapes how a wedding day unfolds. From a Northern Ireland wedding photographer’s perspective, it’s a venue where the pace naturally slows, allowing moments to happen without being rushed or overly directed. The mix of historic character and modern spaces gives the day a lovely balance, with everything flowing easily from one part to the next.  The castle itself provides a wonderful and historic setting for dramatic wedding photography, with Large windows, spiral staircases and hidden private spaces. Outside, the surrounding landscape opens up beautifully, with rolling views and gentle textures that work in all seasons. It’s ideal for natural portraits that feel connected to the day rather than staged.  Set just outside Newry, Killeavy Castle offers a sense of escape without feeling remote. From a photography point of view, Killeavy Castle supports a relaxed, story-led approach, where atmosphere, movement and real connection take centre stage.",
   "heroImageId": "legacy_f61a9d6fff68de349eb670a6",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.715Z",
-  "updatedAt": "2026-07-13T07:52:28.329Z",
+  "updatedAt": "2026-07-14T13:04:50.159Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.329Z",
@@ -5082,5 +5082,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

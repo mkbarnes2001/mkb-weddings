@@ -3,8 +3,8 @@
   "id": "venue_dd1c4de4-e310-43a0-9518-22ea7dddcb3b",
   "slug": "old-rectory",
   "name": "Old Rectory",
-  "county": "",
-  "town": "",
+  "county": "Co. Tyrone",
+  "town": "Killyman",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_dfc1015d2935f3c79ac74e4c",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.678Z",
-  "updatedAt": "2026-07-13T07:52:28.336Z",
+  "updatedAt": "2026-07-14T13:04:50.169Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.336Z",
@@ -798,5 +798,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

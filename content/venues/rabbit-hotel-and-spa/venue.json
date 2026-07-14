@@ -3,8 +3,8 @@
   "id": "venue_a9eefd14-7825-40da-87a4-540551f9ff30",
   "slug": "rabbit-hotel-and-spa",
   "name": "Rabbit hotel and spa",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Templepatrick",
   "intro": "",
   "description": "The Rabbit Hotel & Retreat has a relaxed, contemporary feel that immediately sets the tone for an easy, enjoyable wedding day. From a Northern Ireland wedding photographer’s perspective, it’s a venue that encourages people to slow down, settle in and genuinely enjoy the experience, without anything feeling rushed or overly formal. The outdoor spaces, including the stunning outdoor spa really come into their own for photography. The gardens and surrounding countryside offer a soft, natural backdrop that works beautifully for relaxed portraits and unforced group shots.  Indoors, the modern design, warm textures and natural light create clean, timeless settings that photograph effortlessly in all conditions.  Located just outside Belfast, The Rabbit Hotel & Retreat offers a wedding day that feels connected and unhurried. From morning preparations through to evening celebrations, everything happens within a close, cohesive setting. From a photography point of view, it’s a venue that supports real moments, gentle transitions and a laid-back pace, allowing the story of the day to unfold naturally and honestly.",
   "heroImageId": "legacy_4b52f916f14638ea48a6cb76",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.728Z",
-  "updatedAt": "2026-07-13T07:52:28.339Z",
+  "updatedAt": "2026-07-14T13:04:50.172Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.339Z",
@@ -2473,5 +2473,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

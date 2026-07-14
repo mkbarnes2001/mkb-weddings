@@ -3,8 +3,8 @@
   "id": "venue_100977c3-9650-4b60-8ca3-434afde00835",
   "slug": "bellingham-castle",
   "name": "Bellingham Castle",
-  "county": "",
-  "town": "",
+  "county": "Co. Louth",
+  "town": "Castlebellingham",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_698c536db12da4e474d95024",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.680Z",
-  "updatedAt": "2026-07-13T07:52:28.319Z",
+  "updatedAt": "2026-07-14T13:04:50.144Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.319Z",
@@ -515,5 +515,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

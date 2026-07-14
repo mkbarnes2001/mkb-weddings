@@ -3,8 +3,8 @@
   "id": "venue_dc234a2f-8435-4e88-8daa-90abe9edaeac",
   "slug": "castle-leslie",
   "name": "Castle Leslie",
-  "county": "",
-  "town": "",
+  "county": "Co. Monaghan",
+  "town": "Glaslough",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_849bff2916ec0fca5264504b",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.682Z",
-  "updatedAt": "2026-07-13T07:52:28.321Z",
+  "updatedAt": "2026-07-14T13:04:50.146Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.321Z",
@@ -280,5 +280,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

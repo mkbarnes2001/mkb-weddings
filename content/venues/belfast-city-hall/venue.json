@@ -3,8 +3,8 @@
   "id": "venue_052ef4c5-c78e-4425-8c68-de539bf3a67c",
   "slug": "belfast-city-hall",
   "name": "Belfast City Hall",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Belfast",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_1826a043242e9a00c0edb7a3",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.800Z",
-  "updatedAt": "2026-07-13T07:52:28.319Z",
+  "updatedAt": "2026-07-14T13:04:50.143Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.319Z",
@@ -1546,5 +1546,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

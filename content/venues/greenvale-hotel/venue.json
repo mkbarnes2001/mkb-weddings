@@ -3,8 +3,8 @@
   "id": "venue_55e4b8db-7a5d-46d2-a2fa-2db3d9683d75",
   "slug": "greenvale-hotel",
   "name": "Greenvale Hotel",
-  "county": "",
-  "town": "",
+  "county": "Co. Tyrone",
+  "town": "Cookstown",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_f8b13384e9a6bd094e262888",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.713Z",
-  "updatedAt": "2026-07-13T07:52:28.327Z",
+  "updatedAt": "2026-07-14T13:04:50.155Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.327Z",
@@ -1029,5 +1029,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

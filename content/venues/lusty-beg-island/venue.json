@@ -3,8 +3,8 @@
   "id": "venue_b3c0072f-7e54-4a72-a3df-8454432ae53a",
   "slug": "lusty-beg-island",
   "name": "Lusty beg island",
-  "county": "",
-  "town": "",
+  "county": "Co. Fermanagh",
+  "town": "Lough Erne",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_157f26ff673364d7aaed3f0a",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.665Z",
-  "updatedAt": "2026-07-13T07:52:28.333Z",
+  "updatedAt": "2026-07-14T13:04:50.165Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.333Z",
@@ -740,5 +740,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

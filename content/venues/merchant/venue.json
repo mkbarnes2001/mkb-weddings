@@ -3,8 +3,8 @@
   "id": "venue_49688459-c55f-44bd-bed5-09ca8cc57c5a",
   "slug": "merchant",
   "name": "Merchant",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Belfast",
   "intro": "",
   "description": "The Merchant Hotel has a sense of drama and elegance that’s immediately felt on a wedding day, without tipping into anything over the top. This is a venue where atmosphere leads the way, allowing moments to unfold naturally while still feeling elevated. The layout works surprisingly well for the flow of the day, keeping everything connected and guests engaged rather than drifting between spaces.  Light behaves beautifully throughout the building. Indoors, it’s shaped by high ceilings, large windows and rich textures, which gives photographs depth and character without feeling heavy. It’s especially good for candid moments, where expressions and interactions take centre stage. Step outside and the surrounding streets add a more urban contrast, perfect for portraits that feel relaxed but distinctive, without needing to travel far or break the rhythm of the day.  Located in Belfast, The Merchant Hotel suits couples who want a wedding that feels stylish but grounded. From preparations through to the evening celebrations, The Merchant Hotel supports a story-led approach to photography, where the setting enhances the day rather than competing with it.",
   "heroImageId": "legacy_f770d750a4e3943dbf0e2a1c",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.789Z",
-  "updatedAt": "2026-07-13T07:52:28.334Z",
+  "updatedAt": "2026-07-14T13:04:50.165Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.334Z",
@@ -1265,5 +1265,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

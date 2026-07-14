@@ -3,8 +3,8 @@
   "id": "venue_61821a20-3ac0-4186-8241-a1c883053f69",
   "slug": "beech-hill",
   "name": "Beech hill",
-  "county": "",
-  "town": "",
+  "county": "Co. Londonderry",
+  "town": "Derry-Londonderry",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_48ff74bb9d733b7201cea07e",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.762Z",
-  "updatedAt": "2026-07-13T07:52:28.318Z",
+  "updatedAt": "2026-07-14T13:04:50.141Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.318Z",
@@ -3695,5 +3695,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

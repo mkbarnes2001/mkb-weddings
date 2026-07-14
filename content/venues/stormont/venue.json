@@ -3,8 +3,8 @@
   "id": "venue_f35282e3-d216-4d12-998b-3fe4d9391222",
   "slug": "stormont",
   "name": "Stormont",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Belfast",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_a9747c2bae088c0594b24b76",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.785Z",
-  "updatedAt": "2026-07-13T07:52:28.344Z",
+  "updatedAt": "2026-07-14T13:04:50.179Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.344Z",
@@ -4724,5 +4724,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

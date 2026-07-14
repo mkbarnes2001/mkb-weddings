@@ -3,8 +3,8 @@
   "id": "venue_1286c8b5-9cd6-4aa9-a843-30535035e244",
   "slug": "wool-tower",
   "name": "Wool tower",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Ballymena",
   "intro": "",
   "description": "The Wool Tower has a relaxed, industrial style, character-filled atmosphere that lends itself really well to weddings that feel personal and unforced. From a Northern Ireland wedding photographer’s point of view, it’s a venue where the day flows naturally, without big jumps or interruptions. Everything feels close enough to stay connected, which helps moments unfold as they happen rather than being overly managed. The building’s texture and history add a lot visually, but it’s the way the light moves through the space that really stands out. Large windows and open interiors give plenty of natural light to work with, changing gently throughout the day and adding depth without distraction. It’s ideal for candid moments, especially when people forget the camera is there. Outside, the surrounding grounds offer a quiet contrast to the warmth of the interior, giving just enough variety for portraits without needing to step too far away from the celebration.  Set in Broughshane, The Wool Tower suits couples who want something a little different but still grounded. From a photography perspective, The Wool Tower supports real connection, easy movement and a calm pace, allowing the story of the day to come together naturally.",
   "heroImageId": "legacy_6822f95e88cdca14974a0b93",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.760Z",
-  "updatedAt": "2026-07-13T07:52:28.347Z",
+  "updatedAt": "2026-07-14T13:04:50.184Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.347Z",
@@ -2168,5 +2168,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

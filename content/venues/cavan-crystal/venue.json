@@ -3,8 +3,8 @@
   "id": "venue_7b5b19da-7a9d-40f1-acec-96ff935632d0",
   "slug": "cavan-crystal",
   "name": "Cavan Crystal",
-  "county": "",
-  "town": "",
+  "county": "Co. Cavan",
+  "town": "Cavan",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_c531e2a83570dd07c05072e7",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.685Z",
-  "updatedAt": "2026-07-13T07:52:28.321Z",
+  "updatedAt": "2026-07-14T13:04:50.147Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.321Z",
@@ -1091,5 +1091,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

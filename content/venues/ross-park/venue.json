@@ -3,8 +3,8 @@
   "id": "venue_810e632a-5bdb-43a9-85c0-7d719222ac56",
   "slug": "ross-park",
   "name": "Ross Park",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Ballymena",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_67a80539ca5941b440a3cc84",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.767Z",
-  "updatedAt": "2026-07-13T07:52:28.341Z",
+  "updatedAt": "2026-07-14T13:04:50.174Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.341Z",
@@ -341,5 +341,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

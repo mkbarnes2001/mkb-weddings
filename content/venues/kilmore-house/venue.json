@@ -3,8 +3,8 @@
   "id": "venue_435b67d8-d5b0-4096-bc35-8d23f734ffd2",
   "slug": "kilmore-house",
   "name": "Kilmore house",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Glenariff",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_37928b36b8ea0c6455b11aef",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.694Z",
-  "updatedAt": "2026-07-13T07:52:28.330Z",
+  "updatedAt": "2026-07-14T13:04:50.160Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.330Z",
@@ -223,5 +223,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

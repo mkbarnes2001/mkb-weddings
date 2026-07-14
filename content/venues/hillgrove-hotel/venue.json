@@ -3,8 +3,8 @@
   "id": "venue_e1ce4c91-cd0d-4cd8-a0fc-424fb6ab5589",
   "slug": "hillgrove-hotel",
   "name": "Hillgrove Hotel",
-  "county": "",
-  "town": "",
+  "county": "Co. Monaghan",
+  "town": "Monaghan",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_256a217f39cf81da1aa9bbe6",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.711Z",
-  "updatedAt": "2026-07-13T07:52:28.328Z",
+  "updatedAt": "2026-07-14T13:04:50.157Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.328Z",
@@ -1266,5 +1266,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

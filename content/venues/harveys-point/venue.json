@@ -3,8 +3,8 @@
   "id": "venue_131a2b50-097a-46af-afe1-0506230ff632",
   "slug": "harveys-point",
   "name": "Harveys point",
-  "county": "",
-  "town": "",
+  "county": "Co. Donegal",
+  "town": "Lough Eske",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_296889fea055647aaf230320",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.738Z",
-  "updatedAt": "2026-07-13T07:52:28.327Z",
+  "updatedAt": "2026-07-14T13:04:50.156Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.327Z",
@@ -2137,5 +2137,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

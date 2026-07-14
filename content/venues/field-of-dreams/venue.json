@@ -3,8 +3,8 @@
   "id": "venue_f2b9ece4-50c8-47c3-8ae9-cbd437f5dbd2",
   "slug": "field-of-dreams",
   "name": "Field of dreams",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Bangor",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_2d185efbb8edda5bf739d3fb",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.697Z",
-  "updatedAt": "2026-07-13T07:52:28.325Z",
+  "updatedAt": "2026-07-14T13:04:50.153Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.325Z",
@@ -336,5 +336,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

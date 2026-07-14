@@ -3,8 +3,8 @@
   "id": "venue_cc9666c5-ee80-44a3-8d37-775c3144486a",
   "slug": "farnham",
   "name": "Farnham Estate",
-  "county": "",
-  "town": "",
+  "county": "Co. Cavan",
+  "town": "Cavan",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_9bcd2180b8d6320626a447a0",
@@ -4852,5 +4852,6 @@
     ]
   },
   "createdAt": "2026-07-12T09:18:54.796Z",
-  "updatedAt": "2026-07-14T12:36:59.320Z"
+  "updatedAt": "2026-07-14T13:04:50.152Z",
+  "country": "Ireland"
 }

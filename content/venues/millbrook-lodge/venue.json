@@ -3,8 +3,8 @@
   "id": "venue_383663ac-82d7-4166-b56a-9889f1b3be3f",
   "slug": "millbrook-lodge",
   "name": "Millbrook lodge",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Ballynahinch",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_c5e728494605fa7285d6bfe2",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.722Z",
-  "updatedAt": "2026-07-13T07:52:28.334Z",
+  "updatedAt": "2026-07-14T13:04:50.166Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.334Z",
@@ -7434,5 +7434,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

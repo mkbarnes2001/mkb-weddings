@@ -3,8 +3,8 @@
   "id": "venue_de17ebc7-5330-46d8-b49b-2bdbcc4673d8",
   "slug": "hillsborough-castle",
   "name": "Hillsborough Castle",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Hillsborough",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_34106f4bab85cbe4d6539c24",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.779Z",
-  "updatedAt": "2026-07-13T07:52:28.328Z",
+  "updatedAt": "2026-07-14T13:04:50.157Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.328Z",
@@ -685,5 +685,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

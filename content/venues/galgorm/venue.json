@@ -3,8 +3,8 @@
   "id": "venue_533f43aa-a155-4feb-8b76-65da5407cb25",
   "slug": "galgorm",
   "name": "Galgorm",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Ballymena",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_d1db1f468577128b44f9a378",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.689Z",
-  "updatedAt": "2026-07-13T07:52:28.326Z",
+  "updatedAt": "2026-07-14T13:04:50.154Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.326Z",
@@ -1206,5 +1206,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

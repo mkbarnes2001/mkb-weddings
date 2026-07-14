@@ -3,8 +3,8 @@
   "id": "venue_18302c42-c8ea-4991-8803-1f33076773f1",
   "slug": "redcastle-hotel",
   "name": "Redcastle hotel",
-  "county": "",
-  "town": "",
+  "county": "Co. Donegal",
+  "town": "Moville",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_2bdc22d0d2890c6ce231c349",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.781Z",
-  "updatedAt": "2026-07-13T07:52:28.340Z",
+  "updatedAt": "2026-07-14T13:04:50.173Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.340Z",
@@ -860,5 +860,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

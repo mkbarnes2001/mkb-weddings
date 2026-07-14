@@ -3,8 +3,8 @@
   "id": "venue_0533e381-e5fd-473c-bec3-34707fdf4591",
   "slug": "la-mon-hotel",
   "name": "La mon hotel",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Belfast",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_92688d1a18177a172b8fc450",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.787Z",
-  "updatedAt": "2026-07-13T07:52:28.330Z",
+  "updatedAt": "2026-07-14T13:04:50.160Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.330Z",
@@ -1545,5 +1545,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

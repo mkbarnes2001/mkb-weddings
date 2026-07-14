@@ -3,8 +3,8 @@
   "id": "venue_0a376e42-9552-4e06-abd3-2a142a54ca79",
   "slug": "roe-valley-resort",
   "name": "Roe valley resort",
-  "county": "",
-  "town": "",
+  "county": "Co. Londonderry",
+  "town": "Limavady",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_f425e37b24bd8e5ba1ce7d2e",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.773Z",
-  "updatedAt": "2026-07-13T07:52:28.340Z",
+  "updatedAt": "2026-07-14T13:04:50.174Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.340Z",
@@ -742,5 +742,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

@@ -3,8 +3,8 @@
   "id": "venue_5a757d1d-6071-499d-a470-02504e04f66c",
   "slug": "millhouse-slane",
   "name": "Millhouse Slane",
-  "county": "",
-  "town": "",
+  "county": "Co. Meath",
+  "town": "Slane",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_07579c36bd4febcee97dc05d",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.745Z",
-  "updatedAt": "2026-07-13T07:52:28.336Z",
+  "updatedAt": "2026-07-14T13:04:50.168Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.336Z",
@@ -280,5 +280,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

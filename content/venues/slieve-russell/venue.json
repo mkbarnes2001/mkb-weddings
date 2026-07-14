@@ -3,8 +3,8 @@
   "id": "venue_a908b463-5b84-42ac-8363-e2b21baf5d92",
   "slug": "slieve-russell",
   "name": "Slieve Russell",
-  "county": "",
-  "town": "",
+  "county": "Co. Cavan",
+  "town": "Ballyconnell",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_670a6097c1da18f1c1e1bbcf",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.724Z",
-  "updatedAt": "2026-07-13T07:52:28.343Z",
+  "updatedAt": "2026-07-14T13:04:50.178Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.343Z",
@@ -1490,5 +1490,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

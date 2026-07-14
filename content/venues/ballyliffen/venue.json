@@ -3,8 +3,8 @@
   "id": "venue_b468f579-bfd0-4aaf-9b37-6ca7e15a640d",
   "slug": "ballyliffen",
   "name": "Ballyliffen",
-  "county": "",
-  "town": "",
+  "county": "Co. Donegal",
+  "town": "Inishowen",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_91a681b5bcd40d2215915b56",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.769Z",
-  "updatedAt": "2026-07-13T07:52:28.316Z",
+  "updatedAt": "2026-07-14T13:04:50.138Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.316Z",
@@ -2130,5 +2130,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

@@ -3,8 +3,8 @@
   "id": "venue_a5d32934-f7ff-46b2-98e5-62e2ffe15a97",
   "slug": "crover-house",
   "name": "Crover House",
-  "county": "",
-  "town": "",
+  "county": "Co. Cavan",
+  "town": "Cavan",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_d2561aa5c161195a5cfac495",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.710Z",
-  "updatedAt": "2026-07-13T07:52:28.322Z",
+  "updatedAt": "2026-07-14T13:04:50.149Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.322Z",
@@ -1090,5 +1090,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

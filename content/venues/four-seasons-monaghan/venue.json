@@ -3,8 +3,8 @@
   "id": "venue_657449de-1e42-47b4-a4b2-1447c8dcf6e2",
   "slug": "four-seasons-monaghan",
   "name": "Four Seasons monaghan",
-  "county": "",
-  "town": "",
+  "county": "Co. Monaghan",
+  "town": "Monaghan",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_1e46b297c650b867673530f8",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.687Z",
-  "updatedAt": "2026-07-13T07:52:28.326Z",
+  "updatedAt": "2026-07-14T13:04:50.153Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.326Z",
@@ -1134,5 +1134,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

@@ -3,8 +3,8 @@
   "id": "venue_905451e3-637d-41a6-b5cb-aac952a83681",
   "slug": "ulster-museum",
   "name": "Ulster museum",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Belfast",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_e5e6a292348207a56c4da255",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.754Z",
-  "updatedAt": "2026-07-13T07:52:28.346Z",
+  "updatedAt": "2026-07-14T13:04:50.182Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.346Z",
@@ -2828,5 +2828,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

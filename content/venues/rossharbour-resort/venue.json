@@ -3,8 +3,8 @@
   "id": "venue_24d9010d-f35a-4309-9f7b-b629f0de4252",
   "slug": "rossharbour-resort",
   "name": "Rossharbour resort",
-  "county": "",
-  "town": "",
+  "county": "Co. Fermanagh",
+  "town": "Lough Erne",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_4ad5072a40b5adf6b9424d55",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.783Z",
-  "updatedAt": "2026-07-13T07:52:28.341Z",
+  "updatedAt": "2026-07-14T13:04:50.175Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.341Z",
@@ -3273,5 +3273,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

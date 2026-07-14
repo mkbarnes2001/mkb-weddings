@@ -3,13 +3,13 @@
   "id": "venue_5a757d1d-6071-499d-a470-02504e04f66c",
   "slug": "millhouse-slane",
   "name": "Millhouse Slane",
-  "town": "",
-  "county": "",
-  "country": "Northern Ireland",
+  "town": "Slane",
+  "county": "Co. Meath",
+  "country": "Ireland",
   "intro": "",
   "description": "",
   "status": "published",
-  "updatedAt": "2026-07-13T07:52:28.336Z",
+  "updatedAt": "2026-07-14T13:04:50.168Z",
   "links": {
     "website": "https://www.themillhouse.ie",
     "instagram": "",
@@ -57,24 +57,9 @@
           "indoor",
           "irish wedding"
         ],
-        "aiTags": [
-          "millhouse slane",
-          "getting ready",
-          "bride",
-          "wedding dress",
-          "bridal veil",
-          "window light",
-          "soft light",
-          "romantic",
-          "quiet moment",
-          "bridal portrait",
-          "indoor",
-          "irish wedding"
-        ],
         "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Millhouse%20Slane/getting%20ready/mkb-weddings-irish-wedding-photographer-millhouse-slane-wedding-photography-11_500.webp",
         "fullSrc": "https://images.mkbweddings.co.uk/full/Millhouse%20Slane/getting%20ready/mkb-weddings-irish-wedding-photographer-millhouse-slane-wedding-photography-11_2000.webp",
-        "alt": "Bride in her wedding dress and veil by soft window light during morning preparations at Millhouse Slane",
-        "caption": "A quiet getting ready moment at Millhouse Slane, with soft window light and a relaxed bridal portrait before the day begins."
+        "alt": "Millhouse Slane wedding photography – getting ready"
       },
       {
         "assetId": "legacy_4e2c64e8bbe8c69ad2808864",
@@ -100,24 +85,9 @@
           "millhouse slane",
           "wedding morning"
         ],
-        "aiTags": [
-          "getting ready",
-          "bride",
-          "bridesmaids",
-          "champagne pop",
-          "bridal robes",
-          "morning prep",
-          "window light",
-          "joyful",
-          "celebration",
-          "candid",
-          "millhouse slane",
-          "wedding morning"
-        ],
         "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Millhouse%20Slane/getting%20ready/MKB-photography-Northern-Ireland-wedding-photographer-Slane-Wedding-photography-Millhouse-Slane-wedding-photography-11_500.webp",
         "fullSrc": "https://images.mkbweddings.co.uk/full/Millhouse%20Slane/getting%20ready/MKB-photography-Northern-Ireland-wedding-photographer-Slane-Wedding-photography-Millhouse-Slane-wedding-photography-11_2000.webp",
-        "alt": "Bride and bridesmaids popping champagne in bridal robes during morning prep at Millhouse Slane, County Meath",
-        "caption": "A joyful wedding morning at Millhouse Slane, with the bride and bridesmaids celebrating in soft window light before the day begins."
+        "alt": "Millhouse Slane wedding photography – getting ready"
       },
       {
         "assetId": "legacy_1d96597593495ce145edcdcc",
@@ -143,24 +113,9 @@
           "millhouse slane",
           "wedding morning"
         ],
-        "aiTags": [
-          "getting ready",
-          "bride",
-          "bridal portrait",
-          "staircase",
-          "wedding dress",
-          "veil",
-          "bouquet",
-          "black and white",
-          "dramatic light",
-          "quiet moment",
-          "millhouse slane",
-          "wedding morning"
-        ],
         "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Millhouse%20Slane/getting%20ready/MKB-photography-Northern-Ireland-wedding-photographer-Slane-Wedding-photography-Millhouse-Slane-wedding-photography-26_500.webp",
         "fullSrc": "https://images.mkbweddings.co.uk/full/Millhouse%20Slane/getting%20ready/MKB-photography-Northern-Ireland-wedding-photographer-Slane-Wedding-photography-Millhouse-Slane-wedding-photography-26_2000.webp",
-        "alt": "Black and white bridal portrait on the staircase at Millhouse Slane during a quiet wedding morning moment",
-        "caption": "A calm getting ready moment at Millhouse Slane, with soft dramatic light, a veil and bouquet adding to the quiet atmosphere."
+        "alt": "Millhouse Slane wedding photography – getting ready"
       },
       {
         "assetId": "legacy_0582cabdec8668dc96fff93f",
@@ -186,24 +141,9 @@
           "romantic",
           "outdoor reception"
         ],
-        "aiTags": [
-          "millhouse slane",
-          "reception",
-          "sparkler exit",
-          "bride and groom",
-          "wedding guests",
-          "night photography",
-          "fairy lights",
-          "celebration",
-          "party atmosphere",
-          "candid moment",
-          "romantic",
-          "outdoor reception"
-        ],
         "thumbSrc": "https://images.mkbweddings.co.uk/thumb/Millhouse%20Slane/reception%20and%20party/MKB-photography-Northern-Ireland-wedding-photographer-Slane-Wedding-photography-Millhouse-Slane-wedding-photography-81_500.webp",
         "fullSrc": "https://images.mkbweddings.co.uk/full/Millhouse%20Slane/reception%20and%20party/MKB-photography-Northern-Ireland-wedding-photographer-Slane-Wedding-photography-Millhouse-Slane-wedding-photography-81_2000.webp",
-        "alt": "Bride and groom walk through a sparkler exit with guests at Millhouse Slane during an outdoor night reception",
-        "caption": "A relaxed sparkler exit at Millhouse Slane in Slane, with guests gathered in the fairy lights for a lively night-time celebration."
+        "alt": "Millhouse Slane wedding photography – reception and party"
       }
     ]
   }

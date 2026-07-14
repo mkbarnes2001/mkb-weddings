@@ -3,8 +3,8 @@
   "id": "venue_0efbe5d2-50c5-4c8f-bd29-aba07012dd0a",
   "slug": "shandon-hotel",
   "name": "Shandon Hotel",
-  "county": "",
-  "town": "",
+  "county": "Co. Donegal",
+  "town": "Dunfanaghy",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_608b09b8776bbadd32bc17e9",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.706Z",
-  "updatedAt": "2026-07-13T07:52:28.342Z",
+  "updatedAt": "2026-07-14T13:04:50.176Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.342Z",
@@ -686,5 +686,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Ireland"
 }

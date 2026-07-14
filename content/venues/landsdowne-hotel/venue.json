@@ -3,8 +3,8 @@
   "id": "venue_0f9dcae3-2b92-40a6-b06c-dabdc929f637",
   "slug": "landsdowne-hotel",
   "name": "Landsdowne Hotel",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Belfast",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_f86a7466cbb68a831c13a3c9",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.791Z",
-  "updatedAt": "2026-07-13T07:52:28.331Z",
+  "updatedAt": "2026-07-14T13:04:50.161Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.331Z",
@@ -2590,5 +2590,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

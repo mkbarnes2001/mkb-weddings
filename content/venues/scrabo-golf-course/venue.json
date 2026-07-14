@@ -3,8 +3,8 @@
   "id": "venue_163ef1d4-1a79-44b8-b910-d27f31b48bdb",
   "slug": "scrabo-golf-course",
   "name": "Scrabo golf course",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Newtownards",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_1fc4cd33608f77bf592323d6",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.673Z",
-  "updatedAt": "2026-07-13T07:52:28.342Z",
+  "updatedAt": "2026-07-14T13:04:50.176Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.342Z",
@@ -508,5 +508,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

@@ -3,8 +3,8 @@
   "id": "venue_ab9d72de-d522-4eda-ac54-515aa5d04fe5",
   "slug": "dunadry",
   "name": "Dunadry",
-  "county": "",
-  "town": "",
+  "county": "Co. Antrim",
+  "town": "Antrim",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_bd85964413615d229691f06d",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.704Z",
-  "updatedAt": "2026-07-13T07:52:28.323Z",
+  "updatedAt": "2026-07-14T13:04:50.150Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.323Z",
@@ -1373,5 +1373,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

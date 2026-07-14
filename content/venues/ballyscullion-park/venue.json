@@ -3,8 +3,8 @@
   "id": "venue_a2526126-b52b-4979-a782-866eb9f003d1",
   "slug": "ballyscullion-park",
   "name": "Ballyscullion park",
-  "county": "",
-  "town": "",
+  "county": "Co. Londonderry",
+  "town": "Belaghy",
   "intro": "",
   "description": "Ballyscullion Park has a quiet confidence about it that makes wedding days feel easy and unforced. From a Northern Ireland wedding photographer’s point of view, it’s the kind of venue where everything flows naturally, without needing to be overly managed or staged. The house and grounds feel elegant but welcoming, which helps people relax and be themselves from the morning right through to the evening. Ballyscullion Park really excels with the outdoor locations for capturing stunning portraits, the walled garden is a real highlight, offering structure, texture and shelter, ideal for intimate portraits and relaxed group shots. Just beyond that, the surrounding woods add a slightly wild, cinematic feel. They’re especially beautiful in softer light and were even used as a filming location for Game of Thrones, which gives the setting a subtle sense of drama without feeling over the top.  Located just outside Belaghy, Ballyscullion Park offers a setting where the day feels connected rather than broken into parts. From a photography perspective, it’s a venue that supports real moments, gentle transitions and a relaxed pace, letting the story of the day unfold naturally.",
   "heroImageId": "legacy_9c820f355b8b702001ec95e4",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.675Z",
-  "updatedAt": "2026-07-13T07:52:28.316Z",
+  "updatedAt": "2026-07-14T13:04:50.140Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.316Z",
@@ -3220,5 +3220,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

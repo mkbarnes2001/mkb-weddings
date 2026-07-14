@@ -3,8 +3,8 @@
   "id": "venue_dd4b2bd3-95d4-4cfc-804d-35b540786a93",
   "slug": "whistledown-hotel",
   "name": "Whistledown Hotel",
-  "county": "",
-  "town": "",
+  "county": "Co. Down",
+  "town": "Warrenpoint",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_a985b8d5afb6f3c52a25aa71",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.702Z",
-  "updatedAt": "2026-07-13T07:52:28.347Z",
+  "updatedAt": "2026-07-14T13:04:50.183Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.347Z",
@@ -396,5 +396,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }

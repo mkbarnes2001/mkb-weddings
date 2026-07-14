@@ -3,8 +3,8 @@
   "id": "venue_296da3a7-9896-4daf-8e55-26b1c6622c86",
   "slug": "lough-erne-resort",
   "name": "Lough Erne resort",
-  "county": "",
-  "town": "",
+  "county": "Co. Fermanagh",
+  "town": "Lough Erne",
   "intro": "",
   "description": "",
   "heroImageId": "legacy_6a17333da691ec277f8f7ac6",
@@ -41,7 +41,7 @@
     "description": ""
   },
   "createdAt": "2026-07-12T09:18:54.771Z",
-  "updatedAt": "2026-07-13T07:52:28.333Z",
+  "updatedAt": "2026-07-14T13:04:50.164Z",
   "gallery": {
     "schemaVersion": 1,
     "updatedAt": "2026-07-13T07:52:28.333Z",
@@ -1548,5 +1548,6 @@
         }
       }
     ]
-  }
+  },
+  "country": "Northern Ireland"
 }
