@@ -7,9 +7,9 @@ import { ImageLightbox } from "./ImageLightbox";
 import { MasonryGallery } from "./MasonryGallery";
 import { loadMkbIntelligence, type BlogImage } from "../lib/intelligence";
 import {
-  loadWedding,
-  type WeddingDocument,
-} from "../lib/weddingEngine";
+  PublicWeddingRepository,
+  type PublicWeddingDetail,
+} from "../lib/weddingEngine/PublicWeddingRepository";
 
 function slugify(value: string) {
   return (value || "")
@@ -22,14 +22,17 @@ function slugify(value: string) {
 
 export function WeddingStoryPage() {
   const { slug } = useParams();
-  const [story, setStory] = useState<WeddingDocument | undefined>();
+  const [story, setStory] = useState<PublicWeddingDetail | undefined>();
   const [storyLoading, setStoryLoading] = useState(true);
   const [images, setImages] = useState<BlogImage[]>([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const venueUrl = story
-    ? `/gallery/venue/${slugify(story.venue)}`
+    ? `/gallery/venue/${
+        story.venueSlug ||
+        slugify(story.venue)
+      }`
     : "/gallery/venues";
 
   useEffect(() => {
@@ -46,9 +49,12 @@ export function WeddingStoryPage() {
       return;
     }
 
-    loadWedding(slug)
+    new PublicWeddingRepository()
+      .getPublishedBySlug(slug)
       .then((loadedStory) => {
-        if (!cancelled) setStory(loadedStory);
+        if (!cancelled) {
+          setStory(loadedStory);
+        }
       })
       .catch(() => {
         if (!cancelled) setStory(undefined);
@@ -68,31 +74,72 @@ export function WeddingStoryPage() {
       return;
     }
 
+    if (
+      story.source === "json" &&
+      story.images.length > 0
+    ) {
+      setImages(
+        story.images.map(
+          (image) =>
+            ({
+              filename:
+                image.filename,
+              thumbSrc:
+                image.thumbSrc,
+              fullSrc:
+                image.fullSrc,
+              alt: image.alt,
+              caption:
+                image.caption,
+              isCover:
+                image.isCover,
+            }) as BlogImage,
+        ),
+      );
+
+      return;
+    }
+
     let cancelled = false;
 
+    /*
+     * Existing weddingStories.ts/blog-gallery.csv stories remain readable
+     * until they are deliberately migrated into the JSON repository.
+     */
     loadMkbIntelligence()
       .then((intelligence) => {
         if (!cancelled) {
           setImages(
-            intelligence.getBlogImages(slug, {
-              slug: story.slug,
-              title: story.title,
-              couple: story.couple,
-              venue: story.venue,
-              weddingDate: story.weddingDate,
-              excerpt: story.excerpt,
-              intro: story.intro,
-              story: story.story,
-              facts: story.facts,
-              suppliers: story.suppliers,
-              seoTitle: story.seo?.title,
-              seoDescription: story.seo?.description,
-            }),
+            intelligence.getBlogImages(
+              slug,
+              {
+                slug: story.slug,
+                title: story.title,
+                couple: story.couple,
+                venue: story.venue,
+                weddingDate:
+                  story.weddingDate,
+                excerpt:
+                  story.excerpt,
+                intro: story.intro,
+                story: story.story,
+                facts: story.facts,
+                suppliers:
+                  story.suppliers,
+                seoTitle:
+                  story.seo?.title,
+                seoDescription:
+                  story.seo
+                    ?.description,
+              },
+            ),
           );
         }
       })
       .catch(() => {
-        if (!cancelled) setImages([]);
+        if (!cancelled) {
+          setImages([]);
+        }
       });
 
     return () => {
@@ -334,8 +381,8 @@ export function WeddingStoryPage() {
           <div className="bg-neutral-50 rounded-2xl p-10 text-center">
             <h3 className="text-3xl mb-4">No blog images selected yet</h3>
             <p className="text-neutral-700">
-              Add this story slug to the <span className="font-mono">blogSlug</span> column in{" "}
-              <span className="font-mono">public/blog-gallery.csv</span>.
+              Assign images to the Blog Gallery collection and publish the
+              wedding story from Photography Intelligence.
             </p>
           </div>
         ) : (
