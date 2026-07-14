@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "slug": "farnham-ian-and-shannen",
+  "title": "Ian and Shannen's wedding at Farnham",
+  "couple": "Ian and Shannen",
+  "venue": "Farnham",
+  "venueSlug": "farnham",
+  "venueId": "venue_cc9666c5-ee80-44a3-8d37-775c3144486a",
+  "weddingDate": "Dec 2026",
+  "excerpt": "",
+  "intro": "",
+  "story": [],
+  "facts": {
+    "photographer": "MKB Weddings"
+  },
+  "suppliers": [
+    {
+      "role": "Photography",
+      "name": "MKB Weddings",
+      "instagram": "mkbweddings",
+      "website": "https://www.mkbweddings.co.uk"
+    },
+    {
+      "role": "Venue",
+      "name": "Farnham"
+    }
+  ],
+  "seo": {
+    "title": "",
+    "description": ""
+  },
+  "status": "draft",
+  "updatedAt": "2026-07-13T19:25:43.704Z"
+}

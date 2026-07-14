@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "weddingSlug": "farnham-ian-and-shannen",
+  "updatedAt": "2026-07-14T12:27:23.449Z",
+  "images": [
+    {
+      "id": "image_62647fa2-22bc-4af2-97ec-bced62956a09",
+      "filename": "farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-7-62956a09.webp",
+      "order": 1,
+      "isCover": false,
+      "hidden": false,
+      "rating": 0,
+      "collections": [],
+      "source": {
+        "type": "local-processed-upload",
+        "originalFilename": "mkb-weddings-harveys-point-wedding-photographer-amy-aaron-7.jpg",
+        "originalMimeType": "image/jpeg",
+        "venueSlug": "farnham",
+        "storage": "local",
+        "fullKey": "public/uploads/farnham-ian-and-shannen/full/farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-7-62956a09.webp",
+        "thumbKey": "public/uploads/farnham-ian-and-shannen/thumb/farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-7-62956a09.webp",
+        "fullPath": "/uploads/farnham-ian-and-shannen/full/farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-7-62956a09.webp",
+        "thumbPath": "/uploads/farnham-ian-and-shannen/thumb/farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-7-62956a09.webp",
+        "width": 3508,
+        "height": 5262,
+        "orientation": "portrait"
+      },
+      "fullSrc": "/uploads/farnham-ian-and-shannen/full/farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-7-62956a09.webp",
+      "thumbSrc": "/uploads/farnham-ian-and-shannen/thumb/farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-7-62956a09.webp",
+      "aiAlt": "",
+      "aiCaption": "",
+      "aiTags": []
+    },
+    {
+      "id": "image_0cd77cdb-fc4b-4235-bdbb-348c4219db1b",
+      "filename": "farnham-ian-and-shannen-MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballymascanlon-house-hotel-du-4219db1b.webp",
+      "order": 2,
+      "isCover": false,
+      "hidden": false,
+      "rating": 0,
+      "collections": [],
+      "source": {
+        "type": "local-processed-upload",
+        "originalFilename": "MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballymascanlon-house-hotel-dundalk-wedding-photography-434.jpg",
+        "originalMimeType": "image/jpeg",
+        "venueSlug": "farnham",
+        "storage": "local",
+        "fullKey": "public/uploads/farnham-ian-and-shannen/full/farnham-ian-and-shannen-MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballymascanlon-house-hotel-du-4219db1b.webp",
+        "thumbKey": "public/uploads/farnham-ian-and-shannen/thumb/farnham-ian-and-shannen-MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballymascanlon-house-hotel-du-4219db1b.webp",
+        "fullPath": "/uploads/farnham-ian-and-shannen/full/farnham-ian-and-shannen-MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballymascanlon-house-hotel-du-4219db1b.webp",
+        "thumbPath": "/uploads/farnham-ian-and-shannen/thumb/farnham-ian-and-shannen-MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballymascanlon-house-hotel-du-4219db1b.webp",
+        "width": 5216,
+        "height": 3477,
+        "orientation": "landscape"
+      },
+      "fullSrc": "/uploads/farnham-ian-and-shannen/full/farnham-ian-and-shannen-MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballymascanlon-house-hotel-du-4219db1b.webp",
+      "thumbSrc": "/uploads/farnham-ian-and-shannen/thumb/farnham-ian-and-shannen-MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-ballymascanlon-house-hotel-du-4219db1b.webp",
+      "aiAlt": "",
+      "aiCaption": "",
+      "aiTags": []
+    },
+    {
+      "id": "image_69d3a859-cd8c-45d0-a36a-3d331ebac168",
+      "filename": "farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-5-1ebac168.webp",
+      "order": 3,
+      "isCover": false,
+      "hidden": false,
+      "rating": 0,
+      "collections": [
+        "venue"
+      ],
+      "source": {
+        "type": "r2-processed-upload",
+        "originalFilename": "mkb-weddings-harveys-point-wedding-photographer-amy-aaron-5.jpg",
+        "originalMimeType": "image/jpeg",
+        "venueSlug": "farnham",
+        "storage": "r2",
+        "fullKey": "full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-5-1ebac168.webp",
+        "thumbKey": "thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-5-1ebac168.webp",
+        "fullPath": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-5-1ebac168.webp",
+        "thumbPath": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-5-1ebac168.webp",
+        "width": 6000,
+        "height": 4000,
+        "orientation": "landscape"
+      },
+      "fullSrc": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-5-1ebac168.webp",
+      "thumbSrc": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-mkb-weddings-harveys-point-wedding-photographer-amy-aaron-5-1ebac168.webp",
+      "aiAlt": "",
+      "aiCaption": "",
+      "aiTags": []
+    },
+    {
+      "id": "image_9e85a9df-e80c-4afc-9047-7069b3166ebc",
+      "filename": "farnham-ian-and-shannen-MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-3-b3166ebc.webp",
+      "order": 4,
+      "isCover": false,
+      "hidden": false,
+      "rating": 0,
+      "collections": [
+        "venue"
+      ],
+      "source": {
+        "type": "r2-processed-upload",
+        "originalFilename": "MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-383.jpg",
+        "originalMimeType": "image/jpeg",
+        "venueSlug": "farnham",
+        "storage": "r2",
+        "fullKey": "full/farnham-ian-and-shannen/farnham-ian-and-shannen-MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-3-b3166ebc.webp",
+        "thumbKey": "thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-3-b3166ebc.webp",
+        "fullPath": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-3-b3166ebc.webp",
+        "thumbPath": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-3-b3166ebc.webp",
+        "width": 3225,
+        "height": 4837,
+        "orientation": "portrait"
+      },
+      "fullSrc": "https://images.mkbweddings.co.uk/full/farnham-ian-and-shannen/farnham-ian-and-shannen-MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-3-b3166ebc.webp",
+      "thumbSrc": "https://images.mkbweddings.co.uk/thumb/farnham-ian-and-shannen/farnham-ian-and-shannen-MKB_Photography_Ireland_Northen_irelandl_Wedding_Photography_Clandeboye_lodge_Wedding_Photography_Stephanie_and_Callum-3-b3166ebc.webp",
+      "aiAlt": "",
+      "aiCaption": "",
+      "aiTags": []
+    }
+  ]
+}

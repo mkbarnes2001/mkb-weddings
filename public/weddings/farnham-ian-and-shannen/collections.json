@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "weddingSlug": "farnham-ian-and-shannen",
+  "collections": [
+    {
+      "id": "farnham-ian-and-shannen-blog",
+      "type": "blog",
+      "name": "Blog Gallery",
+      "imageIds": []
+    },
+    {
+      "id": "farnham-ian-and-shannen-venue",
+      "type": "venue",
+      "name": "Venue Gallery",
+      "imageIds": []
+    }
+  ],
+  "updatedAt": "2026-07-14T07:43:45.106Z"
+}
