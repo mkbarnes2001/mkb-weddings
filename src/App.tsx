@@ -6,8 +6,6 @@ import { Galleries } from "./components/Galleries";
 import { Categories } from "./components/Categories";
 import { Blog } from "./components/Blog";
 import { WeddingStoryPage } from "./components/WeddingStoryPage";
-import { BlogAdmin } from "./components/BlogAdmin";
-import { GalleryAdmin } from "./components/GalleryAdmin";
 import { Contact } from "./components/Contact";
 import { Navigation } from "./components/Navigation";
 import { Footer } from "./components/Footer";
@@ -23,7 +21,6 @@ import { GalleryFeaturedStories } from "./components/GalleryFeaturedStories";
 import { GalleryStoryDetail } from "./components/GalleryStoryDetail";
 import { GalleryCreativeFlash } from "./components/GalleryCreativeFlash";
 
-import { AdminApp } from "./admin/app/AdminApp";
 
 import WeddingPackages from "./components/WeddingPackages";
 import { ThankYou } from "./components/ThankYou";
@@ -66,10 +63,6 @@ export default function App() {
 
       <div className="min-h-screen bg-white">
         <Routes>
-          {/* -------- Admin routes: no nav/footer -------- */}
-          <Route path="/admin/*" element={<AdminApp />} />
-          <Route path="/gallery-admin" element={<GalleryAdmin />} />
-
           {/* -------- Public site routes -------- */}
           <Route element={<SiteLayout />}>
             <Route path="/" element={<Home />} />

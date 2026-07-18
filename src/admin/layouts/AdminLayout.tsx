@@ -94,7 +94,7 @@ export function AdminLayout() {
 
           <div className="border-t border-white/10 p-4">
             <a
-              href="/"
+              href="https://www.mkbweddings.co.uk/"
               className="flex items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm text-black hover:bg-white/90"
             >
               View website
@@ -121,13 +121,13 @@ export function AdminLayout() {
 
               <div className="flex items-center gap-3">
                 <a
-                  href="/blog"
+                  href="https://www.mkbweddings.co.uk/blog"
                   className="rounded-full border border-black/10 bg-white/60 px-5 py-2.5 text-sm hover:bg-white"
                 >
                   View blog
                 </a>
                 <a
-                  href="/"
+                  href="https://www.mkbweddings.co.uk/"
                   className="rounded-full bg-black px-5 py-2.5 text-sm text-white hover:bg-black/90"
                 >
                   View site

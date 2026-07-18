@@ -7,10 +7,16 @@
     "dev": "vite",
     "sync-gallery": "node -r dotenv/config scripts/sync-gallery.mjs",
     "sitemap": "node scripts/generate-sitemap.mjs",
-    "build": "npm run sitemap && vite build && cp public/_redirects build/_redirects",
+    "build": "npm run build:website",
     "preview": "vite preview",
     "build:county-meta": "node scripts/build-county-meta.mjs",
-    "build:venue-meta": "node scripts/make-venue-meta.mjs"
+    "build:venue-meta": "node scripts/make-venue-meta.mjs",
+    "dev:website": "vite --config vite.public.config.ts",
+    "dev:admin": "vite --config vite.admin.config.ts",
+    "build:website": "npm run sitemap && vite build --config vite.public.config.ts && cp public/_redirects build/_redirects",
+    "build:admin": "vite build --config vite.admin.config.ts && cp config/admin/_redirects build-admin/_redirects",
+    "preview:website": "vite preview --config vite.public.config.ts",
+    "preview:admin": "vite preview --config vite.admin.config.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.975.0",

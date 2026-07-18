@@ -17,5 +17,10 @@
 /venue-meta.json       /venue-meta.json       200
 /county-meta.json      /county-meta.json      200
 
+# Admin application now lives on the protected subdomain
+/admin       https://admin.mkbweddings.co.uk/admin  301
+/admin/*     https://admin.mkbweddings.co.uk/admin/:splat  301
+/gallery-admin  https://admin.mkbweddings.co.uk/admin  301
+
 # SPA fallback MUST BE LAST
 /*  /index.html  200
