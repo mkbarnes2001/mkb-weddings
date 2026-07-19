@@ -83,6 +83,7 @@ export type VenueDocument = {
   name: string;
   county: string;
   town: string;
+  country: string;
   intro: string;
   description: string;
   heroImageId: string;

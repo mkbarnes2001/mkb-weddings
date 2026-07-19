@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Building2, FileUp, Images, Plus, RefreshCw, Search } from "lucide-react";
+import { Building2, Plus, Search } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import type { VenueSummary } from "../types/venue";
 
@@ -9,8 +9,6 @@ export function Venues() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [syncing, setSyncing] = useState(false);
-  const [syncMessage, setSyncMessage] = useState("");
 
   useEffect(() => {
     AdminApiService.listVenues()
@@ -18,29 +16,6 @@ export function Venues() {
       .catch((err) => setError(err instanceof Error ? err.message : "Unable to load venues."))
       .finally(() => setLoading(false));
   }, []);
-
-  async function syncPublicPages() {
-    setSyncing(true);
-    setError("");
-    setSyncMessage("");
-
-    try {
-      const result =
-        await AdminApiService.syncPublicVenueData();
-
-      setSyncMessage(
-        `${result.publicVenueData.venueCount} venue pages synced with ${result.publicVenueData.imageCount} images.`,
-      );
-    } catch (syncError) {
-      setError(
-        syncError instanceof Error
-          ? syncError.message
-          : "Unable to sync public venue pages.",
-      );
-    } finally {
-      setSyncing(false);
-    }
-  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -65,35 +40,6 @@ export function Venues() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={syncPublicPages}
-              disabled={syncing}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm text-white disabled:opacity-40"
-            >
-              <RefreshCw
-                className={`h-4 w-4 ${
-                  syncing ? "animate-spin" : ""
-                }`}
-              />
-              {syncing
-                ? "Syncing…"
-                : "Sync public pages"}
-            </button>
-            <Link
-              to="/admin/venues/migrate"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm text-white"
-            >
-              <FileUp className="h-4 w-4" />
-              Import CSV
-            </Link>
-            <Link
-              to="/admin/venues/migrate-gallery"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm text-white"
-            >
-              <Images className="h-4 w-4" />
-              Import galleries
-            </Link>
             <Link
               to="/admin/venues/new"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black"
@@ -114,12 +60,6 @@ export function Venues() {
           className="w-full rounded-2xl border border-black/10 bg-white/80 py-3 pl-11 pr-4 text-sm outline-none focus:border-black/30"
         />
       </div>
-
-      {syncMessage ? (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-          {syncMessage}
-        </div>
-      ) : null}
 
       {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{error}</div> : null}
 

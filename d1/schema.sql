@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS venues (
   seo_title TEXT NOT NULL DEFAULT '',
   seo_description TEXT NOT NULL DEFAULT '',
   document_json TEXT NOT NULL,
+  published_json TEXT NOT NULL DEFAULT '',
+  published_at TEXT,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_venues_status ON venues(status);
@@ -160,5 +162,5 @@ CREATE TABLE IF NOT EXISTS migration_log (
 );
 
 INSERT INTO schema_meta (key, value, updated_at)
-VALUES ('schema_version', '1', CURRENT_TIMESTAMP)
+VALUES ('schema_version', '2', CURRENT_TIMESTAMP)
 ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP;

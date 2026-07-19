@@ -198,6 +198,11 @@ export function VenueContentEditor() {
             value={venue.county}
             onChange={(value) => update({ county: value })}
           />
+          <Field
+            label="Country"
+            value={venue.country || ""}
+            onChange={(value) => update({ country: value })}
+          />
 
           <label>
             <span className="mb-2 block text-xs uppercase tracking-[0.16em] text-neutral-500">

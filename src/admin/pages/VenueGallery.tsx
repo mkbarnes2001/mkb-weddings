@@ -7,13 +7,17 @@ import {
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
+  AlertTriangle,
   Check,
+  CloudUpload,
   EyeOff,
   GripVertical,
   Image as ImageIcon,
   Save,
   Search,
   Star,
+  Trash2,
+  Unlink,
   X,
 } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
@@ -50,6 +54,8 @@ export function VenueGallery() {
   const [filter, setFilter] = useState<FilterMode>("all");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -612,8 +618,8 @@ export function VenueGallery() {
     }
   }
 
-  async function saveGallery() {
-    if (!venue || !slug) return;
+  async function saveGallery(): Promise<boolean> {
+    if (!venue || !slug) return false;
 
     setSaving(true);
     setError("");
@@ -638,14 +644,199 @@ export function VenueGallery() {
       setMessage(
         `Saved ${items.filter((item) => item.included).length} venue gallery images and synchronised wedding gallery membership.`,
       );
+
+      return true;
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
           : "Unable to save venue gallery.",
       );
+
+      return false;
     } finally {
       setSaving(false);
+    }
+  }
+
+
+  function removeActiveFromVenueGallery() {
+    if (!activeAsset || !activeItem || !venue) {
+      return;
+    }
+
+    const heroAssetId =
+      venue.gallery?.heroAssetId ||
+      venue.heroImageId ||
+      "";
+
+    if (
+      activeItem.assetId === heroAssetId
+    ) {
+      setError(
+        "Select another venue hero before removing this image from the venue gallery.",
+      );
+      return;
+    }
+
+    patchItem(activeItem.assetId, {
+      included: false,
+      display: {
+        ...activeItem.display,
+        venue: false,
+      },
+    });
+
+    setMessage(
+      "Removed from the venue gallery draft. Select Save gallery to apply the change.",
+    );
+  }
+
+  async function deleteActivePermanently() {
+    if (
+      !activeAsset ||
+      !activeItem ||
+      !venue ||
+      !slug
+    ) {
+      return;
+    }
+
+    if (dirty) {
+      setError(
+        "Save or discard the current gallery changes before permanently deleting an image.",
+      );
+      return;
+    }
+
+    if (!activeAsset.weddingSlug) {
+      setError(
+        "Imported CSV images cannot be permanently deleted here. Remove the image from the venue gallery instead.",
+      );
+      return;
+    }
+
+    const heroAssetId =
+      venue.gallery?.heroAssetId ||
+      venue.heroImageId ||
+      "";
+
+    if (
+      activeItem.assetId === heroAssetId
+    ) {
+      setError(
+        "Select another venue hero before permanently deleting this image.",
+      );
+      return;
+    }
+
+    if (activeAsset.isCover) {
+      setError(
+        "This image is the wedding cover. Select another wedding cover before deleting it.",
+      );
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Permanently delete "${activeAsset.filename}"?\n\n` +
+        "This removes it from the wedding, venue, collections, moments and its R2/local full and thumbnail files. This cannot be undone.",
+    );
+
+    if (!confirmed) return;
+
+    setDeleting(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const result =
+        await AdminApiService.deleteWeddingImage({
+          weddingSlug:
+            activeAsset.weddingSlug,
+          imageId: activeAsset.id,
+          venueSlug: slug,
+        });
+
+      const deletedAssetId =
+        activeItem.assetId;
+
+      const nextAssets = assets.filter(
+        (asset) =>
+          asset.assetId !== deletedAssetId,
+      );
+
+      setAssets(nextAssets);
+
+      setItems((current) =>
+        normaliseOrder(
+          current.filter(
+            (item) =>
+              item.assetId !== deletedAssetId,
+          ),
+        ),
+      );
+
+      setSelectedIds((current) => {
+        const next = new Set(current);
+        next.delete(deletedAssetId);
+        return next;
+      });
+
+      setActiveId(
+        nextAssets[0]?.assetId || null,
+      );
+
+      const warningText =
+        result.deletion.storageWarnings.length
+          ? ` Storage warning: ${result.deletion.storageWarnings.join(
+              " ",
+            )}`
+          : "";
+
+      setMessage(
+        `Permanently deleted ${result.deletion.filename}.${warningText}`,
+      );
+    } catch (deleteError) {
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Unable to delete image.",
+      );
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  async function publishVenue() {
+    if (!venue || !slug) return;
+
+    setPublishing(true);
+    setError("");
+    setMessage("");
+
+    try {
+      if (dirty) {
+        const saved = await saveGallery();
+
+        if (!saved) return;
+      }
+
+      const result =
+        await AdminApiService.publishVenue(
+          slug,
+        );
+
+      setMessage(
+        `${venue.name} published from D1 with ${result.publish.publicImageCount} images. The public venue page now reads this published version directly; no Git content commit or Cloudflare rebuild is required.`,
+      );
+    } catch (publishError) {
+      setError(
+        publishError instanceof Error
+          ? publishError.message
+          : "Unable to publish venue.",
+      );
+    } finally {
+      setPublishing(false);
     }
   }
 
@@ -704,6 +895,18 @@ export function VenueGallery() {
             >
               Manage moments
             </Link>
+          <button
+            type="button"
+            onClick={publishVenue}
+            disabled={publishing || saving}
+            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-medium text-black ring-2 ring-white/30 disabled:opacity-40"
+          >
+            <CloudUpload className="h-4 w-4" />
+            {publishing
+              ? "Publishing…"
+              : "Publish venue"}
+          </button>
+
           <button
             type="button"
             onClick={saveGallery}
@@ -1108,6 +1311,52 @@ export function VenueGallery() {
                       Imported from gallery.csv · {activeItem.source.category}
                     </p>
                   ) : null}
+                </div>
+
+                <div className="space-y-3 border-t border-black/10 pt-5">
+                  <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">
+                    Image actions
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={
+                      removeActiveFromVenueGallery
+                    }
+                    disabled={
+                      !activeItem.included ||
+                      deleting
+                    }
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/15 bg-white px-5 py-3 text-sm text-black disabled:opacity-40"
+                  >
+                    <Unlink className="h-4 w-4" />
+                    Remove from venue gallery
+                  </button>
+
+                  {activeAsset.weddingSlug ? (
+                    <button
+                      type="button"
+                      onClick={
+                        deleteActivePermanently
+                      }
+                      disabled={deleting}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-red-300 bg-red-50 px-5 py-3 text-sm text-red-800 disabled:opacity-40"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      {deleting
+                        ? "Deleting…"
+                        : "Delete image permanently"}
+                    </button>
+                  ) : (
+                    <div className="flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                      Imported CSV images can be removed from this venue gallery, but permanent storage deletion is disabled.
+                    </div>
+                  )}
+
+                  <p className="text-xs leading-relaxed text-neutral-500">
+                    Permanent deletion removes the wedding record, venue references, collections, moments and both stored image files.
+                  </p>
                 </div>
 
                 <Toggle

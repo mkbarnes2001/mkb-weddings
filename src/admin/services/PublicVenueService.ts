@@ -7,11 +7,9 @@ export type PublicVenueImage = {
   rating: number;
   moments: string[];
   tags: string[];
-  aiTags: string[];
   thumbSrc: string;
   fullSrc: string;
   alt: string;
-  caption: string;
 };
 
 export type PublicVenueDocument = {
@@ -65,8 +63,6 @@ export type PublicVenueIndexItem = {
   heroAssetId: string;
   coverThumb: string;
   coverFull: string;
-  coverAlt: string;
-  coverCaption: string;
 };
 
 export type PublicVenueIndex = {

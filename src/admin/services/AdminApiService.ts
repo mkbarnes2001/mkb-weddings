@@ -5,7 +5,9 @@ import type { ImageManagerDocument } from "../types/imageManager";
 import type { MomentRepositoryDocument } from "../types/moment";
 import type { VenueDocument, VenueSummary } from "../types/venue";
 
-const API_BASE = import.meta.env.VITE_ADMIN_API_URL || "http://127.0.0.1:8787";
+const API_BASE =
+  import.meta.env.VITE_ADMIN_API_URL ||
+  (import.meta.env.DEV ? "http://127.0.0.1:8787" : "");
 
 type ApiErrorPayload = { error?: string; details?: string[] };
 
@@ -66,19 +68,9 @@ export type VenuePublishResult = {
   publish: {
     venueSlug: string;
     venueName: string;
-    branch: string;
     noChanges: boolean;
-    commit: string;
-    pushed: boolean;
     publicImageCount: number;
-    stagedPaths: string[];
-    publicVenueData: {
-      generatedAt: string;
-      venueCount: number;
-      imageCount: number;
-      outputPath: string;
-      indexPath: string;
-    };
+    publishedAt: string;
   };
 };
 

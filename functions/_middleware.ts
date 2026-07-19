@@ -76,6 +76,20 @@ export async function onRequest(context: any) {
 
   const canonicalFromPath = (p: string) => `${origin}${p.replace(/\/+$/, "") || "/"}`;
 
+  async function getPublishedVenueFromD1(slug: string): Promise<any | null> {
+    try {
+      const db = (context.env as any)?.MKB_DB;
+      if (!db) return null;
+      const row = await db.prepare(
+        "SELECT published_json FROM venues WHERE slug = ? AND status = 'published' AND published_json <> ''",
+      ).bind(slug).first();
+      if (!row?.published_json) return null;
+      return JSON.parse(String(row.published_json));
+    } catch {
+      return null;
+    }
+  }
+
   async function getJsonCached(pathname: string, cacheTtlSeconds = 3600): Promise<any> {
     const cache = (globalThis as any).caches?.default;
     const cacheKey = new Request(`${origin}${pathname}`, { method: "GET" });
@@ -139,21 +153,24 @@ export async function onRequest(context: any) {
       slug = (venueMatch[1] || "").toLowerCase();
     }
 
-    const metaMap = await getJsonCached("/venue-meta.json", 3600);
+    const d1Venue = await getPublishedVenueFromD1(slug);
+    const metaMap = d1Venue ? null : await getJsonCached("/venue-meta.json", 3600);
     const v = metaMap?.[slug];
 
-    const venueName = (v?.venueName || titleCaseFromSlug(slug)).toString().trim();
-    const town = (v?.venueTown || "").toString().trim();
-    const region = (v?.venueRegion || "").toString().trim();
-    const country = (v?.venueCountry || "").toString().trim();
+    const venueName = (d1Venue?.name || v?.venueName || titleCaseFromSlug(slug)).toString().trim();
+    const town = (d1Venue?.town || v?.venueTown || "").toString().trim();
+    const region = (d1Venue?.county || v?.venueRegion || "").toString().trim();
+    const country = (d1Venue?.country || v?.venueCountry || "").toString().trim();
 
     const locBits = [town, region, country].filter(Boolean);
     const locText = locBits.length ? ` | ${locBits.join(", ")}` : "";
 
-    title = `${venueName} Wedding Photography${locText} | MKB Weddings`;
-    description = `Wedding photography at ${venueName}${
-      locBits.length ? ` in ${locBits.join(", ")}` : ""
-    } — natural, documentary coverage with real venue gallery images by MKB Weddings.`;
+    title = (d1Venue?.seo?.title || "").toString().trim() ||
+      `${venueName} Wedding Photography${locText} | MKB Weddings`;
+    description = (d1Venue?.seo?.description || "").toString().trim() ||
+      `Wedding photography at ${venueName}${
+        locBits.length ? ` in ${locBits.join(", ")}` : ""
+      } — natural, documentary coverage with real venue gallery images by MKB Weddings.`;
     canonical = `${origin}/gallery/venue/${encodeURIComponent(slug)}`;
   }
 
