@@ -1,8 +1,10 @@
 import {
   adminApiRequestAllowed,
   archiveAdminVenue,
+  createAdminVenue,
   errorResponse,
   getAdminVenue,
+  listAdminVenues,
   notFoundResponse,
   publishAdminVenue,
   updateAdminVenue,
@@ -21,9 +23,61 @@ function segments(context: any) {
 export const onRequest: PagesFunction<Env> = async (context) => {
   if (!adminApiRequestAllowed(context.env as any, context.request)) return notFoundResponse();
   const parts = segments(context);
+
+  /*
+   * Cloudflare Pages optional catch-all routes can receive the collection
+   * root (/api/venues) as an empty path. Handle that explicitly here so the
+   * collection endpoint works regardless of whether Pages resolves the
+   * request to index.ts or [[path]].ts.
+   */
+  if (parts.length === 0) {
+    try {
+      if (context.request.method === "GET") {
+        return Response.json({
+          ok: true,
+          venues: await listAdminVenues(
+            context.env.MKB_DB,
+          ),
+        });
+      }
+
+      if (context.request.method === "POST") {
+        const payload =
+          await context.request.json<any>();
+
+        const venue = await createAdminVenue(
+          context.env.MKB_DB,
+          payload?.venue,
+        );
+
+        return Response.json(
+          {
+            ok: true,
+            venue,
+          },
+          {
+            status: 201,
+          },
+        );
+      }
+
+      return new Response(
+        "Method not allowed",
+        {
+          status: 405,
+        },
+      );
+    } catch (error) {
+      return errorResponse(error);
+    }
+  }
+
   const slug = parts[0] || "";
   const action = parts[1] || "";
-  if (!slug || parts.length > 2) return notFoundResponse();
+
+  if (!slug || parts.length > 2) {
+    return notFoundResponse();
+  }
 
   try {
     if (context.request.method === "GET" && !action) {
