@@ -55,9 +55,25 @@ export function adminApiEnabled(env: Record<string, unknown>) {
 
 export function adminApiRequestAllowed(env: Record<string, unknown>, request: Request) {
   if (!adminApiEnabled(env)) return false;
+
   const allowedHost = text(env.ADMIN_HOSTNAME || "admin.mkbweddings.co.uk").toLowerCase();
-  const requestHost = new URL(request.url).hostname.toLowerCase();
-  return Boolean(allowedHost) && requestHost === allowedHost;
+  if (!allowedHost) return false;
+
+  // On a Pages custom domain, request.url normally contains the public hostname.
+  // Cloudflare can also preserve the original hostname in Host/X-Forwarded-Host,
+  // so accept any exact match rather than relying on one representation only.
+  const candidates = new Set(
+    [
+      new URL(request.url).hostname,
+      request.headers.get("host"),
+      request.headers.get("x-forwarded-host"),
+    ]
+      .flatMap((value) => String(value || "").split(","))
+      .map((value) => value.trim().toLowerCase().replace(/:\d+$/, ""))
+      .filter(Boolean),
+  );
+
+  return candidates.has(allowedHost);
 }
 
 export function notFoundResponse() {

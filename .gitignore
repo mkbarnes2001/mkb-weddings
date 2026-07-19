@@ -10,3 +10,4 @@ backups/
 .env
 .env.local
 .env.*.local
+d1/generated/

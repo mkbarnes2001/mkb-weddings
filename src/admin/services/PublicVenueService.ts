@@ -89,12 +89,18 @@ async function loadJson<T>(url: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-async function loadWithFallback<T>(primary: string, fallback: string): Promise<T> {
+async function loadWithFallback<T>(
+  primary: string,
+  fallback: string,
+  isUsable?: (value: T) => boolean,
+): Promise<T> {
   try {
-    return await loadJson<T>(primary);
+    const value = await loadJson<T>(primary);
+    if (!isUsable || isUsable(value)) return value;
   } catch {
-    return loadJson<T>(fallback);
+    // Fall through to the static rollback source while D1 is being migrated.
   }
+  return loadJson<T>(fallback);
 }
 
 export class PublicVenueService {
@@ -102,6 +108,7 @@ export class PublicVenueService {
     return loadWithFallback<PublicVenueIndex>(
       "/api/public/venues",
       "/venue-data/index.json",
+      (index) => Array.isArray(index?.venues) && index.venues.length > 0 && index.imageCount > 0,
     );
   }
 
@@ -110,6 +117,7 @@ export class PublicVenueService {
     return loadWithFallback<PublicVenueDocument>(
       `/api/public/venues/${encoded}`,
       `/venue-data/${encoded}.json`,
+      (venue) => Array.isArray(venue?.gallery?.images) && venue.gallery.images.length > 0,
     );
   }
 }
