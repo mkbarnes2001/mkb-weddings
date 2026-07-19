@@ -419,7 +419,34 @@ export async function archiveAdminVenue(db: D1Db, slug: string) {
 
 function publicImagesFromVenue(venue: any) {
   return (venue?.gallery?.images || [])
-    .filter((item: any) => item.included && !item.hidden && item?.display?.venue)
+    .filter((item: any) => {
+      const display =
+        item?.display && typeof item.display === "object"
+          ? item.display
+          : null;
+
+      const hasDraftVisibilityMetadata =
+        Object.prototype.hasOwnProperty.call(item || {}, "included") ||
+        Object.prototype.hasOwnProperty.call(item || {}, "hidden") ||
+        Boolean(
+          display &&
+          Object.prototype.hasOwnProperty.call(display, "venue"),
+        );
+
+      // Canonical admin draft documents carry inclusion/display flags.
+      // Legacy published snapshots were already filtered before being written
+      // and therefore intentionally omit those flags. Treat such images as
+      // public rather than filtering every one of them out.
+      if (!hasDraftVisibilityMetadata) {
+        return true;
+      }
+
+      return Boolean(
+        item.included &&
+        !item.hidden &&
+        display?.venue,
+      );
+    })
     .sort((a: any, b: any) => Number(a.order || 0) - Number(b.order || 0))
     .map((item: any) => ({
       assetId: text(item.assetId),
@@ -433,8 +460,10 @@ function publicImagesFromVenue(venue: any) {
       aiTags: list(item.aiTags),
       thumbSrc: text(item.thumbSrc),
       fullSrc: text(item.fullSrc),
-      alt: text(item.aiAlt) || `${text(venue.name)} wedding photography`,
-      caption: text(item.aiCaption),
+      alt:
+        text(item.aiAlt || item.alt) ||
+        `${text(venue.name)} wedding photography`,
+      caption: text(item.aiCaption || item.caption),
     }));
 }
 
