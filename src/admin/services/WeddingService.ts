@@ -91,6 +91,7 @@ export class WeddingService {
           String(image.source?.fullPath || "").trim();
 
         return {
+          id: String(image.id || "").trim() || undefined,
           filename,
           slug: source.slug,
           order: Number(image.order || index + 1),

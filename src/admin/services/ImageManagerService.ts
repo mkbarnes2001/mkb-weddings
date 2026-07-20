@@ -23,17 +23,48 @@ export class ImageManagerService {
       weddingSlug,
     ).catch(() => null);
 
+    const overrideImages =
+      overrides?.images || [];
+
     const overrideById = new Map(
-      (overrides?.images || []).map((image) => [
+      overrideImages.map((image) => [
         image.id || imageId(image.filename),
         image,
       ]),
     );
 
-    return baseImages
-      .map((image, index) => {
-        const id = imageId(image.filename);
-        const override = overrideById.get(id);
+    const overrideByFilename = new Map(
+      overrideImages.map((image) => [
+        imageId(image.filename),
+        image,
+      ]),
+    );
+
+    const matchedOverrideIds = new Set<string>();
+
+    const mappedBaseImages = baseImages.map(
+      (image, index) => {
+        const fallbackId = imageId(image.filename);
+        const sourceId = String(image.id || "").trim();
+        const override =
+          (sourceId ? overrideById.get(sourceId) : undefined) ||
+          overrideById.get(fallbackId) ||
+          overrideByFilename.get(fallbackId);
+
+        if (override?.id) {
+          matchedOverrideIds.add(override.id);
+        }
+
+        const id = override?.id || sourceId || fallbackId;
+        const extendedOverride = override as
+          | (typeof override & {
+              thumbSrc?: string;
+              fullSrc?: string;
+              aiTags?: string[];
+              aiAlt?: string;
+              aiCaption?: string;
+            })
+          | undefined;
 
         return {
           id,
@@ -43,17 +74,98 @@ export class ImageManagerService {
           isCover: override?.isCover ?? image.isCover ?? false,
           hidden: override?.hidden ?? false,
           rating: clampRating(override?.rating ?? 0),
-          thumbSrc: image.thumbSrc,
-          fullSrc: image.fullSrc,
-          aiTags: image.aiTags,
-          aiAlt: image.aiAlt,
-          aiCaption: image.aiCaption,
+          thumbSrc:
+            extendedOverride?.thumbSrc ||
+            image.thumbSrc,
+          fullSrc:
+            extendedOverride?.fullSrc ||
+            image.fullSrc,
+          aiTags:
+            extendedOverride?.aiTags ||
+            image.aiTags,
+          aiAlt:
+            extendedOverride?.aiAlt ??
+            image.aiAlt,
+          aiCaption:
+            extendedOverride?.aiCaption ??
+            image.aiCaption,
           collections: override?.collections?.length
             ? [...override.collections]
             : ["blog"],
         };
+      });
+
+    const overrideOnlyImages = overrideImages
+      .filter((image) => {
+        if (matchedOverrideIds.has(image.id)) {
+          return false;
+        }
+
+        const extended = image as typeof image & {
+          thumbSrc?: string;
+          fullSrc?: string;
+          aiTags?: string[];
+          aiAlt?: string;
+          aiCaption?: string;
+        };
+
+        return Boolean(
+          extended.thumbSrc ||
+          extended.fullSrc,
+        );
       })
-      .sort((a, b) => a.order - b.order);
+      .map((image, index) => {
+        const extended = image as typeof image & {
+          thumbSrc?: string;
+          fullSrc?: string;
+          aiTags?: string[];
+          aiAlt?: string;
+          aiCaption?: string;
+        };
+
+        return {
+          id:
+            image.id ||
+            imageId(image.filename),
+          filename: image.filename,
+          slug: weddingSlug,
+          order:
+            image.order ||
+            mappedBaseImages.length +
+              index +
+              1,
+          isCover: Boolean(image.isCover),
+          hidden: Boolean(image.hidden),
+          rating: clampRating(
+            image.rating || 0,
+          ),
+          thumbSrc:
+            extended.thumbSrc ||
+            extended.fullSrc ||
+            "",
+          fullSrc:
+            extended.fullSrc ||
+            extended.thumbSrc ||
+            "",
+          aiTags: Array.isArray(
+            extended.aiTags,
+          )
+            ? extended.aiTags
+            : [],
+          aiAlt: extended.aiAlt || "",
+          aiCaption:
+            extended.aiCaption || "",
+          collections:
+            image.collections?.length
+              ? [...image.collections]
+              : [],
+        };
+      });
+
+    return [
+      ...mappedBaseImages,
+      ...overrideOnlyImages,
+    ].sort((a, b) => a.order - b.order);
   }
 
   static toDocument(

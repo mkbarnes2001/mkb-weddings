@@ -434,10 +434,15 @@ export async function saveWeddingImages(db: D1Db, slug: string, document: any) {
   `).bind(slug).all();
 
   const byId = new Map<string, any>();
-  const byFilename = new Map<string, any>();
+  const byFilename = new Map<string, any[]>();
   for (const row of existing.results || []) {
     if (text(row.image_id)) byId.set(text(row.image_id), row);
-    byFilename.set(text(row.filename).toLowerCase(), row);
+    const filenameKey = text(row.filename).toLowerCase();
+    if (filenameKey) {
+      const matches = byFilename.get(filenameKey) || [];
+      matches.push(row);
+      byFilename.set(filenameKey, matches);
+    }
   }
 
   const statements: any[] = [
@@ -445,16 +450,65 @@ export async function saveWeddingImages(db: D1Db, slug: string, document: any) {
     db.prepare(`DELETE FROM story_images WHERE wedding_slug = ?`).bind(slug),
   ];
 
-  let saved = 0;
+  const resolved = new Map<
+    string,
+    {
+      match: any;
+      item: any;
+      order: number;
+      collections: string[];
+    }
+  >();
+
   for (let index = 0; index < incoming.length; index += 1) {
     const item = incoming[index];
+    const itemId = text(item?.id);
+    const filenameMatches =
+      byFilename.get(text(item?.filename).toLowerCase()) || [];
     const match =
-      byId.get(text(item?.id)) ||
-      byFilename.get(text(item?.filename).toLowerCase());
+      (itemId ? byId.get(itemId) : undefined) ||
+      (filenameMatches.length === 1 ? filenameMatches[0] : undefined);
     if (!match) continue;
 
     const collections = unique(list(item?.collections));
     const order = Number(item?.order || index + 1);
+
+    const assetKey = text(match.asset_key);
+    if (!assetKey) continue;
+
+    const previous = resolved.get(assetKey);
+    if (previous) {
+      resolved.set(assetKey, {
+        match,
+        item: {
+          ...previous.item,
+          ...item,
+          isCover: Boolean(previous.item?.isCover || item?.isCover),
+          hidden: Boolean(previous.item?.hidden || item?.hidden),
+          rating: Math.max(
+            Number(previous.item?.rating || 0),
+            Number(item?.rating || 0),
+          ),
+        },
+        order: Math.min(previous.order, order),
+        collections: unique([
+          ...previous.collections,
+          ...collections,
+        ]),
+      });
+      continue;
+    }
+
+    resolved.set(assetKey, {
+      match,
+      item,
+      order,
+      collections,
+    });
+  }
+
+  let saved = 0;
+  for (const { match, item, order, collections } of resolved.values()) {
 
     statements.push(
       db.prepare(`

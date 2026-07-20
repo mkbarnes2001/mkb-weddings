@@ -4,6 +4,7 @@ export type WeddingPublicationStatus = "draft" | "published" | "archived";
 export type WeddingStorage = "d1" | "legacy" | "json";
 
 export type WeddingImage = {
+  id?: string;
   filename: string;
   slug: string;
   order: number;
