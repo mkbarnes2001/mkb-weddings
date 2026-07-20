@@ -205,8 +205,7 @@ export function WeddingSupplierEditor() {
               {wedding.couple}
             </h1>
             <p className="text-white/65">
-              Smart autocomplete uses suppliers already stored in your
-              supplier CSV.
+              Smart autocomplete uses suppliers already stored across D1 wedding records.
             </p>
           </div>
 
@@ -223,7 +222,7 @@ export function WeddingSupplierEditor() {
               ) : (
                 <AlertCircle className="w-4 h-4" />
               )}
-              {apiOnline ? "Local API connected" : "Local API offline"}
+              {apiOnline ? "Admin API connected" : "Admin API unavailable"}
             </div>
           </div>
         </div>
@@ -382,9 +381,9 @@ export function WeddingSupplierEditor() {
       <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
           <div>
-            <h2 className="text-3xl font-serif">CSV fallback</h2>
+            <h2 className="text-3xl font-serif">Portable supplier export</h2>
             <p className="text-sm text-neutral-500 mt-1">
-              Use this only if the local API is not running.
+              Optional export for backup or external use. D1 remains the live source of truth.
             </p>
           </div>
 
@@ -394,7 +393,7 @@ export function WeddingSupplierEditor() {
             className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm hover:bg-neutral-50"
           >
             <Copy className="w-4 h-4" />
-            {copied ? "Copied" : "Copy CSV"}
+            {copied ? "Copied" : "Copy export"}
           </button>
         </div>
 

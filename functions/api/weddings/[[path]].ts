@@ -1,25 +1,181 @@
-import { adminApiRequestAllowed, errorResponse, notFoundResponse } from "../../../serverless/venue-d1";
-import { getAdminWedding, getWeddingImages, saveWeddingImages } from "../../../serverless/wedding-d1";
+import {
+  adminApiRequestAllowed,
+  errorResponse,
+  notFoundResponse,
+} from "../../../serverless/venue-d1";
+import {
+  archiveAdminWedding,
+  createAdminWedding,
+  getAdminWedding,
+  getWeddingImages,
+  getWeddingPublishPreview,
+  getWeddingStory,
+  getWeddingSuppliers,
+  listAdminWeddings,
+  publishAdminWedding,
+  saveWeddingImages,
+  saveWeddingStory,
+  saveWeddingSuppliers,
+  updateAdminWedding,
+} from "../../../serverless/wedding-d1";
 
-type Env = { MKB_DB: D1Database; ADMIN_API_ENABLED?: string };
-function segments(context: any) { const v = context.params?.path; return Array.isArray(v) ? v.map(String) : v ? [String(v)] : []; }
+type Env = {
+  MKB_DB: D1Database;
+  ADMIN_API_ENABLED?: string;
+  ADMIN_HOSTNAME?: string;
+};
+
+function segments(context: any) {
+  const value = context.params?.path;
+  return Array.isArray(value)
+    ? value.map(String)
+    : value
+      ? [String(value)]
+      : [];
+}
 
 export const onRequest: PagesFunction<Env> = async (context) => {
-  if (!adminApiRequestAllowed(context.env as any, context.request)) return notFoundResponse();
-  const parts = segments(context); const slug = parts[0] || ""; const action = parts[1] || "";
+  if (!adminApiRequestAllowed(context.env as any, context.request)) {
+    return notFoundResponse();
+  }
+
+  const parts = segments(context);
+
+  // Optional catch-all compatibility: /api/weddings can resolve here.
+  if (parts.length === 0) {
+    try {
+      if (context.request.method === "GET") {
+        return Response.json({
+          ok: true,
+          weddings: await listAdminWeddings(context.env.MKB_DB),
+        });
+      }
+
+      if (context.request.method === "POST") {
+        const payload = await context.request.json<any>();
+        const wedding = await createAdminWedding(
+          context.env.MKB_DB,
+          payload?.wedding,
+        );
+        return Response.json(
+          {
+            ok: true,
+            slug: wedding.slug,
+            weddingPath: `d1://weddings/${wedding.slug}`,
+            createdFiles: [],
+            wedding,
+          },
+          { status: 201 },
+        );
+      }
+
+      return new Response("Method not allowed", { status: 405 });
+    } catch (error) {
+      return errorResponse(error);
+    }
+  }
+
+  const slug = parts[0] || "";
+  const action = parts[1] || "";
   if (!slug || parts.length > 2) return notFoundResponse();
+
   try {
-    if (context.request.method === "GET" && !action) {
+    if (!action && context.request.method === "GET") {
       const wedding = await getAdminWedding(context.env.MKB_DB, slug);
-      return wedding ? Response.json({ ok: true, wedding }) : Response.json({ error: "Wedding not found." }, { status: 404 });
+      return wedding
+        ? Response.json({ ok: true, wedding })
+        : Response.json({ error: "Wedding not found." }, { status: 404 });
     }
-    if (action === "images" && context.request.method === "GET") {
-      return Response.json({ ok: true, slug, document: await getWeddingImages(context.env.MKB_DB, slug) });
-    }
-    if (action === "images" && (context.request.method === "POST" || context.request.method === "PUT")) {
+
+    if (!action && context.request.method === "PUT") {
       const payload = await context.request.json<any>();
-      return Response.json(await saveWeddingImages(context.env.MKB_DB, slug, payload?.document));
+      const wedding = await updateAdminWedding(
+        context.env.MKB_DB,
+        slug,
+        payload?.wedding,
+      );
+      return Response.json({ ok: true, wedding, backupPath: null });
     }
+
+    if (!action && context.request.method === "DELETE") {
+      const wedding = await archiveAdminWedding(context.env.MKB_DB, slug);
+      return Response.json({ ok: true, wedding, backupPath: null });
+    }
+
+    if (action === "images" && context.request.method === "GET") {
+      return Response.json({
+        ok: true,
+        slug,
+        document: await getWeddingImages(context.env.MKB_DB, slug),
+      });
+    }
+
+    if (
+      action === "images" &&
+      (context.request.method === "POST" || context.request.method === "PUT")
+    ) {
+      const payload = await context.request.json<any>();
+      return Response.json(
+        await saveWeddingImages(context.env.MKB_DB, slug, payload?.document),
+      );
+    }
+
+    if (action === "suppliers" && context.request.method === "GET") {
+      return Response.json({
+        ok: true,
+        rows: await getWeddingSuppliers(context.env.MKB_DB, slug),
+      });
+    }
+
+    if (
+      action === "suppliers" &&
+      (context.request.method === "POST" || context.request.method === "PUT")
+    ) {
+      const payload = await context.request.json<any>();
+      return Response.json(
+        await saveWeddingSuppliers(context.env.MKB_DB, slug, payload?.rows),
+      );
+    }
+
+    if (action === "story" && context.request.method === "GET") {
+      return Response.json({
+        ok: true,
+        slug,
+        story: await getWeddingStory(context.env.MKB_DB, slug),
+      });
+    }
+
+    if (
+      action === "story" &&
+      (context.request.method === "POST" || context.request.method === "PUT")
+    ) {
+      const payload = await context.request.json<any>();
+      return Response.json(
+        await saveWeddingStory(context.env.MKB_DB, slug, payload?.story),
+      );
+    }
+
+    if (action === "publish" && context.request.method === "GET") {
+      return Response.json({
+        ok: true,
+        preview: await getWeddingPublishPreview(context.env.MKB_DB, slug),
+      });
+    }
+
+    if (action === "publish" && context.request.method === "POST") {
+      const payload = await context.request.json<any>();
+      return Response.json({
+        ok: true,
+        publish: await publishAdminWedding(
+          context.env.MKB_DB,
+          slug,
+          payload?.storyEnabled === true,
+        ),
+      });
+    }
+
     return new Response("Method not allowed", { status: 405 });
-  } catch (error) { return errorResponse(error); }
+  } catch (error) {
+    return errorResponse(error);
+  }
 };

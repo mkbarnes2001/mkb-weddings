@@ -319,8 +319,7 @@ export function WeddingStoryEditor() {
               {wedding.couple}
             </h1>
             <p className="text-white/65">
-              Story edits are saved into the wedding repository.
-              Legacy override files are retained temporarily for compatibility.
+              Story edits are saved directly into the D1 wedding draft. They do not affect the live site until you publish.
             </p>
           </div>
 
@@ -337,7 +336,7 @@ export function WeddingStoryEditor() {
               ) : (
                 <AlertCircle className="w-4 h-4" />
               )}
-              {apiOnline ? "Local API connected" : "Local API offline"}
+              {apiOnline ? "Admin API connected" : "Admin API unavailable"}
             </div>
           </div>
         </div>

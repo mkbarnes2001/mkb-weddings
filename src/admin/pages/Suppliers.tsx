@@ -1,14 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, Users } from "lucide-react";
-import { weddingStories } from "../../data/weddingStories";
 import { SupplierService, type SupplierRecord } from "../services/SupplierService";
+import { WeddingService } from "../services/WeddingService";
 
 export function Suppliers() {
   const [suppliers, setSuppliers] = useState<SupplierRecord[]>([]);
   const [query, setQuery] = useState("");
+  const [weddingTitleBySlug, setWeddingTitleBySlug] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     SupplierService.load().then((service) => setSuppliers(service.getAllSuppliers()));
+    WeddingService.load().then((service) => {
+      setWeddingTitleBySlug(
+        new Map(service.getWeddings().map((wedding) => [wedding.slug, wedding.title])),
+      );
+    });
   }, []);
 
   const filteredSuppliers = useMemo(() => {
@@ -21,8 +27,6 @@ export function Suppliers() {
       ),
     );
   }, [suppliers, query]);
-
-  const weddingTitleBySlug = useMemo(() => new Map(weddingStories.map((story) => [story.slug, story.title])), []);
 
   return (
     <div className="space-y-7">
@@ -63,7 +67,7 @@ export function Suppliers() {
 
         <div className="rounded-[28px] border border-black/10 bg-white/75 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
           <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-3">Source</p>
-          <p className="text-lg font-serif">blog-suppliers.csv</p>
+          <p className="text-lg font-serif">Cloudflare D1</p>
         </div>
       </section>
 
@@ -74,11 +78,8 @@ export function Suppliers() {
             <div>
               <h2 className="text-2xl font-serif mb-2">No supplier rows found yet</h2>
               <p className="text-sm leading-relaxed">
-                Add supplier rows to <span className="font-mono">public/blog-suppliers.csv</span>.
+                Add suppliers from a wedding&apos;s supplier editor. New records are stored directly in D1.
               </p>
-              <pre className="mt-4 rounded-2xl bg-white/70 p-4 text-xs overflow-auto">
-blogSlug,role,name,website,instagram,sortOrder
-              </pre>
             </div>
           </div>
         </section>

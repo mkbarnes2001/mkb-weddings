@@ -83,8 +83,7 @@ export function Weddings() {
             Wedding Repository
           </h1>
           <p className="mt-3 max-w-2xl text-neutral-500">
-            JSON weddings and legacy stories merged into one
-            repository. JSON records override matching legacy records.
+            Weddings, stories and publication state are managed directly in the D1 repository.
           </p>
         </div>
 

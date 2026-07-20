@@ -90,6 +90,20 @@ export async function onRequest(context: any) {
     }
   }
 
+  async function getPublishedWeddingFromD1(slug: string): Promise<any | null> {
+    try {
+      const db = (context.env as any)?.MKB_DB;
+      if (!db) return null;
+      const row = await db.prepare(
+        "SELECT published_json FROM weddings WHERE slug = ? AND story_enabled = 1 AND story_status = 'published' AND published_json <> ''",
+      ).bind(slug).first();
+      if (!row?.published_json) return null;
+      return JSON.parse(String(row.published_json));
+    } catch {
+      return null;
+    }
+  }
+
   async function getJsonCached(pathname: string, cacheTtlSeconds = 3600): Promise<any> {
     const cache = (globalThis as any).caches?.default;
     const cacheKey = new Request(`${origin}${pathname}`, { method: "GET" });
@@ -221,10 +235,13 @@ export async function onRequest(context: any) {
     slug = (blogMatch[1] || "").toLowerCase();
   }
 
+  const wedding = await getPublishedWeddingFromD1(slug);
   const readableTitle = titleCaseFromSlug(slug);
 
-  title = `${readableTitle} Wedding Story | MKB Weddings`;
-  description = `Real wedding photography story for ${readableTitle} by MKB Weddings — natural, candid and documentary wedding photography across Northern Ireland and Ireland.`;
+  title = (wedding?.seo?.title || "").toString().trim() ||
+    (wedding?.title ? `${wedding.title} | MKB Weddings` : `${readableTitle} Wedding Story | MKB Weddings`);
+  description = (wedding?.seo?.description || wedding?.excerpt || "").toString().trim() ||
+    `Real wedding photography story for ${readableTitle} by MKB Weddings — natural, candid and documentary wedding photography across Northern Ireland and Ireland.`;
   canonical = `${origin}/blog/${encodeURIComponent(slug)}`;
   ogType = "article";
   }

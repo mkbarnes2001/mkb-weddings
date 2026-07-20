@@ -1,5 +1,5 @@
 -- Photography Intelligence / MKB Weddings
--- D1 schema v1
+-- D1 schema v3
 -- Canonical content store. CSV files are migration inputs only and are not part of the runtime model.
 
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -56,6 +56,8 @@ CREATE TABLE IF NOT EXISTS weddings (
   seo_title TEXT NOT NULL DEFAULT '',
   seo_description TEXT NOT NULL DEFAULT '',
   document_json TEXT NOT NULL,
+  published_json TEXT NOT NULL DEFAULT '',
+  published_at TEXT,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_weddings_venue_slug ON weddings(venue_slug);
@@ -120,6 +122,15 @@ CREATE TABLE IF NOT EXISTS story_images (
 );
 CREATE INDEX IF NOT EXISTS idx_story_images_order ON story_images(wedding_slug, sort_order);
 
+CREATE TABLE IF NOT EXISTS published_story_images (
+  wedding_slug TEXT NOT NULL,
+  asset_key TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_cover INTEGER NOT NULL DEFAULT 0 CHECK (is_cover IN (0, 1)),
+  PRIMARY KEY (wedding_slug, asset_key)
+);
+CREATE INDEX IF NOT EXISTS idx_published_story_images_order ON published_story_images(wedding_slug, sort_order);
+
 CREATE TABLE IF NOT EXISTS wedding_suppliers (
   wedding_slug TEXT NOT NULL,
   sort_order INTEGER NOT NULL DEFAULT 0,
@@ -162,5 +173,5 @@ CREATE TABLE IF NOT EXISTS migration_log (
 );
 
 INSERT INTO schema_meta (key, value, updated_at)
-VALUES ('schema_version', '2', CURRENT_TIMESTAMP)
+VALUES ('schema_version', '3', CURRENT_TIMESTAMP)
 ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP;

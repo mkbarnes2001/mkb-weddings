@@ -1,4 +1,4 @@
-import { weddingStories } from "../../data/weddingStories";
+import { AdminApiService } from "./AdminApiService";
 
 export type StoryFact = {
   label: string;
@@ -19,81 +19,66 @@ export type StoryRecord = {
   updatedAt?: string;
 };
 
-type StoryOverride = {
-  slug?: string;
-  title?: string;
-  excerpt?: string;
-  intro?: string;
-  paragraphs?: string[];
-  facts?: StoryFact[];
-  updatedAt?: string;
-};
-
-type StoryOverrideDocument = {
-  stories?: Record<string, StoryOverride>;
-};
-
 function factsToList(
-  facts: Record<string, string | undefined> | undefined,
+  facts:
+    | {
+        season?: string;
+        ceremonyType?: string;
+        ceremonyLocation?: string;
+        receptionLocation?: string;
+        celebrant?: string;
+        photographer?: string;
+      }
+    | undefined,
 ): StoryFact[] {
-  if (!facts) return [];
-
-  const labels: Record<string, string> = {
-    season: "Season",
-    ceremonyType: "Ceremony",
-    ceremonyLocation: "Ceremony Location",
-    receptionLocation: "Reception",
-    celebrant: "Celebrant",
-    photographer: "Photography",
-  };
-
-  return Object.entries(facts)
-    .filter(([, value]) => Boolean(value))
-    .map(([key, value]) => ({
-      label: labels[key] || key,
-      value: value || "",
-    }));
-}
-
-async function loadOverrides(): Promise<Record<string, StoryOverride>> {
-  try {
-    const response = await fetch("/wedding-stories-admin.json", {
-      cache: "no-store",
-    });
-
-    if (!response.ok) return {};
-
-    const document = (await response.json()) as StoryOverrideDocument;
-    return document.stories || {};
-  } catch {
-    return {};
-  }
+  const rows: StoryFact[] = [
+    { label: "Season", value: facts?.season || "" },
+    { label: "Ceremony", value: facts?.ceremonyType || "" },
+    { label: "Ceremony Location", value: facts?.ceremonyLocation || "" },
+    { label: "Reception Location", value: facts?.receptionLocation || "" },
+    { label: "Celebrant", value: facts?.celebrant || "" },
+    { label: "Photography", value: facts?.photographer || "" },
+  ];
+  return rows.filter((row) => row.value.trim());
 }
 
 export class StoryService {
   async getStories(): Promise<StoryRecord[]> {
-    const overrides = await loadOverrides();
-
-    return weddingStories.map((story) => {
-      const override = overrides[story.slug];
-
-      return {
-        slug: story.slug,
-        title: override?.title || story.title,
-        couple: story.couple,
-        venue: story.venue,
-        weddingDate: story.weddingDate,
-        excerpt: override?.excerpt ?? story.excerpt,
-        intro: override?.intro ?? story.intro,
-        paragraphs: override?.paragraphs ?? story.story ?? [],
-        facts: override?.facts ?? factsToList(story.facts),
-        supplierCountFromStory: story.suppliers?.length || 0,
-        updatedAt: override?.updatedAt,
-      };
-    });
+    const weddings = await AdminApiService.listJsonWeddings();
+    return weddings.map((wedding) => ({
+      slug: wedding.slug,
+      title: wedding.title,
+      couple: wedding.couple,
+      venue: wedding.venue,
+      weddingDate: wedding.weddingDate,
+      excerpt: wedding.excerpt,
+      intro: wedding.intro,
+      paragraphs: Array.isArray(wedding.story) ? wedding.story : [],
+      facts: factsToList(wedding.facts),
+      supplierCountFromStory: Array.isArray(wedding.suppliers)
+        ? wedding.suppliers.length
+        : 0,
+      updatedAt: wedding.updatedAt,
+    }));
   }
 
   async getStory(slug: string): Promise<StoryRecord | undefined> {
-    return (await this.getStories()).find((story) => story.slug === slug);
+    const wedding = await AdminApiService.getJsonWedding(slug).catch(() => null);
+    if (!wedding) return undefined;
+    return {
+      slug: wedding.slug,
+      title: wedding.title,
+      couple: wedding.couple,
+      venue: wedding.venue,
+      weddingDate: wedding.weddingDate,
+      excerpt: wedding.excerpt,
+      intro: wedding.intro,
+      paragraphs: Array.isArray(wedding.story) ? wedding.story : [],
+      facts: factsToList(wedding.facts),
+      supplierCountFromStory: Array.isArray(wedding.suppliers)
+        ? wedding.suppliers.length
+        : 0,
+      updatedAt: wedding.updatedAt,
+    };
   }
 }

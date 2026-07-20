@@ -1,5 +1,5 @@
-import { parseCsv } from "../utils/csv";
 import { normalise } from "../utils/format";
+import { AdminApiService } from "./AdminApiService";
 
 export type SupplierRecord = {
   blogSlug?: string;
@@ -10,12 +10,6 @@ export type SupplierRecord = {
   sortOrder?: string;
 };
 
-async function fetchText(path: string) {
-  const res = await fetch(path, { cache: "no-store" });
-  if (!res.ok) return "";
-  return res.text();
-}
-
 export class SupplierService {
   private rows: SupplierRecord[];
 
@@ -24,8 +18,8 @@ export class SupplierService {
   }
 
   static async load() {
-    const text = await fetchText("/blog-suppliers.csv");
-    return new SupplierService(parseCsv<SupplierRecord>(text));
+    const rows = await AdminApiService.listSuppliers();
+    return new SupplierService(rows);
   }
 
   getAllSuppliers() {

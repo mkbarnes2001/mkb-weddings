@@ -75,7 +75,7 @@ export function WeddingStoryPage() {
     }
 
     if (
-      story.source === "json" &&
+      story.source !== "legacy" &&
       story.images.length > 0
     ) {
       setImages(
@@ -103,8 +103,8 @@ export function WeddingStoryPage() {
     let cancelled = false;
 
     /*
-     * Existing weddingStories.ts/blog-gallery.csv stories remain readable
-     * until they are deliberately migrated into the JSON repository.
+     * Static legacy data is retained only as a rollback fallback while the
+     * D1 cutover is verified.
      */
     loadMkbIntelligence()
       .then((intelligence) => {

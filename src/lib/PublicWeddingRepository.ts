@@ -1,4 +1,4 @@
-import { weddingStories } from "../../data/weddingStories";
+import { weddingStories } from "../data/weddingStories";
 import type {
   PublicWeddingDocument,
   PublicWeddingImage,

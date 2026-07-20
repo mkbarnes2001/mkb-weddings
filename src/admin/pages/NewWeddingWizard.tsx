@@ -8,7 +8,6 @@ import {
   FilePlus2,
   Save,
 } from "lucide-react";
-import { weddingStories } from "../../data/weddingStories";
 import { AdminApiService } from "../services/AdminApiService";
 import type { VenueSummary } from "../types/venue";
 import {
@@ -43,6 +42,7 @@ export function NewWeddingWizard() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [createdSlug, setCreatedSlug] = useState("");
+  const [existingSlugs, setExistingSlugs] = useState<string[]>([]);
 
   const [draft, setDraft] = useState<NewWeddingDraft>({
     couple: "",
@@ -77,15 +77,16 @@ export function NewWeddingWizard() {
         .catch(() => setOriginVenue(null));
     }
 
-    AdminApiService.health()
-      .then(() => setApiOnline(true))
+    Promise.all([
+      AdminApiService.health(),
+      AdminApiService.listJsonWeddings(),
+    ])
+      .then(([, weddings]) => {
+        setApiOnline(true);
+        setExistingSlugs(weddings.map((wedding) => wedding.slug));
+      })
       .catch(() => setApiOnline(false));
   }, [originVenueSlug]);
-
-  const existingSlugs = useMemo(
-    () => weddingStories.map((story) => story.slug),
-    [],
-  );
 
   const validationErrors = useMemo(
     () => validateNewWeddingDraft(draft, existingSlugs),
@@ -187,7 +188,7 @@ export function NewWeddingWizard() {
             The wedding record is ready.
           </h1>
           <p className="max-w-2xl text-white/65">
-            A new JSON wedding document and starter folders have been created.
+            A new wedding record has been created directly in D1.
           </p>
         </section>
 
@@ -196,7 +197,7 @@ export function NewWeddingWizard() {
             Created
           </p>
           <code className="text-sm">
-            public/weddings/{createdSlug}/wedding.json
+            d1://weddings/{createdSlug}
           </code>
 
           <div className="mt-6 flex flex-wrap gap-3">
@@ -259,8 +260,7 @@ export function NewWeddingWizard() {
               Create a wedding record.
             </h1>
             <p className="max-w-2xl text-white/65">
-              The wizard creates the core JSON record and starter asset files.
-              Image imports and AI processing will plug into this workflow next.
+              The wizard creates the core wedding record directly in D1. Image import and AI processing plug into the same repository workflow.
             </p>
           </div>
 
@@ -271,7 +271,7 @@ export function NewWeddingWizard() {
                 : "border-amber-300/30 bg-amber-300/10 text-amber-100"
             }`}
           >
-            {apiOnline ? "Local API connected" : "Local API offline"}
+            {apiOnline ? "Admin API connected" : "Admin API unavailable"}
           </div>
         </div>
       </section>

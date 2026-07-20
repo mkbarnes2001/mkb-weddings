@@ -1,10 +1,7 @@
 export type WeddingStatus = "ready" | "warning" | "missing";
-export type WeddingPublicationStatus =
-  | "draft"
-  | "published"
-  | "archived";
+export type WeddingPublicationStatus = "draft" | "published" | "archived";
 
-export type WeddingStorage = "legacy" | "json";
+export type WeddingStorage = "d1" | "legacy" | "json";
 
 export type WeddingImage = {
   filename: string;

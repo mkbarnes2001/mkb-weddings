@@ -68,7 +68,7 @@ export function WeddingDetail() {
     wedding.images.find((image) => image.isCover) ||
     wedding.images[0];
 
-  const isJsonWedding = wedding.storage === "json";
+  const isManagedWedding = wedding.storage === "d1";
 
   return (
     <div className="space-y-7">
@@ -115,7 +115,7 @@ export function WeddingDetail() {
             ) : null}
 
             <div className="mt-8 flex flex-wrap gap-3">
-              {isJsonWedding ? (
+              {isManagedWedding ? (
                 <Link
                   to={`/admin/weddings/${wedding.slug}/content`}
                   className="rounded-full bg-white px-5 py-3 text-sm text-black hover:bg-white/90"
@@ -127,7 +127,7 @@ export function WeddingDetail() {
               <Link
                 to={`/admin/weddings/${wedding.slug}/images`}
                 className={`rounded-full px-5 py-3 text-sm ${
-                  isJsonWedding
+                  isManagedWedding
                     ? "border border-white/20 text-white/80 hover:bg-white/10"
                     : "bg-white text-black hover:bg-white/90"
                 }`}
@@ -152,10 +152,9 @@ export function WeddingDetail() {
               </a>
             </div>
 
-            {!isJsonWedding ? (
+            {!isManagedWedding ? (
               <p className="mt-5 max-w-xl text-sm leading-relaxed text-amber-200/80">
-                This is still a legacy wedding. Create or migrate its
-                wedding.json record before using the master content editor.
+                This wedding is managed directly in D1.
               </p>
             ) : null}
           </div>
@@ -205,8 +204,8 @@ export function WeddingDetail() {
           icon={FilePenLine}
           title="Content"
           description="Edit the master wedding record, story, facts, status and SEO."
-          disabled={!isJsonWedding}
-          badge={isJsonWedding ? "JSON master" : "Migration required"}
+          disabled={!isManagedWedding}
+          badge="D1 master"
         />
 
         <ManagementCard
@@ -233,9 +232,9 @@ export function WeddingDetail() {
         <ManagementCard
           to={`/admin/weddings/${wedding.slug}/story`}
           icon={BookOpen}
-          title="Legacy story"
-          description="Review the older story editor while content is migrated."
-          badge="Temporary"
+          title="Wedding story"
+          description="Review and edit the wedding story stored in D1."
+          badge="D1"
         />
 
         <ManagementCard
@@ -291,9 +290,9 @@ export function WeddingDetail() {
               Migration status
             </h2>
             <p className="mt-3 max-w-3xl leading-relaxed text-neutral-600">
-              {isJsonWedding
-                ? "This wedding is backed by wedding.json and can now be managed through the new master content editor."
-                : "This wedding is still loaded from weddingStories.ts. It remains available in admin, but it needs a JSON master record before CSV and TypeScript dependencies can be removed."}
+              {isManagedWedding
+                ? "This wedding is stored in D1 and managed through the production Intelligence admin."
+                : "This wedding is stored in D1."}
             </p>
           </div>
         </div>

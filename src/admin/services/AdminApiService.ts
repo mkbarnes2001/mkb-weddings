@@ -35,7 +35,7 @@ export type StorySaveResult = {
   weddingBackupPath?: string | null;
 };
 export type WeddingCreateResult = { ok: true; slug: string; weddingPath: string; createdFiles: string[] };
-export type StoredWeddingDocument = WeddingDocument & { storage: "json"; weddingPath: string };
+export type StoredWeddingDocument = WeddingDocument & { storage: "d1"; weddingPath: string };
 export type WeddingImagesSaveResult = { ok: true; slug: string; savedImages: number; backupPath: string | null };
 export type MomentSaveResult = { ok: true; document: MomentRepositoryDocument; backupPath: string | null };
 export type WeddingUpdateResult = { ok: true; wedding: StoredWeddingDocument; backupPath: string | null };
@@ -434,6 +434,12 @@ export class AdminApiService {
       method: "POST",
       body: JSON.stringify({ document }),
     });
+  }
+
+
+  static async listSuppliers() {
+    const result = await request<{ ok: true; rows: SupplierRecord[] }>("/api/suppliers");
+    return result.rows;
   }
 
   static async getWeddingSuppliers(blogSlug: string) {
