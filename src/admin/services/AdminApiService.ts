@@ -4,6 +4,7 @@ import type { WeddingDocument } from "../../lib/weddingEngine";
 import type { ImageManagerDocument } from "../types/imageManager";
 import type { MomentRepositoryDocument } from "../types/moment";
 import type { VenueDocument, VenueSummary } from "../types/venue";
+import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
   import.meta.env.VITE_ADMIN_API_URL ||
@@ -53,7 +54,7 @@ export type ImageDeleteResult = {
     removedFromVenues: number;
     backups: string[];
     storageWarnings: string[];
-    publicVenueData: {
+    publicVenueData?: {
       generatedAt: string;
       venueCount: number;
       imageCount: number;
@@ -354,48 +355,107 @@ export class AdminApiService {
     venueSlug,
     weddingSlug,
     file,
+    onProgress,
   }: {
     venueSlug: string;
     weddingSlug: string;
     file: File;
+    onProgress?: (progress: number) => void;
   }) {
     const params = new URLSearchParams({
       venueSlug,
       weddingSlug,
-      filename: file.name,
-      mimeType: file.type,
     });
 
+    // Preserve the existing local development pipeline. Production admin uses
+    // the protected same-origin Pages Function and direct R2 binding below.
+    if (import.meta.env.DEV) {
+      const legacyParams = new URLSearchParams({
+        venueSlug,
+        weddingSlug,
+        filename: file.name,
+        mimeType: file.type,
+      });
+
+      onProgress?.(20);
+      const response = await fetch(
+        `${API_BASE}/api/uploads/image?${legacyParams.toString()}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": file.type || "application/octet-stream",
+          },
+          body: file,
+        },
+      );
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const errorPayload = payload as ApiErrorPayload;
+        throw new Error(
+          errorPayload.error || `Upload failed (${response.status}).`,
+        );
+      }
+      onProgress?.(100);
+      return payload as {
+        ok: true;
+        imageId: string;
+        filename: string;
+        weddingSlug: string;
+        venueSlug: string;
+      };
+    }
+
+    const prepared = await prepareImageUpload(file, onProgress);
+    const form = new FormData();
+    form.append(
+      "full",
+      prepared.full,
+      `${file.name.replace(/\.[^.]+$/, "") || "image"}-full.webp`,
+    );
+    form.append(
+      "thumb",
+      prepared.thumb,
+      `${file.name.replace(/\.[^.]+$/, "") || "image"}-thumb.webp`,
+    );
+    form.append("originalFilename", file.name);
+    form.append("originalMimeType", file.type || "application/octet-stream");
+    form.append("width", String(prepared.width));
+    form.append("height", String(prepared.height));
+
+    onProgress?.(70);
     const response = await fetch(
       `${API_BASE}/api/uploads/image?${params.toString()}`,
       {
         method: "POST",
-        headers: {
-          "Content-Type":
-            file.type || "application/octet-stream",
-        },
-        body: file,
+        body: form,
       },
     );
 
     const payload = await response.json().catch(() => ({}));
-
     if (!response.ok) {
       const errorPayload = payload as ApiErrorPayload;
+      const detailText = errorPayload.details?.length
+        ? ` ${errorPayload.details.join(" ")}`
+        : "";
       throw new Error(
-        errorPayload.error ||
-          `Upload failed (${response.status}).`,
+        `${errorPayload.error || `Upload failed (${response.status}).`}${detailText}`,
       );
     }
 
+    onProgress?.(100);
     return payload as {
       ok: true;
       imageId: string;
       filename: string;
       weddingSlug: string;
       venueSlug: string;
+      storage: "r2";
+      fullSrc: string;
+      thumbSrc: string;
     };
   }
+
 
   static async health() {
     return request<{ ok: boolean; service: string }>("/api/health");

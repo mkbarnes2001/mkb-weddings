@@ -18,9 +18,11 @@ import {
   saveWeddingSuppliers,
   updateAdminWedding,
 } from "../../../serverless/wedding-d1";
+import { deleteManagedImage } from "../../../serverless/image-d1";
 
 type Env = {
   MKB_DB: D1Database;
+  MKB_IMAGES: R2Bucket;
   ADMIN_API_ENABLED?: string;
   ADMIN_HOSTNAME?: string;
 };
@@ -77,9 +79,28 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   const slug = parts[0] || "";
   const action = parts[1] || "";
-  if (!slug || parts.length > 2) return notFoundResponse();
 
   try {
+    if (
+      parts.length === 3 &&
+      action === "images" &&
+      context.request.method === "DELETE"
+    ) {
+      const imageId = parts[2] || "";
+      const url = new URL(context.request.url);
+      const venueSlug = url.searchParams.get("venueSlug") || "";
+
+      return Response.json({
+        ok: true,
+        deletion: await deleteManagedImage(
+          context.env.MKB_DB,
+          context.env.MKB_IMAGES,
+          { weddingSlug: slug, imageId, venueSlug },
+        ),
+      });
+    }
+
+    if (!slug || parts.length > 2) return notFoundResponse();
     if (!action && context.request.method === "GET") {
       const wedding = await getAdminWedding(context.env.MKB_DB, slug);
       return wedding

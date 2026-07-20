@@ -177,6 +177,15 @@ export function VenueUpload() {
           venueSlug: slug,
           weddingSlug: weddingSlug.trim(),
           file: item.file,
+          onProgress: (progress) => {
+            setFiles((current) =>
+              current.map((file) =>
+                file.id === item.id
+                  ? { ...file, progress }
+                  : file,
+              ),
+            );
+          },
         });
 
         successCount += 1;
@@ -250,7 +259,8 @@ export function VenueUpload() {
         </h1>
         <p className="mt-4 max-w-2xl text-white/60">
           Upload finished JPEG, PNG or WebP files after culling and editing in
-          Lightroom. RAW files are intentionally not supported.
+          Lightroom. Images are prepared in your browser, stored directly in
+          Cloudflare R2 and registered in D1. RAW files are intentionally not supported.
         </p>
       </section>
 
@@ -303,7 +313,7 @@ export function VenueUpload() {
               </select>
             ) : (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                No JSON weddings are linked to this venue yet.
+                No weddings are linked to this venue yet.
               </div>
             )}
 
@@ -400,7 +410,18 @@ export function VenueUpload() {
                   <p className="mt-1 text-xs text-neutral-500">
                     {(item.file.size / 1024 / 1024).toFixed(1)} MB ·{" "}
                     {item.status}
+                    {item.status === "uploading"
+                      ? ` · ${item.progress}%`
+                      : ""}
                   </p>
+                  {item.status === "uploading" ? (
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-neutral-100">
+                      <div
+                        className="h-full rounded-full bg-black transition-all"
+                        style={{ width: `${item.progress}%` }}
+                      />
+                    </div>
+                  ) : null}
                   {item.error ? (
                     <p className="mt-1 text-xs text-red-700">
                       {item.error}
