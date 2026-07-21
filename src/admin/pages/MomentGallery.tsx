@@ -420,8 +420,22 @@ export function MomentGallery() {
       </section>
 
       {orderedImages.length ? (
-        <section className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+        <section
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1fr) 320px",
+            gap: "20px",
+            alignItems: "start",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+              gap: "10px",
+              alignItems: "start",
+            }}
+          >
             {orderedImages.map((image, index) => {
               const isSelected = selected.has(image.assetKey);
               const isHidden = hiddenIds.has(image.assetKey);
@@ -444,28 +458,45 @@ export function MomentGallery() {
                     event.preventDefault();
                     dropOn(image.assetKey);
                   }}
-                  className={`overflow-hidden rounded-[18px] bg-white shadow-sm transition ${
-                    activeAssetKey === image.assetKey
-                      ? "border-2 border-black"
-                      : isSelected
-                        ? "border-2 border-neutral-500"
-                        : "border border-black/10"
-                  } ${isHidden ? "opacity-60" : ""}`}
-                  style={{ opacity: dragging ? 0.4 : isHidden ? 0.6 : 1 }}
+                  className="bg-white"
+                  style={{
+                    overflow: "hidden",
+                    borderRadius: "14px",
+                    background: "#ffffff",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.10)",
+                    border:
+                      activeAssetKey === image.assetKey
+                        ? "2px solid #111111"
+                        : isSelected
+                          ? "2px solid #737373"
+                          : "1px solid rgba(0,0,0,0.12)",
+                    opacity: dragging ? 0.4 : isHidden ? 0.6 : 1,
+                  }}
                 >
                   <div
                     role="button"
                     tabIndex={0}
                     onClick={(event) => openImage(event, image, index)}
-                    className="relative aspect-[4/5] cursor-pointer overflow-hidden bg-neutral-100"
+                    style={{
+                      position: "relative",
+                      aspectRatio: "4 / 5",
+                      cursor: "pointer",
+                      overflow: "hidden",
+                      background: "#f5f5f5",
+                    }}
                   >
                     <img
                       src={image.thumbSrc || image.fullSrc}
                       alt={image.alt || image.filename}
                       draggable={false}
-                      className="h-full w-full object-cover"
                       loading="lazy"
-                      style={{ pointerEvents: "none" }}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                        pointerEvents: "none",
+                      }}
                     />
 
                     <button
@@ -475,11 +506,23 @@ export function MomentGallery() {
                         event.stopPropagation();
                         toggleSelection(image, index);
                       }}
-                      className={`absolute right-2.5 top-2.5 z-30 flex h-8 w-8 items-center justify-center rounded-full border shadow-sm ${
-                        isSelected
-                          ? "border-black bg-black text-white"
-                          : "border-black/10 bg-white text-transparent"
-                      }`}
+                      style={{
+                        position: "absolute",
+                        right: "8px",
+                        top: "8px",
+                        zIndex: 30,
+                        width: "30px",
+                        height: "30px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: "999px",
+                        border: "1px solid rgba(0,0,0,0.15)",
+                        background: isSelected ? "#111111" : "#ffffff",
+                        color: isSelected ? "#ffffff" : "transparent",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.14)",
+                        cursor: "pointer",
+                      }}
                     >
                       <Check className="h-4 w-4" />
                     </button>
@@ -493,7 +536,23 @@ export function MomentGallery() {
                         beginDrag(image);
                       }}
                       onDragEnd={() => setDraggedIds([])}
-                      className="absolute bottom-2.5 right-2.5 z-30 flex h-10 w-10 cursor-grab items-center justify-center rounded-full bg-white shadow-[0_6px_18px_rgba(0,0,0,0.24)] active:cursor-grabbing"
+                      style={{
+                        position: "absolute",
+                        right: "8px",
+                        bottom: "8px",
+                        zIndex: 30,
+                        width: "38px",
+                        height: "38px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: "999px",
+                        background: "#ffffff",
+                        color: "#111111",
+                        boxShadow: "0 6px 18px rgba(0,0,0,0.28)",
+                        cursor: "grab",
+                        userSelect: "none",
+                      }}
                       title={
                         selected.size > 1 && isSelected
                           ? `Drag ${selected.size} selected images`
@@ -503,14 +562,25 @@ export function MomentGallery() {
                       <GripVertical className="h-5 w-5" />
                     </div>
 
-                    <div className="absolute left-2.5 top-2.5 flex max-w-[70%] flex-wrap gap-1.5">
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: "8px",
+                        top: "8px",
+                        zIndex: 20,
+                        display: "flex",
+                        maxWidth: "68%",
+                        flexWrap: "wrap",
+                        gap: "5px",
+                      }}
+                    >
                       {isHidden ? <Badge>Hidden</Badge> : null}
                       {isHero ? <Badge>Hero</Badge> : null}
                       {isCard ? <Badge>Card</Badge> : null}
                     </div>
                   </div>
 
-                  <div className="p-2.5">
+                  <div style={{ padding: "8px" }}>
                     <p className="truncate text-[11px] text-neutral-600" title={image.filename}>
                       {image.filename}
                     </p>
@@ -523,7 +593,18 @@ export function MomentGallery() {
             })}
           </div>
 
-          <aside className="sticky top-28 rounded-[24px] border border-black/10 bg-white p-4">
+          <aside
+            style={{
+              position: "sticky",
+              top: "112px",
+              borderRadius: "22px",
+              border: "1px solid rgba(0,0,0,0.12)",
+              background: "#ffffff",
+              padding: "16px",
+              maxHeight: "calc(100vh - 128px)",
+              overflowY: "auto",
+            }}
+          >
             {!activeImage ? (
               <p className="text-sm text-neutral-500">
                 Select an image to edit its gallery settings.
@@ -533,7 +614,13 @@ export function MomentGallery() {
                 <img
                   src={activeImage.thumbSrc || activeImage.fullSrc}
                   alt={activeImage.alt || activeImage.filename}
-                  className="max-h-[260px] w-full rounded-2xl object-contain bg-neutral-100"
+                  style={{
+                    width: "100%",
+                    maxHeight: "240px",
+                    objectFit: "contain",
+                    borderRadius: "16px",
+                    background: "#f5f5f5",
+                  }}
                 />
 
                 <div>
