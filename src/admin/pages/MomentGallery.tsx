@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
+import type { CustomCollectionAssignmentOption } from "../types/customCollection";
 import type {
   MomentGalleryImage,
   MomentRecord,
@@ -38,6 +39,9 @@ export function MomentGallery() {
   const [dirty, setDirty] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [customCollections, setCustomCollections] = useState<CustomCollectionAssignmentOption[]>([]);
+  const [customMemberships, setCustomMemberships] = useState<Record<string, string[]>>({});
+  const [customMembershipDirty, setCustomMembershipDirty] = useState<Set<string>>(new Set());
   const anchorRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -46,8 +50,9 @@ export function MomentGallery() {
     Promise.all([
       AdminApiService.getMoments(),
       AdminApiService.getMomentGallery(slug),
+      AdminApiService.getCustomCollectionMemberships(),
     ])
-      .then(([momentDocument, gallery]) => {
+      .then(([momentDocument, gallery, collectionData]) => {
         if (cancelled) return;
         const repositoryMoment = momentDocument.moments.find(
           (item) => item.slug === slug,
@@ -56,6 +61,8 @@ export function MomentGallery() {
         setDocument(momentDocument);
         setMoment(nextMoment);
         setImages(gallery.images);
+        setCustomCollections(collectionData.collections);
+        setCustomMemberships(collectionData.memberships);
         setActiveAssetKey(gallery.images[0]?.assetKey || null);
       })
       .catch((loadError) => {
@@ -143,6 +150,23 @@ export function MomentGallery() {
           : image,
       ),
     );
+    setDirty(true);
+    setMessage("");
+    setError("");
+  }
+
+  function setCustomCollection(
+    assetKey: string,
+    collectionId: string,
+    checked: boolean,
+  ) {
+    setCustomMemberships((current) => {
+      const next = new Set(current[assetKey] || []);
+      if (checked) next.add(collectionId);
+      else next.delete(collectionId);
+      return { ...current, [assetKey]: [...next] };
+    });
+    setCustomMembershipDirty((current) => new Set(current).add(assetKey));
     setDirty(true);
     setMessage("");
     setError("");
@@ -318,6 +342,15 @@ export function MomentGallery() {
       );
       const result = await AdminApiService.saveMoments(nextDocument);
 
+      if (customMembershipDirty.size) {
+        await AdminApiService.saveCustomCollectionMemberships(
+          [...customMembershipDirty].map((assetKey) => ({
+            assetKey,
+            collectionIds: customMemberships[assetKey] || [],
+          })),
+        );
+      }
+
       const savedMoment = result.document.moments.find(
         (item) => item.id === nextMoment.id,
       );
@@ -330,6 +363,7 @@ export function MomentGallery() {
             : { ...image, globallyEnabled: true },
         ),
       );
+      setCustomMembershipDirty(new Set());
       setDirty(false);
       clearSelection();
       setMessage("Moment gallery saved. Public gallery data is now updated.");
@@ -800,6 +834,30 @@ export function MomentGallery() {
                         />
                       ))}
                   </div>
+                </div>
+
+                <div className="border-t border-black/10 pt-4">
+                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">
+                    Custom collections
+                  </p>
+                  {customCollections.length ? (
+                    <div className="space-y-2">
+                      {customCollections.map((collection) => (
+                        <DetailToggle
+                          key={collection.id}
+                          label={`${collection.name}${collection.status === "draft" ? " (Draft)" : ""}`}
+                          checked={(customMemberships[activeImage.assetKey] || []).includes(collection.id)}
+                          onChange={(checked) =>
+                            setCustomCollection(activeImage.assetKey, collection.id, checked)
+                          }
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs leading-5 text-neutral-500">
+                      No custom collections yet. Create one from Collections.
+                    </p>
+                  )}
                 </div>
 
                 <button

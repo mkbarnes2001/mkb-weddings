@@ -3,7 +3,7 @@ import type { StoryFact } from "./StoryService";
 import type { WeddingDocument } from "../../lib/weddingEngine";
 import type { ImageManagerDocument } from "../types/imageManager";
 import type { MomentGalleryPayload, MomentRepositoryDocument } from "../types/moment";
-import type { CustomCollection, CustomCollectionGalleryPayload } from "../types/customCollection";
+import type { CustomCollection, CustomCollectionGalleryPayload, CustomCollectionMembershipPayload } from "../types/customCollection";
 import type { VenueDocument, VenueSummary } from "../types/venue";
 import { prepareImageUpload } from "./ImageUploadService";
 
@@ -441,6 +441,22 @@ export class AdminApiService {
   static async getCustomCollectionGallery(slug: string) {
     return request<{ ok: true } & CustomCollectionGalleryPayload>(
       `/api/custom-collections/${encodeURIComponent(slug)}/gallery`,
+    );
+  }
+
+  static async getCustomCollectionMemberships() {
+    const result = await request<{ ok: true } & CustomCollectionMembershipPayload>(
+      "/api/custom-collections/memberships",
+    );
+    return { collections: result.collections, memberships: result.memberships };
+  }
+
+  static async saveCustomCollectionMemberships(
+    updates: Array<{ assetKey: string; collectionIds: string[] }>,
+  ) {
+    return request<{ ok: true; updated: number }>(
+      "/api/custom-collections/memberships",
+      { method: "PUT", body: JSON.stringify({ updates }) },
     );
   }
 

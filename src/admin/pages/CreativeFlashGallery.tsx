@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Check, Eye, EyeOff, GripVertical, Save, Search, Star, X } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
+import type { CustomCollectionAssignmentOption } from "../types/customCollection";
 import type { CreativeFlashGallerySettings, MomentGalleryImage, MomentRecord } from "../types/moment";
 
 type Filter = "all" | "shown" | "hidden";
@@ -29,12 +30,16 @@ export function CreativeFlashGallery() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [customCollections, setCustomCollections] = useState<CustomCollectionAssignmentOption[]>([]);
+  const [customMemberships, setCustomMemberships] = useState<Record<string, string[]>>({});
+  const [customMembershipDirty, setCustomMembershipDirty] = useState<Set<string>>(new Set());
   const anchor = useRef<number | null>(null);
 
   useEffect(() => {
-    Promise.all([AdminApiService.getCreativeFlashGallery(), AdminApiService.getMoments()])
-      .then(([gallery, momentDoc]) => {
+    Promise.all([AdminApiService.getCreativeFlashGallery(), AdminApiService.getMoments(), AdminApiService.getCustomCollectionMemberships()])
+      .then(([gallery, momentDoc, collectionData]) => {
         setImages(gallery.images); setSettings(gallery.settings); setMoments(momentDoc.moments.filter((m) => m.status === "active" && m.availableForAssignment));
+        setCustomCollections(collectionData.collections); setCustomMemberships(collectionData.memberships);
         setActive(gallery.images[0]?.assetKey || null);
       }).catch((e) => setError(e instanceof Error ? e.message : "Unable to load Creative Flash gallery."));
   }, []);
@@ -60,6 +65,15 @@ export function CreativeFlashGallery() {
     const next = checked ? unique([...image.moments, slug]) : image.moments.filter((m) => m !== slug);
     patchImage(image.assetKey, { moments: next, display: { ...image.display, moments: next.length > 0 } });
   };
+  const setCustomCollection = (assetKey: string, collectionId: string, checked: boolean) => {
+    setCustomMemberships((current) => {
+      const next = new Set(current[assetKey] || []);
+      checked ? next.add(collectionId) : next.delete(collectionId);
+      return { ...current, [assetKey]: [...next] };
+    });
+    setCustomMembershipDirty((current) => new Set(current).add(assetKey));
+    setDirty(true); setMessage(""); setError("");
+  };
   const hideKeys = (keys: string[]) => patchSettings({ hiddenImageIds: unique([...settings.hiddenImageIds, ...keys]) });
   const showKeys = (keys: string[]) => { const remove = new Set(keys); patchSettings({ hiddenImageIds: settings.hiddenImageIds.filter((id) => !remove.has(id)) }); };
 
@@ -79,7 +93,10 @@ export function CreativeFlashGallery() {
       const valid = new Set(images.map((i) => i.assetKey));
       const clean = { heroImageId: settings.heroImageId, imageOrderIds: order.filter((id) => valid.has(id)), hiddenImageIds: unique(settings.hiddenImageIds).filter((id) => valid.has(id)) };
       await AdminApiService.saveCreativeFlashGallery({ settings: clean, updates: images.map((i) => ({ assetKey: i.assetKey, included: i.included, moments: i.moments, display: i.display })) });
-      setSettings(clean); setDirty(false); setSelected(new Set()); setMessage("Creative Flash gallery saved.");
+      if (customMembershipDirty.size) {
+        await AdminApiService.saveCustomCollectionMemberships([...customMembershipDirty].map((assetKey) => ({ assetKey, collectionIds: customMemberships[assetKey] || [] })));
+      }
+      setSettings(clean); setCustomMembershipDirty(new Set()); setDirty(false); setSelected(new Set()); setMessage("Creative Flash gallery saved.");
     } catch (e) { setError(e instanceof Error ? e.message : "Unable to save Creative Flash gallery."); } finally { setSaving(false); }
   }
 
@@ -106,6 +123,7 @@ export function CreativeFlashGallery() {
         <button onClick={async()=>{try{await AdminApiService.setGalleryMasterHero("landing",activeImage.assetKey);setMessage("Main Gallery landing-page hero updated.")}catch(heroError){setError(heroError instanceof Error?heroError.message:"Unable to set main Gallery landing-page hero.")}}} className="flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm text-white"><Star className="h-4 w-4"/>Set as main Gallery landing hero</button>
         <div className="border-t pt-4"><p className="mb-3 text-xs uppercase tracking-[.14em] text-neutral-500">Gallery destinations</p><CheckRow label="Venue gallery" checked={activeImage.included} onChange={(v)=>patchImage(activeImage.assetKey,{included:v,display:{...activeImage.display,venue:v}})}/><CheckRow label="Creative Flash" checked={activeImage.display.creativeFlash} onChange={(v)=>patchImage(activeImage.assetKey,{display:{...activeImage.display,creativeFlash:v}})}/><CheckRow label="Wedding story" checked={activeImage.display.blog} onChange={(v)=>patchImage(activeImage.assetKey,{display:{...activeImage.display,blog:v}})}/><CheckRow label="Homepage" checked={activeImage.display.homepage} onChange={(v)=>patchImage(activeImage.assetKey,{display:{...activeImage.display,homepage:v}})}/><CheckRow label="Portfolio" checked={activeImage.display.portfolio} onChange={(v)=>patchImage(activeImage.assetKey,{display:{...activeImage.display,portfolio:v}})}/></div>
         <div className="border-t pt-4"><p className="mb-3 text-xs uppercase tracking-[.14em] text-neutral-500">Moments</p>{moments.map((m)=><CheckRow key={m.id} label={m.name} checked={activeImage.moments.includes(m.slug)} onChange={(v)=>toggleMoment(activeImage,m.slug,v)}/>)}</div>
+        <div className="border-t pt-4"><p className="mb-3 text-xs uppercase tracking-[.14em] text-neutral-500">Custom collections</p>{customCollections.length ? customCollections.map((collection)=><CheckRow key={collection.id} label={`${collection.name}${collection.status === "draft" ? " (Draft)" : ""}`} checked={(customMemberships[activeImage.assetKey] || []).includes(collection.id)} onChange={(v)=>setCustomCollection(activeImage.assetKey, collection.id, v)}/>) : <p className="text-xs leading-5 text-neutral-500">No custom collections yet. Create one from Collections.</p>}</div>
       </div>}</aside>
     </section>
   </div>;

@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
+import type { CustomCollectionAssignmentOption } from "../types/customCollection";
 import type { MomentRecord } from "../types/moment";
 import { WeddingService } from "../services/WeddingService";
 import { ImageManagerService } from "../services/ImageManagerService";
@@ -59,6 +60,9 @@ export function VenueGallery() {
   const [dirty, setDirty] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [customCollections, setCustomCollections] = useState<CustomCollectionAssignmentOption[]>([]);
+  const [customMemberships, setCustomMemberships] = useState<Record<string, string[]>>({});
+  const [customMembershipDirty, setCustomMembershipDirty] = useState<Set<string>>(new Set());
   const anchorRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -66,9 +70,10 @@ export function VenueGallery() {
 
     async function load() {
       try {
-        const [loadedVenue, momentDocument] = await Promise.all([
+        const [loadedVenue, momentDocument, collectionData] = await Promise.all([
           AdminApiService.getVenue(slug),
           AdminApiService.getMoments(),
+          AdminApiService.getCustomCollectionMemberships(),
         ]);
         setVenue(loadedVenue);
         setMoments(
@@ -76,6 +81,8 @@ export function VenueGallery() {
             .filter((moment) => moment.status === "active")
             .sort((a, b) => a.sortOrder - b.sortOrder),
         );
+        setCustomCollections(collectionData.collections);
+        setCustomMemberships(collectionData.memberships);
 
         const weddingService = await WeddingService.load();
         const linkedWeddings = weddingService
@@ -533,6 +540,23 @@ export function VenueGallery() {
     setDraggedIds([]);
   }
 
+  function setCustomCollection(
+    assetKey: string,
+    collectionId: string,
+    checked: boolean,
+  ) {
+    setCustomMemberships((current) => {
+      const next = new Set(current[assetKey] || []);
+      if (checked) next.add(collectionId);
+      else next.delete(collectionId);
+      return { ...current, [assetKey]: [...next] };
+    });
+    setCustomMembershipDirty((current) => new Set(current).add(assetKey));
+    setDirty(true);
+    setMessage("");
+    setError("");
+  }
+
   function setHero(assetId: string) {
     if (!venue) return;
 
@@ -647,7 +671,17 @@ export function VenueGallery() {
         },
       });
 
+      if (customMembershipDirty.size) {
+        await AdminApiService.saveCustomCollectionMemberships(
+          [...customMembershipDirty].map((assetKey) => ({
+            assetKey,
+            collectionIds: customMemberships[assetKey] || [],
+          })),
+        );
+      }
+
       setVenue(result.venue);
+      setCustomMembershipDirty(new Set());
       setDirty(false);
       setMessage(
         `Saved ${items.filter((item) => item.included).length} venue gallery images and synchronised wedding gallery membership.`,
@@ -1512,6 +1546,30 @@ export function VenueGallery() {
                         );
                       })}
                   </div>
+                </div>
+
+                <div className="border-t border-black/10 pt-5">
+                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">
+                    Custom collections
+                  </p>
+                  {customCollections.length ? (
+                    <div className="space-y-2">
+                      {customCollections.map((collection) => (
+                        <Toggle
+                          key={collection.id}
+                          label={`${collection.name}${collection.status === "draft" ? " (Draft)" : ""}`}
+                          checked={(customMemberships[activeItem.assetId] || []).includes(collection.id)}
+                          onChange={(checked) =>
+                            setCustomCollection(activeItem.assetId, collection.id, checked)
+                          }
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs leading-5 text-neutral-500">
+                      No custom collections yet. Create one from Collections.
+                    </p>
+                  )}
                 </div>
 
                 <button

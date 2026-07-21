@@ -42,3 +42,16 @@ export type CustomCollectionGalleryPayload = {
   collection: CustomCollection;
   images: CustomCollectionImage[];
 };
+
+export type CustomCollectionAssignmentOption = {
+  id: string;
+  slug: string;
+  name: string;
+  status: "draft" | "active";
+  sortOrder: number;
+};
+
+export type CustomCollectionMembershipPayload = {
+  collections: CustomCollectionAssignmentOption[];
+  memberships: Record<string, string[]>;
+};

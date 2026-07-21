@@ -15,6 +15,7 @@ import {
 import { AdminApiService } from "../services/AdminApiService";
 import type {
   CustomCollection,
+  CustomCollectionAssignmentOption,
   CustomCollectionImage,
 } from "../types/customCollection";
 
@@ -63,15 +64,23 @@ export function CustomCollectionGallery() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [customCollections, setCustomCollections] = useState<CustomCollectionAssignmentOption[]>([]);
+  const [customMemberships, setCustomMemberships] = useState<Record<string, string[]>>({});
+  const [customMembershipDirty, setCustomMembershipDirty] = useState<Set<string>>(new Set());
   const anchor = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    AdminApiService.getCustomCollectionGallery(slug)
-      .then((payload) => {
+    Promise.all([
+      AdminApiService.getCustomCollectionGallery(slug),
+      AdminApiService.getCustomCollectionMemberships(),
+    ])
+      .then(([payload, membershipData]) => {
         if (cancelled) return;
         setCollection(payload.collection);
         setImages(payload.images);
+        setCustomCollections(membershipData.collections);
+        setCustomMemberships(membershipData.memberships);
         setActiveKey(payload.images.find((image) => image.included)?.assetKey || payload.images[0]?.assetKey || null);
       })
       .catch((loadError) => {
@@ -149,6 +158,41 @@ export function CustomCollectionGallery() {
     markDirty();
   }
 
+  function setCustomCollection(
+    assetKey: string,
+    collectionId: string,
+    checked: boolean,
+  ) {
+    setCustomMemberships((current) => {
+      const next = new Set(current[assetKey] || []);
+      if (checked) next.add(collectionId);
+      else next.delete(collectionId);
+      return { ...current, [assetKey]: [...next] };
+    });
+    setCustomMembershipDirty((current) => new Set(current).add(assetKey));
+    markDirty();
+  }
+
+  function syncCurrentCollectionMembership(assetKeys: string[], checked: boolean) {
+    if (!collection) return;
+    const keys = new Set(assetKeys);
+    setCustomMemberships((current) => {
+      const nextState = { ...current };
+      for (const assetKey of keys) {
+        const next = new Set(nextState[assetKey] || []);
+        if (checked) next.add(collection.id);
+        else next.delete(collection.id);
+        nextState[assetKey] = [...next];
+      }
+      return nextState;
+    });
+    setCustomMembershipDirty((current) => {
+      const next = new Set(current);
+      for (const assetKey of keys) next.add(assetKey);
+      return next;
+    });
+  }
+
   function includeKeys(assetKeys: string[]) {
     const target = new Set(assetKeys);
     const currentMax = Math.max(0, ...images.filter((image) => image.included).map((image) => image.sortOrder));
@@ -160,6 +204,7 @@ export function CustomCollectionGallery() {
         return { ...image, included: true, hidden: false, sortOrder: currentMax + offset };
       }),
     );
+    syncCurrentCollectionMembership(assetKeys, true);
     markDirty();
   }
 
@@ -175,6 +220,7 @@ export function CustomCollectionGallery() {
     if (collection?.heroAssetKey && target.has(collection.heroAssetKey)) {
       setCollection({ ...collection, heroAssetKey: "" });
     }
+    syncCurrentCollectionMembership(assetKeys, false);
     markDirty();
   }
 
@@ -280,6 +326,14 @@ export function CustomCollectionGallery() {
         heroAssetKey: collection.heroAssetKey,
         items: included,
       });
+      if (customMembershipDirty.size) {
+        await AdminApiService.saveCustomCollectionMemberships(
+          [...customMembershipDirty].map((assetKey) => ({
+            assetKey,
+            collectionIds: customMemberships[assetKey] || [],
+          })),
+        );
+      }
       const ranks = new Map(included.map((item) => [item.assetKey, item.sortOrder]));
       setImages((current) =>
         current.map((image) =>
@@ -288,6 +342,7 @@ export function CustomCollectionGallery() {
             : image,
         ),
       );
+      setCustomMembershipDirty(new Set());
       setDirty(false);
       setSelected(new Set());
       setMessage("Collection gallery saved. Public gallery data is now updated.");
@@ -589,6 +644,30 @@ export function CustomCollectionGallery() {
                     : excludeKeys([activeImage.assetKey])
                 }
               />
+
+              <div className="border-t border-black/10 pt-4">
+                <p className="mb-3 text-xs uppercase tracking-[0.14em] text-neutral-500">
+                  Other custom collections
+                </p>
+                {customCollections.filter((item) => item.id !== collection.id).length ? (
+                  customCollections
+                    .filter((item) => item.id !== collection.id)
+                    .map((item) => (
+                      <CheckRow
+                        key={item.id}
+                        label={`${item.name}${item.status === "draft" ? " (Draft)" : ""}`}
+                        checked={(customMemberships[activeImage.assetKey] || []).includes(item.id)}
+                        onChange={(checked) =>
+                          setCustomCollection(activeImage.assetKey, item.id, checked)
+                        }
+                      />
+                    ))
+                ) : (
+                  <p className="text-xs leading-5 text-neutral-500">
+                    No other custom collections yet.
+                  </p>
+                )}
+              </div>
 
               <button
                 type="button"
