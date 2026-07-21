@@ -1537,6 +1537,21 @@ export function VenueGallery() {
                   Set as Gallery by Venue master hero
                 </button>
 
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await AdminApiService.setGalleryMasterHero("landing", activeItem.assetId);
+                      setMessage("Main Gallery landing-page hero updated.");
+                    } catch (heroError) {
+                      setError(heroError instanceof Error ? heroError.message : "Unable to set main Gallery landing-page hero.");
+                    }
+                  }}
+                  className="w-full rounded-full bg-black px-5 py-3 text-sm text-white"
+                >
+                  Set as main Gallery landing hero
+                </button>
+
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">
                     AI caption

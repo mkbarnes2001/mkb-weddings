@@ -16,6 +16,7 @@ type GalleryMasterHeroesResponse = {
   ok: true;
   venue: PublicImage | null;
   moments: PublicImage | null;
+  landing: PublicImage | null;
 };
 
 type CreativeFlashResponse = {
@@ -36,8 +37,10 @@ export function GalleryLanding() {
   const [masterHeroes, setMasterHeroes] = useState<GalleryMasterHeroesResponse | null>(null);
   const [creativeFlashHero, setCreativeFlashHero] = useState<PublicImage | null>(null);
 
-  const HERO_IMAGE =
+  const HERO_FALLBACK =
     "https://images.mkbweddings.co.uk/full/Orange%20tree%20house/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000.webp";
+
+  const heroImage = masterHeroes?.landing?.fullSrc || masterHeroes?.landing?.thumbSrc || HERO_FALLBACK;
 
   const countiesThumb =
     "https://images.mkbweddings.co.uk/thumb/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp";
@@ -133,13 +136,13 @@ export function GalleryLanding() {
         <meta property="og:url" content={canonical} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:image" content={HERO_IMAGE} />
+        <meta property="og:image" content={heroImage} />
         <meta property="og:type" content="website" />
       </Helmet>
 
       <div className="relative h-[60vh] min-h-[420px]">
         <ImageWithFallback
-          src={HERO_IMAGE}
+          src={heroImage}
           alt="Wedding photography gallery showcasing weddings across Northern Ireland and Ireland"
           className="w-full h-full object-cover"
         />

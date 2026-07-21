@@ -836,6 +836,22 @@ export function MomentGallery() {
                   Set as Gallery by Moments master hero
                 </button>
 
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await AdminApiService.setGalleryMasterHero("landing", activeImage.assetKey);
+                      setMessage("Main Gallery landing-page hero updated.");
+                    } catch (heroError) {
+                      setError(heroError instanceof Error ? heroError.message : "Unable to set main Gallery landing-page hero.");
+                    }
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm"
+                >
+                  <Star className="h-4 w-4" />
+                  Set as main Gallery landing hero
+                </button>
+
 
 
                 <div className="rounded-2xl bg-neutral-100 p-3 text-xs leading-5 text-neutral-600">

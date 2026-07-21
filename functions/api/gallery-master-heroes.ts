@@ -9,7 +9,7 @@ function parse(value: unknown, fallback: any) {
 
 async function loadSettings(env: Env) {
   const row: any = await env.MKB_DB.prepare(`SELECT document_json FROM content_pages WHERE slug = ? LIMIT 1`).bind(SETTINGS_SLUG).first();
-  return { venueHeroImageId: "", momentsHeroImageId: "", ...parse(row?.document_json, {}) };
+  return { venueHeroImageId: "", momentsHeroImageId: "", landingHeroImageId: "", ...parse(row?.document_json, {}) };
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
@@ -26,6 +26,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     const next = {
       venueHeroImageId: body?.venueHeroImageId !== undefined ? String(body.venueHeroImageId || "").trim() : current.venueHeroImageId,
       momentsHeroImageId: body?.momentsHeroImageId !== undefined ? String(body.momentsHeroImageId || "").trim() : current.momentsHeroImageId,
+      landingHeroImageId: body?.landingHeroImageId !== undefined ? String(body.landingHeroImageId || "").trim() : current.landingHeroImageId,
     };
     await context.env.MKB_DB.prepare(`
       INSERT INTO content_pages (slug, title, status, document_json, updated_at)
