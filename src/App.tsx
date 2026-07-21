@@ -20,6 +20,7 @@ import { GalleryByStyle } from "./components/GalleryByStyle";
 import { GalleryFeaturedStories } from "./components/GalleryFeaturedStories";
 import { GalleryStoryDetail } from "./components/GalleryStoryDetail";
 import { GalleryCreativeFlash } from "./components/GalleryCreativeFlash";
+import { GalleryCustomCollection } from "./components/GalleryCustomCollection";
 
 
 import WeddingPackages from "./components/WeddingPackages";
@@ -96,6 +97,7 @@ export default function App() {
             <Route path="/gallery/story/:storyId" element={<GalleryStoryDetail />} />
             <Route path="/gallery/best-of/:categoryId" element={<GalleryVenueDetail />} />
             <Route path="/gallery/creative-flash" element={<GalleryCreativeFlash />} />
+            <Route path="/gallery/collection/:collectionSlug" element={<GalleryCustomCollection />} />
           </Route>
         </Routes>
       </div>

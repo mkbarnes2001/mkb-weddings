@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import { Search, Layers3 } from "lucide-react";
 import { weddingStories } from "../../data/weddingStories";
 import { CollectionService } from "../services/CollectionService";
+import { AdminApiService } from "../services/AdminApiService";
 import type { ImageCollection } from "../types/collection";
+import type { CustomCollection } from "../types/customCollection";
 
 function statusClasses(status: ImageCollection["status"]) {
   if (status === "active") return "bg-emerald-50 text-emerald-700 border-emerald-200";
@@ -13,10 +15,12 @@ function statusClasses(status: ImageCollection["status"]) {
 
 export function Collections() {
   const [collections, setCollections] = useState<ImageCollection[]>([]);
+  const [customCollections, setCustomCollections] = useState<CustomCollection[]>([]);
   const [query, setQuery] = useState("");
 
   useEffect(() => {
     CollectionService.load().then((service) => setCollections(service.getAllCollections()));
+    AdminApiService.listCustomCollections().then(setCustomCollections).catch(() => {});
   }, []);
 
   const storyBySlug = useMemo(() => new Map(weddingStories.map((story) => [story.slug, story])), []);
@@ -75,6 +79,18 @@ export function Collections() {
             <p className="mt-2 text-sm text-neutral-600">Curate order, visibility, hero image, gallery destinations and moment assignments.</p>
           </div>
           <Link to="/admin/creative-flash" className="rounded-full bg-black px-5 py-3 text-center text-sm text-white">Manage Creative Flash</Link>
+        </div>
+      </section>
+
+      <section className="rounded-[28px] border border-black/10 bg-white/85 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Reusable gallery system</p>
+            <h2 className="mt-2 font-serif text-3xl">Custom Collections</h2>
+            <p className="mt-2 text-sm text-neutral-600">Create galleries such as Beach Weddings, Winter Weddings, Castle Weddings or Black &amp; White.</p>
+            <p className="mt-2 text-xs text-neutral-500">{customCollections.length} created · {customCollections.filter((collection) => collection.status === "active").length} active</p>
+          </div>
+          <Link to="/admin/custom-collections" className="rounded-full bg-black px-5 py-3 text-center text-sm text-white">Manage Custom Collections</Link>
         </div>
       </section>
 

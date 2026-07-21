@@ -24,6 +24,21 @@ type CreativeFlashResponse = {
   heroImage: PublicImage | null;
 };
 
+type PublicCustomCollection = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  sortOrder: number;
+  imageCount: number;
+  heroImage: PublicImage | null;
+};
+
+type PublicCustomCollectionsResponse = {
+  ok: true;
+  collections: PublicCustomCollection[];
+};
+
 function preferredCardSource(image: PublicImage | null | undefined, fallback: string) {
   return image?.thumbSrc || image?.fullSrc || fallback;
 }
@@ -36,6 +51,7 @@ export function GalleryLanding() {
 
   const [masterHeroes, setMasterHeroes] = useState<GalleryMasterHeroesResponse | null>(null);
   const [creativeFlashHero, setCreativeFlashHero] = useState<PublicImage | null>(null);
+  const [customCollections, setCustomCollections] = useState<PublicCustomCollection[]>([]);
 
   const HERO_FALLBACK =
     "https://images.mkbweddings.co.uk/full/Orange%20tree%20house/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000.webp";
@@ -73,7 +89,11 @@ export function GalleryLanding() {
         if (!response.ok) throw new Error("Unable to load Creative Flash hero.");
         return response.json() as Promise<CreativeFlashResponse>;
       }),
-    ]).then(([galleryHeroesResult, creativeFlashResult]) => {
+      fetch("/api/public/custom-collections", { cache: "no-store" }).then((response) => {
+        if (!response.ok) throw new Error("Unable to load custom collections.");
+        return response.json() as Promise<PublicCustomCollectionsResponse>;
+      }),
+    ]).then(([galleryHeroesResult, creativeFlashResult, customCollectionsResult]) => {
       if (cancelled) return;
 
       if (galleryHeroesResult.status === "fulfilled") {
@@ -83,6 +103,10 @@ export function GalleryLanding() {
       if (creativeFlashResult.status === "fulfilled") {
         setCreativeFlashHero(creativeFlashResult.value.heroImage || null);
       }
+
+      if (customCollectionsResult.status === "fulfilled") {
+        setCustomCollections(customCollectionsResult.value.collections || []);
+      }
     });
 
     return () => {
@@ -90,8 +114,20 @@ export function GalleryLanding() {
     };
   }, []);
 
-  const mainTiles = useMemo(
-    () => [
+  const mainTiles = useMemo(() => {
+    const customTiles = customCollections.map((collection) => ({
+      title: collection.name,
+      link: `/gallery/collection/${collection.slug}`,
+      image: preferredCardSource(
+        collection.heroImage,
+        masterHeroes?.landing?.thumbSrc || masterHeroes?.landing?.fullSrc || HERO_FALLBACK,
+      ),
+      description:
+        collection.description ||
+        `Explore ${collection.name.toLowerCase()} wedding photography`,
+    }));
+
+    return [
       {
         title: "Explore by County",
         link: "/wedding-photographer",
@@ -116,15 +152,15 @@ export function GalleryLanding() {
         image: preferredCardSource(creativeFlashHero, creativeFlashFallback),
         description: "Bold, dramatic flash photography",
       },
+      ...customTiles,
       {
         title: "Stories & Reviews",
         link: "/blog",
         image: storiesImage,
         description: "Real wedding love stories",
       },
-    ],
-    [masterHeroes, creativeFlashHero],
-  );
+    ];
+  }, [masterHeroes, creativeFlashHero, customCollections]);
 
   return (
     <div className="min-h-screen bg-white">

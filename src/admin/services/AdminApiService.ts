@@ -3,6 +3,7 @@ import type { StoryFact } from "./StoryService";
 import type { WeddingDocument } from "../../lib/weddingEngine";
 import type { ImageManagerDocument } from "../types/imageManager";
 import type { MomentGalleryPayload, MomentRepositoryDocument } from "../types/moment";
+import type { CustomCollection, CustomCollectionGalleryPayload } from "../types/customCollection";
 import type { VenueDocument, VenueSummary } from "../types/venue";
 import { prepareImageUpload } from "./ImageUploadService";
 
@@ -399,6 +400,61 @@ export class AdminApiService {
       method: "PUT",
       body: JSON.stringify(body),
     });
+  }
+
+
+  static async listCustomCollections() {
+    const result = await request<{ ok: true; collections: CustomCollection[] }>(
+      "/api/custom-collections",
+    );
+    return result.collections;
+  }
+
+  static async createCustomCollection(
+    collection: Partial<CustomCollection> & { name: string },
+  ) {
+    const result = await request<{ ok: true; collection: CustomCollection }>(
+      "/api/custom-collections",
+      { method: "POST", body: JSON.stringify({ collection }) },
+    );
+    return result.collection;
+  }
+
+  static async updateCustomCollection(
+    routeSlug: string,
+    collection: Partial<CustomCollection>,
+  ) {
+    const result = await request<{ ok: true; collection: CustomCollection }>(
+      `/api/custom-collections/${encodeURIComponent(routeSlug)}`,
+      { method: "PUT", body: JSON.stringify({ collection }) },
+    );
+    return result.collection;
+  }
+
+  static async archiveCustomCollection(slug: string) {
+    return request<{ ok: true; slug: string; status: "archived" }>(
+      `/api/custom-collections/${encodeURIComponent(slug)}`,
+      { method: "DELETE" },
+    );
+  }
+
+  static async getCustomCollectionGallery(slug: string) {
+    return request<{ ok: true } & CustomCollectionGalleryPayload>(
+      `/api/custom-collections/${encodeURIComponent(slug)}/gallery`,
+    );
+  }
+
+  static async saveCustomCollectionGallery(
+    slug: string,
+    payload: {
+      heroAssetKey: string;
+      items: Array<{ assetKey: string; sortOrder: number; hidden: boolean }>;
+    },
+  ) {
+    return request<{ ok: true; savedImages: number; heroAssetKey: string }>(
+      `/api/custom-collections/${encodeURIComponent(slug)}/gallery`,
+      { method: "PUT", body: JSON.stringify(payload) },
+    );
   }
 
   static async getCreativeFlashGallery() {
