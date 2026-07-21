@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -7,7 +7,6 @@ import {
   EyeOff,
   GripVertical,
   Image as ImageIcon,
-  Pin,
   Save,
   Search,
   Star,
@@ -20,7 +19,7 @@ import type {
   MomentRepositoryDocument,
 } from "../types/moment";
 
-type GalleryFilter = "all" | "shown" | "hidden" | "pinned";
+type GalleryFilter = "all" | "shown" | "hidden";
 
 function unique(values: string[]) {
   return [...new Set(values.filter(Boolean))];
@@ -32,13 +31,15 @@ export function MomentGallery() {
   const [images, setImages] = useState<MomentGalleryImage[]>([]);
   const [moment, setMoment] = useState<MomentRecord | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [activeAssetKey, setActiveAssetKey] = useState<string | null>(null);
+  const [draggedIds, setDraggedIds] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<GalleryFilter>("all");
-  const [draggedAssetKey, setDraggedAssetKey] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const anchorRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,9 +53,11 @@ export function MomentGallery() {
         const repositoryMoment = momentDocument.moments.find(
           (item) => item.slug === slug,
         );
+        const nextMoment = repositoryMoment || gallery.moment;
         setDocument(momentDocument);
-        setMoment(repositoryMoment || gallery.moment);
+        setMoment(nextMoment);
         setImages(gallery.images);
+        setActiveAssetKey(gallery.images[0]?.assetKey || null);
       })
       .catch((loadError) => {
         if (cancelled) return;
@@ -75,26 +78,30 @@ export function MomentGallery() {
     [moment?.hiddenImageIds],
   );
 
-  const pinnedIds = useMemo(
-    () => moment?.pinnedImageIds || [],
-    [moment?.pinnedImageIds],
+  const imageMap = useMemo(
+    () => new Map(images.map((image) => [image.assetKey, image])),
+    [images],
   );
 
-  const pinnedRank = useMemo(() => {
-    const map = new Map<string, number>();
-    pinnedIds.forEach((assetKey, index) => map.set(assetKey, index));
-    return map;
-  }, [pinnedIds]);
+  const exactOrder = useMemo(() => {
+    const saved = moment?.imageOrderIds || [];
+    const legacyFeatured = moment?.pinnedImageIds || [];
+    const all = images.map((image) => image.assetKey);
+    const available = new Set(all);
+    return unique([...saved, ...legacyFeatured, ...all]).filter((id) =>
+      available.has(id),
+    );
+  }, [moment?.imageOrderIds, moment?.pinnedImageIds, images]);
 
   const orderedImages = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return [...images]
+    return exactOrder
+      .map((assetKey) => imageMap.get(assetKey))
+      .filter((image): image is MomentGalleryImage => Boolean(image))
       .filter((image) => {
         const isHidden = hiddenIds.has(image.assetKey);
-        const isPinned = pinnedRank.has(image.assetKey);
         if (filter === "shown" && isHidden) return false;
         if (filter === "hidden" && !isHidden) return false;
-        if (filter === "pinned" && !isPinned) return false;
         if (!query) return true;
         return [
           image.filename,
@@ -106,23 +113,12 @@ export function MomentGallery() {
           .join(" ")
           .toLowerCase()
           .includes(query);
-      })
-      .sort((a, b) => {
-        const aRank = pinnedRank.get(a.assetKey);
-        const bRank = pinnedRank.get(b.assetKey);
-        if (aRank !== undefined || bRank !== undefined) {
-          if (aRank === undefined) return 1;
-          if (bRank === undefined) return -1;
-          return aRank - bRank;
-        }
-        const venueDiff = a.venueName.localeCompare(b.venueName);
-        if (venueDiff !== 0) return venueDiff;
-        return a.filename.localeCompare(b.filename);
       });
-  }, [images, hiddenIds, pinnedRank, search, filter]);
+  }, [exactOrder, imageMap, hiddenIds, search, filter]);
 
   const shownCount = images.filter((image) => !hiddenIds.has(image.assetKey)).length;
   const hiddenCount = images.length - shownCount;
+  const activeImage = activeAssetKey ? imageMap.get(activeAssetKey) || null : null;
 
   function patchMoment(patch: Partial<MomentRecord>) {
     setMoment((current) => (current ? { ...current, ...patch } : current));
@@ -159,53 +155,76 @@ export function MomentGallery() {
     });
   }
 
-  function pinImages(assetKeys: string[]) {
-    showImages(assetKeys);
-    patchMoment({
-      pinnedImageIds: unique([...(moment?.pinnedImageIds || []), ...assetKeys]),
-    });
-  }
-
-  function unpinImages(assetKeys: string[]) {
-    const remove = new Set(assetKeys);
-    patchMoment({
-      pinnedImageIds: (moment?.pinnedImageIds || []).filter(
-        (assetKey) => !remove.has(assetKey),
-      ),
-    });
-  }
-
-  function toggleSelected(assetKey: string) {
+  function toggleSelection(image: MomentGalleryImage, index: number) {
+    setActiveAssetKey(image.assetKey);
     setSelected((current) => {
       const next = new Set(current);
-      if (next.has(assetKey)) next.delete(assetKey);
-      else next.add(assetKey);
+      if (next.has(image.assetKey)) next.delete(image.assetKey);
+      else next.add(image.assetKey);
       return next;
     });
+    anchorRef.current = index;
+  }
+
+  function openImage(
+    event: React.MouseEvent,
+    image: MomentGalleryImage,
+    index: number,
+  ) {
+    setActiveAssetKey(image.assetKey);
+
+    if (event.shiftKey && anchorRef.current !== null) {
+      const start = Math.min(anchorRef.current, index);
+      const end = Math.max(anchorRef.current, index);
+      setSelected(
+        new Set(orderedImages.slice(start, end + 1).map((item) => item.assetKey)),
+      );
+      return;
+    }
+
+    if (event.metaKey || event.ctrlKey) {
+      toggleSelection(image, index);
+      return;
+    }
+
+    anchorRef.current = index;
   }
 
   function clearSelection() {
     setSelected(new Set());
   }
 
-  function handlePinnedDrop(targetAssetKey: string) {
-    if (!draggedAssetKey || draggedAssetKey === targetAssetKey) {
-      setDraggedAssetKey(null);
+  function beginDrag(image: MomentGalleryImage) {
+    const moving =
+      selected.has(image.assetKey) && selected.size > 1
+        ? exactOrder.filter((assetKey) => selected.has(assetKey))
+        : [image.assetKey];
+
+    if (!selected.has(image.assetKey)) {
+      setSelected(new Set([image.assetKey]));
+    }
+
+    setActiveAssetKey(image.assetKey);
+    setDraggedIds(moving);
+  }
+
+  function dropOn(targetAssetKey: string) {
+    if (!draggedIds.length || draggedIds.includes(targetAssetKey)) {
+      setDraggedIds([]);
       return;
     }
 
-    const current = [...(moment?.pinnedImageIds || [])];
-    const fromIndex = current.indexOf(draggedAssetKey);
-    const targetIndex = current.indexOf(targetAssetKey);
-    if (fromIndex < 0 || targetIndex < 0) {
-      setDraggedAssetKey(null);
-      return;
-    }
+    const movingSet = new Set(draggedIds);
+    const moving = exactOrder.filter((assetKey) => movingSet.has(assetKey));
+    const remaining = exactOrder.filter((assetKey) => !movingSet.has(assetKey));
+    const targetIndex = remaining.indexOf(targetAssetKey);
+    const next = [...remaining];
 
-    const [moved] = current.splice(fromIndex, 1);
-    current.splice(targetIndex, 0, moved);
-    patchMoment({ pinnedImageIds: current });
-    setDraggedAssetKey(null);
+    if (targetIndex < 0) next.push(...moving);
+    else next.splice(targetIndex, 0, ...moving);
+
+    patchMoment({ imageOrderIds: next });
+    setDraggedIds([]);
   }
 
   async function save() {
@@ -217,13 +236,20 @@ export function MomentGallery() {
     try {
       const cleanHidden = unique(moment.hiddenImageIds || []);
       const hiddenSet = new Set(cleanHidden);
+      const validKeys = new Set(images.map((image) => image.assetKey));
+      const cleanOrder = unique([
+        ...(moment.imageOrderIds || []),
+        ...exactOrder,
+      ]).filter((assetKey) => validKeys.has(assetKey));
       const cleanPinned = unique(moment.pinnedImageIds || []).filter(
-        (assetKey) => !hiddenSet.has(assetKey),
+        (assetKey) => validKeys.has(assetKey) && !hiddenSet.has(assetKey),
       );
+
       const nextMoment: MomentRecord = {
         ...moment,
         hiddenImageIds: cleanHidden,
         pinnedImageIds: cleanPinned,
+        imageOrderIds: cleanOrder,
       };
       const nextDocument: MomentRepositoryDocument = {
         ...document,
@@ -277,25 +303,24 @@ export function MomentGallery() {
   const selectedKeys = [...selected];
 
   return (
-    <div className="space-y-7">
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+    <div className="space-y-6">
+      <section className="rounded-[30px] bg-black p-7 text-white md:p-9">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <Link
               to="/admin/moments"
-              className="mb-5 inline-flex items-center gap-2 text-sm text-white/60 hover:text-white"
+              className="mb-4 inline-flex items-center gap-2 text-sm text-white/60 hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to moments
             </Link>
-            <p className="mb-3 text-xs uppercase tracking-[0.25em] text-white/45">
+            <p className="mb-2 text-xs uppercase tracking-[0.25em] text-white/45">
               Moment Gallery Manager
             </p>
-            <h1 className="font-serif text-5xl md:text-6xl">{moment.name}</h1>
-            <p className="mt-4 max-w-3xl text-white/60">
-              Curate photographs already assigned to this moment. Hide individual
-              images without removing their moment tag, pin favourites to the top,
-              and choose the landing-card and gallery hero photographs visually.
+            <h1 className="font-serif text-4xl md:text-5xl">{moment.name}</h1>
+            <p className="mt-3 max-w-3xl text-sm text-white/60">
+              Drag any photograph using its white grip handle to set the exact gallery order.
+              Select several photographs first to move them together as one group.
             </p>
           </div>
 
@@ -320,11 +345,10 @@ export function MomentGallery() {
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="mt-7 grid grid-cols-3 gap-3">
           <Stat label="Assigned" value={images.length} />
           <Stat label="Shown" value={shownCount} />
           <Stat label="Hidden" value={hiddenCount} />
-          <Stat label="Pinned" value={pinnedIds.length} />
         </div>
       </section>
 
@@ -339,15 +363,15 @@ export function MomentGallery() {
         </div>
       ) : null}
 
-      <section className="rounded-[28px] border border-black/10 bg-white/85 p-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <section className="rounded-[24px] border border-black/10 bg-white/85 p-4">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="relative min-w-0 flex-1 xl:max-w-xl">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search filename, venue or wedding…"
-              className="w-full rounded-full border border-black/10 bg-white py-3 pl-11 pr-4 text-sm"
+              className="w-full rounded-full border border-black/10 bg-white py-2.5 pl-11 pr-4 text-sm"
             />
           </div>
 
@@ -357,7 +381,6 @@ export function MomentGallery() {
                 ["all", `All ${images.length}`],
                 ["shown", `Shown ${shownCount}`],
                 ["hidden", `Hidden ${hiddenCount}`],
-                ["pinned", `Pinned ${pinnedIds.length}`],
               ] as const
             ).map(([value, label]) => (
               <button
@@ -377,170 +400,203 @@ export function MomentGallery() {
         </div>
 
         {selected.size ? (
-          <div className="mt-5 flex flex-wrap items-center gap-2 rounded-2xl bg-neutral-100 p-3">
+          <div className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl bg-neutral-100 p-3">
             <span className="mr-2 text-sm font-medium">{selected.size} selected</span>
             <BatchButton onClick={() => showImages(selectedKeys)} icon={Eye} label="Show" />
             <BatchButton onClick={() => hideImages(selectedKeys)} icon={EyeOff} label="Hide" />
-            <BatchButton onClick={() => pinImages(selectedKeys)} icon={Pin} label="Pin" />
-            <BatchButton onClick={() => unpinImages(selectedKeys)} icon={X} label="Unpin" />
+            <span className="text-xs text-neutral-500">
+              Drag the grip on any selected image to move the whole selection.
+            </span>
             <button
               type="button"
               onClick={clearSelection}
-              className="ml-auto rounded-full border border-black/10 px-4 py-2 text-sm"
+              className="ml-auto inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
             >
-              Clear selection
+              <X className="h-4 w-4" />
+              Clear
             </button>
           </div>
         ) : null}
       </section>
 
-      {pinnedIds.length ? (
-        <section className="rounded-[28px] border border-black/10 bg-white/75 p-5">
-          <div className="mb-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
-              Featured order
-            </p>
-            <h2 className="mt-1 font-serif text-2xl">Pinned photographs</h2>
-            <p className="mt-1 text-sm text-neutral-500">
-              Drag pinned photographs to change the order shown at the start of the live gallery.
-            </p>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {pinnedIds.map((assetKey, index) => {
-              const image = images.find((item) => item.assetKey === assetKey);
-              if (!image || hiddenIds.has(assetKey)) return null;
+      {orderedImages.length ? (
+        <section className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+            {orderedImages.map((image, index) => {
+              const isSelected = selected.has(image.assetKey);
+              const isHidden = hiddenIds.has(image.assetKey);
+              const isHero =
+                moment.heroImageId === image.assetKey ||
+                moment.heroImageId === image.imageId;
+              const isCard =
+                moment.cardImageId === image.assetKey ||
+                moment.cardImageId === image.imageId;
+              const dragging = draggedIds.includes(image.assetKey);
+
               return (
-                <div
-                  key={assetKey}
-                  draggable
-                  onDragStart={() => setDraggedAssetKey(assetKey)}
-                  onDragEnd={() => setDraggedAssetKey(null)}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={() => handlePinnedDrop(assetKey)}
-                  className="relative w-36 shrink-0 cursor-grab overflow-hidden rounded-2xl border border-black/10 bg-white"
+                <article
+                  key={image.assetKey}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    dropOn(image.assetKey);
+                  }}
+                  className={`overflow-hidden rounded-[18px] bg-white shadow-sm transition ${
+                    activeAssetKey === image.assetKey
+                      ? "border-2 border-black"
+                      : isSelected
+                        ? "border-2 border-neutral-500"
+                        : "border border-black/10"
+                  } ${isHidden ? "opacity-60" : ""}`}
+                  style={{ opacity: dragging ? 0.4 : isHidden ? 0.6 : 1 }}
                 >
-                  <img
-                    src={image.thumbSrc || image.fullSrc}
-                    alt={image.alt || image.filename}
-                    className="aspect-[4/3] w-full object-cover"
-                  />
-                  <div className="flex items-center gap-2 p-2 text-xs">
-                    <GripVertical className="h-4 w-4" />
-                    #{index + 1}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={(event) => openImage(event, image, index)}
+                    className="relative aspect-[4/5] cursor-pointer overflow-hidden bg-neutral-100"
+                  >
+                    <img
+                      src={image.thumbSrc || image.fullSrc}
+                      alt={image.alt || image.filename}
+                      draggable={false}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      style={{ pointerEvents: "none" }}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        toggleSelection(image, index);
+                      }}
+                      className={`absolute right-2.5 top-2.5 z-30 flex h-8 w-8 items-center justify-center rounded-full border shadow-sm ${
+                        isSelected
+                          ? "border-black bg-black text-white"
+                          : "border-black/10 bg-white text-transparent"
+                      }`}
+                    >
+                      <Check className="h-4 w-4" />
+                    </button>
+
+                    <div
+                      draggable
+                      onDragStart={(event) => {
+                        event.stopPropagation();
+                        event.dataTransfer.effectAllowed = "move";
+                        event.dataTransfer.setData("text/plain", image.assetKey);
+                        beginDrag(image);
+                      }}
+                      onDragEnd={() => setDraggedIds([])}
+                      className="absolute bottom-2.5 right-2.5 z-30 flex h-10 w-10 cursor-grab items-center justify-center rounded-full bg-white shadow-[0_6px_18px_rgba(0,0,0,0.24)] active:cursor-grabbing"
+                      title={
+                        selected.size > 1 && isSelected
+                          ? `Drag ${selected.size} selected images`
+                          : "Drag to reorder"
+                      }
+                    >
+                      <GripVertical className="h-5 w-5" />
+                    </div>
+
+                    <div className="absolute left-2.5 top-2.5 flex max-w-[70%] flex-wrap gap-1.5">
+                      {isHidden ? <Badge>Hidden</Badge> : null}
+                      {isHero ? <Badge>Hero</Badge> : null}
+                      {isCard ? <Badge>Card</Badge> : null}
+                    </div>
                   </div>
-                </div>
+
+                  <div className="p-2.5">
+                    <p className="truncate text-[11px] text-neutral-600" title={image.filename}>
+                      {image.filename}
+                    </p>
+                    <p className="mt-1 truncate text-[11px] font-medium text-neutral-800">
+                      {image.venueName || "Unlinked venue"}
+                    </p>
+                  </div>
+                </article>
               );
             })}
           </div>
-        </section>
-      ) : null}
 
-      {orderedImages.length ? (
-        <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {orderedImages.map((image) => {
-            const isSelected = selected.has(image.assetKey);
-            const isHidden = hiddenIds.has(image.assetKey);
-            const pinIndex = pinnedRank.get(image.assetKey);
-            const isHero = moment.heroImageId === image.assetKey || moment.heroImageId === image.imageId;
-            const isCard = moment.cardImageId === image.assetKey || moment.cardImageId === image.imageId;
+          <aside className="sticky top-28 rounded-[24px] border border-black/10 bg-white p-4">
+            {!activeImage ? (
+              <p className="text-sm text-neutral-500">
+                Select an image to edit its gallery settings.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                <img
+                  src={activeImage.thumbSrc || activeImage.fullSrc}
+                  alt={activeImage.alt || activeImage.filename}
+                  className="max-h-[260px] w-full rounded-2xl object-contain bg-neutral-100"
+                />
 
-            return (
-              <article
-                key={image.assetKey}
-                className={`overflow-hidden rounded-[24px] border bg-white shadow-sm transition ${
-                  isSelected ? "border-black ring-2 ring-black/10" : "border-black/10"
-                } ${isHidden ? "opacity-60" : ""}`}
-              >
+                <div>
+                  <p className="truncate text-sm font-medium">{activeImage.filename}</p>
+                  <p className="mt-1 text-xs text-neutral-500">
+                    {activeImage.venueName || "Unlinked venue"}
+                    {activeImage.weddingSlug ? ` · ${activeImage.weddingSlug}` : ""}
+                  </p>
+                </div>
+
                 <button
                   type="button"
-                  onClick={() => toggleSelected(image.assetKey)}
-                  className="relative block w-full text-left"
+                  onClick={() =>
+                    hiddenIds.has(activeImage.assetKey)
+                      ? showImages([activeImage.assetKey])
+                      : hideImages([activeImage.assetKey])
+                  }
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm"
                 >
-                  <img
-                    src={image.thumbSrc || image.fullSrc}
-                    alt={image.alt || image.filename}
-                    className="aspect-[4/3] w-full bg-neutral-100 object-cover"
-                    loading="lazy"
-                  />
-                  <span
-                    className={`absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border ${
-                      isSelected
-                        ? "border-black bg-black text-white"
-                        : "border-white/70 bg-white/90 text-black"
-                    }`}
-                  >
-                    {isSelected ? <Check className="h-4 w-4" /> : null}
-                  </span>
-                  <div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-2">
-                    {isHidden ? <Badge>Hidden</Badge> : <Badge>Shown</Badge>}
-                    {pinIndex !== undefined ? <Badge>Pin #{pinIndex + 1}</Badge> : null}
-                    {isHero ? <Badge>Hero</Badge> : null}
-                    {isCard ? <Badge>Card</Badge> : null}
-                    {!image.globallyEnabled && !isHidden ? <Badge>Will enable on save</Badge> : null}
-                  </div>
+                  {hiddenIds.has(activeImage.assetKey) ? (
+                    <Eye className="h-4 w-4" />
+                  ) : (
+                    <EyeOff className="h-4 w-4" />
+                  )}
+                  {hiddenIds.has(activeImage.assetKey) ? "Show in gallery" : "Hide from gallery"}
                 </button>
 
-                <div className="space-y-3 p-4">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium" title={image.filename}>
-                      {image.filename}
-                    </p>
-                    <p className="mt-1 text-xs text-neutral-500">
-                      {image.venueName || "Unlinked venue"}
-                      {image.weddingSlug ? ` · ${image.weddingSlug}` : ""}
-                    </p>
-                  </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    showImages([activeImage.assetKey]);
+                    patchMoment({ heroImageId: activeImage.assetKey });
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm"
+                >
+                  <Star className="h-4 w-4" />
+                  {moment.heroImageId === activeImage.assetKey ||
+                  moment.heroImageId === activeImage.imageId
+                    ? "Hero image set"
+                    : "Set as gallery hero"}
+                </button>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        isHidden ? showImages([image.assetKey]) : hideImages([image.assetKey])
-                      }
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-3 py-2 text-xs"
-                    >
-                      {isHidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-                      {isHidden ? "Show" : "Hide"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        pinIndex === undefined
-                          ? pinImages([image.assetKey])
-                          : unpinImages([image.assetKey])
-                      }
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-3 py-2 text-xs"
-                    >
-                      <Pin className="h-3.5 w-3.5" />
-                      {pinIndex === undefined ? "Pin" : "Unpin"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        showImages([image.assetKey]);
-                        patchMoment({ heroImageId: image.assetKey });
-                      }}
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-3 py-2 text-xs"
-                    >
-                      <Star className="h-3.5 w-3.5" />
-                      {isHero ? "Hero set" : "Set hero"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        showImages([image.assetKey]);
-                        patchMoment({ cardImageId: image.assetKey });
-                      }}
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-3 py-2 text-xs"
-                    >
-                      <ImageIcon className="h-3.5 w-3.5" />
-                      {isCard ? "Card set" : "Set card"}
-                    </button>
-                  </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    showImages([activeImage.assetKey]);
+                    patchMoment({ cardImageId: activeImage.assetKey });
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  {moment.cardImageId === activeImage.assetKey ||
+                  moment.cardImageId === activeImage.imageId
+                    ? "Landing card image set"
+                    : "Set as landing card"}
+                </button>
+
+                <div className="rounded-2xl bg-neutral-100 p-3 text-xs leading-5 text-neutral-600">
+                  Tip: use the checkbox on several thumbnails, then drag the white grip on any selected image. The selected group keeps its internal order and moves together.
                 </div>
-              </article>
-            );
-          })}
+              </div>
+            )}
+          </aside>
         </section>
       ) : (
         <section className="rounded-[28px] border border-dashed border-black/15 bg-white/60 p-12 text-center text-neutral-500">
@@ -554,16 +610,16 @@ export function MomentGallery() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-4">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-3">
       <p className="text-xs uppercase tracking-[0.14em] text-white/45">{label}</p>
-      <p className="mt-2 text-2xl">{value}</p>
+      <p className="mt-1 text-xl">{value}</p>
     </div>
   );
 }
 
 function Badge({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded-full bg-black/75 px-2.5 py-1 text-[10px] font-medium text-white backdrop-blur">
+    <span className="rounded-full bg-black/75 px-2 py-1 text-[9px] font-medium text-white backdrop-blur">
       {children}
     </span>
   );

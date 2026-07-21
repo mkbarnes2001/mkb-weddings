@@ -86,10 +86,18 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const hidden = new Set(
       (Array.isArray(moment.hiddenImageIds) ? moment.hiddenImageIds : []).map(String),
     );
+    const imageOrder = Array.isArray(moment.imageOrderIds)
+      ? moment.imageOrderIds.map(String)
+      : [];
+    const orderRank = new Map(
+      imageOrder.map((assetKey: string, index: number) => [assetKey, index]),
+    );
     const pinned = Array.isArray(moment.pinnedImageIds)
       ? moment.pinnedImageIds.map(String)
       : [];
-    const pinRank = new Map(pinned.map((assetKey: string, index: number) => [assetKey, index]));
+    const pinRank = new Map(
+      pinned.map((assetKey: string, index: number) => [assetKey, index]),
+    );
     const seen = new Set<string>();
 
     const images = (result.results || [])
@@ -116,6 +124,18 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         sortOrder: Number(image.sort_order || 0),
       }))
       .sort((a: any, b: any) => {
+        // New moment galleries can carry an exact editorial order. This is
+        // what the admin drag-and-drop grid writes.
+        const aOrder = orderRank.get(a.assetKey);
+        const bOrder = orderRank.get(b.assetKey);
+        if (aOrder !== undefined || bOrder !== undefined) {
+          if (aOrder === undefined) return 1;
+          if (bOrder === undefined) return -1;
+          return aOrder - bOrder;
+        }
+
+        // Preserve compatibility with the earlier pinned-image release until
+        // a gallery has been explicitly reordered and saved.
         const aPin = pinRank.get(a.assetKey);
         const bPin = pinRank.get(b.assetKey);
         if (aPin !== undefined || bPin !== undefined) {

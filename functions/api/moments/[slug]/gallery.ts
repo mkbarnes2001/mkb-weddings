@@ -133,16 +133,27 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       return Response.json({ ok: true, updated: 0 });
     }
 
-    const placeholders = [...enabledAssetKeys].map(() => "?").join(",");
-    const rows = await context.env.MKB_DB.prepare(`
-      SELECT venue_slug, asset_key, display_json
-      FROM venue_images
-      WHERE asset_key IN (${placeholders})
-    `)
-      .bind(...enabledAssetKeys)
-      .all();
+    // D1/SQLite enforces a bound-variable limit. A large moment can contain
+    // hundreds of photographs, so never build one giant IN (?, ?, ...) query.
+    // Keep both reads and writes in conservative chunks.
+    const assetKeys = [...enabledAssetKeys];
+    const rows: any[] = [];
+    const SELECT_CHUNK_SIZE = 75;
 
-    const statements = (rows.results || []).map((row: any) => {
+    for (let start = 0; start < assetKeys.length; start += SELECT_CHUNK_SIZE) {
+      const chunk = assetKeys.slice(start, start + SELECT_CHUNK_SIZE);
+      const placeholders = chunk.map(() => "?").join(",");
+      const result = await context.env.MKB_DB.prepare(`
+        SELECT venue_slug, asset_key, display_json
+        FROM venue_images
+        WHERE asset_key IN (${placeholders})
+      `)
+        .bind(...chunk)
+        .all();
+      rows.push(...(result.results || []));
+    }
+
+    const statements = rows.map((row: any) => {
       const display = parse(row.display_json, {});
       const next = { ...display, moments: true };
       return context.env.MKB_DB.prepare(`
@@ -152,7 +163,12 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       `).bind(JSON.stringify(next), String(row.venue_slug), String(row.asset_key));
     });
 
-    if (statements.length) await context.env.MKB_DB.batch(statements);
+    const UPDATE_CHUNK_SIZE = 50;
+    for (let start = 0; start < statements.length; start += UPDATE_CHUNK_SIZE) {
+      await context.env.MKB_DB.batch(
+        statements.slice(start, start + UPDATE_CHUNK_SIZE),
+      );
+    }
 
     return Response.json({ ok: true, updated: statements.length });
   } catch (error) {

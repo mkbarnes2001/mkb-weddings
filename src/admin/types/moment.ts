@@ -8,8 +8,10 @@ export type MomentRecord = {
   cardImageId: string;
   /** Optional full-width hero used on the individual moment gallery page. */
   heroImageId?: string;
-  /** Ordered asset keys shown before the remainder of the gallery. */
+  /** Ordered asset keys shown before the remainder of the gallery (legacy featured ordering). */
   pinnedImageIds?: string[];
+  /** Exact editorial order for images in this moment gallery. */
+  imageOrderIds?: string[];
   /** Asset keys hidden only from this specific moment gallery. */
   hiddenImageIds?: string[];
   sortOrder: number;

@@ -36,6 +36,10 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         availableForAssignment: Boolean(moment.availableForAssignment),
         showOnMomentsLanding: Boolean(moment.showOnMomentsLanding),
         cardImageId: String(moment.cardImageId || '').trim(),
+        heroImageId: String(moment.heroImageId || '').trim(),
+        pinnedImageIds: Array.isArray(moment.pinnedImageIds) ? [...new Set(moment.pinnedImageIds.map((value: any) => String(value || '').trim()).filter(Boolean))] : [],
+        imageOrderIds: Array.isArray(moment.imageOrderIds) ? [...new Set(moment.imageOrderIds.map((value: any) => String(value || '').trim()).filter(Boolean))] : [],
+        hiddenImageIds: Array.isArray(moment.hiddenImageIds) ? [...new Set(moment.hiddenImageIds.map((value: any) => String(value || '').trim()).filter(Boolean))] : [],
         sortOrder: Number(moment.sortOrder || index + 1),
         status: moment.status === 'archived' ? 'archived' : 'active',
       };
