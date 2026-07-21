@@ -9,6 +9,7 @@ import {
   Images,
   Settings,
   Sparkles,
+  Tags,
   Truck,
   Users,
 } from "lucide-react";
