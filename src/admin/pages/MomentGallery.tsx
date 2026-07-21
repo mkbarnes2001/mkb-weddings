@@ -489,6 +489,20 @@ export function MomentGallery() {
                       alt={image.alt || image.filename}
                       draggable={false}
                       loading="lazy"
+                      onError={(event) => {
+                        const element = event.currentTarget;
+                        if (
+                          !element.dataset.fullFallbackTried &&
+                          image.fullSrc &&
+                          image.fullSrc !== image.thumbSrc
+                        ) {
+                          element.dataset.fullFallbackTried = "true";
+                          element.src = image.fullSrc;
+                          return;
+                        }
+
+                        element.style.display = "none";
+                      }}
                       style={{
                         width: "100%",
                         height: "100%",
@@ -610,6 +624,20 @@ export function MomentGallery() {
                 <img
                   src={activeImage.thumbSrc || activeImage.fullSrc}
                   alt={activeImage.alt || activeImage.filename}
+                  onError={(event) => {
+                    const element = event.currentTarget;
+                    if (
+                      !element.dataset.fullFallbackTried &&
+                      activeImage.fullSrc &&
+                      activeImage.fullSrc !== activeImage.thumbSrc
+                    ) {
+                      element.dataset.fullFallbackTried = "true";
+                      element.src = activeImage.fullSrc;
+                      return;
+                    }
+
+                    element.style.display = "none";
+                  }}
                   style={{
                     width: "100%",
                     maxHeight: "240px",
