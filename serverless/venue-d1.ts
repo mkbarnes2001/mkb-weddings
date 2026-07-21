@@ -119,6 +119,7 @@ function cleanGalleryItem(item: any, index: number): VenueGalleryItem {
       blog: Boolean(item?.display?.blog),
       homepage: Boolean(item?.display?.homepage),
       portfolio: Boolean(item?.display?.portfolio),
+      creativeFlash: Boolean(item?.display?.creativeFlash),
     },
     thumbSrc: text(item?.thumbSrc),
     fullSrc: text(item?.fullSrc),

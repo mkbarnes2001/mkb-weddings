@@ -55,6 +55,7 @@ function getPinOrder(value?: string) {
 
 export function GalleryCreativeFlash() {
   const [rows, setRows] = useState<CsvRow[]>([]);
+  const [managedImages, setManagedImages] = useState<Array<{ thumbSrc: string; fullSrc: string; alt: string; caption: string; filename: string }>>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -66,11 +67,17 @@ export function GalleryCreativeFlash() {
     (async () => {
       try {
         setLoadError(null);
-        const parsed = await fetchGalleryRows();
-
-        if (!cancelled) {
-          setRows(parsed);
+        const managedResponse = await fetch("/api/public/creative-flash?refresh=1", { cache: "no-store" });
+        if (managedResponse.ok) {
+          const data = await managedResponse.json();
+          const next = Array.isArray(data?.images) ? data.images : [];
+          if (!cancelled && next.length > 0) {
+            setManagedImages(next);
+            return;
+          }
         }
+        const parsed = await fetchGalleryRows();
+        if (!cancelled) setRows(parsed);
       } catch (e: any) {
         if (!cancelled) {
           setLoadError(e?.message || "Failed to load gallery data");
@@ -91,6 +98,18 @@ export function GalleryCreativeFlash() {
   }, [rows]);
 
   const images = useMemo(() => {
+    if (managedImages.length > 0) {
+      return managedImages.map((image) => ({
+        thumb: image.thumbSrc,
+        full: image.fullSrc,
+        venue: "",
+        filename: image.filename,
+        flashPin: "",
+        flashPinOrder: "",
+        alt: image.alt || "Creative flash wedding photography",
+        caption: image.caption || "",
+      }));
+    }
     const mapped = flashRows.map((row) => ({
       thumb: thumbUrl(row),
       full: fullUrlFromThumb(row),
@@ -116,7 +135,7 @@ export function GalleryCreativeFlash() {
     const shuffled = stableShuffle(rest, "creative-flash-v2", (image) => image.filename);
 
     return [...pinned, ...shuffled];
-  }, [flashRows]);
+  }, [flashRows, managedImages]);
 
   if (loadError) {
     return (

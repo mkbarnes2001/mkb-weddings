@@ -17,3 +17,35 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return Response.json({ ok: true, document: { schemaVersion: 1, updatedAt, moments } });
   } catch (error) { return errorResponse(error); }
 };
+
+
+export const onRequestPut: PagesFunction<Env> = async (context) => {
+  if (!adminApiRequestAllowed(context.env as any, context.request)) return notFoundResponse();
+  try {
+    const body: any = await context.request.json();
+    const document = body?.document || {};
+    const moments = Array.isArray(document?.moments) ? document.moments : [];
+    const updatedAt = String(document?.updatedAt || new Date().toISOString());
+    const statements: any[] = [context.env.MKB_DB.prepare(`DELETE FROM moments`)];
+    moments.forEach((moment: any, index: number) => {
+      const clean = {
+        id: String(moment.id || `moment_${crypto.randomUUID()}`),
+        name: String(moment.name || '').trim(),
+        slug: String(moment.slug || '').trim(),
+        description: String(moment.description || ''),
+        availableForAssignment: Boolean(moment.availableForAssignment),
+        showOnMomentsLanding: Boolean(moment.showOnMomentsLanding),
+        cardImageId: String(moment.cardImageId || '').trim(),
+        sortOrder: Number(moment.sortOrder || index + 1),
+        status: moment.status === 'archived' ? 'archived' : 'active',
+      };
+      if (!clean.name || !clean.slug) return;
+      statements.push(context.env.MKB_DB.prepare(`
+        INSERT INTO moments (id, slug, name, description, available_for_assignment, show_on_landing, card_image_id, sort_order, status, document_json, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(clean.id, clean.slug, clean.name, clean.description, clean.availableForAssignment ? 1 : 0, clean.showOnMomentsLanding ? 1 : 0, clean.cardImageId, clean.sortOrder, clean.status, JSON.stringify(clean), updatedAt));
+    });
+    await context.env.MKB_DB.batch(statements);
+    return Response.json({ ok: true, document: { schemaVersion: 1, updatedAt, moments }, backupPath: null });
+  } catch (error) { return errorResponse(error); }
+};

@@ -330,6 +330,25 @@ export function Moments() {
               </button>
             </div>
 
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <label>
+                <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">
+                  Card image ID (optional)
+                </span>
+                <input
+                  value={moment.cardImageId}
+                  onChange={(event) =>
+                    updateMoment(moment.id, { cardImageId: event.target.value.trim() })
+                  }
+                  placeholder="Paste an image ID / asset key, or leave blank for automatic"
+                  className="w-full rounded-2xl border border-black/10 px-4 py-3 font-mono text-sm"
+                />
+                <p className="mt-2 text-xs text-neutral-500">
+                  Leave blank to use the first eligible image assigned to this moment.
+                </p>
+              </label>
+            </div>
+
             <label className="mt-4 block">
               <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">
                 Description

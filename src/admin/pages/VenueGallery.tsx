@@ -412,7 +412,8 @@ export function VenueGallery() {
       | "venue"
       | "moments"
       | "homepage"
-      | "portfolio",
+      | "portfolio"
+      | "creativeFlash",
   ) {
     if (!selectedIds.size) return;
 
@@ -428,6 +429,7 @@ export function VenueGallery() {
                 blog: false,
                 homepage: false,
                 portfolio: false,
+                creativeFlash: false,
                 [gallery]: true,
               }
             : {
@@ -588,6 +590,7 @@ export function VenueGallery() {
           "moments",
           "homepage",
           "portfolio",
+          "creative-flash",
         ]);
 
         const retainedCollections = asset.collections.filter(
@@ -601,6 +604,7 @@ export function VenueGallery() {
           ...(galleryItem.display.moments ? ["moments"] : []),
           ...(galleryItem.display.homepage ? ["homepage"] : []),
           ...(galleryItem.display.portfolio ? ["portfolio"] : []),
+          ...(galleryItem.display.creativeFlash ? ["creative-flash"] : []),
         ];
 
         return {
@@ -1025,6 +1029,7 @@ export function VenueGallery() {
               ["moments", "Moments"],
               ["homepage", "Homepage"],
               ["portfolio", "Portfolio"],
+              ["creativeFlash", "Creative Flash"],
             ] as const
           ).map(([gallery, label]) => (
             <button
@@ -1244,6 +1249,11 @@ export function VenueGallery() {
                           Moments
                         </span>
                       ) : null}
+                      {item?.display.creativeFlash ? (
+                        <span className="rounded-full bg-violet-100 px-3 py-1 text-xs text-violet-900">
+                          Creative Flash
+                        </span>
+                      ) : null}
                     </div>
                   </div>
 
@@ -1368,6 +1378,19 @@ export function VenueGallery() {
                       display: {
                         ...activeItem.display,
                         venue: checked,
+                      },
+                    })
+                  }
+                />
+
+                <Toggle
+                  label="Creative Flash gallery"
+                  checked={activeItem.display.creativeFlash}
+                  onChange={(checked) =>
+                    patchItem(activeItem.assetId, {
+                      display: {
+                        ...activeItem.display,
+                        creativeFlash: checked,
                       },
                     })
                   }

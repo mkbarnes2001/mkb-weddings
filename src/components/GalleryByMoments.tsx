@@ -1,139 +1,43 @@
-// src/components/GalleryByMoments.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Helmet } from "react-helmet-async";
 
-type CsvRow = {
-  venue: string;
-  category: string;
-  filename: string;
-};
-
 const SITE_ORIGIN = "https://www.mkbweddings.co.uk";
-
-// Hero image stays full-size
 const HERO_IMAGE =
   "https://images.mkbweddings.co.uk/full/Greenvale%20Hotel/family%20and%20bridal%20party/MKB-weddings-mkb-photography-NI-wedding-photographer-greenvale-cookstown-wedding-photography-434_2000.webp";
 
-// Moment tile images swapped to thumb versions
-const gettingReadyImage =
-  "https://images.mkbweddings.co.uk/thumb/Galgorm/getting%20ready/MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-67_500.webp";
+const LEGACY_CARD_IMAGES: Record<string, string> = {
+  "getting-ready": "https://images.mkbweddings.co.uk/thumb/Galgorm/getting%20ready/MKB-photography-Northern-Ireland-wedding-photographer-Galgorm-resort-Wedding-photography-Glagorm-resort-wedding-photography-full%20res-67_500.webp",
+  ceremony: "https://images.mkbweddings.co.uk/thumb/Killeavy%20castle/ceremony/mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-135_500.webp",
+  "couple-portraits": "https://images.mkbweddings.co.uk/thumb/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_500.webp",
+  "family-and-bridal-party": "https://images.mkbweddings.co.uk/thumb/Orange%20tree%20house/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-415_500.webp",
+  "reception-and-party": "https://images.mkbweddings.co.uk/thumb/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-300_500.webp",
+  "details-and-decor": "https://images.mkbweddings.co.uk/thumb/Leighinmohr%20house%20hotel/details%20and%20decor/mkb-weddings-northern-ireland-wedding-photographer-creative-wedding-photography-10_500.webp",
+};
 
-const ceremonyImage =
-  "https://images.mkbweddings.co.uk/thumb/Killeavy%20castle/ceremony/mkb-weddings-northern-ireland-wedding-photographer-killeavy-castle-newry-wedding-photography-135_500.webp";
+const LEGACY_DESCRIPTIONS: Record<string, string> = {
+  "getting-ready": "Preparation, anticipation, and quiet moments before the ceremony",
+  ceremony: 'The vows, the emotion, and the moment you say “I do”',
+  "couple-portraits": "Just the two of you — captured naturally and beautifully",
+  "family-and-bridal-party": "Celebrating with the people who matter most",
+  "reception-and-party": "Speeches, laughter, dancing — the celebration in full swing",
+  "details-and-decor": "The thoughtful styling, florals, and finishing touches",
+};
 
-const couplePortraitImage =
-  "https://images.mkbweddings.co.uk/thumb/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-4_500.webp";
-
-const bridalPartyImage =
-  "https://images.mkbweddings.co.uk/thumb/Orange%20tree%20house/family%20and%20bridal%20party/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-orange-tree-house-greyabbey-wedding-photography-415_500.webp";
-
-const receptionImage =
-  "https://images.mkbweddings.co.uk/thumb/Belmont/reception%20and%20party/mkb-weddings-mkb-photography-norther-ireland-wedding-photographer-belmont-house-hotel-banbridge-wedding-photography-300_500.webp";
-
-const detailsDecorImage =
-  "https://images.mkbweddings.co.uk/thumb/Leighinmohr%20house%20hotel/details%20and%20decor/mkb-weddings-northern-ireland-wedding-photographer-creative-wedding-photography-10_500.webp";
-
-function slugify(s: string) {
-  return (s || "")
-    .trim()
-    .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function parseGalleryCsv(csvText: string): CsvRow[] {
-  const lines = csvText.split(/\r?\n/).filter(Boolean);
-  if (lines.length < 2) return [];
-
-  const parseLine = (line: string) => {
-    const out: string[] = [];
-    let cur = "";
-    let inQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') {
-        inQuotes = !inQuotes;
-        continue;
-      }
-      if (ch === "," && !inQuotes) {
-        out.push(cur.trim());
-        cur = "";
-      } else {
-        cur += ch;
-      }
-    }
-    out.push(cur.trim());
-    return out;
-  };
-
-  const header = parseLine(lines[0]).map((h) => h.toLowerCase());
-  const venueIdx = header.indexOf("venue");
-  const categoryIdx = header.indexOf("category");
-  const filenameIdx = header.indexOf("filename");
-
-  if (venueIdx === -1 || categoryIdx === -1 || filenameIdx === -1) {
-    console.error("CSV header must be: venue,category,filename");
-    return [];
-  }
-
-  const rows: CsvRow[] = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cols = parseLine(lines[i]);
-    const venue = (cols[venueIdx] || "").trim();
-    const category = (cols[categoryIdx] || "").trim();
-    const filename = (cols[filenameIdx] || "").trim();
-    if (!venue || !category || !filename) continue;
-    rows.push({ venue, category, filename });
-  }
-  return rows;
-}
-
-const MOMENT_TILES = [
-  {
-    id: "getting-ready",
-    title: "Getting Ready",
-    description: "Preparation, anticipation, and quiet moments before the ceremony",
-    image: gettingReadyImage,
-  },
-  {
-    id: "ceremony",
-    title: "Ceremony",
-    description: 'The vows, the emotion, and the moment you say “I do”',
-    image: ceremonyImage,
-  },
-  {
-    id: "couple-portraits",
-    title: "Couple Portraits",
-    description: "Just the two of you — captured naturally and beautifully",
-    image: couplePortraitImage,
-  },
-  {
-    id: "family-and-bridal-party",
-    title: "Family and Bridal Party",
-    description: "Celebrating with the people who matter most",
-    image: bridalPartyImage,
-  },
-  {
-    id: "reception-and-party",
-    title: "Reception and Party",
-    description: "Speeches, laughter, dancing — the celebration in full swing",
-    image: receptionImage,
-  },
-  {
-    id: "details-and-decor",
-    title: "Details and Decor",
-    description: "The thoughtful styling, florals, and finishing touches",
-    image: detailsDecorImage,
-  },
-] as const;
+type PublicMoment = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  sortOrder: number;
+  count: number;
+  image: null | { thumbSrc: string; fullSrc: string; alt: string };
+};
 
 export function GalleryByMoments() {
-  const [rows, setRows] = useState<CsvRow[]>([]);
+  const [moments, setMoments] = useState<PublicMoment[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -142,59 +46,22 @@ export function GalleryByMoments() {
 
   useEffect(() => {
     let cancelled = false;
-
     (async () => {
       try {
-        setLoadError(null);
-        const res = await fetch("/gallery.csv", { cache: "no-store" });
-        if (!res.ok) throw new Error(`Failed to load /gallery.csv (${res.status})`);
-        const text = await res.text();
-        const parsed = parseGalleryCsv(text);
-        if (!cancelled) setRows(parsed);
-      } catch (e: any) {
-        if (!cancelled) setLoadError(e?.message || "Failed to load gallery.csv");
+        const response = await fetch("/api/public/moments?refresh=1", { cache: "no-store" });
+        if (!response.ok) throw new Error(`Failed to load moments (${response.status})`);
+        const data = await response.json();
+        if (!cancelled) setMoments(Array.isArray(data?.moments) ? data.moments : []);
+      } catch (error: any) {
+        if (!cancelled) setLoadError(error?.message || "Failed to load moments");
       }
     })();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
-
-  const countsByMomentId = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const r of rows) {
-      const id = slugify(r.category);
-      map.set(id, (map.get(id) ?? 0) + 1);
-    }
-    return map;
-  }, [rows]);
-
-  const tilesToShow = useMemo(() => {
-    return MOMENT_TILES.filter((t) => (countsByMomentId.get(t.id) ?? 0) > 0);
-  }, [countsByMomentId]);
 
   const canonical = `${SITE_ORIGIN}/gallery/moments`;
   const metaTitle = "Wedding Moments Gallery | Northern Ireland & Ireland | MKB Weddings";
-  const metaDescription =
-    "Browse real wedding photography by moment — getting ready, ceremony, couple portraits, bridal party, reception and details — across Northern Ireland and Ireland.";
-
-  if (loadError) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6">
-        <div className="text-center max-w-xl">
-          <h1 className="text-3xl mb-3">Gallery loading error</h1>
-          <p className="text-neutral-600 mb-6">{loadError}</p>
-          <Link
-            to="/gallery"
-            className="text-neutral-600 hover:text-neutral-900 underline underline-offset-4"
-          >
-            Back to Gallery
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const metaDescription = "Browse real wedding photography by moment — getting ready, ceremony, couple portraits, bridal party, reception and details — across Northern Ireland and Ireland.";
 
   return (
     <div className="min-h-screen bg-white">
@@ -202,7 +69,6 @@ export function GalleryByMoments() {
         <title>{metaTitle}</title>
         <meta name="description" content={metaDescription} />
         <link rel="canonical" href={canonical} />
-
         <meta property="og:url" content={canonical} />
         <meta property="og:title" content={metaTitle} />
         <meta property="og:description" content={metaDescription} />
@@ -211,30 +77,15 @@ export function GalleryByMoments() {
       </Helmet>
 
       <div className="relative h-[60vh] min-h-[420px]">
-        <ImageWithFallback
-          src={HERO_IMAGE}
-          alt="Wedding moments gallery across Northern Ireland and Ireland"
-          className="w-full h-full object-cover"
-        />
+        <ImageWithFallback src={HERO_IMAGE} alt="Wedding moments gallery across Northern Ireland and Ireland" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-
         <div className="absolute inset-0 flex items-end">
           <div className="w-full max-w-7xl mx-auto px-6 pb-20 text-center">
-            <Link
-              to="/gallery"
-              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Back to Gallery
+            <Link to="/gallery" className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors justify-center">
+              <ArrowLeft className="w-5 h-5" /> Back to Gallery
             </Link>
-
-            <h1 className="text-white text-4xl md:text-5xl mb-4 font-serif">
-              Wedding Moments
-            </h1>
-
-            <div className="text-white/85 text-sm">
-              {tilesToShow.length} {tilesToShow.length === 1 ? "gallery" : "galleries"}
-            </div>
+            <h1 className="text-white text-4xl md:text-5xl mb-4 font-serif">Wedding Moments</h1>
+            <div className="text-white/85 text-sm">{moments.length} {moments.length === 1 ? "gallery" : "galleries"}</div>
           </div>
         </div>
       </div>
@@ -242,61 +93,34 @@ export function GalleryByMoments() {
       <div className="max-w-7xl mx-auto px-6 pt-6 pb-10">
         <nav aria-label="Breadcrumb" className="flex justify-center">
           <ol className="flex flex-wrap items-center justify-center gap-2 text-neutral-600 text-sm">
-            <li>
-              <Link to="/" className="hover:text-neutral-900 underline underline-offset-4">
-                Home
-              </Link>
-            </li>
-            <li className="opacity-60">
-              <ChevronRight className="w-4 h-4" />
-            </li>
-            <li>
-              <Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">
-                Gallery
-              </Link>
-            </li>
-            <li className="opacity-60">
-              <ChevronRight className="w-4 h-4" />
-            </li>
+            <li><Link to="/" className="hover:text-neutral-900 underline underline-offset-4">Home</Link></li>
+            <li className="opacity-60"><ChevronRight className="w-4 h-4" /></li>
+            <li><Link to="/gallery" className="hover:text-neutral-900 underline underline-offset-4">Gallery</Link></li>
+            <li className="opacity-60"><ChevronRight className="w-4 h-4" /></li>
             <li className="text-neutral-900">Moments</li>
           </ol>
         </nav>
       </div>
 
       <section className="max-w-5xl mx-auto px-6 pt-12 pb-10 text-center">
-        <p className="text-neutral-700 leading-relaxed text-lg">
-          Browse real wedding photography by moment — from getting ready to the dancefloor —
-          across Northern Ireland and Ireland.
-        </p>
+        <p className="text-neutral-700 leading-relaxed text-lg">Browse real wedding photography by moment — from getting ready to the dancefloor — across Northern Ireland and Ireland.</p>
       </section>
 
       <div className="max-w-7xl mx-auto px-6 pb-32 pt-6">
+        {loadError ? <div className="mb-8 text-center text-sm text-amber-700">{loadError}</div> : null}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {tilesToShow.map((moment) => {
-            const count = countsByMomentId.get(moment.id) ?? 0;
-
+          {moments.map((moment) => {
+            const image = moment.image?.thumbSrc || LEGACY_CARD_IMAGES[moment.slug] || HERO_IMAGE;
+            const description = moment.description || LEGACY_DESCRIPTIONS[moment.slug] || "Explore this collection of real wedding moments.";
             return (
-              <Link
-                key={moment.id}
-                to={`/gallery/moment/${encodeURIComponent(moment.id)}`}
-                className="group relative aspect-[4/3] overflow-hidden rounded-lg"
-              >
-                <ImageWithFallback
-                  src={moment.image}
-                  alt={moment.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
+              <Link key={moment.id || moment.slug} to={`/gallery/moment/${encodeURIComponent(moment.slug)}`} className="group relative aspect-[4/3] overflow-hidden rounded-lg">
+                <ImageWithFallback src={image} alt={moment.image?.alt || moment.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                 <div className="absolute inset-0 flex flex-col justify-end p-8">
-                  <h2 className="text-white text-2xl md:text-3xl mb-2 font-serif leading-tight">
-                    {moment.title}
-                  </h2>
-                  <p className="text-white/90 text-sm mb-4">{moment.description}</p>
-
+                  <h2 className="text-white text-2xl md:text-3xl mb-2 font-serif leading-tight">{moment.name}</h2>
+                  <p className="text-white/90 text-sm mb-4">{description}</p>
                   <div className="flex items-center text-white">
-                    <span className="text-sm uppercase tracking-wider">
-                      View Gallery{count ? ` (${count})` : ""}
-                    </span>
+                    <span className="text-sm uppercase tracking-wider">View Gallery{moment.count ? ` (${moment.count})` : ""}</span>
                     <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-2" />
                   </div>
                 </div>
@@ -304,12 +128,7 @@ export function GalleryByMoments() {
             );
           })}
         </div>
-
-        {tilesToShow.length === 0 && (
-          <div className="text-center py-20 text-neutral-600">
-            No moments found (check gallery.csv categories).
-          </div>
-        )}
+        {!loadError && moments.length === 0 ? <div className="text-center py-20 text-neutral-600">No moments are currently published on this page.</div> : null}
       </div>
     </div>
   );

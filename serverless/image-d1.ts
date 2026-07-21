@@ -186,6 +186,7 @@ export async function registerUploadedImage(
       blog: false,
       homepage: false,
       portfolio: false,
+      creativeFlash: false,
     },
   };
 

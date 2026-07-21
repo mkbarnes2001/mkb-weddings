@@ -42,6 +42,7 @@ export type VenueGalleryDisplay = {
   blog: boolean;
   homepage: boolean;
   portfolio: boolean;
+  creativeFlash: boolean;
 };
 
 export type VenueGalleryItem = {
