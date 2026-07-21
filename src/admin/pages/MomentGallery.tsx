@@ -6,7 +6,6 @@ import {
   Eye,
   EyeOff,
   GripVertical,
-  Image as ImageIcon,
   Save,
   Search,
   Star,
@@ -580,11 +579,8 @@ export function MomentGallery() {
                     </div>
                   </div>
 
-                  <div style={{ padding: "8px" }}>
-                    <p className="truncate text-[11px] text-neutral-600" title={image.filename}>
-                      {image.filename}
-                    </p>
-                    <p className="mt-1 truncate text-[11px] font-medium text-neutral-800">
+                  <div style={{ padding: "7px 8px" }}>
+                    <p className="truncate text-[11px] font-medium text-neutral-800">
                       {image.venueName || "Unlinked venue"}
                     </p>
                   </div>
@@ -652,31 +648,21 @@ export function MomentGallery() {
                   type="button"
                   onClick={() => {
                     showImages([activeImage.assetKey]);
-                    patchMoment({ heroImageId: activeImage.assetKey });
+                    patchMoment({
+                      heroImageId: activeImage.assetKey,
+                      cardImageId: activeImage.assetKey,
+                    });
                   }}
                   className="flex w-full items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm"
                 >
                   <Star className="h-4 w-4" />
                   {moment.heroImageId === activeImage.assetKey ||
                   moment.heroImageId === activeImage.imageId
-                    ? "Hero image set"
-                    : "Set as gallery hero"}
+                    ? "Hero + moment card image set"
+                    : "Set as hero + moment card"}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    showImages([activeImage.assetKey]);
-                    patchMoment({ cardImageId: activeImage.assetKey });
-                  }}
-                  className="flex w-full items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm"
-                >
-                  <ImageIcon className="h-4 w-4" />
-                  {moment.cardImageId === activeImage.assetKey ||
-                  moment.cardImageId === activeImage.imageId
-                    ? "Landing card image set"
-                    : "Set as landing card"}
-                </button>
+
 
                 <div className="rounded-2xl bg-neutral-100 p-3 text-xs leading-5 text-neutral-600">
                   Tip: use the checkbox on several thumbnails, then drag the white grip on any selected image. The selected group keeps its internal order and moves together.
