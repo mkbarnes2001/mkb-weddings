@@ -38,6 +38,7 @@ type PublicMoment = {
 
 export function GalleryByMoments() {
   const [moments, setMoments] = useState<PublicMoment[]>([]);
+  const [masterHero, setMasterHero] = useState<{ fullSrc: string; thumbSrc: string; alt: string } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,10 +49,17 @@ export function GalleryByMoments() {
     let cancelled = false;
     (async () => {
       try {
-        const response = await fetch("/api/public/moments?refresh=1", { cache: "no-store" });
+        const [response, heroResponse] = await Promise.all([
+          fetch("/api/public/moments?refresh=1", { cache: "no-store" }),
+          fetch("/api/public/gallery-master-heroes?refresh=1", { cache: "no-store" }),
+        ]);
         if (!response.ok) throw new Error(`Failed to load moments (${response.status})`);
         const data = await response.json();
-        if (!cancelled) setMoments(Array.isArray(data?.moments) ? data.moments : []);
+        const heroData = heroResponse.ok ? await heroResponse.json() : null;
+        if (!cancelled) {
+          setMoments(Array.isArray(data?.moments) ? data.moments : []);
+          setMasterHero(heroData?.moments || null);
+        }
       } catch (error: any) {
         if (!cancelled) setLoadError(error?.message || "Failed to load moments");
       }
@@ -72,12 +80,12 @@ export function GalleryByMoments() {
         <meta property="og:url" content={canonical} />
         <meta property="og:title" content={metaTitle} />
         <meta property="og:description" content={metaDescription} />
-        <meta property="og:image" content={HERO_IMAGE} />
+        <meta property="og:image" content={masterHero?.fullSrc || masterHero?.thumbSrc || HERO_IMAGE} />
         <meta property="og:type" content="website" />
       </Helmet>
 
       <div className="relative h-[60vh] min-h-[420px]">
-        <ImageWithFallback src={HERO_IMAGE} alt="Wedding moments gallery across Northern Ireland and Ireland" className="w-full h-full object-cover" />
+        <ImageWithFallback src={masterHero?.fullSrc || masterHero?.thumbSrc || HERO_IMAGE} alt={masterHero?.alt || "Wedding moments gallery across Northern Ireland and Ireland"} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         <div className="absolute inset-0 flex items-end">
           <div className="w-full max-w-7xl mx-auto px-6 pb-20 text-center">

@@ -1522,6 +1522,21 @@ export function VenueGallery() {
                   Set as venue hero
                 </button>
 
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await AdminApiService.setGalleryMasterHero("venue", activeItem.assetId);
+                      setMessage("Gallery by Venue master hero updated.");
+                    } catch (heroError) {
+                      setError(heroError instanceof Error ? heroError.message : "Unable to set Gallery by Venue master hero.");
+                    }
+                  }}
+                  className="w-full rounded-full border border-black/15 bg-white px-5 py-3 text-sm text-black"
+                >
+                  Set as Gallery by Venue master hero
+                </button>
+
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">
                     AI caption

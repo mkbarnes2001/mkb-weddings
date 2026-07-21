@@ -820,6 +820,22 @@ export function MomentGallery() {
                     : "Set as hero + moment card"}
                 </button>
 
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await AdminApiService.setGalleryMasterHero("moments", activeImage.assetKey);
+                      setMessage("Gallery by Moments master hero updated.");
+                    } catch (heroError) {
+                      setError(heroError instanceof Error ? heroError.message : "Unable to set Gallery by Moments master hero.");
+                    }
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm text-white"
+                >
+                  <Star className="h-4 w-4" />
+                  Set as Gallery by Moments master hero
+                </button>
+
 
 
                 <div className="rounded-2xl bg-neutral-100 p-3 text-xs leading-5 text-neutral-600">

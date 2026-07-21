@@ -39,6 +39,7 @@ export function GalleryByVenue() {
     PublicVenueIndexItem[]
   >([]);
   const [loading, setLoading] = useState(true);
+  const [masterHero, setMasterHero] = useState<{ fullSrc: string; thumbSrc: string; alt: string } | null>(null);
   const [loadError, setLoadError] = useState<
     string | null
   >(null);
@@ -53,10 +54,16 @@ export function GalleryByVenue() {
   useEffect(() => {
     let cancelled = false;
 
-    PublicVenueService.loadIndex()
-      .then((index) => {
+    Promise.all([
+      PublicVenueService.loadIndex(),
+      fetch("/api/public/gallery-master-heroes?refresh=1", { cache: "no-store" })
+        .then((response) => (response.ok ? response.json() : null))
+        .catch(() => null),
+    ])
+      .then(([index, heroData]) => {
         if (!cancelled) {
           setVenues(index.venues);
+          setMasterHero(heroData?.venue || null);
           setLoadError(null);
         }
       })
@@ -112,6 +119,8 @@ export function GalleryByVenue() {
     "Browse real wedding photography by venue across Northern Ireland and Ireland. Explore venue galleries, style inspiration, and full wedding stories by MKB Weddings.";
 
   const ogImage =
+    masterHero?.fullSrc ||
+    masterHero?.thumbSrc ||
     venueCards[0]?.coverFull ||
     venueCards[0]?.coverThumb ||
     HERO_IMAGE;
@@ -261,8 +270,8 @@ export function GalleryByVenue() {
 
       <div className="relative h-[60vh] min-h-[420px]">
         <ImageWithFallback
-          src={HERO_IMAGE}
-          alt="Wedding venue galleries across Northern Ireland and Ireland"
+          src={masterHero?.fullSrc || masterHero?.thumbSrc || HERO_IMAGE}
+          alt={masterHero?.alt || "Wedding venue galleries across Northern Ireland and Ireland"}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />

@@ -32,6 +32,7 @@ export function Moments() {
   const [dirty, setDirty] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [heroImages, setHeroImages] = useState<Record<string, { thumbSrc: string; fullSrc: string; alt: string }>>({});
 
   useEffect(() => {
     AdminApiService.getMoments()
@@ -44,6 +45,19 @@ export function Moments() {
         ),
       );
   }, []);
+
+  useEffect(() => {
+    fetch("/api/public/moments?refresh=1", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        const next: Record<string, { thumbSrc: string; fullSrc: string; alt: string }> = {};
+        for (const item of Array.isArray(data?.moments) ? data.moments : []) {
+          if (item?.slug && item?.image) next[String(item.slug)] = item.image;
+        }
+        setHeroImages(next);
+      })
+      .catch(() => {});
+  }, [document?.updatedAt]);
 
   const sortedMoments = useMemo(
     () =>
@@ -236,7 +250,7 @@ export function Moments() {
         </section>
       ) : null}
 
-      <section className="space-y-4">
+      <section className="grid grid-cols-1 gap-5 md:grid-cols-2">
         {sortedMoments.map((moment) => (
           <article
             key={moment.id}
@@ -246,12 +260,25 @@ export function Moments() {
               moment.status === "archived" ? "opacity-55" : ""
             }`}
           >
-            <div className="grid grid-cols-1 gap-5 xl:grid-cols-[auto_1fr_1fr_auto] xl:items-center">
+            {heroImages[moment.slug] ? (
+              <div className="mb-5 overflow-hidden rounded-[18px] bg-neutral-100" style={{ aspectRatio: "16 / 9" }}>
+                <img
+                  src={heroImages[moment.slug].thumbSrc || heroImages[moment.slug].fullSrc}
+                  alt={heroImages[moment.slug].alt || `${moment.name} hero`}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="mb-5 flex items-center justify-center rounded-[18px] bg-neutral-100 text-sm text-neutral-400" style={{ aspectRatio: "16 / 9" }}>
+                Set a hero in Manage gallery
+              </div>
+            )}
+            <div className="grid grid-cols-1 gap-5">
               <div
                 draggable
                 onDragStart={() => setDraggedId(moment.id)}
                 onDragEnd={() => setDraggedId(null)}
-                className="cursor-grab rounded-full border border-black/10 bg-white p-3"
+                className="w-fit cursor-grab rounded-full border border-black/10 bg-white p-3"
                 title="Drag to reorder"
               >
                 <GripVertical className="h-5 w-5" />

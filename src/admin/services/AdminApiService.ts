@@ -385,6 +385,18 @@ export class AdminApiService {
     );
   }
 
+  static async getGalleryMasterHeroes() {
+    return request<{ ok: true; settings: { venueHeroImageId: string; momentsHeroImageId: string } }>("/api/gallery-master-heroes");
+  }
+
+  static async setGalleryMasterHero(kind: "venue" | "moments", assetKey: string) {
+    const body = kind === "venue" ? { venueHeroImageId: assetKey } : { momentsHeroImageId: assetKey };
+    return request<{ ok: true; settings: { venueHeroImageId: string; momentsHeroImageId: string } }>("/api/gallery-master-heroes", {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+  }
+
   static async getCreativeFlashGallery() {
     return request<{ ok: true } & import("../types/moment").CreativeFlashGalleryPayload>(
       "/api/creative-flash/gallery",
