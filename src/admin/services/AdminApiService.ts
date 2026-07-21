@@ -359,12 +359,28 @@ export class AdminApiService {
     return { moment: result.moment, images: result.images };
   }
 
-  static async enableMomentGalleryImages(slug: string, enabledAssetKeys: string[]) {
+  static async enableMomentGalleryImages(
+    slug: string,
+    enabledAssetKeys: string[],
+    updates: Array<{
+      assetKey: string;
+      included: boolean;
+      moments: string[];
+      display: {
+        venue: boolean;
+        moments: boolean;
+        blog: boolean;
+        homepage: boolean;
+        portfolio: boolean;
+        creativeFlash: boolean;
+      };
+    }> = [],
+  ) {
     return request<{ ok: true; updated: number }>(
       `/api/moments/${encodeURIComponent(slug)}/gallery`,
       {
         method: "PUT",
-        body: JSON.stringify({ enabledAssetKeys }),
+        body: JSON.stringify({ enabledAssetKeys, updates }),
       },
     );
   }

@@ -126,6 +126,46 @@ export function MomentGallery() {
     setError("");
   }
 
+  function patchImage(
+    assetKey: string,
+    patch: Partial<MomentGalleryImage>,
+  ) {
+    setImages((current) =>
+      current.map((image) =>
+        image.assetKey === assetKey
+          ? {
+              ...image,
+              ...patch,
+              display: patch.display
+                ? { ...image.display, ...patch.display }
+                : image.display,
+            }
+          : image,
+      ),
+    );
+    setDirty(true);
+    setMessage("");
+    setError("");
+  }
+
+  function setImageMoment(
+    image: MomentGalleryImage,
+    momentSlug: string,
+    checked: boolean,
+  ) {
+    const nextMoments = checked
+      ? unique([...(image.moments || []), momentSlug])
+      : (image.moments || []).filter((value) => value !== momentSlug);
+
+    patchImage(image.assetKey, {
+      moments: nextMoments,
+      display: {
+        ...image.display,
+        moments: nextMoments.length > 0,
+      },
+    });
+  }
+
   function showImages(assetKeys: string[]) {
     const remove = new Set(assetKeys);
     patchMoment({
@@ -262,7 +302,20 @@ export function MomentGallery() {
         .filter((image) => !hiddenSet.has(image.assetKey))
         .map((image) => image.assetKey);
 
-      await AdminApiService.enableMomentGalleryImages(slug, visibleAssetKeys);
+      await AdminApiService.enableMomentGalleryImages(
+        slug,
+        visibleAssetKeys,
+        images.map((image) => ({
+          assetKey: image.assetKey,
+          included: image.included,
+          moments: image.moments || [],
+          display: {
+            ...image.display,
+            venue: image.included,
+            moments: (image.moments || []).length > 0,
+          },
+        })),
+      );
       const result = await AdminApiService.saveMoments(nextDocument);
 
       const savedMoment = result.document.moments.find(
@@ -672,6 +725,83 @@ export function MomentGallery() {
                   {hiddenIds.has(activeImage.assetKey) ? "Show in gallery" : "Hide from gallery"}
                 </button>
 
+                <div className="border-t border-black/10 pt-4">
+                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">
+                    Gallery destinations
+                  </p>
+                  <div className="space-y-2">
+                    <DetailToggle
+                      label="Venue gallery"
+                      checked={activeImage.included}
+                      onChange={(checked) =>
+                        patchImage(activeImage.assetKey, {
+                          included: checked,
+                          display: { ...activeImage.display, venue: checked },
+                        })
+                      }
+                    />
+                    <DetailToggle
+                      label="Creative Flash"
+                      checked={activeImage.display.creativeFlash}
+                      onChange={(checked) =>
+                        patchImage(activeImage.assetKey, {
+                          display: { ...activeImage.display, creativeFlash: checked },
+                        })
+                      }
+                    />
+                    {activeImage.weddingSlug ? (
+                      <DetailToggle
+                        label="Wedding story"
+                        checked={activeImage.display.blog}
+                        onChange={(checked) =>
+                          patchImage(activeImage.assetKey, {
+                            display: { ...activeImage.display, blog: checked },
+                          })
+                        }
+                      />
+                    ) : null}
+                    <DetailToggle
+                      label="Homepage"
+                      checked={activeImage.display.homepage}
+                      onChange={(checked) =>
+                        patchImage(activeImage.assetKey, {
+                          display: { ...activeImage.display, homepage: checked },
+                        })
+                      }
+                    />
+                    <DetailToggle
+                      label="Portfolio"
+                      checked={activeImage.display.portfolio}
+                      onChange={(checked) =>
+                        patchImage(activeImage.assetKey, {
+                          display: { ...activeImage.display, portfolio: checked },
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="border-t border-black/10 pt-4">
+                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">
+                    Moments
+                  </p>
+                  <div className="space-y-2">
+                    {document.moments
+                      .filter((item) => item.status === "active" && item.availableForAssignment)
+                      .sort((a, b) => a.sortOrder - b.sortOrder)
+                      .map((item) => (
+                        <DetailToggle
+                          key={item.id}
+                          label={item.name}
+                          checked={(activeImage.moments || []).includes(item.slug)}
+                          onChange={(checked) =>
+                            setImageMoment(activeImage, item.slug, checked)
+                          }
+                        />
+                      ))}
+                  </div>
+                </div>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -706,6 +836,27 @@ export function MomentGallery() {
         </section>
       )}
     </div>
+  );
+}
+
+function DetailToggle({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <label className="flex items-center justify-between gap-4 rounded-2xl border border-black/10 p-3">
+      <span className="text-sm">{label}</span>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+      />
+    </label>
   );
 }
 

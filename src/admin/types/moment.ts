@@ -24,6 +24,15 @@ export type MomentRepositoryDocument = {
   moments: MomentRecord[];
 };
 
+export type MomentGalleryDisplay = {
+  venue: boolean;
+  moments: boolean;
+  blog: boolean;
+  homepage: boolean;
+  portfolio: boolean;
+  creativeFlash: boolean;
+};
+
 export type MomentGalleryImage = {
   assetKey: string;
   imageId: string;
@@ -36,6 +45,9 @@ export type MomentGalleryImage = {
   alt: string;
   caption: string;
   globallyEnabled: boolean;
+  included: boolean;
+  moments: string[];
+  display: MomentGalleryDisplay;
 };
 
 export type MomentGalleryPayload = {

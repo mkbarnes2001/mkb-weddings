@@ -479,6 +479,10 @@ export function VenueGallery() {
         return {
           ...item,
           moments: nextMoments,
+          display: {
+            ...item.display,
+            moments: nextMoments.length > 0,
+          },
         };
       }),
     );
@@ -992,22 +996,6 @@ export function VenueGallery() {
             Remove from venue gallery
           </button>
 
-          <button
-            type="button"
-            onClick={() => setSelectedMomentDisplay(true)}
-            className="rounded-full border border-black/10 px-4 py-2 text-sm"
-          >
-            Show in moment galleries
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setSelectedMomentDisplay(false)}
-            className="rounded-full border border-black/10 px-4 py-2 text-sm"
-          >
-            Hide from moment galleries
-          </button>
-
           <select
             value={batchGalleryMode}
             onChange={(event) =>
@@ -1024,9 +1012,8 @@ export function VenueGallery() {
 
           {(
             [
-              ["blog", "Wedding blog"],
+              ["blog", "Wedding story"],
               ["venue", "Venue"],
-              ["moments", "Moments"],
               ["homepage", "Homepage"],
               ["portfolio", "Portfolio"],
               ["creativeFlash", "Creative Flash"],
@@ -1369,8 +1356,14 @@ export function VenueGallery() {
                   </p>
                 </div>
 
+                <div className="border-t border-black/10 pt-5">
+                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">
+                    Gallery destinations
+                  </p>
+                </div>
+
                 <Toggle
-                  label="Include in venue gallery"
+                  label="Venue gallery"
                   checked={activeItem.included}
                   onChange={(checked) =>
                     patchItem(activeItem.assetId, {
@@ -1396,19 +1389,6 @@ export function VenueGallery() {
                   }
                 />
 
-                <Toggle
-                  label="Show in Gallery by Moment"
-                  checked={activeItem.display.moments}
-                  onChange={(checked) =>
-                    patchItem(activeItem.assetId, {
-                      display: {
-                        ...activeItem.display,
-                        moments: checked,
-                      },
-                    })
-                  }
-                />
-
                 {activeAsset.weddingSlug ? (
                   <>
                     <div className="rounded-2xl border border-black/10 bg-neutral-50 p-4">
@@ -1424,7 +1404,7 @@ export function VenueGallery() {
                     </div>
 
                     <Toggle
-                      label="Wedding blog"
+                      label="Wedding story"
                       checked={activeItem.display.blog}
                       onChange={(checked) =>
                         patchItem(activeItem.assetId, {
@@ -1516,6 +1496,10 @@ export function VenueGallery() {
                                   activeItem.assetId,
                                   {
                                     moments: nextMoments,
+                                    display: {
+                                      ...activeItem.display,
+                                      moments: nextMoments.length > 0,
+                                    },
                                   },
                                 );
                               }}
