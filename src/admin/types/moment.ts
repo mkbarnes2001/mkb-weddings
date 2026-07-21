@@ -54,3 +54,14 @@ export type MomentGalleryPayload = {
   moment: MomentRecord;
   images: MomentGalleryImage[];
 };
+
+export type CreativeFlashGallerySettings = {
+  heroImageId: string;
+  imageOrderIds: string[];
+  hiddenImageIds: string[];
+};
+
+export type CreativeFlashGalleryPayload = {
+  settings: CreativeFlashGallerySettings;
+  images: MomentGalleryImage[];
+};

@@ -1085,12 +1085,19 @@ export function VenueGallery() {
         <section
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) 390px",
+            gridTemplateColumns: "minmax(0, 1fr) 320px",
             gap: "24px",
             alignItems: "start",
           }}
         >
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+              gap: "12px",
+              alignItems: "start",
+            }}
+          >
             {filteredAssets.map((asset, index) => {
               const item = itemMap.get(asset.assetId);
               const selected = selectedIds.has(asset.assetId);
@@ -1111,7 +1118,7 @@ export function VenueGallery() {
                   }}
                   style={{
                     overflow: "hidden",
-                    borderRadius: "22px",
+                    borderRadius: "16px",
                     border:
                       activeId === asset.assetId
                         ? "2px solid #111"
@@ -1162,11 +1169,11 @@ export function VenueGallery() {
                       }}
                       style={{
                         position: "absolute",
-                        right: "12px",
-                        top: "12px",
+                        right: "8px",
+                        top: "8px",
                         zIndex: 30,
-                        width: "34px",
-                        height: "34px",
+                        width: "30px",
+                        height: "30px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -1194,11 +1201,11 @@ export function VenueGallery() {
                       onDragEnd={() => setDraggedIds([])}
                       style={{
                         position: "absolute",
-                        right: "12px",
-                        bottom: "12px",
+                        right: "8px",
+                        bottom: "8px",
                         zIndex: 30,
-                        width: "42px",
-                        height: "42px",
+                        width: "38px",
+                        height: "38px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -1244,18 +1251,15 @@ export function VenueGallery() {
                     </div>
                   </div>
 
-                  <div className="p-4">
-                    <p className="truncate text-xs text-neutral-500">
-                      {asset.filename}
-                    </p>
-                    <p className="mt-2 truncate text-sm font-medium">
+                  <div className="p-2.5">
+                    <p className="truncate text-[11px] font-medium">
                       {asset.weddingCouple}
                     </p>
-                    <div className="mt-3 flex gap-1">
+                    <div className="mt-2 flex gap-0.5">
                       {[1, 2, 3, 4, 5].map((rating) => (
                         <Star
                           key={rating}
-                          className={`h-4 w-4 ${
+                          className={`h-3 w-3 ${
                             rating <= (item?.rating || 0)
                               ? "fill-current text-black"
                               : "text-neutral-300"

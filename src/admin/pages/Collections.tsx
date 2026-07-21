@@ -67,6 +67,17 @@ export function Collections() {
         </div>
       </section>
 
+      <section className="rounded-[28px] border border-black/10 bg-white/85 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Managed gallery</p>
+            <h2 className="mt-2 font-serif text-3xl">Creative Flash</h2>
+            <p className="mt-2 text-sm text-neutral-600">Curate order, visibility, hero image, gallery destinations and moment assignments.</p>
+          </div>
+          <Link to="/admin/creative-flash" className="rounded-full bg-black px-5 py-3 text-center text-sm text-white">Manage Creative Flash</Link>
+        </div>
+      </section>
+
       <section className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div className="rounded-[28px] border border-black/10 bg-white/75 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
           <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-3">Collections</p>

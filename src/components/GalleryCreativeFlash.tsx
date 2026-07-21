@@ -55,7 +55,8 @@ function getPinOrder(value?: string) {
 
 export function GalleryCreativeFlash() {
   const [rows, setRows] = useState<CsvRow[]>([]);
-  const [managedImages, setManagedImages] = useState<Array<{ thumbSrc: string; fullSrc: string; alt: string; caption: string; filename: string }>>([]);
+  const [managedImages, setManagedImages] = useState<Array<{ assetKey?: string; thumbSrc: string; fullSrc: string; alt: string; caption: string; filename: string }>>([]);
+  const [managedHero, setManagedHero] = useState<{ fullSrc: string; alt: string } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -73,6 +74,7 @@ export function GalleryCreativeFlash() {
           const next = Array.isArray(data?.images) ? data.images : [];
           if (!cancelled && next.length > 0) {
             setManagedImages(next);
+            if (data?.heroImage) setManagedHero({ fullSrc: data.heroImage.fullSrc || data.heroImage.thumbSrc, alt: data.heroImage.alt || "Creative flash wedding photography" });
             return;
           }
         }
@@ -153,8 +155,8 @@ export function GalleryCreativeFlash() {
       {/* HERO */}
       <div className="relative h-[60vh] min-h-[400px]">
         <ImageWithFallback
-          src={creativeFlashHero}
-          alt="Creative flash wedding photography"
+          src={managedHero?.fullSrc || creativeFlashHero}
+          alt={managedHero?.alt || "Creative flash wedding photography"}
           className="w-full h-full object-cover"
           style={{ objectPosition: HERO_FOCUS }}
         />

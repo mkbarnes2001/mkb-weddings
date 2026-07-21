@@ -385,6 +385,27 @@ export class AdminApiService {
     );
   }
 
+  static async getCreativeFlashGallery() {
+    return request<{ ok: true } & import("../types/moment").CreativeFlashGalleryPayload>(
+      "/api/creative-flash/gallery",
+    );
+  }
+
+  static async saveCreativeFlashGallery(payload: {
+    settings: import("../types/moment").CreativeFlashGallerySettings;
+    updates: Array<{
+      assetKey: string;
+      included: boolean;
+      moments: string[];
+      display: import("../types/moment").MomentGalleryDisplay;
+    }>;
+  }) {
+    return request<{ ok: true; updated: number; settings: import("../types/moment").CreativeFlashGallerySettings }>(
+      "/api/creative-flash/gallery",
+      { method: "PUT", body: JSON.stringify(payload) },
+    );
+  }
+
   static async uploadVenueImage({
     venueSlug,
     weddingSlug,
