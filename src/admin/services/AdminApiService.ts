@@ -2,7 +2,7 @@ import type { SupplierRecord } from "./SupplierService";
 import type { StoryFact } from "./StoryService";
 import type { WeddingDocument } from "../../lib/weddingEngine";
 import type { ImageManagerDocument } from "../types/imageManager";
-import type { MomentRepositoryDocument } from "../types/moment";
+import type { MomentGalleryPayload, MomentRepositoryDocument } from "../types/moment";
 import type { VenueDocument, VenueSummary } from "../types/venue";
 import { prepareImageUpload } from "./ImageUploadService";
 
@@ -350,6 +350,24 @@ export class AdminApiService {
     });
   }
 
+
+
+  static async getMomentGallery(slug: string) {
+    const result = await request<{ ok: true } & MomentGalleryPayload>(
+      `/api/moments/${encodeURIComponent(slug)}/gallery`,
+    );
+    return { moment: result.moment, images: result.images };
+  }
+
+  static async enableMomentGalleryImages(slug: string, enabledAssetKeys: string[]) {
+    return request<{ ok: true; updated: number }>(
+      `/api/moments/${encodeURIComponent(slug)}/gallery`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ enabledAssetKeys }),
+      },
+    );
+  }
 
   static async uploadVenueImage({
     venueSlug,

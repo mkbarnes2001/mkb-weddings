@@ -24,6 +24,7 @@ import { VenueContentEditor } from "../pages/VenueContentEditor";
 import { VenueMigration } from "../pages/VenueMigration";
 import { VenueGallery } from "../pages/VenueGallery";
 import { Moments } from "../pages/Moments";
+import { MomentGallery } from "../pages/MomentGallery";
 import { VenueUpload } from "../pages/VenueUpload";
 import { VenueGalleryMigration } from "../pages/VenueGalleryMigration";
 
@@ -60,6 +61,7 @@ export function AdminApp() {
         />
         <Route path="gallery" element={<Collections />} />
         <Route path="moments" element={<Moments />} />
+        <Route path="moments/:slug/gallery" element={<MomentGallery />} />
         <Route path="collections" element={<Collections />} />
         <Route path="venues" element={<Venues />} />
         <Route path="venues/new" element={<NewVenue />} />

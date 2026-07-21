@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   AlertCircle,
   CheckCircle2,
   GripVertical,
+  Images,
   Plus,
   Save,
   Trash2,
@@ -319,15 +321,26 @@ export function Moments() {
                 </label>
               </div>
 
-              <button
-                type="button"
-                onClick={() => archiveMoment(moment.id)}
-                disabled={moment.status === "archived"}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-red-200 px-4 py-2 text-sm text-red-700 disabled:opacity-40"
-              >
-                <Trash2 className="h-4 w-4" />
-                Archive
-              </button>
+              <div className="flex flex-col gap-2">
+                {moment.status === "active" ? (
+                  <Link
+                    to={`/admin/moments/${encodeURIComponent(moment.slug)}/gallery`}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-4 py-2 text-sm text-white"
+                  >
+                    <Images className="h-4 w-4" />
+                    Manage gallery
+                  </Link>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => archiveMoment(moment.id)}
+                  disabled={moment.status === "archived"}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-red-200 px-4 py-2 text-sm text-red-700 disabled:opacity-40"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Archive
+                </button>
+              </div>
             </div>
 
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
