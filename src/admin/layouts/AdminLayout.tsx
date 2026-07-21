@@ -18,6 +18,7 @@ const navItems = [
   { to: "/admin/weddings", label: "Weddings", icon: FileText },
   { to: "/admin/gallery", label: "Collections", icon: Images },
   { to: "/admin/venues", label: "Venues", icon: Globe2 },
+  { to: "/admin/moments", label: "Moments", icon: Tags },
   { to: "/admin/suppliers", label: "Suppliers", icon: Users },
   { to: "/admin/ai", label: "AI Centre", icon: Bot },
   { to: "/admin/seo", label: "SEO", icon: BarChart3 },
