@@ -547,7 +547,7 @@ export class AdminApiService {
     collection: Partial<CustomCollection> & { name: string },
   ) {
     const result = await request<{ ok: true; collection: CustomCollection }>(
-      "/api/custom-collections",
+      "/api/custom-collections/create",
       { method: "POST", body: JSON.stringify({ collection }) },
     );
     return result.collection;

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   AlertCircle,
   CheckCircle2,
@@ -127,6 +127,7 @@ function imageSource(image: PublicImage | null | undefined) {
 }
 
 export function Collections() {
+  const navigate = useNavigate();
   const [legacyCollections, setLegacyCollections] = useState<ImageCollection[]>([]);
   const [customCollections, setCustomCollections] = useState<CustomCollection[]>([]);
   const [moments, setMoments] = useState<MomentRepositoryDocument | null>(null);
@@ -150,6 +151,7 @@ export function Collections() {
   const [draggedLandingKey, setDraggedLandingKey] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
   const [savingLanding, setSavingLanding] = useState(false);
   const [savingCollectionId, setSavingCollectionId] = useState("");
   const [query, setQuery] = useState("");
@@ -389,10 +391,11 @@ export function Collections() {
 
   async function createCollection() {
     const name = newName.trim();
-    if (!name) return;
+    if (!name || creating) return;
     setCreating(true);
     setMessage("");
     setError("");
+    setCreateError("");
     try {
       const collection = await AdminApiService.createCustomCollection({
         name,
@@ -401,18 +404,15 @@ export function Collections() {
         status: "draft",
         showOnLanding: false,
       });
-      setCustomCollections((current) => [...current, collection]);
-      setLandingOrder((current) => {
-        const withoutStories = current.filter((key) => key !== "stories");
-        return unique([...withoutStories, `custom:${collection.id}`, "stories"]);
-      });
-      setLandingDirty(true);
       setNewName("");
-      setMessage(`${collection.name} created as a draft gallery.`);
-    } catch (createError) {
-      setError(
-        createError instanceof Error ? createError.message : "Unable to create gallery.",
-      );
+      // Creation now has a dedicated API route and immediately opens the new gallery.
+      // This avoids silent failures on the long Gallery Management page and gives
+      // the photographer an obvious next step: configure images, hero and publishing.
+      navigate(`/admin/custom-collections/${encodeURIComponent(collection.slug)}/gallery`);
+    } catch (caught) {
+      const text = caught instanceof Error ? caught.message : "Unable to create gallery.";
+      setCreateError(text);
+      setError(text);
     } finally {
       setCreating(false);
     }
@@ -715,6 +715,12 @@ export function Collections() {
                   {creating ? "Creating…" : "Add gallery"}
                 </button>
               </div>
+              {createError ? (
+                <div className="mt-3 flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{createError}</span>
+                </div>
+              ) : null}
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "20px" }}>
