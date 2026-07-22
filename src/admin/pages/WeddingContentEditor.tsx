@@ -115,9 +115,14 @@ export function WeddingContentEditor() {
 
   const supplierMatches = useMemo(() => {
     const query = supplierSearch.trim().toLowerCase();
+    const assignedIds = new Set(
+      weddingSuppliers
+        .map((row) => String(row.supplierId || "").trim())
+        .filter(Boolean),
+    );
+
     const rows = masterSuppliers.filter((supplier) => {
-      if (!query) return true;
-      return [
+      const matchesQuery = !query || [
         supplier.name,
         supplier.displayName,
         supplier.category,
@@ -127,10 +132,18 @@ export function WeddingContentEditor() {
         .join(" ")
         .toLowerCase()
         .includes(query);
+
+      if (!matchesQuery) return false;
+
+      // Keep the default list clean: suppliers already assigned to this wedding
+      // only reappear when the user deliberately searches for them, which is the
+      // explicit path for adding another role.
+      if (!query && assignedIds.has(supplier.id)) return false;
+      return true;
     });
 
     return rows.slice(0, 10);
-  }, [masterSuppliers, supplierSearch]);
+  }, [masterSuppliers, supplierSearch, weddingSuppliers]);
 
   function syncWeddingSupplierDocument(rows: SupplierRecord[]) {
     setWedding((current) =>
@@ -590,7 +603,11 @@ export function WeddingContentEditor() {
                     className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-4 py-2 text-sm text-white disabled:opacity-40"
                   >
                     <Plus className="h-4 w-4" />
-                    {supplierSaving ? "Saving…" : "Add"}
+                    {supplierSaving
+                      ? "Saving…"
+                      : weddingSuppliers.some((row) => row.supplierId === supplier.id)
+                        ? "Add another role"
+                        : "Add"}
                   </button>
                 </div>
               ))}

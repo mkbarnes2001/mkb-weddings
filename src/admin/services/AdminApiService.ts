@@ -47,6 +47,31 @@ export type GalleryLandingSettings = { cardOrder: string[]; hiddenCards: string[
 export type VenueListSetting = { slug: string; sortOrder: number; galleryVisible: boolean };
 export type WeddingListSetting = { slug: string; sortOrder: number; storyVisible: boolean };
 
+export type WorkspaceSettings = {
+  businessName: string;
+  websiteUrl: string;
+  adminHostname: string;
+  publicHostname: string;
+  contactEmail: string;
+  phone: string;
+  instagram: string;
+  logoUrl: string;
+  accentColor: string;
+  defaultCountry: string;
+  timezone: string;
+  currency: string;
+};
+
+export type WorkspaceRecord = {
+  id: string;
+  slug: string;
+  name: string;
+  status: string;
+  plan: string;
+  settings: WorkspaceSettings;
+  domains: Array<{ id: string; hostname: string; purpose: string; verified: boolean }>;
+};
+
 export type ImageDeleteResult = {
   ok: true;
   deletion: {
@@ -625,6 +650,20 @@ export class AdminApiService {
     };
   }
 
+
+
+  static async getWorkspace() {
+    const result = await request<{ ok: true; workspace: WorkspaceRecord }>("/api/workspace");
+    return result.workspace;
+  }
+
+  static async updateWorkspace(workspace: Partial<WorkspaceRecord> & { id: string }) {
+    const result = await request<{ ok: true; workspace: WorkspaceRecord }>("/api/workspace", {
+      method: "PUT",
+      body: JSON.stringify({ workspace }),
+    });
+    return result.workspace;
+  }
 
   static async health() {
     return request<{ ok: boolean; service: string }>("/api/health");

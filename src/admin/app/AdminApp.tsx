@@ -17,6 +17,7 @@ import { AICentre } from "../pages/AICentre";
 import { Collections } from "../pages/Collections";
 import { SEOCentre } from "../pages/SEOCentre";
 import { PlaceholderPage } from "../pages/PlaceholderPage";
+import { Settings } from "../pages/Settings";
 import { Venues } from "../pages/Venues";
 import { NewVenue } from "../pages/NewVenue";
 import { VenueDetail } from "../pages/VenueDetail";
@@ -92,15 +93,7 @@ export function AdminApp() {
             />
           }
         />
-        <Route
-          path="settings"
-          element={
-            <PlaceholderPage
-              title="Settings"
-              description="Brand, storage, paths and AI configuration will live here."
-            />
-          }
-        />
+        <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>
   );

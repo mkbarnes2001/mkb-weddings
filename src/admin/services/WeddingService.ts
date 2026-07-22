@@ -67,7 +67,11 @@ export class WeddingService {
   getWeddings(): WeddingRecord[] {
     return this.weddingSources
       .map((source) => this.buildWeddingRecord(source))
-      .sort((a, b) => a.couple.localeCompare(b.couple));
+      .sort((a, b) => {
+        const orderDelta = (a.storySortOrder || 0) - (b.storySortOrder || 0);
+        if (orderDelta !== 0) return orderDelta;
+        return a.couple.localeCompare(b.couple);
+      });
   }
 
   getWedding(slug: string): WeddingRecord | undefined {
@@ -147,6 +151,12 @@ export class WeddingService {
       coverCount,
       status,
       publicationStatus,
+      storyEnabled: source.storyEnabled === true,
+      storyStatus,
+      storyPublishedAt: source.storyPublishedAt || undefined,
+      storySortOrder: Number(source.storySortOrder || 0),
+      storyListVisible: source.storyListVisible === true,
+      venueSlug: source.venueSlug || undefined,
       storage: "d1",
       latestAiUpdate: imageDocument?.updatedAt || source.updatedAt || "",
       images,
