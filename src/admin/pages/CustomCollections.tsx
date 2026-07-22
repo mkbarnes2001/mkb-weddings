@@ -39,7 +39,7 @@ export function CustomCollections() {
       setError(
         loadError instanceof Error
           ? loadError.message
-          : "Unable to load custom collections.",
+          : "Unable to load galleries.",
       );
     }
   }
@@ -85,7 +85,7 @@ export function CustomCollections() {
       setError(
         createError instanceof Error
           ? createError.message
-          : "Unable to create collection.",
+          : "Unable to create gallery.",
       );
     } finally {
       setCreating(false);
@@ -108,7 +108,7 @@ export function CustomCollections() {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Unable to save collection.",
+          : "Unable to save gallery.",
       );
     } finally {
       setSavingSlug("");
@@ -130,7 +130,7 @@ export function CustomCollections() {
       setError(
         archiveError instanceof Error
           ? archiveError.message
-          : "Unable to archive collection.",
+          : "Unable to archive gallery.",
       );
     } finally {
       setSavingSlug("");
@@ -143,11 +143,11 @@ export function CustomCollections() {
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-              Custom Collections
+              Gallery Settings
             </p>
-            <h1 className="font-serif text-5xl md:text-6xl">Reusable galleries</h1>
+            <h1 className="font-serif text-5xl md:text-6xl">Photographer galleries</h1>
             <p className="mt-4 max-w-3xl text-white/60">
-              Create subject-led galleries such as Beach Weddings, Winter Weddings,
+              Create and configure galleries such as Beach Weddings, Winter Weddings,
               Black &amp; White or Castle Weddings. Images are referenced, never duplicated.
             </p>
           </div>
@@ -181,7 +181,7 @@ export function CustomCollections() {
 
       <section className="rounded-[28px] border border-black/10 bg-white/85 p-6">
         <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
-          Add collection
+          Add gallery
         </p>
         <div className="mt-4 flex flex-col gap-3 md:flex-row">
           <input
@@ -200,7 +200,7 @@ export function CustomCollections() {
             className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"
           >
             <Plus className="h-4 w-4" />
-            {creating ? "Creating…" : "Create collection"}
+            {creating ? "Creating…" : "Create gallery"}
           </button>
         </div>
       </section>
@@ -387,7 +387,7 @@ export function CustomCollections() {
                 className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-red-200 px-4 py-2.5 text-sm text-red-700 disabled:opacity-40"
               >
                 <Archive className="h-4 w-4" />
-                Archive collection
+                Archive gallery
               </button>
             </div>
           </article>
@@ -396,7 +396,7 @@ export function CustomCollections() {
 
       {!sorted.length ? (
         <section className="rounded-[28px] border border-dashed border-black/15 bg-white/60 p-12 text-center text-neutral-500">
-          No custom collections yet. Create the first one above.
+          No photographer galleries yet. Create the first one above.
         </section>
       ) : null}
     </div>

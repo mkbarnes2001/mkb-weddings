@@ -224,7 +224,7 @@ export function Collections() {
       .map((collection) => ({
         key: `custom:${collection.id}`,
         title: collection.name,
-        description: collection.description || "Custom curated collection",
+        description: collection.description || "Curated gallery",
         image:
           collection.heroImage?.thumbSrc || collection.heroImage?.fullSrc || "",
         kind: "custom" as const,
@@ -329,7 +329,7 @@ export function Collections() {
           : `${saved.name} landing-card setting saved.`,
       );
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Unable to update collection.");
+      setError(saveError instanceof Error ? saveError.message : "Unable to update gallery.");
     } finally {
       setSavingCollectionId("");
     }
@@ -378,10 +378,10 @@ export function Collections() {
       });
       setLandingDirty(true);
       setNewName("");
-      setMessage(`${collection.name} created as a draft collection.`);
+      setMessage(`${collection.name} created as a draft gallery.`);
     } catch (createError) {
       setError(
-        createError instanceof Error ? createError.message : "Unable to create collection.",
+        createError instanceof Error ? createError.message : "Unable to create gallery.",
       );
     } finally {
       setCreating(false);
@@ -418,9 +418,9 @@ export function Collections() {
             <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
               Gallery Management
             </p>
-            <h1 className="font-serif text-5xl md:text-6xl">Galleries & collections</h1>
+            <h1 className="font-serif text-5xl md:text-6xl">Galleries</h1>
             <p className="mt-4 max-w-3xl text-white/60">
-              Manage the Gallery landing, system galleries and reusable custom collections from one place.
+              Manage default dynamic galleries and photographer-created galleries from one place.
             </p>
           </div>
           <a
@@ -491,7 +491,7 @@ export function Collections() {
                 <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Gallery landing</p>
                 <h2 className="mt-2 font-serif text-3xl">Master landing page</h2>
                 <p className="mt-3 text-sm leading-relaxed text-neutral-600">
-                  The hero can be selected from Venue, Moment or Creative Flash gallery managers. Reorder and hide landing cards below.
+                  Reorder and hide the cards shown on the public Gallery landing below.
                 </p>
                 <div className="mt-5 rounded-2xl bg-neutral-100 p-4 text-sm text-neutral-600">
                   {landingCards.filter(isLandingCardVisible).length} cards currently visible on the Gallery landing.
@@ -512,41 +512,34 @@ export function Collections() {
           <section>
             <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Core galleries</p>
-                <h2 className="mt-2 font-serif text-4xl">System galleries</h2>
+                <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Default galleries</p>
+                <h2 className="mt-2 font-serif text-4xl">Built-in gallery types</h2>
                 <p className="mt-2 text-sm text-neutral-600">
-                  Protected gallery types that use the same image library and assignment system.
+                  Every workspace starts with Venues and Moments. Both use structured assignments and remain fully manageable.
                 </p>
               </div>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "20px" }}>
               <CoreGalleryCard
-                title="Gallery by Venue"
-                description="Venue records, venue galleries and the master Venue landing hero."
+                title="Venues"
+                description="A dynamic gallery generated from venue records and venue image assignments."
                 image={imageSource(masterHeroes.venue)}
                 icon={MapPin}
                 stats={`${publishedVenues.length} published · ${activeVenues.length} managed`}
                 manageTo="/admin/venues"
                 liveHref="https://www.mkbweddings.co.uk/gallery/venues"
+                badge="Default gallery"
               />
               <CoreGalleryCard
-                title="Gallery by Moments"
-                description="Moment definitions, card visibility, ordering and individual moment galleries."
+                title="Moments"
+                description="A dynamic gallery whose moment categories can be created, renamed, reordered and archived."
                 image={imageSource(masterHeroes.moments)}
                 icon={Tags}
                 stats={`${publicMoments.length} public cards · ${activeMoments.length} active moments`}
                 manageTo="/admin/moments"
                 liveHref="https://www.mkbweddings.co.uk/gallery/moments"
-              />
-              <CoreGalleryCard
-                title="Creative Flash"
-                description="Curated Creative Flash gallery with exact order, visibility and hero control."
-                image={creativeHero?.thumbSrc || creativeHero?.fullSrc || ""}
-                icon={Zap}
-                stats={`${visibleCreativeCount} visible · ${creativeImages.length} assigned`}
-                manageTo="/admin/creative-flash"
-                liveHref="https://www.mkbweddings.co.uk/gallery/creative-flash"
+                badge="Default gallery"
               />
             </div>
           </section>
@@ -557,7 +550,7 @@ export function Collections() {
                 <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Gallery landing cards</p>
                 <h2 className="mt-2 font-serif text-3xl">Order & visibility</h2>
                 <p className="mt-2 text-sm text-neutral-600">
-                  Drag cards into the order you want on /gallery. System cards can be hidden without deleting their galleries.
+                  Drag cards into the order you want on /gallery. Any card can be hidden without deleting its underlying content.
                 </p>
               </div>
               <button
@@ -603,12 +596,21 @@ export function Collections() {
                       <div className="flex flex-wrap items-center gap-2">
                         <strong className="font-medium">{index + 1}. {card.title}</strong>
                         {collection ? (
-                          <span className={`rounded-full border px-2 py-1 text-xs ${customStatusClasses(collection.status)}`}>
-                            {collection.status}
-                          </span>
+                          <>
+                            <span className="rounded-full border border-black/10 bg-neutral-50 px-2 py-1 text-xs text-neutral-500">
+                              gallery
+                            </span>
+                            <span className={`rounded-full border px-2 py-1 text-xs ${customStatusClasses(collection.status)}`}>
+                              {collection.status}
+                            </span>
+                          </>
                         ) : (
                           <span className="rounded-full border border-black/10 bg-neutral-50 px-2 py-1 text-xs text-neutral-500">
-                            system
+                            {card.key === "venues" || card.key === "moments"
+                              ? "default"
+                              : card.key === "creative-flash"
+                                ? "gallery"
+                                : "site"}
                           </span>
                         )}
                       </div>
@@ -635,10 +637,10 @@ export function Collections() {
           <section>
             <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Reusable collections</p>
-                <h2 className="mt-2 font-serif text-4xl">Custom collections</h2>
+                <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Photographer galleries</p>
+                <h2 className="mt-2 font-serif text-4xl">Your galleries</h2>
                 <p className="mt-2 max-w-2xl text-sm text-neutral-600">
-                  Create galleries such as Beach Weddings, Winter Weddings, Castle Weddings or Black &amp; White.
+                  Creative Flash and any galleries you create here are photographer-defined rather than built into the platform.
                 </p>
               </div>
               <Link
@@ -646,7 +648,7 @@ export function Collections() {
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm"
               >
                 <Settings2 className="h-4 w-4" />
-                Edit collection settings
+                Gallery settings
               </Link>
             </div>
 
@@ -658,7 +660,7 @@ export function Collections() {
                   onKeyDown={(event) => {
                     if (event.key === "Enter") void createCollection();
                   }}
-                  placeholder="New collection name, e.g. Beach Weddings"
+                  placeholder="New gallery name, e.g. Beach Weddings"
                   className="min-w-0 flex-1 rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
                 />
                 <button
@@ -668,12 +670,22 @@ export function Collections() {
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"
                 >
                   <Plus className="h-4 w-4" />
-                  {creating ? "Creating…" : "Add collection"}
+                  {creating ? "Creating…" : "Add gallery"}
                 </button>
               </div>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "20px" }}>
+              <CoreGalleryCard
+                title="Creative Flash"
+                description="A photographer-defined gallery with exact order, visibility and hero control."
+                image={creativeHero?.thumbSrc || creativeHero?.fullSrc || ""}
+                icon={Zap}
+                stats={`${visibleCreativeCount} visible · ${creativeImages.length} assigned`}
+                manageTo="/admin/creative-flash"
+                liveHref="https://www.mkbweddings.co.uk/gallery/creative-flash"
+                badge="Gallery"
+              />
               {[...customCollections]
                 .sort((a, b) => a.sortOrder - b.sortOrder)
                 .map((collection) => (
@@ -701,6 +713,9 @@ export function Collections() {
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
                             <h3 className="font-serif text-2xl">{collection.name}</h3>
+                            <span className="rounded-full border border-black/10 bg-neutral-50 px-2 py-1 text-xs text-neutral-500">
+                              Gallery
+                            </span>
                             <span className={`rounded-full border px-2 py-1 text-xs ${customStatusClasses(collection.status)}`}>
                               {collection.status}
                             </span>
@@ -771,7 +786,7 @@ export function Collections() {
                   <div>
                     <h2 className="font-serif text-2xl">Wedding publishing collections</h2>
                     <p className="mt-1 text-sm text-neutral-500">
-                      Existing wedding-specific sets used by the publishing workflow. These are separate from public custom galleries.
+                      Existing wedding-specific sets used by the publishing workflow. These remain separate from public galleries.
                     </p>
                   </div>
                 </div>
@@ -843,6 +858,7 @@ function CoreGalleryCard({
   stats,
   manageTo,
   liveHref,
+  badge,
 }: {
   title: string;
   description: string;
@@ -851,6 +867,7 @@ function CoreGalleryCard({
   stats: string;
   manageTo: string;
   liveHref: string;
+  badge?: string;
 }) {
   return (
     <article className="overflow-hidden rounded-[24px] border border-black/10 bg-white/85">
@@ -864,9 +881,14 @@ function CoreGalleryCard({
         )}
       </div>
       <div className="p-5">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Icon className="h-5 w-5" />
           <h3 className="font-serif text-2xl">{title}</h3>
+          {badge ? (
+            <span className="rounded-full border border-black/10 bg-neutral-50 px-2 py-1 text-xs text-neutral-500">
+              {badge}
+            </span>
+          ) : null}
         </div>
         <p className="mt-2 text-sm leading-relaxed text-neutral-600">{description}</p>
         <p className="mt-3 text-xs text-neutral-500">{stats}</p>

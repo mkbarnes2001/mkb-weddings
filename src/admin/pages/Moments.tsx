@@ -198,14 +198,13 @@ export function Moments() {
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-              Moment Repository
+              Default Gallery · Moments
             </p>
             <h1 className="font-serif text-5xl md:text-6xl">
-              Gallery moments
+              Moment categories
             </h1>
             <p className="mt-4 max-w-2xl text-white/60">
-              Control which moments can be assigned to images and which cards
-              appear on Gallery by Moment.
+              This is a default dynamic gallery, but its categories are yours to customise. Create, rename, reorder or archive moments and control which cards appear publicly.
             </p>
           </div>
 
@@ -249,6 +248,10 @@ export function Moments() {
           </div>
         </section>
       ) : null}
+
+      <section className="rounded-[24px] border border-black/10 bg-white/80 p-5 text-sm leading-relaxed text-neutral-600">
+        Every photography workspace starts with a Moments gallery, but the taxonomy is not fixed. These categories define how this workspace organises and presents wedding-day moments.
+      </section>
 
       <section className="grid grid-cols-1 gap-5 md:grid-cols-2">
         {sortedMoments.map((moment) => (
@@ -334,7 +337,7 @@ export function Moments() {
 
                 <label className="flex items-center justify-between gap-4 rounded-2xl border border-black/10 p-4">
                   <span className="text-sm">
-                    Show card on Gallery by Moment
+                    Show card on Moments gallery
                   </span>
                   <input
                     type="checkbox"
