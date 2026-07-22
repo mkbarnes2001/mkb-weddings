@@ -122,6 +122,7 @@ export async function registerUploadedImage(
   }
 
   const assetKey = `${weddingSlug}:${imageId}`;
+  const assetId = `asset:${assetKey}`;
   const source = {
     type: "r2-browser-upload",
     originalFilename: text(input.originalFilename),
@@ -223,10 +224,61 @@ export async function registerUploadedImage(
       source.orientation,
     ),
     db.prepare(`
+      INSERT OR IGNORE INTO assets (
+        id, workspace_id, legacy_asset_key, image_id, original_filename, filename,
+        mime_type, width, height, checksum, source_type, source_json, status,
+        created_at, updated_at
+      ) VALUES (
+        ?,
+        COALESCE((SELECT value FROM schema_meta WHERE key = 'default_workspace_id'), 'workspace_mkb_weddings'),
+        ?, ?, ?, ?, ?, ?, ?, '', ?, ?, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+      )
+    `).bind(
+      assetId,
+      assetKey,
+      imageId,
+      text(input.originalFilename),
+      text(input.filename),
+      text(input.originalMimeType),
+      Number(input.width || 0) || null,
+      Number(input.height || 0) || null,
+      source.type,
+      JSON.stringify(source),
+    ),
+    db.prepare(`
+      INSERT OR REPLACE INTO asset_files (
+        asset_id, variant, storage_key, url, mime_type, width, height,
+        access_level, status, created_at, updated_at
+      ) VALUES (?, 'web', ?, ?, ?, ?, ?, 'public', 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).bind(
+      assetId,
+      text(input.fullKey),
+      text(input.fullSrc),
+      '',
+      Number(input.width || 0) || null,
+      Number(input.height || 0) || null,
+    ),
+    db.prepare(`
+      INSERT OR REPLACE INTO asset_files (
+        asset_id, variant, storage_key, url, mime_type, width, height,
+        access_level, status, created_at, updated_at
+      ) VALUES (?, 'thumb', ?, ?, ?, NULL, NULL, 'public', 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).bind(
+      assetId,
+      text(input.thumbKey),
+      text(input.thumbSrc),
+      '',
+    ),
+    db.prepare(`
       INSERT INTO wedding_images (
         wedding_slug, asset_key, sort_order, is_cover, hidden, rating, collections_json
       ) VALUES (?, ?, ?, 0, 0, 0, '[]')
     `).bind(weddingSlug, assetKey, weddingOrder),
+    db.prepare(`
+      INSERT OR IGNORE INTO asset_wedding_links (
+        asset_id, wedding_slug, sort_order, is_primary
+      ) VALUES (?, ?, ?, 1)
+    `).bind(assetId, weddingSlug, weddingOrder),
     db.prepare(`
       INSERT INTO venue_images (
         venue_slug, asset_key, sort_order, included, hidden, rating, is_hero,
@@ -238,6 +290,11 @@ export async function registerUploadedImage(
       venueOrder,
       JSON.stringify(venueImage.display),
     ),
+    db.prepare(`
+      INSERT OR IGNORE INTO asset_venue_links (
+        asset_id, venue_slug, sort_order, is_primary
+      ) VALUES (?, ?, ?, 1)
+    `).bind(assetId, venueSlug, venueOrder),
     db.prepare(`
       UPDATE venues
       SET document_json = ?, updated_at = CURRENT_TIMESTAMP
@@ -500,11 +557,20 @@ export async function deleteManagedImage(
     );
   }
 
+  const assetId = `asset:${assetKey}`;
+
   statements.push(
+    db.prepare(`DELETE FROM asset_gallery_links WHERE asset_id = ?`).bind(assetId),
+    db.prepare(`DELETE FROM asset_moment_links WHERE asset_id = ?`).bind(assetId),
+    db.prepare(`DELETE FROM asset_venue_links WHERE asset_id = ?`).bind(assetId),
+    db.prepare(`DELETE FROM asset_wedding_links WHERE asset_id = ?`).bind(assetId),
+    db.prepare(`DELETE FROM asset_files WHERE asset_id = ?`).bind(assetId),
+    db.prepare(`DELETE FROM collection_images WHERE asset_key = ?`).bind(assetKey),
     db.prepare(`DELETE FROM venue_images WHERE asset_key = ?`).bind(assetKey),
     db.prepare(`DELETE FROM story_images WHERE asset_key = ?`).bind(assetKey),
     db.prepare(`DELETE FROM published_story_images WHERE asset_key = ?`).bind(assetKey),
     db.prepare(`DELETE FROM wedding_images WHERE asset_key = ?`).bind(assetKey),
+    db.prepare(`DELETE FROM assets WHERE id = ?`).bind(assetId),
     db.prepare(`DELETE FROM images WHERE asset_key = ?`).bind(assetKey),
   );
 

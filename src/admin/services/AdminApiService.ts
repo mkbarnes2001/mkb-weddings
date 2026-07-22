@@ -5,6 +5,7 @@ import type { ImageManagerDocument } from "../types/imageManager";
 import type { MomentGalleryPayload, MomentRepositoryDocument } from "../types/moment";
 import type { CustomCollection, CustomCollectionGalleryPayload, CustomCollectionMembershipPayload } from "../types/customCollection";
 import type { VenueDocument, VenueSummary } from "../types/venue";
+import type { AssetLibraryFilters, AssetLibraryPayload } from "../types/asset";
 import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
@@ -391,6 +392,32 @@ export class AdminApiService {
         method: "POST",
         body: JSON.stringify({ mode }),
       },
+    );
+  }
+
+
+  static async getAssetLibrary(filters: AssetLibraryFilters = {}) {
+    const params = new URLSearchParams();
+    if (filters.q) params.set("q", filters.q);
+    if (filters.wedding) params.set("wedding", filters.wedding);
+    if (filters.venue) params.set("venue", filters.venue);
+    if (filters.moment) params.set("moment", filters.moment);
+    if (filters.gallery) params.set("gallery", filters.gallery);
+    if (filters.unassigned) params.set("unassigned", "1");
+    if (typeof filters.limit === "number") params.set("limit", String(filters.limit));
+    if (typeof filters.offset === "number") params.set("offset", String(filters.offset));
+    const query = params.toString();
+    const result = await request<{ ok: true } & AssetLibraryPayload>(
+      `/api/assets${query ? `?${query}` : ""}`,
+    );
+    const { ok: _ok, ...payload } = result;
+    return payload;
+  }
+
+  static async syncAssetLibrary() {
+    return request<{ ok: true; workspaceId: string; totalAssets: number }>(
+      "/api/assets/sync",
+      { method: "POST" },
     );
   }
 

@@ -2,6 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import {
   BarChart3,
   Bot,
+  Database,
   FileText,
   Gauge,
   Globe2,
@@ -20,6 +21,7 @@ const navItems = [
   { to: "/admin/venues", label: "Venues", icon: Globe2 },
   { to: "/admin/locations", label: "Locations", icon: MapPinned },
   { to: "/admin/suppliers", label: "Suppliers", icon: Users },
+  { to: "/admin/assets", label: "Asset Library", icon: Database },
   { to: "/admin/ai", label: "AI Centre", icon: Bot },
   { to: "/admin/seo", label: "SEO", icon: BarChart3 },
   { to: "/admin/publishing", label: "Publishing", icon: Truck },
