@@ -1,5 +1,5 @@
 -- Photography Intelligence / MKB Weddings
--- D1 schema v3
+-- D1 schema v5
 -- Canonical content store. CSV files are migration inputs only and are not part of the runtime model.
 
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -22,10 +22,13 @@ CREATE TABLE IF NOT EXISTS venues (
   document_json TEXT NOT NULL,
   published_json TEXT NOT NULL DEFAULT '',
   published_at TEXT,
+  gallery_visible INTEGER NOT NULL DEFAULT 1 CHECK (gallery_visible IN (0, 1)),
+  gallery_sort_order INTEGER NOT NULL DEFAULT 0,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_venues_status ON venues(status);
 CREATE INDEX IF NOT EXISTS idx_venues_county ON venues(county);
+CREATE INDEX IF NOT EXISTS idx_venues_gallery_order ON venues(gallery_visible, gallery_sort_order, name);
 
 CREATE TABLE IF NOT EXISTS counties (
   slug TEXT PRIMARY KEY,
@@ -58,10 +61,13 @@ CREATE TABLE IF NOT EXISTS weddings (
   document_json TEXT NOT NULL,
   published_json TEXT NOT NULL DEFAULT '',
   published_at TEXT,
+  story_sort_order INTEGER NOT NULL DEFAULT 0,
+  story_list_visible INTEGER NOT NULL DEFAULT 1 CHECK (story_list_visible IN (0, 1)),
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_weddings_venue_slug ON weddings(venue_slug);
 CREATE INDEX IF NOT EXISTS idx_weddings_story_public ON weddings(story_enabled, story_status);
+CREATE INDEX IF NOT EXISTS idx_weddings_story_order ON weddings(story_enabled, story_status, story_list_visible, story_sort_order);
 
 CREATE TABLE IF NOT EXISTS images (
   asset_key TEXT PRIMARY KEY,
@@ -142,6 +148,37 @@ CREATE TABLE IF NOT EXISTS wedding_suppliers (
 );
 CREATE INDEX IF NOT EXISTS idx_wedding_suppliers_slug ON wedding_suppliers(wedding_slug, sort_order);
 
+CREATE TABLE IF NOT EXISTS suppliers (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  display_name TEXT NOT NULL DEFAULT '',
+  category TEXT NOT NULL DEFAULT '',
+  website TEXT NOT NULL DEFAULT '',
+  instagram TEXT NOT NULL DEFAULT '',
+  email TEXT NOT NULL DEFAULT '',
+  phone TEXT NOT NULL DEFAULT '',
+  location TEXT NOT NULL DEFAULT '',
+  county TEXT NOT NULL DEFAULT '',
+  description TEXT NOT NULL DEFAULT '',
+  notes TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'active',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_suppliers_name ON suppliers(name COLLATE NOCASE);
+CREATE INDEX IF NOT EXISTS idx_suppliers_category ON suppliers(category COLLATE NOCASE, status);
+
+CREATE TABLE IF NOT EXISTS wedding_supplier_links (
+  wedding_slug TEXT NOT NULL,
+  supplier_id TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT '',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (wedding_slug, supplier_id, role),
+  FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+);
+CREATE INDEX IF NOT EXISTS idx_wedding_supplier_links_wedding ON wedding_supplier_links(wedding_slug, sort_order);
+CREATE INDEX IF NOT EXISTS idx_wedding_supplier_links_supplier ON wedding_supplier_links(supplier_id, wedding_slug);
+
 CREATE TABLE IF NOT EXISTS moments (
   id TEXT PRIMARY KEY,
   slug TEXT NOT NULL UNIQUE,
@@ -203,5 +240,5 @@ CREATE TABLE IF NOT EXISTS migration_log (
 );
 
 INSERT INTO schema_meta (key, value, updated_at)
-VALUES ('schema_version', '4', CURRENT_TIMESTAMP)
+VALUES ('schema_version', '5', CURRENT_TIMESTAMP)
 ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP;

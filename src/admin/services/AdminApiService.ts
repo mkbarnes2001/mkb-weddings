@@ -1,4 +1,4 @@
-import type { SupplierRecord } from "./SupplierService";
+import type { MasterSupplier, SupplierRecord } from "./SupplierService";
 import type { StoryFact } from "./StoryService";
 import type { WeddingDocument } from "../../lib/weddingEngine";
 import type { ImageManagerDocument } from "../types/imageManager";
@@ -44,6 +44,8 @@ export type WeddingUpdateResult = { ok: true; wedding: StoredWeddingDocument; ba
 export type VenueUpdateResult = { ok: true; venue: VenueSummary; backupPath: string | null };
 export type VenueCreateResult = { ok: true; venue: VenueSummary };
 export type GalleryLandingSettings = { cardOrder: string[]; hiddenCards: string[] };
+export type VenueListSetting = { slug: string; sortOrder: number; galleryVisible: boolean };
+export type WeddingListSetting = { slug: string; sortOrder: number; storyVisible: boolean };
 
 export type ImageDeleteResult = {
   ok: true;
@@ -305,6 +307,14 @@ export class AdminApiService {
 
   static async listVenues() {
     const result = await request<{ ok: true; venues: VenueSummary[] }>("/api/venues");
+    return result.venues;
+  }
+
+  static async saveVenueListSettings(items: VenueListSetting[]) {
+    const result = await request<{ ok: true; venues: VenueSummary[] }>("/api/venue-list-settings", {
+      method: "POST",
+      body: JSON.stringify({ items }),
+    });
     return result.venues;
   }
 
@@ -625,6 +635,14 @@ export class AdminApiService {
     return result.weddings;
   }
 
+  static async saveWeddingListSettings(items: WeddingListSetting[]) {
+    const result = await request<{ ok: true; weddings: StoredWeddingDocument[] }>("/api/wedding-list-settings", {
+      method: "POST",
+      body: JSON.stringify({ items }),
+    });
+    return result.weddings;
+  }
+
   static async getJsonWedding(slug: string) {
     const result = await request<{ ok: true; wedding: StoredWeddingDocument }>(`/api/weddings/${encodeURIComponent(slug)}`);
     return result.wedding;
@@ -659,6 +677,34 @@ export class AdminApiService {
   static async listSuppliers() {
     const result = await request<{ ok: true; rows: SupplierRecord[] }>("/api/suppliers");
     return result.rows;
+  }
+
+  static async listMasterSuppliers() {
+    const result = await request<{ ok: true; suppliers: MasterSupplier[] }>("/api/suppliers?view=master");
+    return result.suppliers;
+  }
+
+  static async createMasterSupplier(supplier: Partial<MasterSupplier>) {
+    const result = await request<{ ok: true; supplier: MasterSupplier }>("/api/suppliers", {
+      method: "POST",
+      body: JSON.stringify({ supplier }),
+    });
+    return result.supplier;
+  }
+
+  static async updateMasterSupplier(supplier: Partial<MasterSupplier> & { id: string }) {
+    const result = await request<{ ok: true; supplier: MasterSupplier }>("/api/suppliers", {
+      method: "PUT",
+      body: JSON.stringify({ supplier }),
+    });
+    return result.supplier;
+  }
+
+  static async archiveMasterSupplier(id: string) {
+    const result = await request<{ ok: true; supplier: MasterSupplier }>(`/api/suppliers?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+    return result.supplier;
   }
 
   static async getWeddingSuppliers(blogSlug: string) {

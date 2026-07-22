@@ -20,6 +20,7 @@ type VenueGalleryItem = {
     blog: boolean;
     homepage: boolean;
     portfolio: boolean;
+    creativeFlash?: boolean;
   };
   thumbSrc: string;
   fullSrc: string;
@@ -218,6 +219,8 @@ function hydrateVenue(row: any) {
     description: text(doc.description),
     heroImageId: text(doc.heroImageId || row.hero_asset_id),
     status: text(row.status || doc.status || "draft"),
+    galleryVisible: row.gallery_visible === undefined ? true : Boolean(row.gallery_visible),
+    gallerySortOrder: Number(row.gallery_sort_order || 0),
     links: {
       website: text(doc?.links?.website),
       instagram: text(doc?.links?.instagram),
@@ -298,7 +301,7 @@ function enrich(venue: any, weddings: any[]) {
 
 export async function listAdminVenues(db: D1Db) {
   const [venueResult, weddings] = await Promise.all([
-    db.prepare(`SELECT * FROM venues ORDER BY name COLLATE NOCASE ASC`).all(),
+    db.prepare(`SELECT * FROM venues ORDER BY CASE WHEN gallery_sort_order > 0 THEN 0 ELSE 1 END, gallery_sort_order ASC, name COLLATE NOCASE ASC`).all(),
     weddingSummaries(db),
   ]);
   return (venueResult.results || []).map(hydrateVenue).map((venue: any) => enrich(venue, weddings));
@@ -532,6 +535,26 @@ export async function publishAdminVenue(db: D1Db, slug: string) {
   };
 }
 
+export async function saveVenueListSettings(db: D1Db, items: any[]) {
+  const rows = Array.isArray(items) ? items : [];
+  const statements = rows
+    .map((item) => {
+      const slug = text(item?.slug);
+      if (!slug) return null;
+      return db.prepare(`
+        UPDATE venues
+        SET gallery_sort_order = ?, gallery_visible = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE slug = ?
+      `).bind(Number(item?.sortOrder || 0), item?.galleryVisible === false ? 0 : 1, slug);
+    })
+    .filter(Boolean);
+  for (let index = 0; index < statements.length; index += 75) {
+    const chunk = statements.slice(index, index + 75);
+    if (chunk.length) await db.batch(chunk);
+  }
+  return listAdminVenues(db);
+}
+
 export async function getPublicVenue(db: D1Db, slug: string) {
   const row = await db.prepare(`
     SELECT published_json, published_at, updated_at, country
@@ -546,10 +569,10 @@ export async function getPublicVenue(db: D1Db, slug: string) {
 
 export async function listPublicVenues(db: D1Db) {
   const result = await db.prepare(`
-    SELECT slug, published_json, published_at, updated_at, country
+    SELECT slug, published_json, published_at, updated_at, country, gallery_sort_order
     FROM venues
-    WHERE status = 'published' AND published_json <> ''
-    ORDER BY name COLLATE NOCASE ASC
+    WHERE status = 'published' AND published_json <> '' AND gallery_visible = 1
+    ORDER BY CASE WHEN gallery_sort_order > 0 THEN 0 ELSE 1 END, gallery_sort_order ASC, name COLLATE NOCASE ASC
   `).all();
   const venues = (result.results || [])
     .map((row: any) => {

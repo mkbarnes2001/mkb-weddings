@@ -1,52 +1,41 @@
-import type { SupplierRecord } from "./SupplierService";
+import type { MasterSupplier, SupplierRecord } from "./SupplierService";
 
 export type SupplierDirectoryEntry = {
+  supplierId: string;
   name: string;
   role: string;
   website: string;
   instagram: string;
+  email: string;
+  phone: string;
+  location: string;
+  county: string;
   usageCount: number;
 };
-
-function normalise(value?: string) {
-  return (value || "").trim().toLowerCase();
-}
 
 function cleanInstagram(value?: string) {
   return (value || "").trim().replace(/^@/, "");
 }
 
-export function buildSupplierDirectory(rows: SupplierRecord[]): SupplierDirectoryEntry[] {
-  const map = new Map<string, SupplierDirectoryEntry>();
-
-  for (const row of rows) {
-    const name = (row.name || "").trim();
-    if (!name) continue;
-
-    const key = normalise(name);
-    const existing = map.get(key);
-
-    if (existing) {
-      existing.usageCount += 1;
-      if (!existing.role && row.role) existing.role = row.role;
-      if (!existing.website && row.website) existing.website = row.website;
-      if (!existing.instagram && row.instagram) existing.instagram = cleanInstagram(row.instagram);
-      continue;
-    }
-
-    map.set(key, {
-      name,
-      role: (row.role || "").trim(),
-      website: (row.website || "").trim(),
-      instagram: cleanInstagram(row.instagram),
-      usageCount: 1,
+export function buildSupplierDirectory(rows: MasterSupplier[]): SupplierDirectoryEntry[] {
+  return rows
+    .filter((supplier) => supplier.status !== "archived")
+    .map((supplier) => ({
+      supplierId: supplier.id,
+      name: supplier.name,
+      role: supplier.category,
+      website: supplier.website,
+      instagram: cleanInstagram(supplier.instagram),
+      email: supplier.email,
+      phone: supplier.phone,
+      location: supplier.location,
+      county: supplier.county,
+      usageCount: supplier.linkedWeddingCount || 0,
+    }))
+    .sort((a, b) => {
+      if (b.usageCount !== a.usageCount) return b.usageCount - a.usageCount;
+      return a.name.localeCompare(b.name);
     });
-  }
-
-  return Array.from(map.values()).sort((a, b) => {
-    if (b.usageCount !== a.usageCount) return b.usageCount - a.usageCount;
-    return a.name.localeCompare(b.name);
-  });
 }
 
 export function validateSupplier(row: SupplierRecord) {
@@ -67,9 +56,9 @@ function csvEscape(value?: string) {
 }
 
 export function suppliersToCsv(rows: SupplierRecord[]) {
-  const header = "blogSlug,role,name,website,instagram,sortOrder";
+  const header = "blogSlug,supplierId,role,name,website,instagram,sortOrder";
   const body = rows.map((row, index) =>
-    [row.blogSlug, row.role, row.name, row.website, cleanInstagram(row.instagram), row.sortOrder || String(index + 1)]
+    [row.blogSlug, row.supplierId, row.role, row.name, row.website, cleanInstagram(row.instagram), row.sortOrder || String(index + 1)]
       .map(csvEscape)
       .join(","),
   );

@@ -1,3 +1,5 @@
+import { ensureMasterSupplier } from "./supplier-d1";
+
 type D1Db = any;
 
 function text(value: unknown) {
@@ -54,10 +56,15 @@ function slugify(value: string) {
 
 function cleanSupplier(item: any) {
   return {
-    role: text(item?.role),
+    supplierId: text(item?.supplierId || item?.id),
+    role: text(item?.role || item?.category),
     name: text(item?.name),
     website: text(item?.website),
     instagram: text(item?.instagram).replace(/^@/, ""),
+    email: text(item?.email),
+    phone: text(item?.phone),
+    location: text(item?.location),
+    county: text(item?.county),
   };
 }
 
@@ -146,6 +153,8 @@ function hydrateWedding(row: any) {
     storyEnabled: Boolean(row.story_enabled),
     storyStatus: text(row.story_status || "draft"),
     storyPublishedAt: row.story_published_at || undefined,
+    storySortOrder: Number(row.story_sort_order || 0),
+    storyListVisible: row.story_list_visible === undefined ? true : Boolean(row.story_list_visible),
     seo: {
       title: text(row.seo_title || document?.seo?.title),
       description: text(row.seo_description || document?.seo?.description),
@@ -197,37 +206,67 @@ function factsFromStoryRows(rows: any[]) {
 }
 
 async function replaceSuppliers(db: D1Db, slug: string, suppliers: any[]) {
+  const cleanRows: any[] = [];
+
+  for (const supplier of suppliers || []) {
+    const clean = cleanSupplier(supplier);
+    if (!clean.role && !clean.name) continue;
+    const master = await ensureMasterSupplier(db, {
+      id: clean.supplierId,
+      name: clean.name,
+      displayName: clean.name,
+      category: clean.role,
+      website: clean.website,
+      instagram: clean.instagram,
+      email: clean.email,
+      phone: clean.phone,
+      location: clean.location,
+      county: clean.county,
+    });
+    cleanRows.push({
+      ...clean,
+      supplierId: master?.id || clean.supplierId,
+      name: master?.name || clean.name,
+      website: master?.website || clean.website,
+      instagram: master?.instagram || clean.instagram,
+      role: clean.role || master?.category || "Supplier",
+    });
+  }
+
   const statements: any[] = [
     db.prepare(`DELETE FROM wedding_suppliers WHERE wedding_slug = ?`).bind(slug),
+    db.prepare(`DELETE FROM wedding_supplier_links WHERE wedding_slug = ?`).bind(slug),
   ];
 
-  suppliers.forEach((supplier, index) => {
-    const clean = cleanSupplier(supplier);
-    if (!clean.role && !clean.name) return;
+  cleanRows.forEach((clean, index) => {
     statements.push(
       db.prepare(`
         INSERT INTO wedding_suppliers (
           wedding_slug, sort_order, role, name, website, instagram
         ) VALUES (?, ?, ?, ?, ?, ?)
       `).bind(
-        slug,
-        index + 1,
-        clean.role,
-        clean.name,
-        clean.website,
-        clean.instagram,
+        slug, index + 1, clean.role, clean.name, clean.website, clean.instagram,
       ),
     );
+    if (clean.supplierId) {
+      statements.push(
+        db.prepare(`
+          INSERT INTO wedding_supplier_links (wedding_slug, supplier_id, role, sort_order)
+          VALUES (?, ?, ?, ?)
+        `).bind(slug, clean.supplierId, clean.role, index + 1),
+      );
+    }
   });
 
   await runBatches(db, statements);
+  return cleanRows;
 }
 
 export async function listAdminWeddings(db: D1Db) {
   const result = await db.prepare(`
     SELECT *
     FROM weddings
-    ORDER BY couple COLLATE NOCASE ASC, title COLLATE NOCASE ASC
+    ORDER BY CASE WHEN story_sort_order > 0 THEN 0 ELSE 1 END, story_sort_order ASC, couple COLLATE NOCASE ASC, title COLLATE NOCASE ASC
   `).all();
 
   return (result.results || []).map(hydrateWedding);
@@ -290,6 +329,7 @@ export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: 
       db.prepare(`UPDATE story_images SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
       db.prepare(`UPDATE published_story_images SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
       db.prepare(`UPDATE wedding_suppliers SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
+      db.prepare(`UPDATE wedding_supplier_links SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
     );
   }
 
@@ -415,7 +455,7 @@ export async function getWeddingImages(db: D1Db, slug: string) {
         aiCaption: text(row.caption),
         source: {
           ...json(row.source_json, {}),
-          type: text(row.source_type) || json(row.source_json, {})?.type || "",
+          type: text(row.source_type) || json<any>(row.source_json, {})?.type || "",
         },
       };
     }),
@@ -550,35 +590,57 @@ export async function saveWeddingImages(db: D1Db, slug: string, document: any) {
 
 export async function getWeddingSuppliers(db: D1Db, slug: string) {
   const result = await db.prepare(`
+    SELECT l.wedding_slug, l.sort_order, l.role, l.supplier_id,
+           s.name, s.website, s.instagram, s.email, s.phone, s.location, s.county, s.category
+    FROM wedding_supplier_links l
+    JOIN suppliers s ON s.id = l.supplier_id
+    WHERE l.wedding_slug = ?
+    ORDER BY l.sort_order ASC, l.role COLLATE NOCASE ASC, s.name COLLATE NOCASE ASC
+  `).bind(slug).all();
+
+  if ((result.results || []).length) {
+    return (result.results || []).map((row: any) => ({
+      supplierId: text(row.supplier_id),
+      blogSlug: text(row.wedding_slug),
+      role: text(row.role || row.category),
+      name: text(row.name),
+      website: text(row.website),
+      instagram: text(row.instagram),
+      email: text(row.email),
+      phone: text(row.phone),
+      location: text(row.location),
+      county: text(row.county),
+      sortOrder: String(Number(row.sort_order || 0)),
+    }));
+  }
+
+  const legacy = await db.prepare(`
     SELECT wedding_slug, sort_order, role, name, website, instagram
     FROM wedding_suppliers
     WHERE wedding_slug = ?
     ORDER BY sort_order ASC, role COLLATE NOCASE ASC, name COLLATE NOCASE ASC
   `).bind(slug).all();
 
-  return (result.results || []).map((row: any) => ({
-    blogSlug: text(row.wedding_slug),
-    role: text(row.role),
-    name: text(row.name),
-    website: text(row.website),
-    instagram: text(row.instagram),
+  return (legacy.results || []).map((row: any) => ({
+    blogSlug: text(row.wedding_slug), role: text(row.role), name: text(row.name),
+    website: text(row.website), instagram: text(row.instagram),
     sortOrder: String(Number(row.sort_order || 0)),
   }));
 }
 
 export async function listAdminSuppliers(db: D1Db) {
   const result = await db.prepare(`
-    SELECT wedding_slug, sort_order, role, name, website, instagram
-    FROM wedding_suppliers
-    ORDER BY wedding_slug COLLATE NOCASE ASC, sort_order ASC
+    SELECT l.wedding_slug, l.sort_order, l.role, l.supplier_id,
+           s.name, s.website, s.instagram, s.email, s.phone, s.location, s.county
+    FROM wedding_supplier_links l
+    JOIN suppliers s ON s.id = l.supplier_id
+    ORDER BY l.wedding_slug COLLATE NOCASE ASC, l.sort_order ASC
   `).all();
 
   return (result.results || []).map((row: any) => ({
-    blogSlug: text(row.wedding_slug),
-    role: text(row.role),
-    name: text(row.name),
-    website: text(row.website),
-    instagram: text(row.instagram),
+    supplierId: text(row.supplier_id), blogSlug: text(row.wedding_slug), role: text(row.role),
+    name: text(row.name), website: text(row.website), instagram: text(row.instagram),
+    email: text(row.email), phone: text(row.phone), location: text(row.location), county: text(row.county),
     sortOrder: String(Number(row.sort_order || 0)),
   }));
 }
@@ -601,12 +663,12 @@ export async function saveWeddingSuppliers(db: D1Db, slug: string, rows: any[]) 
   });
   if (validation.length) throw httpError("Supplier validation failed.", 400, validation);
 
-  await replaceSuppliers(db, slug, suppliers);
+  const savedSuppliers = await replaceSuppliers(db, slug, suppliers);
 
   const document = json(weddingRow.document_json, {} as any);
   const nextDocument = {
     ...document,
-    suppliers,
+    suppliers: savedSuppliers.map(({ supplierId, email, phone, location, county, ...supplier }) => supplier),
     updatedAt: new Date().toISOString(),
   };
 
@@ -619,8 +681,8 @@ export async function saveWeddingSuppliers(db: D1Db, slug: string, rows: any[]) 
   return {
     ok: true,
     blogSlug: slug,
-    savedRows: suppliers.length,
-    totalRows: suppliers.length,
+    savedRows: savedSuppliers.length,
+    totalRows: savedSuppliers.length,
     backupPath: null,
   };
 }
@@ -968,16 +1030,40 @@ export async function publishAdminWedding(db: D1Db, slug: string, storyEnabled: 
   };
 }
 
+export async function saveWeddingListSettings(db: D1Db, items: any[]) {
+  const rows = Array.isArray(items) ? items : [];
+  const statements: any[] = [];
+  for (const item of rows) {
+    const slug = text(item?.slug);
+    if (!slug) continue;
+    const requestedVisible = item?.storyVisible === true;
+    if (requestedVisible) {
+      const row = await db.prepare(`SELECT story_enabled, story_status, published_json FROM weddings WHERE slug = ?`).bind(slug).first();
+      if (!row) throw httpError(`Wedding not found: ${slug}`, 404);
+      if (!Boolean(row.story_enabled) || text(row.story_status) !== "published" || !text(row.published_json)) {
+        throw httpError("A wedding story must be published before it can be shown on Stories & Reviews.", 409, [slug]);
+      }
+    }
+    statements.push(
+      db.prepare(`UPDATE weddings SET story_sort_order = ?, story_list_visible = ?, updated_at = CURRENT_TIMESTAMP WHERE slug = ?`)
+        .bind(Number(item?.sortOrder || 0), requestedVisible ? 1 : 0, slug),
+    );
+  }
+  await runBatches(db, statements);
+  return listAdminWeddings(db);
+}
+
 export async function listPublicWeddings(db: D1Db) {
   const [allResult, publishedResult] = await Promise.all([
     db.prepare(`SELECT slug FROM weddings ORDER BY slug ASC`).all(),
     db.prepare(`
-      SELECT slug, published_json, published_at
+      SELECT slug, published_json, published_at, story_sort_order
       FROM weddings
       WHERE story_enabled = 1
         AND story_status = 'published'
+        AND story_list_visible = 1
         AND published_json <> ''
-      ORDER BY COALESCE(story_published_at, published_at, updated_at) DESC, slug ASC
+      ORDER BY CASE WHEN story_sort_order > 0 THEN 0 ELSE 1 END, story_sort_order ASC, COALESCE(story_published_at, published_at, updated_at) DESC, slug ASC
     `).all(),
   ]);
 

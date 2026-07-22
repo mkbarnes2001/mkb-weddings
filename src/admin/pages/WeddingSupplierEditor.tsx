@@ -14,6 +14,7 @@ import { WeddingService } from "../services/WeddingService";
 import type { WeddingRecord } from "../types/wedding";
 import {
   SupplierService,
+  type MasterSupplier,
   type SupplierRecord,
 } from "../services/SupplierService";
 import {
@@ -40,7 +41,7 @@ const EMPTY_SUPPLIER: SupplierRecord = {
 export function WeddingSupplierEditor() {
   const { slug } = useParams();
   const [weddings, setWeddings] = useState<WeddingRecord[]>([]);
-  const [allSuppliers, setAllSuppliers] = useState<SupplierRecord[]>([]);
+  const [allSuppliers, setAllSuppliers] = useState<MasterSupplier[]>([]);
   const [rows, setRows] = useState<SupplierRecord[]>([]);
   const [copied, setCopied] = useState(false);
   const [apiOnline, setApiOnline] = useState(false);
@@ -55,8 +56,7 @@ export function WeddingSupplierEditor() {
     );
 
     SupplierService.load().then((service) => {
-      const all = service.getAllSuppliers();
-      setAllSuppliers(all);
+      setAllSuppliers(service.getMasterSuppliers());
       setRows(service.getSuppliersForWedding(slug || ""));
     });
 
@@ -97,10 +97,15 @@ export function WeddingSupplierEditor() {
     supplier: SupplierDirectoryEntry,
   ) {
     updateRow(index, {
+      supplierId: supplier.supplierId,
       name: supplier.name,
       role: rows[index]?.role || supplier.role,
       website: supplier.website,
       instagram: supplier.instagram,
+      email: supplier.email,
+      phone: supplier.phone,
+      location: supplier.location,
+      county: supplier.county,
     });
   }
 
@@ -205,7 +210,7 @@ export function WeddingSupplierEditor() {
               {wedding.couple}
             </h1>
             <p className="text-white/65">
-              Smart autocomplete uses suppliers already stored across D1 wedding records.
+              Search the reusable supplier master database. A new name entered here is added to the master database when you save.
             </p>
           </div>
 
@@ -275,12 +280,15 @@ export function WeddingSupplierEditor() {
                     value={row.name || ""}
                     directory={directory}
                     onChange={(value) =>
-                      updateRow(index, { name: value })
+                      updateRow(index, { name: value, supplierId: "" })
                     }
                     onSelect={(supplier) =>
                       selectDirectorySupplier(index, supplier)
                     }
                   />
+                  <p className="mt-2 text-xs text-neutral-500">
+                    {row.supplierId ? "Linked to master supplier record." : "New supplier — will be added to the master database on save."}
+                  </p>
                 </label>
 
                 <label className="block">
