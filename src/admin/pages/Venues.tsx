@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Building2, GripVertical, Images, Plus, Save, Search } from "lucide-react";
-import { AdminApiService } from "../services/AdminApiService";
+import { Building2, Check, GripVertical, Images, MapPin, Plus, Save, Search } from "lucide-react";
+import { AdminApiService, type LocationArea, type LocationGallerySettings } from "../services/AdminApiService";
 import type { VenueSummary } from "../types/venue";
 
 function venueHero(venue: VenueSummary) {
@@ -20,12 +20,17 @@ export function Venues() {
   const [draggedSlug, setDraggedSlug] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [locationSettings, setLocationSettings] = useState<LocationGallerySettings | null>(null);
+  const [locations, setLocations] = useState<LocationArea[]>([]);
+  const [locationSaving, setLocationSaving] = useState(false);
 
   useEffect(() => {
-    AdminApiService.listVenues()
-      .then((rows) => {
+    Promise.all([AdminApiService.listVenues(), AdminApiService.getLocations()])
+      .then(([rows, locationConfig]) => {
         setVenues(rows);
         setActiveSlug(rows[0]?.slug || null);
+        setLocationSettings(locationConfig.settings);
+        setLocations(locationConfig.locations || []);
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Unable to load venues."))
       .finally(() => setLoading(false));
@@ -38,6 +43,44 @@ export function Venues() {
   }, [venues, query]);
 
   const active = venues.find((venue) => venue.slug === activeSlug) || null;
+
+
+  const activeLocationIds = useMemo(() => {
+    if (!active) return new Set<string>();
+    return new Set(locations.filter((location) => location.venueSlugs.includes(active.slug)).map((location) => location.id));
+  }, [active, locations]);
+
+  const groupedLocations = useMemo(() => {
+    const groups = new Map<string, LocationArea[]>();
+    for (const location of locations.filter((item) => item.status === "active")) {
+      const key = location.areaType || "custom";
+      groups.set(key, [...(groups.get(key) || []), location]);
+    }
+    return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b));
+  }, [locations]);
+
+  async function toggleVenueLocation(locationId: string, checked: boolean) {
+    if (!active || !locationSettings) return;
+    const nextLocations = locations.map((location) => {
+      if (location.id !== locationId) return location;
+      const venueSlugs = checked
+        ? Array.from(new Set([...location.venueSlugs, active.slug]))
+        : location.venueSlugs.filter((slug) => slug !== active.slug);
+      return { ...location, venueSlugs };
+    });
+    setLocations(nextLocations);
+    setLocationSaving(true); setError(""); setMessage("");
+    try {
+      const saved = await AdminApiService.saveLocations({ settings: locationSettings, locations: nextLocations });
+      setLocationSettings(saved.settings);
+      setLocations(saved.locations);
+      setMessage(`Location assignments saved for ${active.name}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to save venue locations.");
+      const fresh = await AdminApiService.getLocations().catch(() => null);
+      if (fresh) { setLocationSettings(fresh.settings); setLocations(fresh.locations); }
+    } finally { setLocationSaving(false); }
+  }
 
   function dropOn(targetSlug: string) {
     if (!draggedSlug || draggedSlug === targetSlug) { setDraggedSlug(null); return; }
@@ -123,6 +166,36 @@ export function Venues() {
               {venueHero(active) ? <img src={venueHero(active)?.thumbSrc || venueHero(active)?.fullSrc} alt={active.name} className="max-h-[220px] w-full rounded-2xl object-cover" /> : null}
               <div><p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Venue</p><h2 className="mt-2 font-serif text-3xl">{active.name}</h2><p className="mt-2 text-sm text-neutral-500">{[active.town, active.county, active.country].filter(Boolean).join(", ")}</p></div>
               <label className="flex items-center justify-between gap-4 rounded-2xl border border-black/10 p-4"><span className="text-sm">Show on Gallery by Venue</span><input type="checkbox" checked={active.galleryVisible !== false} onChange={(event) => toggleVisible(active.slug, event.target.checked)} /></label>
+              <div className="rounded-2xl border border-black/10 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="flex items-center gap-2 text-sm font-medium"><MapPin className="h-4 w-4" />Locations</p>
+                    <p className="mt-1 text-xs text-neutral-500">Assign this venue to any county, region, destination or custom location.</p>
+                  </div>
+                  {locationSaving ? <span className="text-xs text-neutral-400">Saving…</span> : null}
+                </div>
+                <div className="mt-4 space-y-4">
+                  {groupedLocations.length ? groupedLocations.map(([type, items]) => (
+                    <div key={type}>
+                      <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-neutral-400">{type.replace(/(^|[-_ ])\w/g, (m) => m.toUpperCase())}</p>
+                      <div className="space-y-2">
+                        {items.map((location) => {
+                          const checked = activeLocationIds.has(location.id);
+                          return (
+                            <label key={location.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-black/10 px-3 py-2 text-sm">
+                              <span>{location.name}</span>
+                              <span className="flex items-center gap-2">
+                                {checked ? <Check className="h-4 w-4" /> : null}
+                                <input type="checkbox" checked={checked} disabled={locationSaving} onChange={(event) => void toggleVenueLocation(location.id, event.target.checked)} />
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )) : <p className="text-sm text-neutral-500">No location areas have been created yet. Add them in Gallery Management → Locations.</p>}
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-3"><Mini label="Weddings" value={active.weddingCount} /><Mini label="Images" value={active.imageCount} /></div>
               <div className="rounded-2xl bg-neutral-50 p-4 text-sm text-neutral-600"><p><span className="text-neutral-400">Status:</span> {active.status}</p><p className="mt-2"><span className="text-neutral-400">Public order:</span> {venues.findIndex((venue) => venue.slug === active.slug) + 1}</p></div>
               <Link to={`/admin/venues/${active.slug}`} className="block w-full rounded-full bg-black px-5 py-3 text-center text-sm text-white">Open venue</Link>
