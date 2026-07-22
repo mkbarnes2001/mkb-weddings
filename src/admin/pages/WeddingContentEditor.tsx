@@ -6,10 +6,18 @@ import {
   CheckCircle2,
   Plus,
   Save,
+  Search,
   Trash2,
+  Users,
+  X,
 } from "lucide-react";
 import type { WeddingDocument } from "../../lib/weddingEngine";
 import { AdminApiService } from "../services/AdminApiService";
+import {
+  SupplierService,
+  type MasterSupplier,
+  type SupplierRecord,
+} from "../services/SupplierService";
 
 type WeddingFactsRecord = {
   season?: string;
@@ -38,20 +46,37 @@ export function WeddingContentEditor() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  const [masterSuppliers, setMasterSuppliers] = useState<MasterSupplier[]>([]);
+  const [weddingSuppliers, setWeddingSuppliers] = useState<SupplierRecord[]>([]);
+  const [supplierSearch, setSupplierSearch] = useState("");
+  const [supplierRole, setSupplierRole] = useState("");
+  const [supplierSaving, setSupplierSaving] = useState(false);
+  const [supplierMessage, setSupplierMessage] = useState("");
+  const [supplierError, setSupplierError] = useState("");
+
   useEffect(() => {
     if (!slug) {
       setLoading(false);
       return;
     }
 
-    AdminApiService.getJsonWedding(slug)
-      .then((record) => {
+    Promise.all([
+      AdminApiService.getJsonWedding(slug),
+      SupplierService.load(),
+    ])
+      .then(([record, supplierService]) => {
         setWedding({
           ...record,
           facts: record.facts || {},
           seo: record.seo || {},
           story: Array.isArray(record.story) ? record.story : [],
         });
+        setMasterSuppliers(
+          supplierService
+            .getMasterSuppliers()
+            .filter((supplier) => supplier.status !== "archived"),
+        );
+        setWeddingSuppliers(supplierService.getSuppliersForWedding(slug));
       })
       .catch((loadError) => {
         setError(
@@ -87,6 +112,115 @@ export function WeddingContentEditor() {
 
     return errors;
   }, [wedding]);
+
+  const supplierMatches = useMemo(() => {
+    const query = supplierSearch.trim().toLowerCase();
+    const rows = masterSuppliers.filter((supplier) => {
+      if (!query) return true;
+      return [
+        supplier.name,
+        supplier.displayName,
+        supplier.category,
+        supplier.location,
+        supplier.county,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+    });
+
+    return rows.slice(0, 10);
+  }, [masterSuppliers, supplierSearch]);
+
+  function syncWeddingSupplierDocument(rows: SupplierRecord[]) {
+    setWedding((current) =>
+      current
+        ? {
+            ...current,
+            suppliers: rows.map((row) => ({
+              role: row.role || "Supplier",
+              name: row.name || "",
+              website: row.website || "",
+              instagram: row.instagram || "",
+            })),
+          }
+        : current,
+    );
+  }
+
+  async function saveSupplierRows(nextRows: SupplierRecord[], successMessage: string) {
+    if (!slug) return;
+
+    setSupplierSaving(true);
+    setSupplierMessage("");
+    setSupplierError("");
+
+    const normalized = nextRows.map((row, index) => ({
+      ...row,
+      blogSlug: slug,
+      sortOrder: String(index + 1),
+    }));
+
+    try {
+      await AdminApiService.saveWeddingSuppliers(slug, normalized);
+      setWeddingSuppliers(normalized);
+      syncWeddingSupplierDocument(normalized);
+      setSupplierMessage(successMessage);
+    } catch (saveError) {
+      setSupplierError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Unable to update wedding suppliers.",
+      );
+    } finally {
+      setSupplierSaving(false);
+    }
+  }
+
+  async function addSupplier(supplier: MasterSupplier) {
+    const role = supplierRole.trim() || supplier.category || "Supplier";
+    const duplicate = weddingSuppliers.some(
+      (row) =>
+        row.supplierId === supplier.id &&
+        String(row.role || "").trim().toLowerCase() === role.toLowerCase(),
+    );
+
+    if (duplicate) {
+      setSupplierError(`${supplier.name} is already assigned as ${role}.`);
+      setSupplierMessage("");
+      return;
+    }
+
+    const nextRows = [
+      ...weddingSuppliers,
+      {
+        supplierId: supplier.id,
+        blogSlug: slug || "",
+        role,
+        name: supplier.name,
+        website: supplier.website,
+        instagram: supplier.instagram,
+        email: supplier.email,
+        phone: supplier.phone,
+        location: supplier.location,
+        county: supplier.county,
+        sortOrder: String(weddingSuppliers.length + 1),
+      },
+    ];
+
+    await saveSupplierRows(nextRows, `${supplier.name} added to this wedding.`);
+    setSupplierSearch("");
+    setSupplierRole("");
+  }
+
+  async function removeSupplier(index: number) {
+    const supplier = weddingSuppliers[index];
+    const nextRows = weddingSuppliers.filter((_, rowIndex) => rowIndex !== index);
+    await saveSupplierRows(
+      nextRows,
+      `${supplier?.name || "Supplier"} removed from this wedding.`,
+    );
+  }
 
   function updateWedding(patch: Partial<WeddingDocument>) {
     setWedding((current) =>
@@ -333,6 +467,135 @@ export function WeddingContentEditor() {
             onChange={(value) => updateWedding({ title: value })}
             wide
           />
+        </div>
+      </EditorSection>
+
+      <EditorSection eyebrow="Suppliers" title="Wedding suppliers">
+        <div className="space-y-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p className="text-sm text-neutral-600">
+                Assign suppliers directly from the reusable master supplier database. Changes save immediately.
+              </p>
+              <p className="mt-1 text-xs text-neutral-500">
+                The same supplier can be added more than once when they have different roles.
+              </p>
+            </div>
+            <Link
+              to={`/admin/weddings/${slug}/suppliers/edit`}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
+            >
+              <Users className="h-4 w-4" />
+              Full supplier editor
+            </Link>
+          </div>
+
+          {supplierMessage ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+              {supplierMessage}
+            </div>
+          ) : null}
+          {supplierError ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+              {supplierError}
+            </div>
+          ) : null}
+
+          <div className="space-y-2">
+            {weddingSuppliers.length ? (
+              weddingSuppliers.map((row, index) => (
+                <div
+                  key={`${row.supplierId || row.name}-${row.role}-${index}`}
+                  className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{row.name}</p>
+                    <p className="mt-1 text-xs text-neutral-500">
+                      {row.role || "Supplier"}
+                      {row.instagram ? ` · @${String(row.instagram).replace(/^@/, "")}` : ""}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeSupplier(index)}
+                    disabled={supplierSaving}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-red-200 bg-white px-4 py-2 text-sm text-red-700 disabled:opacity-40"
+                  >
+                    <X className="h-4 w-4" />
+                    Remove
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-2xl border border-dashed border-black/15 bg-neutral-50 p-5 text-sm text-neutral-500">
+                No suppliers assigned yet. Search the master database below to add them.
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-[24px] border border-black/10 bg-white p-5">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <label className="block">
+                <span className="mb-2 block text-xs uppercase tracking-[0.16em] text-neutral-500">
+                  Search master suppliers
+                </span>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                  <input
+                    value={supplierSearch}
+                    onChange={(event) => {
+                      setSupplierSearch(event.target.value);
+                      setSupplierError("");
+                      setSupplierMessage("");
+                    }}
+                    placeholder="Search supplier, category or location…"
+                    className="w-full rounded-2xl border border-black/10 bg-white py-3 pl-11 pr-4 text-sm"
+                  />
+                </div>
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-xs uppercase tracking-[0.16em] text-neutral-500">
+                  Role for this wedding
+                </span>
+                <input
+                  value={supplierRole}
+                  onChange={(event) => setSupplierRole(event.target.value)}
+                  placeholder="Uses supplier category if left blank"
+                  className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                />
+              </label>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              {supplierMatches.map((supplier) => (
+                <div
+                  key={supplier.id}
+                  className="flex flex-col gap-3 rounded-2xl border border-black/10 p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">
+                      {supplier.displayName || supplier.name}
+                    </p>
+                    <p className="mt-1 text-xs text-neutral-500">
+                      {[supplier.category, supplier.location || supplier.county]
+                        .filter(Boolean)
+                        .join(" · ") || "Supplier"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => addSupplier(supplier)}
+                    disabled={supplierSaving}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-4 py-2 text-sm text-white disabled:opacity-40"
+                  >
+                    <Plus className="h-4 w-4" />
+                    {supplierSaving ? "Saving…" : "Add"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </EditorSection>
 

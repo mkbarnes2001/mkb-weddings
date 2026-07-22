@@ -31,6 +31,45 @@ function text(value: unknown) {
   return String(value ?? "").trim();
 }
 
+const LEGACY_PUBLIC_VENUE_ORDER = [
+  "Orange Tree House",
+  "Ballyscullion Park",
+  "Tullyglass Hotel",
+  "Killeavy Castle",
+  "Slieve Donard Hotel",
+  "Wool Tower",
+  "Merchant",
+  "Rabbit Hotel and Spa",
+  "Leighinmohr House Hotel",
+  "Beech Hill",
+];
+
+function sortGalleryVenues<T extends { name?: string; gallerySortOrder?: number }>(venues: T[]) {
+  const hasSavedOrder = venues.some((venue) => Number(venue.gallerySortOrder || 0) > 0);
+
+  if (hasSavedOrder) {
+    return [...venues].sort((a, b) => {
+      const aOrder = Number(a.gallerySortOrder || 0);
+      const bOrder = Number(b.gallerySortOrder || 0);
+      if (aOrder > 0 && bOrder <= 0) return -1;
+      if (aOrder <= 0 && bOrder > 0) return 1;
+      if (aOrder > 0 && bOrder > 0 && aOrder !== bOrder) return aOrder - bOrder;
+      return text(a.name).localeCompare(text(b.name));
+    });
+  }
+
+  const legacyOrder = new Map(
+    LEGACY_PUBLIC_VENUE_ORDER.map((name, index) => [name.toLowerCase(), index]),
+  );
+
+  return [...venues].sort((a, b) => {
+    const aOrder = legacyOrder.get(text(a.name).toLowerCase()) ?? Number.MAX_SAFE_INTEGER;
+    const bOrder = legacyOrder.get(text(b.name).toLowerCase()) ?? Number.MAX_SAFE_INTEGER;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return text(a.name).localeCompare(text(b.name));
+  });
+}
+
 function list(value: unknown) {
   return Array.isArray(value)
     ? value.map((item) => text(item)).filter(Boolean)
@@ -301,10 +340,13 @@ function enrich(venue: any, weddings: any[]) {
 
 export async function listAdminVenues(db: D1Db) {
   const [venueResult, weddings] = await Promise.all([
-    db.prepare(`SELECT * FROM venues ORDER BY CASE WHEN gallery_sort_order > 0 THEN 0 ELSE 1 END, gallery_sort_order ASC, name COLLATE NOCASE ASC`).all(),
+    db.prepare(`SELECT * FROM venues`).all(),
     weddingSummaries(db),
   ]);
-  return (venueResult.results || []).map(hydrateVenue).map((venue: any) => enrich(venue, weddings));
+  const venues = (venueResult.results || [])
+    .map(hydrateVenue)
+    .map((venue: any) => enrich(venue, weddings));
+  return sortGalleryVenues(venues);
 }
 
 export async function getAdminVenue(db: D1Db, slug: string) {
@@ -572,33 +614,36 @@ export async function listPublicVenues(db: D1Db) {
     SELECT slug, published_json, published_at, updated_at, country, gallery_sort_order
     FROM venues
     WHERE status = 'published' AND published_json <> '' AND gallery_visible = 1
-    ORDER BY CASE WHEN gallery_sort_order > 0 THEN 0 ELSE 1 END, gallery_sort_order ASC, name COLLATE NOCASE ASC
   `).all();
-  const venues = (result.results || [])
-    .map((row: any) => {
-      const doc = json(row.published_json, null);
-      if (!doc) return null;
-      const venue = toPublicVenue({ ...doc, country: text(doc.country || row.country) });
-      const images = venue.gallery.images;
-      const hero = images.find((item: any) => item.assetId === venue.gallery.heroAssetId) || images[0] || null;
-      return {
-        id: venue.id,
-        slug: venue.slug,
-        name: venue.name,
-        town: venue.town,
-        county: venue.county,
-        country: venue.country,
-        status: "published",
-        updatedAt: venue.updatedAt,
-        imageCount: images.length,
-        heroAssetId: venue.gallery.heroAssetId,
-        coverThumb: hero?.thumbSrc || "",
-        coverFull: hero?.fullSrc || "",
-        coverAlt: hero?.alt || "",
-        coverCaption: hero?.caption || "",
-      };
-    })
-    .filter(Boolean);
+  const venues = sortGalleryVenues(
+    (result.results || [])
+      .map((row: any) => {
+        const doc = json(row.published_json, null);
+        if (!doc) return null;
+        const venue = toPublicVenue({ ...doc, country: text(doc.country || row.country) });
+        const images = venue.gallery.images;
+        const hero = images.find((item: any) => item.assetId === venue.gallery.heroAssetId) || images[0] || null;
+        return {
+          id: venue.id,
+          slug: venue.slug,
+          name: venue.name,
+          town: venue.town,
+          county: venue.county,
+          country: venue.country,
+          status: "published",
+          updatedAt: venue.updatedAt,
+          imageCount: images.length,
+          heroAssetId: venue.gallery.heroAssetId,
+          coverThumb: hero?.thumbSrc || "",
+          coverFull: hero?.fullSrc || "",
+          coverAlt: hero?.alt || "",
+          coverCaption: hero?.caption || "",
+          gallerySortOrder: Number(row.gallery_sort_order || 0),
+        };
+      })
+      .filter(Boolean),
+  ).map(({ gallerySortOrder: _gallerySortOrder, ...venue }: any) => venue);
+
   return {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),

@@ -21,18 +21,7 @@ const SITE_ORIGIN =
 const HERO_IMAGE =
   "https://images.mkbweddings.co.uk/full/Crover%20House/couple%20portraits/mkb-weddings-irish-wedding-photographer-crover-house-cavan-wedding-photography-9_2000.webp";
 
-const PINNED_VENUES = [
-  "Orange Tree House",
-  "Ballyscullion Park",
-  "Tullyglass Hotel",
-  "Killeavy Castle",
-  "Slieve Donard Hotel",
-  "Wool Tower",
-  "Merchant",
-  "Rabbit Hotel and Spa",
-  "Leighinmohr House Hotel",
-  "Beech Hill",
-];
+
 
 export function GalleryByVenue() {
   const [venues, setVenues] = useState<
@@ -85,29 +74,7 @@ export function GalleryByVenue() {
     };
   }, []);
 
-  const venueCards = useMemo(() => {
-    const pinnedOrder = new Map(
-      PINNED_VENUES.map((venue, index) => [
-        venue.toLowerCase(),
-        index,
-      ]),
-    );
-
-    return [...venues].sort((a, b) => {
-      const aOrder =
-        pinnedOrder.get(a.name.toLowerCase()) ??
-        Number.MAX_SAFE_INTEGER;
-      const bOrder =
-        pinnedOrder.get(b.name.toLowerCase()) ??
-        Number.MAX_SAFE_INTEGER;
-
-      if (aOrder !== bOrder) {
-        return aOrder - bOrder;
-      }
-
-      return a.name.localeCompare(b.name);
-    });
-  }, [venues]);
+  const venueCards = useMemo(() => venues, [venues]);
 
   const canonical =
     `${SITE_ORIGIN}/gallery/venues`;
