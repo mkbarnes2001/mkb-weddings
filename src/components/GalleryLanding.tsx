@@ -39,6 +39,14 @@ type PublicCustomCollectionsResponse = {
   collections: PublicCustomCollection[];
 };
 
+type GalleryLandingSettingsResponse = {
+  ok: true;
+  settings: {
+    cardOrder: string[];
+    hiddenCards: string[];
+  };
+};
+
 function preferredCardSource(image: PublicImage | null | undefined, fallback: string) {
   return image?.thumbSrc || image?.fullSrc || fallback;
 }
@@ -52,6 +60,10 @@ export function GalleryLanding() {
   const [masterHeroes, setMasterHeroes] = useState<GalleryMasterHeroesResponse | null>(null);
   const [creativeFlashHero, setCreativeFlashHero] = useState<PublicImage | null>(null);
   const [customCollections, setCustomCollections] = useState<PublicCustomCollection[]>([]);
+  const [landingSettings, setLandingSettings] = useState<{ cardOrder: string[]; hiddenCards: string[] }>({
+    cardOrder: ["county", "venues", "moments", "creative-flash", "stories"],
+    hiddenCards: [],
+  });
 
   const HERO_FALLBACK =
     "https://images.mkbweddings.co.uk/full/Orange%20tree%20house/couple%20portraits/MKB_Photography-Northern-ireland-wedding-photography-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-494_2000.webp";
@@ -93,7 +105,11 @@ export function GalleryLanding() {
         if (!response.ok) throw new Error("Unable to load custom collections.");
         return response.json() as Promise<PublicCustomCollectionsResponse>;
       }),
-    ]).then(([galleryHeroesResult, creativeFlashResult, customCollectionsResult]) => {
+      fetch("/api/public/gallery-landing-settings", { cache: "no-store" }).then((response) => {
+        if (!response.ok) throw new Error("Unable to load Gallery landing settings.");
+        return response.json() as Promise<GalleryLandingSettingsResponse>;
+      }),
+    ]).then(([galleryHeroesResult, creativeFlashResult, customCollectionsResult, landingSettingsResult]) => {
       if (cancelled) return;
 
       if (galleryHeroesResult.status === "fulfilled") {
@@ -107,6 +123,10 @@ export function GalleryLanding() {
       if (customCollectionsResult.status === "fulfilled") {
         setCustomCollections(customCollectionsResult.value.collections || []);
       }
+
+      if (landingSettingsResult.status === "fulfilled") {
+        setLandingSettings(landingSettingsResult.value.settings);
+      }
     });
 
     return () => {
@@ -116,6 +136,7 @@ export function GalleryLanding() {
 
   const mainTiles = useMemo(() => {
     const customTiles = customCollections.map((collection) => ({
+      key: `custom:${collection.id}`,
       title: collection.name,
       link: `/gallery/collection/${collection.slug}`,
       image: preferredCardSource(
@@ -127,26 +148,30 @@ export function GalleryLanding() {
         `Explore ${collection.name.toLowerCase()} wedding photography`,
     }));
 
-    return [
+    const tiles = [
       {
+        key: "county",
         title: "Explore by County",
         link: "/wedding-photographer",
         image: countiesThumb,
         description: "Browse wedding galleries by county",
       },
       {
+        key: "venues",
         title: "Venues",
         link: "/gallery/venues",
         image: preferredCardSource(masterHeroes?.venue, venueFallback),
         description: "Browse weddings by location",
       },
       {
+        key: "moments",
         title: "Wedding Moments",
         link: "/gallery/moments",
         image: preferredCardSource(masterHeroes?.moments, momentsFallback),
         description: "Explore wedding day highlights",
       },
       {
+        key: "creative-flash",
         title: "Creative Flash",
         link: "/gallery/creative-flash",
         image: preferredCardSource(creativeFlashHero, creativeFlashFallback),
@@ -154,13 +179,45 @@ export function GalleryLanding() {
       },
       ...customTiles,
       {
+        key: "stories",
         title: "Stories & Reviews",
         link: "/blog",
         image: storiesImage,
         description: "Real wedding love stories",
       },
     ];
-  }, [masterHeroes, creativeFlashHero, customCollections]);
+
+    const hidden = new Set(landingSettings.hiddenCards || []);
+    const customKeys = customTiles.map((tile) => tile.key);
+    const savedOrder = [...new Set(landingSettings.cardOrder || [])];
+    const hasCustomOrder = savedOrder.some((key) => key.startsWith("custom:"));
+    let effectiveOrder = savedOrder;
+
+    if (!hasCustomOrder) {
+      effectiveOrder = [
+        ...savedOrder.filter((key) => key !== "stories"),
+        ...customKeys,
+        "stories",
+      ];
+    } else {
+      const missingCustom = customKeys.filter((key) => !savedOrder.includes(key));
+      const next = [...savedOrder];
+      const storiesIndex = next.indexOf("stories");
+      if (storiesIndex >= 0) next.splice(storiesIndex, 0, ...missingCustom);
+      else next.push(...missingCustom);
+      effectiveOrder = next;
+    }
+
+    const allKeys = tiles.map((tile) => tile.key);
+    effectiveOrder = [...new Set([...effectiveOrder, ...allKeys])].filter((key) =>
+      allKeys.includes(key),
+    );
+    const rank = new Map(effectiveOrder.map((key, index) => [key, index]));
+
+    return tiles
+      .filter((tile) => !hidden.has(tile.key))
+      .sort((a, b) => (rank.get(a.key) ?? 9999) - (rank.get(b.key) ?? 9999));
+  }, [masterHeroes, creativeFlashHero, customCollections, landingSettings]);
 
   return (
     <div className="min-h-screen bg-white">

@@ -156,7 +156,7 @@ export function CustomCollections() {
             to="/admin/gallery"
             className="rounded-full border border-white/20 px-5 py-3 text-center text-sm"
           >
-            Back to Collections
+            Back to Gallery Management
           </Link>
         </div>
       </section>

@@ -43,6 +43,7 @@ export type MomentSaveResult = { ok: true; document: MomentRepositoryDocument; b
 export type WeddingUpdateResult = { ok: true; wedding: StoredWeddingDocument; backupPath: string | null };
 export type VenueUpdateResult = { ok: true; venue: VenueSummary; backupPath: string | null };
 export type VenueCreateResult = { ok: true; venue: VenueSummary };
+export type GalleryLandingSettings = { cardOrder: string[]; hiddenCards: string[] };
 
 export type ImageDeleteResult = {
   ok: true;
@@ -388,6 +389,21 @@ export class AdminApiService {
 
   static async getGalleryMasterHeroes() {
     return request<{ ok: true; settings: { venueHeroImageId: string; momentsHeroImageId: string; landingHeroImageId: string } }>("/api/gallery-master-heroes");
+  }
+
+  static async getGalleryLandingSettings() {
+    const result = await request<{ ok: true; settings: GalleryLandingSettings }>(
+      "/api/gallery-landing-settings",
+    );
+    return result.settings;
+  }
+
+  static async saveGalleryLandingSettings(settings: GalleryLandingSettings) {
+    const result = await request<{ ok: true; settings: GalleryLandingSettings }>(
+      "/api/gallery-landing-settings",
+      { method: "PUT", body: JSON.stringify(settings) },
+    );
+    return result.settings;
   }
 
   static async setGalleryMasterHero(kind: "venue" | "moments" | "landing", assetKey: string) {
