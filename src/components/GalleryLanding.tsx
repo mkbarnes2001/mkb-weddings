@@ -47,6 +47,27 @@ type GalleryLandingSettingsResponse = {
   };
 };
 
+type PublicLocationSettings = {
+  enabled: boolean;
+  landingTitle: string;
+  cardDescription: string;
+  publicBasePath: string;
+  heroImageUrl: string;
+};
+
+type PublicLocationsResponse = {
+  ok: true;
+  settings: PublicLocationSettings;
+};
+
+const DEFAULT_LOCATION_SETTINGS: PublicLocationSettings = {
+  enabled: true,
+  landingTitle: "Explore by County",
+  cardDescription: "Browse wedding galleries by county",
+  publicBasePath: "/wedding-photographer",
+  heroImageUrl: "",
+};
+
 function preferredCardSource(image: PublicImage | null | undefined, fallback: string) {
   return image?.thumbSrc || image?.fullSrc || fallback;
 }
@@ -55,11 +76,12 @@ export function GalleryLanding() {
   const canonical = "https://www.mkbweddings.co.uk/gallery";
   const title = "Wedding Photography Gallery | Northern Ireland & Ireland | MKB Weddings";
   const description =
-    "Browse real wedding photography from venues across Northern Ireland and Ireland. Explore galleries by county, venue, moments, creative flash and real wedding stories.";
+    "Browse real wedding photography from venues across Northern Ireland and Ireland. Explore galleries by location, venue, moments and real wedding stories.";
 
   const [masterHeroes, setMasterHeroes] = useState<GalleryMasterHeroesResponse | null>(null);
   const [creativeFlashHero, setCreativeFlashHero] = useState<PublicImage | null>(null);
   const [customCollections, setCustomCollections] = useState<PublicCustomCollection[]>([]);
+  const [locationSettings, setLocationSettings] = useState<PublicLocationSettings>(DEFAULT_LOCATION_SETTINGS);
   const [landingSettings, setLandingSettings] = useState<{ cardOrder: string[]; hiddenCards: string[] }>({
     cardOrder: ["county", "venues", "moments", "creative-flash", "stories"],
     hiddenCards: [],
@@ -109,7 +131,11 @@ export function GalleryLanding() {
         if (!response.ok) throw new Error("Unable to load Gallery landing settings.");
         return response.json() as Promise<GalleryLandingSettingsResponse>;
       }),
-    ]).then(([galleryHeroesResult, creativeFlashResult, customCollectionsResult, landingSettingsResult]) => {
+      fetch("/api/public/locations", { cache: "no-store" }).then((response) => {
+        if (!response.ok) throw new Error("Unable to load location gallery settings.");
+        return response.json() as Promise<PublicLocationsResponse>;
+      }),
+    ]).then(([galleryHeroesResult, creativeFlashResult, customCollectionsResult, landingSettingsResult, locationsResult]) => {
       if (cancelled) return;
 
       if (galleryHeroesResult.status === "fulfilled") {
@@ -126,6 +152,10 @@ export function GalleryLanding() {
 
       if (landingSettingsResult.status === "fulfilled") {
         setLandingSettings(landingSettingsResult.value.settings);
+      }
+
+      if (locationsResult.status === "fulfilled") {
+        setLocationSettings({ ...DEFAULT_LOCATION_SETTINGS, ...locationsResult.value.settings });
       }
     });
 
@@ -151,10 +181,11 @@ export function GalleryLanding() {
     const tiles = [
       {
         key: "county",
-        title: "Explore by County",
-        link: "/wedding-photographer",
-        image: countiesThumb,
-        description: "Browse wedding galleries by county",
+        title: locationSettings.landingTitle || "Explore by Location",
+        link: locationSettings.publicBasePath || "/gallery/locations",
+        image: locationSettings.heroImageUrl || countiesThumb,
+        description: locationSettings.cardDescription || "Browse wedding galleries by location",
+        disabled: !locationSettings.enabled,
       },
       {
         key: "venues",
@@ -189,7 +220,7 @@ export function GalleryLanding() {
 
     const hidden = new Set(landingSettings.hiddenCards || []);
     const customKeys = customTiles.map((tile) => tile.key);
-    const savedOrder = [...new Set(landingSettings.cardOrder || [])];
+    const savedOrder = [...new Set<string>(landingSettings.cardOrder || [])];
     const hasCustomOrder = savedOrder.some((key) => key.startsWith("custom:"));
     let effectiveOrder = savedOrder;
 
@@ -208,16 +239,17 @@ export function GalleryLanding() {
       effectiveOrder = next;
     }
 
-    const allKeys = tiles.map((tile) => tile.key);
+    const enabledTiles = tiles.filter((tile) => tile.key !== "county" || locationSettings.enabled);
+    const allKeys = enabledTiles.map((tile) => tile.key);
     effectiveOrder = [...new Set([...effectiveOrder, ...allKeys])].filter((key) =>
       allKeys.includes(key),
     );
     const rank = new Map(effectiveOrder.map((key, index) => [key, index]));
 
-    return tiles
+    return enabledTiles
       .filter((tile) => !hidden.has(tile.key))
       .sort((a, b) => (rank.get(a.key) ?? 9999) - (rank.get(b.key) ?? 9999));
-  }, [masterHeroes, creativeFlashHero, customCollections, landingSettings]);
+  }, [masterHeroes, creativeFlashHero, customCollections, landingSettings, locationSettings]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -267,7 +299,7 @@ export function GalleryLanding() {
       <section className="max-w-5xl mx-auto px-6 pt-4 pb-10 text-center">
         <p className="text-neutral-700 leading-relaxed text-lg">
           Browse real wedding photography captured across Northern Ireland and Ireland — explore
-          galleries by county, venues, wedding moments, creative flash, and real wedding stories.
+          galleries by location, venues, wedding moments, photographer galleries, and real wedding stories.
         </p>
       </section>
 

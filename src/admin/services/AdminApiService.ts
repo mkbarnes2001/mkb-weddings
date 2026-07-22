@@ -47,6 +47,57 @@ export type GalleryLandingSettings = { cardOrder: string[]; hiddenCards: string[
 export type VenueListSetting = { slug: string; sortOrder: number; galleryVisible: boolean };
 export type WeddingListSetting = { slug: string; sortOrder: number; storyVisible: boolean };
 
+export type LocationGallerySettings = {
+  enabled: boolean;
+  landingTitle: string;
+  galleryTitle: string;
+  cardDescription: string;
+  singularLabel: string;
+  pluralLabel: string;
+  groupingLevel: string;
+  publicBasePath: string;
+  intro: string;
+  seoTitle: string;
+  seoDescription: string;
+  heroImageUrl: string;
+  publicOrigin?: string;
+};
+
+export type LocationArea = {
+  id: string;
+  workspaceId?: string;
+  slug: string;
+  name: string;
+  areaType: string;
+  parentId?: string;
+  country: string;
+  countryCode: string;
+  region: string;
+  status: "active" | "archived";
+  showOnLanding: boolean;
+  sortOrder: number;
+  heroImageUrl: string;
+  seoTitle: string;
+  seoDescription: string;
+  intro: string;
+  venueSlugs: string[];
+};
+
+export type LocationVenueOption = {
+  slug: string;
+  name: string;
+  town: string;
+  county: string;
+  country: string;
+  status: string;
+};
+
+export type LocationConfiguration = {
+  settings: LocationGallerySettings;
+  locations: LocationArea[];
+  venues: LocationVenueOption[];
+};
+
 export type WorkspaceSettings = {
   businessName: string;
   websiteUrl: string;
@@ -420,6 +471,23 @@ export class AdminApiService {
         body: JSON.stringify({ enabledAssetKeys, updates }),
       },
     );
+  }
+
+
+  static async getLocations() {
+    const result = await request<{ ok: true } & LocationConfiguration>("/api/locations");
+    return { settings: result.settings, locations: result.locations, venues: result.venues };
+  }
+
+  static async saveLocations(configuration: {
+    settings: LocationGallerySettings;
+    locations: LocationArea[];
+  }) {
+    const result = await request<{ ok: true } & LocationConfiguration>("/api/locations", {
+      method: "PUT",
+      body: JSON.stringify(configuration),
+    });
+    return { settings: result.settings, locations: result.locations, venues: result.venues };
   }
 
   static async getGalleryMasterHeroes() {

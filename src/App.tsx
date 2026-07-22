@@ -84,6 +84,8 @@ export default function App() {
             {/* County SEO pages */}
             <Route path="/wedding-photographer" element={<CountiesLanding />} />
             <Route path="/wedding-photographer/:countySlug" element={<CountyPage />} />
+            <Route path="/gallery/locations" element={<CountiesLanding />} />
+            <Route path="/gallery/locations/:locationSlug" element={<CountyPage />} />
 
             {/* Gallery system */}
             <Route path="/gallery" element={<GalleryLanding />} />

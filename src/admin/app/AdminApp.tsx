@@ -17,6 +17,7 @@ import { Collections } from "../pages/Collections";
 import { SEOCentre } from "../pages/SEOCentre";
 import { PlaceholderPage } from "../pages/PlaceholderPage";
 import { Settings } from "../pages/Settings";
+import { Locations } from "../pages/Locations";
 import { Venues } from "../pages/Venues";
 import { NewVenue } from "../pages/NewVenue";
 import { VenueDetail } from "../pages/VenueDetail";
@@ -63,6 +64,7 @@ export function AdminApp() {
           element={<WeddingCollections />}
         />
         <Route path="gallery" element={<Collections />} />
+        <Route path="locations" element={<Locations />} />
         <Route path="moments" element={<Moments />} />
         <Route path="moments/:slug/gallery" element={<MomentGallery />} />
         <Route path="creative-flash" element={<CreativeFlashGallery />} />

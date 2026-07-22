@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { weddingStories } from "../../data/weddingStories";
 import { CollectionService } from "../services/CollectionService";
-import { AdminApiService } from "../services/AdminApiService";
+import { AdminApiService, type LocationArea, type LocationGallerySettings } from "../services/AdminApiService";
 import type { ImageCollection } from "../types/collection";
 import type { CustomCollection } from "../types/customCollection";
 import type { MomentRepositoryDocument } from "../types/moment";
@@ -48,6 +48,25 @@ type LandingCard = {
 };
 
 const CORE_KEYS = ["county", "venues", "moments", "creative-flash", "stories"];
+const LOCATION_FALLBACK_HERO =
+  "https://images.mkbweddings.co.uk/thumb/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp";
+
+const DEFAULT_LOCATION_SETTINGS: LocationGallerySettings = {
+  enabled: true,
+  landingTitle: "Explore by County",
+  galleryTitle: "Northern Ireland & Ireland Wedding Photography",
+  cardDescription: "Browse wedding galleries by county",
+  singularLabel: "County",
+  pluralLabel: "Counties",
+  groupingLevel: "county",
+  publicBasePath: "/wedding-photographer",
+  intro: "",
+  seoTitle: "",
+  seoDescription: "",
+  heroImageUrl: LOCATION_FALLBACK_HERO,
+  publicOrigin: "https://www.mkbweddings.co.uk",
+};
+
 
 function slugify(value: string) {
   return value
@@ -112,6 +131,8 @@ export function Collections() {
   const [customCollections, setCustomCollections] = useState<CustomCollection[]>([]);
   const [moments, setMoments] = useState<MomentRepositoryDocument | null>(null);
   const [venues, setVenues] = useState<VenueSummary[]>([]);
+  const [locationSettings, setLocationSettings] = useState<LocationGallerySettings>(DEFAULT_LOCATION_SETTINGS);
+  const [locationAreas, setLocationAreas] = useState<LocationArea[]>([]);
   const [creativeImages, setCreativeImages] = useState<any[]>([]);
   const [creativeSettings, setCreativeSettings] = useState({
     heroImageId: "",
@@ -140,11 +161,12 @@ export function Collections() {
     setLoading(true);
     setError("");
 
-    const [customResult, momentsResult, venuesResult, creativeResult, landingResult, heroResult] =
+    const [customResult, momentsResult, venuesResult, locationResult, creativeResult, landingResult, heroResult] =
       await Promise.allSettled([
         AdminApiService.listCustomCollections(),
         AdminApiService.getMoments(),
         AdminApiService.listVenues(),
+        AdminApiService.getLocations(),
         AdminApiService.getCreativeFlashGallery(),
         AdminApiService.getGalleryLandingSettings(),
         fetch("/api/public/gallery-master-heroes?refresh=1", { cache: "no-store" }).then(
@@ -159,6 +181,10 @@ export function Collections() {
     setCustomCollections(loadedCustom);
     if (momentsResult.status === "fulfilled") setMoments(momentsResult.value);
     if (venuesResult.status === "fulfilled") setVenues(venuesResult.value);
+    if (locationResult.status === "fulfilled") {
+      setLocationSettings(locationResult.value.settings || DEFAULT_LOCATION_SETTINGS);
+      setLocationAreas(locationResult.value.locations || []);
+    }
     if (creativeResult.status === "fulfilled") {
       setCreativeImages(creativeResult.value.images || []);
       setCreativeSettings(creativeResult.value.settings);
@@ -179,7 +205,7 @@ export function Collections() {
     setHiddenCoreCards(landingSettings.hiddenCards.filter((key) => CORE_KEYS.includes(key)));
     setLandingDirty(false);
 
-    const failed = [customResult, momentsResult, venuesResult, creativeResult, landingResult].filter(
+    const failed = [customResult, momentsResult, venuesResult, locationResult, creativeResult, landingResult].filter(
       (result) => result.status === "rejected",
     );
     if (failed.length) {
@@ -217,6 +243,8 @@ export function Collections() {
   const publicMoments = activeMoments.filter((moment) => moment.showOnMomentsLanding);
   const activeVenues = venues.filter((venue) => venue.status !== "archived");
   const publishedVenues = venues.filter((venue) => venue.status === "published");
+  const activeLocations = locationAreas.filter((location) => location.status === "active");
+  const publicLocations = activeLocations.filter((location) => location.showOnLanding);
 
   const landingCards = useMemo<LandingCard[]>(() => {
     const customCards = customCollections
@@ -234,10 +262,9 @@ export function Collections() {
     const cards: LandingCard[] = [
       {
         key: "county",
-        title: "Explore by County",
-        description: "Browse wedding galleries by county",
-        image:
-          "https://images.mkbweddings.co.uk/thumb/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp",
+        title: locationSettings.landingTitle || "Explore by Location",
+        description: locationSettings.cardDescription || "Browse wedding galleries by location",
+        image: locationSettings.heroImageUrl || LOCATION_FALLBACK_HERO,
         kind: "system",
       },
       {
@@ -275,12 +302,13 @@ export function Collections() {
     const map = new Map(cards.map((card) => [card.key, card]));
     const order = normaliseLandingOrder(landingOrder, customCollections);
     return order.map((key) => map.get(key)).filter((card): card is LandingCard => Boolean(card));
-  }, [customCollections, landingOrder, masterHeroes, creativeHero]);
+  }, [customCollections, landingOrder, masterHeroes, creativeHero, locationSettings]);
 
   function isLandingCardVisible(card: LandingCard) {
     if (card.kind === "custom") {
       return Boolean(card.custom?.showOnLanding && card.custom.status === "active");
     }
+    if (card.key === "county" && !locationSettings.enabled) return false;
     return !hiddenCoreCards.includes(card.key);
   }
 
@@ -515,7 +543,7 @@ export function Collections() {
                 <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Default galleries</p>
                 <h2 className="mt-2 font-serif text-4xl">Built-in gallery types</h2>
                 <p className="mt-2 text-sm text-neutral-600">
-                  Every workspace starts with Venues and Moments. Both use structured assignments and remain fully manageable.
+                  Every workspace starts with Venues and Moments. Locations is an optional dynamic gallery that can be counties, regions, states, cities or destinations.
                 </p>
               </div>
             </div>
@@ -540,6 +568,16 @@ export function Collections() {
                 manageTo="/admin/moments"
                 liveHref="https://www.mkbweddings.co.uk/gallery/moments"
                 badge="Default gallery"
+              />
+              <CoreGalleryCard
+                title={locationSettings.landingTitle || "Locations"}
+                description="A workspace-configurable dynamic gallery for counties, regions, states, cities, countries or custom destinations."
+                image={locationSettings.heroImageUrl || LOCATION_FALLBACK_HERO}
+                icon={MapPin}
+                stats={`${publicLocations.length} public · ${activeLocations.length} active · ${locationSettings.enabled ? "enabled" : "disabled"}`}
+                manageTo="/admin/locations"
+                liveHref={`${locationSettings.publicOrigin || "https://www.mkbweddings.co.uk"}${locationSettings.publicBasePath || "/gallery/locations"}`}
+                badge="Optional dynamic"
               />
             </div>
           </section>
@@ -608,9 +646,11 @@ export function Collections() {
                           <span className="rounded-full border border-black/10 bg-neutral-50 px-2 py-1 text-xs text-neutral-500">
                             {card.key === "venues" || card.key === "moments"
                               ? "default"
-                              : card.key === "creative-flash"
-                                ? "gallery"
-                                : "site"}
+                              : card.key === "county"
+                                ? "dynamic"
+                                : card.key === "creative-flash"
+                                  ? "gallery"
+                                  : "site"}
                           </span>
                         )}
                       </div>
@@ -621,7 +661,7 @@ export function Collections() {
                       <input
                         type="checkbox"
                         checked={collection ? collection.showOnLanding : visible}
-                        disabled={savingCollectionId === collection?.id || collection?.status === "archived"}
+                        disabled={savingCollectionId === collection?.id || collection?.status === "archived" || (card.key === "county" && !locationSettings.enabled)}
                         onChange={(event) => {
                           if (collection) void toggleCustomLanding(collection, event.target.checked);
                           else toggleCoreLandingCard(card.key, event.target.checked);
