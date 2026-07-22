@@ -3,6 +3,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type MouseEvent,
 } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -22,6 +23,7 @@ import {
 } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import type { CustomCollectionAssignmentOption } from "../types/customCollection";
+import type { LocationArea, LocationTypeDefinition } from "../services/AdminApiService";
 import type { MomentRecord } from "../types/moment";
 import { WeddingService } from "../services/WeddingService";
 import { ImageManagerService } from "../services/ImageManagerService";
@@ -61,6 +63,8 @@ export function VenueGallery() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [customCollections, setCustomCollections] = useState<CustomCollectionAssignmentOption[]>([]);
+  const [locationTypes, setLocationTypes] = useState<LocationTypeDefinition[]>([]);
+  const [locations, setLocations] = useState<LocationArea[]>([]);
   const [customMemberships, setCustomMemberships] = useState<Record<string, string[]>>({});
   const [customMembershipDirty, setCustomMembershipDirty] = useState<Set<string>>(new Set());
   const anchorRef = useRef<number | null>(null);
@@ -70,10 +74,11 @@ export function VenueGallery() {
 
     async function load() {
       try {
-        const [loadedVenue, momentDocument, collectionData] = await Promise.all([
+        const [loadedVenue, momentDocument, collectionData, locationData] = await Promise.all([
           AdminApiService.getVenue(slug),
           AdminApiService.getMoments(),
           AdminApiService.getCustomCollectionMemberships(),
+          AdminApiService.getLocations(),
         ]);
         setVenue(loadedVenue);
         setMoments(
@@ -83,6 +88,8 @@ export function VenueGallery() {
         );
         setCustomCollections(collectionData.collections);
         setCustomMemberships(collectionData.memberships);
+        setLocationTypes(locationData.types || []);
+        setLocations(locationData.locations || []);
 
         const weddingService = await WeddingService.load();
         const linkedWeddings = weddingService
@@ -224,6 +231,7 @@ export function VenueGallery() {
               blog: asset.collections.includes("blog"),
               homepage: asset.collections.includes("homepage"),
               portfolio: asset.collections.includes("portfolio"),
+              creativeFlash: asset.collections.includes("creative-flash"),
             },
           };
         });
@@ -295,6 +303,41 @@ export function VenueGallery() {
 
   const activeItem = activeId ? itemMap.get(activeId) || null : null;
 
+  const inheritedLocations = useMemo(() => {
+    if (!venue) return [] as LocationArea[];
+    const normalise = (value: unknown) => String(value || "").trim().toLowerCase();
+    return locations
+      .filter((location) => {
+        if (location.status !== "active") return false;
+        if (location.venueSlugs.includes(venue.slug)) return true;
+        const target = normalise(location.name);
+        if (!target) return false;
+        if (location.areaType === "county") {
+          const county = normalise(venue.county);
+          return county === target || `county ${county}` === target || county === target.replace(/^county\s+/, "");
+        }
+        if (location.areaType === "country") return normalise(venue.country) === target;
+        if (location.areaType === "city") return normalise(venue.town) === target;
+        return false;
+      })
+      .sort((a, b) => {
+        const typeOrder = new Map<string, number>(locationTypes.map((type) => [type.key, type.sortOrder] as const));
+        return (typeOrder.get(a.areaType) || 999) - (typeOrder.get(b.areaType) || 999) || a.sortOrder - b.sortOrder || a.name.localeCompare(b.name);
+      });
+  }, [venue, locations, locationTypes]);
+
+  const inheritedLocationGroups = useMemo(() => {
+    const groups = new Map<string, LocationArea[]>();
+    inheritedLocations.forEach((location) => {
+      groups.set(location.areaType, [...(groups.get(location.areaType) || []), location]);
+    });
+    return Array.from(groups.entries());
+  }, [inheritedLocations]);
+
+  function locationTypeLabel(key: string) {
+    return locationTypes.find((type) => type.key === key)?.label || key.replace(/(^|[-_ ])\w/g, (match) => match.toUpperCase());
+  }
+
   function commit(
     updater: (current: VenueGalleryItem[]) => VenueGalleryItem[],
   ) {
@@ -348,7 +391,7 @@ export function VenueGallery() {
   }
 
   function openAsset(
-    event: React.MouseEvent,
+    event: MouseEvent,
     asset: AggregatedAsset,
     index: number,
   ) {
@@ -1395,182 +1438,136 @@ export function VenueGallery() {
                 </div>
 
                 <div className="border-t border-black/10 pt-5">
-                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">
+                  <p className="mb-1 text-xs uppercase tracking-[0.16em] text-neutral-500">
                     Gallery destinations
                   </p>
+                  <p className="text-xs leading-5 text-neutral-500">
+                    Venue, Moments, inherited Locations and photographer-defined Galleries use the same destination model.
+                  </p>
                 </div>
-
-                <Toggle
-                  label="Venue gallery"
-                  checked={activeItem.included}
-                  onChange={(checked) =>
-                    patchItem(activeItem.assetId, {
-                      included: checked,
-                      display: {
-                        ...activeItem.display,
-                        venue: checked,
-                      },
-                    })
-                  }
-                />
-
-                <Toggle
-                  label="Creative Flash gallery"
-                  checked={activeItem.display.creativeFlash}
-                  onChange={(checked) =>
-                    patchItem(activeItem.assetId, {
-                      display: {
-                        ...activeItem.display,
-                        creativeFlash: checked,
-                      },
-                    })
-                  }
-                />
-
-                {activeAsset.weddingSlug ? (
-                  <>
-                    <div className="rounded-2xl border border-black/10 bg-neutral-50 p-4">
-                      <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">
-                        Wedding blog destination
-                      </p>
-                      <p className="mt-2 text-sm font-medium">
-                        {activeAsset.weddingCouple}
-                      </p>
-                      <p className="mt-1 break-all text-xs text-neutral-500">
-                        /blog/{activeAsset.weddingSlug}
-                      </p>
-                    </div>
-
-                    <Toggle
-                      label="Wedding story"
-                      checked={activeItem.display.blog}
-                      onChange={(checked) =>
-                        patchItem(activeItem.assetId, {
-                          display: {
-                            ...activeItem.display,
-                            blog: checked,
-                          },
-                        })
-                      }
-                    />
-                  </>
-                ) : (
-                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                    This image was imported from the existing venue CSV and is
-                    not linked to a wedding blog. Venue and moment gallery
-                    controls work normally.
-                  </div>
-                )}
-
-                <Toggle
-                  label="Homepage"
-                  checked={activeItem.display.homepage}
-                  onChange={(checked) =>
-                    patchItem(activeItem.assetId, {
-                      display: {
-                        ...activeItem.display,
-                        homepage: checked,
-                      },
-                    })
-                  }
-                />
-
-                <Toggle
-                  label="Portfolio"
-                  checked={activeItem.display.portfolio}
-                  onChange={(checked) =>
-                    patchItem(activeItem.assetId, {
-                      display: {
-                        ...activeItem.display,
-                        portfolio: checked,
-                      },
-                    })
-                  }
-                />
 
                 <div>
-                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">
-                    Moments
-                  </p>
+                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">Venue</p>
+                  <Toggle
+                    label={venue.name}
+                    checked={activeItem.included}
+                    onChange={(checked) =>
+                      patchItem(activeItem.assetId, {
+                        included: checked,
+                        display: { ...activeItem.display, venue: checked },
+                      })
+                    }
+                  />
+                </div>
 
+                <div>
+                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">Moments</p>
                   <div className="space-y-2">
-                    {moments
-                      .filter(
-                        (moment) =>
-                          moment.availableForAssignment,
-                      )
-                      .map((moment) => {
-                        const checked =
-                          activeItem.moments.includes(
-                            moment.slug,
-                          );
-
-                        return (
-                          <label
-                            key={moment.id}
-                            className="flex items-center justify-between gap-4 rounded-2xl border border-black/10 p-3"
-                          >
-                            <span className="text-sm">
-                              {moment.name}
-                            </span>
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={(event) => {
-                                const nextMoments =
-                                  event.target.checked
-                                    ? [
-                                        ...new Set([
-                                          ...activeItem.moments,
-                                          moment.slug,
-                                        ]),
-                                      ]
-                                    : activeItem.moments.filter(
-                                        (value) =>
-                                          value !== moment.slug,
-                                      );
-
-                                patchItem(
-                                  activeItem.assetId,
-                                  {
-                                    moments: nextMoments,
-                                    display: {
-                                      ...activeItem.display,
-                                      moments: nextMoments.length > 0,
-                                    },
-                                  },
-                                );
-                              }}
-                            />
-                          </label>
-                        );
-                      })}
+                    {moments.filter((moment) => moment.availableForAssignment).map((moment) => {
+                      const checked = activeItem.moments.includes(moment.slug);
+                      return (
+                        <label key={moment.id} className="flex items-center justify-between gap-4 rounded-2xl border border-black/10 p-3">
+                          <span className="text-sm">{moment.name}</span>
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={(event) => {
+                              const nextMoments = event.target.checked
+                                ? [...new Set([...activeItem.moments, moment.slug])]
+                                : activeItem.moments.filter((value) => value !== moment.slug);
+                              patchItem(activeItem.assetId, {
+                                moments: nextMoments,
+                                display: { ...activeItem.display, moments: nextMoments.length > 0 },
+                              });
+                            }}
+                          />
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
 
-                <div className="border-t border-black/10 pt-5">
-                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">
-                    Custom collections
-                  </p>
-                  {customCollections.length ? (
-                    <div className="space-y-2">
-                      {customCollections.map((collection) => (
-                        <Toggle
-                          key={collection.id}
-                          label={`${collection.name}${collection.status === "draft" ? " (Draft)" : ""}`}
-                          checked={(customMemberships[activeItem.assetId] || []).includes(collection.id)}
-                          onChange={(checked) =>
-                            setCustomCollection(activeItem.assetId, collection.id, checked)
-                          }
-                        />
+                <div>
+                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">Locations</p>
+                  {inheritedLocationGroups.length ? (
+                    <div className="space-y-4">
+                      {inheritedLocationGroups.map(([type, locationItems]) => (
+                        <div key={type}>
+                          <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-neutral-400">{locationTypeLabel(type)}</p>
+                          <div className="space-y-2">
+                            {locationItems.map((location) => (
+                              <div key={location.id} className="flex items-center justify-between gap-3 rounded-2xl border border-black/10 bg-neutral-50 p-3">
+                                <span className="text-sm">{location.name}</span>
+                                <span className="inline-flex items-center gap-1 text-xs text-emerald-700"><Check className="h-3.5 w-3.5" />Inherited</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       ))}
+                      <p className="text-xs leading-5 text-neutral-500">
+                        Location membership is inherited from {venue.name}. Change it in Admin → Venues or Admin → Locations rather than tagging every image separately.
+                      </p>
                     </div>
                   ) : (
-                    <p className="text-xs leading-5 text-neutral-500">
-                      No custom collections yet. Create one from Collections.
+                    <p className="rounded-2xl bg-neutral-50 p-4 text-xs leading-5 text-neutral-500">
+                      This venue has no active Location assignments yet. Assign counties, regions or destinations in Admin → Venues.
                     </p>
                   )}
                 </div>
+
+                <div>
+                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">Custom galleries</p>
+                  <div className="space-y-2">
+                    <Toggle
+                      label="Creative Flash"
+                      checked={Boolean(activeItem.display.creativeFlash)}
+                      onChange={(checked) =>
+                        patchItem(activeItem.assetId, {
+                          display: { ...activeItem.display, creativeFlash: checked },
+                        })
+                      }
+                    />
+                    {customCollections.map((collection) => (
+                      <div key={collection.id}>
+                        <Toggle
+                          label={`${collection.name}${collection.status === "draft" ? " (Draft)" : ""}`}
+                          checked={(customMemberships[activeItem.assetId] || []).includes(collection.id)}
+                          onChange={(checked) => setCustomCollection(activeItem.assetId, collection.id, checked)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  {!customCollections.length ? (
+                    <p className="mt-2 text-xs leading-5 text-neutral-500">Creative Flash is the current MKB photographer gallery. Additional galleries created in Gallery Management appear here automatically.</p>
+                  ) : null}
+                </div>
+
+                <details className="border-t border-black/10 pt-5">
+                  <summary className="cursor-pointer text-xs uppercase tracking-[0.16em] text-neutral-500">Other publishing destinations</summary>
+                  <div className="mt-4 space-y-2">
+                    {activeAsset.weddingSlug ? (
+                      <Toggle
+                        label={`Wedding story — ${activeAsset.weddingCouple}`}
+                        checked={activeItem.display.blog}
+                        onChange={(checked) => patchItem(activeItem.assetId, { display: { ...activeItem.display, blog: checked } })}
+                      />
+                    ) : (
+                      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                        This imported venue image is not linked to a wedding story.
+                      </div>
+                    )}
+                    <Toggle
+                      label="Homepage"
+                      checked={activeItem.display.homepage}
+                      onChange={(checked) => patchItem(activeItem.assetId, { display: { ...activeItem.display, homepage: checked } })}
+                    />
+                    <Toggle
+                      label="Portfolio"
+                      checked={activeItem.display.portfolio}
+                      onChange={(checked) => patchItem(activeItem.assetId, { display: { ...activeItem.display, portfolio: checked } })}
+                    />
+                  </div>
+                </details>
 
                 <button
                   type="button"

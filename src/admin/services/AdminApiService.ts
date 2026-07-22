@@ -63,6 +63,18 @@ export type LocationGallerySettings = {
   publicOrigin?: string;
 };
 
+export type LocationTypeDefinition = {
+  id: string;
+  workspaceId?: string;
+  key: string;
+  label: string;
+  pluralLabel: string;
+  enabled: boolean;
+  galleryEligible: boolean;
+  sortOrder: number;
+  system: boolean;
+};
+
 export type LocationArea = {
   id: string;
   workspaceId?: string;
@@ -94,6 +106,7 @@ export type LocationVenueOption = {
 
 export type LocationConfiguration = {
   settings: LocationGallerySettings;
+  types: LocationTypeDefinition[];
   locations: LocationArea[];
   venues: LocationVenueOption[];
 };
@@ -476,18 +489,19 @@ export class AdminApiService {
 
   static async getLocations() {
     const result = await request<{ ok: true } & LocationConfiguration>("/api/locations");
-    return { settings: result.settings, locations: result.locations, venues: result.venues };
+    return { settings: result.settings, types: result.types, locations: result.locations, venues: result.venues };
   }
 
   static async saveLocations(configuration: {
-    settings: LocationGallerySettings;
-    locations: LocationArea[];
+    settings?: LocationGallerySettings;
+    types?: LocationTypeDefinition[];
+    locations?: LocationArea[];
   }) {
     const result = await request<{ ok: true } & LocationConfiguration>("/api/locations", {
       method: "PUT",
       body: JSON.stringify(configuration),
     });
-    return { settings: result.settings, locations: result.locations, venues: result.venues };
+    return { settings: result.settings, types: result.types, locations: result.locations, venues: result.venues };
   }
 
   static async getGalleryMasterHeroes() {

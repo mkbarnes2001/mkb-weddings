@@ -243,7 +243,9 @@ export function Collections() {
   const publicMoments = activeMoments.filter((moment) => moment.showOnMomentsLanding);
   const activeVenues = venues.filter((venue) => venue.status !== "archived");
   const publishedVenues = venues.filter((venue) => venue.status === "published");
-  const activeLocations = locationAreas.filter((location) => location.status === "active");
+  const activeLocations = locationAreas.filter(
+    (location) => location.status === "active" && location.areaType === locationSettings.groupingLevel,
+  );
   const publicLocations = activeLocations.filter((location) => location.showOnLanding);
 
   const landingCards = useMemo<LandingCard[]>(() => {
@@ -543,7 +545,7 @@ export function Collections() {
                 <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Default galleries</p>
                 <h2 className="mt-2 font-serif text-4xl">Built-in gallery types</h2>
                 <p className="mt-2 text-sm text-neutral-600">
-                  Every workspace starts with Venues and Moments. Locations is an optional dynamic gallery that can be counties, regions, states, cities or destinations.
+                  Every workspace starts with Venues and Moments. The optional Location Gallery can be powered by any location type enabled in Admin → Locations.
                 </p>
               </div>
             </div>
@@ -571,11 +573,11 @@ export function Collections() {
               />
               <CoreGalleryCard
                 title={locationSettings.landingTitle || "Locations"}
-                description="A workspace-configurable dynamic gallery for counties, regions, states, cities, countries or custom destinations."
+                description={`A dynamic gallery currently powered by ${locationSettings.pluralLabel || "Locations"}. Change its source type, title and route independently from Location Intelligence.`}
                 image={locationSettings.heroImageUrl || LOCATION_FALLBACK_HERO}
                 icon={MapPin}
                 stats={`${publicLocations.length} public · ${activeLocations.length} active · ${locationSettings.enabled ? "enabled" : "disabled"}`}
-                manageTo="/admin/locations"
+                manageTo="/admin/gallery/locations"
                 liveHref={`${locationSettings.publicOrigin || "https://www.mkbweddings.co.uk"}${locationSettings.publicBasePath || "/gallery/locations"}`}
                 badge="Optional dynamic"
               />

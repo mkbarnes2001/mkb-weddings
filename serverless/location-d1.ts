@@ -61,6 +61,57 @@ const DEFAULT_SETTINGS = {
   publicOrigin: "https://www.mkbweddings.co.uk",
 };
 
+const DEFAULT_LOCATION_TYPES = [
+  { key: "county", label: "County", pluralLabel: "Counties", sortOrder: 10 },
+  { key: "region", label: "Region", pluralLabel: "Regions", sortOrder: 20 },
+  { key: "state", label: "State / Province", pluralLabel: "States / Provinces", sortOrder: 30 },
+  { key: "country", label: "Country", pluralLabel: "Countries", sortOrder: 40 },
+  { key: "city", label: "City / Town", pluralLabel: "Cities / Towns", sortOrder: 50 },
+  { key: "destination", label: "Destination", pluralLabel: "Destinations", sortOrder: 60 },
+  { key: "custom", label: "Custom area", pluralLabel: "Custom areas", sortOrder: 70 },
+];
+
+function hydrateLocationType(row: any) {
+  return {
+    id: text(row?.id),
+    workspaceId: text(row?.workspace_id),
+    key: text(row?.type_key),
+    label: text(row?.label),
+    pluralLabel: text(row?.plural_label),
+    enabled: Number(row?.enabled || 0) === 1,
+    galleryEligible: Number(row?.gallery_eligible || 0) === 1,
+    sortOrder: number(row?.sort_order),
+    system: Number(row?.system || 0) === 1,
+  };
+}
+
+export async function loadLocationTypes(
+  db: D1Db,
+  workspaceId = DEFAULT_LOCATION_WORKSPACE_ID,
+) {
+  const result = await db.prepare(`
+    SELECT *
+    FROM location_types
+    WHERE workspace_id = ?
+    ORDER BY sort_order ASC, label COLLATE NOCASE ASC
+  `).bind(workspaceId).all();
+
+  const rows = result.results || [];
+  if (rows.length) return rows.map(hydrateLocationType);
+
+  return DEFAULT_LOCATION_TYPES.map((type, index) => ({
+    id: `location_type_${workspaceId}_${type.key}`,
+    workspaceId,
+    key: type.key,
+    label: type.label,
+    pluralLabel: type.pluralLabel,
+    enabled: true,
+    galleryEligible: type.key === "county",
+    sortOrder: type.sortOrder || (index + 1) * 10,
+    system: true,
+  }));
+}
+
 async function getWorkspacePublicOrigin(db: D1Db, workspaceId: string) {
   const row = await db.prepare(`
     SELECT website_url, public_hostname
@@ -136,8 +187,9 @@ export async function listLocationConfiguration(
   db: D1Db,
   workspaceId = DEFAULT_LOCATION_WORKSPACE_ID,
 ) {
-  const [settings, areaResult, linkResult, venueResult] = await Promise.all([
+  const [settings, types, areaResult, linkResult, venueResult] = await Promise.all([
     loadLocationGallerySettings(db, workspaceId),
+    loadLocationTypes(db, workspaceId),
     db.prepare(`
       SELECT *
       FROM location_areas
@@ -169,6 +221,7 @@ export async function listLocationConfiguration(
 
   return {
     settings,
+    types,
     locations: (areaResult.results || []).map((row: any) =>
       hydrateLocation(row, links.get(text(row.id)) || []),
     ),
@@ -223,58 +276,128 @@ export async function saveLocationConfiguration(
   workspaceId = DEFAULT_LOCATION_WORKSPACE_ID,
 ) {
   const current = await listLocationConfiguration(db, workspaceId);
-  const settingsInput = incoming?.settings || {};
-  const settings = {
-    ...current.settings,
-    enabled: bool(settingsInput.enabled, current.settings.enabled),
-    landingTitle: text(settingsInput.landingTitle) || current.settings.landingTitle,
-    galleryTitle: text(settingsInput.galleryTitle) || current.settings.galleryTitle,
-    cardDescription: text(settingsInput.cardDescription) || current.settings.cardDescription,
-    singularLabel: text(settingsInput.singularLabel) || current.settings.singularLabel,
-    pluralLabel: text(settingsInput.pluralLabel) || current.settings.pluralLabel,
-    groupingLevel: text(settingsInput.groupingLevel) || current.settings.groupingLevel,
-    publicBasePath: cleanBasePath(settingsInput.publicBasePath || current.settings.publicBasePath),
-    intro: text(settingsInput.intro),
-    seoTitle: text(settingsInput.seoTitle),
-    seoDescription: text(settingsInput.seoDescription),
-    heroImageUrl: text(settingsInput.heroImageUrl),
-  };
 
-  await db.prepare(`
-    INSERT INTO location_gallery_settings (
-      workspace_id, enabled, landing_title, gallery_title, card_description,
-      singular_label, plural_label, grouping_level, public_base_path,
-      intro, seo_title, seo_description, hero_image_url, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    ON CONFLICT(workspace_id) DO UPDATE SET
-      enabled = excluded.enabled,
-      landing_title = excluded.landing_title,
-      gallery_title = excluded.gallery_title,
-      card_description = excluded.card_description,
-      singular_label = excluded.singular_label,
-      plural_label = excluded.plural_label,
-      grouping_level = excluded.grouping_level,
-      public_base_path = excluded.public_base_path,
-      intro = excluded.intro,
-      seo_title = excluded.seo_title,
-      seo_description = excluded.seo_description,
-      hero_image_url = excluded.hero_image_url,
-      updated_at = CURRENT_TIMESTAMP
-  `).bind(
-    workspaceId,
-    settings.enabled ? 1 : 0,
-    settings.landingTitle,
-    settings.galleryTitle,
-    settings.cardDescription,
-    settings.singularLabel,
-    settings.pluralLabel,
-    settings.groupingLevel,
-    settings.publicBasePath,
-    settings.intro,
-    settings.seoTitle,
-    settings.seoDescription,
-    settings.heroImageUrl,
-  ).run();
+  if (incoming?.settings) {
+    const settingsInput = incoming.settings;
+    const settings = {
+      ...current.settings,
+      enabled: bool(settingsInput.enabled, current.settings.enabled),
+      landingTitle: text(settingsInput.landingTitle) || current.settings.landingTitle,
+      galleryTitle: text(settingsInput.galleryTitle) || current.settings.galleryTitle,
+      cardDescription: text(settingsInput.cardDescription) || current.settings.cardDescription,
+      singularLabel: text(settingsInput.singularLabel) || current.settings.singularLabel,
+      pluralLabel: text(settingsInput.pluralLabel) || current.settings.pluralLabel,
+      groupingLevel: text(settingsInput.groupingLevel) || current.settings.groupingLevel,
+      publicBasePath: cleanBasePath(settingsInput.publicBasePath || current.settings.publicBasePath),
+      intro: text(settingsInput.intro),
+      seoTitle: text(settingsInput.seoTitle),
+      seoDescription: text(settingsInput.seoDescription),
+      heroImageUrl: text(settingsInput.heroImageUrl),
+    };
+
+    const validGallerySource = current.types.some(
+      (type: any) => type.key === settings.groupingLevel && type.enabled && type.galleryEligible,
+    );
+    if (!validGallerySource) {
+      throw httpError(
+        "Location Gallery validation failed.",
+        400,
+        ["The selected location type is not enabled as a gallery source."],
+      );
+    }
+
+    await db.prepare(`
+      INSERT INTO location_gallery_settings (
+        workspace_id, enabled, landing_title, gallery_title, card_description,
+        singular_label, plural_label, grouping_level, public_base_path,
+        intro, seo_title, seo_description, hero_image_url, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(workspace_id) DO UPDATE SET
+        enabled = excluded.enabled,
+        landing_title = excluded.landing_title,
+        gallery_title = excluded.gallery_title,
+        card_description = excluded.card_description,
+        singular_label = excluded.singular_label,
+        plural_label = excluded.plural_label,
+        grouping_level = excluded.grouping_level,
+        public_base_path = excluded.public_base_path,
+        intro = excluded.intro,
+        seo_title = excluded.seo_title,
+        seo_description = excluded.seo_description,
+        hero_image_url = excluded.hero_image_url,
+        updated_at = CURRENT_TIMESTAMP
+    `).bind(
+      workspaceId,
+      settings.enabled ? 1 : 0,
+      settings.landingTitle,
+      settings.galleryTitle,
+      settings.cardDescription,
+      settings.singularLabel,
+      settings.pluralLabel,
+      settings.groupingLevel,
+      settings.publicBasePath,
+      settings.intro,
+      settings.seoTitle,
+      settings.seoDescription,
+      settings.heroImageUrl,
+    ).run();
+  }
+
+  if (Array.isArray(incoming?.types)) {
+    const cleanedTypes = incoming.types.map((incomingType: any, index: number) => {
+      const label = text(incomingType?.label);
+      const key = slugify(incomingType?.key || label);
+      if (!label || !key) {
+        throw httpError("Location type validation failed.", 400, ["Every location type needs a label and key."]);
+      }
+      return {
+        id: text(incomingType?.id) || `location_type_${crypto.randomUUID()}`,
+        key,
+        label,
+        pluralLabel: text(incomingType?.pluralLabel) || `${label}s`,
+        enabled: bool(incomingType?.enabled, true),
+        galleryEligible: bool(incomingType?.galleryEligible, false),
+        sortOrder: number(incomingType?.sortOrder, (index + 1) * 10),
+        system: bool(incomingType?.system, false),
+      };
+    });
+    const keys = new Set<string>();
+    for (const type of cleanedTypes) {
+      if (keys.has(type.key)) {
+        throw httpError("Location type validation failed.", 400, [`Duplicate location type key: ${type.key}`]);
+      }
+      keys.add(type.key);
+    }
+    if (current.settings.enabled) {
+      const activeGalleryType = cleanedTypes.find(
+        (type: any) => type.key === current.settings.groupingLevel,
+      );
+      if (activeGalleryType && (!activeGalleryType.enabled || !activeGalleryType.galleryEligible)) {
+        throw httpError(
+          "Location type validation failed.",
+          400,
+          ["Change or disable the current Location Gallery source in Gallery Management before disabling this type for galleries."],
+        );
+      }
+    }
+    await runBatches(db, cleanedTypes.map((type: any) => db.prepare(`
+      INSERT INTO location_types (
+        id, workspace_id, type_key, label, plural_label, enabled,
+        gallery_eligible, sort_order, system, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(id) DO UPDATE SET
+        type_key = excluded.type_key,
+        label = excluded.label,
+        plural_label = excluded.plural_label,
+        enabled = excluded.enabled,
+        gallery_eligible = excluded.gallery_eligible,
+        sort_order = excluded.sort_order,
+        updated_at = CURRENT_TIMESTAMP
+    `).bind(
+      type.id, workspaceId, type.key, type.label, type.pluralLabel,
+      type.enabled ? 1 : 0, type.galleryEligible ? 1 : 0, type.sortOrder, type.system ? 1 : 0,
+    )));
+  }
 
   if (Array.isArray(incoming?.locations)) {
     const cleaned = incoming.locations.map(cleanLocation);
@@ -393,9 +516,9 @@ export async function listPublicLocations(
   const [areaResult, venueResult, linkResult] = await Promise.all([
     db.prepare(`
       SELECT * FROM location_areas
-      WHERE workspace_id = ? AND status = 'active' AND show_on_landing = 1
+      WHERE workspace_id = ? AND area_type = ? AND status = 'active' AND show_on_landing = 1
       ORDER BY sort_order ASC, name COLLATE NOCASE ASC
-    `).bind(workspaceId).all(),
+    `).bind(workspaceId, settings.groupingLevel).all(),
     db.prepare(`
       SELECT slug, name, town, county, country, gallery_sort_order
       FROM venues
@@ -441,9 +564,9 @@ export async function getPublicLocation(
   if (!settings.enabled) return null;
   const area = await db.prepare(`
     SELECT * FROM location_areas
-    WHERE workspace_id = ? AND slug = ? AND status = 'active'
+    WHERE workspace_id = ? AND area_type = ? AND slug = ? AND status = 'active'
     LIMIT 1
-  `).bind(workspaceId, cleanSlug).first();
+  `).bind(workspaceId, settings.groupingLevel, cleanSlug).first();
   if (!area) return null;
 
   const [venueResult, linkResult] = await Promise.all([

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Building2, Check, GripVertical, Images, MapPin, Plus, Save, Search } from "lucide-react";
-import { AdminApiService, type LocationArea, type LocationGallerySettings } from "../services/AdminApiService";
+import { AdminApiService, type LocationArea, type LocationTypeDefinition } from "../services/AdminApiService";
 import type { VenueSummary } from "../types/venue";
 
 function venueHero(venue: VenueSummary) {
@@ -20,7 +20,7 @@ export function Venues() {
   const [draggedSlug, setDraggedSlug] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [locationSettings, setLocationSettings] = useState<LocationGallerySettings | null>(null);
+  const [locationTypes, setLocationTypes] = useState<LocationTypeDefinition[]>([]);
   const [locations, setLocations] = useState<LocationArea[]>([]);
   const [locationSaving, setLocationSaving] = useState(false);
 
@@ -29,7 +29,7 @@ export function Venues() {
       .then(([rows, locationConfig]) => {
         setVenues(rows);
         setActiveSlug(rows[0]?.slug || null);
-        setLocationSettings(locationConfig.settings);
+        setLocationTypes(locationConfig.types || []);
         setLocations(locationConfig.locations || []);
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Unable to load venues."))
@@ -56,11 +56,16 @@ export function Venues() {
       const key = location.areaType || "custom";
       groups.set(key, [...(groups.get(key) || []), location]);
     }
-    return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b));
-  }, [locations]);
+    const typeOrder = new Map<string, number>(locationTypes.map((type) => [type.key, type.sortOrder] as const));
+    return Array.from(groups.entries()).sort(([a], [b]) => (typeOrder.get(a) || 999) - (typeOrder.get(b) || 999) || a.localeCompare(b));
+  }, [locations, locationTypes]);
+
+  function locationTypeLabel(key: string) {
+    return locationTypes.find((type) => type.key === key)?.label || key.replace(/(^|[-_ ])\w/g, (m) => m.toUpperCase());
+  }
 
   async function toggleVenueLocation(locationId: string, checked: boolean) {
-    if (!active || !locationSettings) return;
+    if (!active) return;
     const nextLocations = locations.map((location) => {
       if (location.id !== locationId) return location;
       const venueSlugs = checked
@@ -71,14 +76,14 @@ export function Venues() {
     setLocations(nextLocations);
     setLocationSaving(true); setError(""); setMessage("");
     try {
-      const saved = await AdminApiService.saveLocations({ settings: locationSettings, locations: nextLocations });
-      setLocationSettings(saved.settings);
+      const saved = await AdminApiService.saveLocations({ locations: nextLocations });
+      setLocationTypes(saved.types || []);
       setLocations(saved.locations);
       setMessage(`Location assignments saved for ${active.name}.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to save venue locations.");
       const fresh = await AdminApiService.getLocations().catch(() => null);
-      if (fresh) { setLocationSettings(fresh.settings); setLocations(fresh.locations); }
+      if (fresh) { setLocationTypes(fresh.types || []); setLocations(fresh.locations); }
     } finally { setLocationSaving(false); }
   }
 
@@ -177,7 +182,7 @@ export function Venues() {
                 <div className="mt-4 space-y-4">
                   {groupedLocations.length ? groupedLocations.map(([type, items]) => (
                     <div key={type}>
-                      <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-neutral-400">{type.replace(/(^|[-_ ])\w/g, (m) => m.toUpperCase())}</p>
+                      <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-neutral-400">{locationTypeLabel(type)}</p>
                       <div className="space-y-2">
                         {items.map((location) => {
                           const checked = activeLocationIds.has(location.id);
@@ -193,7 +198,7 @@ export function Venues() {
                         })}
                       </div>
                     </div>
-                  )) : <p className="text-sm text-neutral-500">No location areas have been created yet. Add them in Gallery Management → Locations.</p>}
+                  )) : <p className="text-sm text-neutral-500">No location areas have been created yet. Add them in Admin → Locations.</p>}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3"><Mini label="Weddings" value={active.weddingCount} /><Mini label="Images" value={active.imageCount} /></div>
