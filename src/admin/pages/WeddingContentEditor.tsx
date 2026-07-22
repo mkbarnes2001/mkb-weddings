@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   Plus,
   Save,
-  Search,
   Trash2,
   Users,
   X,
@@ -48,7 +47,7 @@ export function WeddingContentEditor() {
 
   const [masterSuppliers, setMasterSuppliers] = useState<MasterSupplier[]>([]);
   const [weddingSuppliers, setWeddingSuppliers] = useState<SupplierRecord[]>([]);
-  const [supplierSearch, setSupplierSearch] = useState("");
+  const [selectedSupplierId, setSelectedSupplierId] = useState("");
   const [supplierRole, setSupplierRole] = useState("");
   const [supplierSaving, setSupplierSaving] = useState(false);
   const [supplierMessage, setSupplierMessage] = useState("");
@@ -113,37 +112,16 @@ export function WeddingContentEditor() {
     return errors;
   }, [wedding]);
 
-  const supplierMatches = useMemo(() => {
-    const query = supplierSearch.trim().toLowerCase();
-    const assignedIds = new Set(
-      weddingSuppliers
-        .map((row) => String(row.supplierId || "").trim())
-        .filter(Boolean),
+  const supplierOptions = useMemo(() => {
+    return [...masterSuppliers].sort((a, b) =>
+      String(a.displayName || a.name).localeCompare(String(b.displayName || b.name)),
     );
+  }, [masterSuppliers]);
 
-    const rows = masterSuppliers.filter((supplier) => {
-      const matchesQuery = !query || [
-        supplier.name,
-        supplier.displayName,
-        supplier.category,
-        supplier.location,
-        supplier.county,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(query);
-
-      if (!matchesQuery) return false;
-
-      // Keep the default list clean: suppliers already assigned to this wedding
-      // only reappear when the user deliberately searches for them, which is the
-      // explicit path for adding another role.
-      if (!query && assignedIds.has(supplier.id)) return false;
-      return true;
-    });
-
-    return rows.slice(0, 10);
-  }, [masterSuppliers, supplierSearch, weddingSuppliers]);
+  const selectedSupplier = useMemo(
+    () => supplierOptions.find((supplier) => supplier.id === selectedSupplierId) || null,
+    [selectedSupplierId, supplierOptions],
+  );
 
   function syncWeddingSupplierDocument(rows: SupplierRecord[]) {
     setWedding((current) =>
@@ -222,7 +200,7 @@ export function WeddingContentEditor() {
     ];
 
     await saveSupplierRows(nextRows, `${supplier.name} added to this wedding.`);
-    setSupplierSearch("");
+    setSelectedSupplierId("");
     setSupplierRole("");
   }
 
@@ -547,24 +525,37 @@ export function WeddingContentEditor() {
           </div>
 
           <div className="rounded-[24px] border border-black/10 bg-white p-5">
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] lg:items-end">
               <label className="block">
                 <span className="mb-2 block text-xs uppercase tracking-[0.16em] text-neutral-500">
-                  Search master suppliers
+                  Add supplier
                 </span>
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-                  <input
-                    value={supplierSearch}
-                    onChange={(event) => {
-                      setSupplierSearch(event.target.value);
-                      setSupplierError("");
-                      setSupplierMessage("");
-                    }}
-                    placeholder="Search supplier, category or location…"
-                    className="w-full rounded-2xl border border-black/10 bg-white py-3 pl-11 pr-4 text-sm"
-                  />
-                </div>
+                <select
+                  value={selectedSupplierId}
+                  onChange={(event) => {
+                    setSelectedSupplierId(event.target.value);
+                    setSupplierError("");
+                    setSupplierMessage("");
+                  }}
+                  className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
+                >
+                  <option value="">Select a supplier…</option>
+                  {supplierOptions.map((supplier) => {
+                    const alreadyAssigned = weddingSuppliers.some(
+                      (row) => row.supplierId === supplier.id,
+                    );
+                    const detail = [supplier.category, supplier.location || supplier.county]
+                      .filter(Boolean)
+                      .join(" · ");
+                    return (
+                      <option key={supplier.id} value={supplier.id}>
+                        {supplier.displayName || supplier.name}
+                        {detail ? ` — ${detail}` : ""}
+                        {alreadyAssigned ? " — already assigned" : ""}
+                      </option>
+                    );
+                  })}
+                </select>
               </label>
 
               <label className="block">
@@ -574,44 +565,28 @@ export function WeddingContentEditor() {
                 <input
                   value={supplierRole}
                   onChange={(event) => setSupplierRole(event.target.value)}
-                  placeholder="Uses supplier category if left blank"
+                  placeholder={selectedSupplier?.category || "Uses supplier category if blank"}
                   className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
                 />
               </label>
-            </div>
 
-            <div className="mt-4 space-y-2">
-              {supplierMatches.map((supplier) => (
-                <div
-                  key={supplier.id}
-                  className="flex flex-col gap-3 rounded-2xl border border-black/10 p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">
-                      {supplier.displayName || supplier.name}
-                    </p>
-                    <p className="mt-1 text-xs text-neutral-500">
-                      {[supplier.category, supplier.location || supplier.county]
-                        .filter(Boolean)
-                        .join(" · ") || "Supplier"}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => addSupplier(supplier)}
-                    disabled={supplierSaving}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-4 py-2 text-sm text-white disabled:opacity-40"
-                  >
-                    <Plus className="h-4 w-4" />
-                    {supplierSaving
-                      ? "Saving…"
-                      : weddingSuppliers.some((row) => row.supplierId === supplier.id)
-                        ? "Add another role"
-                        : "Add"}
-                  </button>
-                </div>
-              ))}
+              <button
+                type="button"
+                onClick={() => selectedSupplier && addSupplier(selectedSupplier)}
+                disabled={!selectedSupplier || supplierSaving}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"
+              >
+                <Plus className="h-4 w-4" />
+                {supplierSaving
+                  ? "Saving…"
+                  : selectedSupplier && weddingSuppliers.some((row) => row.supplierId === selectedSupplier.id)
+                    ? "Add another role"
+                    : "Add supplier"}
+              </button>
             </div>
+            <p className="mt-3 text-xs text-neutral-500">
+              Suppliers already assigned remain selectable only when you need to add a second role for the same wedding.
+            </p>
           </div>
         </div>
       </EditorSection>

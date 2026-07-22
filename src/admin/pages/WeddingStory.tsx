@@ -83,11 +83,11 @@ export function WeddingStory() {
           </div>
 
           <Link
-            to={`/admin/weddings/${story.slug}/story/edit`}
+            to={`/admin/weddings/${story.slug}/content`}
             className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black hover:bg-white/90"
           >
             <Pencil className="w-4 h-4" />
-            Edit story
+            Edit master content
           </Link>
         </div>
       </section>

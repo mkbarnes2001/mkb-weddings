@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route, useParams } from "react-router-dom";
 import { AdminLayout } from "../layouts/AdminLayout";
 import { Dashboard } from "../pages/Dashboard";
 import { Weddings } from "../pages/Weddings";
@@ -9,7 +9,6 @@ import { WeddingImages } from "../pages/WeddingImages";
 import { WeddingSuppliers } from "../pages/WeddingSuppliers";
 import { WeddingSupplierEditor } from "../pages/WeddingSupplierEditor";
 import { WeddingStory } from "../pages/WeddingStory";
-import { WeddingStoryEditor } from "../pages/WeddingStoryEditor";
 import { WeddingPublish } from "../pages/WeddingPublish";
 import { WeddingCollections } from "../pages/WeddingCollections";
 import { Suppliers } from "../pages/Suppliers";
@@ -48,7 +47,7 @@ export function AdminApp() {
         <Route path="weddings/:slug/story" element={<WeddingStory />} />
         <Route
           path="weddings/:slug/story/edit"
-          element={<WeddingStoryEditor />}
+          element={<LegacyWeddingStoryEditorRedirect />}
         />
         <Route
           path="weddings/:slug/suppliers"
@@ -97,4 +96,10 @@ export function AdminApp() {
       </Route>
     </Routes>
   );
+}
+
+
+function LegacyWeddingStoryEditorRedirect() {
+  const { slug } = useParams();
+  return <Navigate to={`/admin/weddings/${slug || ""}/content`} replace />;
 }
