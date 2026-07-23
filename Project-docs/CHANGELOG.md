@@ -1,5 +1,13 @@
 # MKB Intelligence — Changelog
 
+## v1.1.1 — Client Gallery Visual Refinement
+- Refined the private client gallery into a cleaner ShootProof-inspired layout.
+- Reduced and restyled the gallery title using the existing Canela/Playfair heading stack.
+- Added compact favourite and reserved download icons to image tiles and the lightbox.
+- Kept download controls disabled until secure full-resolution original delivery is implemented.
+- Added resilient relative-asset URL resolution against the public website origin.
+- No D1 migration required; schema version remains 11.
+
 ## v0.8.0.2 — Wedding Supplier Quick Assign + Venue Order Alignment
 - Added supplier assignment directly to the Master Wedding Record / blog content editor.
 - Existing master suppliers can be searched and added with one click; role defaults to the supplier category and can be overridden.

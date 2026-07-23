@@ -1,7 +1,7 @@
 # Project State
 
 ## Version
-Current release: **v1.1.0 — Private Client Galleries Foundation**.  
+Current release: **v1.1.1 — Client Gallery Visual Refinement**.  
 Database schema version: **11**.
 
 ## Working production model
@@ -60,6 +60,15 @@ New browser uploads dual-write into the canonical registry. Managed deletion als
 - Card labels are cleaned for readability while preserving the full original filename in the tooltip/inspector.
 - Filter and inspector layout wraps more cleanly at narrower admin window widths.
 - No database migration; schema version remains **10**.
+
+
+## Client Gallery visual refinement — v1.1.1
+- Public client galleries now use a cleaner ShootProof-inspired presentation while retaining MKB branding.
+- Gallery headings use the existing Canela/Playfair serif stack at a smaller, more restrained scale.
+- Image tiles use compact overlay controls for favourites and the future secure-download action.
+- Download icons are deliberately non-functional until private originals and authorised download endpoints are available.
+- Relative legacy asset URLs are resolved against the workspace/public website origin before display.
+- No database migration; schema version remains **11**.
 
 ## Admin Asset Library
 `Admin → Asset Library` provides:
