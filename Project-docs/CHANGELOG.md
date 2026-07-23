@@ -142,3 +142,12 @@
 - Improved filter and inspector wrapping for narrower admin layouts.
 - No D1 migration; schema version remains 10.
 
+## v1.1.0 — Private Client Galleries Foundation
+- Added workspace-owned `client_galleries`, `client_gallery_assets` and `client_gallery_favourites` tables.
+- Added Admin → Client Galleries with create/manage flows, Wedding linking and automatic import from canonical Wedding asset relationships.
+- Added manual Asset Library search/add, cover selection, image hide/remove controls and live/draft/archive status.
+- Added unguessable private share tokens, optional salted PBKDF2 PIN protection and optional expiry.
+- Added standalone `/client-gallery/:token` client delivery view with responsive image grid, lightbox and browser-scoped favourites.
+- Existing public web/thumb derivatives are reused as previews only; no existing R2 objects are copied.
+- Full-resolution downloads remain intentionally disabled until private `original` upload and authorization are implemented.
+- D1 schema version advances to 11.

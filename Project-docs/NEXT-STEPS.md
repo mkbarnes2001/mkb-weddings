@@ -1,7 +1,7 @@
 # Next Steps
 
 ## Current baseline
-v1.0.1 is the validated workspace-aware canonical Asset Library baseline, with resilient thumbnail/web fallback and responsive admin polish, without replacing the proven MKB public/gallery workflows.
+v1.1.0 adds workspace-owned Private Client Galleries on top of the validated canonical Asset Library, while leaving the proven MKB public/gallery workflows intact.
 
 The storage model is now:
 
@@ -13,13 +13,13 @@ Workspace
 Existing public images are indexed in place; no R2 duplication is introduced.
 
 ## Next engineering sequence
-1. Build Private Client Gallery foundation around canonical `asset_id`.
-2. Add private full-resolution `original` file variant and secure download authorization.
-3. Add high-volume direct multipart R2 upload with resumability/background derivative generation.
-4. Add client access, favourites, selections, expiry and download controls.
-5. Allow client-selected assets to be promoted into public Venue/Moment/Location/Custom Galleries without re-upload.
+1. Add high-volume direct/multipart private-original upload into canonical `asset_id` records.
+2. Generate controlled web previews/thumbnails in the background without exposing private originals.
+3. Add secure original-file download authorization and full-gallery ZIP jobs.
+4. Add client selections/shortlists alongside favourites and make them visible in Admin.
+5. Allow selected client assets to be promoted into public Venue/Moment/Location/Custom Galleries without re-upload.
 6. Progressively cut existing gallery managers over to canonical relationship writes only after parity is proven.
-7. Begin CRM/client/job foundation after storage/access isolation is proven.
+7. Begin CRM/client/job foundation after storage/access isolation and delivery workflows are proven.
 
 ## Guardrails
 - Never expose private `original` keys through public APIs.

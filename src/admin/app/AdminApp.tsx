@@ -18,6 +18,8 @@ import { SEOCentre } from "../pages/SEOCentre";
 import { PlaceholderPage } from "../pages/PlaceholderPage";
 import { Settings } from "../pages/Settings";
 import { AssetLibrary } from "../pages/AssetLibrary";
+import { ClientGalleries } from "../pages/ClientGalleries";
+import { ClientGalleryEditor } from "../pages/ClientGalleryEditor";
 import { Locations } from "../pages/Locations";
 import { LocationGallerySettingsPage } from "../pages/LocationGallerySettings";
 import { Venues } from "../pages/Venues";
@@ -87,6 +89,8 @@ export function AdminApp() {
         <Route path="venues/:slug/upload" element={<VenueUpload />} />
         <Route path="suppliers" element={<Suppliers />} />
         <Route path="assets" element={<AssetLibrary />} />
+        <Route path="client-galleries" element={<ClientGalleries />} />
+        <Route path="client-galleries/:id" element={<ClientGalleryEditor />} />
         <Route path="ai" element={<AICentre />} />
         <Route path="seo" element={<SEOCentre />} />
         <Route

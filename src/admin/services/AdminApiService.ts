@@ -6,6 +6,7 @@ import type { MomentGalleryPayload, MomentRepositoryDocument } from "../types/mo
 import type { CustomCollection, CustomCollectionGalleryPayload, CustomCollectionMembershipPayload } from "../types/customCollection";
 import type { VenueDocument, VenueSummary } from "../types/venue";
 import type { AssetLibraryFilters, AssetLibraryPayload } from "../types/asset";
+import type { ClientGalleryDetailPayload, ClientGalleryListPayload, ClientGalleryRecord } from "../types/clientGallery";
 import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
@@ -419,6 +420,54 @@ export class AdminApiService {
       "/api/assets/sync",
       { method: "POST" },
     );
+  }
+
+
+  static async listClientGalleries() {
+    const result = await request<{ ok: true } & ClientGalleryListPayload>("/api/client-galleries");
+    const { ok: _ok, ...payload } = result;
+    return payload;
+  }
+
+  static async createClientGallery(gallery: Partial<ClientGalleryRecord> & { title: string; weddingSlug?: string }) {
+    const result = await request<{ ok: true; gallery: ClientGalleryRecord }>("/api/client-galleries", {
+      method: "POST",
+      body: JSON.stringify({ gallery }),
+    });
+    return result.gallery;
+  }
+
+  static async getClientGallery(id: string) {
+    const result = await request<{ ok: true } & ClientGalleryDetailPayload>(
+      `/api/client-galleries/${encodeURIComponent(id)}`,
+    );
+    const { ok: _ok, ...payload } = result;
+    return payload;
+  }
+
+  static async updateClientGallery(id: string, gallery: Partial<ClientGalleryRecord> & { pin?: string }) {
+    const result = await request<{ ok: true; gallery: ClientGalleryRecord }>(
+      `/api/client-galleries/${encodeURIComponent(id)}`,
+      { method: "PUT", body: JSON.stringify({ gallery }) },
+    );
+    return result.gallery;
+  }
+
+  static async archiveClientGallery(id: string) {
+    const result = await request<{ ok: true; gallery: ClientGalleryRecord }>(
+      `/api/client-galleries/${encodeURIComponent(id)}`,
+      { method: "DELETE" },
+    );
+    return result.gallery;
+  }
+
+  static async mutateClientGalleryAssets(id: string, payload: Record<string, unknown>) {
+    const result = await request<{ ok: true; total: number } & ClientGalleryDetailPayload>(
+      `/api/client-galleries/${encodeURIComponent(id)}/assets`,
+      { method: "POST", body: JSON.stringify(payload) },
+    );
+    const { ok: _ok, total: _total, ...detail } = result;
+    return detail;
   }
 
   static async listVenues() {

@@ -3,7 +3,7 @@
 Always inspect the actual migration files before assuming a table/column exists.
 
 ## Schema version
-Current target schema version: **9**. Migrations 005–009 must be read in sequence when reconstructing production state.
+Current target schema version: **11**. Read migrations in sequence when reconstructing production state; migrations 010–011 establish canonical assets and private client delivery.
 
 ## Core domains
 - `venues`
@@ -100,3 +100,19 @@ Migration behaviour:
 - leaves existing image/gallery tables in place as compatibility authority during phased cutover.
 
 New commercial image features should use `assets.id` as canonical identity and `workspace_id` as the ownership boundary.
+
+## Schema version 11
+Migration: `011_private_client_galleries_foundation.sql`
+
+Adds:
+- `client_galleries`
+- `client_gallery_assets`
+- `client_gallery_favourites`
+
+Rules:
+- every client gallery is workspace-owned;
+- public access uses a high-entropy `access_token` rather than exposing internal IDs;
+- optional PINs are stored only as salted PBKDF2 hashes;
+- gallery membership references canonical `assets.id` and never filenames;
+- existing `web`/`thumb` derivatives may be used as previews, but private originals are not implied or fabricated;
+- secure original download authorization is deferred until `asset_files.variant = 'original'` is populated by the high-volume upload pipeline.

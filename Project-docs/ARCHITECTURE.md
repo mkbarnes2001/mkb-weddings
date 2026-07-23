@@ -139,3 +139,8 @@ New managed uploads dual-write to both layers. This creates a safe migration pat
 
 ### Security rule for Client Galleries
 A public gallery may reference the same `asset_id` as a private client gallery, but public rendering may only expose approved derivatives. Private `original` storage keys must never be emitted by public gallery APIs.
+
+## Private Client Delivery boundary — v1.1
+Client Galleries are workspace-owned delivery containers referencing canonical assets. A gallery share token is a capability URL and may optionally require a salted PBKDF2 PIN. Client favourites are keyed by gallery + browser visitor key + canonical asset ID.
+
+Current MKB public derivatives can be reused as previews for foundation testing, but they are not considered private originals. Future client uploads must store originals privately and expose only authorized derivatives/download responses.

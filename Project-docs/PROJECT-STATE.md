@@ -1,8 +1,8 @@
 # Project State
 
 ## Version
-Current release: **v1.0.1 — Asset Library Polish**.  
-Database schema version: **10**.
+Current release: **v1.1.0 — Private Client Galleries Foundation**.  
+Database schema version: **11**.
 
 ## Working production model
 - Cloudflare D1 is the structured source of truth.
@@ -83,5 +83,24 @@ MKB remains configured as:
 
 Venue images inherit Locations through `venue_location_links`; direct asset-level geographic overrides remain deferred.
 
+## Private Client Galleries — v1.1.0
+A workspace-owned private delivery layer now sits on top of canonical `assets`.
+
+Adds:
+- `client_galleries`
+- `client_gallery_assets`
+- `client_gallery_favourites`
+- Admin → Client Galleries
+- secure unguessable share tokens
+- optional salted PBKDF2 PIN protection
+- expiry/status controls
+- wedding-linked automatic asset import
+- manual Asset Library additions
+- cover/visibility controls
+- browser-scoped client favourites
+- standalone `/client-gallery/:token` delivery route
+
+Important boundary: existing MKB website derivatives are reused as gallery previews. They are not private full-resolution originals. Full-resolution download delivery remains disabled until the private-original upload pipeline is added.
+
 ## Immediate next major module
-Private Client Gallery foundation using canonical `assets` + private `original` files, followed by the high-volume direct-to-R2 upload/derivative pipeline.
+High-volume private-original upload and derivative generation, secure original downloads and resumable delivery workflows.

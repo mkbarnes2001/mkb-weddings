@@ -27,12 +27,15 @@ import WeddingPackages from "./components/WeddingPackages";
 import { ThankYou } from "./components/ThankYou";
 import { CountyPage } from "./components/CountyPage";
 import { CountiesLanding } from "./components/CountiesLanding";
+import { ClientGallery } from "./components/ClientGallery";
 
 /* ---------------- Google Analytics Listener ---------------- */
 function GoogleAnalyticsListener() {
   const location = useLocation();
 
   useEffect(() => {
+    // Private client-gallery capability tokens must never be sent to analytics.
+    if (location.pathname.startsWith("/client-gallery/")) return;
     if (window.gtag) {
       window.gtag("config", "G-RQB9V9DTZP", {
         page_path: location.pathname,
@@ -64,6 +67,8 @@ export default function App() {
 
       <div className="min-h-screen bg-white">
         <Routes>
+          <Route path="/client-gallery/:token" element={<ClientGallery />} />
+
           {/* -------- Public site routes -------- */}
           <Route element={<SiteLayout />}>
             <Route path="/" element={<Home />} />
