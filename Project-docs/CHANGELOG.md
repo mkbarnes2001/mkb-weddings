@@ -133,3 +133,12 @@
 - Managed image deletion now cleans canonical asset records as well as legacy image records.
 - No existing public URLs or R2 object keys are changed.
 - D1 schema version advances to 10.
+
+## v1.0.1 — Asset Library Polish
+- Added resilient thumbnail rendering: dedicated thumbnail first, then web derivative fallback, then placeholder.
+- Applied the same fallback behaviour to the Asset inspector preview.
+- Cleaned asset-card labels while retaining full filenames in detail views/tooltips.
+- Added Wedding badges to cards and corrected singular/plural Gallery badge labels.
+- Improved filter and inspector wrapping for narrower admin layouts.
+- No D1 migration; schema version remains 10.
+

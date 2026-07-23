@@ -1,7 +1,7 @@
 # Project State
 
 ## Version
-Target release: **v1.0.0 — Workspace Asset Library Foundation**.  
+Current release: **v1.0.1 — Asset Library Polish**.  
 Database schema version: **10**.
 
 ## Working production model
@@ -53,6 +53,13 @@ Supporting tables:
 Existing gallery managers remain authoritative during the compatibility phase. The new Asset Library reads live Wedding/Venue/Moment/Gallery relationships from the proven existing tables while canonical asset identity is established underneath.
 
 New browser uploads dual-write into the canonical registry. Managed deletion also removes canonical asset records.
+
+## Asset Library polish — v1.0.1
+- Asset cards fall back from a missing/broken thumbnail to the web derivative before showing a placeholder.
+- The inspector uses the same resilient image fallback behaviour.
+- Card labels are cleaned for readability while preserving the full original filename in the tooltip/inspector.
+- Filter and inspector layout wraps more cleanly at narrower admin window widths.
+- No database migration; schema version remains **10**.
 
 ## Admin Asset Library
 `Admin → Asset Library` provides:

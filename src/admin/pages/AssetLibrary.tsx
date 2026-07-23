@@ -28,6 +28,47 @@ function formatNumber(value: number) {
   return new Intl.NumberFormat("en-GB").format(value || 0);
 }
 
+function cleanAssetLabel(asset: AssetRecord) {
+  const raw = (asset.originalFilename || asset.filename || "Untitled asset").trim();
+  const withoutPath = raw.split(/[\\/]/).pop() || raw;
+  const withoutExtension = withoutPath.replace(/\.[a-z0-9]{2,5}$/i, "");
+  const withoutCommonPrefix = withoutExtension.replace(/^mkb[-_ ]weddings[-_ ]?/i, "");
+  return withoutCommonPrefix.replace(/_/g, " ").replace(/\s+/g, " ").trim() || raw;
+}
+
+function AssetImage({
+  primary,
+  fallback,
+  alt,
+  loading = "lazy",
+}: {
+  primary?: string;
+  fallback?: string;
+  alt: string;
+  loading?: "eager" | "lazy";
+}) {
+  const candidates = useMemo(() => Array.from(new Set([primary, fallback].filter(Boolean) as string[])), [primary, fallback]);
+  const [candidateIndex, setCandidateIndex] = useState(0);
+
+  useEffect(() => {
+    setCandidateIndex(0);
+  }, [primary, fallback]);
+
+  const src = candidates[candidateIndex];
+  if (!src) return <ImageIcon size={28} color="#888" />;
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading={loading}
+      decoding="async"
+      onError={() => setCandidateIndex((current) => current + 1)}
+      style={{ width: "100%", height: "100%", objectFit: "cover", display: candidateIndex >= candidates.length ? "none" : "block" }}
+    />
+  );
+}
+
 function StatCard({ label, value, note }: { label: string; value: string; note: string }) {
   return (
     <div style={{ border: "1px solid rgba(0,0,0,.12)", borderRadius: 18, padding: 18, background: "rgba(255,255,255,.62)" }}>
@@ -146,8 +187,8 @@ export function AssetLibrary() {
       </div>
 
       <div style={{ marginTop: 18, border: "1px solid rgba(0,0,0,.12)", borderRadius: 20, padding: 16, background: "rgba(255,255,255,.62)" }}>
-        <form onSubmit={submitSearch} style={{ display: "grid", gridTemplateColumns: "minmax(220px,1.5fr) repeat(4,minmax(150px,1fr)) auto", gap: 10, alignItems: "center" }}>
-          <div style={{ display: "flex", border: "1px solid rgba(0,0,0,.15)", borderRadius: 12, background: "#fff", overflow: "hidden" }}>
+        <form onSubmit={submitSearch} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 10, alignItems: "center" }}>
+          <div style={{ display: "flex", border: "1px solid rgba(0,0,0,.15)", borderRadius: 12, background: "#fff", overflow: "hidden", minWidth: 0 }}>
             <Search size={16} style={{ margin: "12px 0 0 12px", color: "#777" }} />
             <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search filename, alt or caption" style={{ width: "100%", border: 0, outline: 0, padding: "10px 12px", background: "transparent" }} />
           </div>
@@ -180,8 +221,8 @@ export function AssetLibrary() {
 
       {error ? <div style={{ marginTop: 16, border: "1px solid #b91c1c", background: "#fff7f7", color: "#991b1b", borderRadius: 14, padding: 14 }}>{error}</div> : null}
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 360px", gap: 20, marginTop: 20, alignItems: "start" }}>
-        <div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 20, marginTop: 20, alignItems: "flex-start" }}>
+        <div style={{ flex: "1 1 760px", minWidth: 0 }}>
           {loading ? (
             <div style={{ padding: 50, textAlign: "center", color: "#737373" }}>Loading assets…</div>
           ) : payload.assets.length ? (
@@ -203,7 +244,7 @@ export function AssetLibrary() {
           </div>
         </div>
 
-        <aside style={{ position: "sticky", top: 110, border: "1px solid rgba(0,0,0,.13)", borderRadius: 20, background: "rgba(255,255,255,.78)", overflow: "hidden" }}>
+        <aside style={{ position: "sticky", top: 110, flex: "1 1 320px", maxWidth: 380, minWidth: 280, border: "1px solid rgba(0,0,0,.13)", borderRadius: 20, background: "rgba(255,255,255,.78)", overflow: "hidden" }}>
           {activeAsset ? <AssetInspector asset={activeAsset} /> : <div style={{ padding: 24, color: "#737373" }}>Select an asset to inspect it.</div>}
         </aside>
       </div>
@@ -212,18 +253,19 @@ export function AssetLibrary() {
 }
 
 function AssetCard({ asset, active, onClick }: { asset: AssetRecord; active: boolean; onClick: () => void }) {
-  const src = asset.files.thumb || asset.files.web;
+  const fullFilename = asset.originalFilename || asset.filename || "Untitled asset";
   return (
-    <button type="button" onClick={onClick} style={{ border: active ? "2px solid #111" : "1px solid rgba(0,0,0,.12)", padding: active ? 0 : 1, borderRadius: 14, overflow: "hidden", background: "#fff", textAlign: "left", cursor: "pointer" }}>
+    <button type="button" onClick={onClick} style={{ border: active ? "2px solid #111" : "1px solid rgba(0,0,0,.12)", padding: active ? 0 : 1, borderRadius: 14, overflow: "hidden", background: "#fff", textAlign: "left", cursor: "pointer", minWidth: 0 }}>
       <div style={{ aspectRatio: "4 / 3", background: "#e8e5df", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        {src ? <img src={src} alt={asset.alt || asset.filename} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /> : <ImageIcon size={28} color="#888" />}
+        <AssetImage primary={asset.files.thumb} fallback={asset.files.web} alt={asset.alt || fullFilename} />
       </div>
       <div style={{ padding: 9 }}>
-        <div style={{ fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{asset.originalFilename || asset.filename}</div>
+        <div title={fullFilename} style={{ fontSize: 12, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cleanAssetLabel(asset)}</div>
         <div style={{ marginTop: 5, display: "flex", gap: 5, flexWrap: "wrap" }}>
+          {asset.weddings.length ? <SmallBadge text={`${asset.weddings.length} wedding${asset.weddings.length === 1 ? "" : "s"}`} /> : null}
           {asset.venues.length ? <SmallBadge text={`${asset.venues.length} venue${asset.venues.length === 1 ? "" : "s"}`} /> : null}
           {asset.moments.length ? <SmallBadge text={`${asset.moments.length} moment${asset.moments.length === 1 ? "" : "s"}`} /> : null}
-          {asset.galleries.length ? <SmallBadge text={`${asset.galleries.length} gallery`} /> : null}
+          {asset.galleries.length ? <SmallBadge text={`${asset.galleries.length} gallery${asset.galleries.length === 1 ? "" : "s"}`} /> : null}
         </div>
       </div>
     </button>
@@ -235,11 +277,10 @@ function SmallBadge({ text }: { text: string }) {
 }
 
 function AssetInspector({ asset }: { asset: AssetRecord }) {
-  const src = asset.files.web || asset.files.thumb;
   return (
     <div>
       <div style={{ aspectRatio: "16 / 11", background: "#e8e5df", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        {src ? <img src={src} alt={asset.alt || asset.filename} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <ImageIcon size={34} color="#888" />}
+        <AssetImage primary={asset.files.web} fallback={asset.files.thumb} alt={asset.alt || asset.filename} loading="eager" />
       </div>
       <div style={{ padding: 20, display: "grid", gap: 17 }}>
         <section>
@@ -255,7 +296,7 @@ function AssetInspector({ asset }: { asset: AssetRecord }) {
 
         <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           <div style={fileCardStyle}><HardDrive size={16} /><strong>Web</strong><span>{asset.files.web ? "Available" : "Missing"}</span></div>
-          <div style={fileCardStyle}><ImageIcon size={16} /><strong>Thumb</strong><span>{asset.files.thumb ? "Available" : "Missing"}</span></div>
+          <div style={fileCardStyle}><ImageIcon size={16} /><strong>Thumb</strong><span>{asset.files.thumb ? "Available" : asset.files.web ? "Missing · using web fallback" : "Missing"}</span></div>
           <div style={{ ...fileCardStyle, gridColumn: "1 / -1" }}><LockKeyhole size={16} /><strong>Private original</strong><span>{asset.files.original ? "Stored privately" : "Not yet stored — enabled by Client Galleries phase"}</span></div>
         </section>
 

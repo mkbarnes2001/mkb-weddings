@@ -1,7 +1,7 @@
 # Next Steps
 
 ## Current baseline
-v1.0.0 establishes the workspace-aware canonical Asset Library without replacing the proven MKB public/gallery workflows.
+v1.0.1 is the validated workspace-aware canonical Asset Library baseline, with resilient thumbnail/web fallback and responsive admin polish, without replacing the proven MKB public/gallery workflows.
 
 The storage model is now:
 
@@ -13,15 +13,13 @@ Workspace
 Existing public images are indexed in place; no R2 duplication is introduced.
 
 ## Next engineering sequence
-1. Verify migration 010 counts against production `images`, `wedding_images` and `venue_images`.
-2. Verify Admin → Asset Library filters and relationship inspector against real MKB data.
-3. Build Private Client Gallery foundation around canonical `asset_id`.
-4. Add private full-resolution `original` file variant and secure download authorization.
-5. Add high-volume direct multipart R2 upload with resumability/background derivative generation.
-6. Add client access, favourites, selections, expiry and download controls.
-7. Allow client-selected assets to be promoted into public Venue/Moment/Location/Custom Galleries without re-upload.
-8. Progressively cut existing gallery managers over to canonical relationship writes only after parity is proven.
-9. Begin CRM/client/job foundation after storage/access isolation is proven.
+1. Build Private Client Gallery foundation around canonical `asset_id`.
+2. Add private full-resolution `original` file variant and secure download authorization.
+3. Add high-volume direct multipart R2 upload with resumability/background derivative generation.
+4. Add client access, favourites, selections, expiry and download controls.
+5. Allow client-selected assets to be promoted into public Venue/Moment/Location/Custom Galleries without re-upload.
+6. Progressively cut existing gallery managers over to canonical relationship writes only after parity is proven.
+7. Begin CRM/client/job foundation after storage/access isolation is proven.
 
 ## Guardrails
 - Never expose private `original` keys through public APIs.
