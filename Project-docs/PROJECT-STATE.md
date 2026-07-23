@@ -1,7 +1,7 @@
 # Project State
 
 ## Version
-Current release: **v1.1.1 — Client Gallery Visual Refinement**.  
+Current release: **v1.1.2 — ShootProof-style Client Gallery Hero**.  
 Database schema version: **11**.
 
 ## Working production model
@@ -62,9 +62,9 @@ New browser uploads dual-write into the canonical registry. Managed deletion als
 - No database migration; schema version remains **10**.
 
 
-## Client Gallery visual refinement — v1.1.1
-- Public client galleries now use a cleaner ShootProof-inspired presentation while retaining MKB branding.
-- Gallery headings use the existing Canela/Playfair serif stack at a smaller, more restrained scale.
+## Client Gallery visual refinement — v1.1.2
+- Public client galleries use a cleaner ShootProof-inspired presentation while retaining MKB branding.
+- The hero title now uses Montserrat in uppercase with medium weight, wider tracking and centred positioning to match the supplied ShootProof reference more closely.
 - Image tiles use compact overlay controls for favourites and the future secure-download action.
 - Download icons are deliberately non-functional until private originals and authorised download endpoints are available.
 - Relative legacy asset URLs are resolved against the workspace/public website origin before display.

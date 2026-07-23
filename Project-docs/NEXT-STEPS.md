@@ -1,7 +1,7 @@
 # Next Steps
 
 ## Current baseline
-v1.1.1 refines the client-facing gallery presentation and keeps workspace-owned Private Client Galleries on top of the validated canonical Asset Library, while leaving the proven MKB public/gallery workflows intact.
+v1.1.2 refines the client-facing gallery hero typography and keeps workspace-owned Private Client Galleries on top of the validated canonical Asset Library, while leaving the proven MKB public/gallery workflows intact.
 
 The storage model is now:
 

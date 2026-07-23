@@ -1,5 +1,11 @@
 # MKB Intelligence — Changelog
 
+## v1.1.2 — ShootProof-style Client Gallery Hero
+- Replaced the client-gallery hero serif heading with a compact geometric sans-serif treatment using Montserrat.
+- Matched the reference more closely with uppercase lettering, medium weight, wider tracking, centred positioning, divider line and photograph count.
+- Retained the existing serif typography elsewhere in the MKB website and client gallery.
+- No D1 migration required; schema version remains 11.
+
 ## v1.1.1 — Client Gallery Visual Refinement
 - Refined the private client gallery into a cleaner ShootProof-inspired layout.
 - Reduced and restyled the gallery title using the existing Canela/Playfair heading stack.

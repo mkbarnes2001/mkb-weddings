@@ -249,26 +249,64 @@ export function ClientGallery() {
         <section style={{ height: "58vh", minHeight: 390, maxHeight: 720, position: "relative", overflow: "hidden", background: "#ddd" }}>
           <GalleryImage image={cover} baseOrigin={publicAssetOrigin} mode="hero" />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,.64), rgba(0,0,0,.02) 65%)" }} />
-          <div className="max-w-[1500px] mx-auto px-6 md:px-10" style={{ position: "absolute", left: 0, right: 0, bottom: 38, color: "white" }}>
-            <p className="text-[10px] uppercase tracking-[0.28em] text-white/75">Private gallery</p>
+          <div
+            className="max-w-[1500px] mx-auto px-6 md:px-10"
+            style={{
+              position: "absolute",
+              inset: 0,
+              color: "white",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              paddingTop: 24,
+            }}
+          >
             <h1
               style={{
-                fontFamily: '"Canela", "Playfair Display", Georgia, serif',
-                fontSize: "clamp(2.35rem, 5vw, 4.75rem)",
-                lineHeight: .98,
-                fontWeight: 400,
-                letterSpacing: "-.018em",
-                marginTop: 10,
+                fontFamily: '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif',
+                fontSize: "clamp(1.35rem, 2.35vw, 2.15rem)",
+                lineHeight: 1.18,
+                fontWeight: 600,
+                letterSpacing: ".12em",
+                textTransform: "uppercase",
+                margin: 0,
                 maxWidth: 1040,
+                textShadow: "0 2px 18px rgba(0,0,0,.42)",
               }}
             >
               {payload.title}
             </h1>
-            <p className="mt-3 text-sm md:text-base text-white/85">{payload.clientName || payload.couple}{payload.venue ? ` · ${payload.venue}` : ""}</p>
+            <div
+              aria-hidden="true"
+              style={{
+                width: 56,
+                height: 1,
+                background: "rgba(255,255,255,.78)",
+                marginTop: 20,
+                marginBottom: 14,
+              }}
+            />
+            <p
+              style={{
+                fontFamily: '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif',
+                fontSize: 11,
+                lineHeight: 1.2,
+                fontWeight: 500,
+                letterSpacing: ".18em",
+                textTransform: "uppercase",
+                margin: 0,
+                color: "rgba(255,255,255,.9)",
+                textShadow: "0 2px 12px rgba(0,0,0,.36)",
+              }}
+            >
+              {images.length} {images.length === 1 ? "photo" : "photos"}
+            </p>
           </div>
         </section>
       ) : (
-        <section className="max-w-[1500px] mx-auto px-6 md:px-10 py-16 text-center"><p className="text-[10px] uppercase tracking-[0.28em] text-neutral-500">Private gallery</p><h1 style={{ fontFamily: '"Canela", "Playfair Display", Georgia, serif', fontSize: "clamp(2.35rem, 5vw, 4.75rem)", lineHeight: 1, fontWeight: 400, marginTop: 10 }}>{payload.title}</h1></section>
+        <section className="max-w-[1500px] mx-auto px-6 md:px-10 py-16 text-center"><p className="text-[10px] uppercase tracking-[0.28em] text-neutral-500">Private gallery</p><h1 style={{ fontFamily: '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif', fontSize: "clamp(1.35rem, 2.35vw, 2.15rem)", lineHeight: 1.18, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", marginTop: 12 }}>{payload.title}</h1></section>
       )}
 
       <main className="max-w-[1500px] mx-auto px-4 md:px-8 py-10 md:py-12">
