@@ -32,6 +32,43 @@ export type ClientGalleryVisitor = {
   visitCount: number;
 };
 
+
+export type ClientGallerySelectionRequest = {
+  id: string;
+  galleryId: string;
+  name: string;
+  instructions: string;
+  minImages: number;
+  maxImages: number;
+  status: "active" | "archived";
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ClientGallerySelectionAsset = {
+  assetId: string;
+  filename: string;
+  thumbSrc: string;
+  webSrc: string;
+  sortOrder: number;
+};
+
+export type ClientGallerySelection = {
+  id: string;
+  requestId: string;
+  requestName: string;
+  visitorKey: string;
+  email: string;
+  displayName: string;
+  status: "draft" | "submitted";
+  submittedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  selectedCount: number;
+  assets: ClientGallerySelectionAsset[];
+};
+
 export type ClientGalleryRecord = {
   id: string;
   workspaceId: string;
@@ -88,6 +125,8 @@ export type ClientGalleryDetailPayload = {
   weddings: ClientGalleryWeddingOption[];
   contacts: ClientGalleryContact[];
   visitors: ClientGalleryVisitor[];
+  selectionRequests: ClientGallerySelectionRequest[];
+  selections: ClientGallerySelection[];
 };
 
 export type PrivateOriginalUploadedPart = {

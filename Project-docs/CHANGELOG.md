@@ -241,3 +241,11 @@
 - Replaced Wedding card Workspace text buttons with compact icon-only shortcuts.
 - Made Wedding Workspace Venue and Supplier areas visually distinct standalone panels.
 - Added migration 014; schema version advances to 14.
+
+## v1.5.0 — Client Selections & Shortlists
+- Added named Client Gallery selection requests with instructions and optional minimum/maximum counts.
+- Added visitor/email-linked draft selections with automatic saving and final submission.
+- Added per-image selection controls to the public Client Gallery alongside favourites and secure downloads.
+- Submitted selections are locked until reopened by Admin.
+- Added Admin response review, selected filename copy and CSV export for Lightroom/manual selection workflows.
+- Added migration 015; schema version advances to 15.

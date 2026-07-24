@@ -151,3 +151,15 @@ Adds:
 `client_gallery_contacts` stores gallery-specific authorised email identities and per-contact original-download entitlement. It does not replace the future CRM contact model; it is a delivery permission boundary that can later link to CRM contacts.
 
 `client_gallery_visitors` stores gallery/browser visitor keys, email identity, first/last seen timestamps and visit counts. Raw IP addresses are not stored.
+
+## Schema version 15
+Migration: `015_client_selections_and_shortlists.sql`
+
+Adds:
+- `client_gallery_selection_requests`
+- `client_gallery_selections`
+- `client_gallery_selection_assets`
+
+A selection request belongs to one Client Gallery and defines a named task plus optional minimum/maximum image counts. A visitor selection belongs to a request and visitor/email identity and moves from `draft` to `submitted`. Selected images reference canonical `assets.id` only. Submitted selections are immutable to the client until Admin reopens them.
+
+No R2 objects are copied or deleted by this migration.

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Download, Heart, LockKeyhole, Mail, X } from "lucide-react";
+import { Check, ClipboardList, Download, Heart, LockKeyhole, Mail, Send, X } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { resolveAssetUrl } from "../lib/assetUrl";
@@ -12,6 +12,26 @@ type ClientGalleryImage = {
   width: number;
   height: number;
   hasOriginal: boolean;
+};
+
+type ClientGallerySelection = {
+  id: string;
+  status: "draft" | "submitted";
+  submittedAt: string;
+  selectedCount: number;
+  assetIds: string[];
+};
+
+type ClientGallerySelectionRequest = {
+  id: string;
+  galleryId: string;
+  name: string;
+  instructions: string;
+  minImages: number;
+  maxImages: number;
+  status: "active" | "archived";
+  sortOrder: number;
+  selection: ClientGallerySelection | null;
 };
 
 type ClientGalleryPayload = {
@@ -42,6 +62,7 @@ type ClientGalleryPayload = {
   cover?: ClientGalleryImage | null;
   assets?: ClientGalleryImage[];
   favouriteAssetIds?: string[];
+  selectionRequests?: ClientGallerySelectionRequest[];
 };
 
 function visitorKey() {
@@ -154,6 +175,8 @@ export function ClientGallery() {
   const [favourites, setFavourites] = useState<Set<string>>(new Set());
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [downloading, setDownloading] = useState<Set<string>>(new Set());
+  const [activeSelectionRequestId, setActiveSelectionRequestId] = useState("");
+  const [selectionBusy, setSelectionBusy] = useState(false);
 
   const load = async (attemptPin = "", attemptEmail = "") => {
     setError("");
@@ -173,6 +196,10 @@ export function ClientGallery() {
     }
     setPayload(body as ClientGalleryPayload);
     setFavourites(new Set((body?.favouriteAssetIds || []) as string[]));
+    const requests = (body?.selectionRequests || []) as ClientGallerySelectionRequest[];
+    if (requests.length) {
+      setActiveSelectionRequestId((current) => current && requests.some((request) => request.id === current) ? current : requests[0].id);
+    }
     if (response.ok && attemptPin) {
       try { sessionStorage.setItem(`client-gallery-pin:${token}`, attemptPin); } catch {}
     }
@@ -263,9 +290,68 @@ export function ClientGallery() {
     }
   };
 
+
+  const updateSelection = async (assetId: string, selected: boolean) => {
+    if (!activeSelectionRequestId || selectionBusy) return;
+    setSelectionBusy(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/public/client-galleries/${encodeURIComponent(token)}/selections`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pin,
+          email,
+          visitorKey: visitor,
+          requestId: activeSelectionRequestId,
+          action: "toggle",
+          assetId,
+          selected,
+        }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body?.error || "Unable to update selection.");
+      setPayload((current) => current ? { ...current, selectionRequests: body.selectionRequests || [] } : current);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to update selection.");
+    } finally {
+      setSelectionBusy(false);
+    }
+  };
+
+  const submitSelection = async () => {
+    if (!activeSelectionRequestId || selectionBusy) return;
+    setSelectionBusy(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/public/client-galleries/${encodeURIComponent(token)}/selections`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pin,
+          email,
+          visitorKey: visitor,
+          requestId: activeSelectionRequestId,
+          action: "submit",
+        }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body?.error || "Unable to submit selection.");
+      setPayload((current) => current ? { ...current, selectionRequests: body.selectionRequests || [] } : current);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to submit selection.");
+    } finally {
+      setSelectionBusy(false);
+    }
+  };
+
   const images = payload?.assets || [];
   const cover = payload?.cover || images[0] || null;
   const favouriteImages = useMemo(() => images.filter((image) => favourites.has(image.assetId)), [images, favourites]);
+  const selectionRequests = payload?.selectionRequests || [];
+  const activeSelectionRequest = selectionRequests.find((request) => request.id === activeSelectionRequestId) || selectionRequests[0] || null;
+  const activeSelection = activeSelectionRequest?.selection || null;
+  const selectedAssetIds = new Set(activeSelection?.assetIds || []);
   const publicAssetOrigin = payload?.websiteUrl || "https://www.mkbweddings.co.uk";
 
   if (loading) {
@@ -392,6 +478,42 @@ export function ClientGallery() {
         {error ? <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div> : null}
         {payload.intro ? <p style={{ fontFamily: '"Canela", "Playfair Display", Georgia, serif', fontSize: "clamp(1.15rem,2vw,1.55rem)", lineHeight: 1.55, maxWidth: 760, margin: "0 auto 42px", textAlign: "center", color: "#3d3d3d" }}>{payload.intro}</p> : null}
 
+        {activeSelectionRequest ? (
+          <section className="mb-8 rounded-2xl border border-black/10 bg-white px-5 py-4">
+            <div className="flex items-start justify-between gap-5 flex-wrap">
+              <div className="min-w-0" style={{ flex: 1 }}>
+                <div className="flex items-center gap-2"><ClipboardList size={16} /><p className="text-xs uppercase tracking-[0.16em] text-neutral-500">Client selection</p></div>
+                {selectionRequests.length > 1 ? (
+                  <select value={activeSelectionRequest.id} onChange={(event) => setActiveSelectionRequestId(event.target.value)} className="mt-2 rounded-lg border border-black/15 bg-white px-3 py-2 text-sm">
+                    {selectionRequests.map((request) => <option key={request.id} value={request.id}>{request.name}</option>)}
+                  </select>
+                ) : <h2 className="mt-2 text-lg font-semibold">{activeSelectionRequest.name}</h2>}
+                {activeSelectionRequest.instructions ? <p className="mt-2 text-sm text-neutral-600">{activeSelectionRequest.instructions}</p> : null}
+                <p className="mt-2 text-xs text-neutral-500">
+                  {activeSelection?.selectedCount || 0} selected
+                  {activeSelectionRequest.minImages ? ` · minimum ${activeSelectionRequest.minImages}` : ""}
+                  {activeSelectionRequest.maxImages ? ` · maximum ${activeSelectionRequest.maxImages}` : ""}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                {activeSelection?.status === "submitted" ? (
+                  <span className="rounded-full bg-green-50 border border-green-200 px-4 py-2 text-xs text-green-800">Submitted</span>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={selectionBusy || !(activeSelection?.selectedCount || 0)}
+                    onClick={submitSelection}
+                    className="rounded-lg bg-black text-white px-4 py-2.5 text-sm inline-flex items-center gap-2 disabled:opacity-40"
+                  >
+                    <Send size={15} /> {selectionBusy ? "Saving…" : "Submit selection"}
+                  </button>
+                )}
+              </div>
+            </div>
+            {activeSelection?.status === "submitted" ? <p className="mt-3 text-xs text-neutral-500">Your selection is locked after submission. Your photographer can reopen it if changes are needed.</p> : <p className="mt-3 text-xs text-neutral-500">Use the check icon on each photograph. Changes save automatically until you submit.</p>}
+          </section>
+        ) : null}
+
         <div className="flex items-center justify-between gap-4 mb-5 flex-wrap border-b border-black/10 pb-4">
           <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">{images.length} photographs</p>
           <div className="flex items-center gap-4 text-xs text-neutral-500">
@@ -407,6 +529,18 @@ export function ClientGallery() {
                 <GalleryImage image={image} baseOrigin={publicAssetOrigin} mode="tile" />
               </button>
               <div style={{ position: "absolute", top: 9, right: 9, display: "flex", alignItems: "center", gap: 7 }}>
+                {activeSelectionRequest ? (
+                  <button
+                    type="button"
+                    disabled={selectionBusy || activeSelection?.status === "submitted"}
+                    onClick={(event) => { event.stopPropagation(); updateSelection(image.assetId, !selectedAssetIds.has(image.assetId)); }}
+                    aria-label={selectedAssetIds.has(image.assetId) ? "Remove from selection" : "Add to selection"}
+                    title={activeSelection?.status === "submitted" ? "Selection submitted" : selectedAssetIds.has(image.assetId) ? "Remove from selection" : "Add to selection"}
+                    style={{ width: 32, height: 32, borderRadius: 999, border: selectedAssetIds.has(image.assetId) ? "1px solid #111" : 0, display: "inline-flex", alignItems: "center", justifyContent: "center", background: selectedAssetIds.has(image.assetId) ? "#111" : "rgba(255,255,255,.92)", color: selectedAssetIds.has(image.assetId) ? "white" : "#111", boxShadow: "0 3px 16px rgba(0,0,0,.14)", cursor: activeSelection?.status === "submitted" ? "not-allowed" : "pointer", opacity: activeSelection?.status === "submitted" ? .72 : 1 }}
+                  >
+                    <Check size={15} strokeWidth={2} />
+                  </button>
+                ) : null}
                 <DownloadControl compact enabled={payload.allowDownloads && image.hasOriginal} busy={downloading.has(image.assetId)} onClick={() => downloadOriginal(image)} />
                 {payload.allowFavourites ? (
                   <button onClick={() => toggleFavourite(image.assetId)} aria-label={favourites.has(image.assetId) ? "Remove favourite" : "Add favourite"} title={favourites.has(image.assetId) ? "Remove favourite" : "Add favourite"} style={{ width: 32, height: 32, borderRadius: 999, border: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,.92)", color: "#111", boxShadow: "0 3px 16px rgba(0,0,0,.14)", cursor: "pointer" }}>
@@ -431,6 +565,7 @@ export function ClientGallery() {
             <GalleryImage image={images[lightboxIndex]} baseOrigin={publicAssetOrigin} mode="lightbox" />
           </div>
           <div style={{ position: "absolute", bottom: 22, display: "flex", alignItems: "center", gap: 9 }}>
+            {activeSelectionRequest ? <button type="button" disabled={selectionBusy || activeSelection?.status === "submitted"} onClick={() => updateSelection(images[lightboxIndex].assetId, !selectedAssetIds.has(images[lightboxIndex].assetId))} className="rounded-full bg-white px-4 py-2 inline-flex items-center gap-2 text-sm disabled:opacity-50"><Check className="h-4 w-4" /> {selectedAssetIds.has(images[lightboxIndex].assetId) ? "Selected" : "Select"}</button> : null}
             <DownloadControl enabled={payload.allowDownloads && images[lightboxIndex].hasOriginal} busy={downloading.has(images[lightboxIndex].assetId)} onClick={() => downloadOriginal(images[lightboxIndex])} />
             {payload.allowFavourites ? <button onClick={() => toggleFavourite(images[lightboxIndex].assetId)} className="rounded-full bg-white px-4 py-2 inline-flex items-center gap-2 text-sm"><Heart className="h-4 w-4" fill={favourites.has(images[lightboxIndex].assetId) ? "currentColor" : "none"} /> Favourite</button> : null}
           </div>

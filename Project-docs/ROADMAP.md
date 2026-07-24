@@ -23,13 +23,31 @@ Completed and in production:
 - Generate editable Instagram preview captions from venue / supplier Instagram data
 - Keep private originals protected while publishing only safe web derivatives
 
-## Next — Gallery Visitor Identity & Permissions
+## Completed — Gallery Visitor Identity & Permissions
 - Optional required email entry before viewing a gallery
 - Visitor identity and activity history
 - Linked client / couple email identities
 - Per-person download entitlements
 - Couple may receive full-resolution downloads while guests remain view / favourite / print-order only
 - Guest favourites, downloads and future orders tied to visitor identity
+
+
+## v1.5 — Client Selections & Shortlists
+- Named photographer-created selection requests
+- Optional minimum / maximum image counts
+- Auto-saved draft selections tied to visitor/email identity
+- Submit/lock lifecycle with Admin reopen
+- Admin response review
+- Copy filenames and CSV export for Lightroom/manual workflows
+- Canonical asset references only; no duplicate image storage
+
+## Next — Print Store Foundation
+- Workspace product catalogue and price lists
+- Print sizes, products and studio markup
+- Cart and crop choices
+- Orders and payment-provider boundary
+- Photographer approval before lab fulfilment
+- Lab connector interface with Loxley as the first target subject to partner/API access
 
 ## Print Store & Professional Lab Fulfilment
 - Product catalogues and workspace price lists

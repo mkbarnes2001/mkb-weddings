@@ -1,8 +1,8 @@
 # Project State
 
 ## Version
-Current release: **v1.3.3 — Wedding Navigation, Safe Deletion & Compact Supplier Table**.  
-Database schema version: **13**.
+Current release: **v1.5.0 — Client Selections & Shortlists**.  
+Database schema version: **15**.
 
 
 ## Wedding management refinement — v1.3.3
@@ -12,6 +12,23 @@ Database schema version: **13**.
 - A live Client Gallery blocks permanent deletion until that gallery is archived.
 - Wedding Workspace supplier assignments use a compact table (Role / Supplier / Instagram / Remove) instead of large stacked cards.
 - No D1 migration; schema version remains **13**.
+
+
+## Client Selections & Shortlists — v1.5.0
+Client Galleries now support photographer-created named selection requests such as Album Selection, Parent Album, Thank-you Cards or Print Favourites.
+
+Rules:
+- selections reference canonical `assets.id`; no image files are duplicated;
+- clients can save progress, return later with the same visitor identity/email, and submit when ready;
+- optional minimum/maximum image counts are enforced on submit;
+- submitted selections are locked until the photographer reopens them;
+- Admin can review responses, copy filenames and export CSV for Lightroom/manual workflows;
+- selections remain separate from lightweight favourites so both workflows can coexist.
+
+New tables:
+- `client_gallery_selection_requests`
+- `client_gallery_selections`
+- `client_gallery_selection_assets`
 
 ## Working production model
 - Cloudflare D1 is the structured source of truth.

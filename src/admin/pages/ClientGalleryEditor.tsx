@@ -4,6 +4,7 @@ import {
   AlertCircle,
   ArrowLeft,
   CheckCircle2,
+  ClipboardList,
   Copy,
   Download,
   ExternalLink,
@@ -11,11 +12,13 @@ import {
   EyeOff,
   ImagePlus,
   RefreshCw,
+  RotateCcw,
   Save,
   Star,
   Trash2,
   UploadCloud,
   UserPlus,
+  Plus,
   Users,
   X,
 } from "lucide-react";
@@ -49,6 +52,7 @@ export function ClientGalleryEditor() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [contactDraft, setContactDraft] = useState({ email: "", displayName: "", role: "client", allowOriginalDownloads: true });
+  const [selectionDraft, setSelectionDraft] = useState({ name: "Album Selection", instructions: "Choose the photographs you would like included.", minImages: 0, maxImages: 0 });
 
   const load = async () => {
     setError("");
@@ -111,6 +115,58 @@ export function ClientGalleryEditor() {
     if (!contactDraft.email.trim()) return;
     await mutateContact({ action: "upsert", ...contactDraft }, "Access contact saved.");
     setContactDraft({ email: "", displayName: "", role: "client", allowOriginalDownloads: true });
+  };
+
+  const mutateSelection = async (payload: Record<string, unknown>, success: string) => {
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      const next = await AdminApiService.mutateClientGallerySelection(id, payload);
+      setDetail(next);
+      setDraft((current) => ({ ...current, ...next.gallery, pin: undefined }));
+      setMessage(success);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to update client selections.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const createSelectionRequest = async () => {
+    if (!selectionDraft.name.trim()) return;
+    await mutateSelection({ action: "createRequest", ...selectionDraft }, "Selection request created.");
+    setSelectionDraft({ name: "Album Selection", instructions: "Choose the photographs you would like included.", minImages: 0, maxImages: 0 });
+  };
+
+  const copySelectionFilenames = async (filenames: string[]) => {
+    const text = filenames.filter(Boolean).join("\n");
+    if (!text) return;
+    try {
+      await navigator.clipboard?.writeText(text);
+      setMessage(`${filenames.length} filename${filenames.length === 1 ? "" : "s"} copied.`);
+    } catch {
+      setError("Unable to copy filenames. Your browser may block clipboard access.");
+    }
+  };
+
+  const downloadSelectionCsv = (selection: ClientGalleryDetailPayload["selections"][number]) => {
+    const escape = (value: string) => `"${String(value || "").replaceAll('"', '""')}"`;
+    const rows = [
+      ["filename", "asset_id", "selection", "client_email", "status"],
+      ...selection.assets.map((asset) => [asset.filename, asset.assetId, selection.requestName, selection.email, selection.status]),
+    ];
+    const csv = rows.map((row) => row.map((value) => escape(String(value))).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    const safeName = (selection.requestName || "client-selection").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    anchor.href = url;
+    anchor.download = `${safeName || "client-selection"}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
   };
 
   const save = async () => {
@@ -397,6 +453,56 @@ export function ClientGalleryEditor() {
               <div className="flex items-center gap-2"><Users className="h-4 w-4" /><h3 className="text-sm font-semibold">Recent visitors</h3></div>
               <p className="mt-1 text-xs text-neutral-500">{detail.visitors.length ? `${detail.visitors.length} identified visitor${detail.visitors.length === 1 ? "" : "s"}` : "No identified visitors yet."}</p>
               {detail.visitors.length ? <div className="mt-3 max-h-56 overflow-auto space-y-2">{detail.visitors.slice(0, 20).map((visitor) => <div key={visitor.visitorKey} className="rounded-lg bg-neutral-50 p-2"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><p className="text-xs font-medium truncate">{visitor.email || "Anonymous"}</p><p className="text-[10px] uppercase tracking-[0.08em] text-neutral-400">{visitor.role.replaceAll("_", " ")} · {visitor.visitCount} visit{visitor.visitCount === 1 ? "" : "s"}</p></div>{visitor.canDownloadOriginals ? <Download className="h-3.5 w-3.5" /> : null}</div></div>)}</div> : null}
+            </div>
+
+            <div className="border-t border-black/10 pt-5">
+              <div className="flex items-center gap-2"><ClipboardList className="h-4 w-4" /><h3 className="text-sm font-semibold">Client selections</h3></div>
+              <p className="mt-1 text-xs text-neutral-500">Create named shortlists for albums, prints, cards or any client decision.</p>
+
+              {detail.selectionRequests.length ? <div className="mt-3 space-y-2">
+                {detail.selectionRequests.map((request) => {
+                  const requestSelections = detail.selections.filter((selection) => selection.requestId === request.id);
+                  return <div key={request.id} className={`rounded-xl border p-3 ${request.status === "archived" ? "border-black/5 bg-neutral-50 opacity-60" : "border-black/10 bg-white"}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium">{request.name}</p>
+                        <p className="text-[11px] text-neutral-500 mt-1">{request.instructions || "No instructions"}</p>
+                        <p className="text-[10px] uppercase tracking-[0.08em] text-neutral-400 mt-1">{request.minImages ? `min ${request.minImages}` : "no minimum"} · {request.maxImages ? `max ${request.maxImages}` : "no maximum"} · {requestSelections.length} response{requestSelections.length === 1 ? "" : "s"}</p>
+                      </div>
+                      {request.status === "active" ? <button title="Archive selection request" disabled={busy} onClick={() => mutateSelection({ action: "archiveRequest", requestId: request.id }, "Selection request archived.")} className="rounded-lg border border-black/10 p-2 disabled:opacity-40"><Trash2 className="h-3.5 w-3.5" /></button> : null}
+                    </div>
+                  </div>;
+                })}
+              </div> : <p className="mt-3 text-xs text-neutral-400">No selection requests yet.</p>}
+
+              <div className="mt-3 rounded-xl border border-black/10 p-3 space-y-2">
+                <input value={selectionDraft.name} onChange={(e) => setSelectionDraft({ ...selectionDraft, name: e.target.value })} placeholder="Selection name" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm" />
+                <textarea value={selectionDraft.instructions} onChange={(e) => setSelectionDraft({ ...selectionDraft, instructions: e.target.value })} rows={2} placeholder="Instructions" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm" />
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="text-[10px] uppercase tracking-[0.08em] text-neutral-500">Min<input type="number" min="0" value={selectionDraft.minImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, minImages: Math.max(0, Number(e.target.value) || 0) })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2 text-sm" /></label>
+                  <label className="text-[10px] uppercase tracking-[0.08em] text-neutral-500">Max<input type="number" min="0" value={selectionDraft.maxImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, maxImages: Math.max(0, Number(e.target.value) || 0) })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2 text-sm" /></label>
+                </div>
+                <button disabled={busy || !selectionDraft.name.trim()} onClick={createSelectionRequest} className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm inline-flex items-center justify-center gap-2 disabled:opacity-40"><Plus className="h-4 w-4" /> Create selection request</button>
+              </div>
+
+              {detail.selections.length ? <div className="mt-4 space-y-2">
+                <p className="text-[10px] uppercase tracking-[0.12em] text-neutral-500">Responses</p>
+                {detail.selections.map((selection) => <div key={selection.id} className="rounded-xl bg-neutral-50 border border-black/10 p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold truncate">{selection.requestName}</p>
+                      <p className="text-xs text-neutral-600 truncate">{selection.displayName || selection.email || "Anonymous visitor"}</p>
+                      <p className="mt-1 text-[10px] uppercase tracking-[0.08em] text-neutral-400">{selection.selectedCount} selected · {selection.status}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button title="Copy selected filenames" disabled={!selection.assets.length} onClick={() => copySelectionFilenames(selection.assets.map((asset) => asset.filename))} className="rounded-lg border border-black/10 p-2 disabled:opacity-30"><Copy className="h-3.5 w-3.5" /></button>
+                      <button title="Download selection CSV" disabled={!selection.assets.length} onClick={() => downloadSelectionCsv(selection)} className="rounded-lg border border-black/10 p-2 disabled:opacity-30"><Download className="h-3.5 w-3.5" /></button>
+                      {selection.status === "submitted" ? <button title="Reopen selection" disabled={busy} onClick={() => mutateSelection({ action: "reopenSelection", selectionId: selection.id }, "Selection reopened for editing.")} className="rounded-lg border border-black/10 p-2 disabled:opacity-30"><RotateCcw className="h-3.5 w-3.5" /></button> : null}
+                    </div>
+                  </div>
+                  {selection.assets.length ? <details className="mt-2"><summary className="text-[11px] cursor-pointer text-neutral-500">View selected filenames</summary><div className="mt-2 max-h-28 overflow-auto text-[10px] leading-relaxed text-neutral-500">{selection.assets.map((asset) => <div key={asset.assetId} className="truncate" title={asset.filename}>{asset.filename}</div>)}</div></details> : null}
+                </div>)}
+              </div> : null}
             </div>
 
             {message ? <p className="text-sm text-green-700">{message}</p> : null}

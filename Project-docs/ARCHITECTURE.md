@@ -194,3 +194,10 @@ Private gallery access now supports a lightweight identity layer before the full
 Gallery → visitor email identity → contact match → effective permissions.
 
 A gallery-wide download switch is always required. When email gating is enabled, original downloads are additionally restricted to authorised `client_gallery_contacts` unless guest downloads are explicitly enabled. This layer is intentionally designed so future CRM contacts can be linked without changing the public gallery permission model.
+
+## Client selection boundary
+Client selections sit above canonical assets and identified gallery visitors:
+
+`Client Gallery → Selection Request → Visitor Selection → Canonical Asset memberships`
+
+Favourites remain lightweight personal markers. Selection requests are explicit photographer workflows with constraints and a submit/lock lifecycle. This keeps album choices, print shortlists and other decisions independent from casual favourites. The future Lightroom plugin should consume the same selection data/asset IDs rather than create a separate selection store.

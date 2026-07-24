@@ -530,6 +530,153 @@ async function listClientGalleryVisitors(db: D1Db, galleryId: string) {
   }));
 }
 
+
+function mapSelectionRequest(row: any) {
+  return {
+    id: text(row?.id),
+    galleryId: text(row?.gallery_id),
+    name: text(row?.name),
+    instructions: text(row?.instructions),
+    minImages: number(row?.min_images),
+    maxImages: number(row?.max_images),
+    status: text(row?.status) === "archived" ? "archived" : "active",
+    sortOrder: number(row?.sort_order),
+    createdAt: text(row?.created_at),
+    updatedAt: text(row?.updated_at),
+  };
+}
+
+export async function listClientGallerySelectionRequests(db: D1Db, galleryId: string, includeArchived = true) {
+  const result = await db.prepare(`
+    SELECT * FROM client_gallery_selection_requests
+    WHERE gallery_id = ? ${includeArchived ? "" : "AND status = 'active'"}
+    ORDER BY status ASC, sort_order ASC, created_at ASC
+  `).bind(galleryId).all();
+  return (result.results || []).map(mapSelectionRequest);
+}
+
+async function listClientGallerySelections(db: D1Db, galleryId: string) {
+  const [selectionResult, assetResult] = await Promise.all([
+    db.prepare(`
+      SELECT
+        cgs.*,
+        cgsr.name AS request_name,
+        COUNT(cgsa.asset_id) AS selected_count
+      FROM client_gallery_selections cgs
+      JOIN client_gallery_selection_requests cgsr ON cgsr.id = cgs.request_id
+      LEFT JOIN client_gallery_selection_assets cgsa ON cgsa.selection_id = cgs.id
+      WHERE cgs.gallery_id = ?
+      GROUP BY cgs.id
+      ORDER BY CASE cgs.status WHEN 'submitted' THEN 0 ELSE 1 END,
+               COALESCE(cgs.submitted_at, cgs.updated_at) DESC
+    `).bind(galleryId).all(),
+    db.prepare(`
+      SELECT
+        cgsa.selection_id,
+        cgsa.asset_id,
+        cgsa.sort_order,
+        a.filename,
+        a.original_filename,
+        COALESCE(tf.url, wf.url, '') AS thumb_url,
+        COALESCE(wf.url, tf.url, '') AS web_url
+      FROM client_gallery_selection_assets cgsa
+      JOIN client_gallery_selections cgs ON cgs.id = cgsa.selection_id
+      JOIN assets a ON a.id = cgsa.asset_id
+      LEFT JOIN asset_files tf ON tf.asset_id = a.id AND tf.variant = 'thumb' AND tf.status = 'active'
+      LEFT JOIN asset_files wf ON wf.asset_id = a.id AND wf.variant = 'web' AND wf.status = 'active'
+      WHERE cgs.gallery_id = ?
+      ORDER BY cgsa.selection_id, cgsa.sort_order ASC, cgsa.selected_at ASC
+    `).bind(galleryId).all(),
+  ]);
+  const assetsBySelection = new Map<string, any[]>();
+  for (const row of assetResult.results || []) {
+    const selectionId = text((row as any).selection_id);
+    const list = assetsBySelection.get(selectionId) || [];
+    list.push({
+      assetId: text((row as any).asset_id),
+      filename: text((row as any).filename || (row as any).original_filename),
+      thumbSrc: text((row as any).thumb_url),
+      webSrc: text((row as any).web_url),
+      sortOrder: number((row as any).sort_order),
+    });
+    assetsBySelection.set(selectionId, list);
+  }
+  return (selectionResult.results || []).map((row: any) => ({
+    id: text(row.id),
+    requestId: text(row.request_id),
+    requestName: text(row.request_name),
+    visitorKey: text(row.visitor_key),
+    email: text(row.email),
+    displayName: text(row.display_name),
+    status: text(row.status) === 'submitted' ? 'submitted' : 'draft',
+    submittedAt: text(row.submitted_at),
+    createdAt: text(row.created_at),
+    updatedAt: text(row.updated_at),
+    selectedCount: number(row.selected_count),
+    assets: assetsBySelection.get(text(row.id)) || [],
+  }));
+}
+
+export async function mutateClientGallerySelections(db: D1Db, galleryId: string, input: any) {
+  const workspaceId = await getDefaultWorkspaceId(db);
+  const gallery = await db.prepare(`SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1`)
+    .bind(galleryId, workspaceId).first();
+  if (!gallery) throw new Error('Client gallery not found.');
+  const action = text(input?.action || 'createRequest');
+
+  if (action === 'createRequest') {
+    const name = text(input?.name);
+    if (!name) throw new Error('Selection name is required.');
+    const maxRow = await db.prepare(`SELECT COALESCE(MAX(sort_order), -10) AS max_order FROM client_gallery_selection_requests WHERE gallery_id = ?`)
+      .bind(galleryId).first();
+    const minImages = Math.max(0, Math.floor(number(input?.minImages)));
+    const maxImages = Math.max(0, Math.floor(number(input?.maxImages)));
+    if (maxImages > 0 && minImages > maxImages) throw new Error('Minimum images cannot exceed maximum images.');
+    await db.prepare(`
+      INSERT INTO client_gallery_selection_requests (
+        id, gallery_id, name, instructions, min_images, max_images, status, sort_order, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).bind(
+      `selection_request_${crypto.randomUUID()}`,
+      galleryId,
+      name,
+      text(input?.instructions),
+      minImages,
+      maxImages,
+      number(maxRow?.max_order, -10) + 10,
+    ).run();
+  } else if (action === 'updateRequest') {
+    const requestId = text(input?.requestId);
+    if (!requestId) throw new Error('Selection request is required.');
+    const minImages = Math.max(0, Math.floor(number(input?.minImages)));
+    const maxImages = Math.max(0, Math.floor(number(input?.maxImages)));
+    if (maxImages > 0 && minImages > maxImages) throw new Error('Minimum images cannot exceed maximum images.');
+    await db.prepare(`
+      UPDATE client_gallery_selection_requests
+      SET name = ?, instructions = ?, min_images = ?, max_images = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ? AND gallery_id = ?
+    `).bind(text(input?.name), text(input?.instructions), minImages, maxImages, requestId, galleryId).run();
+  } else if (action === 'archiveRequest') {
+    await db.prepare(`
+      UPDATE client_gallery_selection_requests SET status = 'archived', updated_at = CURRENT_TIMESTAMP
+      WHERE id = ? AND gallery_id = ?
+    `).bind(text(input?.requestId), galleryId).run();
+  } else if (action === 'reopenSelection') {
+    await db.prepare(`
+      UPDATE client_gallery_selections
+      SET status = 'draft', submitted_at = NULL, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ? AND gallery_id = ?
+    `).bind(text(input?.selectionId), galleryId).run();
+  } else {
+    throw new Error('Unsupported selection action.');
+  }
+
+  return {
+    selectionRequests: await listClientGallerySelectionRequests(db, galleryId, true),
+    selections: await listClientGallerySelections(db, galleryId),
+  };
+}
+
 async function adminGalleryAssets(db: D1Db, galleryId: string) {
   const result = await db.prepare(`
     SELECT
@@ -566,15 +713,17 @@ async function adminGalleryAssets(db: D1Db, galleryId: string) {
 
 export async function getClientGalleryAdmin(db: D1Db, id: string) {
   const workspaceId = await getDefaultWorkspaceId(db);
-  const [row, assets, weddings, contacts, visitors] = await Promise.all([
+  const [row, assets, weddings, contacts, visitors, selectionRequests, selections] = await Promise.all([
     galleryBaseRow(db, id, workspaceId),
     adminGalleryAssets(db, id),
     listWeddingOptions(db),
     listClientGalleryContacts(db, id),
     listClientGalleryVisitors(db, id),
+    listClientGallerySelectionRequests(db, id, true),
+    listClientGallerySelections(db, id),
   ]);
   if (!row) throw new Error("Client gallery not found.");
-  return { workspaceId, gallery: mapGallery(row), assets, weddings, contacts, visitors };
+  return { workspaceId, gallery: mapGallery(row), assets, weddings, contacts, visitors, selectionRequests, selections };
 }
 
 export async function importWeddingAssets(db: D1Db, galleryId: string, workspaceId?: string, weddingSlug?: string) {
@@ -837,6 +986,201 @@ async function favouriteIds(db: D1Db, galleryId: string, visitorKey: string) {
   return (result.results || []).map((row: any) => text(row.asset_id)).filter(Boolean);
 }
 
+
+async function publicSelectionState(db: D1Db, galleryId: string, visitorKey: string, emailNormalized = "") {
+  const requestResult = await db.prepare(`
+    SELECT * FROM client_gallery_selection_requests
+    WHERE gallery_id = ? AND status = 'active'
+    ORDER BY sort_order ASC, created_at ASC
+  `).bind(galleryId).all();
+  const requests = (requestResult.results || []).map(mapSelectionRequest);
+  if ((!visitorKey && !emailNormalized) || !requests.length) {
+    return requests.map((request: any) => ({ ...request, selection: null }));
+  }
+  const selectionResult = await db.prepare(`
+    SELECT * FROM client_gallery_selections
+    WHERE gallery_id = ?
+      AND (visitor_key = ? OR (? <> '' AND email_normalized = ?))
+    ORDER BY CASE WHEN visitor_key = ? THEN 0 ELSE 1 END, updated_at DESC
+  `).bind(galleryId, visitorKey, emailNormalized, emailNormalized, visitorKey).all();
+  const selections = selectionResult.results || [];
+  const selectionIds = selections.map((row: any) => text(row.id)).filter(Boolean);
+  const assetMap = new Map<string, string[]>();
+  if (selectionIds.length) {
+    const placeholders = selectionIds.map(() => '?').join(',');
+    const assetResult = await db.prepare(`
+      SELECT selection_id, asset_id
+      FROM client_gallery_selection_assets
+      WHERE selection_id IN (${placeholders})
+      ORDER BY sort_order ASC, selected_at ASC
+    `).bind(...selectionIds).all();
+    for (const row of assetResult.results || []) {
+      const selectionId = text((row as any).selection_id);
+      const list = assetMap.get(selectionId) || [];
+      list.push(text((row as any).asset_id));
+      assetMap.set(selectionId, list);
+    }
+  }
+  const byRequest = new Map<string, any>();
+  for (const row of selections as any[]) {
+    const requestId = text(row.request_id);
+    if (!byRequest.has(requestId)) byRequest.set(requestId, row);
+  }
+  return requests.map((request: any) => {
+    const row: any = byRequest.get(request.id);
+    if (!row) return { ...request, selection: null };
+    const assetIds = assetMap.get(text(row.id)) || [];
+    return {
+      ...request,
+      selection: {
+        id: text(row.id),
+        status: text(row.status) === 'submitted' ? 'submitted' : 'draft',
+        submittedAt: text(row.submitted_at),
+        selectedCount: assetIds.length,
+        assetIds,
+      },
+    };
+  });
+}
+
+async function ensurePublicSelection(
+  db: D1Db,
+  galleryId: string,
+  requestId: string,
+  visitorKey: string,
+  identity: PublicVisitorIdentity | null,
+) {
+  let row = await db.prepare(`
+    SELECT * FROM client_gallery_selections
+    WHERE request_id = ? AND gallery_id = ?
+      AND (visitor_key = ? OR (? <> '' AND email_normalized = ?))
+    ORDER BY CASE WHEN visitor_key = ? THEN 0 ELSE 1 END, updated_at DESC
+    LIMIT 1
+  `).bind(requestId, galleryId, visitorKey, identity?.emailNormalized || '', identity?.emailNormalized || '', visitorKey).first();
+  if (row) {
+    if (text(row.visitor_key) !== visitorKey) {
+      await db.prepare(`UPDATE client_gallery_selections SET visitor_key = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`)
+        .bind(visitorKey, text(row.id)).run();
+      row = { ...row, visitor_key: visitorKey };
+    }
+    return row;
+  }
+  const id = `selection_${crypto.randomUUID()}`;
+  await db.prepare(`
+    INSERT INTO client_gallery_selections (
+      id, request_id, gallery_id, visitor_key, email, email_normalized, display_name,
+      status, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, 'draft', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `).bind(
+    id,
+    requestId,
+    galleryId,
+    visitorKey,
+    identity?.email || '',
+    identity?.emailNormalized || '',
+    identity?.displayName || '',
+  ).run();
+  row = await db.prepare(`SELECT * FROM client_gallery_selections WHERE id = ? LIMIT 1`).bind(id).first();
+  return row;
+}
+
+export async function mutatePublicClientGallerySelection(db: D1Db, token: string, input: any) {
+  const row = await publicGalleryRow(db, token);
+  const access = await verifyPublicAccess(db, row, {
+    pin: text(input?.pin),
+    visitorKey: text(input?.visitorKey),
+    email: text(input?.email),
+  });
+  if (!access.ok) return { status: access.status, body: { error: access.error } };
+
+  const galleryId = text(row.id);
+  const visitorKey = text(input?.visitorKey).slice(0, 160);
+  const requestId = text(input?.requestId);
+  const action = text(input?.action || 'toggle');
+  if (!visitorKey || !requestId) return { status: 400, body: { error: 'Visitor and selection request are required.' } };
+
+  const request = await db.prepare(`
+    SELECT * FROM client_gallery_selection_requests
+    WHERE id = ? AND gallery_id = ? AND status = 'active' LIMIT 1
+  `).bind(requestId, galleryId).first();
+  if (!request) return { status: 404, body: { error: 'Selection request not found.' } };
+
+  const selection: any = await ensurePublicSelection(db, galleryId, requestId, visitorKey, access.identity);
+  if (!selection) return { status: 500, body: { error: 'Unable to create selection.' } };
+
+  if (action === 'toggle') {
+    if (text(selection.status) === 'submitted') {
+      return { status: 409, body: { error: 'This selection has already been submitted. Ask your photographer to reopen it before making changes.' } };
+    }
+    const assetId = text(input?.assetId);
+    if (!assetId) return { status: 400, body: { error: 'Asset is required.' } };
+    const member = await db.prepare(`
+      SELECT asset_id FROM client_gallery_assets
+      WHERE gallery_id = ? AND asset_id = ? AND hidden = 0 LIMIT 1
+    `).bind(galleryId, assetId).first();
+    if (!member) return { status: 404, body: { error: 'Image not found in this gallery.' } };
+    const existing = await db.prepare(`
+      SELECT asset_id FROM client_gallery_selection_assets
+      WHERE selection_id = ? AND asset_id = ? LIMIT 1
+    `).bind(text(selection.id), assetId).first();
+    const selected = bool(input?.selected, !existing);
+    if (selected && !existing) {
+      const countRow = await db.prepare(`SELECT COUNT(*) AS total FROM client_gallery_selection_assets WHERE selection_id = ?`)
+        .bind(text(selection.id)).first();
+      const currentCount = number(countRow?.total);
+      const maxImages = number(request.max_images);
+      if (maxImages > 0 && currentCount >= maxImages) {
+        return { status: 409, body: { error: `This selection is limited to ${maxImages} image${maxImages === 1 ? '' : 's'}.` } };
+      }
+      await db.prepare(`
+        INSERT OR IGNORE INTO client_gallery_selection_assets (selection_id, asset_id, sort_order, selected_at)
+        VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+      `).bind(text(selection.id), assetId, currentCount).run();
+    } else if (!selected && existing) {
+      await db.prepare(`DELETE FROM client_gallery_selection_assets WHERE selection_id = ? AND asset_id = ?`)
+        .bind(text(selection.id), assetId).run();
+    }
+    await db.prepare(`UPDATE client_gallery_selections SET updated_at = CURRENT_TIMESTAMP WHERE id = ?`)
+      .bind(text(selection.id)).run();
+  } else if (action === 'submit') {
+    if (text(selection.status) === 'submitted') {
+      return { status: 409, body: { error: 'This selection has already been submitted.' } };
+    }
+    const countRow = await db.prepare(`SELECT COUNT(*) AS total FROM client_gallery_selection_assets WHERE selection_id = ?`)
+      .bind(text(selection.id)).first();
+    const total = number(countRow?.total);
+    const minImages = number(request.min_images);
+    const maxImages = number(request.max_images);
+    if (minImages > 0 && total < minImages) {
+      return { status: 400, body: { error: `Please select at least ${minImages} image${minImages === 1 ? '' : 's'} before submitting.` } };
+    }
+    if (maxImages > 0 && total > maxImages) {
+      return { status: 400, body: { error: `Please select no more than ${maxImages} image${maxImages === 1 ? '' : 's'}.` } };
+    }
+    await db.prepare(`
+      UPDATE client_gallery_selections
+      SET status = 'submitted', submitted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP,
+          email = ?, email_normalized = ?, display_name = ?
+      WHERE id = ?
+    `).bind(
+      access.identity?.email || text(selection.email),
+      access.identity?.emailNormalized || text(selection.email_normalized),
+      access.identity?.displayName || text(selection.display_name),
+      text(selection.id),
+    ).run();
+  } else {
+    return { status: 400, body: { error: 'Unsupported selection action.' } };
+  }
+
+  return {
+    status: 200,
+    body: {
+      ok: true,
+      selectionRequests: await publicSelectionState(db, galleryId, visitorKey, access.identity?.emailNormalized || ""),
+    },
+  };
+}
+
 function effectiveDownloadPermission(row: any, identity: PublicVisitorIdentity | null) {
   if (number(row?.allow_downloads) !== 1) return false;
   if (number(row?.require_email) !== 1) return true;
@@ -882,9 +1226,10 @@ export async function getPublicClientGallery(db: D1Db, token: string, pin = '', 
     return { status: access.status, body: { ok: false, locked: true, ...base, error: access.error } };
   }
 
-  const [assets, favourites] = await Promise.all([
+  const [assets, favourites, selectionRequests] = await Promise.all([
     publicAssets(db, text(row.id)),
     favouriteIds(db, text(row.id), visitorKey),
+    publicSelectionState(db, text(row.id), visitorKey, identity?.emailNormalized || ""),
   ]);
   const coverAssetId = text(row.cover_asset_id);
   const cover = assets.find((asset) => asset.assetId === coverAssetId) || assets[0] || null;
@@ -897,6 +1242,7 @@ export async function getPublicClientGallery(db: D1Db, token: string, pin = '', 
       cover,
       assets,
       favouriteAssetIds: favourites,
+      selectionRequests,
     },
   };
 }
