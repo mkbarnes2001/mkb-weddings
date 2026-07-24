@@ -19,11 +19,12 @@ import {
   X,
 } from "lucide-react";
 import type { WeddingDocument } from "../../lib/weddingEngine";
-import { AdminApiService } from "../services/AdminApiService";
+import { AdminApiService, type LocationConfiguration, type VenueDiscoveryResult, type WorkspaceRecord } from "../services/AdminApiService";
 import { SupplierService, type MasterSupplier, type SupplierRecord } from "../services/SupplierService";
 import { uploadPrivateOriginal } from "../lib/privateOriginalUpload";
 import type { VenueSummary } from "../types/venue";
 import type { WeddingWorkspacePayload } from "../types/weddingWorkspace";
+import { COUNTRY_OPTIONS } from "../data/countries";
 
 const PUBLIC_ORIGIN = "https://www.mkbweddings.co.uk";
 
@@ -86,12 +87,19 @@ export function WeddingWorkspace() {
   const [workspace, setWorkspace] = useState<WeddingWorkspacePayload | null>(null);
   const [wedding, setWedding] = useState<WeddingDocument | null>(null);
   const [venues, setVenues] = useState<VenueSummary[]>([]);
+  const [locationConfig, setLocationConfig] = useState<LocationConfiguration | null>(null);
+  const [workspaceRecord, setWorkspaceRecord] = useState<WorkspaceRecord | null>(null);
+  const [venuePicker, setVenuePicker] = useState("");
+  const [venueDirectoryQuery, setVenueDirectoryQuery] = useState("");
+  const [venueDirectoryResults, setVenueDirectoryResults] = useState<VenueDiscoveryResult[]>([]);
+  const [venueDirectoryConfigured, setVenueDirectoryConfigured] = useState<boolean | null>(null);
+  const [venueDirectoryBusy, setVenueDirectoryBusy] = useState(false);
   const [masterSuppliers, setMasterSuppliers] = useState<MasterSupplier[]>([]);
   const [suppliers, setSuppliers] = useState<SupplierRecord[]>([]);
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
   const [supplierRole, setSupplierRole] = useState("");
   const [showNewVenue, setShowNewVenue] = useState(false);
-  const [newVenue, setNewVenue] = useState({ name: "", town: "", county: "", country: "Northern Ireland", website: "", instagram: "" });
+  const [newVenue, setNewVenue] = useState({ name: "", town: "", county: "", country: "Northern Ireland", additionalLocationId: "", website: "", instagram: "" });
   const [showNewSupplier, setShowNewSupplier] = useState(false);
   const [newSupplier, setNewSupplier] = useState({ name: "", category: "", role: "", website: "", instagram: "", email: "" });
   const [previewIds, setPreviewIds] = useState<string[]>([]);
@@ -108,15 +116,24 @@ export function WeddingWorkspace() {
   const reload = async () => {
     setError("");
     try {
-      const [nextWorkspace, nextWedding, nextVenues, supplierService] = await Promise.all([
+      const [nextWorkspace, nextWedding, nextVenues, supplierService, nextLocations, nextWorkspaceRecord] = await Promise.all([
         AdminApiService.getWeddingWorkspace(slug),
         AdminApiService.getJsonWedding(slug),
         AdminApiService.listVenues(),
         SupplierService.load(),
+        AdminApiService.getLocations(),
+        AdminApiService.getWorkspace(),
       ]);
       setWorkspace(nextWorkspace);
       setWedding(nextWedding);
       setVenues(nextVenues.filter((venue) => venue.status !== "archived"));
+      setLocationConfig(nextLocations);
+      setWorkspaceRecord(nextWorkspaceRecord);
+      setVenuePicker(nextWedding.venue || nextWorkspace.wedding.venue || "");
+      setNewVenue((current) => ({
+        ...current,
+        country: current.country || nextWorkspaceRecord.settings.defaultCountry || "Northern Ireland",
+      }));
       setMasterSuppliers(supplierService.getMasterSuppliers().filter((supplier) => supplier.status !== "archived"));
       setSuppliers(supplierService.getSuppliersForWedding(slug));
       setPreviewIds(nextWorkspace.previewSet.assetIds);
@@ -146,6 +163,18 @@ export function WeddingWorkspace() {
   const possibleSupplierMatches = useMemo(
     () => newSupplier.name.trim() ? masterSuppliers.filter((supplier) => looksSimilar(newSupplier.name, supplier.displayName || supplier.name)).slice(0, 4) : [],
     [newSupplier.name, masterSuppliers],
+  );
+  const activeLocations = useMemo(
+    () => (locationConfig?.locations || []).filter((location) => location.status !== "archived"),
+    [locationConfig?.locations],
+  );
+  const countyLocations = useMemo(
+    () => activeLocations.filter((location) => location.areaType === "county" && (!newVenue.country || !location.country || matchKey(location.country) === matchKey(newVenue.country))),
+    [activeLocations, newVenue.country],
+  );
+  const additionalLocations = useMemo(
+    () => activeLocations.filter((location) => location.areaType !== "county"),
+    [activeLocations],
   );
   const previewAssets = useMemo(
     () => (workspace?.assets || []).filter((asset) => previewIds.includes(asset.id)),
@@ -204,6 +233,7 @@ export function WeddingWorkspace() {
       };
       const result = await AdminApiService.updateJsonWedding(slug, updated);
       setWedding(result.wedding);
+      setVenuePicker(venue?.name || "");
       setMessage(venue ? `${venue.name} linked to this wedding.` : "Venue link cleared.");
       await reload();
     } catch (err) {
@@ -211,6 +241,78 @@ export function WeddingWorkspace() {
     } finally {
       setBusy(false);
     }
+  };
+
+  const linkVenueFromPicker = async () => {
+    const value = venuePicker.trim();
+    if (!value) {
+      await saveVenue("");
+      return;
+    }
+    const exact = venues.find((venue) => matchKey(venue.name) === matchKey(value) || venue.slug === value);
+    if (exact) {
+      await saveVenue(exact.slug);
+      return;
+    }
+    setShowNewVenue(true);
+    setNewVenue((current) => ({ ...current, name: value }));
+    setMessage(`No existing venue matched “${value}”. Complete the quick-create details below.`);
+  };
+
+  const searchVenueDirectory = async () => {
+    const query = venueDirectoryQuery.trim() || newVenue.name.trim() || venuePicker.trim();
+    if (query.length < 3) {
+      setError("Enter at least 3 characters to search the venue directory.");
+      return;
+    }
+    setVenueDirectoryBusy(true);
+    setError("");
+    try {
+      const result = await AdminApiService.discoverVenues(query);
+      setVenueDirectoryConfigured(result.configured);
+      setVenueDirectoryResults(result.results);
+      if (!result.configured) {
+        setMessage("External venue directory is not configured yet. Your own venue database search remains available.");
+      } else if (!result.results.length) {
+        setMessage("No external venue matches found. You can still create the venue manually.");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to search venue directory.");
+    } finally {
+      setVenueDirectoryBusy(false);
+    }
+  };
+
+  const useDiscoveredVenue = (venue: VenueDiscoveryResult) => {
+    setShowNewVenue(true);
+    setNewVenue((current) => ({
+      ...current,
+      name: venue.name || current.name,
+      town: venue.town || current.town,
+      county: venue.county || current.county,
+      country: venue.country || current.country,
+    }));
+    setVenueDirectoryQuery(venue.name);
+    setMessage("Venue details loaded from the directory. Review them before creating your own master venue record.");
+  };
+
+  const linkCreatedVenueToLocations = async (venueSlug: string, countyName: string, additionalLocationId: string) => {
+    if (!locationConfig) return;
+    const targetIds = new Set<string>();
+    const countyMatch = locationConfig.locations.find(
+      (location) => location.status !== "archived" && location.areaType === "county" && matchKey(location.name) === matchKey(countyName),
+    );
+    if (countyMatch) targetIds.add(countyMatch.id);
+    if (additionalLocationId) targetIds.add(additionalLocationId);
+    if (!targetIds.size) return;
+
+    const nextLocations = locationConfig.locations.map((location) =>
+      targetIds.has(location.id)
+        ? { ...location, venueSlugs: Array.from(new Set([...(location.venueSlugs || []), venueSlug])) }
+        : location,
+    );
+    const saved = await AdminApiService.saveLocations({ locations: nextLocations });
+    setLocationConfig(saved);
   };
 
   const createAndLinkVenue = async () => {
@@ -261,10 +363,14 @@ export function WeddingWorkspace() {
         venue: created.name,
       };
       await AdminApiService.updateJsonWedding(slug, updated);
+      await linkCreatedVenueToLocations(created.slug, newVenue.county.trim(), newVenue.additionalLocationId);
       setVenues((current) => [...current.filter((item) => item.slug !== created.slug), created].sort((a, b) => a.name.localeCompare(b.name)));
       setWedding(updated);
+      setVenuePicker(created.name);
       setShowNewVenue(false);
-      setNewVenue({ name: "", town: "", county: "", country: "Northern Ireland", website: "", instagram: "" });
+      setVenueDirectoryResults([]);
+      setVenueDirectoryQuery("");
+      setNewVenue({ name: "", town: "", county: "", country: workspaceRecord?.settings.defaultCountry || "Northern Ireland", additionalLocationId: "", website: "", instagram: "" });
       setMessage(`${created.name} created and linked to this wedding.`);
       await reload();
     } catch (err) {
@@ -555,49 +661,112 @@ export function WeddingWorkspace() {
         <main className="space-y-7">
           <section className="rounded-[26px] border border-black/10 bg-white p-6">
             <div className="flex items-start justify-between gap-5 flex-wrap">
-              <div><p className="text-xs uppercase tracking-[0.18em] text-neutral-500">1 · Wedding setup</p><h2 className="mt-2 text-2xl" style={{ fontWeight: 600 }}>Venue & suppliers</h2></div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">1 · Wedding setup</p>
+                <h2 className="mt-2 text-2xl" style={{ fontWeight: 600 }}>Venue & suppliers</h2>
+                <p className="mt-2 max-w-2xl text-sm text-neutral-600">Work down the page: link or create the venue first, then build the supplier team without leaving this wedding.</p>
+              </div>
               <Link to={`/admin/weddings/${slug}/content`} className="text-sm underline underline-offset-4">Edit full wedding record</Link>
             </div>
 
-            <div className="mt-6 grid gap-5 lg:grid-cols-2">
-              <div>
-                <label className="text-xs uppercase tracking-[0.14em] text-neutral-500">Venue</label>
-                <select value={wedding.venueSlug || ""} disabled={busy} onChange={(event) => saveVenue(event.target.value)} className="mt-2 w-full rounded-xl border border-black/15 bg-white px-4 py-3">
-                  <option value="">Search or select venue…</option>
-                  {venues.map((venue) => <option key={venue.slug} value={venue.slug}>{venue.name}</option>)}
-                </select>
-                <div className="mt-2 flex items-center justify-between gap-3">
-                  {selectedVenue ? <p className="text-xs text-neutral-500">{selectedVenue.town}{selectedVenue.county ? ` · ${selectedVenue.county}` : ""}</p> : <span />}
-                  <button type="button" onClick={() => setShowNewVenue((value) => !value)} className="text-xs underline underline-offset-4">{showNewVenue ? "Cancel new venue" : "+ Add new venue"}</button>
+            <div className="mt-7 space-y-7">
+              <div className="rounded-2xl border border-black/10 bg-neutral-50 p-5">
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Venue</p>
+                    {selectedVenue ? <p className="mt-2 text-sm text-neutral-600">Currently linked: <strong className="text-black">{selectedVenue.name}</strong>{selectedVenue.town ? ` · ${selectedVenue.town}` : ""}{selectedVenue.county ? ` · ${selectedVenue.county}` : ""}</p> : <p className="mt-2 text-sm text-neutral-500">Search your venue database or create a new venue inline.</p>}
+                  </div>
+                  <button type="button" onClick={() => setShowNewVenue((value) => !value)} className="admin-action-secondary">{showNewVenue ? "Cancel new venue" : "Add new venue"}</button>
                 </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+                  <div>
+                    <input
+                      list="wedding-workspace-venues"
+                      value={venuePicker}
+                      onChange={(event) => setVenuePicker(event.target.value)}
+                      onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void linkVenueFromPicker(); } }}
+                      placeholder="Search or select venue…"
+                      className="w-full rounded-xl border border-black/15 bg-white px-4 py-3"
+                    />
+                    <datalist id="wedding-workspace-venues">
+                      {venues.map((venue) => <option key={venue.slug} value={venue.name}>{[venue.town, venue.county].filter(Boolean).join(" · ")}</option>)}
+                    </datalist>
+                  </div>
+                  <button type="button" disabled={busy} onClick={linkVenueFromPicker} className="admin-action-primary">Link venue</button>
+                </div>
+
                 {showNewVenue ? (
-                  <div className="mt-4 rounded-2xl border border-black/10 bg-neutral-50 p-4">
-                    <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="mt-5 rounded-2xl border border-black/10 bg-white p-5">
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div>
+                        <h3 className="text-base" style={{ fontWeight: 600 }}>Create a new venue</h3>
+                        <p className="mt-1 text-xs text-neutral-500">Quick-create the essentials now. Full venue intelligence can be completed later.</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 rounded-xl border border-black/10 bg-neutral-50 p-4">
+                      <label className="text-xs uppercase tracking-[0.12em] text-neutral-500">Venue directory search</label>
+                      <div className="mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+                        <input value={venueDirectoryQuery} onChange={(event) => setVenueDirectoryQuery(event.target.value)} placeholder="Search by venue name and location…" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
+                        <button type="button" disabled={venueDirectoryBusy} onClick={searchVenueDirectory} className="admin-action-secondary">{venueDirectoryBusy ? "Searching…" : "Search directory"}</button>
+                      </div>
+                      {venueDirectoryConfigured === false ? <p className="mt-2 text-xs text-neutral-500">External venue lookup is optional and not configured on this workspace yet. Your own venue database and manual create remain available.</p> : null}
+                      {venueDirectoryResults.length ? <div className="mt-3 space-y-2">{venueDirectoryResults.map((venue) => <button key={venue.id} type="button" onClick={() => useDiscoveredVenue(venue)} className="w-full rounded-xl border border-black/10 bg-white p-3 text-left"><strong className="block text-sm">{venue.name}</strong><span className="mt-1 block text-xs text-neutral-500">{venue.formattedAddress}</span><span className="mt-1 block text-[11px] uppercase tracking-[0.08em] text-neutral-400">Google Places</span></button>)}</div> : null}
+                    </div>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       <input value={newVenue.name} onChange={(event) => setNewVenue((current) => ({ ...current, name: event.target.value }))} placeholder="Venue name" className="rounded-xl border border-black/15 bg-white px-3 py-3 sm:col-span-2" />
                       <input value={newVenue.town} onChange={(event) => setNewVenue((current) => ({ ...current, town: event.target.value }))} placeholder="Town / city" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
-                      <input value={newVenue.county} onChange={(event) => setNewVenue((current) => ({ ...current, county: event.target.value }))} placeholder="County / region" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
-                      <input value={newVenue.country} onChange={(event) => setNewVenue((current) => ({ ...current, country: event.target.value }))} placeholder="Country" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
+                      <div>
+                        <input list="venue-county-options" value={newVenue.county} onChange={(event) => setNewVenue((current) => ({ ...current, county: event.target.value }))} placeholder="County / administrative area" className="w-full rounded-xl border border-black/15 bg-white px-3 py-3" />
+                        <datalist id="venue-county-options">{countyLocations.map((location) => <option key={location.id} value={location.name} />)}</datalist>
+                      </div>
+                      <div>
+                        <input list="country-options" value={newVenue.country} onChange={(event) => setNewVenue((current) => ({ ...current, country: event.target.value }))} placeholder="Country" className="w-full rounded-xl border border-black/15 bg-white px-3 py-3" />
+                        <datalist id="country-options">{COUNTRY_OPTIONS.map((country) => <option key={country} value={country} />)}</datalist>
+                      </div>
+                      <select value={newVenue.additionalLocationId} onChange={(event) => setNewVenue((current) => ({ ...current, additionalLocationId: event.target.value }))} className="rounded-xl border border-black/15 bg-white px-3 py-3">
+                        <option value="">Optional region / destination…</option>
+                        {additionalLocations.map((location) => <option key={location.id} value={location.id}>{location.name} · {location.areaType}</option>)}
+                      </select>
                       <input value={newVenue.instagram} onChange={(event) => setNewVenue((current) => ({ ...current, instagram: event.target.value }))} placeholder="Instagram" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
                       <input value={newVenue.website} onChange={(event) => setNewVenue((current) => ({ ...current, website: event.target.value }))} placeholder="Website" className="rounded-xl border border-black/15 bg-white px-3 py-3 sm:col-span-2" />
                     </div>
-                    {possibleVenueMatches.length ? <div className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-950"><strong>Possible existing venue:</strong><div className="mt-2 flex flex-wrap gap-2">{possibleVenueMatches.map((venue) => <button key={venue.slug} type="button" onClick={() => { setShowNewVenue(false); void saveVenue(venue.slug); }} className="rounded-full border border-amber-300 bg-white px-3 py-1.5">Use {venue.name}</button>)}</div></div> : null}
-                    <button type="button" disabled={busy || !newVenue.name.trim()} onClick={createAndLinkVenue} className="mt-4 rounded-full bg-black px-5 py-2.5 text-sm text-white disabled:opacity-40"><Plus className="mr-2 inline h-4 w-4" />Create & link venue</button>
+                    <p className="mt-3 text-xs text-neutral-500">Country is globally searchable. County and other geography remain workspace-configurable, so studios in other regions can use states, provinces, regions or destinations instead.</p>
+                    {possibleVenueMatches.length ? <div className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-950"><strong>Possible existing venue:</strong><div className="mt-2 flex flex-wrap gap-2">{possibleVenueMatches.map((venue) => <button key={venue.slug} type="button" onClick={() => { setShowNewVenue(false); setVenuePicker(venue.name); void saveVenue(venue.slug); }} className="admin-action-secondary">Use {venue.name}</button>)}</div></div> : null}
+                    <button type="button" disabled={busy || !newVenue.name.trim()} onClick={createAndLinkVenue} className="admin-action-primary mt-4"><Plus className="h-4 w-4" />Create & link venue</button>
                   </div>
                 ) : null}
               </div>
-              <div>
-                <label className="text-xs uppercase tracking-[0.14em] text-neutral-500">Add supplier</label>
-                <div className="mt-2 grid grid-cols-[minmax(0,1fr)_150px_auto] gap-2">
-                  <select value={selectedSupplierId} onChange={(event) => setSelectedSupplierId(event.target.value)} className="min-w-0 rounded-xl border border-black/15 bg-white px-3 py-3">
+
+              <div className="rounded-2xl border border-black/10 bg-neutral-50 p-5">
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Suppliers</p>
+                    <p className="mt-2 text-sm text-neutral-500">Add existing suppliers or quick-create a new supplier without leaving this wedding.</p>
+                  </div>
+                  <button type="button" onClick={() => setShowNewSupplier((value) => !value)} className="admin-action-secondary">{showNewSupplier ? "Cancel new supplier" : "Create new supplier"}</button>
+                </div>
+
+                {suppliers.length ? <div className="mt-4 grid gap-2">{suppliers.map((row, index) => (
+                  <div key={`${row.supplierId}-${row.role}-${index}`} className="flex items-center justify-between gap-4 rounded-xl border border-black/10 bg-white px-4 py-3">
+                    <div className="min-w-0"><span className="text-xs uppercase tracking-[0.08em] text-neutral-400">{row.role}</span><strong className="ml-3 text-sm font-medium">{row.name}</strong>{row.instagram ? <span className="ml-2 text-xs text-neutral-400">{cleanInstagram(row.instagram)}</span> : null}</div>
+                    <button title="Remove" disabled={busy} onClick={() => removeSupplier(index)} className="admin-icon-button"><X className="h-4 w-4" /></button>
+                  </div>
+                ))}</div> : <p className="mt-4 text-sm text-neutral-500">No suppliers linked yet.</p>}
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+                  <select value={selectedSupplierId} onChange={(event) => { setSelectedSupplierId(event.target.value); if (!event.target.value) setSupplierRole(""); }} className="min-w-0 rounded-xl border border-black/15 bg-white px-3 py-3">
                     <option value="">Search or select supplier…</option>
                     {masterSuppliers.map((supplier) => <option key={supplier.id} value={supplier.id}>{supplier.displayName || supplier.name}</option>)}
                   </select>
-                  <input value={supplierRole} onChange={(event) => setSupplierRole(event.target.value)} placeholder={selectedSupplier?.category || "Role"} className="rounded-xl border border-black/15 px-3 py-3" />
-                  <button disabled={!selectedSupplier || busy} onClick={addSupplier} className="rounded-xl bg-black px-4 text-white disabled:opacity-40"><Plus className="h-4 w-4" /></button>
+                  {selectedSupplier ? <button disabled={busy} onClick={addSupplier} className="admin-action-primary"><Plus className="h-4 w-4" />Add supplier</button> : null}
                 </div>
-                <div className="mt-2 text-right"><button type="button" onClick={() => setShowNewSupplier((value) => !value)} className="text-xs underline underline-offset-4">{showNewSupplier ? "Cancel new supplier" : "+ Create new supplier"}</button></div>
+                {selectedSupplier ? <div className="mt-3 max-w-md"><label className="text-xs uppercase tracking-[0.12em] text-neutral-500">Role for this wedding</label><input value={supplierRole} onChange={(event) => setSupplierRole(event.target.value)} placeholder={selectedSupplier.category || "Supplier role"} className="mt-2 w-full rounded-xl border border-black/15 bg-white px-3 py-3" /></div> : null}
+
                 {showNewSupplier ? (
-                  <div className="mt-4 rounded-2xl border border-black/10 bg-neutral-50 p-4">
+                  <div className="mt-5 rounded-2xl border border-black/10 bg-white p-5">
                     <div className="grid gap-3 sm:grid-cols-2">
                       <input value={newSupplier.name} onChange={(event) => setNewSupplier((current) => ({ ...current, name: event.target.value }))} placeholder="Business name" className="rounded-xl border border-black/15 bg-white px-3 py-3 sm:col-span-2" />
                       <input value={newSupplier.category} onChange={(event) => setNewSupplier((current) => ({ ...current, category: event.target.value }))} placeholder="Category (e.g. Florist)" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
@@ -606,21 +775,11 @@ export function WeddingWorkspace() {
                       <input value={newSupplier.email} onChange={(event) => setNewSupplier((current) => ({ ...current, email: event.target.value }))} placeholder="Email" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
                       <input value={newSupplier.website} onChange={(event) => setNewSupplier((current) => ({ ...current, website: event.target.value }))} placeholder="Website" className="rounded-xl border border-black/15 bg-white px-3 py-3 sm:col-span-2" />
                     </div>
-                    {possibleSupplierMatches.length ? <div className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-950"><strong>Possible existing supplier:</strong><div className="mt-2 flex flex-wrap gap-2">{possibleSupplierMatches.map((supplier) => <button key={supplier.id} type="button" onClick={() => { setSelectedSupplierId(supplier.id); setSupplierRole(newSupplier.role || supplier.category || ""); setShowNewSupplier(false); }} className="rounded-full border border-amber-300 bg-white px-3 py-1.5">Use {supplier.displayName || supplier.name}</button>)}</div></div> : null}
-                    <button type="button" disabled={busy || !newSupplier.name.trim()} onClick={createAndLinkSupplier} className="mt-4 rounded-full bg-black px-5 py-2.5 text-sm text-white disabled:opacity-40"><Plus className="mr-2 inline h-4 w-4" />Create & link supplier</button>
+                    {possibleSupplierMatches.length ? <div className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-950"><strong>Possible existing supplier:</strong><div className="mt-2 flex flex-wrap gap-2">{possibleSupplierMatches.map((supplier) => <button key={supplier.id} type="button" onClick={() => { setSelectedSupplierId(supplier.id); setSupplierRole(newSupplier.role || supplier.category || ""); setShowNewSupplier(false); }} className="admin-action-secondary">Use {supplier.displayName || supplier.name}</button>)}</div></div> : null}
+                    <button type="button" disabled={busy || !newSupplier.name.trim()} onClick={createAndLinkSupplier} className="admin-action-primary mt-4"><Plus className="h-4 w-4" />Create & link supplier</button>
                   </div>
                 ) : null}
               </div>
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-2">
-              {suppliers.map((row, index) => (
-                <span key={`${row.supplierId}-${row.role}-${index}`} className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-neutral-50 px-3 py-2 text-sm">
-                  <span className="text-neutral-500">{row.role}</span><strong className="font-medium">{row.name}</strong>{row.instagram ? <span className="text-neutral-400">{cleanInstagram(row.instagram)}</span> : null}
-                  <button title="Remove" disabled={busy} onClick={() => removeSupplier(index)}><X className="h-3.5 w-3.5" /></button>
-                </span>
-              ))}
-              {!suppliers.length ? <p className="text-sm text-neutral-500">No suppliers linked yet.</p> : null}
             </div>
           </section>
 

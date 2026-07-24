@@ -176,3 +176,14 @@ Wedding → Venue / Suppliers → Client Gallery → Canonical Assets → Previe
 Private originals remain isolated in private R2. When a private-upload asset is selected for public publishing, the compatibility layer registers only its web / thumbnail derivative URLs in legacy publishing tables.
 
 Future CRM / Client Portal work must write structured client-entered venue and supplier selections back into the same Wedding relationships. Unknown suppliers enter a review / merge workflow; clients never directly mutate the global Supplier Master record.
+
+## External venue discovery connector
+`/api/venue-discovery` is an optional admin-only lookup boundary. It never replaces the canonical `venues` table.
+
+Current adapter contract:
+- internal Venue search remains local and always available;
+- if `GOOGLE_PLACES_API_KEY` is configured, the endpoint can return transient Google Places search suggestions;
+- the user reviews/prefills a new Venue record, and Intelligence creates its own canonical Venue identity;
+- absence or failure of an external provider must never block Wedding creation or manual Venue creation.
+
+Location relationships continue to use `venue_location_links`; external providers do not define the platform's geography model.

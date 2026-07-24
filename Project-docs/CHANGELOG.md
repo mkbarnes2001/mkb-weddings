@@ -206,3 +206,15 @@
 - Corrected Asset Library private-original status so secure R2 originals no longer appear as “Not yet stored” simply because they have no public URL.
 - Added Asset Library original-status filtering: Private original stored / Preview only.
 - No D1 migration; schema version remains 13.
+
+## v1.3.2 — Global Venue Discovery & Admin UI Refinement
+- Reworked Wedding Workspace setup into a single vertical flow: Venue first, then Suppliers.
+- Replaced the venue-only select with a searchable existing-venue picker and explicit Link venue action.
+- Added searchable global country suggestions without restricting studios to one national geography model.
+- County/administrative-area suggestions now come from workspace Location Intelligence while still allowing free-form values for new regions.
+- Added optional Region / Destination assignment during venue quick-create using existing Location records.
+- Newly created venues are automatically linked back into matching County and selected Location records when available.
+- Added an optional venue-discovery endpoint with a Google Places adapter when `GOOGLE_PLACES_API_KEY` is configured; manual and internal search remain fully functional when it is absent.
+- Simplified supplier add flow so the wedding role field only appears after a supplier is selected.
+- Replaced cramped pill-style action controls with compact rectangular action buttons; pills remain for statuses/tags.
+- No D1 migration; schema version remains 13.

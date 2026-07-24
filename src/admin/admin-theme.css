@@ -58,3 +58,67 @@
 .admin-shell .uppercase {
   letter-spacing: 0.14em;
 }
+
+/* v1.3.2 — action controls use buttons; pills are reserved for status/tags */
+.admin-shell button.rounded-full,
+.admin-shell a.rounded-full {
+  border-radius: 10px !important;
+  min-height: 40px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.admin-shell .admin-action-primary,
+.admin-shell .admin-action-secondary,
+.admin-shell .admin-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.admin-shell .admin-action-primary {
+  min-height: 42px;
+  border: 1px solid #111;
+  border-radius: 10px;
+  background: #111;
+  color: #fff;
+  padding: 0.7rem 1rem;
+}
+
+.admin-shell .admin-action-secondary {
+  min-height: 40px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  padding: 0.65rem 0.9rem;
+}
+
+.admin-shell .admin-icon-button {
+  width: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 9px;
+  background: #fff;
+}
+
+.admin-shell .admin-action-primary:disabled,
+.admin-shell .admin-action-secondary:disabled,
+.admin-shell .admin-icon-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .admin-shell button.rounded-full,
+  .admin-shell a.rounded-full,
+  .admin-shell .admin-action-primary,
+  .admin-shell .admin-action-secondary {
+    max-width: 100%;
+  }
+}

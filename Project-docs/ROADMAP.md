@@ -85,3 +85,10 @@ Required behaviour:
 - Hosted galleries and website embeds
 - Public API / plugins / SDKs
 - Monitoring, backups and support tooling
+
+## Venue discovery / global geography
+- Keep Workspace Venue records as the source of truth.
+- Support internal text search first, then optional external venue-directory connectors.
+- Google Places is the first connector adapter; provider-specific IDs/content must not become the core Venue identity.
+- Country selection must remain global; administrative geography comes from configurable Location Types (county, state, province, region, destination, custom).
+- Future SaaS onboarding should allow a studio to choose its default country and enabled Location Types without code changes.

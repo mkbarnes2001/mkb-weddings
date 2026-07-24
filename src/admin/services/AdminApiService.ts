@@ -46,6 +46,19 @@ export type MomentSaveResult = { ok: true; document: MomentRepositoryDocument; b
 export type WeddingUpdateResult = { ok: true; wedding: StoredWeddingDocument; backupPath: string | null };
 export type VenueUpdateResult = { ok: true; venue: VenueSummary; backupPath: string | null };
 export type VenueCreateResult = { ok: true; venue: VenueSummary };
+
+export type VenueDiscoveryResult = {
+  provider: "google" | "none";
+  configured: boolean;
+  id: string;
+  name: string;
+  formattedAddress: string;
+  town: string;
+  county: string;
+  country: string;
+  countryCode: string;
+  googleMapsUrl: string;
+};
 export type GalleryLandingSettings = { cardOrder: string[]; hiddenCards: string[] };
 export type VenueListSetting = { slug: string; sortOrder: number; galleryVisible: boolean };
 export type WeddingListSetting = { slug: string; sortOrder: number; storyVisible: boolean };
@@ -582,6 +595,14 @@ export class AdminApiService {
       method: "POST",
       body: JSON.stringify({ venue }),
     });
+  }
+
+
+  static async discoverVenues(query: string) {
+    const result = await request<{ ok: true; provider: "google" | "none"; configured: boolean; results: VenueDiscoveryResult[] }>(
+      `/api/venue-discovery?q=${encodeURIComponent(query)}`,
+    );
+    return result;
   }
 
   static async updateVenue(routeSlug: string, venue: VenueDocument) {

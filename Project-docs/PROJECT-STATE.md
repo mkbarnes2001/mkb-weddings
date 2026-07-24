@@ -182,3 +182,16 @@ Supplier quick-create:
 Asset Library private-original status now derives from the active private `asset_files` original storage record rather than requiring a public URL. Private originals therefore display as **Stored securely** while remaining inaccessible by direct public URL. The Asset Library also supports filtering between **Private original stored** and **Preview only** assets.
 
 No D1 migration is required; schema version remains **13**.
+
+## Venue discovery and Wedding Workspace UI — v1.3.2
+Wedding setup is now a single-column operational flow. Existing venues are searchable by text, and missing venues can be quick-created inline.
+
+Venue quick-create geography is commercially portable:
+- Country uses a searchable global suggestion list but still permits a custom value.
+- County / administrative area suggestions are supplied by workspace Location Intelligence.
+- An optional Region / Destination can be linked from any active non-county Location record.
+- Matching structured Location records receive the new Venue relationship automatically.
+
+An optional `/api/venue-discovery` connector can query Google Places when the admin project has `GOOGLE_PLACES_API_KEY`. The platform's own Venue record remains authoritative; external discovery only assists lookup and prefilling.
+
+Admin action controls now use compact rectangular buttons. Fully rounded pills are reserved for statuses and tags. No D1 migration is required; schema version remains **13**.

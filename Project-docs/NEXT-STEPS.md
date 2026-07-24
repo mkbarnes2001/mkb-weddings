@@ -32,3 +32,11 @@ v1.3.1 refines the Unified Wedding Workspace so missing Venues and Suppliers can
 - Public publishing uses safe derivatives only.
 - Clients may link/suggest suppliers but may not overwrite shared master supplier records without studio approval.
 - Filename is never asset identity.
+
+## v1.3.2 validation
+1. Search and link an existing venue by typing its name in the Wedding Workspace.
+2. Quick-create a new venue using Country and County/administrative-area suggestions.
+3. Assign an optional Region / Destination and confirm the venue appears under that Location record.
+4. Confirm Supplier setup appears underneath Venue setup and the Role field only appears after selecting a supplier.
+5. Check Admin action buttons on Wedding Workspace, Client Galleries, Asset Library and Gallery Management for consistent single-line rectangular presentation.
+6. Optional: configure `GOOGLE_PLACES_API_KEY` on the admin Pages project and test external venue-directory lookup. Without the key, manual/internal venue workflows must continue to work normally.
