@@ -9,6 +9,29 @@ export type ClientGalleryWeddingOption = {
   status: string;
 };
 
+export type ClientGalleryContact = {
+  email: string;
+  emailNormalized: string;
+  displayName: string;
+  role: string;
+  allowOriginalDownloads: boolean;
+  status: "active" | "archived";
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ClientGalleryVisitor = {
+  visitorKey: string;
+  email: string;
+  emailNormalized: string;
+  displayName: string;
+  role: string;
+  canDownloadOriginals: boolean;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  visitCount: number;
+};
+
 export type ClientGalleryRecord = {
   id: string;
   workspaceId: string;
@@ -25,6 +48,8 @@ export type ClientGalleryRecord = {
   expiresAt: string;
   allowFavourites: boolean;
   allowDownloads: boolean;
+  requireEmail: boolean;
+  allowGuestDownloads: boolean;
   coverAssetId: string;
   coverThumb: string;
   coverWeb: string;
@@ -32,6 +57,8 @@ export type ClientGalleryRecord = {
   visibleAssetCount: number;
   favouriteCount: number;
   downloadCount: number;
+  visitorCount: number;
+  authorisedContactCount: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -59,6 +86,8 @@ export type ClientGalleryDetailPayload = {
   gallery: ClientGalleryRecord;
   assets: ClientGalleryAsset[];
   weddings: ClientGalleryWeddingOption[];
+  contacts: ClientGalleryContact[];
+  visitors: ClientGalleryVisitor[];
 };
 
 export type PrivateOriginalUploadedPart = {

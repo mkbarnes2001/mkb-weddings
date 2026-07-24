@@ -137,3 +137,17 @@ No existing asset, image, gallery or R2 object is rewritten by migration 012.
 `wedding_preview_assets` links canonical `assets.id` values to a preview set with exact ordering.
 
 Preview-set membership does not copy image files and does not imply public visibility. Publishing destinations are applied separately and use only safe `web` / `thumb` derivatives.
+
+## Schema version 14
+Migration: `014_gallery_visitor_identity_permissions.sql`
+
+Adds:
+- `client_gallery_access_settings`
+- `client_gallery_contacts`
+- `client_gallery_visitors`
+
+`client_gallery_access_settings` stores email-gating and guest-download policy without altering legacy `client_galleries` columns.
+
+`client_gallery_contacts` stores gallery-specific authorised email identities and per-contact original-download entitlement. It does not replace the future CRM contact model; it is a delivery permission boundary that can later link to CRM contacts.
+
+`client_gallery_visitors` stores gallery/browser visitor keys, email identity, first/last seen timestamps and visit counts. Raw IP addresses are not stored.

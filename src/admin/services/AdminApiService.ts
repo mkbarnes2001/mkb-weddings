@@ -485,6 +485,15 @@ export class AdminApiService {
     return detail;
   }
 
+  static async mutateClientGalleryContact(id: string, payload: Record<string, unknown>) {
+    const result = await request<{ ok: true } & ClientGalleryDetailPayload>(
+      `/api/client-galleries/${encodeURIComponent(id)}/contacts`,
+      { method: "POST", body: JSON.stringify(payload) },
+    );
+    const { ok: _ok, ...detail } = result;
+    return detail;
+  }
+
 
   static async createPrivateOriginalUpload(
     galleryId: string,

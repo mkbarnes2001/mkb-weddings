@@ -228,3 +228,16 @@
 - Compactified Wedding Workspace supplier assignments into a table with Role, Supplier, Instagram and Remove columns.
 - No D1 migration; schema version remains 13.
 
+
+## v1.4.0 — Gallery Visitor Identity & Permissions
+- Added optional required-email entry for private Client Galleries.
+- Added per-gallery authorised client contacts with per-email full-resolution download entitlement.
+- Added optional guest full-resolution download permission while retaining the gallery-wide master download switch.
+- Added visitor identity/activity records keyed by gallery + browser visitor key; no raw IP storage.
+- Existing `client_email` values are seeded as authorised `primary_client` contacts.
+- Client Gallery admin now shows authorised contacts and recent identified visitors.
+- Public gallery access now distinguishes authorised clients from guests before enabling original downloads.
+- Added email/visitor indicators to Client Gallery management cards.
+- Replaced Wedding card Workspace text buttons with compact icon-only shortcuts.
+- Made Wedding Workspace Venue and Supplier areas visually distinct standalone panels.
+- Added migration 014; schema version advances to 14.

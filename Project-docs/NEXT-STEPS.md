@@ -49,3 +49,19 @@ v1.3.3 keeps the Unified Wedding Workspace as the operational centre, makes it e
 4. Confirm Supplier setup appears underneath Venue setup and the Role field only appears after selecting a supplier.
 5. Check Admin action buttons on Wedding Workspace, Client Galleries, Asset Library and Gallery Management for consistent single-line rectangular presentation.
 6. Optional: configure `GOOGLE_PLACES_API_KEY` on the admin Pages project and test external venue-directory lookup. Without the key, manual/internal venue workflows must continue to work normally.
+
+## v1.4.0 validation
+1. Run migration 014 and confirm schema version 14 plus the three new `client_gallery_*` access/identity tables.
+2. Open a Client Gallery, enable **Require email to enter**, keep **Allow guest full-resolution downloads** off, and save.
+3. Confirm the gallery's primary client email appears under Authorised client emails with original-download permission.
+4. Open the gallery in an incognito browser, enter a different guest email, and confirm viewing/favourites work but original downloads are unavailable.
+5. Open with the authorised client email and confirm original downloads are available when the gallery-wide download switch is enabled.
+6. Return to Admin and confirm both visitors appear in Recent visitors.
+7. Confirm Wedding cards now show an icon-only Workspace shortcut and Wedding Workspace displays Venue and Suppliers as clearly separate panels.
+
+## Next engineering sequence after v1.4.0
+1. Client selections / shortlists alongside favourites, with photographer review/export.
+2. Print Store foundation: products, price lists, crop choices, cart, checkout and order records.
+3. Professional lab connector interface; pursue Loxley Colour integration first subject to partner/API access.
+4. Lightroom Classic Publish Plugin using the same private-original ingestion endpoints.
+5. CRM / Client Portal foundation with client-entered venue/supplier questionnaires and duplicate-safe approval workflows.

@@ -92,3 +92,11 @@ Required behaviour:
 - Google Places is the first connector adapter; provider-specific IDs/content must not become the core Venue identity.
 - Country selection must remain global; administrative geography comes from configurable Location Types (county, state, province, region, destination, custom).
 - Future SaaS onboarding should allow a studio to choose its default country and enabled Location Types without code changes.
+
+## Gallery identity foundation completed in v1.4.0
+- Optional required-email gallery entry
+- Linked client email permissions for full-resolution downloads
+- Guest view/favourite access with separate download policy
+- Visitor activity tracking without raw IP storage
+
+Next delivery/commerce work should build client selections, print-store ordering and lab fulfilment on top of this identified visitor model.

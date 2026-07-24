@@ -10,7 +10,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const url = new URL(context.request.url);
     const visitorKey = String(url.searchParams.get("visitor") || "").trim();
-    const result = await getPublicClientGallery(context.env.MKB_DB, tokenOf(context), "", visitorKey);
+    const result = await getPublicClientGallery(context.env.MKB_DB, tokenOf(context), "", visitorKey, "", "");
     return Response.json(result.body, {
       status: result.status,
       headers: { "Cache-Control": "private, no-store" },
@@ -28,6 +28,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       tokenOf(context),
       String(body?.pin || ""),
       String(body?.visitorKey || ""),
+      String(body?.email || ""),
+      String(body?.displayName || ""),
     );
     return Response.json(result.body, {
       status: result.status,

@@ -171,7 +171,7 @@ export function Weddings() {
                   <p className="truncate font-serif text-lg">{wedding.couple}</p>
                   <div className="mt-2 flex items-center justify-between gap-2">
                     <span className={`rounded-full border px-2.5 py-1 text-[10px] ${publicationClasses(wedding.publicationStatus)}`}>{wedding.publicationStatus}</span>
-                    <Link to={`/admin/weddings/${wedding.slug}/workspace`} onClick={(event) => event.stopPropagation()} className="inline-flex items-center gap-1 rounded-lg border border-black/10 px-2 py-1 text-[10px] font-medium text-neutral-700 hover:bg-neutral-50"><LayoutDashboard className="h-3 w-3" />Workspace</Link>
+                    <Link to={`/admin/weddings/${wedding.slug}/workspace`} onClick={(event) => event.stopPropagation()} aria-label={`Open ${wedding.couple} workspace`} title="Open Wedding Workspace" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-black/10 text-neutral-700 hover:bg-neutral-50"><LayoutDashboard className="h-4 w-4" /></Link>
                   </div>
                 </div>
               </article>

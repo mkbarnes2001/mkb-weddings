@@ -187,3 +187,10 @@ Current adapter contract:
 - absence or failure of an external provider must never block Wedding creation or manual Venue creation.
 
 Location relationships continue to use `venue_location_links`; external providers do not define the platform's geography model.
+
+## Client Gallery identity boundary
+Private gallery access now supports a lightweight identity layer before the full CRM exists:
+
+Gallery → visitor email identity → contact match → effective permissions.
+
+A gallery-wide download switch is always required. When email gating is enabled, original downloads are additionally restricted to authorised `client_gallery_contacts` unless guest downloads are explicitly enabled. This layer is intentionally designed so future CRM contacts can be linked without changing the public gallery permission model.

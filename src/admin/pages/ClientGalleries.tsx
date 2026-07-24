@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Copy, ExternalLink, Images, LockKeyhole, Plus, RefreshCcw } from "lucide-react";
+import { Copy, ExternalLink, Images, LockKeyhole, Mail, Plus, RefreshCcw, Users } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import type { ClientGalleryListPayload } from "../types/clientGallery";
 
@@ -115,13 +115,14 @@ export function ClientGalleries() {
               <div className="p-5">
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-xs uppercase tracking-[0.18em] text-neutral-500">{gallery.status}</span>
-                  <span className="inline-flex items-center gap-1 text-xs text-neutral-500"><LockKeyhole className="h-3.5 w-3.5" /> {gallery.pinEnabled ? "PIN" : "Private link"}</span>
+                  <span className="inline-flex items-center gap-1 text-xs text-neutral-500">{gallery.requireEmail ? <Mail className="h-3.5 w-3.5" /> : <LockKeyhole className="h-3.5 w-3.5" />} {gallery.requireEmail ? "Email required" : gallery.pinEnabled ? "PIN" : "Private link"}</span>
                 </div>
                 <h2 className="font-serif text-2xl mt-2">{gallery.title}</h2>
                 <p className="text-sm text-neutral-600 mt-1">{gallery.clientName || gallery.weddingTitle || "No client assigned"}</p>
                 <div className="mt-4 text-sm text-neutral-600 flex gap-4 flex-wrap">
                   <span>{gallery.assetCount} images</span>
                   <span>{gallery.favouriteCount} favourites</span>
+                  <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" />{gallery.visitorCount || 0} visitors</span>
                 </div>
                 <div className="mt-5 flex gap-2 flex-wrap">
                   <Link to={`/admin/client-galleries/${gallery.id}`} className="rounded-full bg-black text-white px-4 py-2 text-sm">Manage</Link>

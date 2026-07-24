@@ -204,3 +204,20 @@ Venue quick-create geography is commercially portable:
 An optional `/api/venue-discovery` connector can query Google Places when the admin project has `GOOGLE_PLACES_API_KEY`. The platform's own Venue record remains authoritative; external discovery only assists lookup and prefilling.
 
 Admin action controls now use compact rectangular buttons. Fully rounded pills are reserved for statuses and tags. No D1 migration is required; schema version remains **13**.
+
+## Gallery Visitor Identity & Permissions — v1.4.0
+Client Galleries now support an optional email-identification gate before viewing. Visitor identity is persisted per gallery/browser and feeds favourites, download permissions and visitor activity.
+
+Access rules:
+- `allow_downloads` remains the gallery-wide master switch.
+- `require_email` is stored in `client_gallery_access_settings` and can be enabled per gallery.
+- authorised emails live in `client_gallery_contacts`; each contact can independently receive full-resolution download rights.
+- guests may view/favourite but cannot download originals unless `allow_guest_downloads` is explicitly enabled.
+- the existing `client_email` is automatically maintained as a `primary_client` authorised contact.
+- identified visits are recorded in `client_gallery_visitors`; no raw IP address is stored.
+
+Wedding admin refinements in the same release:
+- Wedding cards use an icon-only Workspace shortcut.
+- Wedding Workspace Venue and Supplier management are visually separated into distinct panels.
+
+Schema version advances to **14**.

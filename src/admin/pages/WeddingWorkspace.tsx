@@ -9,6 +9,7 @@ import {
   ImagePlus,
   Instagram,
   Loader2,
+  MapPin,
   Plus,
   RefreshCw,
   Save,
@@ -663,18 +664,21 @@ export function WeddingWorkspace() {
             <div className="flex items-start justify-between gap-5 flex-wrap">
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">1 · Wedding setup</p>
-                <h2 className="mt-2 text-2xl" style={{ fontWeight: 600 }}>Venue & suppliers</h2>
-                <p className="mt-2 max-w-2xl text-sm text-neutral-600">Work down the page: link or create the venue first, then build the supplier team without leaving this wedding.</p>
+                <h2 className="mt-2 text-2xl" style={{ fontWeight: 600 }}>Wedding setup</h2>
+                <p className="mt-2 max-w-2xl text-sm text-neutral-600">Link the venue first, then build the supplier team. Each section is managed independently without leaving this wedding.</p>
               </div>
               <Link to={`/admin/weddings/${slug}/content`} className="text-sm underline underline-offset-4">Edit full wedding record</Link>
             </div>
 
             <div className="mt-7 space-y-7">
-              <div className="rounded-2xl border border-black/10 bg-neutral-50 p-5">
+              <section className="rounded-[22px] p-5" style={{ border: "1px solid rgba(120,102,75,.28)", background: "#fbfaf7", boxShadow: "0 8px 28px rgba(44,36,24,.04)" }}>
                 <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div>
+                  <div className="flex items-start gap-3">
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white" style={{ border: "1px solid rgba(120,102,75,.22)" }}><MapPin className="h-4 w-4" /></span>
+                    <div>
                     <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Venue</p>
                     {selectedVenue ? <p className="mt-2 text-sm text-neutral-600">Currently linked: <strong className="text-black">{selectedVenue.name}</strong>{selectedVenue.town ? ` · ${selectedVenue.town}` : ""}{selectedVenue.county ? ` · ${selectedVenue.county}` : ""}</p> : <p className="mt-2 text-sm text-neutral-500">Search your venue database or create a new venue inline.</p>}
+                    </div>
                   </div>
                   <button type="button" onClick={() => setShowNewVenue((value) => !value)} className="admin-action-secondary">{showNewVenue ? "Cancel new venue" : "Add new venue"}</button>
                 </div>
@@ -738,13 +742,16 @@ export function WeddingWorkspace() {
                     <button type="button" disabled={busy || !newVenue.name.trim()} onClick={createAndLinkVenue} className="admin-action-primary mt-4"><Plus className="h-4 w-4" />Create & link venue</button>
                   </div>
                 ) : null}
-              </div>
+              </section>
 
-              <div className="rounded-2xl border border-black/10 bg-neutral-50 p-5">
+              <section className="rounded-[22px] p-5" style={{ border: "1px solid rgba(71,88,105,.22)", background: "#f8fafb", boxShadow: "0 8px 28px rgba(34,48,58,.04)" }}>
                 <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Suppliers</p>
-                    <p className="mt-2 text-sm text-neutral-500">Add existing suppliers or quick-create a new supplier without leaving this wedding.</p>
+                  <div className="flex items-start gap-3">
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white" style={{ border: "1px solid rgba(71,88,105,.18)" }}><Users className="h-4 w-4" /></span>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Suppliers</p>
+                      <p className="mt-2 text-sm text-neutral-500">Current wedding team, with quick-add controls kept separate below.</p>
+                    </div>
                   </div>
                   <button type="button" onClick={() => setShowNewSupplier((value) => !value)} className="admin-action-secondary">{showNewSupplier ? "Cancel new supplier" : "Create new supplier"}</button>
                 </div>
@@ -790,7 +797,7 @@ export function WeddingWorkspace() {
                     <button type="button" disabled={busy || !newSupplier.name.trim()} onClick={createAndLinkSupplier} className="admin-action-primary mt-4"><Plus className="h-4 w-4" />Create & link supplier</button>
                   </div>
                 ) : null}
-              </div>
+              </section>
             </div>
           </section>
 

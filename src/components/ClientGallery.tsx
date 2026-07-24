@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Download, Heart, LockKeyhole, X } from "lucide-react";
+import { Download, Heart, LockKeyhole, Mail, X } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { resolveAssetUrl } from "../lib/assetUrl";
@@ -30,7 +30,14 @@ type ClientGalleryPayload = {
   websiteUrl: string;
   allowFavourites: boolean;
   allowDownloads: boolean;
+  galleryDownloadsEnabled?: boolean;
+  requireEmail?: boolean;
+  requiresEmail?: boolean;
+  emailRequired?: boolean;
   requiresPin: boolean;
+  visitorEmail?: string;
+  visitorRole?: string;
+  visitorCanDownloadOriginals?: boolean;
   expiresAt: string;
   cover?: ClientGalleryImage | null;
   assets?: ClientGalleryImage[];
@@ -138,6 +145,9 @@ export function ClientGallery() {
   const [pin, setPin] = useState(() => {
     try { return sessionStorage.getItem(`client-gallery-pin:${token}`) || ""; } catch { return ""; }
   });
+  const [email, setEmail] = useState(() => {
+    try { return localStorage.getItem(`client-gallery-email:${token}`) || ""; } catch { return ""; }
+  });
   const [loading, setLoading] = useState(true);
   const [unlocking, setUnlocking] = useState(false);
   const [error, setError] = useState("");
@@ -145,14 +155,15 @@ export function ClientGallery() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [downloading, setDownloading] = useState<Set<string>>(new Set());
 
-  const load = async (attemptPin = "") => {
+  const load = async (attemptPin = "", attemptEmail = "") => {
     setError("");
     const endpoint = `/api/public/client-galleries/${encodeURIComponent(token)}`;
-    const response = attemptPin
+    const shouldPost = Boolean(attemptPin || attemptEmail);
+    const response = shouldPost
       ? await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pin: attemptPin, visitorKey: visitor }),
+          body: JSON.stringify({ pin: attemptPin, email: attemptEmail, visitorKey: visitor }),
           cache: "no-store",
         })
       : await fetch(`${endpoint}?visitor=${encodeURIComponent(visitor)}`, { cache: "no-store" });
@@ -165,13 +176,18 @@ export function ClientGallery() {
     if (response.ok && attemptPin) {
       try { sessionStorage.setItem(`client-gallery-pin:${token}`, attemptPin); } catch {}
     }
+    if (response.ok && (attemptEmail || body?.visitorEmail)) {
+      const rememberedEmail = String(attemptEmail || body?.visitorEmail || "");
+      setEmail(rememberedEmail);
+      try { localStorage.setItem(`client-gallery-email:${token}`, rememberedEmail); } catch {}
+    }
   };
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     const remembered = pin;
-    load(remembered)
+    load(remembered, "")
       .catch((err) => { if (!cancelled) setError(err instanceof Error ? err.message : "Unable to load gallery."); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
@@ -180,7 +196,7 @@ export function ClientGallery() {
   const unlock = async () => {
     setUnlocking(true);
     try {
-      await load(pin);
+      await load(pin, email);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to unlock gallery.");
     } finally {
@@ -198,7 +214,7 @@ export function ClientGallery() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pin, visitorKey: visitor }),
+          body: JSON.stringify({ pin, email, visitorKey: visitor }),
           cache: "no-store",
         },
       );
@@ -236,7 +252,7 @@ export function ClientGallery() {
       const response = await fetch(`/api/public/client-galleries/${encodeURIComponent(token)}/favourites`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin, visitorKey: visitor, assetId, favourite: nextValue }),
+        body: JSON.stringify({ pin, email, visitorKey: visitor, assetId, favourite: nextValue }),
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body?.error || "Unable to save favourite.");
@@ -261,6 +277,8 @@ export function ClientGallery() {
   }
 
   if (payload?.locked) {
+    const needsEmail = Boolean(payload.emailRequired);
+    const needsPin = Boolean(payload.requiresPin);
     return (
       <div className="min-h-screen bg-[#f7f6f3] flex items-center justify-center px-6">
         <Helmet>
@@ -269,13 +287,15 @@ export function ClientGallery() {
           <meta name="referrer" content="no-referrer" />
         </Helmet>
         <div className="w-full max-w-md rounded-3xl border border-black/15 bg-white p-8 text-center">
-          <LockKeyhole className="h-8 w-8 mx-auto" />
+          {needsEmail ? <Mail className="h-8 w-8 mx-auto" /> : <LockKeyhole className="h-8 w-8 mx-auto" />}
           <p className="text-xs uppercase tracking-[0.24em] text-neutral-500 mt-5">Private gallery</p>
-          <h1 style={{ fontFamily: '"Canela", "Playfair Display", Georgia, serif', fontSize: 42, fontWeight: 400, marginTop: 8 }}>{payload.title || "Client Gallery"}</h1>
-          <p className="mt-3 text-neutral-600">Enter the PIN supplied by your photographer.</p>
-          <input value={pin} onChange={(event) => setPin(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") unlock(); }} placeholder="Gallery PIN" className="mt-6 w-full rounded-xl border border-black/20 px-4 py-3 text-center" autoFocus />
-          <button onClick={unlock} disabled={unlocking || !pin.trim()} className="mt-3 w-full rounded-xl bg-black text-white px-5 py-3 disabled:opacity-40">{unlocking ? "Checking…" : "Open gallery"}</button>
-          {payload.error ? <p className="mt-3 text-sm text-red-700">{payload.error}</p> : null}
+          <h1 style={{ fontFamily: '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif', fontSize: 28, lineHeight: 1.25, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", marginTop: 10 }}>{payload.title || "Client Gallery"}</h1>
+          <p className="mt-4 text-sm text-neutral-600">{needsEmail ? "Enter your email address to view this private gallery." : "Enter the PIN supplied by your photographer."}</p>
+          {needsEmail ? <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email address" className="mt-6 w-full rounded-xl border border-black/20 px-4 py-3 text-center" autoFocus /> : null}
+          {needsPin ? <input value={pin} onChange={(event) => setPin(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") unlock(); }} placeholder="Gallery PIN" className={`${needsEmail ? "mt-3" : "mt-6"} w-full rounded-xl border border-black/20 px-4 py-3 text-center`} autoFocus={!needsEmail} /> : null}
+          <button onClick={unlock} disabled={unlocking || (needsEmail && !email.trim()) || (needsPin && !pin.trim())} className="mt-3 w-full rounded-xl bg-black text-white px-5 py-3 disabled:opacity-40">{unlocking ? "Checking…" : "View gallery"}</button>
+          {(error || (payload.error && payload.error !== "Email required." && payload.error !== "PIN required.")) ? <p className="mt-3 text-sm text-red-700">{error || payload.error}</p> : null}
+          <p className="mt-4 text-[11px] leading-relaxed text-neutral-400">Your email identifies your favourites and gallery permissions. It is not shown publicly.</p>
         </div>
       </div>
     );
@@ -297,7 +317,10 @@ export function ClientGallery() {
             {payload.logoUrl ? <img src={resolveAssetUrl(payload.logoUrl, publicAssetOrigin)} alt="" style={{ height: 30, maxWidth: 150, objectFit: "contain" }} /> : null}
             <div className="min-w-0"><p style={{ fontFamily: '"Canela", "Playfair Display", Georgia, serif', fontSize: 18, lineHeight: 1.05 }}>{payload.businessName}</p><p className="text-[11px] text-neutral-500 mt-1">Private client gallery</p></div>
           </div>
-          {payload.allowFavourites ? <div className="text-xs md:text-sm inline-flex items-center gap-2 whitespace-nowrap"><Heart className="h-4 w-4" /> {favourites.size} favourites</div> : null}
+          <div className="flex items-center gap-4">
+            {payload.visitorEmail ? <div className="hidden md:block text-right"><p className="text-xs text-neutral-700">{payload.visitorEmail}</p><p className="text-[10px] uppercase tracking-[0.1em] text-neutral-400">{(payload.visitorRole || "guest").replaceAll("_", " ")}</p></div> : null}
+            {payload.allowFavourites ? <div className="text-xs md:text-sm inline-flex items-center gap-2 whitespace-nowrap"><Heart className="h-4 w-4" /> {favourites.size} favourites</div> : null}
+          </div>
         </div>
       </header>
 
@@ -373,7 +396,7 @@ export function ClientGallery() {
           <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">{images.length} photographs</p>
           <div className="flex items-center gap-4 text-xs text-neutral-500">
             {payload.allowFavourites && favouriteImages.length ? <span>Your favourites are saved on this device.</span> : null}
-            <span className="inline-flex items-center gap-1.5"><Download size={14} /> {payload.allowDownloads ? `${images.filter((image) => image.hasOriginal).length} originals available` : "Downloads disabled"}</span>
+            <span className="inline-flex items-center gap-1.5"><Download size={14} /> {payload.allowDownloads ? `${images.filter((image) => image.hasOriginal).length} originals available` : payload.galleryDownloadsEnabled ? "Originals reserved for authorised clients" : "Downloads disabled"}</span>
           </div>
         </div>
 

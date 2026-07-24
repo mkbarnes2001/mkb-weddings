@@ -15,6 +15,8 @@ import {
   Star,
   Trash2,
   UploadCloud,
+  UserPlus,
+  Users,
   X,
 } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
@@ -46,6 +48,7 @@ export function ClientGalleryEditor() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [contactDraft, setContactDraft] = useState({ email: "", displayName: "", role: "client", allowOriginalDownloads: true });
 
   const load = async () => {
     setError("");
@@ -88,6 +91,28 @@ export function ClientGalleryEditor() {
     }
   };
 
+  const mutateContact = async (payload: Record<string, unknown>, success: string) => {
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      const next = await AdminApiService.mutateClientGalleryContact(id, payload);
+      setDetail(next);
+      setDraft((current) => ({ ...current, ...next.gallery, pin: undefined }));
+      setMessage(success);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to update gallery access contact.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const addContact = async () => {
+    if (!contactDraft.email.trim()) return;
+    await mutateContact({ action: "upsert", ...contactDraft }, "Access contact saved.");
+    setContactDraft({ email: "", displayName: "", role: "client", allowOriginalDownloads: true });
+  };
+
   const save = async () => {
     if (!detail) return;
     setBusy(true);
@@ -99,6 +124,7 @@ export function ClientGalleryEditor() {
       const gallery = await AdminApiService.updateClientGallery(id, payload);
       setDetail({ ...detail, gallery });
       setDraft({ ...gallery, pin: undefined });
+      await load();
       setMessage("Gallery settings saved.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to save client gallery.");
@@ -199,7 +225,7 @@ export function ClientGalleryEditor() {
           <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">Private delivery</p>
           <h1 className="text-4xl mt-2" style={{ fontWeight: 600, letterSpacing: "-.025em" }}>{gallery.title}</h1>
           <p className="mt-3 text-neutral-600">
-            {gallery.assetCount} images · {originalCount} private originals · {gallery.favouriteCount} favourites · {gallery.downloadCount || 0} downloads · {gallery.status}
+            {gallery.assetCount} images · {originalCount} private originals · {gallery.favouriteCount} favourites · {gallery.downloadCount || 0} downloads · {gallery.visitorCount || 0} visitors · {gallery.status}
           </p>
 
           <div className="mt-7 rounded-3xl border border-black/15 bg-white p-5 flex gap-3 flex-wrap">
@@ -330,12 +356,49 @@ export function ClientGalleryEditor() {
             <label className="block"><span className="text-xs uppercase tracking-[0.16em] text-neutral-500">New / replacement PIN</span><input value={draft.pin || ""} onChange={(e) => setDraft({ ...draft, pin: e.target.value })} placeholder={gallery.pinEnabled ? "Leave blank to keep current PIN" : "Optional"} className="mt-1 w-full rounded-xl border border-black/20 px-3 py-2.5" /></label>
             {gallery.pinEnabled ? <button onClick={() => setDraft({ ...draft, pin: "" })} className="text-xs underline underline-offset-4">Clear PIN on save</button> : null}
             <label className="block"><span className="text-xs uppercase tracking-[0.16em] text-neutral-500">Expiry</span><input type="datetime-local" value={(draft.expiresAt || "").slice(0,16)} onChange={(e) => setDraft({ ...draft, expiresAt: e.target.value })} className="mt-1 w-full rounded-xl border border-black/20 px-3 py-2.5" /></label>
-            <label className="flex items-center gap-3"><input type="checkbox" checked={draft.allowFavourites ?? true} onChange={(e) => setDraft({ ...draft, allowFavourites: e.target.checked })} /> <span>Allow favourites</span></label>
-            <label className="flex items-center gap-3"><input type="checkbox" checked={draft.allowDownloads ?? false} onChange={(e) => setDraft({ ...draft, allowDownloads: e.target.checked })} /> <span>Allow original downloads</span></label>
-            <div className="rounded-xl bg-neutral-100 p-3 text-xs text-neutral-600">
-              Downloads are available only for images with a private original. Existing website-only assets remain view-only.
+            <div className="rounded-2xl border border-black/10 bg-neutral-50 p-4 space-y-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Visitor access</p>
+                <p className="mt-1 text-xs text-neutral-600">Identify visitors by email so clients and guests can receive different permissions.</p>
+              </div>
+              <label className="flex items-start gap-3"><input type="checkbox" checked={draft.requireEmail ?? false} onChange={(e) => setDraft({ ...draft, requireEmail: e.target.checked })} /><span><strong className="block text-sm font-medium">Require email to enter</strong><span className="block text-xs text-neutral-500">Visitors enter an email once per browser before viewing.</span></span></label>
+              {draft.requireEmail ? <div className="rounded-lg bg-white p-3 text-[11px] leading-relaxed text-neutral-500">Email identifies visitors and applies permissions; it is not proof of identity. For stronger client-only download protection, keep a gallery PIN enabled as well.</div> : null}
+              <label className="flex items-center gap-3"><input type="checkbox" checked={draft.allowFavourites ?? true} onChange={(e) => setDraft({ ...draft, allowFavourites: e.target.checked })} /> <span>Allow favourites</span></label>
+              <label className="flex items-start gap-3"><input type="checkbox" checked={draft.allowDownloads ?? false} onChange={(e) => setDraft({ ...draft, allowDownloads: e.target.checked })} /><span><strong className="block text-sm font-medium">Enable original downloads</strong><span className="block text-xs text-neutral-500">Master switch. Individual email permissions apply when email access is enabled.</span></span></label>
+              <label className="flex items-start gap-3"><input type="checkbox" disabled={!draft.requireEmail || !draft.allowDownloads} checked={draft.allowGuestDownloads ?? false} onChange={(e) => setDraft({ ...draft, allowGuestDownloads: e.target.checked })} /><span><strong className="block text-sm font-medium">Allow guest full-resolution downloads</strong><span className="block text-xs text-neutral-500">Leave off to reserve originals for authorised client emails only.</span></span></label>
             </div>
             <button onClick={save} disabled={busy} className="w-full rounded-xl bg-black text-white px-5 py-3 inline-flex items-center justify-center gap-2 disabled:opacity-50"><Save className="h-4 w-4" /> Save settings</button>
+
+            <div className="border-t border-black/10 pt-5">
+              <div className="flex items-center gap-2"><UserPlus className="h-4 w-4" /><h3 className="text-sm font-semibold">Authorised client emails</h3></div>
+              <p className="mt-1 text-xs text-neutral-500">These contacts can receive full-resolution downloads when the gallery download switch is enabled.</p>
+              <div className="mt-3 space-y-2">
+                {detail.contacts.map((contact) => (
+                  <div key={contact.emailNormalized} className="rounded-xl border border-black/10 bg-neutral-50 p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0"><p className="text-sm font-medium truncate">{contact.displayName || contact.email}</p><p className="text-xs text-neutral-500 truncate">{contact.email}</p><p className="mt-1 text-[10px] uppercase tracking-[0.08em] text-neutral-400">{contact.role.replaceAll("_", " ")} · {contact.allowOriginalDownloads ? "originals allowed" : "view only"}</p></div>
+                      <button title="Remove access contact" onClick={() => mutateContact({ action: "remove", email: contact.email }, "Access contact removed.")} className="rounded-lg border border-black/10 p-2"><X className="h-3.5 w-3.5" /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 space-y-2 rounded-xl border border-black/10 p-3">
+                <input value={contactDraft.displayName} onChange={(e) => setContactDraft({ ...contactDraft, displayName: e.target.value })} placeholder="Name (optional)" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm" />
+                <input type="email" value={contactDraft.email} onChange={(e) => setContactDraft({ ...contactDraft, email: e.target.value })} placeholder="client@example.com" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm" />
+                <div className="grid grid-cols-2 gap-2">
+                  <select value={contactDraft.role} onChange={(e) => setContactDraft({ ...contactDraft, role: e.target.value })} className="rounded-lg border border-black/15 px-3 py-2 text-sm bg-white"><option value="client">Client</option><option value="primary_client">Primary client</option><option value="family">Family</option><option value="other">Other</option></select>
+                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={contactDraft.allowOriginalDownloads} onChange={(e) => setContactDraft({ ...contactDraft, allowOriginalDownloads: e.target.checked })} /> Full-res</label>
+                </div>
+                <button disabled={busy || !contactDraft.email.trim()} onClick={addContact} className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm inline-flex items-center justify-center gap-2 disabled:opacity-40"><UserPlus className="h-4 w-4" /> Add contact</button>
+              </div>
+            </div>
+
+            <div className="border-t border-black/10 pt-5">
+              <div className="flex items-center gap-2"><Users className="h-4 w-4" /><h3 className="text-sm font-semibold">Recent visitors</h3></div>
+              <p className="mt-1 text-xs text-neutral-500">{detail.visitors.length ? `${detail.visitors.length} identified visitor${detail.visitors.length === 1 ? "" : "s"}` : "No identified visitors yet."}</p>
+              {detail.visitors.length ? <div className="mt-3 max-h-56 overflow-auto space-y-2">{detail.visitors.slice(0, 20).map((visitor) => <div key={visitor.visitorKey} className="rounded-lg bg-neutral-50 p-2"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><p className="text-xs font-medium truncate">{visitor.email || "Anonymous"}</p><p className="text-[10px] uppercase tracking-[0.08em] text-neutral-400">{visitor.role.replaceAll("_", " ")} · {visitor.visitCount} visit{visitor.visitCount === 1 ? "" : "s"}</p></div>{visitor.canDownloadOriginals ? <Download className="h-3.5 w-3.5" /> : null}</div></div>)}</div> : null}
+            </div>
+
             {message ? <p className="text-sm text-green-700">{message}</p> : null}
             {error ? <p className="text-sm text-red-700">{error}</p> : null}
           </div>
