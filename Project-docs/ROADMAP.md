@@ -120,3 +120,10 @@ Required behaviour:
 - Visitor activity tracking without raw IP storage
 
 Next delivery/commerce work should build client selections, print-store ordering and lab fulfilment on top of this identified visitor model.
+
+## v1.5.2 — Favourite Review & Full-Resolution Download
+- Admin favourite thumbnail review.
+- Per-person and combined deduplicated favourites.
+- Secure individual original download.
+- Streamed Download All ZIP for favourites and formal selections.
+- Direct album-design handoff using preserved original filenames.

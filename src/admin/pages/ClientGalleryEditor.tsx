@@ -9,6 +9,7 @@ import {
   Download,
   ExternalLink,
   Eye,
+  Heart,
   EyeOff,
   ImagePlus,
   RefreshCw,
@@ -450,6 +451,32 @@ export function ClientGalleryEditor() {
             </div>
 
             <div className="border-t border-black/10 pt-5">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2"><Heart className="h-4 w-4" /><h3 className="text-sm font-semibold">Favourites</h3></div>
+                  <p className="mt-1 text-xs text-neutral-500">Review client favourites as thumbnails and download the private full-resolution originals for album design.</p>
+                </div>
+                <span className="text-xs text-neutral-500">{gallery.favouriteCount} favourite{gallery.favouriteCount === 1 ? "" : "s"}</span>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link
+                  to={`/admin/client-galleries/${id}/review?source=favourites&group=combined`}
+                  className="rounded-lg border border-black/15 px-3 py-2 text-sm inline-flex items-center gap-2"
+                >
+                  <Eye className="h-4 w-4" /> View favourites
+                </Link>
+                {gallery.favouriteCount > 0 ? (
+                  <a
+                    href={AdminApiService.clientGalleryBulkDownloadUrl(id, { source: "favourites", group: "combined" })}
+                    className="rounded-lg bg-black text-white px-3 py-2 text-sm inline-flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" /> Download all originals
+                  </a>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="border-t border-black/10 pt-5">
               <div className="flex items-center gap-2"><Users className="h-4 w-4" /><h3 className="text-sm font-semibold">Recent visitors</h3></div>
               <p className="mt-1 text-xs text-neutral-500">{detail.visitors.length ? `${detail.visitors.length} identified visitor${detail.visitors.length === 1 ? "" : "s"}` : "No identified visitors yet."}</p>
               {detail.visitors.length ? <div className="mt-3 max-h-56 overflow-auto space-y-2">{detail.visitors.slice(0, 20).map((visitor) => <div key={visitor.visitorKey} className="rounded-lg bg-neutral-50 p-2"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><p className="text-xs font-medium truncate">{visitor.email || "Anonymous"}</p><p className="text-[10px] uppercase tracking-[0.08em] text-neutral-400">{visitor.role.replaceAll("_", " ")} · {visitor.visitCount} visit{visitor.visitCount === 1 ? "" : "s"}</p></div>{visitor.canDownloadOriginals ? <Download className="h-3.5 w-3.5" /> : null}</div></div>)}</div> : null}
@@ -495,6 +522,8 @@ export function ClientGalleryEditor() {
                       <p className="mt-1 text-[10px] uppercase tracking-[0.08em] text-neutral-400">{selection.selectedCount} selected · {selection.status}</p>
                     </div>
                     <div className="flex gap-1">
+                      <Link title="View selection thumbnails" to={`/admin/client-galleries/${id}/review?source=selection&selectionId=${encodeURIComponent(selection.id)}`} className={`rounded-lg border border-black/10 p-2 ${selection.assets.length ? "" : "pointer-events-none opacity-30"}`}><Eye className="h-3.5 w-3.5" /></Link>
+                      {selection.assets.length ? <a title="Download all selection originals" href={AdminApiService.clientGalleryBulkDownloadUrl(id, { source: "selection", selectionId: selection.id })} className="rounded-lg border border-black/10 p-2"><Download className="h-3.5 w-3.5" /></a> : null}
                       <button title="Copy selected filenames" disabled={!selection.assets.length} onClick={() => copySelectionFilenames(selection.assets.map((asset) => asset.filename))} className="rounded-lg border border-black/10 p-2 disabled:opacity-30"><Copy className="h-3.5 w-3.5" /></button>
                       <button title="Download selection CSV" disabled={!selection.assets.length} onClick={() => downloadSelectionCsv(selection)} className="rounded-lg border border-black/10 p-2 disabled:opacity-30"><Download className="h-3.5 w-3.5" /></button>
                       {selection.status === "submitted" ? <button title="Reopen selection" disabled={busy} onClick={() => mutateSelection({ action: "reopenSelection", selectionId: selection.id }, "Selection reopened for editing.")} className="rounded-lg border border-black/10 p-2 disabled:opacity-30"><RotateCcw className="h-3.5 w-3.5" /></button> : null}

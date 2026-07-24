@@ -112,6 +112,39 @@ export type ClientGalleryAsset = {
   hasOriginal: boolean;
 };
 
+
+export type ClientGalleryFavouriteAsset = {
+  assetId: string;
+  filename: string;
+  thumbSrc: string;
+  webSrc: string;
+  hasOriginal: boolean;
+  fileSize: number;
+  firstFavouritedAt: string;
+};
+
+export type ClientGalleryFavouriteGroup = {
+  key: string;
+  label: string;
+  email: string;
+  displayName: string;
+  verified: boolean;
+  assetCount: number;
+  assets: ClientGalleryFavouriteAsset[];
+};
+
+export type ClientGalleryFavouritesPayload = {
+  workspaceId: string;
+  gallery: {
+    id: string;
+    title: string;
+    clientName: string;
+    weddingSlug: string;
+  };
+  combinedAssets: ClientGalleryFavouriteAsset[];
+  groups: ClientGalleryFavouriteGroup[];
+};
+
 export type ClientGalleryListPayload = {
   workspaceId: string;
   galleries: ClientGalleryRecord[];

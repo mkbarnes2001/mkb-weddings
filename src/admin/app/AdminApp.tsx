@@ -21,6 +21,7 @@ import { Settings } from "../pages/Settings";
 import { AssetLibrary } from "../pages/AssetLibrary";
 import { ClientGalleries } from "../pages/ClientGalleries";
 import { ClientGalleryEditor } from "../pages/ClientGalleryEditor";
+import { ClientGalleryReview } from "../pages/ClientGalleryReview";
 import { Locations } from "../pages/Locations";
 import { LocationGallerySettingsPage } from "../pages/LocationGallerySettings";
 import { Venues } from "../pages/Venues";
@@ -93,6 +94,7 @@ export function AdminApp() {
         <Route path="assets" element={<AssetLibrary />} />
         <Route path="client-galleries" element={<ClientGalleries />} />
         <Route path="client-galleries/:id" element={<ClientGalleryEditor />} />
+        <Route path="client-galleries/:id/review" element={<ClientGalleryReview />} />
         <Route path="ai" element={<AICentre />} />
         <Route path="seo" element={<SEOCentre />} />
         <Route

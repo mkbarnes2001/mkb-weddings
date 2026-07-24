@@ -1,8 +1,8 @@
 # Project State
 
 ## Version
-Current release: **v1.5.0 — Client Selections & Shortlists**.  
-Database schema version: **15**.
+Current release: **v1.5.2 — Favourite Review & Full-Resolution Download**.  
+Database schema version: **16**.
 
 
 ## Wedding management refinement — v1.3.3
@@ -29,6 +29,21 @@ New tables:
 - `client_gallery_selection_requests`
 - `client_gallery_selections`
 - `client_gallery_selection_assets`
+
+
+## Favourite Review & Full-Resolution Download — v1.5.2
+Client Gallery Admin now includes an operational review/download workflow for favourites and formal selections.
+
+Rules:
+- favourites are shown as a thumbnail grid with original filenames;
+- Admin can download each secure private original individually;
+- Admin can download all available originals as a streamed ZIP without exposing private R2 keys or URLs;
+- the combined favourites view deduplicates photographs favourited by more than one person;
+- per-person favourite views remain available for album/client workflows;
+- submitted/draft selections use the same thumbnail review and bulk-original download path;
+- filename copy and CSV export remain available;
+- bulk ZIP downloads are audited through `asset_download_events` with delivery `zip`;
+- no D1 migration; schema version remains **16**.
 
 ## Working production model
 - Cloudflare D1 is the structured source of truth.

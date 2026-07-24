@@ -6,7 +6,7 @@ import type { MomentGalleryPayload, MomentRepositoryDocument } from "../types/mo
 import type { CustomCollection, CustomCollectionGalleryPayload, CustomCollectionMembershipPayload } from "../types/customCollection";
 import type { VenueDocument, VenueSummary } from "../types/venue";
 import type { AssetLibraryFilters, AssetLibraryPayload } from "../types/asset";
-import type { ClientGalleryDetailPayload, ClientGalleryListPayload, ClientGalleryRecord, PrivateOriginalUploadSession, PrivateOriginalUploadedPart } from "../types/clientGallery";
+import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, ClientGalleryListPayload, ClientGalleryRecord, PrivateOriginalUploadSession, PrivateOriginalUploadedPart } from "../types/clientGallery";
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import { prepareImageUpload } from "./ImageUploadService";
 
@@ -501,6 +501,29 @@ export class AdminApiService {
     );
     const { ok: _ok, ...detail } = result;
     return detail;
+  }
+
+  static async getClientGalleryFavourites(id: string) {
+    const result = await request<{ ok: true } & ClientGalleryFavouritesPayload>(
+      `/api/client-galleries/${encodeURIComponent(id)}/favourites`,
+    );
+    const { ok: _ok, ...payload } = result;
+    return payload;
+  }
+
+  static clientGalleryOriginalDownloadUrl(id: string, assetId: string) {
+    return `${API_BASE}/api/client-galleries/${encodeURIComponent(id)}/assets/${encodeURIComponent(assetId)}/download`;
+  }
+
+  static clientGalleryBulkDownloadUrl(
+    id: string,
+    input: { source?: "favourites" | "selection"; group?: string; selectionId?: string } = {},
+  ) {
+    const params = new URLSearchParams();
+    params.set("source", input.source || "favourites");
+    if (input.group) params.set("group", input.group);
+    if (input.selectionId) params.set("selectionId", input.selectionId);
+    return `${API_BASE}/api/client-galleries/${encodeURIComponent(id)}/downloads?${params.toString()}`;
   }
 
 

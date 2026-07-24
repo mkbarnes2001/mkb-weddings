@@ -1398,20 +1398,312 @@ export async function recordClientGalleryDownload(
     visitorKey?: string;
     bytesSent?: number;
     userAgent?: string;
+    delivery?: 'original' | 'web' | 'zip';
   },
 ) {
   await db.prepare(`
     INSERT INTO asset_download_events (
       id, workspace_id, gallery_id, asset_id, visitor_key,
       delivery, bytes_sent, user_agent, created_at
-    ) VALUES (?, ?, ?, ?, ?, 'original', ?, ?, CURRENT_TIMESTAMP)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
   `).bind(
     `asset_download_${crypto.randomUUID()}`,
     text(input.workspaceId),
     text(input.galleryId),
     text(input.assetId),
     text(input.visitorKey).slice(0, 160),
+    input.delivery === 'zip' || input.delivery === 'web' ? input.delivery : 'original',
     number(input.bytesSent),
     text(input.userAgent).slice(0, 500),
   ).run();
+}
+
+export type AdminClientGalleryFavouriteAsset = {
+  assetId: string;
+  filename: string;
+  thumbSrc: string;
+  webSrc: string;
+  hasOriginal: boolean;
+  fileSize: number;
+  firstFavouritedAt: string;
+};
+
+export type AdminClientGalleryFavouriteGroup = {
+  key: string;
+  label: string;
+  email: string;
+  displayName: string;
+  verified: boolean;
+  assetCount: number;
+  assets: AdminClientGalleryFavouriteAsset[];
+};
+
+type AdminFavouriteInternalAsset = AdminClientGalleryFavouriteAsset & {
+  originalFilename: string;
+  storageKey: string;
+  mimeType: string;
+};
+
+type AdminFavouriteInternalGroup = Omit<AdminClientGalleryFavouriteGroup, 'assets'> & {
+  assets: AdminFavouriteInternalAsset[];
+};
+
+async function collectAdminClientGalleryFavourites(db: D1Db, galleryId: string) {
+  const workspaceId = await getDefaultWorkspaceId(db);
+  const gallery = await db.prepare(`
+    SELECT id, title, client_name, wedding_slug
+    FROM client_galleries
+    WHERE id = ? AND workspace_id = ?
+    LIMIT 1
+  `).bind(galleryId, workspaceId).first();
+  if (!gallery) throw new Error('Client gallery not found.');
+
+  const result = await db.prepare(`
+    SELECT
+      cgf.visitor_key,
+      cgf.asset_id,
+      cgf.created_at AS favourited_at,
+      cigv.identity_id,
+      ci.email AS identity_email,
+      ci.display_name AS identity_display_name,
+      ci.verified_at AS identity_verified_at,
+      cgv.email AS visitor_email,
+      cgv.display_name AS visitor_display_name,
+      a.filename,
+      a.original_filename,
+      COALESCE(tf.url, wf.url, '') AS thumb_url,
+      COALESCE(wf.url, tf.url, '') AS web_url,
+      ofile.storage_key AS original_storage_key,
+      ofile.mime_type AS original_mime_type,
+      ofile.file_size AS original_file_size
+    FROM client_gallery_favourites cgf
+    JOIN assets a ON a.id = cgf.asset_id AND a.status = 'active'
+    LEFT JOIN client_identity_gallery_visitors cigv
+      ON cigv.gallery_id = cgf.gallery_id AND cigv.visitor_key = cgf.visitor_key
+    LEFT JOIN client_identities ci
+      ON ci.id = cigv.identity_id AND ci.status = 'active'
+    LEFT JOIN client_gallery_visitors cgv
+      ON cgv.gallery_id = cgf.gallery_id AND cgv.visitor_key = cgf.visitor_key
+    LEFT JOIN asset_files tf
+      ON tf.asset_id = a.id AND tf.variant = 'thumb' AND tf.status = 'active'
+    LEFT JOIN asset_files wf
+      ON wf.asset_id = a.id AND wf.variant = 'web' AND wf.status = 'active'
+    LEFT JOIN asset_files ofile
+      ON ofile.asset_id = a.id
+      AND ofile.variant = 'original'
+      AND ofile.status = 'active'
+      AND ofile.access_level = 'private'
+    WHERE cgf.gallery_id = ?
+    ORDER BY cgf.created_at ASC, a.filename COLLATE NOCASE ASC
+  `).bind(galleryId).all();
+
+  const groups = new Map<string, AdminFavouriteInternalGroup>();
+  const combined = new Map<string, AdminFavouriteInternalAsset>();
+
+  for (const row of result.results || []) {
+    const identityId = text((row as any).identity_id);
+    const identityEmail = text((row as any).identity_email);
+    const visitorEmail = text((row as any).visitor_email);
+    const email = identityEmail || visitorEmail;
+    const emailNormalized = normalizeEmail(email);
+    const visitorKey = text((row as any).visitor_key);
+    const groupKey = identityId
+      ? `identity:${identityId}`
+      : emailNormalized
+        ? `email:${emailNormalized}`
+        : `visitor:${visitorKey}`;
+    const displayName = text((row as any).identity_display_name || (row as any).visitor_display_name);
+    const label = displayName || email || 'Anonymous visitor';
+
+    let group = groups.get(groupKey);
+    if (!group) {
+      group = {
+        key: groupKey,
+        label,
+        email,
+        displayName,
+        verified: Boolean(text((row as any).identity_verified_at)),
+        assetCount: 0,
+        assets: [],
+      };
+      groups.set(groupKey, group);
+    }
+
+    const asset: AdminFavouriteInternalAsset = {
+      assetId: text((row as any).asset_id),
+      filename: text((row as any).original_filename || (row as any).filename || 'photograph.jpg'),
+      originalFilename: text((row as any).original_filename || (row as any).filename || 'photograph.jpg'),
+      thumbSrc: text((row as any).thumb_url),
+      webSrc: text((row as any).web_url),
+      hasOriginal: Boolean(text((row as any).original_storage_key)),
+      storageKey: text((row as any).original_storage_key),
+      mimeType: text((row as any).original_mime_type || 'image/jpeg'),
+      fileSize: number((row as any).original_file_size),
+      firstFavouritedAt: text((row as any).favourited_at),
+    };
+
+    if (!group.assets.some((item) => item.assetId === asset.assetId)) {
+      group.assets.push(asset);
+      group.assetCount = group.assets.length;
+    }
+    const existingCombined = combined.get(asset.assetId);
+    if (!existingCombined || asset.firstFavouritedAt < existingCombined.firstFavouritedAt) {
+      combined.set(asset.assetId, asset);
+    }
+  }
+
+  const orderedGroups = Array.from(groups.values()).sort((a, b) => {
+    if (b.assetCount !== a.assetCount) return b.assetCount - a.assetCount;
+    return a.label.localeCompare(b.label);
+  });
+  const combinedAssets = Array.from(combined.values()).sort((a, b) =>
+    a.firstFavouritedAt.localeCompare(b.firstFavouritedAt) || a.filename.localeCompare(b.filename),
+  );
+
+  return {
+    workspaceId,
+    gallery: {
+      id: text(gallery.id),
+      title: text(gallery.title),
+      clientName: text(gallery.client_name),
+      weddingSlug: text(gallery.wedding_slug),
+    },
+    combinedAssets,
+    groups: orderedGroups,
+  };
+}
+
+export async function listAdminClientGalleryFavourites(db: D1Db, galleryId: string) {
+  const data = await collectAdminClientGalleryFavourites(db, galleryId);
+  const publicAsset = (asset: AdminFavouriteInternalAsset): AdminClientGalleryFavouriteAsset => ({
+    assetId: asset.assetId,
+    filename: asset.filename,
+    thumbSrc: asset.thumbSrc,
+    webSrc: asset.webSrc,
+    hasOriginal: asset.hasOriginal,
+    fileSize: asset.fileSize,
+    firstFavouritedAt: asset.firstFavouritedAt,
+  });
+  return {
+    workspaceId: data.workspaceId,
+    gallery: data.gallery,
+    combinedAssets: data.combinedAssets.map(publicAsset),
+    groups: data.groups.map((group) => ({
+      key: group.key,
+      label: group.label,
+      email: group.email,
+      displayName: group.displayName,
+      verified: group.verified,
+      assetCount: group.assetCount,
+      assets: group.assets.map(publicAsset),
+    })),
+  };
+}
+
+export async function resolveAdminClientGalleryOriginalDownload(db: D1Db, galleryId: string, assetId: string) {
+  const workspaceId = await getDefaultWorkspaceId(db);
+  const row = await db.prepare(`
+    SELECT
+      cg.id AS gallery_id,
+      a.id AS asset_id,
+      COALESCE(NULLIF(a.original_filename, ''), a.filename, 'photograph.jpg') AS download_filename,
+      af.storage_key,
+      af.mime_type,
+      af.file_size
+    FROM client_galleries cg
+    JOIN client_gallery_assets cga ON cga.gallery_id = cg.id
+    JOIN assets a ON a.id = cga.asset_id AND a.status = 'active'
+    JOIN asset_files af
+      ON af.asset_id = a.id
+      AND af.variant = 'original'
+      AND af.status = 'active'
+      AND af.access_level = 'private'
+    WHERE cg.id = ?
+      AND cg.workspace_id = ?
+      AND a.id = ?
+    LIMIT 1
+  `).bind(galleryId, workspaceId, assetId).first();
+  if (!row || !text(row.storage_key)) return null;
+  return {
+    workspaceId,
+    galleryId: text(row.gallery_id),
+    assetId: text(row.asset_id),
+    filename: text(row.download_filename),
+    storageKey: text(row.storage_key),
+    mimeType: text(row.mime_type || 'image/jpeg'),
+    fileSize: number(row.file_size),
+  };
+}
+
+export async function resolveAdminClientGalleryBulkDownload(
+  db: D1Db,
+  galleryId: string,
+  input: { source?: string; group?: string; selectionId?: string },
+) {
+  const source = text(input.source || 'favourites');
+  if (source === 'selection') {
+    const workspaceId = await getDefaultWorkspaceId(db);
+    const selectionId = text(input.selectionId);
+    const gallery = await db.prepare(`SELECT id, title FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1`)
+      .bind(galleryId, workspaceId).first();
+    if (!gallery) throw new Error('Client gallery not found.');
+    const selection = await db.prepare(`
+      SELECT cgs.id, cgsr.name
+      FROM client_gallery_selections cgs
+      JOIN client_gallery_selection_requests cgsr ON cgsr.id = cgs.request_id
+      WHERE cgs.id = ? AND cgs.gallery_id = ?
+      LIMIT 1
+    `).bind(selectionId, galleryId).first();
+    if (!selection) throw new Error('Client selection not found.');
+    const result = await db.prepare(`
+      SELECT
+        a.id AS asset_id,
+        COALESCE(NULLIF(a.original_filename, ''), a.filename, 'photograph.jpg') AS download_filename,
+        af.storage_key,
+        af.mime_type,
+        af.file_size
+      FROM client_gallery_selection_assets cgsa
+      JOIN assets a ON a.id = cgsa.asset_id AND a.status = 'active'
+      JOIN asset_files af
+        ON af.asset_id = a.id
+        AND af.variant = 'original'
+        AND af.status = 'active'
+        AND af.access_level = 'private'
+      WHERE cgsa.selection_id = ?
+      ORDER BY cgsa.sort_order ASC, cgsa.selected_at ASC
+    `).bind(selectionId).all();
+    return {
+      workspaceId,
+      galleryId,
+      label: text(selection.name || 'Client Selection'),
+      assets: (result.results || []).map((row: any) => ({
+        assetId: text(row.asset_id),
+        filename: text(row.download_filename),
+        storageKey: text(row.storage_key),
+        mimeType: text(row.mime_type || 'image/jpeg'),
+        fileSize: number(row.file_size),
+      })).filter((asset: any) => asset.storageKey),
+    };
+  }
+
+  const data = await collectAdminClientGalleryFavourites(db, galleryId);
+  const groupKey = text(input.group || 'combined');
+  const selected = groupKey === 'combined'
+    ? data.combinedAssets
+    : (data.groups.find((group) => group.key === groupKey)?.assets || []);
+  const label = groupKey === 'combined'
+    ? `${data.gallery.title || 'Client Gallery'} Favourites`
+    : `${data.groups.find((group) => group.key === groupKey)?.label || 'Client'} Favourites`;
+  return {
+    workspaceId: data.workspaceId,
+    galleryId,
+    label,
+    assets: selected.filter((asset) => asset.hasOriginal && asset.storageKey).map((asset) => ({
+      assetId: asset.assetId,
+      filename: asset.originalFilename || asset.filename,
+      storageKey: asset.storageKey,
+      mimeType: asset.mimeType,
+      fileSize: asset.fileSize,
+    })),
+  };
 }

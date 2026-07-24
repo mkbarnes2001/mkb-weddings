@@ -262,3 +262,15 @@
 - Selection state continues to follow identified email and works with the verified session identity.
 - Gallery PIN checks remain independent and are not bypassed by magic-link authentication.
 - Added migration 016; schema version advances to 16.
+
+## v1.5.2 — Favourite Review & Full-Resolution Download
+- Added a dedicated Admin thumbnail review page for Client Gallery favourites.
+- Added combined deduplicated favourites plus per-person favourite filters.
+- Added secure individual full-resolution original download from Admin.
+- Added streamed ZIP download of all available private originals for favourites.
+- Added the same thumbnail review and Download All workflow for formal client selections.
+- Preserved original filenames for direct import into album design software.
+- Added filename copy and CSV export on the review screen.
+- Bulk downloads stream private R2 originals and do not expose storage keys or permanent public URLs.
+- Added ZIP audit events using the existing `asset_download_events` table.
+- No D1 migration; schema version remains 16.
