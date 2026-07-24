@@ -201,3 +201,15 @@ Client selections sit above canonical assets and identified gallery visitors:
 `Client Gallery → Selection Request → Visitor Selection → Canonical Asset memberships`
 
 Favourites remain lightweight personal markers. Selection requests are explicit photographer workflows with constraints and a submit/lock lifecycle. This keeps album choices, print shortlists and other decisions independent from casual favourites. The future Lightroom plugin should consume the same selection data/asset IDs rather than create a separate selection store.
+
+
+## Persistent client identity
+The identity boundary is now:
+
+`workspace -> client identity -> gallery/browser visitor links -> favourites / selections / permissions`
+
+Email entry alone remains an identification convenience and does not prove mailbox ownership. Secure sign-in verifies mailbox control with a one-time link. The resulting session is stored as an HttpOnly cookie and resolved server-side on every Client Gallery request.
+
+Favourites remain keyed by legacy gallery/browser visitor keys for backwards compatibility. Verified identities aggregate those keys through `client_identity_gallery_visitors`, avoiding a destructive rewrite and preserving existing favourite history. Removing a favourite while authenticated removes that asset from all visitor keys linked to the same identity for that gallery.
+
+The email transport sits behind a small provider boundary. v1.5.1 implements Resend through its HTTPS API, while core identity/session storage is provider-independent.

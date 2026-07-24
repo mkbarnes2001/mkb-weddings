@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, ClipboardList, Download, Heart, LockKeyhole, Mail, Send, X } from "lucide-react";
+import { Check, ClipboardList, Download, Heart, LockKeyhole, LogIn, LogOut, Mail, Send, ShieldCheck, X } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { resolveAssetUrl } from "../lib/assetUrl";
@@ -58,6 +58,9 @@ type ClientGalleryPayload = {
   visitorEmail?: string;
   visitorRole?: string;
   visitorCanDownloadOriginals?: boolean;
+  authenticated?: boolean;
+  authenticatedEmail?: string;
+  secureSignInAvailable?: boolean;
   expiresAt: string;
   cover?: ClientGalleryImage | null;
   assets?: ClientGalleryImage[];
@@ -177,6 +180,9 @@ export function ClientGallery() {
   const [downloading, setDownloading] = useState<Set<string>>(new Set());
   const [activeSelectionRequestId, setActiveSelectionRequestId] = useState("");
   const [selectionBusy, setSelectionBusy] = useState(false);
+  const [showSecureSignIn, setShowSecureSignIn] = useState(false);
+  const [secureSignInBusy, setSecureSignInBusy] = useState(false);
+  const [secureSignInMessage, setSecureSignInMessage] = useState("");
 
   const load = async (attemptPin = "", attemptEmail = "") => {
     setError("");
@@ -203,8 +209,8 @@ export function ClientGallery() {
     if (response.ok && attemptPin) {
       try { sessionStorage.setItem(`client-gallery-pin:${token}`, attemptPin); } catch {}
     }
-    if (response.ok && (attemptEmail || body?.visitorEmail)) {
-      const rememberedEmail = String(attemptEmail || body?.visitorEmail || "");
+    if (response.ok && (attemptEmail || body?.visitorEmail || body?.authenticatedEmail)) {
+      const rememberedEmail = String(body?.authenticatedEmail || attemptEmail || body?.visitorEmail || "");
       setEmail(rememberedEmail);
       try { localStorage.setItem(`client-gallery-email:${token}`, rememberedEmail); } catch {}
     }
@@ -228,6 +234,41 @@ export function ClientGallery() {
       setError(err instanceof Error ? err.message : "Unable to unlock gallery.");
     } finally {
       setUnlocking(false);
+    }
+  };
+
+  const requestSecureSignIn = async () => {
+    const targetEmail = String(email || payload?.visitorEmail || "").trim();
+    if (!targetEmail) {
+      setSecureSignInMessage("Enter your email address first.");
+      return;
+    }
+    setSecureSignInBusy(true);
+    setSecureSignInMessage("");
+    try {
+      const response = await fetch("/api/public/client-auth/request-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ galleryToken: token, email: targetEmail, visitorKey: visitor }),
+        cache: "no-store",
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body?.error || "Unable to send secure sign-in link.");
+      setSecureSignInMessage(body?.message || "Secure sign-in link sent. Check your email.");
+    } catch (err) {
+      setSecureSignInMessage(err instanceof Error ? err.message : "Unable to send secure sign-in link.");
+    } finally {
+      setSecureSignInBusy(false);
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await fetch("/api/public/client-auth/sign-out", { method: "POST", cache: "no-store" });
+    } finally {
+      setSecureSignInMessage("");
+      setShowSecureSignIn(false);
+      await load(pin, email);
     }
   };
 
@@ -380,8 +421,10 @@ export function ClientGallery() {
           {needsEmail ? <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email address" className="mt-6 w-full rounded-xl border border-black/20 px-4 py-3 text-center" autoFocus /> : null}
           {needsPin ? <input value={pin} onChange={(event) => setPin(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") unlock(); }} placeholder="Gallery PIN" className={`${needsEmail ? "mt-3" : "mt-6"} w-full rounded-xl border border-black/20 px-4 py-3 text-center`} autoFocus={!needsEmail} /> : null}
           <button onClick={unlock} disabled={unlocking || (needsEmail && !email.trim()) || (needsPin && !pin.trim())} className="mt-3 w-full rounded-xl bg-black text-white px-5 py-3 disabled:opacity-40">{unlocking ? "Checking…" : "View gallery"}</button>
+          {needsEmail && payload.secureSignInAvailable ? <button type="button" onClick={requestSecureSignIn} disabled={secureSignInBusy || !email.trim()} className="mt-3 w-full rounded-xl border border-black/20 bg-white px-5 py-3 text-sm inline-flex items-center justify-center gap-2 disabled:opacity-40"><LogIn size={16} /> {secureSignInBusy ? "Sending…" : "Email secure sign-in link"}</button> : null}
+          {secureSignInMessage ? <p className="mt-3 text-sm text-neutral-700">{secureSignInMessage}</p> : null}
           {(error || (payload.error && payload.error !== "Email required." && payload.error !== "PIN required.")) ? <p className="mt-3 text-sm text-red-700">{error || payload.error}</p> : null}
-          <p className="mt-4 text-[11px] leading-relaxed text-neutral-400">Your email identifies your favourites and gallery permissions. It is not shown publicly.</p>
+          <p className="mt-4 text-[11px] leading-relaxed text-neutral-400">{payload.secureSignInAvailable ? "You can view with your email as before. Secure sign-in verifies that email and syncs favourites and selections across your devices." : "Your email identifies your favourites and gallery permissions. It is not shown publicly."}</p>
         </div>
       </div>
     );
@@ -403,8 +446,16 @@ export function ClientGallery() {
             {payload.logoUrl ? <img src={resolveAssetUrl(payload.logoUrl, publicAssetOrigin)} alt="" style={{ height: 30, maxWidth: 150, objectFit: "contain" }} /> : null}
             <div className="min-w-0"><p style={{ fontFamily: '"Canela", "Playfair Display", Georgia, serif', fontSize: 18, lineHeight: 1.05 }}>{payload.businessName}</p><p className="text-[11px] text-neutral-500 mt-1">Private client gallery</p></div>
           </div>
-          <div className="flex items-center gap-4">
-            {payload.visitorEmail ? <div className="hidden md:block text-right"><p className="text-xs text-neutral-700">{payload.visitorEmail}</p><p className="text-[10px] uppercase tracking-[0.1em] text-neutral-400">{(payload.visitorRole || "guest").replaceAll("_", " ")}</p></div> : null}
+          <div className="flex items-center gap-3 md:gap-4">
+            {payload.visitorEmail ? <div className="hidden md:block text-right"><p className="text-xs text-neutral-700">{payload.visitorEmail}</p><p className="text-[10px] uppercase tracking-[0.1em] text-neutral-400">{payload.authenticated ? "securely signed in" : (payload.visitorRole || "guest").replaceAll("_", " ")}</p></div> : null}
+            {payload.authenticated ? (
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-neutral-600"><ShieldCheck size={15} /> Signed in</span>
+                <button type="button" onClick={signOut} className="rounded-lg border border-black/15 bg-white px-3 py-2 text-xs inline-flex items-center gap-1.5"><LogOut size={14} /> <span className="hidden sm:inline">Sign out</span></button>
+              </div>
+            ) : payload.secureSignInAvailable ? (
+              <button type="button" onClick={() => { setShowSecureSignIn(true); setSecureSignInMessage(""); }} className="rounded-lg border border-black/15 bg-white px-3 py-2 text-xs inline-flex items-center gap-1.5"><LogIn size={14} /> Sign in</button>
+            ) : null}
             {payload.allowFavourites ? <div className="text-xs md:text-sm inline-flex items-center gap-2 whitespace-nowrap"><Heart className="h-4 w-4" /> {favourites.size} favourites</div> : null}
           </div>
         </div>
@@ -517,7 +568,7 @@ export function ClientGallery() {
         <div className="flex items-center justify-between gap-4 mb-5 flex-wrap border-b border-black/10 pb-4">
           <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">{images.length} photographs</p>
           <div className="flex items-center gap-4 text-xs text-neutral-500">
-            {payload.allowFavourites && favouriteImages.length ? <span>Your favourites are saved on this device.</span> : null}
+            {payload.allowFavourites && favouriteImages.length ? <span>{payload.authenticated ? "Your favourites are synced to your secure account." : payload.secureSignInAvailable ? "Your favourites are saved on this device. Sign in to sync across devices." : "Your favourites are saved on this device."}</span> : null}
             <span className="inline-flex items-center gap-1.5"><Download size={14} /> {payload.allowDownloads ? `${images.filter((image) => image.hasOriginal).length} originals available` : payload.galleryDownloadsEnabled ? "Originals reserved for authorised clients" : "Downloads disabled"}</span>
           </div>
         </div>
@@ -553,6 +604,18 @@ export function ClientGallery() {
         </div>
         {!images.length ? <div className="text-center py-20 text-neutral-500">This gallery does not contain any visible images yet.</div> : null}
       </main>
+
+      {showSecureSignIn && !payload.authenticated && payload.secureSignInAvailable ? (
+        <div style={{ position: "fixed", inset: 0, zIndex: 1200, background: "rgba(0,0,0,.42)", display: "grid", placeItems: "center", padding: 20 }} onMouseDown={() => setShowSecureSignIn(false)}>
+          <div className="w-full max-w-md rounded-2xl bg-white border border-black/10 p-6 shadow-2xl" onMouseDown={(event) => event.stopPropagation()}>
+            <div className="flex items-start justify-between gap-4"><div><div className="flex items-center gap-2"><ShieldCheck size={18} /><h2 className="text-lg font-semibold">Secure client sign-in</h2></div><p className="mt-2 text-sm text-neutral-600">We will email a one-time link. After signing in, favourites and selections follow you across phones, tablets and computers.</p></div><button type="button" onClick={() => setShowSecureSignIn(false)} aria-label="Close"><X size={18} /></button></div>
+            <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email address" className="mt-5 w-full rounded-xl border border-black/20 px-4 py-3" autoFocus />
+            <button type="button" onClick={requestSecureSignIn} disabled={secureSignInBusy || !email.trim()} className="mt-3 w-full rounded-xl bg-black text-white px-5 py-3 inline-flex items-center justify-center gap-2 disabled:opacity-40"><Mail size={16} /> {secureSignInBusy ? "Sending…" : "Send secure sign-in link"}</button>
+            {secureSignInMessage ? <p className="mt-3 text-sm text-neutral-700">{secureSignInMessage}</p> : null}
+            <p className="mt-4 text-[11px] leading-relaxed text-neutral-400">The link expires after 15 minutes and can only be used once. Your existing gallery PIN, where enabled, remains separate.</p>
+          </div>
+        </div>
+      ) : null}
 
       <footer className="border-t border-black/10 py-9 px-6 text-center text-xs tracking-wide text-neutral-500 bg-white/55">
         Private gallery delivered by {payload.businessName}.

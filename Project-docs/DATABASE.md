@@ -163,3 +163,19 @@ Adds:
 A selection request belongs to one Client Gallery and defines a named task plus optional minimum/maximum image counts. A visitor selection belongs to a request and visitor/email identity and moves from `draft` to `submitted`. Selected images reference canonical `assets.id` only. Submitted selections are immutable to the client until Admin reopens them.
 
 No R2 objects are copied or deleted by this migration.
+
+
+## Schema version 16
+Migration: `016_persistent_client_identity_magic_links.sql`
+
+Adds:
+- `client_identities`
+- `client_identity_gallery_visitors`
+- `client_identity_magic_links`
+- `client_identity_sessions`
+
+`client_identities` is a workspace-level verified email identity boundary for future Client Portal/commerce work. `client_identity_gallery_visitors` maps historical/browser visitor keys to a verified identity on a per-gallery basis so existing favourites can be reused without copying asset records.
+
+Magic-link and session credentials are stored as SHA-256 hashes only. Magic links are one-time and expire after 15 minutes. Sessions expire after 30 days and may be explicitly revoked by sign-out. The browser session token is delivered only through an HttpOnly, SameSite=Lax cookie.
+
+No R2 object is copied, renamed or deleted by migration 016. Existing favourites and selections remain in their original tables.

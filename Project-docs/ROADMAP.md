@@ -32,7 +32,9 @@ Completed and in production:
 - Guest favourites, downloads and future orders tied to visitor identity
 
 
-## v1.5 — Client Selections & Shortlists
+## v1.5 — Client Selections, Shortlists & Persistent Identity
+- Secure one-time email sign-in with persistent cross-device client sessions
+- Cross-device favourite synchronisation through verified client identity
 - Named photographer-created selection requests
 - Optional minimum / maximum image counts
 - Auto-saved draft selections tied to visitor/email identity

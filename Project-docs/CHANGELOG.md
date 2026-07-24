@@ -249,3 +249,16 @@
 - Submitted selections are locked until reopened by Admin.
 - Added Admin response review, selected filename copy and CSV export for Lightroom/manual selection workflows.
 - Added migration 015; schema version advances to 15.
+
+
+## v1.5.1 — Persistent Client Identity & Magic-Link Sign-In
+- Added workspace-level verified client identities for Client Galleries.
+- Added secure one-time email sign-in links with 15-minute expiry and one-time consumption.
+- Added 30-day revocable client sessions using HttpOnly/SameSite cookies.
+- Added a provider boundary for authentication email delivery with Resend as the first adapter.
+- Added a public **Sign in** flow to every Client Gallery, including email-gated galleries.
+- Verified clients can now sync favourites across browsers/devices and continue to add/remove favourites at any time.
+- Existing favourites are preserved and aggregated through verified identity-to-visitor links; no image or favourite backfill/copy is required.
+- Selection state continues to follow identified email and works with the verified session identity.
+- Gallery PIN checks remain independent and are not bypassed by magic-link authentication.
+- Added migration 016; schema version advances to 16.

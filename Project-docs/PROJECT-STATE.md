@@ -238,3 +238,21 @@ Wedding admin refinements in the same release:
 - Wedding Workspace Venue and Supplier management are visually separated into distinct panels.
 
 Schema version advances to **14**.
+
+
+## Persistent Client Identity & Magic-Link Sign-In — v1.5.1
+Client Galleries now support optional secure email sign-in in addition to the existing email-identification and PIN flow.
+
+A verified client identity is workspace-owned and persists across browsers/devices through a secure, HttpOnly session cookie. One-time email links expire after 15 minutes and are stored only as SHA-256 token hashes; raw magic-link/session tokens are never stored in D1.
+
+When a verified identity opens a gallery, existing browser visitor records for the same verified email in that gallery are linked to the identity. Favourite membership is then resolved across all linked visitor keys, so clients can add/remove favourites on one device and see the same state on another. Formal v1.5 selections continue to resolve by identified email and therefore follow the same verified identity.
+
+The current email delivery adapter is provider-boundary based with Resend as the first implementation. The public Pages project requires `RESEND_API_KEY` and `CLIENT_AUTH_FROM_EMAIL`; `CLIENT_AUTH_FROM_NAME` and `CLIENT_AUTH_EMAIL_PROVIDER` are optional. Gallery PINs remain independent and are never bypassed by email authentication.
+
+New tables:
+- `client_identities`
+- `client_identity_gallery_visitors`
+- `client_identity_magic_links`
+- `client_identity_sessions`
+
+Schema version advances to **16**.

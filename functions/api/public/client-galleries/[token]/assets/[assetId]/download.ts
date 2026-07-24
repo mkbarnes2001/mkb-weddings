@@ -1,3 +1,4 @@
+import { getAuthenticatedClientIdentity } from "../../../../../../../serverless/client-auth-d1";
 import {
   authoriseClientGalleryOriginalDownload,
   recordClientGalleryDownload,
@@ -19,6 +20,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json({ error: "Private delivery storage is not configured." }, { status: 503 });
     }
     const body: any = await context.request.json().catch(() => ({}));
+    const authenticatedIdentity = await getAuthenticatedClientIdentity(context.env.MKB_DB, context.request);
     const result = await authoriseClientGalleryOriginalDownload(
       context.env.MKB_DB,
       String(context.params.token || "").trim(),
@@ -26,6 +28,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         ...(body || {}),
         assetId: String(context.params.assetId || "").trim(),
       },
+      authenticatedIdentity,
     );
     if (result.status !== 200) {
       return Response.json({ error: result.error }, { status: result.status, headers: { "Cache-Control": "private, no-store" } });

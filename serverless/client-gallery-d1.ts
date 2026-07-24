@@ -1,4 +1,5 @@
 import { getDefaultWorkspaceId } from "./workspace-d1";
+import { ClientAuthIdentity, linkAuthenticatedVisitor } from "./client-auth-d1";
 
 type D1Db = any;
 
@@ -168,7 +169,7 @@ async function galleryBaseRow(db: D1Db, id: string, workspaceId: string) {
       w.couple AS wedding_couple,
       COUNT(DISTINCT cga.asset_id) AS asset_count,
       COUNT(DISTINCT CASE WHEN cga.hidden = 0 THEN cga.asset_id END) AS visible_asset_count,
-      COUNT(DISTINCT cgf.asset_id || ':' || cgf.visitor_key) AS favourite_count,
+      COUNT(DISTINCT cgf.asset_id || ':' || COALESCE(cigv.identity_id, cgf.visitor_key)) AS favourite_count,
       COUNT(DISTINCT ade.id) AS download_count,
       COUNT(DISTINCT cgv.visitor_key) AS visitor_count,
       COUNT(DISTINCT CASE WHEN cgc.status = 'active' THEN cgc.email_normalized END) AS authorised_contact_count,
@@ -180,6 +181,7 @@ async function galleryBaseRow(db: D1Db, id: string, workspaceId: string) {
     LEFT JOIN weddings w ON w.slug = cg.wedding_slug
     LEFT JOIN client_gallery_assets cga ON cga.gallery_id = cg.id
     LEFT JOIN client_gallery_favourites cgf ON cgf.gallery_id = cg.id
+    LEFT JOIN client_identity_gallery_visitors cigv ON cigv.gallery_id = cgf.gallery_id AND cigv.visitor_key = cgf.visitor_key
     LEFT JOIN asset_download_events ade ON ade.gallery_id = cg.id
     LEFT JOIN client_gallery_access_settings cgas ON cgas.gallery_id = cg.id
     LEFT JOIN client_gallery_visitors cgv ON cgv.gallery_id = cg.id
@@ -225,7 +227,7 @@ export async function listClientGalleries(db: D1Db) {
         w.couple AS wedding_couple,
         COUNT(DISTINCT cga.asset_id) AS asset_count,
         COUNT(DISTINCT CASE WHEN cga.hidden = 0 THEN cga.asset_id END) AS visible_asset_count,
-        COUNT(DISTINCT cgf.asset_id || ':' || cgf.visitor_key) AS favourite_count,
+        COUNT(DISTINCT cgf.asset_id || ':' || COALESCE(cigv.identity_id, cgf.visitor_key)) AS favourite_count,
         COUNT(DISTINCT ade.id) AS download_count,
         COUNT(DISTINCT cgv.visitor_key) AS visitor_count,
         COUNT(DISTINCT CASE WHEN cgc.status = 'active' THEN cgc.email_normalized END) AS authorised_contact_count,
@@ -237,6 +239,7 @@ export async function listClientGalleries(db: D1Db) {
       LEFT JOIN weddings w ON w.slug = cg.wedding_slug
       LEFT JOIN client_gallery_assets cga ON cga.gallery_id = cg.id
       LEFT JOIN client_gallery_favourites cgf ON cgf.gallery_id = cg.id
+      LEFT JOIN client_identity_gallery_visitors cigv ON cigv.gallery_id = cgf.gallery_id AND cigv.visitor_key = cgf.visitor_key
       LEFT JOIN asset_download_events ade ON ade.gallery_id = cg.id
       LEFT JOIN client_gallery_access_settings cgas ON cgas.gallery_id = cg.id
       LEFT JOIN client_gallery_visitors cgv ON cgv.gallery_id = cg.id
@@ -914,18 +917,32 @@ async function touchVisitor(db: D1Db, galleryId: string, visitorKey: string) {
   `).bind(galleryId, visitorKey).run();
 }
 
-async function verifyPublicAccess(db: D1Db, row: any, input: { pin?: string; visitorKey?: string; email?: string; displayName?: string }) {
-  if (!row) return { ok: false, status: 404, error: 'Gallery not found.', identity: null as PublicVisitorIdentity | null };
-  if (galleryIsExpired(row)) return { ok: false, status: 410, error: 'This gallery has expired.', identity: null as PublicVisitorIdentity | null };
+async function verifyPublicAccess(
+  db: D1Db,
+  row: any,
+  input: { pin?: string; visitorKey?: string; email?: string; displayName?: string },
+  authenticatedIdentity: ClientAuthIdentity | null = null,
+) {
+  if (!row) return { ok: false, status: 404, error: 'Gallery not found.', identity: null as PublicVisitorIdentity | null, authenticatedIdentity: null as ClientAuthIdentity | null };
+  if (galleryIsExpired(row)) return { ok: false, status: 410, error: 'This gallery has expired.', identity: null as PublicVisitorIdentity | null, authenticatedIdentity: null as ClientAuthIdentity | null };
 
   const galleryId = text(row.id);
   const visitorKey = text(input.visitorKey).slice(0, 160);
+  const verifiedIdentity = authenticatedIdentity?.workspaceId === text(row.workspace_id) ? authenticatedIdentity : null;
   let identity = await visitorIdentity(db, galleryId, visitorKey);
-  if (text(input.email)) {
+
+  if (verifiedIdentity?.emailNormalized) {
+    try {
+      identity = await registerVisitorIdentity(db, galleryId, visitorKey, verifiedIdentity.email, verifiedIdentity.displayName);
+      await linkAuthenticatedVisitor(db, verifiedIdentity, galleryId, visitorKey);
+    } catch (error: any) {
+      return { ok: false, status: 400, error: error?.message || 'Unable to restore secure client identity.', identity, authenticatedIdentity: verifiedIdentity };
+    }
+  } else if (text(input.email)) {
     try {
       identity = await registerVisitorIdentity(db, galleryId, visitorKey, text(input.email), text(input.displayName));
     } catch (error: any) {
-      return { ok: false, status: 400, error: error?.message || 'Enter a valid email address.', identity };
+      return { ok: false, status: 400, error: error?.message || 'Enter a valid email address.', identity, authenticatedIdentity: null as ClientAuthIdentity | null };
     }
   } else if (identity) {
     await touchVisitor(db, galleryId, visitorKey);
@@ -934,16 +951,16 @@ async function verifyPublicAccess(db: D1Db, row: any, input: { pin?: string; vis
 
   const requireEmail = number(row.require_email) === 1;
   if (requireEmail && !identity?.emailNormalized) {
-    return { ok: false, status: 401, error: 'Email required.', identity };
+    return { ok: false, status: 401, error: 'Email required.', identity, authenticatedIdentity: verifiedIdentity };
   }
 
   const wantedHash = text(row.pin_hash);
   if (wantedHash) {
     const pin = text(input.pin);
-    if (!pin) return { ok: false, status: 401, error: 'PIN required.', identity };
-    if (!(await verifyPinHash(wantedHash, pin))) return { ok: false, status: 401, error: 'Incorrect PIN.', identity };
+    if (!pin) return { ok: false, status: 401, error: 'PIN required.', identity, authenticatedIdentity: verifiedIdentity };
+    if (!(await verifyPinHash(wantedHash, pin))) return { ok: false, status: 401, error: 'Incorrect PIN.', identity, authenticatedIdentity: verifiedIdentity };
   }
-  return { ok: true, status: 200, error: '', identity };
+  return { ok: true, status: 200, error: '', identity, authenticatedIdentity: verifiedIdentity };
 }
 
 async function publicAssets(db: D1Db, galleryId: string) {
@@ -976,13 +993,29 @@ async function publicAssets(db: D1Db, galleryId: string) {
   }));
 }
 
-async function favouriteIds(db: D1Db, galleryId: string, visitorKey: string) {
-  if (!visitorKey) return [] as string[];
-  const result = await db.prepare(`
-    SELECT asset_id FROM client_gallery_favourites
-    WHERE gallery_id = ? AND visitor_key = ?
-    ORDER BY created_at ASC
-  `).bind(galleryId, visitorKey).all();
+async function favouriteIds(db: D1Db, galleryId: string, visitorKey: string, identityId = '') {
+  if (!visitorKey && !identityId) return [] as string[];
+  const result = identityId
+    ? await db.prepare(`
+        SELECT DISTINCT cgf.asset_id, MIN(cgf.created_at) AS first_created_at
+        FROM client_gallery_favourites cgf
+        WHERE cgf.gallery_id = ?
+          AND (
+            cgf.visitor_key = ?
+            OR cgf.visitor_key IN (
+              SELECT visitor_key
+              FROM client_identity_gallery_visitors
+              WHERE identity_id = ? AND gallery_id = ?
+            )
+          )
+        GROUP BY cgf.asset_id
+        ORDER BY first_created_at ASC
+      `).bind(galleryId, visitorKey, identityId, galleryId).all()
+    : await db.prepare(`
+        SELECT asset_id FROM client_gallery_favourites
+        WHERE gallery_id = ? AND visitor_key = ?
+        ORDER BY created_at ASC
+      `).bind(galleryId, visitorKey).all();
   return (result.results || []).map((row: any) => text(row.asset_id)).filter(Boolean);
 }
 
@@ -1084,13 +1117,13 @@ async function ensurePublicSelection(
   return row;
 }
 
-export async function mutatePublicClientGallerySelection(db: D1Db, token: string, input: any) {
+export async function mutatePublicClientGallerySelection(db: D1Db, token: string, input: any, authenticatedIdentity: ClientAuthIdentity | null = null) {
   const row = await publicGalleryRow(db, token);
   const access = await verifyPublicAccess(db, row, {
     pin: text(input?.pin),
     visitorKey: text(input?.visitorKey),
     email: text(input?.email),
-  });
+  }, authenticatedIdentity);
   if (!access.ok) return { status: access.status, body: { error: access.error } };
 
   const galleryId = text(row.id);
@@ -1189,14 +1222,14 @@ function effectiveDownloadPermission(row: any, identity: PublicVisitorIdentity |
   return number(row?.allow_guest_downloads) === 1;
 }
 
-export async function getPublicClientGallery(db: D1Db, token: string, pin = '', visitorKey = '', email = '', displayName = '') {
+export async function getPublicClientGallery(db: D1Db, token: string, pin = '', visitorKey = '', email = '', displayName = '', authenticatedIdentity: ClientAuthIdentity | null = null) {
   const row = await publicGalleryRow(db, token);
   if (!row) return { status: 404, body: { error: 'Gallery not found.' } };
   if (galleryIsExpired(row)) return { status: 410, body: { error: 'This gallery has expired.' } };
 
   const requiresPin = Boolean(text(row.pin_hash));
   const requireEmail = number(row.require_email) === 1;
-  const access = await verifyPublicAccess(db, row, { pin, visitorKey, email, displayName });
+  const access = await verifyPublicAccess(db, row, { pin, visitorKey, email, displayName }, authenticatedIdentity);
   const identity = access.identity;
   const base = {
     id: text(row.id),
@@ -1219,6 +1252,8 @@ export async function getPublicClientGallery(db: D1Db, token: string, pin = '', 
     visitorEmail: identity?.email || '',
     visitorRole: identity?.role || 'guest',
     visitorCanDownloadOriginals: effectiveDownloadPermission(row, identity),
+    authenticated: Boolean(access.authenticatedIdentity?.id),
+    authenticatedEmail: access.authenticatedIdentity?.email || '',
     expiresAt: text(row.expires_at),
   };
 
@@ -1228,7 +1263,7 @@ export async function getPublicClientGallery(db: D1Db, token: string, pin = '', 
 
   const [assets, favourites, selectionRequests] = await Promise.all([
     publicAssets(db, text(row.id)),
-    favouriteIds(db, text(row.id), visitorKey),
+    favouriteIds(db, text(row.id), visitorKey, access.authenticatedIdentity?.id || ''),
     publicSelectionState(db, text(row.id), visitorKey, identity?.emailNormalized || ""),
   ]);
   const coverAssetId = text(row.cover_asset_id);
@@ -1247,13 +1282,13 @@ export async function getPublicClientGallery(db: D1Db, token: string, pin = '', 
   };
 }
 
-export async function setPublicFavourite(db: D1Db, token: string, input: any) {
+export async function setPublicFavourite(db: D1Db, token: string, input: any, authenticatedIdentity: ClientAuthIdentity | null = null) {
   const row = await publicGalleryRow(db, token);
   const access = await verifyPublicAccess(db, row, {
     pin: text(input?.pin),
     visitorKey: text(input?.visitorKey),
     email: text(input?.email),
-  });
+  }, authenticatedIdentity);
   if (!access.ok) return { status: access.status, body: { error: access.error } };
   if (number(row?.allow_favourites, 1) !== 1) return { status: 403, body: { error: 'Favourites are disabled for this gallery.' } };
 
@@ -1269,11 +1304,25 @@ export async function setPublicFavourite(db: D1Db, token: string, input: any) {
   `).bind(galleryId, assetId).first();
   if (!member) return { status: 404, body: { error: 'Image not found in this gallery.' } };
 
+  const identityId = access.authenticatedIdentity?.id || '';
   if (favourite) {
     await db.prepare(`
       INSERT OR IGNORE INTO client_gallery_favourites (gallery_id, visitor_key, asset_id)
       VALUES (?, ?, ?)
     `).bind(galleryId, visitorKey, assetId).run();
+  } else if (identityId) {
+    await db.prepare(`
+      DELETE FROM client_gallery_favourites
+      WHERE gallery_id = ? AND asset_id = ?
+        AND (
+          visitor_key = ?
+          OR visitor_key IN (
+            SELECT visitor_key
+            FROM client_identity_gallery_visitors
+            WHERE identity_id = ? AND gallery_id = ?
+          )
+        )
+    `).bind(galleryId, assetId, visitorKey, identityId, galleryId).run();
   } else {
     await db.prepare(`
       DELETE FROM client_gallery_favourites
@@ -1281,16 +1330,16 @@ export async function setPublicFavourite(db: D1Db, token: string, input: any) {
     `).bind(galleryId, visitorKey, assetId).run();
   }
 
-  return { status: 200, body: { ok: true, favouriteAssetIds: await favouriteIds(db, galleryId, visitorKey) } };
+  return { status: 200, body: { ok: true, favouriteAssetIds: await favouriteIds(db, galleryId, visitorKey, identityId) } };
 }
 
-export async function authoriseClientGalleryOriginalDownload(db: D1Db, token: string, input: any) {
+export async function authoriseClientGalleryOriginalDownload(db: D1Db, token: string, input: any, authenticatedIdentity: ClientAuthIdentity | null = null) {
   const row = await publicGalleryRow(db, token);
   const access = await verifyPublicAccess(db, row, {
     pin: text(input?.pin),
     visitorKey: text(input?.visitorKey),
     email: text(input?.email),
-  });
+  }, authenticatedIdentity);
   if (!access.ok) return { status: access.status, error: access.error } as const;
   if (!effectiveDownloadPermission(row, access.identity)) {
     return { status: 403, error: 'Full-resolution downloads are not enabled for this visitor.' } as const;
