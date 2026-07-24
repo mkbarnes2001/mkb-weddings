@@ -405,6 +405,7 @@ export class AdminApiService {
     if (filters.venue) params.set("venue", filters.venue);
     if (filters.moment) params.set("moment", filters.moment);
     if (filters.gallery) params.set("gallery", filters.gallery);
+    if (filters.original) params.set("original", filters.original);
     if (filters.unassigned) params.set("unassigned", "1");
     if (typeof filters.limit === "number") params.set("limit", String(filters.limit));
     if (typeof filters.offset === "number") params.set("offset", String(filters.offset));

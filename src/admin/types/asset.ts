@@ -40,6 +40,7 @@ export type AssetRecord = {
     web: string;
     thumb: string;
     originalAccess: string;
+    originalStored: boolean;
   };
   weddings: AssetRelation[];
   venues: AssetRelation[];
@@ -87,6 +88,7 @@ export type AssetLibraryFilters = {
   venue?: string;
   moment?: string;
   gallery?: string;
+  original?: "stored" | "preview";
   unassigned?: boolean;
   limit?: number;
   offset?: number;

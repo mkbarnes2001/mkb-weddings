@@ -129,7 +129,7 @@ export function AssetLibrary() {
   useEffect(() => {
     void load(filters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.wedding, filters.venue, filters.moment, filters.gallery, filters.unassigned, filters.offset]);
+  }, [filters.wedding, filters.venue, filters.moment, filters.gallery, filters.original, filters.unassigned, filters.offset]);
 
   function setFilter(key: keyof AssetLibraryFilters, value: string | boolean | number | undefined) {
     setFilters((current) => ({ ...current, [key]: value || undefined, offset: 0 }));
@@ -182,7 +182,7 @@ export function AssetLibrary() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 12, marginTop: 26 }}>
         <StatCard label="Canonical assets" value={formatNumber(payload.stats.totalAssets)} note="Workspace-owned asset identities." />
         <StatCard label="Existing public assets" value={formatNumber(payload.stats.compatibilityAssets)} note="Indexed from the proven images/R2 model." />
-        <StatCard label="Private originals" value={formatNumber(payload.stats.originalAssets)} note="Reserved for the client-gallery upload pipeline." />
+        <StatCard label="Private originals" value={formatNumber(payload.stats.originalAssets)} note="Full-resolution originals stored securely for authorised delivery." />
         <StatCard label="Current results" value={formatNumber(payload.pagination.total)} note="After the active filters below." />
       </div>
 
@@ -207,6 +207,11 @@ export function AssetLibrary() {
           <select value={filters.gallery || ""} onChange={(e) => setFilter("gallery", e.target.value)} style={selectStyle}>
             <option value="">All galleries</option>
             {payload.facets.galleries.map((item) => <option key={item.id || item.slug} value={item.slug}>{item.name}</option>)}
+          </select>
+          <select value={filters.original || ""} onChange={(e) => setFilter("original", e.target.value)} style={selectStyle}>
+            <option value="">All original statuses</option>
+            <option value="stored">Private original stored</option>
+            <option value="preview">Preview only</option>
           </select>
           <button type="submit" style={{ ...buttonStyle, background: "#111", color: "#fff", borderColor: "#111" }}>Search</button>
         </form>
@@ -262,6 +267,7 @@ function AssetCard({ asset, active, onClick }: { asset: AssetRecord; active: boo
       <div style={{ padding: 9 }}>
         <div title={fullFilename} style={{ fontSize: 12, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cleanAssetLabel(asset)}</div>
         <div style={{ marginTop: 5, display: "flex", gap: 5, flexWrap: "wrap" }}>
+          {asset.files.originalStored ? <SmallBadge text="Original stored" /> : null}
           {asset.weddings.length ? <SmallBadge text={`${asset.weddings.length} wedding${asset.weddings.length === 1 ? "" : "s"}`} /> : null}
           {asset.venues.length ? <SmallBadge text={`${asset.venues.length} venue${asset.venues.length === 1 ? "" : "s"}`} /> : null}
           {asset.moments.length ? <SmallBadge text={`${asset.moments.length} moment${asset.moments.length === 1 ? "" : "s"}`} /> : null}
@@ -297,7 +303,7 @@ function AssetInspector({ asset }: { asset: AssetRecord }) {
         <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           <div style={fileCardStyle}><HardDrive size={16} /><strong>Web</strong><span>{asset.files.web ? "Available" : "Missing"}</span></div>
           <div style={fileCardStyle}><ImageIcon size={16} /><strong>Thumb</strong><span>{asset.files.thumb ? "Available" : asset.files.web ? "Missing · using web fallback" : "Missing"}</span></div>
-          <div style={{ ...fileCardStyle, gridColumn: "1 / -1" }}><LockKeyhole size={16} /><strong>Private original</strong><span>{asset.files.original ? "Stored privately" : "Not yet stored — enabled by Client Galleries phase"}</span></div>
+          <div style={{ ...fileCardStyle, gridColumn: "1 / -1" }}><LockKeyhole size={16} /><strong>Private original</strong><span>{asset.files.originalStored ? `Stored securely${asset.files.originalAccess ? ` · ${asset.files.originalAccess}` : ""} · authorised download only` : "Preview only — no private full-resolution original stored"}</span></div>
         </section>
 
         <RelationGroup title="Wedding" items={asset.weddings} />
@@ -308,7 +314,7 @@ function AssetInspector({ asset }: { asset: AssetRecord }) {
 
         <section style={{ borderTop: "1px solid rgba(0,0,0,.1)", paddingTop: 16, color: "#666", fontSize: 12, lineHeight: 1.55 }}>
           <div style={{ display: "flex", gap: 8, alignItems: "center", color: "#333", marginBottom: 6 }}><Layers3 size={15} /> Compatibility phase</div>
-          Existing Venue, Moment and Gallery managers remain authoritative in v1.0.0. The Asset Library reads those live relationships while the canonical asset identity is established underneath them.
+          Canonical asset identity is authoritative for private originals. Existing Venue, Moment and Gallery relationships remain compatibility-backed while unified publishing workflows continue moving onto canonical asset links.
         </section>
       </div>
     </div>

@@ -14,8 +14,8 @@ Completed and in production:
 
 ## v1.3 — Wedding Workspace & Post-Wedding Workflow
 - One operational page per wedding
-- Link / change venue
-- Assign reusable master suppliers
+- Link / change venue, including inline quick-create for new venues
+- Assign reusable master suppliers, including inline quick-create for new suppliers
 - Create or open the linked Client Gallery
 - Upload full-resolution preview JPEGs directly
 - Maintain a reusable Wedding Day Preview Set

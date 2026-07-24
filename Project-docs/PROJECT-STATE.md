@@ -1,7 +1,7 @@
 # Project State
 
 ## Version
-Current release: **v1.3.0 — Wedding Workspace & Preview Workflow**.  
+Current release: **v1.3.1 — Wedding Workspace Quick Create & Asset Original Status**.  
 Database schema version: **13**.
 
 ## Working production model
@@ -162,3 +162,23 @@ New tables:
 - `wedding_preview_assets`
 
 New weddings now lead naturally into the Wedding Workspace after creation, while legacy wedding admin routes remain available.
+
+
+## Wedding Workspace Quick Create — v1.3.1
+The Wedding Workspace now supports creating missing Venues and Suppliers without leaving the wedding.
+
+Venue quick-create:
+- name, town/city, county/region, country, website and Instagram;
+- possible existing venue suggestions are shown before creation;
+- newly created Venue records are immediately linked to the Wedding;
+- full venue intelligence can still be completed later from Admin → Venues.
+
+Supplier quick-create:
+- business name, category, wedding role, website, Instagram and email;
+- possible existing Supplier Master records are suggested before creation;
+- newly created suppliers are immediately linked to the Wedding with the chosen role;
+- Instagram caption generation refreshes from the structured supplier data.
+
+Asset Library private-original status now derives from the active private `asset_files` original storage record rather than requiring a public URL. Private originals therefore display as **Stored securely** while remaining inaccessible by direct public URL. The Asset Library also supports filtering between **Private original stored** and **Preview only** assets.
+
+No D1 migration is required; schema version remains **13**.

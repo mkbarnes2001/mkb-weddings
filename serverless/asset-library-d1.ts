@@ -122,10 +122,11 @@ function buildFilters(url: URL) {
   const venue = text(url.searchParams.get("venue"));
   const moment = text(url.searchParams.get("moment"));
   const gallery = text(url.searchParams.get("gallery"));
+  const original = text(url.searchParams.get("original"));
   const unassigned = url.searchParams.get("unassigned") === "1";
   const limit = Math.min(Math.max(number(url.searchParams.get("limit"), 60), 1), 120);
   const offset = Math.max(number(url.searchParams.get("offset"), 0), 0);
-  return { q, wedding, venue, moment, gallery, unassigned, limit, offset };
+  return { q, wedding, venue, moment, gallery, original, unassigned, limit, offset };
 }
 
 function queryParts(filters: ReturnType<typeof buildFilters>) {
@@ -174,6 +175,24 @@ function queryParts(filters: ReturnType<typeof buildFilters>) {
         )
     )`);
     bindings.push(filters.moment, filters.moment, filters.moment);
+  }
+
+  if (filters.original === "stored") {
+    where.push(`EXISTS (
+      SELECT 1 FROM asset_files af
+      WHERE af.asset_id = a.id
+        AND af.variant = 'original'
+        AND af.status = 'active'
+        AND TRIM(COALESCE(af.storage_key, '')) <> ''
+    )`);
+  } else if (filters.original === "preview") {
+    where.push(`NOT EXISTS (
+      SELECT 1 FROM asset_files af
+      WHERE af.asset_id = a.id
+        AND af.variant = 'original'
+        AND af.status = 'active'
+        AND TRIM(COALESCE(af.storage_key, '')) <> ''
+    )`);
   }
 
   if (filters.gallery) {
@@ -518,6 +537,7 @@ export async function listAssetLibrary(db: D1Db, requestUrl: string) {
         web: text(row.web_url),
         thumb: text(row.thumb_url),
         originalAccess: text(row.original_access_level),
+        originalStored: Boolean(text(row.original_storage_key)),
       },
       weddings: relations.weddings.get(assetKey) || [],
       venues: relations.venues.get(assetKey) || [],

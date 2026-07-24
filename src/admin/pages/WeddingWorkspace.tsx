@@ -44,6 +44,31 @@ function cleanInstagram(value: string) {
   return handle ? `@${handle}` : "";
 }
 
+function slugify(value: string) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function matchKey(value: string) {
+  return String(value || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function looksSimilar(left: string, right: string) {
+  const a = matchKey(left);
+  const b = matchKey(right);
+  return Boolean(a && b && (a === b || (a.length >= 5 && b.length >= 5 && (a.includes(b) || b.includes(a)))));
+}
+
+function normaliseWebsite(value: string) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+}
+
 function displayDate(value: string) {
   if (!value) return "";
   const parsed = new Date(`${value}T12:00:00`);
@@ -65,6 +90,10 @@ export function WeddingWorkspace() {
   const [suppliers, setSuppliers] = useState<SupplierRecord[]>([]);
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
   const [supplierRole, setSupplierRole] = useState("");
+  const [showNewVenue, setShowNewVenue] = useState(false);
+  const [newVenue, setNewVenue] = useState({ name: "", town: "", county: "", country: "Northern Ireland", website: "", instagram: "" });
+  const [showNewSupplier, setShowNewSupplier] = useState(false);
+  const [newSupplier, setNewSupplier] = useState({ name: "", category: "", role: "", website: "", instagram: "", email: "" });
   const [previewIds, setPreviewIds] = useState<string[]>([]);
   const [selectedMomentIds, setSelectedMomentIds] = useState<string[]>([]);
   const [selectedGalleryIds, setSelectedGalleryIds] = useState<string[]>([]);
@@ -109,6 +138,14 @@ export function WeddingWorkspace() {
   const selectedSupplier = useMemo(
     () => masterSuppliers.find((supplier) => supplier.id === selectedSupplierId) || null,
     [masterSuppliers, selectedSupplierId],
+  );
+  const possibleVenueMatches = useMemo(
+    () => newVenue.name.trim() ? venues.filter((venue) => looksSimilar(newVenue.name, venue.name)).slice(0, 4) : [],
+    [newVenue.name, venues],
+  );
+  const possibleSupplierMatches = useMemo(
+    () => newSupplier.name.trim() ? masterSuppliers.filter((supplier) => looksSimilar(newSupplier.name, supplier.displayName || supplier.name)).slice(0, 4) : [],
+    [newSupplier.name, masterSuppliers],
   );
   const previewAssets = useMemo(
     () => (workspace?.assets || []).filter((asset) => previewIds.includes(asset.id)),
@@ -171,6 +208,121 @@ export function WeddingWorkspace() {
       await reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to update venue.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const createAndLinkVenue = async () => {
+    if (!wedding) return;
+    const name = newVenue.name.trim();
+    const finalSlug = slugify(name);
+    if (!name || !finalSlug) {
+      setError("Venue name is required.");
+      return;
+    }
+    const exact = venues.find((venue) => matchKey(venue.name) === matchKey(name));
+    if (exact) {
+      setError(`${exact.name} already exists. Use the existing venue instead.`);
+      return;
+    }
+
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      const result = await AdminApiService.createVenue({
+        schemaVersion: 1,
+        slug: finalSlug,
+        name,
+        town: newVenue.town.trim(),
+        county: newVenue.county.trim(),
+        country: newVenue.country.trim(),
+        status: "draft",
+        intro: "",
+        description: "",
+        heroImageId: "",
+        links: {
+          website: normaliseWebsite(newVenue.website),
+          instagram: cleanInstagram(newVenue.instagram).replace(/^@/, ""),
+          facebook: "",
+          googleMaps: "",
+        },
+        contact: { email: "", phone: "", coordinatorName: "", coordinatorEmail: "" },
+        practical: { address: "", parking: "", accommodation: "", ceremonyTypes: "", capacity: "", outdoorCeremony: false },
+        notes: { general: "", portraitLocations: "", rainBackup: "", sunsetNotes: "", restrictions: "" },
+        seo: { title: "", description: "" },
+      });
+      const created = result.venue;
+      const updated: WeddingDocument = {
+        ...wedding,
+        venueSlug: created.slug,
+        venueId: created.id,
+        venue: created.name,
+      };
+      await AdminApiService.updateJsonWedding(slug, updated);
+      setVenues((current) => [...current.filter((item) => item.slug !== created.slug), created].sort((a, b) => a.name.localeCompare(b.name)));
+      setWedding(updated);
+      setShowNewVenue(false);
+      setNewVenue({ name: "", town: "", county: "", country: "Northern Ireland", website: "", instagram: "" });
+      setMessage(`${created.name} created and linked to this wedding.`);
+      await reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to create and link venue.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const createAndLinkSupplier = async () => {
+    const name = newSupplier.name.trim();
+    if (!name) {
+      setError("Supplier name is required.");
+      return;
+    }
+    const exact = masterSuppliers.find((supplier) => matchKey(supplier.displayName || supplier.name) === matchKey(name));
+    if (exact) {
+      setError(`${exact.displayName || exact.name} already exists. Use the existing supplier instead.`);
+      return;
+    }
+
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      const created = await AdminApiService.createMasterSupplier({
+        name,
+        displayName: name,
+        category: newSupplier.category.trim(),
+        website: normaliseWebsite(newSupplier.website),
+        instagram: cleanInstagram(newSupplier.instagram).replace(/^@/, ""),
+        email: newSupplier.email.trim(),
+        status: "active",
+      });
+      const role = newSupplier.role.trim() || created.category || "Supplier";
+      const nextRows: SupplierRecord[] = [
+        ...suppliers,
+        {
+          supplierId: created.id,
+          role,
+          name: created.name,
+          website: created.website,
+          instagram: created.instagram,
+          email: created.email,
+          phone: created.phone,
+          location: created.location,
+          county: created.county,
+        },
+      ].map((row, index) => ({ ...row, blogSlug: slug, sortOrder: String(index + 1) }));
+      await AdminApiService.saveWeddingSuppliers(slug, nextRows);
+      setMasterSuppliers((current) => [...current, created].sort((a, b) => a.name.localeCompare(b.name)));
+      setSuppliers(nextRows);
+      setShowNewSupplier(false);
+      setNewSupplier({ name: "", category: "", role: "", website: "", instagram: "", email: "" });
+      setMessage(`${created.name} created and linked as ${role}.`);
+      await reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to create and link supplier.");
     } finally {
       setBusy(false);
     }
@@ -411,21 +563,53 @@ export function WeddingWorkspace() {
               <div>
                 <label className="text-xs uppercase tracking-[0.14em] text-neutral-500">Venue</label>
                 <select value={wedding.venueSlug || ""} disabled={busy} onChange={(event) => saveVenue(event.target.value)} className="mt-2 w-full rounded-xl border border-black/15 bg-white px-4 py-3">
-                  <option value="">Select venue…</option>
+                  <option value="">Search or select venue…</option>
                   {venues.map((venue) => <option key={venue.slug} value={venue.slug}>{venue.name}</option>)}
                 </select>
-                {selectedVenue ? <p className="mt-2 text-xs text-neutral-500">{selectedVenue.town}{selectedVenue.county ? ` · ${selectedVenue.county}` : ""}</p> : null}
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  {selectedVenue ? <p className="text-xs text-neutral-500">{selectedVenue.town}{selectedVenue.county ? ` · ${selectedVenue.county}` : ""}</p> : <span />}
+                  <button type="button" onClick={() => setShowNewVenue((value) => !value)} className="text-xs underline underline-offset-4">{showNewVenue ? "Cancel new venue" : "+ Add new venue"}</button>
+                </div>
+                {showNewVenue ? (
+                  <div className="mt-4 rounded-2xl border border-black/10 bg-neutral-50 p-4">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <input value={newVenue.name} onChange={(event) => setNewVenue((current) => ({ ...current, name: event.target.value }))} placeholder="Venue name" className="rounded-xl border border-black/15 bg-white px-3 py-3 sm:col-span-2" />
+                      <input value={newVenue.town} onChange={(event) => setNewVenue((current) => ({ ...current, town: event.target.value }))} placeholder="Town / city" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
+                      <input value={newVenue.county} onChange={(event) => setNewVenue((current) => ({ ...current, county: event.target.value }))} placeholder="County / region" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
+                      <input value={newVenue.country} onChange={(event) => setNewVenue((current) => ({ ...current, country: event.target.value }))} placeholder="Country" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
+                      <input value={newVenue.instagram} onChange={(event) => setNewVenue((current) => ({ ...current, instagram: event.target.value }))} placeholder="Instagram" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
+                      <input value={newVenue.website} onChange={(event) => setNewVenue((current) => ({ ...current, website: event.target.value }))} placeholder="Website" className="rounded-xl border border-black/15 bg-white px-3 py-3 sm:col-span-2" />
+                    </div>
+                    {possibleVenueMatches.length ? <div className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-950"><strong>Possible existing venue:</strong><div className="mt-2 flex flex-wrap gap-2">{possibleVenueMatches.map((venue) => <button key={venue.slug} type="button" onClick={() => { setShowNewVenue(false); void saveVenue(venue.slug); }} className="rounded-full border border-amber-300 bg-white px-3 py-1.5">Use {venue.name}</button>)}</div></div> : null}
+                    <button type="button" disabled={busy || !newVenue.name.trim()} onClick={createAndLinkVenue} className="mt-4 rounded-full bg-black px-5 py-2.5 text-sm text-white disabled:opacity-40"><Plus className="mr-2 inline h-4 w-4" />Create & link venue</button>
+                  </div>
+                ) : null}
               </div>
               <div>
                 <label className="text-xs uppercase tracking-[0.14em] text-neutral-500">Add supplier</label>
                 <div className="mt-2 grid grid-cols-[minmax(0,1fr)_150px_auto] gap-2">
                   <select value={selectedSupplierId} onChange={(event) => setSelectedSupplierId(event.target.value)} className="min-w-0 rounded-xl border border-black/15 bg-white px-3 py-3">
-                    <option value="">Select supplier…</option>
+                    <option value="">Search or select supplier…</option>
                     {masterSuppliers.map((supplier) => <option key={supplier.id} value={supplier.id}>{supplier.displayName || supplier.name}</option>)}
                   </select>
                   <input value={supplierRole} onChange={(event) => setSupplierRole(event.target.value)} placeholder={selectedSupplier?.category || "Role"} className="rounded-xl border border-black/15 px-3 py-3" />
                   <button disabled={!selectedSupplier || busy} onClick={addSupplier} className="rounded-xl bg-black px-4 text-white disabled:opacity-40"><Plus className="h-4 w-4" /></button>
                 </div>
+                <div className="mt-2 text-right"><button type="button" onClick={() => setShowNewSupplier((value) => !value)} className="text-xs underline underline-offset-4">{showNewSupplier ? "Cancel new supplier" : "+ Create new supplier"}</button></div>
+                {showNewSupplier ? (
+                  <div className="mt-4 rounded-2xl border border-black/10 bg-neutral-50 p-4">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <input value={newSupplier.name} onChange={(event) => setNewSupplier((current) => ({ ...current, name: event.target.value }))} placeholder="Business name" className="rounded-xl border border-black/15 bg-white px-3 py-3 sm:col-span-2" />
+                      <input value={newSupplier.category} onChange={(event) => setNewSupplier((current) => ({ ...current, category: event.target.value }))} placeholder="Category (e.g. Florist)" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
+                      <input value={newSupplier.role} onChange={(event) => setNewSupplier((current) => ({ ...current, role: event.target.value }))} placeholder="Wedding role" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
+                      <input value={newSupplier.instagram} onChange={(event) => setNewSupplier((current) => ({ ...current, instagram: event.target.value }))} placeholder="Instagram" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
+                      <input value={newSupplier.email} onChange={(event) => setNewSupplier((current) => ({ ...current, email: event.target.value }))} placeholder="Email" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
+                      <input value={newSupplier.website} onChange={(event) => setNewSupplier((current) => ({ ...current, website: event.target.value }))} placeholder="Website" className="rounded-xl border border-black/15 bg-white px-3 py-3 sm:col-span-2" />
+                    </div>
+                    {possibleSupplierMatches.length ? <div className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-950"><strong>Possible existing supplier:</strong><div className="mt-2 flex flex-wrap gap-2">{possibleSupplierMatches.map((supplier) => <button key={supplier.id} type="button" onClick={() => { setSelectedSupplierId(supplier.id); setSupplierRole(newSupplier.role || supplier.category || ""); setShowNewSupplier(false); }} className="rounded-full border border-amber-300 bg-white px-3 py-1.5">Use {supplier.displayName || supplier.name}</button>)}</div></div> : null}
+                    <button type="button" disabled={busy || !newSupplier.name.trim()} onClick={createAndLinkSupplier} className="mt-4 rounded-full bg-black px-5 py-2.5 text-sm text-white disabled:opacity-40"><Plus className="mr-2 inline h-4 w-4" />Create & link supplier</button>
+                  </div>
+                ) : null}
               </div>
             </div>
 

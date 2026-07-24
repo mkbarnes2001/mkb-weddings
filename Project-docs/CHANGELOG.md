@@ -193,3 +193,16 @@
 - Added editable Instagram preview caption generation using structured venue and supplier Instagram usernames.
 - Updated Weddings management and Wedding Control Centre links to prioritise the Wedding Workspace.
 - Added migration 013; schema version advances to 13.
+
+
+## v1.3.1 — Wedding Workspace Quick Create & Asset Original Status
+- Added inline `+ Add new venue` to the Wedding Workspace.
+- New venues can be created with essential identity/location/contact fields and are linked to the Wedding immediately.
+- Added possible-match suggestions to reduce duplicate Venue creation.
+- Added inline `+ Create new supplier` to the Wedding Workspace.
+- New master suppliers are created and linked with a wedding-specific role in one flow.
+- Added possible-match suggestions to reduce duplicate Supplier Master records.
+- Instagram preview captions refresh from newly linked venue/supplier data.
+- Corrected Asset Library private-original status so secure R2 originals no longer appear as “Not yet stored” simply because they have no public URL.
+- Added Asset Library original-status filtering: Private original stored / Preview only.
+- No D1 migration; schema version remains 13.

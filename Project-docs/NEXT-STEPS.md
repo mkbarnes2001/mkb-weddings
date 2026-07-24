@@ -1,17 +1,20 @@
 # Next Steps
 
 ## Current baseline
-v1.3.0 adds the Unified Wedding Workspace on top of the proven v1.2 private-original delivery pipeline. A newly created wedding can now move through venue, suppliers, Client Gallery, full-resolution previews, Preview Set publishing and Instagram caption generation from one operational page.
+v1.3.1 refines the Unified Wedding Workspace so missing Venues and Suppliers can be created and linked inline, without leaving the wedding. It also corrects secure private-original status in the Asset Library and adds original-status filtering.
 
 ## Immediate validation
 1. Create a test wedding and confirm the success action opens the Wedding Workspace.
-2. Link a venue and several reusable suppliers.
-3. Create a linked Client Gallery.
-4. Upload 2–5 full-resolution JPEG previews from the Wedding Workspace.
-5. Confirm uploads automatically join the Wedding Day Preview Set.
-6. Add the Preview Set to the linked Venue plus at least one Moment and one photographer Gallery.
-7. Confirm only web derivatives appear publicly; secure originals remain downloadable only through authorized Client Gallery access.
-8. Generate and copy the Instagram preview caption and verify supplier handles are normalized correctly.
+2. Create one new Venue inline and confirm it is added to Admin → Venues and linked immediately.
+3. Create one new Supplier inline and confirm it is added to the Supplier Master Database and linked with the selected role.
+4. Verify possible-match suggestions appear for similar existing Venue/Supplier names.
+5. Create a linked Client Gallery.
+6. Upload 2–5 full-resolution JPEG previews from the Wedding Workspace.
+7. Confirm uploads automatically join the Wedding Day Preview Set.
+8. Add the Preview Set to the linked Venue plus at least one Moment and one photographer Gallery.
+9. Confirm only web derivatives appear publicly; secure originals remain downloadable only through authorized Client Gallery access.
+10. Open Asset Library and confirm uploaded originals show `Stored securely`, then test the Private original stored / Preview only filter.
+11. Generate and copy the Instagram preview caption and verify supplier handles are normalized correctly.
 
 ## Next engineering sequence
 1. Gallery Visitor Identity: optional required email before entry.
