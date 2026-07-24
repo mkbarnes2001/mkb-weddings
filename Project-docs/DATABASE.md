@@ -116,3 +116,16 @@ Rules:
 - gallery membership references canonical `assets.id` and never filenames;
 - existing `web`/`thumb` derivatives may be used as previews, but private originals are not implied or fabricated;
 - secure original download authorization is deferred until `asset_files.variant = 'original'` is populated by the high-volume upload pipeline.
+
+## Schema version 12
+Migration: `012_private_original_upload_and_secure_delivery.sql`
+
+Adds:
+- `asset_upload_sessions`
+- `asset_download_events`
+
+`asset_upload_sessions` stores workspace/gallery/asset ownership, client file fingerprint, private object key, R2 multipart upload ID, part size, accepted part ETags, processing state and completion timestamps.
+
+`asset_download_events` records authorised original deliveries by workspace, gallery, canonical asset and browser visitor key. It records delivery bytes and user agent, but does not store raw client IP addresses.
+
+No existing asset, image, gallery or R2 object is rewritten by migration 012.

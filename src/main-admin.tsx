@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import { AdminRoot } from "./AdminRoot";
 import "./index.css";
+import "./admin/admin-theme.css";
 
 const rootElement = document.getElementById("root");
 

@@ -31,6 +31,7 @@ export type ClientGalleryRecord = {
   assetCount: number;
   visibleAssetCount: number;
   favouriteCount: number;
+  downloadCount: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -58,4 +59,26 @@ export type ClientGalleryDetailPayload = {
   gallery: ClientGalleryRecord;
   assets: ClientGalleryAsset[];
   weddings: ClientGalleryWeddingOption[];
+};
+
+export type PrivateOriginalUploadedPart = {
+  partNumber: number;
+  etag: string;
+};
+
+export type PrivateOriginalUploadSession = {
+  id: string;
+  galleryId: string;
+  assetId: string;
+  originalFilename: string;
+  mimeType: string;
+  fileSize: number;
+  width: number;
+  height: number;
+  partSize: number;
+  status: "created" | "uploading" | "processing" | "complete" | "failed" | "aborted";
+  uploadedParts: PrivateOriginalUploadedPart[];
+  error: string;
+  createdAt: string;
+  updatedAt: string;
 };

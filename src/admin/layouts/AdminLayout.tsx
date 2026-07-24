@@ -32,7 +32,7 @@ const navItems = [
 
 export function AdminLayout() {
   return (
-    <div className="min-h-screen bg-[#f5f3ef] text-neutral-950">
+    <div className="admin-shell min-h-screen bg-[#f5f3ef] text-neutral-950">
       <div
         className="min-h-screen"
         style={{

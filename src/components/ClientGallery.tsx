@@ -90,27 +90,44 @@ function GalleryImage({
   );
 }
 
-function DownloadControl({ compact = false }: { compact?: boolean }) {
+function DownloadControl({
+  compact = false,
+  enabled,
+  busy,
+  onClick,
+}: {
+  compact?: boolean;
+  enabled: boolean;
+  busy?: boolean;
+  onClick?: () => void;
+}) {
   return (
-    <span
-      aria-label="Full-resolution download not yet available"
-      title="Full-resolution download will be enabled with secure original delivery"
+    <button
+      type="button"
+      disabled={!enabled || busy}
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick?.();
+      }}
+      aria-label={enabled ? "Download full-resolution original" : "Full-resolution original unavailable"}
+      title={enabled ? "Download full-resolution original" : "Full-resolution original unavailable"}
       style={{
         width: compact ? 32 : 38,
         height: compact ? 32 : 38,
         borderRadius: 999,
+        border: 0,
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
         background: "rgba(255,255,255,.92)",
         color: "#111",
         boxShadow: "0 3px 16px rgba(0,0,0,.14)",
-        opacity: .68,
-        cursor: "not-allowed",
+        opacity: enabled ? 1 : .58,
+        cursor: enabled && !busy ? "pointer" : "not-allowed",
       }}
     >
       <Download size={compact ? 15 : 17} strokeWidth={1.7} />
-    </span>
+    </button>
   );
 }
 
@@ -126,6 +143,7 @@ export function ClientGallery() {
   const [error, setError] = useState("");
   const [favourites, setFavourites] = useState<Set<string>>(new Set());
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [downloading, setDownloading] = useState<Set<string>>(new Set());
 
   const load = async (attemptPin = "") => {
     setError("");
@@ -167,6 +185,44 @@ export function ClientGallery() {
       setError(err instanceof Error ? err.message : "Unable to unlock gallery.");
     } finally {
       setUnlocking(false);
+    }
+  };
+
+  const downloadOriginal = async (image: ClientGalleryImage) => {
+    if (!payload?.allowDownloads || !image.hasOriginal || downloading.has(image.assetId)) return;
+    setError("");
+    setDownloading((current) => new Set(current).add(image.assetId));
+    try {
+      const response = await fetch(
+        `/api/public/client-galleries/${encodeURIComponent(token)}/assets/${encodeURIComponent(image.assetId)}/download`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pin, visitorKey: visitor }),
+          cache: "no-store",
+        },
+      );
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body?.error || "Unable to download original.");
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = image.filename || "photograph.jpg";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to download original.");
+    } finally {
+      setDownloading((current) => {
+        const next = new Set(current);
+        next.delete(image.assetId);
+        return next;
+      });
     }
   };
 
@@ -310,13 +366,14 @@ export function ClientGallery() {
       )}
 
       <main className="max-w-[1500px] mx-auto px-4 md:px-8 py-10 md:py-12">
+        {error ? <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div> : null}
         {payload.intro ? <p style={{ fontFamily: '"Canela", "Playfair Display", Georgia, serif', fontSize: "clamp(1.15rem,2vw,1.55rem)", lineHeight: 1.55, maxWidth: 760, margin: "0 auto 42px", textAlign: "center", color: "#3d3d3d" }}>{payload.intro}</p> : null}
 
         <div className="flex items-center justify-between gap-4 mb-5 flex-wrap border-b border-black/10 pb-4">
           <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">{images.length} photographs</p>
           <div className="flex items-center gap-4 text-xs text-neutral-500">
             {payload.allowFavourites && favouriteImages.length ? <span>Your favourites are saved on this device.</span> : null}
-            <span className="inline-flex items-center gap-1.5"><Download size={14} /> Full-resolution downloads follow in the next delivery phase.</span>
+            <span className="inline-flex items-center gap-1.5"><Download size={14} /> {payload.allowDownloads ? `${images.filter((image) => image.hasOriginal).length} originals available` : "Downloads disabled"}</span>
           </div>
         </div>
 
@@ -327,7 +384,7 @@ export function ClientGallery() {
                 <GalleryImage image={image} baseOrigin={publicAssetOrigin} mode="tile" />
               </button>
               <div style={{ position: "absolute", top: 9, right: 9, display: "flex", alignItems: "center", gap: 7 }}>
-                <DownloadControl compact />
+                <DownloadControl compact enabled={payload.allowDownloads && image.hasOriginal} busy={downloading.has(image.assetId)} onClick={() => downloadOriginal(image)} />
                 {payload.allowFavourites ? (
                   <button onClick={() => toggleFavourite(image.assetId)} aria-label={favourites.has(image.assetId) ? "Remove favourite" : "Add favourite"} title={favourites.has(image.assetId) ? "Remove favourite" : "Add favourite"} style={{ width: 32, height: 32, borderRadius: 999, border: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,.92)", color: "#111", boxShadow: "0 3px 16px rgba(0,0,0,.14)", cursor: "pointer" }}>
                     <Heart size={15} strokeWidth={1.7} fill={favourites.has(image.assetId) ? "currentColor" : "none"} />
@@ -351,7 +408,7 @@ export function ClientGallery() {
             <GalleryImage image={images[lightboxIndex]} baseOrigin={publicAssetOrigin} mode="lightbox" />
           </div>
           <div style={{ position: "absolute", bottom: 22, display: "flex", alignItems: "center", gap: 9 }}>
-            <DownloadControl />
+            <DownloadControl enabled={payload.allowDownloads && images[lightboxIndex].hasOriginal} busy={downloading.has(images[lightboxIndex].assetId)} onClick={() => downloadOriginal(images[lightboxIndex])} />
             {payload.allowFavourites ? <button onClick={() => toggleFavourite(images[lightboxIndex].assetId)} className="rounded-full bg-white px-4 py-2 inline-flex items-center gap-2 text-sm"><Heart className="h-4 w-4" fill={favourites.has(images[lightboxIndex].assetId) ? "currentColor" : "none"} /> Favourite</button> : null}
           </div>
         </div>

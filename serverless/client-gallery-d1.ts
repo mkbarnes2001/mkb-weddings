@@ -111,6 +111,7 @@ function mapGallery(row: any) {
   const assetCount = number(row?.asset_count);
   const visibleAssetCount = number(row?.visible_asset_count);
   const favouriteCount = number(row?.favourite_count);
+  const downloadCount = number(row?.download_count);
   return {
     id: text(row?.id),
     workspaceId: text(row?.workspace_id),
@@ -133,6 +134,7 @@ function mapGallery(row: any) {
     assetCount,
     visibleAssetCount,
     favouriteCount,
+    downloadCount,
     createdAt: text(row?.created_at),
     updatedAt: text(row?.updated_at),
   };
@@ -152,14 +154,16 @@ async function galleryBaseRow(db: D1Db, id: string, workspaceId: string) {
       w.title AS wedding_title,
       w.couple AS wedding_couple,
       COUNT(DISTINCT cga.asset_id) AS asset_count,
-      SUM(CASE WHEN cga.hidden = 0 THEN 1 ELSE 0 END) AS visible_asset_count,
+      COUNT(DISTINCT CASE WHEN cga.hidden = 0 THEN cga.asset_id END) AS visible_asset_count,
       COUNT(DISTINCT cgf.asset_id || ':' || cgf.visitor_key) AS favourite_count,
+      COUNT(DISTINCT ade.id) AS download_count,
       COALESCE(cover_thumb.url, '') AS cover_thumb,
       COALESCE(cover_web.url, '') AS cover_web
     FROM client_galleries cg
     LEFT JOIN weddings w ON w.slug = cg.wedding_slug
     LEFT JOIN client_gallery_assets cga ON cga.gallery_id = cg.id
     LEFT JOIN client_gallery_favourites cgf ON cgf.gallery_id = cg.id
+    LEFT JOIN asset_download_events ade ON ade.gallery_id = cg.id
     LEFT JOIN asset_files cover_thumb
       ON cover_thumb.asset_id = cg.cover_asset_id
       AND cover_thumb.variant = 'thumb'
@@ -200,14 +204,16 @@ export async function listClientGalleries(db: D1Db) {
         w.title AS wedding_title,
         w.couple AS wedding_couple,
         COUNT(DISTINCT cga.asset_id) AS asset_count,
-        SUM(CASE WHEN cga.hidden = 0 THEN 1 ELSE 0 END) AS visible_asset_count,
+        COUNT(DISTINCT CASE WHEN cga.hidden = 0 THEN cga.asset_id END) AS visible_asset_count,
         COUNT(DISTINCT cgf.asset_id || ':' || cgf.visitor_key) AS favourite_count,
+        COUNT(DISTINCT ade.id) AS download_count,
         COALESCE(cover_thumb.url, '') AS cover_thumb,
         COALESCE(cover_web.url, '') AS cover_web
       FROM client_galleries cg
       LEFT JOIN weddings w ON w.slug = cg.wedding_slug
       LEFT JOIN client_gallery_assets cga ON cga.gallery_id = cg.id
       LEFT JOIN client_gallery_favourites cgf ON cgf.gallery_id = cg.id
+      LEFT JOIN asset_download_events ade ON ade.gallery_id = cg.id
       LEFT JOIN asset_files cover_thumb
         ON cover_thumb.asset_id = cg.cover_asset_id
         AND cover_thumb.variant = 'thumb'
@@ -636,4 +642,84 @@ export async function setPublicFavourite(db: D1Db, token: string, input: any) {
   }
 
   return { status: 200, body: { ok: true, favouriteAssetIds: await favouriteIds(db, galleryId, visitorKey) } };
+}
+
+export async function authoriseClientGalleryOriginalDownload(db: D1Db, token: string, input: any) {
+  const row = await publicGalleryRow(db, token);
+  const pin = text(input?.pin);
+  const access = await verifyPublicAccess(row, pin);
+  if (!access.ok) return { status: access.status, error: access.error } as const;
+  if (number(row?.allow_downloads) !== 1) {
+    return { status: 403, error: "Downloads are disabled for this gallery." } as const;
+  }
+
+  const galleryId = text(row.id);
+  const workspaceId = text(row.workspace_id);
+  const assetId = text(input?.assetId);
+  if (!assetId) return { status: 400, error: "Asset is required." } as const;
+
+  const asset = await db.prepare(`
+    SELECT
+      a.id,
+      a.original_filename,
+      a.filename,
+      af.storage_key,
+      af.mime_type,
+      af.file_size
+    FROM client_gallery_assets cga
+    JOIN assets a ON a.id = cga.asset_id
+    JOIN asset_files af
+      ON af.asset_id = a.id
+      AND af.variant = 'original'
+      AND af.status = 'active'
+      AND af.access_level = 'private'
+    WHERE cga.gallery_id = ?
+      AND cga.asset_id = ?
+      AND cga.hidden = 0
+      AND a.status = 'active'
+    LIMIT 1
+  `).bind(galleryId, assetId).first();
+
+  if (!asset || !text(asset.storage_key)) {
+    return { status: 404, error: "Full-resolution original is not available for this image." } as const;
+  }
+
+  return {
+    status: 200,
+    workspaceId,
+    galleryId,
+    assetId: text(asset.id),
+    filename: text(asset.original_filename || asset.filename || "photograph.jpg"),
+    storageKey: text(asset.storage_key),
+    mimeType: text(asset.mime_type || "image/jpeg"),
+    fileSize: number(asset.file_size),
+    visitorKey: text(input?.visitorKey).slice(0, 160),
+  } as const;
+}
+
+export async function recordClientGalleryDownload(
+  db: D1Db,
+  input: {
+    workspaceId: string;
+    galleryId: string;
+    assetId: string;
+    visitorKey?: string;
+    bytesSent?: number;
+    userAgent?: string;
+  },
+) {
+  await db.prepare(`
+    INSERT INTO asset_download_events (
+      id, workspace_id, gallery_id, asset_id, visitor_key,
+      delivery, bytes_sent, user_agent, created_at
+    ) VALUES (?, ?, ?, ?, ?, 'original', ?, ?, CURRENT_TIMESTAMP)
+  `).bind(
+    `asset_download_${crypto.randomUUID()}`,
+    text(input.workspaceId),
+    text(input.galleryId),
+    text(input.assetId),
+    text(input.visitorKey).slice(0, 160),
+    number(input.bytesSent),
+    text(input.userAgent).slice(0, 500),
+  ).run();
 }

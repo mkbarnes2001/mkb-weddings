@@ -144,3 +144,25 @@ A public gallery may reference the same `asset_id` as a private client gallery, 
 Client Galleries are workspace-owned delivery containers referencing canonical assets. A gallery share token is a capability URL and may optionally require a salted PBKDF2 PIN. Client favourites are keyed by gallery + browser visitor key + canonical asset ID.
 
 Current MKB public derivatives can be reused as previews for foundation testing, but they are not considered private originals. Future client uploads must store originals privately and expose only authorized derivatives/download responses.
+
+## Private original storage and delivery — v1.2
+Private client delivery uses two distinct R2 bindings:
+
+- `MKB_PRIVATE_ASSETS`: non-public original JPEG storage;
+- `MKB_IMAGES`: display derivatives and thumbnails.
+
+Original object layout:
+`workspaces/{workspace_id}/assets/{asset_id}/original/{safe_filename}.jpg`
+
+Derivative layout:
+- `workspaces/{workspace_id}/assets/{asset_id}/web/display.webp`
+- `workspaces/{workspace_id}/assets/{asset_id}/thumb/thumb.webp`
+
+A browser upload is restartable by re-selecting the same file. The client fingerprint (`name:size:lastModified`) locates an incomplete upload session, and previously accepted multipart parts are skipped.
+
+Security invariants:
+- private original storage keys never appear in public gallery payloads;
+- public download authorization checks gallery token, live state, expiry, optional PIN, download permission, visible membership and private-original availability;
+- downloads are streamed through the Function rather than redirected to R2;
+- download auditing stores gallery/asset/visitor metadata but not raw IP addresses;
+- existing website-only assets remain preview-only because no original is fabricated.

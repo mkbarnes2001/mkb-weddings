@@ -6,7 +6,7 @@ import type { MomentGalleryPayload, MomentRepositoryDocument } from "../types/mo
 import type { CustomCollection, CustomCollectionGalleryPayload, CustomCollectionMembershipPayload } from "../types/customCollection";
 import type { VenueDocument, VenueSummary } from "../types/venue";
 import type { AssetLibraryFilters, AssetLibraryPayload } from "../types/asset";
-import type { ClientGalleryDetailPayload, ClientGalleryListPayload, ClientGalleryRecord } from "../types/clientGallery";
+import type { ClientGalleryDetailPayload, ClientGalleryListPayload, ClientGalleryRecord, PrivateOriginalUploadSession, PrivateOriginalUploadedPart } from "../types/clientGallery";
 import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
@@ -468,6 +468,62 @@ export class AdminApiService {
     );
     const { ok: _ok, total: _total, ...detail } = result;
     return detail;
+  }
+
+
+  static async createPrivateOriginalUpload(
+    galleryId: string,
+    input: { filename: string; mimeType: string; fileSize: number; width: number; height: number; fingerprint: string },
+  ) {
+    return request<{ ok: true; resumed: boolean; session: PrivateOriginalUploadSession }>(
+      `/api/client-galleries/${encodeURIComponent(galleryId)}/uploads`,
+      { method: "POST", body: JSON.stringify(input) },
+    );
+  }
+
+  static async uploadPrivateOriginalPart(
+    galleryId: string,
+    sessionId: string,
+    partNumber: number,
+    body: Blob,
+  ) {
+    const response = await fetch(
+      `${API_BASE}/api/client-galleries/${encodeURIComponent(galleryId)}/uploads/${encodeURIComponent(sessionId)}/parts/${partNumber}`,
+      { method: "PUT", headers: { "Content-Type": "application/octet-stream" }, body },
+    );
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error((payload as ApiErrorPayload).error || `Part ${partNumber} failed (${response.status}).`);
+    return payload as { ok: true; partNumber: number; etag: string; uploadedParts: PrivateOriginalUploadedPart[] };
+  }
+
+  static async completePrivateOriginalUpload(
+    galleryId: string,
+    sessionId: string,
+    parts: PrivateOriginalUploadedPart[],
+  ) {
+    return request<{ ok: true; session: PrivateOriginalUploadSession }>(
+      `/api/client-galleries/${encodeURIComponent(galleryId)}/uploads/${encodeURIComponent(sessionId)}/complete`,
+      { method: "POST", body: JSON.stringify({ parts }) },
+    );
+  }
+
+  static async uploadPrivateOriginalDerivatives(
+    galleryId: string,
+    sessionId: string,
+    input: { web: Blob; thumb: Blob; width: number; height: number },
+  ) {
+    const form = new FormData();
+    form.set("web", new File([input.web], "display.webp", { type: "image/webp" }));
+    form.set("thumb", new File([input.thumb], "thumb.webp", { type: "image/webp" }));
+    form.set("width", String(input.width));
+    form.set("height", String(input.height));
+    const response = await fetch(
+      `${API_BASE}/api/client-galleries/${encodeURIComponent(galleryId)}/uploads/${encodeURIComponent(sessionId)}/derivatives`,
+      { method: "POST", body: form },
+    );
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error((payload as ApiErrorPayload).error || `Derivative upload failed (${response.status}).`);
+    return payload as { ok: true; session: PrivateOriginalUploadSession };
   }
 
   static async listVenues() {

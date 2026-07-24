@@ -1,0 +1,60 @@
+/* v1.2 — Photography Intelligence admin typography system */
+.admin-shell,
+.admin-shell button,
+.admin-shell input,
+.admin-shell select,
+.admin-shell textarea,
+.admin-shell label,
+.admin-shell p,
+.admin-shell span,
+.admin-shell li,
+.admin-shell a,
+.admin-shell table,
+.admin-shell th,
+.admin-shell td,
+.admin-shell small,
+.admin-shell h1,
+.admin-shell h2,
+.admin-shell h3,
+.admin-shell h4,
+.admin-shell h5,
+.admin-shell h6,
+.admin-shell .font-serif {
+  font-family: "Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.admin-shell {
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+
+.admin-shell h1,
+.admin-shell h2,
+.admin-shell h3,
+.admin-shell h4,
+.admin-shell .font-serif {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.admin-shell button,
+.admin-shell input,
+.admin-shell select,
+.admin-shell textarea {
+  font-size: 0.875rem;
+}
+
+.admin-shell button,
+.admin-shell nav a {
+  font-weight: 500;
+}
+
+.admin-shell input,
+.admin-shell select,
+.admin-shell textarea {
+  letter-spacing: 0;
+}
+
+.admin-shell .uppercase {
+  letter-spacing: 0.14em;
+}

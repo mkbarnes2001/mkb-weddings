@@ -113,3 +113,31 @@ Important boundary: existing MKB website derivatives are reused as gallery previ
 
 ## Immediate next major module
 High-volume private-original upload and derivative generation, secure original downloads and resumable delivery workflows.
+
+## Private Original Upload & Secure Delivery — v1.2.0
+The platform now supports full-resolution JPEG originals for Client Galleries without changing the existing 2,329 indexed public assets.
+
+Storage boundary:
+- `MKB_PRIVATE_ASSETS`: dedicated private R2 bucket for original JPEGs;
+- `MKB_IMAGES`: existing public/controlled R2 bucket for generated WebP previews and thumbnails;
+- D1 `asset_files.variant = 'original'`: private storage key only, with no public URL;
+- D1 `asset_files.variant = 'web'/'thumb'`: generated derivatives used for gallery display.
+
+Upload workflow:
+1. browser decodes the selected JPEG and prepares WebP display/thumbnail derivatives;
+2. the original uploads to private R2 in resumable 8 MB multipart chunks;
+3. D1 tracks uploaded parts in `asset_upload_sessions`;
+4. the multipart original is finalised;
+5. generated derivatives are stored in the existing image bucket;
+6. the canonical asset is immediately linked to the Client Gallery and linked Wedding where applicable.
+
+Secure delivery:
+- downloads require a live, unexpired gallery;
+- PIN validation is reused when enabled;
+- `allow_downloads` must be enabled;
+- the requested asset must be a visible gallery member with an active private original;
+- private R2 keys are never returned by the public API;
+- the download Function streams the object with attachment/no-store headers;
+- each successful delivery is recorded in `asset_download_events`.
+
+Admin typography is now centrally scoped through `src/admin/admin-theme.css`, using Montserrat consistently across navigation, headings, controls, cards, labels and tables. The public MKB site remains unchanged.

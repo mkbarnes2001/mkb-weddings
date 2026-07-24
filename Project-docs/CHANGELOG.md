@@ -165,3 +165,16 @@
 - Existing public web/thumb derivatives are reused as previews only; no existing R2 objects are copied.
 - Full-resolution downloads remain intentionally disabled until private `original` upload and authorization are implemented.
 - D1 schema version advances to 11.
+
+## v1.2.0 — Private Original Upload & Secure Delivery
+- Added a dedicated private-original multipart upload pipeline for full-resolution JPEGs.
+- Added resumable upload sessions with 8 MB parts, persisted uploaded-part state and automatic retry support.
+- Added browser-side generation of 2400px WebP display derivatives and 640px WebP thumbnails.
+- New original assets are created under canonical workspace-owned `assets.id` identities and linked directly to their Client Gallery and linked Wedding.
+- Added secure individual original downloads through token/PIN/status/expiry/membership authorization.
+- Private R2 storage keys are never exposed to public gallery clients.
+- Added download audit events and download totals in Client Gallery admin.
+- Activated per-image client download controls only when the gallery allows downloads and an original exists.
+- Added a dedicated `MKB_PRIVATE_ASSETS` R2 binding requirement for both admin and public Pages projects.
+- Applied Montserrat consistently across the full Admin application through a scoped central theme.
+- Added D1 migration 012; schema version advances to 12.
