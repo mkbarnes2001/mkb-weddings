@@ -6,6 +6,7 @@ import {
 import {
   archiveAdminWedding,
   createAdminWedding,
+  deleteAdminWeddingPermanently,
   getAdminWedding,
   getWeddingImages,
   getWeddingPublishPreview,
@@ -119,6 +120,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
 
     if (!action && context.request.method === "DELETE") {
+      const mode = new URL(context.request.url).searchParams.get("mode") || "archive";
+      if (mode === "permanent") {
+        const deletion = await deleteAdminWeddingPermanently(context.env.MKB_DB, slug);
+        return Response.json({ ok: true, deletion });
+      }
       const wedding = await archiveAdminWedding(context.env.MKB_DB, slug);
       return Response.json({ ok: true, wedding, backupPath: null });
     }

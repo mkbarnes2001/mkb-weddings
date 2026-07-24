@@ -1,8 +1,17 @@
 # Project State
 
 ## Version
-Current release: **v1.3.1 — Wedding Workspace Quick Create & Asset Original Status**.  
+Current release: **v1.3.3 — Wedding Navigation, Safe Deletion & Compact Supplier Table**.  
 Database schema version: **13**.
+
+
+## Wedding management refinement — v1.3.3
+- Wedding cards now expose a direct **Workspace** action so existing weddings can enter the unified operational workflow without remembering the route.
+- Wedding list/detail views provide **Archive** and guarded **Permanent delete** actions.
+- Permanent deletion is relationship-safe: canonical assets, private originals, master venues, master suppliers and non-live Client Galleries are preserved.
+- A live Client Gallery blocks permanent deletion until that gallery is archived.
+- Wedding Workspace supplier assignments use a compact table (Role / Supplier / Instagram / Remove) instead of large stacked cards.
+- No D1 migration; schema version remains **13**.
 
 ## Working production model
 - Cloudflare D1 is the structured source of truth.

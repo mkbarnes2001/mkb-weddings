@@ -1,7 +1,7 @@
 # Next Steps
 
 ## Current baseline
-v1.3.1 refines the Unified Wedding Workspace so missing Venues and Suppliers can be created and linked inline, without leaving the wedding. It also corrects secure private-original status in the Asset Library and adds original-status filtering.
+v1.3.3 keeps the Unified Wedding Workspace as the operational centre, makes it easier to enter from any existing Wedding, compacts the linked-supplier UI, and adds safe Archive/Permanent Delete record controls without deleting image assets.
 
 ## Immediate validation
 1. Create a test wedding and confirm the success action opens the Wedding Workspace.
@@ -15,6 +15,15 @@ v1.3.1 refines the Unified Wedding Workspace so missing Venues and Suppliers can
 9. Confirm only web derivatives appear publicly; secure originals remain downloadable only through authorized Client Gallery access.
 10. Open Asset Library and confirm uploaded originals show `Stored securely`, then test the Private original stored / Preview only filter.
 11. Generate and copy the Instagram preview caption and verify supplier handles are normalized correctly.
+
+
+## v1.3.3 validation
+1. Open Admin → Weddings and confirm every Wedding card has a compact **Workspace** action.
+2. Open an existing Wedding and confirm the Wedding Control Centre still exposes **Wedding Workspace** prominently.
+3. Confirm the Wedding Workspace supplier section displays a compact Role / Supplier / Instagram table.
+4. Archive a disposable test Wedding and confirm it remains in the repository under Archived with all assets preserved.
+5. Permanently delete a disposable test Wedding by typing `DELETE`; confirm the Wedding disappears while Asset Library items, master Venue and master Suppliers remain.
+6. Confirm a Wedding with a **live** Client Gallery cannot be permanently deleted until the gallery is archived.
 
 ## Next engineering sequence
 1. Gallery Visitor Identity: optional required email before entry.

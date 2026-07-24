@@ -402,6 +402,62 @@ export async function archiveAdminWedding(db: D1Db, slug: string) {
   return getAdminWedding(db, slug);
 }
 
+export async function deleteAdminWeddingPermanently(db: D1Db, slug: string) {
+  const row = await db.prepare(`SELECT slug, title, couple FROM weddings WHERE slug = ?`).bind(slug).first();
+  if (!row) throw httpError("Wedding not found.", 404);
+
+  const liveGalleryResult = await db.prepare(`
+    SELECT id, title
+    FROM client_galleries
+    WHERE wedding_slug = ? AND status = 'live'
+    ORDER BY updated_at DESC
+  `).bind(slug).all();
+  const liveGalleries = liveGalleryResult?.results || [];
+  if (liveGalleries.length) {
+    throw httpError(
+      "This wedding has a live Client Gallery and cannot be permanently deleted yet.",
+      409,
+      liveGalleries.map((gallery: any) => `Archive the Client Gallery first: ${text(gallery.title) || text(gallery.id)}`),
+    );
+  }
+
+  const statements = [
+    // Preserve Client Galleries and all canonical/private assets, but detach non-live galleries
+    // from the wedding being removed.
+    db.prepare(`UPDATE client_galleries SET wedding_slug = NULL, updated_at = CURRENT_TIMESTAMP WHERE wedding_slug = ?`).bind(slug),
+
+    // Remove wedding-specific Preview Set membership before deleting the parent sets.
+    db.prepare(`
+      DELETE FROM wedding_preview_assets
+      WHERE preview_set_id IN (SELECT id FROM wedding_preview_sets WHERE wedding_slug = ?)
+    `).bind(slug),
+    db.prepare(`DELETE FROM wedding_preview_sets WHERE wedding_slug = ?`).bind(slug),
+
+    // Remove relationships only. Canonical assets and R2 objects are deliberately retained.
+    db.prepare(`DELETE FROM asset_wedding_links WHERE wedding_slug = ?`).bind(slug),
+    db.prepare(`DELETE FROM wedding_supplier_links WHERE wedding_slug = ?`).bind(slug),
+    db.prepare(`DELETE FROM wedding_suppliers WHERE wedding_slug = ?`).bind(slug),
+    db.prepare(`DELETE FROM published_story_images WHERE wedding_slug = ?`).bind(slug),
+    db.prepare(`DELETE FROM story_images WHERE wedding_slug = ?`).bind(slug),
+    db.prepare(`DELETE FROM wedding_images WHERE wedding_slug = ?`).bind(slug),
+
+    // Legacy image rows remain available to the Asset Library; only their wedding ownership is cleared.
+    db.prepare(`UPDATE images SET wedding_slug = '', updated_at = CURRENT_TIMESTAMP WHERE wedding_slug = ?`).bind(slug),
+
+    db.prepare(`DELETE FROM weddings WHERE slug = ?`).bind(slug),
+  ];
+
+  await runBatches(db, statements);
+
+  return {
+    slug,
+    title: text(row.title),
+    couple: text(row.couple),
+    deleted: true,
+    assetsPreserved: true,
+  };
+}
+
 export async function getWeddingImages(db: D1Db, slug: string) {
   const result = await db.prepare(`
     SELECT

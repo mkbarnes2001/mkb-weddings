@@ -968,6 +968,22 @@ export class AdminApiService {
     );
   }
 
+  static async archiveWedding(slug: string) {
+    return request<{ ok: true; wedding: StoredWeddingDocument; backupPath: null }>(
+      `/api/weddings/${encodeURIComponent(slug)}`,
+      { method: "DELETE" },
+    );
+  }
+
+  static async deleteWeddingPermanently(slug: string) {
+    return request<{
+      ok: true;
+      deletion: { slug: string; title: string; couple: string; deleted: true; assetsPreserved: true };
+    }>(`/api/weddings/${encodeURIComponent(slug)}?mode=permanent`, {
+      method: "DELETE",
+    });
+  }
+
   static async getWeddingImages(slug: string) {
     const result = await request<{ ok: true; slug: string; document: ImageManagerDocument | null }>(`/api/weddings/${encodeURIComponent(slug)}/images`);
     return result.document;

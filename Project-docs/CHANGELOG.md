@@ -218,3 +218,13 @@
 - Simplified supplier add flow so the wedding role field only appears after a supplier is selected.
 - Replaced cramped pill-style action controls with compact rectangular action buttons; pills remain for statuses/tags.
 - No D1 migration; schema version remains 13.
+
+## v1.3.3 — Wedding Navigation, Safe Deletion & Compact Supplier Table
+- Added a direct Workspace action to every Wedding card while retaining the full Open Wedding Workspace action in the details pane/control centre.
+- Added Archive controls for normal non-destructive removal from active work.
+- Added guarded permanent Wedding deletion requiring the user to type `DELETE`.
+- Permanent deletion removes wedding-specific records/relationships only and preserves canonical assets, private originals, master venues, master suppliers and non-live Client Galleries.
+- Live Client Galleries block permanent deletion until archived.
+- Compactified Wedding Workspace supplier assignments into a table with Role, Supplier, Instagram and Remove columns.
+- No D1 migration; schema version remains 13.
+

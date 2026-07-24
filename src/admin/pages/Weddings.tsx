@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { FileText, GripVertical, Image as ImageIcon, Plus, Save, Search, Users } from "lucide-react";
+import { Archive, FileText, GripVertical, Image as ImageIcon, LayoutDashboard, Plus, Save, Search, Trash2, Users, X } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import { WeddingService } from "../services/WeddingService";
 import type { WeddingPublicationStatus, WeddingRecord } from "../types/wedding";
@@ -29,13 +29,23 @@ export function Weddings() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<WeddingRecord | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [destructiveBusy, setDestructiveBusy] = useState(false);
+
+  async function reloadWeddings(preferredSlug?: string) {
+    const service = await WeddingService.load();
+    const rows = service.getWeddings();
+    setWeddings(rows);
+    setActiveSlug((current) => {
+      const preferred = preferredSlug || current;
+      return preferred && rows.some((row) => row.slug === preferred) ? preferred : rows[0]?.slug || null;
+    });
+    return rows;
+  }
 
   useEffect(() => {
-    WeddingService.load().then((service) => {
-      const rows = service.getWeddings();
-      setWeddings(rows);
-      setActiveSlug(rows[0]?.slug || null);
-    }).catch((err) => setError(err instanceof Error ? err.message : "Unable to load weddings."));
+    reloadWeddings().catch((err) => setError(err instanceof Error ? err.message : "Unable to load weddings."));
   }, []);
 
   const filteredWeddings = useMemo(() => {
@@ -83,6 +93,37 @@ export function Weddings() {
     } finally { setSaving(false); }
   }
 
+  async function archiveWedding(wedding: WeddingRecord) {
+    if (!window.confirm(`Archive ${wedding.couple}? The wedding and all linked data will be preserved.`)) return;
+    setDestructiveBusy(true); setError(""); setMessage("");
+    try {
+      await AdminApiService.archiveWedding(wedding.slug);
+      await reloadWeddings(wedding.slug);
+      setMessage(`${wedding.couple} archived. Nothing was deleted.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to archive wedding.");
+    } finally {
+      setDestructiveBusy(false);
+    }
+  }
+
+  async function deleteWedding() {
+    if (!deleteTarget || deleteConfirm !== "DELETE") return;
+    setDestructiveBusy(true); setError(""); setMessage("");
+    try {
+      await AdminApiService.deleteWeddingPermanently(deleteTarget.slug);
+      const deletedName = deleteTarget.couple;
+      setDeleteTarget(null);
+      setDeleteConfirm("");
+      await reloadWeddings();
+      setMessage(`${deletedName} permanently deleted. Canonical assets, private originals, venues and suppliers were preserved.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to delete wedding.");
+    } finally {
+      setDestructiveBusy(false);
+    }
+  }
+
   if (!weddings.length && !error) return <div className="text-neutral-500">Loading weddings…</div>;
 
   const draftCount = weddings.filter((wedding) => wedding.publicationStatus === "draft").length;
@@ -126,7 +167,13 @@ export function Weddings() {
                   <div draggable onDragStart={(event) => { event.stopPropagation(); event.dataTransfer.effectAllowed = "move"; setDraggedSlug(wedding.slug); }} onDragEnd={() => setDraggedSlug(null)} style={{ position: "absolute", right: "10px", bottom: "10px", width: "38px", height: "38px", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "999px", background: "#fff", boxShadow: "0 6px 18px rgba(0,0,0,0.22)", cursor: "grab" }} title="Drag to reorder"><GripVertical className="h-5 w-5" /></div>
                   {!wedding.storyListVisible && wedding.storyStatus === "published" ? <span className="absolute left-2.5 top-2.5 rounded-full bg-black/80 px-2.5 py-1 text-[10px] text-white">Story hidden</span> : null}
                 </div>
-                <div className="p-3"><p className="truncate font-serif text-lg">{wedding.couple}</p><div className="mt-2"><span className={`rounded-full border px-2.5 py-1 text-[10px] ${publicationClasses(wedding.publicationStatus)}`}>{wedding.publicationStatus}</span></div></div>
+                <div className="p-3">
+                  <p className="truncate font-serif text-lg">{wedding.couple}</p>
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <span className={`rounded-full border px-2.5 py-1 text-[10px] ${publicationClasses(wedding.publicationStatus)}`}>{wedding.publicationStatus}</span>
+                    <Link to={`/admin/weddings/${wedding.slug}/workspace`} onClick={(event) => event.stopPropagation()} className="inline-flex items-center gap-1 rounded-lg border border-black/10 px-2 py-1 text-[10px] font-medium text-neutral-700 hover:bg-neutral-50"><LayoutDashboard className="h-3 w-3" />Workspace</Link>
+                  </div>
+                </div>
               </article>
             );
           })}
@@ -147,9 +194,39 @@ export function Weddings() {
 
             <Link to={`/admin/weddings/${active.slug}/workspace`} className="block w-full rounded-full bg-black px-5 py-3 text-center text-sm text-white">Open Wedding Workspace</Link>
             <div className="grid grid-cols-2 gap-2"><Link to={`/admin/weddings/${active.slug}/story`} className="flex items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm"><FileText className="h-4 w-4" />Story</Link><Link to={`/admin/weddings/${active.slug}/images`} className="flex items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm"><ImageIcon className="h-4 w-4" />Images</Link><Link to={`/admin/weddings/${active.slug}/suppliers`} className="flex items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm"><Users className="h-4 w-4" />Suppliers</Link><Link to={`/admin/weddings/${active.slug}/publish`} className="flex items-center justify-center rounded-full border border-black/10 px-4 py-2.5 text-sm">Publish</Link></div>
+            <div className="border-t border-black/10 pt-4">
+              <p className="mb-2 text-[11px] uppercase tracking-[0.12em] text-neutral-400">Record actions</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" disabled={destructiveBusy || active.publicationStatus === "archived"} onClick={() => archiveWedding(active)} className="admin-action-secondary text-xs"><Archive className="h-4 w-4" />{active.publicationStatus === "archived" ? "Archived" : "Archive"}</button>
+                <button type="button" disabled={destructiveBusy} onClick={() => { setDeleteTarget(active); setDeleteConfirm(""); setError(""); }} className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 hover:bg-red-100"><Trash2 className="h-4 w-4" />Delete</button>
+              </div>
+            </div>
           </div>}
         </aside>
       </section>
+
+      {deleteTarget ? (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 p-4" role="dialog" aria-modal="true" aria-labelledby="delete-wedding-title">
+          <div className="w-full max-w-lg rounded-[22px] bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.14em] text-red-600">Permanent deletion</p>
+                <h2 id="delete-wedding-title" className="mt-2 text-2xl font-semibold">Delete {deleteTarget.couple}?</h2>
+              </div>
+              <button type="button" onClick={() => { setDeleteTarget(null); setDeleteConfirm(""); }} className="admin-icon-button" aria-label="Close delete dialog"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="mt-4 rounded-xl border border-red-100 bg-red-50 p-4 text-sm leading-relaxed text-red-900">
+              This permanently removes the wedding record, wedding-specific supplier links, preview sets, story links and wedding assignments. Canonical assets, private originals, master venues, master suppliers and non-live Client Galleries are preserved. A live Client Gallery will block deletion until it is archived.
+            </div>
+            <label className="mt-5 block text-sm font-medium">Type <strong>DELETE</strong> to confirm</label>
+            <input autoFocus value={deleteConfirm} onChange={(event) => setDeleteConfirm(event.target.value)} className="mt-2 w-full rounded-xl border border-black/15 px-3 py-3" placeholder="DELETE" />
+            <div className="mt-5 flex justify-end gap-2">
+              <button type="button" onClick={() => { setDeleteTarget(null); setDeleteConfirm(""); }} className="admin-action-secondary">Cancel</button>
+              <button type="button" disabled={destructiveBusy || deleteConfirm !== "DELETE"} onClick={deleteWedding} className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-[10px] border border-red-700 bg-red-700 px-4 font-semibold text-white disabled:opacity-40"><Trash2 className="h-4 w-4" />{destructiveBusy ? "Deleting…" : "Permanently delete wedding"}</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

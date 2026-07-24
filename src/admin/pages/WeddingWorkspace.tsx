@@ -749,12 +749,23 @@ export function WeddingWorkspace() {
                   <button type="button" onClick={() => setShowNewSupplier((value) => !value)} className="admin-action-secondary">{showNewSupplier ? "Cancel new supplier" : "Create new supplier"}</button>
                 </div>
 
-                {suppliers.length ? <div className="mt-4 grid gap-2">{suppliers.map((row, index) => (
-                  <div key={`${row.supplierId}-${row.role}-${index}`} className="flex items-center justify-between gap-4 rounded-xl border border-black/10 bg-white px-4 py-3">
-                    <div className="min-w-0"><span className="text-xs uppercase tracking-[0.08em] text-neutral-400">{row.role}</span><strong className="ml-3 text-sm font-medium">{row.name}</strong>{row.instagram ? <span className="ml-2 text-xs text-neutral-400">{cleanInstagram(row.instagram)}</span> : null}</div>
-                    <button title="Remove" disabled={busy} onClick={() => removeSupplier(index)} className="admin-icon-button"><X className="h-4 w-4" /></button>
+                {suppliers.length ? (
+                  <div className="mt-4 overflow-x-auto rounded-xl border border-black/10 bg-white">
+                    <div style={{ minWidth: "620px" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "150px minmax(0,1fr) minmax(150px,0.8fr) 44px", gap: "12px", alignItems: "center" }} className="border-b border-black/10 bg-neutral-50 px-3 py-2 text-[11px] uppercase tracking-[0.1em] text-neutral-400">
+                        <span>Role</span><span>Supplier</span><span>Instagram</span><span />
+                      </div>
+                      {suppliers.map((row, index) => (
+                        <div key={`${row.supplierId}-${row.role}-${index}`} style={{ display: "grid", gridTemplateColumns: "150px minmax(0,1fr) minmax(150px,0.8fr) 44px", gap: "12px", alignItems: "center" }} className="border-b border-black/5 px-3 py-2 last:border-b-0">
+                          <span className="truncate text-xs font-medium text-neutral-500">{row.role || "Supplier"}</span>
+                          <strong className="truncate text-sm font-medium text-neutral-900">{row.name}</strong>
+                          <span className="truncate text-xs text-neutral-400">{row.instagram ? cleanInstagram(row.instagram) : "—"}</span>
+                          <button type="button" title={`Remove ${row.name}`} aria-label={`Remove ${row.name}`} disabled={busy} onClick={() => removeSupplier(index)} className="admin-icon-button"><X className="h-4 w-4" /></button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}</div> : <p className="mt-4 text-sm text-neutral-500">No suppliers linked yet.</p>}
+                ) : <p className="mt-4 text-sm text-neutral-500">No suppliers linked yet.</p>}
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
                   <select value={selectedSupplierId} onChange={(event) => { setSelectedSupplierId(event.target.value); if (!event.target.value) setSupplierRole(""); }} className="min-w-0 rounded-xl border border-black/15 bg-white px-3 py-3">

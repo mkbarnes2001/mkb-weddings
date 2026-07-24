@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
+  Archive,
   ArrowLeft,
   BookOpen,
   FilePenLine,
@@ -10,19 +11,27 @@ import {
   SearchCheck,
   Send,
   Sparkles,
+  Trash2,
   Users,
+  X,
 } from "lucide-react";
 import { WeddingService } from "../services/WeddingService";
 import type { WeddingRecord } from "../types/wedding";
 import { ProgressBar } from "../components/ProgressBar";
 import { StatusBadge } from "../components/Badge";
 import { SupplierService } from "../services/SupplierService";
+import { AdminApiService } from "../services/AdminApiService";
 
 export function WeddingDetail() {
   const { slug } = useParams();
+  const navigate = useNavigate();
 
   const [weddings, setWeddings] = useState<WeddingRecord[]>([]);
   const [supplierCount, setSupplierCount] = useState(0);
+  const [recordError, setRecordError] = useState("");
+  const [recordBusy, setRecordBusy] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
 
   useEffect(() => {
     WeddingService.load().then((service) =>
@@ -71,6 +80,32 @@ export function WeddingDetail() {
 
   const isManagedWedding = wedding.storage === "d1";
 
+  async function archiveWedding() {
+    if (!window.confirm(`Archive ${wedding.couple}? Nothing will be deleted.`)) return;
+    setRecordBusy(true); setRecordError("");
+    try {
+      await AdminApiService.archiveWedding(wedding.slug);
+      window.location.reload();
+    } catch (err) {
+      setRecordError(err instanceof Error ? err.message : "Unable to archive wedding.");
+    } finally {
+      setRecordBusy(false);
+    }
+  }
+
+  async function permanentlyDeleteWedding() {
+    if (deleteConfirm !== "DELETE") return;
+    setRecordBusy(true); setRecordError("");
+    try {
+      await AdminApiService.deleteWeddingPermanently(wedding.slug);
+      navigate("/admin/weddings", { replace: true });
+    } catch (err) {
+      setRecordError(err instanceof Error ? err.message : "Unable to delete wedding.");
+    } finally {
+      setRecordBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-7">
       <Link
@@ -80,6 +115,8 @@ export function WeddingDetail() {
         <ArrowLeft className="h-4 w-4" />
         Back to weddings
       </Link>
+
+      {recordError ? <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{recordError}</div> : null}
 
       <section className="overflow-hidden rounded-[32px] bg-black text-white">
         <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr]">
@@ -305,6 +342,34 @@ export function WeddingDetail() {
           </div>
         </div>
       </section>
+
+      <section className="rounded-[28px] border border-red-100 bg-white p-7">
+        <p className="text-xs uppercase tracking-[0.14em] text-red-600">Record actions</p>
+        <h2 className="mt-2 text-2xl font-semibold">Archive or delete this wedding</h2>
+        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-neutral-600">Archive for normal removal from active work. Permanent deletion removes only the wedding record and wedding-specific relationships; canonical assets, private originals, master venues and suppliers are preserved.</p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <button type="button" disabled={recordBusy || wedding.publicationStatus === "archived"} onClick={archiveWedding} className="admin-action-secondary"><Archive className="h-4 w-4" />{wedding.publicationStatus === "archived" ? "Archived" : "Archive wedding"}</button>
+          <button type="button" disabled={recordBusy} onClick={() => { setDeleteOpen(true); setDeleteConfirm(""); setRecordError(""); }} className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-[10px] border border-red-700 bg-red-700 px-4 font-semibold text-white"><Trash2 className="h-4 w-4" />Delete permanently</button>
+        </div>
+      </section>
+
+      {deleteOpen ? (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 p-4" role="dialog" aria-modal="true" aria-labelledby="detail-delete-title">
+          <div className="w-full max-w-lg rounded-[22px] bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div><p className="text-xs uppercase tracking-[0.14em] text-red-600">Permanent deletion</p><h2 id="detail-delete-title" className="mt-2 text-2xl font-semibold">Delete {wedding.couple}?</h2></div>
+              <button type="button" onClick={() => setDeleteOpen(false)} className="admin-icon-button" aria-label="Close delete dialog"><X className="h-4 w-4" /></button>
+            </div>
+            <p className="mt-4 rounded-xl border border-red-100 bg-red-50 p-4 text-sm leading-relaxed text-red-900">A live Client Gallery blocks permanent deletion until it is archived. Non-live galleries and all image assets remain preserved.</p>
+            <label className="mt-5 block text-sm font-medium">Type <strong>DELETE</strong> to confirm</label>
+            <input autoFocus value={deleteConfirm} onChange={(event) => setDeleteConfirm(event.target.value)} className="mt-2 w-full rounded-xl border border-black/15 px-3 py-3" placeholder="DELETE" />
+            <div className="mt-5 flex justify-end gap-2">
+              <button type="button" onClick={() => setDeleteOpen(false)} className="admin-action-secondary">Cancel</button>
+              <button type="button" disabled={recordBusy || deleteConfirm !== "DELETE"} onClick={permanentlyDeleteWedding} className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-[10px] border border-red-700 bg-red-700 px-4 font-semibold text-white disabled:opacity-40"><Trash2 className="h-4 w-4" />{recordBusy ? "Deleting…" : "Permanently delete"}</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
