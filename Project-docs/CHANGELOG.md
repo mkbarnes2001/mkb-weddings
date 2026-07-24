@@ -274,3 +274,12 @@
 - Bulk downloads stream private R2 originals and do not expose storage keys or permanent public URLs.
 - Added ZIP audit events using the existing `asset_download_events` table.
 - No D1 migration; schema version remains 16.
+
+## v1.5.3 — Client Gallery Admin Tabs
+- Split Client Gallery Admin into two focused tabs: **Gallery & access** and **Selections & favourites**.
+- Moved favourites review/download controls out of the already-busy Gallery settings sidebar.
+- Moved selection requests, client responses, filename/CSV tools, reopen controls and full-resolution download actions into the dedicated Selections & favourites tab.
+- Preserved the existing thumbnail review and secure streamed bulk-original download workflow.
+- Kept visitor access, authorised client emails, recent visitors, uploads and gallery image management on the Gallery & access tab.
+- No D1 migration; schema version remains 16.
+

@@ -1,7 +1,7 @@
 # Project State
 
 ## Version
-Current release: **v1.5.2 — Favourite Review & Full-Resolution Download**.  
+Current release: **v1.5.3 — Client Gallery Admin Tabs**.  
 Database schema version: **16**.
 
 
@@ -30,6 +30,15 @@ New tables:
 - `client_gallery_selections`
 - `client_gallery_selection_assets`
 
+
+
+## Client Gallery Admin Tabs — v1.5.3
+Client Gallery administration is now split into two focused working areas:
+
+- **Gallery & access** — gallery settings, privacy/access controls, authorised client emails, recent visitors, full-resolution uploads, Asset Library import and image management.
+- **Selections & favourites** — favourite thumbnail review/downloads, formal selection requests, client responses, filename/CSV export, reopen controls and bulk private-original downloads.
+
+The change is presentation-only: all existing favourite, selection, identity and secure-download data models remain unchanged. No D1 migration; schema version remains **16**.
 
 ## Favourite Review & Full-Resolution Download — v1.5.2
 Client Gallery Admin now includes an operational review/download workflow for favourites and formal selections.

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   AlertCircle,
   ArrowLeft,
@@ -43,6 +43,8 @@ type UploadItem = {
 
 export function ClientGalleryEditor() {
   const { id = "" } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") === "selections" ? "selections" : "gallery";
   const [detail, setDetail] = useState<ClientGalleryDetailPayload | null>(null);
   const [draft, setDraft] = useState<Partial<ClientGalleryRecord> & { pin?: string }>({});
   const [assetSearch, setAssetSearch] = useState("");
@@ -277,14 +279,41 @@ export function ClientGalleryEditor() {
         <ArrowLeft className="h-4 w-4" /> Client Galleries
       </Link>
 
-      <div className="mt-5" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 390px", gap: 24, alignItems: "start" }}>
-        <main>
+      <div className="mt-5 flex items-end justify-between gap-4 flex-wrap">
+        <div>
           <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">Private delivery</p>
           <h1 className="text-4xl mt-2" style={{ fontWeight: 600, letterSpacing: "-.025em" }}>{gallery.title}</h1>
           <p className="mt-3 text-neutral-600">
             {gallery.assetCount} images · {originalCount} private originals · {gallery.favouriteCount} favourites · {gallery.downloadCount || 0} downloads · {gallery.visitorCount || 0} visitors · {gallery.status}
           </p>
+        </div>
+      </div>
 
+      <nav className="mt-6 flex gap-2" style={{ borderBottom: "1px solid rgba(0,0,0,.10)" }} aria-label="Client gallery sections">
+        <button
+          type="button"
+          onClick={() => setSearchParams({})}
+          className="px-4 py-3 text-sm font-medium"
+          style={{ marginBottom: -1, borderBottom: activeTab === "gallery" ? "2px solid #111" : "2px solid transparent", color: activeTab === "gallery" ? "#111" : "#737373" }}
+        >
+          Gallery & access
+        </button>
+        <button
+          type="button"
+          onClick={() => setSearchParams({ tab: "selections" })}
+          className="px-4 py-3 text-sm font-medium inline-flex items-center gap-2"
+          style={{ marginBottom: -1, borderBottom: activeTab === "selections" ? "2px solid #111" : "2px solid transparent", color: activeTab === "selections" ? "#111" : "#737373" }}
+        >
+          <Heart className="h-4 w-4" /> Selections & favourites
+        </button>
+      </nav>
+
+      {message ? <p className="mt-4 rounded-xl px-4 py-3 text-sm" style={{ background: "#f0fdf4", color: "#15803d" }}>{message}</p> : null}
+      {error ? <p className="mt-4 rounded-xl px-4 py-3 text-sm" style={{ background: "#fef2f2", color: "#b91c1c" }}>{error}</p> : null}
+
+      {activeTab === "gallery" ? (
+      <div className="mt-5" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 390px", gap: 24, alignItems: "start" }}>
+        <main>
           <div className="mt-7 rounded-3xl border border-black/15 bg-white p-5 flex gap-3 flex-wrap">
             <button disabled={busy || !draft.weddingSlug} onClick={() => mutateAssets({ action: "importWedding" }, "Wedding assets imported.")} className="rounded-full bg-black text-white px-5 py-3 inline-flex items-center gap-2 disabled:opacity-40">
               <ImagePlus className="h-4 w-4" /> Import wedding assets
@@ -451,94 +480,111 @@ export function ClientGalleryEditor() {
             </div>
 
             <div className="border-t border-black/10 pt-5">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2"><Heart className="h-4 w-4" /><h3 className="text-sm font-semibold">Favourites</h3></div>
-                  <p className="mt-1 text-xs text-neutral-500">Review client favourites as thumbnails and download the private full-resolution originals for album design.</p>
-                </div>
-                <span className="text-xs text-neutral-500">{gallery.favouriteCount} favourite{gallery.favouriteCount === 1 ? "" : "s"}</span>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Link
-                  to={`/admin/client-galleries/${id}/review?source=favourites&group=combined`}
-                  className="rounded-lg border border-black/15 px-3 py-2 text-sm inline-flex items-center gap-2"
-                >
-                  <Eye className="h-4 w-4" /> View favourites
-                </Link>
-                {gallery.favouriteCount > 0 ? (
-                  <a
-                    href={AdminApiService.clientGalleryBulkDownloadUrl(id, { source: "favourites", group: "combined" })}
-                    className="rounded-lg bg-black text-white px-3 py-2 text-sm inline-flex items-center gap-2"
-                  >
-                    <Download className="h-4 w-4" /> Download all originals
-                  </a>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="border-t border-black/10 pt-5">
               <div className="flex items-center gap-2"><Users className="h-4 w-4" /><h3 className="text-sm font-semibold">Recent visitors</h3></div>
               <p className="mt-1 text-xs text-neutral-500">{detail.visitors.length ? `${detail.visitors.length} identified visitor${detail.visitors.length === 1 ? "" : "s"}` : "No identified visitors yet."}</p>
               {detail.visitors.length ? <div className="mt-3 max-h-56 overflow-auto space-y-2">{detail.visitors.slice(0, 20).map((visitor) => <div key={visitor.visitorKey} className="rounded-lg bg-neutral-50 p-2"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><p className="text-xs font-medium truncate">{visitor.email || "Anonymous"}</p><p className="text-[10px] uppercase tracking-[0.08em] text-neutral-400">{visitor.role.replaceAll("_", " ")} · {visitor.visitCount} visit{visitor.visitCount === 1 ? "" : "s"}</p></div>{visitor.canDownloadOriginals ? <Download className="h-3.5 w-3.5" /> : null}</div></div>)}</div> : null}
             </div>
 
-            <div className="border-t border-black/10 pt-5">
-              <div className="flex items-center gap-2"><ClipboardList className="h-4 w-4" /><h3 className="text-sm font-semibold">Client selections</h3></div>
-              <p className="mt-1 text-xs text-neutral-500">Create named shortlists for albums, prints, cards or any client decision.</p>
-
-              {detail.selectionRequests.length ? <div className="mt-3 space-y-2">
-                {detail.selectionRequests.map((request) => {
-                  const requestSelections = detail.selections.filter((selection) => selection.requestId === request.id);
-                  return <div key={request.id} className={`rounded-xl border p-3 ${request.status === "archived" ? "border-black/5 bg-neutral-50 opacity-60" : "border-black/10 bg-white"}`}>
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium">{request.name}</p>
-                        <p className="text-[11px] text-neutral-500 mt-1">{request.instructions || "No instructions"}</p>
-                        <p className="text-[10px] uppercase tracking-[0.08em] text-neutral-400 mt-1">{request.minImages ? `min ${request.minImages}` : "no minimum"} · {request.maxImages ? `max ${request.maxImages}` : "no maximum"} · {requestSelections.length} response{requestSelections.length === 1 ? "" : "s"}</p>
-                      </div>
-                      {request.status === "active" ? <button title="Archive selection request" disabled={busy} onClick={() => mutateSelection({ action: "archiveRequest", requestId: request.id }, "Selection request archived.")} className="rounded-lg border border-black/10 p-2 disabled:opacity-40"><Trash2 className="h-3.5 w-3.5" /></button> : null}
-                    </div>
-                  </div>;
-                })}
-              </div> : <p className="mt-3 text-xs text-neutral-400">No selection requests yet.</p>}
-
-              <div className="mt-3 rounded-xl border border-black/10 p-3 space-y-2">
-                <input value={selectionDraft.name} onChange={(e) => setSelectionDraft({ ...selectionDraft, name: e.target.value })} placeholder="Selection name" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm" />
-                <textarea value={selectionDraft.instructions} onChange={(e) => setSelectionDraft({ ...selectionDraft, instructions: e.target.value })} rows={2} placeholder="Instructions" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm" />
-                <div className="grid grid-cols-2 gap-2">
-                  <label className="text-[10px] uppercase tracking-[0.08em] text-neutral-500">Min<input type="number" min="0" value={selectionDraft.minImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, minImages: Math.max(0, Number(e.target.value) || 0) })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2 text-sm" /></label>
-                  <label className="text-[10px] uppercase tracking-[0.08em] text-neutral-500">Max<input type="number" min="0" value={selectionDraft.maxImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, maxImages: Math.max(0, Number(e.target.value) || 0) })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2 text-sm" /></label>
-                </div>
-                <button disabled={busy || !selectionDraft.name.trim()} onClick={createSelectionRequest} className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm inline-flex items-center justify-center gap-2 disabled:opacity-40"><Plus className="h-4 w-4" /> Create selection request</button>
-              </div>
-
-              {detail.selections.length ? <div className="mt-4 space-y-2">
-                <p className="text-[10px] uppercase tracking-[0.12em] text-neutral-500">Responses</p>
-                {detail.selections.map((selection) => <div key={selection.id} className="rounded-xl bg-neutral-50 border border-black/10 p-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold truncate">{selection.requestName}</p>
-                      <p className="text-xs text-neutral-600 truncate">{selection.displayName || selection.email || "Anonymous visitor"}</p>
-                      <p className="mt-1 text-[10px] uppercase tracking-[0.08em] text-neutral-400">{selection.selectedCount} selected · {selection.status}</p>
-                    </div>
-                    <div className="flex gap-1">
-                      <Link title="View selection thumbnails" to={`/admin/client-galleries/${id}/review?source=selection&selectionId=${encodeURIComponent(selection.id)}`} className={`rounded-lg border border-black/10 p-2 ${selection.assets.length ? "" : "pointer-events-none opacity-30"}`}><Eye className="h-3.5 w-3.5" /></Link>
-                      {selection.assets.length ? <a title="Download all selection originals" href={AdminApiService.clientGalleryBulkDownloadUrl(id, { source: "selection", selectionId: selection.id })} className="rounded-lg border border-black/10 p-2"><Download className="h-3.5 w-3.5" /></a> : null}
-                      <button title="Copy selected filenames" disabled={!selection.assets.length} onClick={() => copySelectionFilenames(selection.assets.map((asset) => asset.filename))} className="rounded-lg border border-black/10 p-2 disabled:opacity-30"><Copy className="h-3.5 w-3.5" /></button>
-                      <button title="Download selection CSV" disabled={!selection.assets.length} onClick={() => downloadSelectionCsv(selection)} className="rounded-lg border border-black/10 p-2 disabled:opacity-30"><Download className="h-3.5 w-3.5" /></button>
-                      {selection.status === "submitted" ? <button title="Reopen selection" disabled={busy} onClick={() => mutateSelection({ action: "reopenSelection", selectionId: selection.id }, "Selection reopened for editing.")} className="rounded-lg border border-black/10 p-2 disabled:opacity-30"><RotateCcw className="h-3.5 w-3.5" /></button> : null}
-                    </div>
-                  </div>
-                  {selection.assets.length ? <details className="mt-2"><summary className="text-[11px] cursor-pointer text-neutral-500">View selected filenames</summary><div className="mt-2 max-h-28 overflow-auto text-[10px] leading-relaxed text-neutral-500">{selection.assets.map((asset) => <div key={asset.assetId} className="truncate" title={asset.filename}>{asset.filename}</div>)}</div></details> : null}
-                </div>)}
-              </div> : null}
-            </div>
-
-            {message ? <p className="text-sm text-green-700">{message}</p> : null}
-            {error ? <p className="text-sm text-red-700">{error}</p> : null}
           </div>
         </aside>
       </div>
+      ) : (
+        <section className="mt-7" style={{ maxWidth: 1220 }}>
+          <div className="mb-6">
+            <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Client decisions</p>
+            <h2 className="text-3xl mt-2" style={{ fontWeight: 600, letterSpacing: "-.02em" }}>Selections & favourites</h2>
+            <p className="mt-2 text-sm text-neutral-600" style={{ maxWidth: 760 }}>
+              Review favourite photographs, download secure originals for album design, and manage formal client selection requests without crowding the main gallery setup screen.
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(340px, .72fr)", gap: 22, alignItems: "start" }}>
+            <div className="space-y-5">
+              <section className="rounded-3xl border border-black/15 bg-white p-6">
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div>
+                    <div className="flex items-center gap-2"><Heart className="h-5 w-5" /><h3 className="text-xl font-semibold">Favourites</h3></div>
+                    <p className="mt-2 text-sm text-neutral-600">Review all client favourites as thumbnails, filter by client, or download private full-resolution originals ready for album design.</p>
+                  </div>
+                  <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-xs font-medium text-neutral-700">{gallery.favouriteCount} favourite{gallery.favouriteCount === 1 ? "" : "s"}</span>
+                </div>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Link
+                    to={`/admin/client-galleries/${id}/review?source=favourites&group=combined`}
+                    className="rounded-lg border border-black/15 px-4 py-2.5 text-sm inline-flex items-center gap-2"
+                  >
+                    <Eye className="h-4 w-4" /> View favourite thumbnails
+                  </Link>
+                  {gallery.favouriteCount > 0 ? (
+                    <a
+                      href={AdminApiService.clientGalleryBulkDownloadUrl(id, { source: "favourites", group: "combined" })}
+                      className="rounded-lg bg-black text-white px-4 py-2.5 text-sm inline-flex items-center gap-2"
+                    >
+                      <Download className="h-4 w-4" /> Download all originals
+                    </a>
+                  ) : null}
+                </div>
+              </section>
+
+              <section className="rounded-3xl border border-black/15 bg-white p-6">
+                <div className="flex items-center gap-2"><ClipboardList className="h-5 w-5" /><h3 className="text-xl font-semibold">Client selections</h3></div>
+                <p className="mt-2 text-sm text-neutral-600">Create named shortlists for albums, prints, cards or any other client decision.</p>
+
+                {detail.selectionRequests.length ? <div className="mt-5 space-y-3">
+                  {detail.selectionRequests.map((request) => {
+                    const requestSelections = detail.selections.filter((selection) => selection.requestId === request.id);
+                    return <div key={request.id} className={`rounded-2xl border p-4 ${request.status === "archived" ? "border-black/5 bg-neutral-50 opacity-60" : "border-black/10 bg-white"}`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold">{request.name}</p>
+                          <p className="text-xs text-neutral-500 mt-1">{request.instructions || "No instructions"}</p>
+                          <p className="text-[10px] uppercase tracking-[0.08em] text-neutral-400 mt-2">{request.minImages ? `min ${request.minImages}` : "no minimum"} · {request.maxImages ? `max ${request.maxImages}` : "no maximum"} · {requestSelections.length} response{requestSelections.length === 1 ? "" : "s"}</p>
+                        </div>
+                        {request.status === "active" ? <button title="Archive selection request" disabled={busy} onClick={() => mutateSelection({ action: "archiveRequest", requestId: request.id }, "Selection request archived.")} className="rounded-lg border border-black/10 p-2 disabled:opacity-40"><Trash2 className="h-3.5 w-3.5" /></button> : null}
+                      </div>
+                    </div>;
+                  })}
+                </div> : <div className="mt-5 rounded-2xl bg-neutral-50 p-4 text-sm text-neutral-500">No selection requests yet.</div>}
+
+                {detail.selections.length ? <div className="mt-6 space-y-3">
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-neutral-500">Client responses</p>
+                  {detail.selections.map((selection) => <div key={selection.id} className="rounded-2xl bg-neutral-50 border border-black/10 p-4">
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold truncate">{selection.requestName}</p>
+                        <p className="text-sm text-neutral-600 truncate">{selection.displayName || selection.email || "Anonymous visitor"}</p>
+                        <p className="mt-1 text-[10px] uppercase tracking-[0.08em] text-neutral-400">{selection.selectedCount} selected · {selection.status}</p>
+                      </div>
+                      <div className="flex gap-1.5 flex-wrap">
+                        <Link title="View selection thumbnails" to={`/admin/client-galleries/${id}/review?source=selection&selectionId=${encodeURIComponent(selection.id)}`} className={`rounded-lg border border-black/10 p-2.5 ${selection.assets.length ? "" : "pointer-events-none opacity-30"}`}><Eye className="h-4 w-4" /></Link>
+                        {selection.assets.length ? <a title="Download all selection originals" href={AdminApiService.clientGalleryBulkDownloadUrl(id, { source: "selection", selectionId: selection.id })} className="rounded-lg border border-black/10 p-2.5"><Download className="h-4 w-4" /></a> : null}
+                        <button title="Copy selected filenames" disabled={!selection.assets.length} onClick={() => copySelectionFilenames(selection.assets.map((asset) => asset.filename))} className="rounded-lg border border-black/10 p-2.5 disabled:opacity-30"><Copy className="h-4 w-4" /></button>
+                        <button title="Download selection CSV" disabled={!selection.assets.length} onClick={() => downloadSelectionCsv(selection)} className="rounded-lg border border-black/10 p-2.5 disabled:opacity-30"><Download className="h-4 w-4" /></button>
+                        {selection.status === "submitted" ? <button title="Reopen selection" disabled={busy} onClick={() => mutateSelection({ action: "reopenSelection", selectionId: selection.id }, "Selection reopened for editing.")} className="rounded-lg border border-black/10 p-2.5 disabled:opacity-30"><RotateCcw className="h-4 w-4" /></button> : null}
+                      </div>
+                    </div>
+                    {selection.assets.length ? <details className="mt-3"><summary className="text-xs cursor-pointer text-neutral-500">View selected filenames</summary><div className="mt-2 max-h-32 overflow-auto text-[11px] leading-relaxed text-neutral-500">{selection.assets.map((asset) => <div key={asset.assetId} className="truncate" title={asset.filename}>{asset.filename}</div>)}</div></details> : null}
+                  </div>)}
+                </div> : null}
+              </section>
+            </div>
+
+            <aside className="rounded-3xl border border-black/15 bg-white p-6" style={{ position: "sticky", top: 24 }}>
+              <div className="flex items-center gap-2"><Plus className="h-5 w-5" /><h3 className="text-xl font-semibold">New selection request</h3></div>
+              <p className="mt-2 text-sm text-neutral-600">Set an optional minimum or maximum, then clients can save progress and submit when ready.</p>
+              <div className="mt-5 space-y-3">
+                <label className="block"><span className="text-xs uppercase tracking-[0.12em] text-neutral-500">Name</span><input value={selectionDraft.name} onChange={(e) => setSelectionDraft({ ...selectionDraft, name: e.target.value })} placeholder="Selection name" className="mt-1 w-full rounded-xl border border-black/15 px-3 py-2.5 text-sm" /></label>
+                <label className="block"><span className="text-xs uppercase tracking-[0.12em] text-neutral-500">Instructions</span><textarea value={selectionDraft.instructions} onChange={(e) => setSelectionDraft({ ...selectionDraft, instructions: e.target.value })} rows={4} placeholder="Instructions" className="mt-1 w-full rounded-xl border border-black/15 px-3 py-2.5 text-sm" /></label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="text-xs uppercase tracking-[0.12em] text-neutral-500">Min<input type="number" min="0" value={selectionDraft.minImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, minImages: Math.max(0, Number(e.target.value) || 0) })} className="mt-1 w-full rounded-xl border border-black/15 px-3 py-2.5 text-sm" /></label>
+                  <label className="text-xs uppercase tracking-[0.12em] text-neutral-500">Max<input type="number" min="0" value={selectionDraft.maxImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, maxImages: Math.max(0, Number(e.target.value) || 0) })} className="mt-1 w-full rounded-xl border border-black/15 px-3 py-2.5 text-sm" /></label>
+                </div>
+                <button disabled={busy || !selectionDraft.name.trim()} onClick={createSelectionRequest} className="w-full rounded-xl bg-black text-white px-4 py-3 text-sm inline-flex items-center justify-center gap-2 disabled:opacity-40"><Plus className="h-4 w-4" /> Create selection request</button>
+              </div>
+            </aside>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
