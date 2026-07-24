@@ -1,31 +1,31 @@
 # Next Steps
 
 ## Current baseline
-v1.2.0 provides workspace-owned canonical assets, private Client Galleries, resumable full-resolution JPEG upload, generated web derivatives, secure individual original downloads, download auditing and a consistent Montserrat Admin design system.
+v1.3.0 adds the Unified Wedding Workspace on top of the proven v1.2 private-original delivery pipeline. A newly created wedding can now move through venue, suppliers, Client Gallery, full-resolution previews, Preview Set publishing and Instagram caption generation from one operational page.
 
-Storage model:
-
-Workspace
-→ Canonical Asset
-→ Private original in `MKB_PRIVATE_ASSETS`
-→ Web/thumbnail derivatives in `MKB_IMAGES`
-→ Wedding / Venue / Moment / Gallery relationships
-→ Client Gallery access and download policy
+## Immediate validation
+1. Create a test wedding and confirm the success action opens the Wedding Workspace.
+2. Link a venue and several reusable suppliers.
+3. Create a linked Client Gallery.
+4. Upload 2–5 full-resolution JPEG previews from the Wedding Workspace.
+5. Confirm uploads automatically join the Wedding Day Preview Set.
+6. Add the Preview Set to the linked Venue plus at least one Moment and one photographer Gallery.
+7. Confirm only web derivatives appear publicly; secure originals remain downloadable only through authorized Client Gallery access.
+8. Generate and copy the Instagram preview caption and verify supplier handles are normalized correctly.
 
 ## Next engineering sequence
-1. Add queued full-gallery ZIP generation with progress, caching and expiry.
-2. Add upload-session administration: abandoned-session cleanup, explicit abort and storage usage summaries.
-3. Move derivative generation from browser-only processing to a background processing worker for very large deliveries.
-4. Add client selections/shortlists alongside favourites and expose them in Admin.
-5. Add bulk gallery ordering, section dividers and gallery-level display preferences.
-6. Allow client-selected canonical assets to be promoted into Venue/Moment/Location/Custom Galleries without re-upload.
-7. Add client email delivery templates and access-event reporting.
-8. Begin CRM/client/job foundation once storage isolation and delivery workflows are proven.
+1. Gallery Visitor Identity: optional required email before entry.
+2. Linked-client vs guest permissions, including per-email full-resolution entitlement.
+3. Client selections / shortlists alongside favourites.
+4. Print Store foundation with products, price lists, cart, crop choices, checkout and order management.
+5. Professional lab connector interface; pursue Loxley Colour integration first, subject to partner/API access.
+6. Lightroom Classic Publish Plugin using the same private-original ingestion API.
+7. Begin CRM / Client Portal foundation, including client-entered venue and supplier questionnaires with duplicate-safe supplier review.
 
 ## Guardrails
-- Never expose private original object keys or public bucket URLs for originals.
-- Never treat a web derivative as a full-resolution original.
-- Never identify an asset by filename.
-- Keep all new storage and delivery records workspace-scoped.
-- Existing MKB public assets and URLs remain the regression baseline.
-- Full-gallery ZIP delivery must be queued/cached rather than assembled synchronously in a request.
+- One photograph = one canonical asset.
+- Never duplicate R2 originals merely because an asset appears in multiple galleries.
+- Never expose private-original object keys or URLs publicly.
+- Public publishing uses safe derivatives only.
+- Clients may link/suggest suppliers but may not overwrite shared master supplier records without studio approval.
+- Filename is never asset identity.

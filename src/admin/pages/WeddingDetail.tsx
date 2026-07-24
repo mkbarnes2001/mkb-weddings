@@ -6,6 +6,7 @@ import {
   FilePenLine,
   FolderKanban,
   Image as ImageIcon,
+  LayoutDashboard,
   SearchCheck,
   Send,
   Sparkles,
@@ -115,10 +116,17 @@ export function WeddingDetail() {
             ) : null}
 
             <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                to={`/admin/weddings/${wedding.slug}/workspace`}
+                className="rounded-full bg-white px-5 py-3 text-sm text-black hover:bg-white/90 inline-flex items-center gap-2"
+              >
+                <LayoutDashboard className="h-4 w-4" /> Wedding Workspace
+              </Link>
+
               {isManagedWedding ? (
                 <Link
                   to={`/admin/weddings/${wedding.slug}/content`}
-                  className="rounded-full bg-white px-5 py-3 text-sm text-black hover:bg-white/90"
+                  className="rounded-full border border-white/20 px-5 py-3 text-sm text-white/80 hover:bg-white/10"
                 >
                   Edit master content
                 </Link>

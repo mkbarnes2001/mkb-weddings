@@ -330,6 +330,9 @@ export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: 
       db.prepare(`UPDATE published_story_images SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
       db.prepare(`UPDATE wedding_suppliers SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
       db.prepare(`UPDATE wedding_supplier_links SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
+      db.prepare(`UPDATE asset_wedding_links SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
+      db.prepare(`UPDATE client_galleries SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
+      db.prepare(`UPDATE wedding_preview_sets SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
     );
   }
 

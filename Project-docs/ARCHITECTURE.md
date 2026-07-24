@@ -166,3 +166,13 @@ Security invariants:
 - downloads are streamed through the Function rather than redirected to R2;
 - download auditing stores gallery/asset/visitor metadata but not raw IP addresses;
 - existing website-only assets remain preview-only because no original is fabricated.
+
+
+## Post-wedding Wedding Workspace
+The Wedding Workspace orchestrates existing domains rather than creating duplicate records:
+
+Wedding → Venue / Suppliers → Client Gallery → Canonical Assets → Preview Set → Venue / Moments / Galleries → Social caption.
+
+Private originals remain isolated in private R2. When a private-upload asset is selected for public publishing, the compatibility layer registers only its web / thumbnail derivative URLs in legacy publishing tables.
+
+Future CRM / Client Portal work must write structured client-entered venue and supplier selections back into the same Wedding relationships. Unknown suppliers enter a review / merge workflow; clients never directly mutate the global Supplier Master record.

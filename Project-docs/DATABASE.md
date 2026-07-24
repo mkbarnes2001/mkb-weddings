@@ -129,3 +129,11 @@ Adds:
 `asset_download_events` records authorised original deliveries by workspace, gallery, canonical asset and browser visitor key. It records delivery bytes and user agent, but does not store raw client IP addresses.
 
 No existing asset, image, gallery or R2 object is rewritten by migration 012.
+
+
+## Wedding preview sets — schema 13
+`wedding_preview_sets` provides a reusable named selection boundary for post-wedding preview workflows. The initial built-in set is `wedding-day-previews`, but the model permits additional sets later.
+
+`wedding_preview_assets` links canonical `assets.id` values to a preview set with exact ordering.
+
+Preview-set membership does not copy image files and does not imply public visibility. Publishing destinations are applied separately and use only safe `web` / `thumb` derivatives.

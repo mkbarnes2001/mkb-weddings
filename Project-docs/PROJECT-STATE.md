@@ -1,8 +1,8 @@
 # Project State
 
 ## Version
-Current release: **v1.1.2 — ShootProof-style Client Gallery Hero**.  
-Database schema version: **11**.
+Current release: **v1.3.0 — Wedding Workspace & Preview Workflow**.  
+Database schema version: **13**.
 
 ## Working production model
 - Cloudflare D1 is the structured source of truth.
@@ -109,10 +109,10 @@ Adds:
 - browser-scoped client favourites
 - standalone `/client-gallery/:token` delivery route
 
-Important boundary: existing MKB website derivatives are reused as gallery previews. They are not private full-resolution originals. Full-resolution download delivery remains disabled until the private-original upload pipeline is added.
+Important boundary: legacy MKB website derivatives remain preview-only. New private-original uploads use dedicated private R2 storage and authorized download delivery; legacy public derivatives are never reclassified as originals.
 
 ## Immediate next major module
-High-volume private-original upload and derivative generation, secure original downloads and resumable delivery workflows.
+Gallery Visitor Identity & Permissions: optional required-email entry, linked-client identities and per-person full-resolution download entitlements, followed by print-store / lab fulfilment foundations.
 
 ## Private Original Upload & Secure Delivery — v1.2.0
 The platform now supports full-resolution JPEG originals for Client Galleries without changing the existing 2,329 indexed public assets.
@@ -141,3 +141,24 @@ Secure delivery:
 - each successful delivery is recorded in `asset_download_events`.
 
 Admin typography is now centrally scoped through `src/admin/admin-theme.css`, using Montserrat consistently across navigation, headings, controls, cards, labels and tables. The public MKB site remains unchanged.
+
+
+## Unified Wedding Workspace — v1.3.0
+`Admin → Weddings → Wedding Workspace` is the operational post-wedding centre.
+
+It combines:
+- wedding / venue setup;
+- reusable supplier assignment;
+- linked Client Gallery creation and access;
+- private full-resolution preview upload through the v1.2 multipart pipeline;
+- reusable `Wedding Day Previews` sets;
+- additive publishing of preview assets into Venue, Moment and photographer Gallery destinations;
+- editable Instagram preview captions generated from structured venue / supplier Instagram data.
+
+Preview publication never exposes the private original. A canonical private-upload asset is promoted to compatibility/public publishing records using only its web and thumbnail derivatives. The original remains in `MKB_PRIVATE_ASSETS` and continues to require Client Gallery authorization for download.
+
+New tables:
+- `wedding_preview_sets`
+- `wedding_preview_assets`
+
+New weddings now lead naturally into the Wedding Workspace after creation, while legacy wedding admin routes remain available.

@@ -165,7 +165,7 @@ export function NewWeddingWizard() {
         return;
       }
 
-      setCreatedSlug(result.slug);
+      navigate(`/admin/weddings/${result.slug}/workspace`, { replace: true });
     } catch (error) {
       setSaveError(
         error instanceof Error ? error.message : "Unable to create wedding.",
@@ -203,10 +203,10 @@ export function NewWeddingWizard() {
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={() => navigate(`/admin/weddings/${createdSlug}`)}
+              onClick={() => navigate(`/admin/weddings/${createdSlug}/workspace`)}
               className="rounded-full bg-black px-5 py-3 text-sm text-white"
             >
-              Open wedding
+              Open Wedding Workspace
             </button>
             <button
               type="button"

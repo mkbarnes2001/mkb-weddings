@@ -178,3 +178,18 @@
 - Added a dedicated `MKB_PRIVATE_ASSETS` R2 binding requirement for both admin and public Pages projects.
 - Applied Montserrat consistently across the full Admin application through a scoped central theme.
 - Added D1 migration 012; schema version advances to 12.
+
+
+## v1.3.0 — Unified Wedding Workspace & Preview Workflow
+- Added `/admin/weddings/:slug/workspace` as the post-wedding operational centre.
+- New Wedding creation now leads directly into the Wedding Workspace.
+- Added inline venue linking and reusable supplier assignment.
+- Added linked Client Gallery creation / management from the same page.
+- Reused the v1.2 resumable private-original pipeline for direct preview uploads.
+- Added workspace-owned `wedding_preview_sets` and `wedding_preview_assets`.
+- Uploaded previews are automatically added to the Wedding Day Preview Set.
+- Added additive preview publishing to the linked Venue, selected Moments, Creative Flash and custom Galleries.
+- Private-upload assets are promoted into legacy/public compatibility records with web derivatives only; private originals remain protected.
+- Added editable Instagram preview caption generation using structured venue and supplier Instagram usernames.
+- Updated Weddings management and Wedding Control Centre links to prioritise the Wedding Workspace.
+- Added migration 013; schema version advances to 13.

@@ -5,6 +5,7 @@ import { Weddings } from "../pages/Weddings";
 import { NewWeddingWizard } from "../pages/NewWeddingWizard";
 import { WeddingDetail } from "../pages/WeddingDetail";
 import { WeddingContentEditor } from "../pages/WeddingContentEditor";
+import { WeddingWorkspace } from "../pages/WeddingWorkspace";
 import { WeddingImages } from "../pages/WeddingImages";
 import { WeddingSuppliers } from "../pages/WeddingSuppliers";
 import { WeddingSupplierEditor } from "../pages/WeddingSupplierEditor";
@@ -44,6 +45,7 @@ export function AdminApp() {
         <Route path="weddings" element={<Weddings />} />
         <Route path="weddings/new" element={<NewWeddingWizard />} />
         <Route path="weddings/:slug" element={<WeddingDetail />} />
+        <Route path="weddings/:slug/workspace" element={<WeddingWorkspace />} />
         <Route
           path="weddings/:slug/content"
           element={<WeddingContentEditor />}

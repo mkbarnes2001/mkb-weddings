@@ -7,6 +7,7 @@ import type { CustomCollection, CustomCollectionGalleryPayload, CustomCollection
 import type { VenueDocument, VenueSummary } from "../types/venue";
 import type { AssetLibraryFilters, AssetLibraryPayload } from "../types/asset";
 import type { ClientGalleryDetailPayload, ClientGalleryListPayload, ClientGalleryRecord, PrivateOriginalUploadSession, PrivateOriginalUploadedPart } from "../types/clientGallery";
+import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
@@ -429,7 +430,7 @@ export class AdminApiService {
     return payload;
   }
 
-  static async createClientGallery(gallery: Partial<ClientGalleryRecord> & { title: string; weddingSlug?: string }) {
+  static async createClientGallery(gallery: Partial<ClientGalleryRecord> & { title: string; weddingSlug?: string; importWeddingAssets?: boolean }) {
     const result = await request<{ ok: true; gallery: ClientGalleryRecord }>("/api/client-galleries", {
       method: "POST",
       body: JSON.stringify({ gallery }),
@@ -525,6 +526,37 @@ export class AdminApiService {
     if (!response.ok) throw new Error((payload as ApiErrorPayload).error || `Derivative upload failed (${response.status}).`);
     return payload as { ok: true; session: PrivateOriginalUploadSession };
   }
+
+  static async getWeddingWorkspace(slug: string) {
+    const result = await request<{ ok: true } & WeddingWorkspacePayload>(
+      `/api/wedding-workspace/${encodeURIComponent(slug)}`,
+    );
+    const { ok: _ok, ...payload } = result;
+    return payload;
+  }
+
+  static async saveWeddingPreviewSet(slug: string, assetIds: string[]) {
+    const result = await request<{ ok: true } & WeddingWorkspacePayload>(
+      `/api/wedding-workspace/${encodeURIComponent(slug)}`,
+      { method: "POST", body: JSON.stringify({ action: "savePreviewSet", assetIds }) },
+    );
+    const { ok: _ok, ...payload } = result;
+    return payload;
+  }
+
+  static async publishWeddingPreviewAssignments(slug: string, input: WeddingPreviewAssignmentInput) {
+    return request<{
+      ok: true;
+      published: number;
+      venue: { slug: string; name: string } | null;
+      moments: Array<{ id: string; slug: string; name: string }>;
+      galleries: Array<{ id: string; slug: string; name: string }>;
+    }>(
+      `/api/wedding-workspace/${encodeURIComponent(slug)}`,
+      { method: "POST", body: JSON.stringify({ action: "publishAssignments", ...input }) },
+    );
+  }
+
 
   static async listVenues() {
     const result = await request<{ ok: true; venues: VenueSummary[] }>("/api/venues");
