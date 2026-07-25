@@ -40,6 +40,25 @@ function cleanStatus(value: unknown) {
   return status === "live" || status === "archived" ? status : "draft";
 }
 
+function cleanHexColor(value: unknown, fallback = "") {
+  const raw = text(value).toLowerCase();
+  if (/^#[0-9a-f]{6}$/.test(raw)) return raw;
+  if (/^#[0-9a-f]{3}$/.test(raw)) {
+    return `#${raw.slice(1).split("").map((part) => `${part}${part}`).join("")}`;
+  }
+  return fallback;
+}
+
+function cleanLogoMode(value: unknown) {
+  const mode = text(value);
+  return mode === "custom" || mode === "hidden" ? mode : "workspace";
+}
+
+function cleanHeadingFont(value: unknown) {
+  const font = text(value);
+  return font === "modern" || font === "classic" ? font : "editorial";
+}
+
 function accessToken() {
   return `${crypto.randomUUID().replace(/-/g, "")}${crypto.randomUUID().replace(/-/g, "")}`;
 }
@@ -151,6 +170,156 @@ function mapGallery(row: any) {
     authorisedContactCount: number(row?.authorised_contact_count),
     createdAt: text(row?.created_at),
     updatedAt: text(row?.updated_at),
+  };
+}
+
+function mapBranding(row: any) {
+  const businessName = text(row?.workspace_business_name || "Photography Gallery");
+  const workspaceLogoUrl = text(row?.workspace_logo_url);
+  const workspaceAccentColor = cleanHexColor(row?.workspace_accent_color, "#111111");
+  const logoMode = cleanLogoMode(row?.logo_mode);
+  const customLogoUrl = text(row?.custom_logo_url);
+  const effectiveLogoUrl = logoMode === "hidden"
+    ? ""
+    : logoMode === "custom" && customLogoUrl
+      ? customLogoUrl
+      : workspaceLogoUrl;
+  return {
+    businessName,
+    logoMode,
+    customLogoUrl,
+    customLogoStored: Boolean(text(row?.custom_logo_storage_key)),
+    effectiveLogoUrl,
+    workspaceLogoUrl,
+    workspaceAccentColor,
+    accentColor: cleanHexColor(row?.accent_color, workspaceAccentColor),
+    backgroundColor: cleanHexColor(row?.background_color, "#f7f6f3"),
+    surfaceColor: cleanHexColor(row?.surface_color, "#ffffff"),
+    textColor: cleanHexColor(row?.text_color, "#111111"),
+    headingFont: cleanHeadingFont(row?.heading_font),
+    showStudioName: number(row?.show_studio_name, 1) === 1,
+    updatedAt: text(row?.branding_updated_at || row?.updated_at),
+  };
+}
+
+export async function getClientGalleryBranding(db: D1Db, galleryId: string) {
+  const workspaceId = await getDefaultWorkspaceId(db);
+  const row = await db.prepare(`
+    SELECT
+      cg.id,
+      ws.business_name AS workspace_business_name,
+      ws.logo_url AS workspace_logo_url,
+      ws.accent_color AS workspace_accent_color,
+      cgb.logo_mode,
+      cgb.custom_logo_url,
+      cgb.custom_logo_storage_key,
+      cgb.accent_color,
+      cgb.background_color,
+      cgb.surface_color,
+      cgb.text_color,
+      cgb.heading_font,
+      cgb.show_studio_name,
+      cgb.updated_at AS branding_updated_at
+    FROM client_galleries cg
+    LEFT JOIN workspace_settings ws ON ws.workspace_id = cg.workspace_id
+    LEFT JOIN client_gallery_branding cgb ON cgb.gallery_id = cg.id
+    WHERE cg.id = ? AND cg.workspace_id = ?
+    LIMIT 1
+  `).bind(galleryId, workspaceId).first();
+  if (!row) throw new Error("Client gallery not found.");
+  return mapBranding(row);
+}
+
+export async function updateClientGalleryBranding(db: D1Db, galleryId: string, input: any) {
+  const workspaceId = await getDefaultWorkspaceId(db);
+  const gallery = await db.prepare(`
+    SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1
+  `).bind(galleryId, workspaceId).first();
+  if (!gallery) throw new Error("Client gallery not found.");
+
+  const existing = await db.prepare(`SELECT * FROM client_gallery_branding WHERE gallery_id = ? LIMIT 1`)
+    .bind(galleryId).first();
+  const accentColor = cleanHexColor(input?.accentColor ?? existing?.accent_color);
+  const backgroundColor = cleanHexColor(input?.backgroundColor ?? existing?.background_color);
+  const surfaceColor = cleanHexColor(input?.surfaceColor ?? existing?.surface_color);
+  const textColor = cleanHexColor(input?.textColor ?? existing?.text_color);
+
+  await db.prepare(`
+    INSERT INTO client_gallery_branding (
+      gallery_id, logo_mode, custom_logo_url, custom_logo_storage_key,
+      accent_color, background_color, surface_color, text_color,
+      heading_font, show_studio_name, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(gallery_id) DO UPDATE SET
+      logo_mode = excluded.logo_mode,
+      custom_logo_url = excluded.custom_logo_url,
+      custom_logo_storage_key = excluded.custom_logo_storage_key,
+      accent_color = excluded.accent_color,
+      background_color = excluded.background_color,
+      surface_color = excluded.surface_color,
+      text_color = excluded.text_color,
+      heading_font = excluded.heading_font,
+      show_studio_name = excluded.show_studio_name,
+      updated_at = CURRENT_TIMESTAMP
+  `).bind(
+    galleryId,
+    cleanLogoMode(input?.logoMode ?? existing?.logo_mode),
+    text(existing?.custom_logo_url),
+    text(existing?.custom_logo_storage_key),
+    accentColor,
+    backgroundColor,
+    surfaceColor,
+    textColor,
+    cleanHeadingFont(input?.headingFont ?? existing?.heading_font),
+    bool(input?.showStudioName, number(existing?.show_studio_name, 1) === 1) ? 1 : 0,
+  ).run();
+
+  return getClientGalleryBranding(db, galleryId);
+}
+
+export async function setClientGalleryBrandingLogo(
+  db: D1Db,
+  galleryId: string,
+  input: { url: string; storageKey: string },
+) {
+  const workspaceId = await getDefaultWorkspaceId(db);
+  const gallery = await db.prepare(`
+    SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1
+  `).bind(galleryId, workspaceId).first();
+  if (!gallery) throw new Error("Client gallery not found.");
+
+  const previous = await db.prepare(`
+    SELECT custom_logo_storage_key FROM client_gallery_branding WHERE gallery_id = ? LIMIT 1
+  `).bind(galleryId).first();
+  await db.prepare(`
+    INSERT INTO client_gallery_branding (
+      gallery_id, logo_mode, custom_logo_url, custom_logo_storage_key, updated_at
+    ) VALUES (?, 'custom', ?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(gallery_id) DO UPDATE SET
+      logo_mode = 'custom',
+      custom_logo_url = excluded.custom_logo_url,
+      custom_logo_storage_key = excluded.custom_logo_storage_key,
+      updated_at = CURRENT_TIMESTAMP
+  `).bind(galleryId, text(input.url), text(input.storageKey)).run();
+  return {
+    branding: await getClientGalleryBranding(db, galleryId),
+    previousStorageKey: text(previous?.custom_logo_storage_key),
+  };
+}
+
+export async function resetClientGalleryBranding(db: D1Db, galleryId: string) {
+  const workspaceId = await getDefaultWorkspaceId(db);
+  const gallery = await db.prepare(`
+    SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1
+  `).bind(galleryId, workspaceId).first();
+  if (!gallery) throw new Error("Client gallery not found.");
+  const existing = await db.prepare(`
+    SELECT custom_logo_storage_key FROM client_gallery_branding WHERE gallery_id = ? LIMIT 1
+  `).bind(galleryId).first();
+  await db.prepare(`DELETE FROM client_gallery_branding WHERE gallery_id = ?`).bind(galleryId).run();
+  return {
+    branding: await getClientGalleryBranding(db, galleryId),
+    previousStorageKey: text(existing?.custom_logo_storage_key),
   };
 }
 
@@ -830,7 +999,7 @@ async function adminGalleryAssets(db: D1Db, galleryId: string) {
 
 export async function getClientGalleryAdmin(db: D1Db, id: string) {
   const workspaceId = await getDefaultWorkspaceId(db);
-  const [row, assets, weddings, contacts, visitors, selectionRequests, selections, albums] = await Promise.all([
+  const [row, assets, weddings, contacts, visitors, selectionRequests, selections, albums, branding] = await Promise.all([
     galleryBaseRow(db, id, workspaceId),
     adminGalleryAssets(db, id),
     listWeddingOptions(db),
@@ -839,9 +1008,10 @@ export async function getClientGalleryAdmin(db: D1Db, id: string) {
     listClientGallerySelectionRequests(db, id, true),
     listClientGallerySelections(db, id),
     listClientGalleryAlbums(db, id, true),
+    getClientGalleryBranding(db, id),
   ]);
   if (!row) throw new Error("Client gallery not found.");
-  return { workspaceId, gallery: mapGallery(row), assets, weddings, contacts, visitors, selectionRequests, selections, albums };
+  return { workspaceId, gallery: mapGallery(row), assets, weddings, contacts, visitors, selectionRequests, selections, albums, branding };
 }
 
 export async function importWeddingAssets(db: D1Db, galleryId: string, workspaceId?: string, weddingSlug?: string) {
@@ -952,14 +1122,24 @@ async function publicGalleryRow(db: D1Db, token: string) {
       COALESCE(cgas.require_email, 0) AS require_email,
       COALESCE(cgas.allow_guest_downloads, 0) AS allow_guest_downloads,
       ws.business_name,
-      ws.logo_url,
+      ws.logo_url AS workspace_logo_url,
+      ws.accent_color AS workspace_accent_color,
       ws.website_url,
+      COALESCE(cgb.logo_mode, 'workspace') AS branding_logo_mode,
+      COALESCE(cgb.custom_logo_url, '') AS branding_custom_logo_url,
+      COALESCE(cgb.accent_color, '') AS branding_accent_color,
+      COALESCE(cgb.background_color, '') AS branding_background_color,
+      COALESCE(cgb.surface_color, '') AS branding_surface_color,
+      COALESCE(cgb.text_color, '') AS branding_text_color,
+      COALESCE(cgb.heading_font, 'editorial') AS branding_heading_font,
+      COALESCE(cgb.show_studio_name, 1) AS branding_show_studio_name,
       w.couple,
       w.venue,
       w.wedding_date
     FROM client_galleries cg
     LEFT JOIN client_gallery_access_settings cgas ON cgas.gallery_id = cg.id
     LEFT JOIN workspace_settings ws ON ws.workspace_id = cg.workspace_id
+    LEFT JOIN client_gallery_branding cgb ON cgb.gallery_id = cg.id
     LEFT JOIN weddings w ON w.slug = cg.wedding_slug
     WHERE cg.access_token = ? AND cg.status = 'live'
     LIMIT 1
@@ -1363,8 +1543,28 @@ export async function getPublicClientGallery(db: D1Db, token: string, pin = '', 
     venue: text(row.venue),
     weddingDate: text(row.wedding_date),
     businessName: text(row.business_name || 'Photography Gallery'),
-    logoUrl: text(row.logo_url),
+    logoUrl: (() => {
+      const mode = cleanLogoMode(row.branding_logo_mode);
+      if (mode === 'hidden') return '';
+      if (mode === 'custom' && text(row.branding_custom_logo_url)) return text(row.branding_custom_logo_url);
+      return text(row.workspace_logo_url);
+    })(),
     websiteUrl: text(row.website_url),
+    branding: {
+      logoMode: cleanLogoMode(row.branding_logo_mode),
+      logoUrl: (() => {
+        const mode = cleanLogoMode(row.branding_logo_mode);
+        if (mode === 'hidden') return '';
+        if (mode === 'custom' && text(row.branding_custom_logo_url)) return text(row.branding_custom_logo_url);
+        return text(row.workspace_logo_url);
+      })(),
+      accentColor: cleanHexColor(row.branding_accent_color, cleanHexColor(row.workspace_accent_color, '#111111')),
+      backgroundColor: cleanHexColor(row.branding_background_color, '#f7f6f3'),
+      surfaceColor: cleanHexColor(row.branding_surface_color, '#ffffff'),
+      textColor: cleanHexColor(row.branding_text_color, '#111111'),
+      headingFont: cleanHeadingFont(row.branding_heading_font),
+      showStudioName: number(row.branding_show_studio_name, 1) === 1,
+    },
     allowFavourites: number(row.allow_favourites, 1) === 1,
     allowDownloads: effectiveDownloadPermission(row, identity),
     galleryDownloadsEnabled: number(row.allow_downloads) === 1,

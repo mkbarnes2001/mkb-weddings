@@ -1,17 +1,17 @@
 # Next Steps
 
 ## Current baseline
-v1.5.4 consolidates Client Gallery management into a dedicated workspace with Photos, Client Activity, Access and Settings. Client Gallery albums/sections now organise canonical assets without duplication and are available to the private client-facing gallery.
+v1.5.5 completes the Client Gallery workspace consolidation with compact photo action menus and per-gallery client-facing branding. Schema version is 18.
 
-## v1.5.4 validation
-1. Run migration 017 and confirm `client_gallery_albums` and `client_gallery_album_assets` exist before setting schema version 17.
-2. Open a Client Gallery and confirm **Photos** is the default workspace tab with the persistent gallery summary sidebar.
-3. Create albums such as Getting Ready / Ceremony, select several thumbnails and add them to an album. Confirm no new Asset Library records are created.
-4. Preview the live client gallery and confirm All Photos plus active album filters show the expected photographs.
-5. Confirm Client Activity still exposes favourites, bulk original downloads, selection responses and visitor activity.
-6. Confirm Access saves email/PIN/download permissions and authorised contacts.
-7. Confirm Settings saves title, client, wedding linkage, status and introduction.
-8. Confirm Preview and Share work from every workspace tab.
+## v1.5.5 validation
+1. Run migration 018 and confirm `client_gallery_branding` exists before setting schema version 18.
+2. Open Client Gallery Admin → Photos and confirm each card has one vertical-options icon while the selection circle remains separate.
+3. Test View photo, Download original, Set cover, Show/Hide and Remove from gallery. Confirm removal does not delete the Asset Library asset or private R2 original.
+4. Create an album and use an individual photo menu to add one image to it.
+5. Open Branding and test Studio logo, Custom logo and No logo.
+6. Upload a transparent PNG under 2 MB and confirm the live preview updates.
+7. Save each light colour preset and preview the live Client Gallery. Confirm favourites, selections, albums and downloads still work.
+8. Reset to studio defaults and confirm the workspace logo/accent return.
 
 ## Next engineering sequence
 1. Print Store foundation: products, sizes, workspace price lists/markup, cart, crop choices, order records and payment-provider boundary.
@@ -22,7 +22,7 @@ v1.5.4 consolidates Client Gallery management into a dedicated workspace with Ph
 
 ## Guardrails
 - One photograph = one canonical asset.
-- Never duplicate R2 originals because an asset appears in multiple galleries, favourites or selections.
-- Never expose private-original object keys or URLs publicly.
+- Never duplicate or delete R2 originals merely because gallery membership changes.
+- Branding accepts validated theme tokens only, never arbitrary CSS/JavaScript.
+- Custom logos live in public branding storage; wedding originals remain private.
 - Filename is never asset identity.
-- Bulk downloads must remain authenticated Admin operations and auditable.

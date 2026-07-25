@@ -224,3 +224,13 @@ Client Gallery Admin is organised by operational responsibility rather than by i
 - **Settings**: gallery identity, wedding linkage, status and presentation copy.
 
 Album sections are presentation relationships only. `client_gallery_album_assets` links albums to canonical assets; R2 objects and `assets` rows are never duplicated. Public Client Galleries receive active album metadata and filter the same canonical gallery assets by album membership.
+
+## Client Gallery branding boundary — v1.5.5
+Client Gallery branding is presentation metadata, not image content:
+
+`Workspace branding defaults → optional gallery override → safe public theme tokens`
+
+The workspace logo/accent remains the default. `client_gallery_branding` can override logo mode, a managed custom logo URL, colours, heading style and studio-name visibility for one gallery. The public gallery receives validated values only; Admin cannot inject arbitrary CSS or scripts.
+
+Custom branding logos use the public `MKB_IMAGES` bucket because clients must be able to render them. They are stored separately from canonical wedding assets and never enter the Asset Library. Private originals continue to use `MKB_PRIVATE_ASSETS`. Replacing or resetting a managed custom logo removes the superseded R2 object where possible.
+

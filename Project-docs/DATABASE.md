@@ -187,3 +187,16 @@ No R2 object is copied, renamed or deleted by migration 016. Existing favourites
 `client_gallery_album_assets` is a relationship table only. It references existing canonical `assets.id` records and never creates duplicate image files or asset identities. An asset may belong to multiple albums. `All Photos` is not stored as an album; it remains the virtual complete gallery membership from `client_gallery_assets`.
 
 Migration: `d1/migrations/017_client_gallery_workspace_albums.sql`.
+
+## Schema version 18
+Migration: `018_client_gallery_branding.sql`
+
+Adds `client_gallery_branding`, one optional row per Client Gallery. Fields store:
+- logo mode (`workspace`, `custom`, `hidden`);
+- managed custom logo URL/storage key;
+- validated accent, page background, surface and text colours;
+- limited heading-font choice;
+- studio-name visibility.
+
+No data backfill is required. Existing galleries automatically resolve workspace branding defaults until an override is saved. Canonical assets and private originals are unchanged.
+

@@ -16,6 +16,8 @@ import {
   Heart,
   ImagePlus,
   Images,
+  MoreVertical,
+  Palette,
   Plus,
   RefreshCw,
   RotateCcw,
@@ -46,6 +48,25 @@ function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(date);
 }
 
+const BRANDING_PRESETS = [
+  { name: "Studio monochrome", accentColor: "#111111", backgroundColor: "#f7f6f3", surfaceColor: "#ffffff", textColor: "#111111" },
+  { name: "Warm ivory", accentColor: "#6b4f3a", backgroundColor: "#f5efe6", surfaceColor: "#fffaf3", textColor: "#2b211a" },
+  { name: "Soft slate", accentColor: "#334155", backgroundColor: "#f1f5f9", surfaceColor: "#ffffff", textColor: "#0f172a" },
+] as const;
+
+function headingFontFamily(value: string) {
+  if (value === "modern") return '"Montserrat", "Avenir Next", Arial, sans-serif';
+  if (value === "classic") return 'Georgia, "Times New Roman", serif';
+  return '"Canela", "Playfair Display", Georgia, serif';
+}
+
+function contrastText(value: string) {
+  const hex = value.replace("#", "");
+  if (!/^[0-9a-f]{6}$/i.test(hex)) return "#ffffff";
+  const [r, g, b] = [0, 2, 4].map((index) => Number.parseInt(hex.slice(index, index + 2), 16));
+  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? "#111111" : "#ffffff";
+}
+
 type UploadItem = {
   id: string;
   file: File;
@@ -55,13 +76,13 @@ type UploadItem = {
   error: string;
 };
 
-type WorkspaceTab = "photos" | "activity" | "access" | "settings";
+type WorkspaceTab = "photos" | "activity" | "access" | "branding" | "settings";
 
 export function ClientGalleryEditor() {
   const { id = "" } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const rawTab = searchParams.get("tab");
-  const activeTab: WorkspaceTab = rawTab === "activity" || rawTab === "access" || rawTab === "settings" ? rawTab : "photos";
+  const activeTab: WorkspaceTab = rawTab === "activity" || rawTab === "access" || rawTab === "branding" || rawTab === "settings" ? rawTab : "photos";
   const [detail, setDetail] = useState<ClientGalleryDetailPayload | null>(null);
   const [draft, setDraft] = useState<Partial<ClientGalleryRecord> & { pin?: string }>({});
   const [assetSearch, setAssetSearch] = useState("");
@@ -73,6 +94,11 @@ export function ClientGalleryEditor() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [showShare, setShowShare] = useState(false);
+  const [brandingDraft, setBrandingDraft] = useState<ClientGalleryDetailPayload["branding"] | null>(null);
+  const [brandingUploading, setBrandingUploading] = useState(false);
+  const [openPhotoMenuId, setOpenPhotoMenuId] = useState("");
+  const [photoMenuAlbumId, setPhotoMenuAlbumId] = useState("");
+  const [previewAssetId, setPreviewAssetId] = useState("");
   const [activeAlbumId, setActiveAlbumId] = useState("");
   const [newAlbumName, setNewAlbumName] = useState("");
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
@@ -86,13 +112,24 @@ export function ClientGalleryEditor() {
       const next = await AdminApiService.getClientGallery(id);
       setDetail(next);
       setDraft({ ...next.gallery, pin: undefined });
+      setBrandingDraft(next.branding);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load client gallery.");
     }
   };
 
   useEffect(() => { load(); }, [id]);
-  useEffect(() => { setSelectedAssets(new Set()); }, [activeAlbumId, activeTab]);
+  useEffect(() => { setSelectedAssets(new Set()); setOpenPhotoMenuId(""); }, [activeAlbumId, activeTab]);
+  useEffect(() => {
+    const close = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target?.closest?.("[data-photo-menu]")) setOpenPhotoMenuId("");
+    };
+    const key = (event: KeyboardEvent) => { if (event.key === "Escape") { setOpenPhotoMenuId(""); setPreviewAssetId(""); } };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", key);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", key); };
+  }, []);
 
   const selectedWedding = useMemo(
     () => detail?.weddings.find((wedding) => wedding.slug === draft.weddingSlug),
@@ -192,6 +229,62 @@ export function ClientGalleryEditor() {
     finally { setBusy(false); }
   };
 
+  const saveBranding = async () => {
+    if (!brandingDraft) return;
+    setBusy(true); setError(""); setMessage("");
+    try {
+      const branding = await AdminApiService.updateClientGalleryBranding(id, {
+        logoMode: brandingDraft.logoMode,
+        accentColor: brandingDraft.accentColor,
+        backgroundColor: brandingDraft.backgroundColor,
+        surfaceColor: brandingDraft.surfaceColor,
+        textColor: brandingDraft.textColor,
+        headingFont: brandingDraft.headingFont,
+        showStudioName: brandingDraft.showStudioName,
+      });
+      setBrandingDraft(branding);
+      setDetail((current) => current ? { ...current, branding } : current);
+      setMessage("Client gallery branding saved.");
+    } catch (err) { setError(err instanceof Error ? err.message : "Unable to save gallery branding."); }
+    finally { setBusy(false); }
+  };
+
+  const resetBranding = async () => {
+    if (!window.confirm("Reset this gallery to the studio branding defaults?")) return;
+    setBusy(true); setError(""); setMessage("");
+    try {
+      const branding = await AdminApiService.updateClientGalleryBranding(id, { action: "reset" });
+      setBrandingDraft(branding);
+      setDetail((current) => current ? { ...current, branding } : current);
+      setMessage("Branding reset to studio defaults.");
+    } catch (err) { setError(err instanceof Error ? err.message : "Unable to reset gallery branding."); }
+    finally { setBusy(false); }
+  };
+
+  const uploadBrandingLogo = async (file: File | null) => {
+    if (!file) return;
+    setBrandingUploading(true); setError(""); setMessage("");
+    try {
+      const branding = await AdminApiService.uploadClientGalleryBrandingLogo(id, file);
+      setBrandingDraft(branding);
+      setDetail((current) => current ? { ...current, branding } : current);
+      setMessage("Custom gallery logo uploaded.");
+    } catch (err) { setError(err instanceof Error ? err.message : "Unable to upload gallery logo."); }
+    finally { setBrandingUploading(false); }
+  };
+
+  const runPhotoAction = async (payload: Record<string, unknown>, success: string) => {
+    setOpenPhotoMenuId("");
+    await mutateAssets(payload, success);
+  };
+
+  const addPhotoToAlbum = async (assetId: string) => {
+    if (!photoMenuAlbumId) return;
+    setOpenPhotoMenuId("");
+    await mutateAlbum({ action: "addAssets", albumId: photoMenuAlbumId, assetIds: [assetId] }, "Image added to album.");
+    setPhotoMenuAlbumId("");
+  };
+
   const searchAssets = async () => {
     setBusy(true); setError("");
     try {
@@ -246,10 +339,12 @@ export function ClientGalleryEditor() {
   const gallery = detail.gallery;
   const shareUrl = publicUrl(gallery.accessToken);
   const queuedCount = uploads.filter((item) => item.status === "queued").length;
+  const previewAsset = detail.assets.find((asset) => asset.assetId === previewAssetId) || null;
   const tabItems: Array<{ key: WorkspaceTab; label: string; icon: typeof Images }> = [
     { key: "photos", label: "Photos", icon: Images },
     { key: "activity", label: "Client Activity", icon: Activity },
     { key: "access", label: "Access", icon: ShieldCheck },
+    { key: "branding", label: "Branding", icon: Palette },
     { key: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -320,9 +415,9 @@ export function ClientGalleryEditor() {
             </div>
 
             <div className="mt-4" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))", gap: 12 }}>
-              {visiblePhotos.map((asset) => <article key={asset.assetId} className="rounded-xl border border-black/10 overflow-hidden bg-white" style={{ position: "relative" }}>
-                <div style={{ aspectRatio: "4/3", position: "relative", background: "#eee" }}><img src={asset.thumbSrc || asset.webSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: asset.hidden ? .42 : 1 }} /><button aria-label={selectedAssets.has(asset.assetId) ? "Deselect photo" : "Select photo"} onClick={() => toggleSelected(asset.assetId)} style={{ position: "absolute", top: 9, right: 9, width: 28, height: 28, borderRadius: 999, display: "grid", placeItems: "center", border: selectedAssets.has(asset.assetId) ? "1px solid #111" : "1px solid rgba(0,0,0,.25)", background: selectedAssets.has(asset.assetId) ? "#111" : "rgba(255,255,255,.94)", color: selectedAssets.has(asset.assetId) ? "#fff" : "#111" }}>{selectedAssets.has(asset.assetId) ? <Check className="h-4 w-4" /> : null}</button>{gallery.coverAssetId === asset.assetId ? <span className="absolute top-2 left-2 rounded-full bg-black text-white px-2 py-1 text-[9px] uppercase">Cover</span> : null}</div>
-                <div className="p-3"><p className="text-xs truncate" title={asset.filename}>{asset.filename}</p><div className="mt-2 flex items-center justify-between gap-2"><div className="flex gap-1"><button title="Set cover" onClick={() => mutateAssets({ action: "setCover", assetId: asset.assetId }, "Cover updated.")} className="rounded-lg border border-black/10 p-2"><Star className="h-3.5 w-3.5" /></button><button title={asset.hidden ? "Show" : "Hide"} onClick={() => mutateAssets({ action: "setHidden", assetId: asset.assetId, hidden: !asset.hidden }, asset.hidden ? "Image shown." : "Image hidden.")} className="rounded-lg border border-black/10 p-2">{asset.hidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}</button><button title="Remove from gallery" onClick={() => mutateAssets({ action: "remove", assetId: asset.assetId }, "Image removed.")} className="rounded-lg border border-black/10 p-2"><Trash2 className="h-3.5 w-3.5" /></button></div>{asset.hasOriginal ? <span title="Private original stored" className="text-[9px] uppercase tracking-[.08em] text-neutral-400"><Download className="inline h-3 w-3 mr-1" />Original</span> : null}</div></div>
+              {visiblePhotos.map((asset) => <article key={asset.assetId} className="rounded-xl border border-black/10 bg-white" style={{ position: "relative" }}>
+                <div style={{ aspectRatio: "4/3", position: "relative", background: "#eee", overflow: "hidden", borderRadius: "12px 12px 0 0" }}><img src={asset.thumbSrc || asset.webSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: asset.hidden ? .42 : 1 }} /><button aria-label={selectedAssets.has(asset.assetId) ? "Deselect photo" : "Select photo"} onClick={() => toggleSelected(asset.assetId)} style={{ position: "absolute", top: 9, right: 9, width: 28, height: 28, borderRadius: 999, display: "grid", placeItems: "center", border: selectedAssets.has(asset.assetId) ? "1px solid #111" : "1px solid rgba(0,0,0,.25)", background: selectedAssets.has(asset.assetId) ? "#111" : "rgba(255,255,255,.94)", color: selectedAssets.has(asset.assetId) ? "#fff" : "#111" }}>{selectedAssets.has(asset.assetId) ? <Check className="h-4 w-4" /> : null}</button>{gallery.coverAssetId === asset.assetId ? <span className="absolute top-2 left-2 rounded-full bg-black text-white px-2 py-1 text-[9px] uppercase">Cover</span> : null}</div>
+                <div className="p-3 flex items-center justify-between gap-2"><div className="min-w-0"><p className="text-xs truncate" title={asset.filename}>{asset.filename}</p><p className="mt-1 text-[9px] uppercase tracking-[.08em] text-neutral-400">{asset.hidden ? "Hidden" : asset.hasOriginal ? "Original stored" : "Preview only"}</p></div><div data-photo-menu style={{ position: "relative" }}><button type="button" aria-label={`Open options for ${asset.filename}`} title="Photo options" onClick={(event) => { event.stopPropagation(); setPhotoMenuAlbumId(""); setOpenPhotoMenuId((current) => current === asset.assetId ? "" : asset.assetId); }} className="rounded-lg p-2 hover:bg-neutral-100"><MoreVertical className="h-4 w-4" /></button>{openPhotoMenuId === asset.assetId ? <div className="rounded-xl border border-black/10 bg-white p-1 shadow-xl" style={{ position: "absolute", right: 0, bottom: "calc(100% + 6px)", width: 220, zIndex: 50 }}><button type="button" onClick={() => { setPreviewAssetId(asset.assetId); setOpenPhotoMenuId(""); }} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50"><Eye className="h-4 w-4" /> View photo</button>{asset.hasOriginal ? <a href={AdminApiService.clientGalleryOriginalDownloadUrl(id, asset.assetId)} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50"><Download className="h-4 w-4" /> Download original</a> : <span className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 text-neutral-400"><Download className="h-4 w-4" /> Original unavailable</span>}<button type="button" disabled={gallery.coverAssetId === asset.assetId} onClick={() => runPhotoAction({ action: "setCover", assetId: asset.assetId }, "Cover updated.")} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50 disabled:text-neutral-400"><Star className="h-4 w-4" /> {gallery.coverAssetId === asset.assetId ? "Current cover" : "Set as gallery cover"}</button><button type="button" onClick={() => runPhotoAction({ action: "setHidden", assetId: asset.assetId, hidden: !asset.hidden }, asset.hidden ? "Image shown." : "Image hidden.")} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50">{asset.hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />} {asset.hidden ? "Show in client gallery" : "Hide from client gallery"}</button>{activeAlbums.length ? <div className="mt-1 border-t border-black/5 p-2"><label className="text-[10px] uppercase tracking-[.1em] text-neutral-400">Add to album</label><div className="mt-1 flex gap-1"><select value={photoMenuAlbumId} onChange={(event) => setPhotoMenuAlbumId(event.target.value)} className="min-w-0 flex-1 rounded-lg border border-black/15 bg-white px-2 py-1.5 text-xs"><option value="">Choose…</option>{activeAlbums.map((album) => <option key={album.id} value={album.id}>{album.name}</option>)}</select><button type="button" disabled={!photoMenuAlbumId} onClick={() => addPhotoToAlbum(asset.assetId)} className="rounded-lg border border-black/15 p-2 disabled:opacity-30"><FolderPlus className="h-3.5 w-3.5" /></button></div></div> : null}<div className="mt-1 border-t border-black/5 pt-1"><button type="button" onClick={() => { if (window.confirm(`Remove ${asset.filename} from this client gallery? The canonical Asset Library image and private original will be preserved.`)) runPhotoAction({ action: "remove", assetId: asset.assetId }, "Image removed."); }} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 text-red-700 hover:bg-red-50"><Trash2 className="h-4 w-4" /> Remove from gallery</button></div></div> : null}</div></div>
               </article>)}
             </div>
             {!visiblePhotos.length ? <div className="mt-4 rounded-2xl border border-dashed border-black/15 bg-white p-12 text-center text-sm text-neutral-500">{activeAlbum ? "This album is empty. Select photographs from All Photos and add them here." : "No photographs match this view."}</div> : null}
@@ -341,9 +436,15 @@ export function ClientGalleryEditor() {
             <aside className="rounded-2xl border border-black/10 bg-white p-5"><div className="flex items-center gap-2"><UserPlus className="h-5 w-5" /><h3 className="text-lg font-semibold">Authorised client emails</h3></div><p className="mt-2 text-xs text-neutral-500">Contacts can receive client-level permissions and secure sign-in.</p><div className="mt-4 space-y-2">{detail.contacts.map((contact) => <div key={contact.emailNormalized} className="rounded-xl border border-black/10 bg-neutral-50 p-3"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-sm font-medium truncate">{contact.displayName || contact.email}</p><p className="text-xs text-neutral-500 truncate">{contact.email}</p><p className="mt-1 text-[10px] uppercase tracking-[.08em] text-neutral-400">{contact.role.replaceAll("_", " ")} · {contact.allowOriginalDownloads ? "originals allowed" : "view only"}</p></div><button title="Remove" onClick={() => mutateContact({ action: "remove", email: contact.email }, "Access contact removed.")}><X className="h-4 w-4" /></button></div></div>)}</div><div className="mt-4 rounded-xl border border-black/10 p-3 space-y-2"><input value={contactDraft.displayName} onChange={(e) => setContactDraft({ ...contactDraft, displayName: e.target.value })} placeholder="Name (optional)" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm" /><input type="email" value={contactDraft.email} onChange={(e) => setContactDraft({ ...contactDraft, email: e.target.value })} placeholder="client@example.com" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm" /><div className="grid grid-cols-2 gap-2"><select value={contactDraft.role} onChange={(e) => setContactDraft({ ...contactDraft, role: e.target.value })} className="rounded-lg border border-black/15 px-3 py-2 text-sm bg-white"><option value="client">Client</option><option value="primary_client">Primary client</option><option value="family">Family</option><option value="other">Other</option></select><label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={contactDraft.allowOriginalDownloads} onChange={(e) => setContactDraft({ ...contactDraft, allowOriginalDownloads: e.target.checked })} /> Full-res</label></div><button disabled={busy || !contactDraft.email.trim()} onClick={addContact} className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm inline-flex items-center justify-center gap-2 disabled:opacity-40"><UserPlus className="h-4 w-4" /> Add contact</button></div></aside>
           </section> : null}
 
+          {activeTab === "branding" && brandingDraft ? <section className="mt-5" style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(360px, .8fr)", gap: 18, alignItems: "start" }}>
+            <div className="rounded-2xl border border-black/10 bg-white p-5"><div className="flex items-center gap-2"><Palette className="h-5 w-5" /><h3 className="text-xl font-semibold">Client gallery branding</h3></div><p className="mt-2 text-sm text-neutral-600">Change the logo and colour scheme clients see. These choices affect only this private Client Gallery.</p><div className="mt-5"><p className="text-xs uppercase tracking-[.12em] text-neutral-500">Logo</p><div className="mt-2 grid grid-cols-3 gap-2">{([['workspace','Studio logo'],['custom','Custom logo'],['hidden','No logo']] as const).map(([value,label]) => <button key={value} type="button" onClick={() => setBrandingDraft({ ...brandingDraft, logoMode: value })} className="rounded-xl border px-3 py-3 text-sm" style={{ borderColor: brandingDraft.logoMode === value ? '#111' : 'rgba(0,0,0,.12)', background: brandingDraft.logoMode === value ? '#f5f5f5' : '#fff', fontWeight: brandingDraft.logoMode === value ? 600 : 400 }}>{label}</button>)}</div>{brandingDraft.logoMode === 'custom' ? <div className="mt-3 rounded-xl border border-black/10 bg-neutral-50 p-4"><div className="flex items-center gap-3">{brandingDraft.customLogoUrl ? <img src={brandingDraft.customLogoUrl} alt="Current custom logo" style={{ maxWidth: 180, maxHeight: 70, objectFit: 'contain' }} /> : <div className="text-sm text-neutral-500">No custom logo uploaded yet.</div>}</div><label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-black/15 bg-white px-3 py-2 text-sm">{brandingUploading ? 'Uploading…' : 'Upload logo'}<input type="file" accept="image/png,image/jpeg,image/webp" disabled={brandingUploading} onChange={(event) => { uploadBrandingLogo(event.target.files?.[0] || null); event.currentTarget.value = ''; }} style={{ display: 'none' }} /></label><p className="mt-2 text-xs text-neutral-400">PNG, JPEG or WebP. Maximum 2 MB. Transparent PNG is recommended.</p></div> : null}</div><div className="mt-6"><p className="text-xs uppercase tracking-[.12em] text-neutral-500">Colour presets</p><div className="mt-2 grid grid-cols-2 gap-2">{BRANDING_PRESETS.map((preset) => <button type="button" key={preset.name} onClick={() => setBrandingDraft({ ...brandingDraft, ...preset })} className="rounded-xl border border-black/10 p-3 text-left"><span className="flex items-center gap-2"><span style={{ width: 22, height: 22, borderRadius: 999, background: preset.accentColor, border: '1px solid rgba(0,0,0,.12)' }} /><strong className="text-sm">{preset.name}</strong></span><span className="mt-2 flex gap-1">{[preset.backgroundColor,preset.surfaceColor,preset.textColor].map((color) => <span key={color} style={{ width: 20, height: 12, borderRadius: 3, background: color, border: '1px solid rgba(0,0,0,.1)' }} />)}</span></button>)}</div></div><div className="mt-6 grid grid-cols-2 gap-4">{([['accentColor','Accent'],['backgroundColor','Page background'],['surfaceColor','Cards / header'],['textColor','Text']] as const).map(([key,label]) => <label key={key} className="block"><span className="text-xs uppercase tracking-[.1em] text-neutral-500">{label}</span><div className="mt-1 flex items-center gap-2 rounded-lg border border-black/15 px-2 py-2"><input type="color" value={brandingDraft[key]} onChange={(event) => setBrandingDraft({ ...brandingDraft, [key]: event.target.value })} style={{ width: 34, height: 28, border: 0, padding: 0, background: 'transparent' }} /><input value={brandingDraft[key]} onChange={(event) => setBrandingDraft({ ...brandingDraft, [key]: event.target.value })} className="min-w-0 flex-1 text-sm outline-none" /></div></label>)}</div><div className="mt-5 grid grid-cols-2 gap-4"><label className="block"><span className="text-xs uppercase tracking-[.1em] text-neutral-500">Heading style</span><select value={brandingDraft.headingFont} onChange={(event) => setBrandingDraft({ ...brandingDraft, headingFont: event.target.value as any })} className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2.5"><option value="editorial">Editorial serif</option><option value="modern">Modern sans serif</option><option value="classic">Classic serif</option></select></label><label className="flex items-center gap-3 rounded-xl border border-black/10 p-4 mt-5"><input type="checkbox" checked={brandingDraft.showStudioName} onChange={(event) => setBrandingDraft({ ...brandingDraft, showStudioName: event.target.checked })} /><span className="text-sm">Show studio name beside logo</span></label></div><div className="mt-6 flex items-center gap-3 flex-wrap"><button type="button" onClick={saveBranding} disabled={busy} className="rounded-lg bg-black text-white px-5 py-3 inline-flex items-center gap-2 disabled:opacity-50"><Save className="h-4 w-4" /> Save branding</button><button type="button" onClick={resetBranding} disabled={busy} className="rounded-lg border border-black/15 px-5 py-3 inline-flex items-center gap-2 disabled:opacity-50"><RotateCcw className="h-4 w-4" /> Reset to studio defaults</button></div></div>
+            <aside className="rounded-2xl border border-black/10 overflow-hidden" style={{ background: brandingDraft.backgroundColor, color: brandingDraft.textColor, position: 'sticky', top: 20 }}><div className="px-5 py-4 flex items-center gap-3" style={{ background: brandingDraft.surfaceColor, borderBottom: `1px solid ${brandingDraft.textColor}22` }}>{brandingDraft.logoMode !== 'hidden' && (brandingDraft.logoMode === 'custom' ? brandingDraft.customLogoUrl : brandingDraft.workspaceLogoUrl) ? <img src={brandingDraft.logoMode === 'custom' ? brandingDraft.customLogoUrl : brandingDraft.workspaceLogoUrl} alt="" style={{ maxHeight: 34, maxWidth: 150, objectFit: 'contain' }} /> : null}{brandingDraft.showStudioName ? <strong className="text-sm">{brandingDraft.businessName}</strong> : null}</div><div style={{ aspectRatio: '16/9', background: '#ddd', overflow: 'hidden' }}>{gallery.coverWeb || gallery.coverThumb ? <img src={gallery.coverWeb || gallery.coverThumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : null}</div><div className="p-6 text-center"><p className="text-[10px] uppercase tracking-[.22em]" style={{ opacity: .62 }}>Private gallery</p><h4 className="mt-2" style={{ fontFamily: headingFontFamily(brandingDraft.headingFont), fontSize: 30, fontWeight: 500 }}>{gallery.title}</h4><p className="mt-2 text-sm" style={{ opacity: .7 }}>{gallery.intro || 'Your wedding photographs, privately delivered.'}</p><div className="mt-5 flex items-center justify-center gap-2"><span className="rounded-lg px-4 py-2 text-sm" style={{ background: brandingDraft.accentColor, color: contrastText(brandingDraft.accentColor) }}>All Photos</span><span className="rounded-lg border px-4 py-2 text-sm" style={{ borderColor: `${brandingDraft.textColor}33`, background: brandingDraft.surfaceColor }}>Ceremony</span></div></div></aside>
+          </section> : null}
+
           {activeTab === "settings" ? <section className="mt-5 rounded-2xl border border-black/10 bg-white p-5" style={{ maxWidth: 880 }}><div className="flex items-center gap-2"><Settings className="h-5 w-5" /><h3 className="text-xl font-semibold">Gallery settings</h3></div><p className="mt-2 text-sm text-neutral-600">General gallery identity and wedding linkage. Access and security now live in the Access tab.</p><div className="mt-5" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 16 }}><label className="block"><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Title</span><input value={draft.title || ""} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5" /></label><label className="block"><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Status</span><select value={draft.status || "draft"} onChange={(e) => setDraft({ ...draft, status: e.target.value as any })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5 bg-white"><option value="draft">Draft</option><option value="live">Live</option><option value="archived">Archived</option></select></label><label className="block"><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Client name</span><input value={draft.clientName || ""} onChange={(e) => setDraft({ ...draft, clientName: e.target.value })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5" /></label><label className="block"><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Primary client email</span><input value={draft.clientEmail || ""} onChange={(e) => setDraft({ ...draft, clientEmail: e.target.value })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5" /></label><label className="block" style={{ gridColumn: "1 / -1" }}><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Wedding</span><select value={draft.weddingSlug || ""} onChange={(e) => setDraft({ ...draft, weddingSlug: e.target.value })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5 bg-white"><option value="">No linked wedding</option>{detail.weddings.map((wedding) => <option key={wedding.slug} value={wedding.slug}>{wedding.title || wedding.couple || wedding.slug}</option>)}</select></label><label className="block" style={{ gridColumn: "1 / -1" }}><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Gallery introduction</span><textarea value={draft.intro || ""} onChange={(e) => setDraft({ ...draft, intro: e.target.value })} rows={5} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5" /></label></div><div className="mt-5 flex items-center gap-3"><button onClick={save} disabled={busy} className="rounded-lg bg-black text-white px-5 py-3 inline-flex items-center gap-2 disabled:opacity-50"><Save className="h-4 w-4" /> Save settings</button>{gallery.status === "live" ? <button onClick={() => navigator.clipboard?.writeText(shareUrl)} className="rounded-lg border border-black/15 px-5 py-3 inline-flex items-center gap-2"><Copy className="h-4 w-4" /> Copy private link</button> : null}</div></section> : null}
         </div>
       </div>
+      {previewAsset ? <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(0,0,0,.88)", display: "grid", placeItems: "center", padding: 24 }} onMouseDown={() => setPreviewAssetId("")}><div style={{ maxWidth: "92vw", maxHeight: "90vh", position: "relative" }} onMouseDown={(event) => event.stopPropagation()}><img src={previewAsset.webSrc || previewAsset.thumbSrc} alt={previewAsset.filename} style={{ maxWidth: "92vw", maxHeight: "84vh", objectFit: "contain", display: "block" }} /><div className="mt-3 flex items-center justify-between gap-3 text-white"><span className="text-sm">{previewAsset.filename}</span><div className="flex gap-2">{previewAsset.hasOriginal ? <a href={AdminApiService.clientGalleryOriginalDownloadUrl(id, previewAsset.assetId)} className="rounded-lg bg-white text-black px-3 py-2 text-sm inline-flex items-center gap-2"><Download className="h-4 w-4" /> Download original</a> : null}<button type="button" onClick={() => setPreviewAssetId("")} className="rounded-lg border border-white/30 px-3 py-2 text-sm">Close</button></div></div></div></div> : null}
     </div>
   );
 }

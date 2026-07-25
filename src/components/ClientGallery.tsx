@@ -57,6 +57,16 @@ type ClientGalleryPayload = {
   businessName: string;
   logoUrl: string;
   websiteUrl: string;
+  branding?: {
+    logoMode: "workspace" | "custom" | "hidden";
+    logoUrl: string;
+    accentColor: string;
+    backgroundColor: string;
+    surfaceColor: string;
+    textColor: string;
+    headingFont: "editorial" | "modern" | "classic";
+    showStudioName: boolean;
+  };
   allowFavourites: boolean;
   allowDownloads: boolean;
   galleryDownloadsEnabled?: boolean;
@@ -77,6 +87,19 @@ type ClientGalleryPayload = {
   selectionRequests?: ClientGallerySelectionRequest[];
   albums?: ClientGalleryAlbum[];
 };
+
+function headingFontFamily(value: string) {
+  if (value === "modern") return '"Montserrat", "Avenir Next", Avenir, Arial, sans-serif';
+  if (value === "classic") return 'Georgia, "Times New Roman", serif';
+  return '"Canela", "Playfair Display", Georgia, serif';
+}
+
+function contrastText(value: string) {
+  const hex = value.replace("#", "");
+  if (!/^[0-9a-f]{6}$/i.test(hex)) return "#ffffff";
+  const [r, g, b] = [0, 2, 4].map((index) => Number.parseInt(hex.slice(index, index + 2), 16));
+  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? "#111111" : "#ffffff";
+}
 
 function visitorKey() {
   const storageKey = "mkb-client-gallery-visitor";
@@ -407,6 +430,17 @@ export function ClientGallery() {
   const activeSelection = activeSelectionRequest?.selection || null;
   const selectedAssetIds = new Set(activeSelection?.assetIds || []);
   const publicAssetOrigin = payload?.websiteUrl || "https://www.mkbweddings.co.uk";
+  const branding = payload?.branding || {
+    logoMode: "workspace" as const,
+    logoUrl: payload?.logoUrl || "",
+    accentColor: "#111111",
+    backgroundColor: "#f7f6f3",
+    surfaceColor: "#ffffff",
+    textColor: "#111111",
+    headingFont: "editorial" as const,
+    showStudioName: true,
+  };
+  const accentTextColor = contrastText(branding.accentColor);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-[#f7f6f3] text-neutral-600">Loading private gallery…</div>;
@@ -420,20 +454,21 @@ export function ClientGallery() {
     const needsEmail = Boolean(payload.emailRequired);
     const needsPin = Boolean(payload.requiresPin);
     return (
-      <div className="min-h-screen bg-[#f7f6f3] flex items-center justify-center px-6">
+      <div className="client-gallery-theme min-h-screen flex items-center justify-center px-6" style={{ background: branding.backgroundColor, color: branding.textColor, "--gallery-surface": branding.surfaceColor, "--gallery-muted": `${branding.textColor}99`, "--gallery-border": `${branding.textColor}22` } as any}>
         <Helmet>
           <title>{payload.title || "Private Gallery"}</title>
           <meta name="robots" content="noindex,nofollow,noarchive" />
           <meta name="referrer" content="no-referrer" />
         </Helmet>
-        <div className="w-full max-w-md rounded-3xl border border-black/15 bg-white p-8 text-center">
+        <div className="w-full max-w-md rounded-3xl border border-black/15 p-8 text-center" style={{ background: branding.surfaceColor }}>
           {needsEmail ? <Mail className="h-8 w-8 mx-auto" /> : <LockKeyhole className="h-8 w-8 mx-auto" />}
           <p className="text-xs uppercase tracking-[0.24em] text-neutral-500 mt-5">Private gallery</p>
-          <h1 style={{ fontFamily: '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif', fontSize: 28, lineHeight: 1.25, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", marginTop: 10 }}>{payload.title || "Client Gallery"}</h1>
+          {branding.logoUrl ? <img src={resolveAssetUrl(branding.logoUrl, publicAssetOrigin)} alt="" style={{ maxHeight: 42, maxWidth: 180, objectFit: "contain", margin: "18px auto 0" }} /> : null}
+          <h1 style={{ fontFamily: headingFontFamily(branding.headingFont), fontSize: 30, lineHeight: 1.25, fontWeight: 500, marginTop: 14 }}>{payload.title || "Client Gallery"}</h1>
           <p className="mt-4 text-sm text-neutral-600">{needsEmail ? "Enter your email address to view this private gallery." : "Enter the PIN supplied by your photographer."}</p>
           {needsEmail ? <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email address" className="mt-6 w-full rounded-xl border border-black/20 px-4 py-3 text-center" autoFocus /> : null}
           {needsPin ? <input value={pin} onChange={(event) => setPin(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") unlock(); }} placeholder="Gallery PIN" className={`${needsEmail ? "mt-3" : "mt-6"} w-full rounded-xl border border-black/20 px-4 py-3 text-center`} autoFocus={!needsEmail} /> : null}
-          <button onClick={unlock} disabled={unlocking || (needsEmail && !email.trim()) || (needsPin && !pin.trim())} className="mt-3 w-full rounded-xl bg-black text-white px-5 py-3 disabled:opacity-40">{unlocking ? "Checking…" : "View gallery"}</button>
+          <button onClick={unlock} disabled={unlocking || (needsEmail && !email.trim()) || (needsPin && !pin.trim())} className="mt-3 w-full rounded-xl px-5 py-3 disabled:opacity-40" style={{ background: branding.accentColor, color: accentTextColor }}>{unlocking ? "Checking…" : "View gallery"}</button>
           {needsEmail && payload.secureSignInAvailable ? <button type="button" onClick={requestSecureSignIn} disabled={secureSignInBusy || !email.trim()} className="mt-3 w-full rounded-xl border border-black/20 bg-white px-5 py-3 text-sm inline-flex items-center justify-center gap-2 disabled:opacity-40"><LogIn size={16} /> {secureSignInBusy ? "Sending…" : "Email secure sign-in link"}</button> : null}
           {secureSignInMessage ? <p className="mt-3 text-sm text-neutral-700">{secureSignInMessage}</p> : null}
           {(error || (payload.error && payload.error !== "Email required." && payload.error !== "PIN required.")) ? <p className="mt-3 text-sm text-red-700">{error || payload.error}</p> : null}
@@ -446,18 +481,26 @@ export function ClientGallery() {
   if (!payload) return null;
 
   return (
-    <div className="min-h-screen bg-[#f7f6f3] text-neutral-950">
+    <div className="client-gallery-theme min-h-screen" style={{ background: branding.backgroundColor, color: branding.textColor, "--gallery-surface": branding.surfaceColor, "--gallery-muted": `${branding.textColor}99`, "--gallery-border": `${branding.textColor}22` } as any}>
       <Helmet>
         <title>{payload.title} | Private Gallery</title>
         <meta name="robots" content="noindex,nofollow,noarchive" />
         <meta name="referrer" content="no-referrer" />
       </Helmet>
+      <style>{`
+        .client-gallery-theme .text-neutral-400,
+        .client-gallery-theme .text-neutral-500,
+        .client-gallery-theme .text-neutral-600,
+        .client-gallery-theme .text-neutral-700 { color: var(--gallery-muted) !important; }
+        .client-gallery-theme .bg-white { background-color: var(--gallery-surface) !important; }
+        .client-gallery-theme [class*="border-black/"] { border-color: var(--gallery-border) !important; }
+      `}</style>
 
-      <header className="px-5 md:px-8 py-4 border-b border-black/10 bg-white/95 backdrop-blur" style={{ position: "sticky", top: 0, zIndex: 20 }}>
+      <header className="px-5 md:px-8 py-4 border-b border-black/10 backdrop-blur" style={{ position: "sticky", top: 0, zIndex: 20, background: `${branding.surfaceColor}f2` }}>
         <div className="max-w-[1500px] mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            {payload.logoUrl ? <img src={resolveAssetUrl(payload.logoUrl, publicAssetOrigin)} alt="" style={{ height: 30, maxWidth: 150, objectFit: "contain" }} /> : null}
-            <div className="min-w-0"><p style={{ fontFamily: '"Canela", "Playfair Display", Georgia, serif', fontSize: 18, lineHeight: 1.05 }}>{payload.businessName}</p><p className="text-[11px] text-neutral-500 mt-1">Private client gallery</p></div>
+            {branding.logoUrl ? <img src={resolveAssetUrl(branding.logoUrl, publicAssetOrigin)} alt="" style={{ height: 30, maxWidth: 150, objectFit: "contain" }} /> : null}
+            {branding.showStudioName ? <div className="min-w-0"><p style={{ fontFamily: headingFontFamily(branding.headingFont), fontSize: 18, lineHeight: 1.05 }}>{payload.businessName}</p><p className="text-[11px] mt-1" style={{ opacity: .58 }}>Private client gallery</p></div> : null}
           </div>
           <div className="flex items-center gap-3 md:gap-4">
             {payload.visitorEmail ? <div className="hidden md:block text-right"><p className="text-xs text-neutral-700">{payload.visitorEmail}</p><p className="text-[10px] uppercase tracking-[0.1em] text-neutral-400">{payload.authenticated ? "securely signed in" : (payload.visitorRole || "guest").replaceAll("_", " ")}</p></div> : null}
@@ -494,12 +537,12 @@ export function ClientGallery() {
           >
             <h1
               style={{
-                fontFamily: '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif',
+                fontFamily: headingFontFamily(branding.headingFont),
                 fontSize: "clamp(1.35rem, 2.35vw, 2.15rem)",
                 lineHeight: 1.18,
                 fontWeight: 600,
-                letterSpacing: ".12em",
-                textTransform: "uppercase",
+                letterSpacing: branding.headingFont === "modern" ? ".08em" : ".02em",
+                textTransform: branding.headingFont === "modern" ? "uppercase" : "none",
                 margin: 0,
                 maxWidth: 1040,
                 textShadow: "0 2px 18px rgba(0,0,0,.42)",
@@ -535,15 +578,15 @@ export function ClientGallery() {
           </div>
         </section>
       ) : (
-        <section className="max-w-[1500px] mx-auto px-6 md:px-10 py-16 text-center"><p className="text-[10px] uppercase tracking-[0.28em] text-neutral-500">Private gallery</p><h1 style={{ fontFamily: '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif', fontSize: "clamp(1.35rem, 2.35vw, 2.15rem)", lineHeight: 1.18, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", marginTop: 12 }}>{payload.title}</h1></section>
+        <section className="max-w-[1500px] mx-auto px-6 md:px-10 py-16 text-center"><p className="text-[10px] uppercase tracking-[0.28em]" style={{ opacity: .58 }}>Private gallery</p><h1 style={{ fontFamily: headingFontFamily(branding.headingFont), fontSize: "clamp(1.7rem, 3vw, 2.8rem)", lineHeight: 1.18, fontWeight: 500, marginTop: 12 }}>{payload.title}</h1></section>
       )}
 
       <main className="max-w-[1500px] mx-auto px-4 md:px-8 py-10 md:py-12">
         {error ? <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div> : null}
-        {payload.intro ? <p style={{ fontFamily: '"Canela", "Playfair Display", Georgia, serif', fontSize: "clamp(1.15rem,2vw,1.55rem)", lineHeight: 1.55, maxWidth: 760, margin: "0 auto 42px", textAlign: "center", color: "#3d3d3d" }}>{payload.intro}</p> : null}
+        {payload.intro ? <p style={{ fontFamily: headingFontFamily(branding.headingFont), fontSize: "clamp(1.15rem,2vw,1.55rem)", lineHeight: 1.55, maxWidth: 760, margin: "0 auto 42px", textAlign: "center", color: branding.textColor, opacity: .78 }}>{payload.intro}</p> : null}
 
         {activeSelectionRequest ? (
-          <section className="mb-8 rounded-2xl border border-black/10 bg-white px-5 py-4">
+          <section className="mb-8 rounded-2xl border border-black/10 px-5 py-4" style={{ background: branding.surfaceColor }}>
             <div className="flex items-start justify-between gap-5 flex-wrap">
               <div className="min-w-0" style={{ flex: 1 }}>
                 <div className="flex items-center gap-2"><ClipboardList size={16} /><p className="text-xs uppercase tracking-[0.16em] text-neutral-500">Client selection</p></div>
@@ -567,7 +610,8 @@ export function ClientGallery() {
                     type="button"
                     disabled={selectionBusy || !(activeSelection?.selectedCount || 0)}
                     onClick={submitSelection}
-                    className="rounded-lg bg-black text-white px-4 py-2.5 text-sm inline-flex items-center gap-2 disabled:opacity-40"
+                    className="rounded-lg px-4 py-2.5 text-sm inline-flex items-center gap-2 disabled:opacity-40"
+                    style={{ background: branding.accentColor, color: accentTextColor }}
                   >
                     <Send size={15} /> {selectionBusy ? "Saving…" : "Submit selection"}
                   </button>
@@ -580,8 +624,8 @@ export function ClientGallery() {
 
         {albums.length ? (
           <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-2">
-            <button type="button" onClick={() => setActiveAlbumId("")} className={`shrink-0 rounded-lg px-4 py-2 text-sm border ${!activeAlbumId ? "bg-black text-white border-black" : "bg-white border-black/15"}`}>All Photos <span className="ml-1 opacity-60">{images.length}</span></button>
-            {albums.map((album) => <button key={album.id} type="button" onClick={() => setActiveAlbumId(album.id)} className={`shrink-0 rounded-lg px-4 py-2 text-sm border ${activeAlbumId === album.id ? "bg-black text-white border-black" : "bg-white border-black/15"}`}>{album.name} <span className="ml-1 opacity-60">{album.assetCount}</span></button>)}
+            <button type="button" onClick={() => setActiveAlbumId("")} className="shrink-0 rounded-lg px-4 py-2 text-sm border" style={{ background: !activeAlbumId ? branding.accentColor : branding.surfaceColor, color: !activeAlbumId ? accentTextColor : branding.textColor, borderColor: !activeAlbumId ? branding.accentColor : `${branding.textColor}25` }}>All Photos <span className="ml-1 opacity-60">{images.length}</span></button>
+            {albums.map((album) => <button key={album.id} type="button" onClick={() => setActiveAlbumId(album.id)} className="shrink-0 rounded-lg px-4 py-2 text-sm border" style={{ background: activeAlbumId === album.id ? branding.accentColor : branding.surfaceColor, color: activeAlbumId === album.id ? accentTextColor : branding.textColor, borderColor: activeAlbumId === album.id ? branding.accentColor : `${branding.textColor}25` }}>{album.name} <span className="ml-1 opacity-60">{album.assetCount}</span></button>)}
           </div>
         ) : null}
 
@@ -637,7 +681,7 @@ export function ClientGallery() {
         </div>
       ) : null}
 
-      <footer className="border-t border-black/10 py-9 px-6 text-center text-xs tracking-wide text-neutral-500 bg-white/55">
+      <footer className="border-t border-black/10 py-9 px-6 text-center text-xs tracking-wide" style={{ background: `${branding.surfaceColor}99`, opacity: .72 }}>
         Private gallery delivered by {payload.businessName}.
       </footer>
 

@@ -503,6 +503,26 @@ export class AdminApiService {
     return detail;
   }
 
+  static async updateClientGalleryBranding(id: string, payload: Record<string, unknown>) {
+    const result = await request<{ ok: true; branding: ClientGalleryDetailPayload["branding"] }>(
+      `/api/client-galleries/${encodeURIComponent(id)}/branding`,
+      { method: "POST", body: JSON.stringify(payload) },
+    );
+    return result.branding;
+  }
+
+  static async uploadClientGalleryBrandingLogo(id: string, file: File) {
+    const form = new FormData();
+    form.append("logo", file);
+    const response = await fetch(`${API_BASE}/api/client-galleries/${encodeURIComponent(id)}/branding-logo`, {
+      method: "POST",
+      body: form,
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error((result as ApiErrorPayload).error || `Logo upload failed (${response.status}).`);
+    return (result as { branding: ClientGalleryDetailPayload["branding"] }).branding;
+  }
+
   static async mutateClientGallerySelection(id: string, payload: Record<string, unknown>) {
     const result = await request<{ ok: true } & ClientGalleryDetailPayload>(
       `/api/client-galleries/${encodeURIComponent(id)}/selections`,

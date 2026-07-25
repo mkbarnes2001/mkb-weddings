@@ -131,3 +131,12 @@ Next delivery/commerce work should build client selections, print-store ordering
 
 ## Completed before Print Store: v1.5.4 Client Gallery Workspace
 The Client Gallery management surface has been consolidated before commerce work begins: Photos is now the operational default, client activity/access/settings are separated, and canonical assets can be organised into reusable gallery albums/sections. This provides the cleaner gallery shell that future Print Store/cart/order controls can plug into without crowding the core editor.
+
+## Completed before Print Store: v1.5.5 Photo Menus & Branding
+- Compact per-photo options menu in Client Gallery Admin.
+- Safe single-photo actions without exposing permanent controls on every thumbnail.
+- Per-gallery client-facing logo and colour scheme with workspace defaults.
+- Managed public R2 logo upload, live preview and safe theme tokens.
+
+The Client Gallery workspace is now ready for Print Store navigation and product controls without further crowding the Photos screen.
+

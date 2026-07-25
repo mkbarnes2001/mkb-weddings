@@ -101,6 +101,24 @@ export type ClientGalleryRecord = {
 };
 
 
+
+export type ClientGalleryBranding = {
+  businessName: string;
+  logoMode: "workspace" | "custom" | "hidden";
+  customLogoUrl: string;
+  customLogoStored: boolean;
+  effectiveLogoUrl: string;
+  workspaceLogoUrl: string;
+  workspaceAccentColor: string;
+  accentColor: string;
+  backgroundColor: string;
+  surfaceColor: string;
+  textColor: string;
+  headingFont: "editorial" | "modern" | "classic";
+  showStudioName: boolean;
+  updatedAt: string;
+};
+
 export type ClientGalleryAlbum = {
   id: string;
   galleryId: string;
@@ -176,6 +194,7 @@ export type ClientGalleryDetailPayload = {
   selectionRequests: ClientGallerySelectionRequest[];
   selections: ClientGallerySelection[];
   albums: ClientGalleryAlbum[];
+  branding: ClientGalleryBranding;
 };
 
 export type PrivateOriginalUploadedPart = {

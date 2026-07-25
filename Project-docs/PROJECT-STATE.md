@@ -300,3 +300,11 @@ New tables:
 - `client_identity_sessions`
 
 Schema version advances to **16**.
+
+## Client Gallery Photo Menus & Branding — v1.5.5
+Client Gallery Admin photo cards now use one compact vertical-options icon instead of permanently displaying multiple action buttons. The menu provides preview, secure original download, cover selection, show/hide, album assignment and safe removal from the Client Gallery. Removing a photo preserves the canonical Asset Library record and all R2 objects.
+
+A dedicated **Branding** workspace tab now controls the client-facing private gallery presentation. Each gallery can use the workspace logo, upload a gallery-specific logo, or hide the logo. Safe theme tokens control accent, background, surface and text colours plus a limited heading-font choice. Arbitrary CSS is not accepted. A live preview and reset-to-studio-defaults action are included.
+
+Custom logos are stored in public `MKB_IMAGES` R2 under managed branding keys. Private wedding originals remain isolated in `MKB_PRIVATE_ASSETS`. Schema version advances to **18**.
+

@@ -297,3 +297,16 @@
 - Moved email/PIN/download controls and authorised contacts into a dedicated Access area.
 - Moved general gallery metadata and wedding linkage into Settings; advanced security options are collapsed until needed.
 - Added migration 017; schema version advances to 17.
+
+## v1.5.5 — Client Gallery Photo Menus & Branding
+- Replaced the three persistent action icons on every Client Gallery photo card with one compact vertical-options button.
+- Added an accessible photo menu for preview, secure original download, set cover, show/hide, add to album and remove from gallery.
+- Added confirmation text clarifying that removing a gallery photo preserves the canonical asset and private original.
+- Added an Admin image-preview overlay and retained bulk-selection controls separately.
+- Added a dedicated **Branding** workspace tab.
+- Added workspace-logo, custom-logo and no-logo modes.
+- Added managed PNG/JPEG/WebP logo upload to public R2 with a 2 MB limit and replacement cleanup.
+- Added light colour presets, individual colour controls, limited heading styles, studio-name visibility and a live client-gallery preview.
+- Applied branding to the private gallery header, access screen, page surfaces, album navigation and primary actions.
+- Added migration 018; schema version advances to 18.
+
