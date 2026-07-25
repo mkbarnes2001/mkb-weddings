@@ -1,16 +1,17 @@
 # Next Steps
 
 ## Current baseline
-v1.5.3 separates Client Gallery setup/access from operational Selections & Favourites work, while retaining v1.5.2 thumbnail review and secure full-resolution download tools. Persistent verified client identity remains the basis for cross-device favourites.
+v1.5.4 consolidates Client Gallery management into a dedicated workspace with Photos, Client Activity, Access and Settings. Client Gallery albums/sections now organise canonical assets without duplication and are available to the private client-facing gallery.
 
-## v1.5.3 validation
-1. Open any Client Gallery in Admin and confirm the default **Gallery & access** tab contains settings, uploads, images, contacts and visitors but no long favourites/selections blocks.
-2. Open **Selections & favourites** and confirm favourite totals and thumbnail/download actions are present.
-3. Confirm selection requests can still be created, archived and reviewed from this tab.
-4. Confirm client responses still expose thumbnail review, bulk-original download, filename copy, CSV export and Reopen where applicable.
-5. Switch between tabs and confirm unsaved Gallery settings remain in place until Save is clicked.
-6. Confirm schema version remains 16.
-
+## v1.5.4 validation
+1. Run migration 017 and confirm `client_gallery_albums` and `client_gallery_album_assets` exist before setting schema version 17.
+2. Open a Client Gallery and confirm **Photos** is the default workspace tab with the persistent gallery summary sidebar.
+3. Create albums such as Getting Ready / Ceremony, select several thumbnails and add them to an album. Confirm no new Asset Library records are created.
+4. Preview the live client gallery and confirm All Photos plus active album filters show the expected photographs.
+5. Confirm Client Activity still exposes favourites, bulk original downloads, selection responses and visitor activity.
+6. Confirm Access saves email/PIN/download permissions and authorised contacts.
+7. Confirm Settings saves title, client, wedding linkage, status and introduction.
+8. Confirm Preview and Share work from every workspace tab.
 
 ## Next engineering sequence
 1. Print Store foundation: products, sizes, workspace price lists/markup, cart, crop choices, order records and payment-provider boundary.

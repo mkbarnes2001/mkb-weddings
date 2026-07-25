@@ -283,3 +283,17 @@
 - Kept visitor access, authorised client emails, recent visitors, uploads and gallery image management on the Gallery & access tab.
 - No D1 migration; schema version remains 16.
 
+
+
+## v1.5.4 — Client Gallery Workspace
+- Rebuilt Client Gallery Admin as a four-area operational workspace: **Photos**, **Client Activity**, **Access** and **Settings**.
+- Made Photos the default gallery screen instead of opening into a settings-heavy editor.
+- Added a persistent summary sidebar with cover image, live/draft status, client, photo/original counts, wedding date and latest visit.
+- Added prominent Preview and Share actions with a compact private-link/security summary panel.
+- Reworked photo management into a cleaner selectable thumbnail grid with contextual bulk album actions.
+- Added Client Gallery albums/sections with no image duplication; album membership references canonical asset IDs.
+- Added public Client Gallery album navigation while retaining a virtual **All Photos** view.
+- Consolidated favourites, selections and visitor history into a compact Client Activity area.
+- Moved email/PIN/download controls and authorised contacts into a dedicated Access area.
+- Moved general gallery metadata and wedding linkage into Settings; advanced security options are collapsed until needed.
+- Added migration 017; schema version advances to 17.

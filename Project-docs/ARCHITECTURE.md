@@ -213,3 +213,14 @@ Email entry alone remains an identification convenience and does not prove mailb
 Favourites remain keyed by legacy gallery/browser visitor keys for backwards compatibility. Verified identities aggregate those keys through `client_identity_gallery_visitors`, avoiding a destructive rewrite and preserving existing favourite history. Removing a favourite while authenticated removes that asset from all visitor keys linked to the same identity for that gallery.
 
 The email transport sits behind a small provider boundary. v1.5.1 implements Resend through its HTTPS API, while core identity/session storage is provider-independent.
+
+
+## Client Gallery workspace and albums — v1.5.4
+Client Gallery Admin is organised by operational responsibility rather than by implementation tables:
+
+- **Photos**: canonical gallery membership, private-original upload, Asset Library import, cover/visibility controls and album organisation.
+- **Client Activity**: favourites, formal selections, downloads/review tools and visitor activity.
+- **Access**: identification, magic-link-ready client contacts, PIN, expiry and original-download policy.
+- **Settings**: gallery identity, wedding linkage, status and presentation copy.
+
+Album sections are presentation relationships only. `client_gallery_album_assets` links albums to canonical assets; R2 objects and `assets` rows are never duplicated. Public Client Galleries receive active album metadata and filter the same canonical gallery assets by album membership.

@@ -127,3 +127,7 @@ Next delivery/commerce work should build client selections, print-store ordering
 - Secure individual original download.
 - Streamed Download All ZIP for favourites and formal selections.
 - Direct album-design handoff using preserved original filenames.
+
+
+## Completed before Print Store: v1.5.4 Client Gallery Workspace
+The Client Gallery management surface has been consolidated before commerce work begins: Photos is now the operational default, client activity/access/settings are separated, and canonical assets can be organised into reusable gallery albums/sections. This provides the cleaner gallery shell that future Print Store/cart/order controls can plug into without crowding the core editor.

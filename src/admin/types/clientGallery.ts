@@ -100,6 +100,20 @@ export type ClientGalleryRecord = {
   updatedAt: string;
 };
 
+
+export type ClientGalleryAlbum = {
+  id: string;
+  galleryId: string;
+  name: string;
+  slug: string;
+  status: "active" | "archived";
+  sortOrder: number;
+  assetCount: number;
+  assetIds: string[];
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type ClientGalleryAsset = {
   assetId: string;
   filename: string;
@@ -110,6 +124,7 @@ export type ClientGalleryAsset = {
   sortOrder: number;
   hidden: boolean;
   hasOriginal: boolean;
+  albumIds: string[];
 };
 
 
@@ -160,6 +175,7 @@ export type ClientGalleryDetailPayload = {
   visitors: ClientGalleryVisitor[];
   selectionRequests: ClientGallerySelectionRequest[];
   selections: ClientGallerySelection[];
+  albums: ClientGalleryAlbum[];
 };
 
 export type PrivateOriginalUploadedPart = {

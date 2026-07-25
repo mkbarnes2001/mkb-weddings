@@ -179,3 +179,11 @@ Adds:
 Magic-link and session credentials are stored as SHA-256 hashes only. Magic links are one-time and expire after 15 minutes. Sessions expire after 30 days and may be explicitly revoked by sign-out. The browser session token is delivered only through an HttpOnly, SameSite=Lax cookie.
 
 No R2 object is copied, renamed or deleted by migration 016. Existing favourites and selections remain in their original tables.
+
+
+## v1.5.4 Client Gallery Albums — schema 17
+`client_gallery_albums` stores workspace-gallery presentation sections such as Getting Ready, Ceremony, Portraits, Reception and Evening.
+
+`client_gallery_album_assets` is a relationship table only. It references existing canonical `assets.id` records and never creates duplicate image files or asset identities. An asset may belong to multiple albums. `All Photos` is not stored as an album; it remains the virtual complete gallery membership from `client_gallery_assets`.
+
+Migration: `d1/migrations/017_client_gallery_workspace_albums.sql`.

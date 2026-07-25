@@ -680,6 +680,113 @@ export async function mutateClientGallerySelections(db: D1Db, galleryId: string,
   };
 }
 
+
+export async function listClientGalleryAlbums(db: D1Db, galleryId: string, includeArchived = true) {
+  const result = await db.prepare(`
+    SELECT
+      cga.*,
+      COUNT(cgaa.asset_id) AS asset_count,
+      COALESCE(GROUP_CONCAT(cgaa.asset_id, ','), '') AS asset_ids
+    FROM client_gallery_albums cga
+    LEFT JOIN client_gallery_album_assets cgaa ON cgaa.album_id = cga.id
+    WHERE cga.gallery_id = ? ${includeArchived ? '' : "AND cga.status = 'active'"}
+    GROUP BY cga.id
+    ORDER BY cga.sort_order ASC, cga.created_at ASC
+  `).bind(galleryId).all();
+  return (result.results || []).map((row: any) => ({
+    id: text(row.id),
+    galleryId: text(row.gallery_id),
+    name: text(row.name),
+    slug: text(row.slug),
+    status: text(row.status) === 'archived' ? 'archived' : 'active',
+    sortOrder: number(row.sort_order),
+    assetCount: number(row.asset_count),
+    assetIds: text(row.asset_ids).split(',').map((value) => value.trim()).filter(Boolean),
+    createdAt: text(row.created_at),
+    updatedAt: text(row.updated_at),
+  }));
+}
+
+async function uniqueAlbumSlug(db: D1Db, galleryId: string, wanted: string, excludeId = '') {
+  const base = cleanSlug(wanted) || 'album';
+  let candidate = base;
+  let attempt = 1;
+  while (attempt < 100) {
+    const row = await db.prepare(`
+      SELECT id FROM client_gallery_albums
+      WHERE gallery_id = ? AND slug = ? AND id <> ? LIMIT 1
+    `).bind(galleryId, candidate, excludeId).first();
+    if (!row) return candidate;
+    attempt += 1;
+    candidate = `${base}-${attempt}`;
+  }
+  return `${base}-${crypto.randomUUID().slice(0, 8)}`;
+}
+
+export async function mutateClientGalleryAlbums(db: D1Db, galleryId: string, input: any) {
+  const workspaceId = await getDefaultWorkspaceId(db);
+  const gallery = await db.prepare(`SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1`)
+    .bind(galleryId, workspaceId).first();
+  if (!gallery) throw new Error('Client gallery not found.');
+
+  const action = text(input?.action);
+  if (action === 'create') {
+    const name = text(input?.name);
+    if (!name) throw new Error('Album name is required.');
+    const slug = await uniqueAlbumSlug(db, galleryId, name);
+    const maxRow = await db.prepare(`SELECT COALESCE(MAX(sort_order), -1) AS max_order FROM client_gallery_albums WHERE gallery_id = ?`)
+      .bind(galleryId).first();
+    await db.prepare(`
+      INSERT INTO client_gallery_albums (id, gallery_id, name, slug, status, sort_order)
+      VALUES (?, ?, ?, ?, 'active', ?)
+    `).bind(crypto.randomUUID(), galleryId, name, slug, number(maxRow?.max_order, -1) + 1).run();
+  } else if (action === 'rename') {
+    const albumId = text(input?.albumId);
+    const name = text(input?.name);
+    if (!albumId || !name) throw new Error('Album and name are required.');
+    const slug = await uniqueAlbumSlug(db, galleryId, name, albumId);
+    await db.prepare(`UPDATE client_gallery_albums SET name = ?, slug = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND gallery_id = ?`)
+      .bind(name, slug, albumId, galleryId).run();
+  } else if (action === 'archive') {
+    const albumId = text(input?.albumId);
+    await db.prepare(`UPDATE client_gallery_albums SET status = 'archived', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND gallery_id = ?`)
+      .bind(albumId, galleryId).run();
+  } else if (action === 'restore') {
+    const albumId = text(input?.albumId);
+    await db.prepare(`UPDATE client_gallery_albums SET status = 'active', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND gallery_id = ?`)
+      .bind(albumId, galleryId).run();
+  } else if (action === 'addAssets') {
+    const albumId = text(input?.albumId);
+    const album = await db.prepare(`SELECT id FROM client_gallery_albums WHERE id = ? AND gallery_id = ? LIMIT 1`).bind(albumId, galleryId).first();
+    if (!album) throw new Error('Album not found.');
+    const assetIds = Array.isArray(input?.assetIds) ? [...new Set(input.assetIds.map(text).filter(Boolean))] : [];
+    const maxRow = await db.prepare(`SELECT COALESCE(MAX(sort_order), -1) AS max_order FROM client_gallery_album_assets WHERE album_id = ?`).bind(albumId).first();
+    let next = number(maxRow?.max_order, -1) + 1;
+    const statements: any[] = [];
+    for (const assetId of assetIds) {
+      statements.push(db.prepare(`
+        INSERT OR IGNORE INTO client_gallery_album_assets (album_id, asset_id, sort_order)
+        SELECT ?, cga.asset_id, ? FROM client_gallery_assets cga
+        WHERE cga.gallery_id = ? AND cga.asset_id = ?
+      `).bind(albumId, next++, galleryId, assetId));
+    }
+    if (statements.length) await db.batch(statements);
+  } else if (action === 'removeAssets') {
+    const albumId = text(input?.albumId);
+    const assetIds = Array.isArray(input?.assetIds) ? [...new Set(input.assetIds.map(text).filter(Boolean))] : [];
+    const statements = assetIds.map((assetId: string) => db.prepare(`DELETE FROM client_gallery_album_assets WHERE album_id = ? AND asset_id = ?`).bind(albumId, assetId));
+    if (statements.length) await db.batch(statements);
+  } else if (action === 'reorder') {
+    const albumIds = Array.isArray(input?.albumIds) ? input.albumIds.map(text).filter(Boolean) : [];
+    const statements = albumIds.map((albumId: string, index: number) => db.prepare(`UPDATE client_gallery_albums SET sort_order = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND gallery_id = ?`).bind(index, albumId, galleryId));
+    if (statements.length) await db.batch(statements);
+  } else {
+    throw new Error('Unsupported client gallery album action.');
+  }
+
+  return { albums: await listClientGalleryAlbums(db, galleryId, true) };
+}
+
 async function adminGalleryAssets(db: D1Db, galleryId: string) {
   const result = await db.prepare(`
     SELECT
@@ -692,7 +799,13 @@ async function adminGalleryAssets(db: D1Db, galleryId: string) {
       a.height,
       COALESCE(tf.url, '') AS thumb_url,
       COALESCE(wf.url, '') AS web_url,
-      CASE WHEN of.variant IS NULL THEN 0 ELSE 1 END AS has_original
+      CASE WHEN of.variant IS NULL THEN 0 ELSE 1 END AS has_original,
+      COALESCE((
+        SELECT GROUP_CONCAT(cgaa.album_id, ',')
+        FROM client_gallery_album_assets cgaa
+        JOIN client_gallery_albums cgal ON cgal.id = cgaa.album_id
+        WHERE cgaa.asset_id = cga.asset_id AND cgal.gallery_id = cga.gallery_id AND cgal.status = 'active'
+      ), '') AS album_ids
     FROM client_gallery_assets cga
     JOIN assets a ON a.id = cga.asset_id
     LEFT JOIN asset_files tf ON tf.asset_id = a.id AND tf.variant = 'thumb' AND tf.status = 'active'
@@ -711,12 +824,13 @@ async function adminGalleryAssets(db: D1Db, galleryId: string) {
     sortOrder: number(row.sort_order),
     hidden: number(row.hidden) === 1,
     hasOriginal: number(row.has_original) === 1,
+    albumIds: text(row.album_ids).split(',').map((value) => value.trim()).filter(Boolean),
   }));
 }
 
 export async function getClientGalleryAdmin(db: D1Db, id: string) {
   const workspaceId = await getDefaultWorkspaceId(db);
-  const [row, assets, weddings, contacts, visitors, selectionRequests, selections] = await Promise.all([
+  const [row, assets, weddings, contacts, visitors, selectionRequests, selections, albums] = await Promise.all([
     galleryBaseRow(db, id, workspaceId),
     adminGalleryAssets(db, id),
     listWeddingOptions(db),
@@ -724,9 +838,10 @@ export async function getClientGalleryAdmin(db: D1Db, id: string) {
     listClientGalleryVisitors(db, id),
     listClientGallerySelectionRequests(db, id, true),
     listClientGallerySelections(db, id),
+    listClientGalleryAlbums(db, id, true),
   ]);
   if (!row) throw new Error("Client gallery not found.");
-  return { workspaceId, gallery: mapGallery(row), assets, weddings, contacts, visitors, selectionRequests, selections };
+  return { workspaceId, gallery: mapGallery(row), assets, weddings, contacts, visitors, selectionRequests, selections, albums };
 }
 
 export async function importWeddingAssets(db: D1Db, galleryId: string, workspaceId?: string, weddingSlug?: string) {
@@ -806,6 +921,7 @@ export async function mutateClientGalleryAssets(db: D1Db, galleryId: string, inp
       await db.batch([
         db.prepare(`DELETE FROM client_gallery_assets WHERE gallery_id = ? AND asset_id = ?`).bind(galleryId, assetId),
         db.prepare(`DELETE FROM client_gallery_favourites WHERE gallery_id = ? AND asset_id = ?`).bind(galleryId, assetId),
+        db.prepare(`DELETE FROM client_gallery_album_assets WHERE asset_id = ? AND album_id IN (SELECT id FROM client_gallery_albums WHERE gallery_id = ?)`).bind(assetId, galleryId),
         db.prepare(`UPDATE client_galleries SET cover_asset_id = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND cover_asset_id = ?`).bind(galleryId, assetId),
       ]);
     }
@@ -973,7 +1089,13 @@ async function publicAssets(db: D1Db, galleryId: string) {
       a.height,
       COALESCE(tf.url, wf.url, '') AS thumb_url,
       COALESCE(wf.url, tf.url, '') AS web_url,
-      CASE WHEN of.variant IS NULL THEN 0 ELSE 1 END AS has_original
+      CASE WHEN of.variant IS NULL THEN 0 ELSE 1 END AS has_original,
+      COALESCE((
+        SELECT GROUP_CONCAT(cgaa.album_id, ',')
+        FROM client_gallery_album_assets cgaa
+        JOIN client_gallery_albums cgal ON cgal.id = cgaa.album_id
+        WHERE cgaa.asset_id = cga.asset_id AND cgal.gallery_id = cga.gallery_id AND cgal.status = 'active'
+      ), '') AS album_ids
     FROM client_gallery_assets cga
     JOIN assets a ON a.id = cga.asset_id
     LEFT JOIN asset_files tf ON tf.asset_id = a.id AND tf.variant = 'thumb' AND tf.status = 'active'
@@ -990,6 +1112,7 @@ async function publicAssets(db: D1Db, galleryId: string) {
     width: number(row.width),
     height: number(row.height),
     hasOriginal: number(row.has_original) === 1,
+    albumIds: text(row.album_ids).split(',').map((value) => value.trim()).filter(Boolean),
   }));
 }
 
@@ -1261,10 +1384,11 @@ export async function getPublicClientGallery(db: D1Db, token: string, pin = '', 
     return { status: access.status, body: { ok: false, locked: true, ...base, error: access.error } };
   }
 
-  const [assets, favourites, selectionRequests] = await Promise.all([
+  const [assets, favourites, selectionRequests, albums] = await Promise.all([
     publicAssets(db, text(row.id)),
     favouriteIds(db, text(row.id), visitorKey, access.authenticatedIdentity?.id || ''),
     publicSelectionState(db, text(row.id), visitorKey, identity?.emailNormalized || ""),
+    listClientGalleryAlbums(db, text(row.id), false),
   ]);
   const coverAssetId = text(row.cover_asset_id);
   const cover = assets.find((asset) => asset.assetId === coverAssetId) || assets[0] || null;
@@ -1278,6 +1402,7 @@ export async function getPublicClientGallery(db: D1Db, token: string, pin = '', 
       assets,
       favouriteAssetIds: favourites,
       selectionRequests,
+      albums,
     },
   };
 }

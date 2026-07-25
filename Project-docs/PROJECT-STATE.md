@@ -1,8 +1,28 @@
 # Project State
 
 ## Version
-Current release: **v1.5.3 — Client Gallery Admin Tabs**.  
-Database schema version: **16**.
+Current release: **v1.5.4 — Client Gallery Workspace**.  
+Database schema version: **17**.
+
+## Client Gallery Workspace — v1.5.4
+Client Gallery administration is now an operational workspace rather than one long editor form.
+
+Workspace structure:
+- persistent gallery summary sidebar with cover, status, client, photo/original counts, wedding date and last visit;
+- **Photos** (default) for image operations, upload/import and gallery albums;
+- **Client Activity** for favourites, selections and visitor activity;
+- **Access** for email/PIN/download permissions and authorised contacts;
+- **Settings** for gallery identity, wedding linkage, status and introduction;
+- prominent Preview and Share actions remain available across the workspace.
+
+Gallery albums/sections:
+- `client_gallery_albums` stores named gallery sections;
+- `client_gallery_album_assets` references canonical `assets.id`; images are never duplicated;
+- **All Photos** remains a virtual complete view;
+- an asset may belong to multiple albums;
+- active albums are exposed to the private client gallery as filter/navigation sections.
+
+The Photos workspace uses compact thumbnail selection controls and contextual album actions to reduce persistent button clutter. Advanced access/security options are grouped away from routine photo management. Schema version advances to **17**.
 
 
 ## Wedding management refinement — v1.3.3

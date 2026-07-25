@@ -12,6 +12,15 @@ type ClientGalleryImage = {
   width: number;
   height: number;
   hasOriginal: boolean;
+  albumIds?: string[];
+};
+
+type ClientGalleryAlbum = {
+  id: string;
+  name: string;
+  slug: string;
+  assetCount: number;
+  assetIds: string[];
 };
 
 type ClientGallerySelection = {
@@ -66,6 +75,7 @@ type ClientGalleryPayload = {
   assets?: ClientGalleryImage[];
   favouriteAssetIds?: string[];
   selectionRequests?: ClientGallerySelectionRequest[];
+  albums?: ClientGalleryAlbum[];
 };
 
 function visitorKey() {
@@ -179,6 +189,7 @@ export function ClientGallery() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [downloading, setDownloading] = useState<Set<string>>(new Set());
   const [activeSelectionRequestId, setActiveSelectionRequestId] = useState("");
+  const [activeAlbumId, setActiveAlbumId] = useState("");
   const [selectionBusy, setSelectionBusy] = useState(false);
   const [showSecureSignIn, setShowSecureSignIn] = useState(false);
   const [secureSignInBusy, setSecureSignInBusy] = useState(false);
@@ -387,6 +398,8 @@ export function ClientGallery() {
   };
 
   const images = payload?.assets || [];
+  const albums = payload?.albums || [];
+  const displayImages = activeAlbumId ? images.filter((image) => (image.albumIds || []).includes(activeAlbumId)) : images;
   const cover = payload?.cover || images[0] || null;
   const favouriteImages = useMemo(() => images.filter((image) => favourites.has(image.assetId)), [images, favourites]);
   const selectionRequests = payload?.selectionRequests || [];
@@ -565,8 +578,15 @@ export function ClientGallery() {
           </section>
         ) : null}
 
+        {albums.length ? (
+          <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-2">
+            <button type="button" onClick={() => setActiveAlbumId("")} className={`shrink-0 rounded-lg px-4 py-2 text-sm border ${!activeAlbumId ? "bg-black text-white border-black" : "bg-white border-black/15"}`}>All Photos <span className="ml-1 opacity-60">{images.length}</span></button>
+            {albums.map((album) => <button key={album.id} type="button" onClick={() => setActiveAlbumId(album.id)} className={`shrink-0 rounded-lg px-4 py-2 text-sm border ${activeAlbumId === album.id ? "bg-black text-white border-black" : "bg-white border-black/15"}`}>{album.name} <span className="ml-1 opacity-60">{album.assetCount}</span></button>)}
+          </div>
+        ) : null}
+
         <div className="flex items-center justify-between gap-4 mb-5 flex-wrap border-b border-black/10 pb-4">
-          <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">{images.length} photographs</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">{displayImages.length} photograph{displayImages.length === 1 ? "" : "s"}{activeAlbumId ? " in this album" : ""}</p>
           <div className="flex items-center gap-4 text-xs text-neutral-500">
             {payload.allowFavourites && favouriteImages.length ? <span>{payload.authenticated ? "Your favourites are synced to your secure account." : payload.secureSignInAvailable ? "Your favourites are saved on this device. Sign in to sync across devices." : "Your favourites are saved on this device."}</span> : null}
             <span className="inline-flex items-center gap-1.5"><Download size={14} /> {payload.allowDownloads ? `${images.filter((image) => image.hasOriginal).length} originals available` : payload.galleryDownloadsEnabled ? "Originals reserved for authorised clients" : "Downloads disabled"}</span>
@@ -574,7 +594,7 @@ export function ClientGallery() {
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(205px, 1fr))", gap: 8 }}>
-          {images.map((image, index) => (
+          {displayImages.map((image, index) => (
             <div key={image.assetId} style={{ position: "relative", aspectRatio: image.width && image.height ? `${image.width}/${image.height}` : "4/3", minHeight: 170, overflow: "hidden", background: "#e8e6e1" }}>
               <button onClick={() => setLightboxIndex(index)} aria-label={`Open image ${index + 1}`} style={{ width: "100%", height: "100%", display: "block", border: 0, padding: 0, cursor: "zoom-in", background: "transparent" }}>
                 <GalleryImage image={image} baseOrigin={publicAssetOrigin} mode="tile" />
@@ -602,7 +622,7 @@ export function ClientGallery() {
             </div>
           ))}
         </div>
-        {!images.length ? <div className="text-center py-20 text-neutral-500">This gallery does not contain any visible images yet.</div> : null}
+        {!displayImages.length ? <div className="text-center py-20 text-neutral-500">{activeAlbumId ? "This album does not contain any visible images yet." : "This gallery does not contain any visible images yet."}</div> : null}
       </main>
 
       {showSecureSignIn && !payload.authenticated && payload.secureSignInAvailable ? (
@@ -621,16 +641,16 @@ export function ClientGallery() {
         Private gallery delivered by {payload.businessName}.
       </footer>
 
-      {lightboxIndex !== null && images[lightboxIndex] ? (
+      {lightboxIndex !== null && displayImages[lightboxIndex] ? (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.95)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
           <button onClick={() => setLightboxIndex(null)} aria-label="Close image" className="rounded-full bg-white p-2" style={{ position: "absolute", top: 18, right: 18, zIndex: 2 }}><X className="h-5 w-5" /></button>
           <div style={{ width: "96vw", height: "91vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <GalleryImage image={images[lightboxIndex]} baseOrigin={publicAssetOrigin} mode="lightbox" />
+            <GalleryImage image={displayImages[lightboxIndex]} baseOrigin={publicAssetOrigin} mode="lightbox" />
           </div>
           <div style={{ position: "absolute", bottom: 22, display: "flex", alignItems: "center", gap: 9 }}>
-            {activeSelectionRequest ? <button type="button" disabled={selectionBusy || activeSelection?.status === "submitted"} onClick={() => updateSelection(images[lightboxIndex].assetId, !selectedAssetIds.has(images[lightboxIndex].assetId))} className="rounded-full bg-white px-4 py-2 inline-flex items-center gap-2 text-sm disabled:opacity-50"><Check className="h-4 w-4" /> {selectedAssetIds.has(images[lightboxIndex].assetId) ? "Selected" : "Select"}</button> : null}
-            <DownloadControl enabled={payload.allowDownloads && images[lightboxIndex].hasOriginal} busy={downloading.has(images[lightboxIndex].assetId)} onClick={() => downloadOriginal(images[lightboxIndex])} />
-            {payload.allowFavourites ? <button onClick={() => toggleFavourite(images[lightboxIndex].assetId)} className="rounded-full bg-white px-4 py-2 inline-flex items-center gap-2 text-sm"><Heart className="h-4 w-4" fill={favourites.has(images[lightboxIndex].assetId) ? "currentColor" : "none"} /> Favourite</button> : null}
+            {activeSelectionRequest ? <button type="button" disabled={selectionBusy || activeSelection?.status === "submitted"} onClick={() => updateSelection(displayImages[lightboxIndex].assetId, !selectedAssetIds.has(displayImages[lightboxIndex].assetId))} className="rounded-full bg-white px-4 py-2 inline-flex items-center gap-2 text-sm disabled:opacity-50"><Check className="h-4 w-4" /> {selectedAssetIds.has(displayImages[lightboxIndex].assetId) ? "Selected" : "Select"}</button> : null}
+            <DownloadControl enabled={payload.allowDownloads && displayImages[lightboxIndex].hasOriginal} busy={downloading.has(displayImages[lightboxIndex].assetId)} onClick={() => downloadOriginal(displayImages[lightboxIndex])} />
+            {payload.allowFavourites ? <button onClick={() => toggleFavourite(displayImages[lightboxIndex].assetId)} className="rounded-full bg-white px-4 py-2 inline-flex items-center gap-2 text-sm"><Heart className="h-4 w-4" fill={favourites.has(displayImages[lightboxIndex].assetId) ? "currentColor" : "none"} /> Favourite</button> : null}
           </div>
         </div>
       ) : null}
