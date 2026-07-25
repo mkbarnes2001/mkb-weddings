@@ -1,8 +1,18 @@
 # Project State
 
 ## Version
-Current release: **v1.5.7 — Client Gallery Compact Controls**.  
+Current release: **v1.5.8 — Global Admin UI System & Visual Refresh**.  
 Database schema version: **19**.
+
+
+## Global Admin UI System & Visual Refresh — v1.5.8
+- Introduces shared Admin UI primitives for page headers, panels, toolbars, actions, icon buttons, tabs, status badges, fields and empty states.
+- Establishes one compact design token system for spacing, radii, control heights, typography, borders and shadows.
+- Refines the global Admin shell with a narrower sidebar, smaller navigation, compact top bar and consistent content width.
+- Applies the Client Gallery compact-control language across legacy Admin buttons, inputs, selects, textareas, tables, cards, modals and status indicators without changing routes or workflows.
+- Converts the main Dashboard, Weddings, Venues, Suppliers, Locations, Gallery Management, Asset Library, Client Galleries, AI Centre, SEO Centre, Settings and Publishing headers to the shared compact page-header structure.
+- Remaining detail/edit pages inherit the same global controls and compact legacy-header treatment automatically.
+- This is a presentation-only release: no D1 migration, API change, route change or data change. Schema remains **19**.
 
 
 ## Client Gallery Compact Controls — v1.5.7

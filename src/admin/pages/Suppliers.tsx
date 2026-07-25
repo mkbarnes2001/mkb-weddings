@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Archive, ExternalLink, Plus, Save, Search, Users } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import { SupplierService, type MasterSupplier } from "../services/SupplierService";
+import { AdminPage, AdminPageHeader, AdminToolbar } from "../components/ui/AdminUI";
 
 const CATEGORIES = [
   "Photography", "Venue", "Videographer", "Florist", "Flowers", "Hair", "Makeup", "Make-up",
@@ -93,19 +94,13 @@ export function Suppliers() {
   const linkedWeddingCount = new Set(suppliers.flatMap((s) => s.linkedWeddings.map((w) => w.slug))).size;
 
   return (
-    <div className="space-y-7">
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">Supplier Master Database</p>
-            <h1 className="font-serif text-5xl md:text-6xl">Suppliers</h1>
-            <p className="mt-4 max-w-2xl text-white/60">Create each business once, reuse it across unlimited weddings, and keep contact and web details current in one place.</p>
-          </div>
-          <button type="button" onClick={newSupplier} className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black">
-            <Plus className="h-4 w-4" /> New supplier
-          </button>
-        </div>
-      </section>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Supplier master database"
+        title="Suppliers"
+        description="Create each business once, reuse it across weddings and maintain contact, web and social details in one place."
+        actions={<button type="button" onClick={newSupplier} className="admin-button admin-button--primary"><Plus className="admin-button__icon" />New supplier</button>}
+      />
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Stat label="Master suppliers" value={suppliers.length} />
@@ -118,10 +113,12 @@ export function Suppliers() {
 
       <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 390px", gap: "24px", alignItems: "start" }}>
         <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name, category, county or Instagram..." className="w-full rounded-2xl border border-black/10 bg-white/80 py-3 pl-11 pr-4 text-sm" />
-          </div>
+          <AdminToolbar>
+            <div className="relative min-w-[220px] flex-1">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name, category, county or Instagram..." className="h-[34px] w-full border border-black/10 bg-white pl-9 pr-3 text-[11px]" />
+            </div>
+          </AdminToolbar>
 
           <div className="overflow-hidden rounded-[24px] border border-black/10 bg-white/80">
             {filtered.length ? filtered.map((supplier) => (
@@ -168,7 +165,7 @@ export function Suppliers() {
           )}
         </aside>
       </section>
-    </div>
+    </AdminPage>
   );
 }
 

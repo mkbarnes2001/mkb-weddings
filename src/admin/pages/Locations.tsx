@@ -6,6 +6,7 @@ import {
   type LocationTypeDefinition,
   type LocationVenueOption,
 } from "../services/AdminApiService";
+import { AdminPage, AdminPageHeader } from "../components/ui/AdminUI";
 
 function slugify(value: string) {
   return value
@@ -155,27 +156,13 @@ export function Locations() {
   }
 
   return (
-    <div className="space-y-7">
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">Location Intelligence</p>
-            <h1 className="font-serif text-5xl md:text-6xl">Locations</h1>
-            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-white/60">
-              Define the geographic structure used across venues, intelligence and dynamic galleries. Each workspace chooses the location types that fit its market.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => void save()}
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black disabled:opacity-40"
-          >
-            <Save className="h-4 w-4" />
-            {saving ? "Saving…" : "Save locations"}
-          </button>
-        </div>
-      </section>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Location intelligence"
+        title="Locations"
+        description="Define the geographic structure used across venues, intelligence and dynamic public galleries for this workspace."
+        actions={<button type="button" onClick={() => void save()} disabled={saving} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : "Save locations"}</button>}
+      />
 
       {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div> : null}
       {message ? (
@@ -291,7 +278,7 @@ export function Locations() {
           </section>
         </>
       )}
-    </div>
+    </AdminPage>
   );
 }
 

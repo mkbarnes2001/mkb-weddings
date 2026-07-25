@@ -1,5 +1,17 @@
 # MKB Intelligence — Changelog
 
+## v1.5.8 — Global Admin UI System & Visual Refresh
+- Added reusable Admin UI primitives in `src/admin/components/ui/AdminUI.tsx`.
+- Added shared visual tokens and global legacy-control normalisation in `src/admin/admin-theme.css`.
+- Reduced Admin sidebar width and navigation density; standardised the sticky top bar and content frame.
+- Reworked top-level page mastheads into compact white page headers with consistent action placement.
+- Standardised action buttons at 30–34px heights, smaller labels, aligned icons and non-pill corner radii.
+- Reserved fully rounded pills for statuses/tags and reduced status typography.
+- Standardised form controls, toolbars, panels, tables, progress bars, stat cards, empty states and destructive actions.
+- Applied the system to Dashboard, Weddings, Venues, Suppliers, Locations, Gallery Management, Asset Library, Client Galleries, AI Centre, SEO Centre, Settings and Publishing.
+- Added global compatibility styling so existing detail/editor pages adopt the same visual language without workflow rewrites.
+- No migration; schema remains 19.
+
 ## v1.5.7 — Client Gallery Compact Controls
 - Reworked the Client Gallery photo toolbar into one compact grid row with consistent 32px controls and 10px labels.
 - Tightened the global Admin header actions to compact Blog / Website buttons.

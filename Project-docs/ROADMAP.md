@@ -50,6 +50,13 @@ Completed and in production:
 - Drag-and-drop All Photos and album sequences
 - EXIF/file-time metadata for future uploads with deterministic legacy fallback
 
+## Completed — Global Admin UI System
+- Shared Admin page-header, panel, toolbar, action, icon-button, tab, status, field and empty-state primitives.
+- Compact global design tokens for consistent controls, forms, cards, tables and dialogs.
+- Main Admin repositories and control centres now use the same visual structure.
+- Legacy detail/editor pages inherit the visual system without route, API or data changes.
+- Future Print Store, CRM and Lightroom modules should use these primitives from their first release.
+
 ## Next — Print Store Foundation
 - Workspace product catalogue and price lists
 - Print sizes, products and studio markup

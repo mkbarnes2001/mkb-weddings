@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AdminApiService, type WorkspaceRecord } from "../services/AdminApiService";
+import { AdminPage, AdminPageHeader } from "../components/ui/AdminUI";
 
 function Field({ label, value, onChange, placeholder = "" }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string }) {
   return (
@@ -54,14 +55,12 @@ export function Settings() {
   if (!workspace) return <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-red-800">{error || "Workspace unavailable."}</div>;
 
   return (
-    <div className="space-y-7">
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">Commercial foundation</p>
-        <h1 className="mb-4 font-serif text-4xl leading-tight md:text-6xl">Workspace settings.</h1>
-        <p className="max-w-3xl text-white/65">
-          MKB Weddings is now workspace #1. These settings establish the tenant boundary used by future CRM, client galleries, storage, users and publishing integrations without changing the current live workflow.
-        </p>
-      </section>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Commercial foundation"
+        title="Workspace settings"
+        description="Configure the studio identity and tenant boundary used by client galleries, storage, users and future commercial modules."
+      />
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1.3fr_0.7fr]">
         <div className="rounded-[28px] border border-black/10 bg-white/75 p-7">
@@ -125,6 +124,6 @@ export function Settings() {
           Existing wedding, venue, supplier and gallery tables remain untouched in this release. New commercial modules will be workspace-scoped from day one. Existing tables will be migrated in controlled phases only after each path is verified, so MKB continues to operate as the default workspace throughout the transition.
         </p>
       </section>
-    </div>
+    </AdminPage>
   );
 }

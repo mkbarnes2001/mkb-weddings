@@ -242,3 +242,16 @@ Custom branding logos use the public `MKB_IMAGES` bucket because clients must be
 - `client_gallery_album_assets.sort_order` is the custom order inside each album.
 - `asset_capture_metadata` stores capture timestamps separately from canonical `assets`, preserving the one-asset identity rule.
 - Future private uploads attempt EXIF DateTimeOriginal first and then use the source file modification timestamp. Existing assets use `assets.created_at` as a deterministic fallback.
+
+## Admin presentation system — v1.5.8
+Admin presentation is centralised rather than implemented independently by each feature page.
+
+Shared primitives live in `src/admin/components/ui/AdminUI.tsx` and cover:
+- page headers and action groups;
+- panels and compact toolbars;
+- primary, secondary, ghost, destructive and icon-only actions;
+- tabs, statuses, fields and empty states.
+
+Design tokens and legacy compatibility rules live in `src/admin/admin-theme.css`. This allows older detail/editor pages to adopt the same control heights, typography, radii, form treatment and table density without changing their data or API workflows.
+
+New Admin modules must use the shared primitives first. Feature-specific inline styles should be limited to layouts that cannot be expressed by the shared system, such as responsive image grids or drag-and-drop workspaces. Client-facing gallery branding remains separate and must never inherit Admin theme rules.

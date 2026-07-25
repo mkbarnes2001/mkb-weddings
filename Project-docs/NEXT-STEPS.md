@@ -1,7 +1,15 @@
 # Next Steps
 
 ## Current baseline
-v1.5.7 completes the Client Gallery compact-control and filename refinement. Schema version is 19.
+v1.5.8 completes the shared Admin UI system and global visual refresh. Schema version is 19.
+
+## v1.5.8 validation
+1. Check Dashboard, Weddings, Venues, Suppliers, Locations, Gallery Management, Asset Library and Client Galleries at normal desktop width.
+2. Confirm page headers use the same compact title/action structure and that action labels remain on one line.
+3. Confirm legacy detail/editor pages inherit smaller buttons, inputs, selects, panels and status badges without losing any controls.
+4. Test modal/dialog actions, destructive actions and icon-only controls for clear focus, hover and disabled states.
+5. Resize the browser below 1050px and confirm the narrower Admin sidebar and content area remain usable.
+6. Recheck the Client Gallery Photos toolbar and cards to confirm the global design system has not altered the proven v1.5.7 layout.
 
 ## v1.5.7 validation
 1. Confirm the Photos toolbar stays on one row at normal desktop widths and no labels collide.

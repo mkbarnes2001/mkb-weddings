@@ -6,6 +6,7 @@ import { WeddingService } from "../services/WeddingService";
 import type { WeddingPublicationStatus, WeddingRecord } from "../types/wedding";
 import { ProgressBar } from "../components/ProgressBar";
 import { StatusBadge } from "../components/Badge";
+import { AdminPage, AdminPageHeader, AdminToolbar } from "../components/ui/AdminUI";
 
  type StatusFilter = "all" | WeddingPublicationStatus;
 
@@ -130,30 +131,26 @@ export function Weddings() {
   const publishedCount = weddings.filter((wedding) => wedding.storyEnabled && wedding.storyStatus === "published" && wedding.storyListVisible).length;
 
   return (
-    <div className="space-y-7">
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">Wedding Repository</p>
-            <h1 className="font-serif text-5xl md:text-6xl">Weddings</h1>
-            <p className="mt-4 max-w-2xl text-white/60">Compact wedding management. Drag cards to control Stories & Reviews order; hide a story without removing its wedding, suppliers or gallery images.</p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link to="/admin/weddings/new" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm text-white"><Plus className="h-4 w-4" />New wedding</Link>
-            <button type="button" onClick={saveLayout} disabled={!dirty || saving} className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black disabled:opacity-40"><Save className="h-4 w-4" />{saving ? "Saving…" : dirty ? "Save order" : "Saved"}</button>
-          </div>
-        </div>
-      </section>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Wedding repository"
+        title="Weddings"
+        description="Manage wedding records, public story visibility and display order without affecting linked suppliers, galleries or assets."
+        actions={<>
+          <Link to="/admin/weddings/new" className="admin-button admin-button--secondary"><Plus className="admin-button__icon" />New wedding</Link>
+          <button type="button" onClick={saveLayout} disabled={!dirty || saving} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : dirty ? "Save order" : "Saved"}</button>
+        </>}
+      />
 
       {message ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{message}</div> : null}
       {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{error}</div> : null}
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3"><MiniStat label="Total" value={weddings.length} /><MiniStat label="Draft / hidden" value={draftCount} /><MiniStat label="Visible stories" value={publishedCount} /></section>
 
-      <section className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-        <div className="relative min-w-0 flex-1 xl:max-w-xl"><Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search couples, venues or weddings..." className="w-full rounded-2xl border border-black/10 bg-white/80 py-3 pl-11 pr-4 text-sm" /></div>
-        <div className="flex flex-wrap gap-2">{(["all", "draft", "published", "archived"] as StatusFilter[]).map((status) => <button key={status} type="button" onClick={() => setStatusFilter(status)} className={`rounded-full border px-4 py-2 text-sm ${statusFilter === status ? "border-black bg-black text-white" : "border-black/10 bg-white/70 text-neutral-700"}`}>{status}</button>)}</div>
-      </section>
+      <AdminToolbar>
+        <div className="relative min-w-[220px] flex-1"><Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search couples, venues or weddings..." className="h-[34px] w-full border border-black/10 bg-white pl-9 pr-3 text-[11px]" /></div>
+        <div className="flex flex-wrap gap-1.5">{(["all", "draft", "published", "archived"] as StatusFilter[]).map((status) => <button key={status} type="button" onClick={() => setStatusFilter(status)} className={`admin-button admin-button--sm ${statusFilter === status ? "admin-button--primary" : "admin-button--secondary"}`}>{status}</button>)}</div>
+      </AdminToolbar>
 
       <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 360px", gap: "24px", alignItems: "start" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(145px, 1fr))", gap: "14px" }}>
@@ -227,7 +224,7 @@ export function Weddings() {
           </div>
         </div>
       ) : null}
-    </div>
+    </AdminPage>
   );
 }
 

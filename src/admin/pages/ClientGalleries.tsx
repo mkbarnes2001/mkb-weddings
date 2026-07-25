@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Copy, ExternalLink, Images, LockKeyhole, Mail, Plus, RefreshCcw, Users } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import type { ClientGalleryListPayload } from "../types/clientGallery";
+import { AdminPage, AdminPageHeader, AdminPanel } from "../components/ui/AdminUI";
 
 function publicUrl(token: string) {
   return `${window.location.protocol}//${window.location.host.replace(/^admin\./, "www.")}/client-gallery/${token}`;
@@ -54,25 +55,15 @@ export function ClientGalleries() {
   };
 
   return (
-    <div className="p-8" style={{ maxWidth: 1500 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
-        <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">Private delivery</p>
-          <h1 className="font-serif text-5xl mt-2">Client Galleries</h1>
-          <p className="mt-4 text-neutral-600" style={{ maxWidth: 760 }}>
-            Create secure client-facing galleries from the canonical Asset Library. Existing public website images are reused as previews; private full-resolution originals will plug into the same asset identities in the next upload phase.
-          </p>
-        </div>
-        <button onClick={load} className="rounded-full border border-black px-5 py-3 inline-flex items-center gap-2">
-          <RefreshCcw className="h-4 w-4" /> Refresh
-        </button>
-      </div>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Private delivery"
+        title="Client Galleries"
+        description="Create secure client-facing galleries from canonical assets, private originals and persistent client identities."
+        actions={<button onClick={load} className="admin-button admin-button--secondary"><RefreshCcw className="admin-button__icon" />Refresh</button>}
+      />
 
-      <div className="mt-8 rounded-3xl border border-black/15 bg-white p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Plus className="h-5 w-5" />
-          <h2 className="font-serif text-2xl">New client gallery</h2>
-        </div>
+      <AdminPanel title="New client gallery" description="Link a wedding to import its existing assets automatically." icon={Plus}>
         <div style={{ display: "grid", gridTemplateColumns: "minmax(220px,1fr) minmax(260px,1fr) auto", gap: 12 }}>
           <input
             value={title}
@@ -98,9 +89,9 @@ export function ClientGalleries() {
           <p className="mt-3 text-sm text-neutral-500">Wedding assets will be imported automatically into the new gallery.</p>
         ) : null}
         {error ? <p className="mt-4 text-sm text-red-700">{error}</p> : null}
-      </div>
+      </AdminPanel>
 
-      <div className="mt-8" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 18 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
         {(payload?.galleries || []).map((gallery) => {
           const shareUrl = publicUrl(gallery.accessToken);
           return (
@@ -149,6 +140,6 @@ export function ClientGalleries() {
           No client galleries yet. Create one above and link it to a wedding to import its assets automatically.
         </div>
       ) : null}
-    </div>
+    </AdminPage>
   );
 }

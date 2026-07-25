@@ -23,6 +23,7 @@ import type { ImageCollection } from "../types/collection";
 import type { CustomCollection } from "../types/customCollection";
 import type { MomentRepositoryDocument } from "../types/moment";
 import type { VenueSummary } from "../types/venue";
+import { AdminPage, AdminPageHeader } from "../components/ui/AdminUI";
 
 type PublicImage = {
   assetKey?: string;
@@ -441,29 +442,13 @@ export function Collections() {
   }, [legacyCollections, query, storyBySlug]);
 
   return (
-    <div className="space-y-7">
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-              Gallery Management
-            </p>
-            <h1 className="font-serif text-5xl md:text-6xl">Galleries</h1>
-            <p className="mt-4 max-w-3xl text-white/60">
-              Manage default dynamic galleries and photographer-created galleries from one place.
-            </p>
-          </div>
-          <a
-            href="https://www.mkbweddings.co.uk/gallery"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm"
-          >
-            <ExternalLink className="h-4 w-4" />
-            View live Gallery
-          </a>
-        </div>
-      </section>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Gallery management"
+        title="Galleries"
+        description="Manage default dynamic galleries, landing-card order and photographer-created galleries from one workspace."
+        actions={<a href="https://www.mkbweddings.co.uk/gallery" target="_blank" rel="noreferrer" className="admin-button admin-button--secondary"><ExternalLink className="admin-button__icon" />View live gallery</a>}
+      />
 
       {message ? (
         <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
@@ -894,7 +879,7 @@ export function Collections() {
           </details>
         </>
       )}
-    </div>
+    </AdminPage>
   );
 }
 

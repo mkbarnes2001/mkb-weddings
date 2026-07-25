@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { SEOService, type SeoReport, type WeddingSeoStatus } from "../services/SEOService";
 import { ProgressBar } from "../components/ProgressBar";
+import { AdminPage, AdminPageHeader, AdminStatus } from "../components/ui/AdminUI";
 
 function StatBox({
   label,
@@ -138,32 +139,13 @@ export function SEOCentre() {
     report.galleryImageCount > 0 && report.galleryAltComplete === report.galleryImageCount;
 
   return (
-    <div className="space-y-7">
-      <section className="rounded-[32px] bg-black text-white p-8 md:p-10">
-        <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-6">
-          <div>
-            <p className="uppercase tracking-[0.25em] text-xs text-white/45 mb-4">
-              SEO Centre
-            </p>
-
-            <h1 className="text-4xl md:text-6xl font-serif leading-tight mb-4">
-              Search visibility control room.
-            </h1>
-
-            <p className="text-white/65 max-w-2xl">
-              Check blog routes, image metadata, collections, publish readiness and sitemap commands.
-            </p>
-          </div>
-
-          <div className="rounded-3xl bg-white/10 border border-white/10 p-5 min-w-[260px]">
-            <div className="flex items-center gap-3 mb-3">
-              {blogAltReady ? <CheckCircle2 className="w-6 h-6 text-emerald-300" /> : <SearchCheck className="w-6 h-6" />}
-              <p className="font-serif text-2xl">{blogAltReady ? "Blog SEO ready" : "Needs checks"}</p>
-            </div>
-            <p className="text-sm text-white/55">{report.storyRouteCount} story routes</p>
-          </div>
-        </div>
-      </section>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="SEO Centre"
+        title="Search visibility"
+        description="Check blog routes, image metadata, collections, publish readiness and sitemap commands."
+        meta={<><AdminStatus tone={blogAltReady ? "success" : "warning"}>{blogAltReady ? "Blog SEO ready" : "Needs checks"}</AdminStatus><span className="text-[10px] text-neutral-500">{report.storyRouteCount} story routes</span></>}
+      />
 
       <section className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-5">
         <StatBox label="Story routes" value={report.storyRouteCount} detail="/blog/:slug" />
@@ -269,6 +251,6 @@ export function SEOCentre() {
           missing meta descriptions and Google Search Console indexing status.
         </p>
       </section>
-    </div>
+    </AdminPage>
   );
 }

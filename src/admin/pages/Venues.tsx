@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Building2, Check, GripVertical, Images, MapPin, Plus, Save, Search } from "lucide-react";
 import { AdminApiService, type LocationArea, type LocationTypeDefinition } from "../services/AdminApiService";
 import type { VenueSummary } from "../types/venue";
+import { AdminPage, AdminPageHeader, AdminToolbar } from "../components/ui/AdminUI";
 
 function venueHero(venue: VenueSummary) {
   const images = venue.gallery?.images || [];
@@ -125,25 +126,23 @@ export function Venues() {
   if (loading) return <div className="text-neutral-500">Loading venues…</div>;
 
   return (
-    <div className="space-y-7">
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">Venue Repository</p>
-            <h1 className="font-serif text-5xl md:text-6xl">Venues</h1>
-            <p className="mt-4 max-w-2xl text-white/60">Drag venues into the public Gallery by Venue order. Hide a venue without deleting its weddings, images or content.</p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link to="/admin/venues/new" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm text-white"><Plus className="h-4 w-4" />New venue</Link>
-            <button type="button" onClick={saveLayout} disabled={!dirty || saving} className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black disabled:opacity-40"><Save className="h-4 w-4" />{saving ? "Saving…" : dirty ? "Save order" : "Saved"}</button>
-          </div>
-        </div>
-      </section>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Venue repository"
+        title="Venues"
+        description="Manage venue records, public visibility and Gallery by Venue order without affecting linked weddings or assets."
+        actions={<>
+          <Link to="/admin/venues/new" className="admin-button admin-button--secondary"><Plus className="admin-button__icon" />New venue</Link>
+          <button type="button" onClick={saveLayout} disabled={!dirty || saving} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : dirty ? "Save order" : "Saved"}</button>
+        </>}
+      />
 
       {message ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{message}</div> : null}
       {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{error}</div> : null}
 
-      <div className="relative"><Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search venues, towns or counties..." className="w-full rounded-2xl border border-black/10 bg-white/80 py-3 pl-11 pr-4 text-sm" /></div>
+      <AdminToolbar>
+        <div className="relative min-w-[220px] flex-1"><Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search venues, towns or counties..." className="h-[34px] w-full border border-black/10 bg-white pl-9 pr-3 text-[11px]" /></div>
+      </AdminToolbar>
 
       {!filtered.length ? (
         <section className="rounded-[28px] border border-black/10 bg-white/75 p-10 text-center"><Building2 className="mx-auto h-9 w-9 text-neutral-400" /><h2 className="mt-4 font-serif text-3xl">No venues found</h2></section>
@@ -209,7 +208,7 @@ export function Venues() {
           </aside>
         </section>
       )}
-    </div>
+    </AdminPage>
   );
 }
 

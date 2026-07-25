@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 export function StatCard({
   title,
   value,
@@ -7,21 +8,23 @@ export function StatCard({
   title: string;
   value: string | number;
   detail?: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
 }) {
   return (
-    <div className="rounded-[28px] border border-black/10 bg-white/75 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.22em] text-neutral-500 mb-3">{title}</p>
-          <p className="text-4xl font-serif text-neutral-950 tracking-tight">{value}</p>
-          {detail ? <p className="text-sm text-neutral-500 mt-3">{detail}</p> : null}
-        </div>
-        {icon ? (
-          <div className="rounded-2xl bg-[#f5f3ef] border border-black/5 p-3 text-neutral-800">
-            {icon}
+    <div className="admin-panel admin-panel--compact">
+      <div className="admin-panel__body">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="admin-eyebrow mb-0">{title}</p>
+            <p className="mt-1 text-3xl font-semibold tracking-tight text-neutral-950">{value}</p>
+            {detail ? <p className="mt-1.5 text-[10px] leading-5 text-neutral-500">{detail}</p> : null}
           </div>
-        ) : null}
+          {icon ? (
+            <div className="flex h-8 w-8 flex-none items-center justify-center rounded-lg border border-black/5 bg-[#f5f3ef] text-neutral-800">
+              {icon}
+            </div>
+          ) : null}
+        </div>
       </div>
     </div>
   );

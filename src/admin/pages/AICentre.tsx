@@ -3,6 +3,7 @@ import { Bot, CheckCircle2, Copy, Sparkles, Terminal, Wand2 } from "lucide-react
 import { Link } from "react-router-dom";
 import { AIStatusService, type AiStatusReport } from "../services/AIStatusService";
 import { ProgressBar } from "../components/ProgressBar";
+import { AdminPage, AdminPageHeader, AdminStatus } from "../components/ui/AdminUI";
 import { StatusBadge } from "../components/Badge";
 
 function CommandCard({
@@ -80,32 +81,13 @@ export function AICentre() {
     report.blog.missingCaptions === 0;
 
   return (
-    <div className="space-y-7">
-      <section className="rounded-[32px] bg-black text-white p-8 md:p-10">
-        <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-6">
-          <div>
-            <p className="uppercase tracking-[0.25em] text-xs text-white/45 mb-4">
-              AI Centre
-            </p>
-
-            <h1 className="text-4xl md:text-6xl font-serif leading-tight mb-4">
-              Image intelligence control room.
-            </h1>
-
-            <p className="text-white/65 max-w-2xl">
-              Monitor visual tags, alt text, captions and script commands from one place.
-            </p>
-          </div>
-
-          <div className="rounded-3xl bg-white/10 border border-white/10 p-5 min-w-[260px]">
-            <div className="flex items-center gap-3 mb-3">
-              {blogComplete ? <CheckCircle2 className="w-6 h-6 text-emerald-300" /> : <Sparkles className="w-6 h-6" />}
-              <p className="font-serif text-2xl">{blogComplete ? "Blog AI complete" : "Blog AI needs checks"}</p>
-            </div>
-            <p className="text-sm text-white/55">{report.blog.total} blog AI rows</p>
-          </div>
-        </div>
-      </section>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="AI Centre"
+        title="Image intelligence"
+        description="Monitor visual tags, alt text, captions and operational commands from one place."
+        meta={<><AdminStatus tone={blogComplete ? "success" : "warning"}>{blogComplete ? "Blog AI complete" : "Needs checks"}</AdminStatus><span className="text-[10px] text-neutral-500">{report.blog.total} blog AI rows</span></>}
+      />
 
       <section className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-5">
         <StatBox label="Blog rows" value={report.blog.total} detail={`${report.blog.missingAlt} missing alt`} />
@@ -222,6 +204,6 @@ export function AICentre() {
           ))}
         </div>
       </section>
-    </div>
+    </AdminPage>
   );
 }

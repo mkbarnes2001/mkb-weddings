@@ -15,6 +15,7 @@ import type {
   AssetLibraryPayload,
   AssetRecord,
 } from "../types/asset";
+import { AdminPage, AdminPageHeader, AdminToolbar } from "../components/ui/AdminUI";
 
 const emptyPayload: AssetLibraryPayload = {
   workspaceId: "",
@@ -159,25 +160,13 @@ export function AssetLibrary() {
   const end = Math.min(payload.pagination.offset + payload.assets.length, payload.pagination.total);
 
   return (
-    <div style={{ maxWidth: 1680, margin: "0 auto" }}>
-      <div style={{ display: "flex", gap: 24, justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap" }}>
-        <div>
-          <div style={{ fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "#737373" }}>Workspace assets</div>
-          <h1 style={{ margin: "8px 0 0", fontFamily: "serif", fontSize: 40, fontWeight: 500 }}>Asset Library</h1>
-          <p style={{ margin: "10px 0 0", maxWidth: 760, color: "#666", lineHeight: 1.65 }}>
-            One canonical record for every photograph. Existing MKB images are indexed without copying R2 objects, while future private originals can live behind the same asset identity.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => void sync()}
-          disabled={syncing}
-          style={{ border: "1px solid #111", borderRadius: 999, padding: "11px 16px", background: "#111", color: "#fff", display: "flex", alignItems: "center", gap: 8, cursor: syncing ? "wait" : "pointer" }}
-        >
-          <RefreshCw size={15} className={syncing ? "animate-spin" : ""} />
-          {syncing ? "Indexing…" : "Index missing assets"}
-        </button>
-      </div>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Workspace assets"
+        title="Asset Library"
+        description="One canonical record for every photograph, connecting public previews, private originals and every gallery relationship."
+        actions={<button type="button" onClick={() => void sync()} disabled={syncing} className="admin-button admin-button--primary"><RefreshCw className={`admin-button__icon ${syncing ? "animate-spin" : ""}`} />{syncing ? "Indexing…" : "Index missing assets"}</button>}
+      />
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 12, marginTop: 26 }}>
         <StatCard label="Canonical assets" value={formatNumber(payload.stats.totalAssets)} note="Workspace-owned asset identities." />
@@ -186,8 +175,8 @@ export function AssetLibrary() {
         <StatCard label="Current results" value={formatNumber(payload.pagination.total)} note="After the active filters below." />
       </div>
 
-      <div style={{ marginTop: 18, border: "1px solid rgba(0,0,0,.12)", borderRadius: 20, padding: 16, background: "rgba(255,255,255,.62)" }}>
-        <form onSubmit={submitSearch} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 10, alignItems: "center" }}>
+      <AdminToolbar>
+        <form onSubmit={submitSearch} style={{ width: "100%", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 7, alignItems: "center" }}>
           <div style={{ display: "flex", border: "1px solid rgba(0,0,0,.15)", borderRadius: 12, background: "#fff", overflow: "hidden", minWidth: 0 }}>
             <Search size={16} style={{ margin: "12px 0 0 12px", color: "#777" }} />
             <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search filename, alt or caption" style={{ width: "100%", border: 0, outline: 0, padding: "10px 12px", background: "transparent" }} />
@@ -222,7 +211,7 @@ export function AssetLibrary() {
           </label>
           <button type="button" onClick={() => { const next = { limit: 60, offset: 0 }; setSearchInput(""); setFilters(next); void load(next); }} style={{ ...buttonStyle, padding: "8px 12px" }}>Clear filters</button>
         </div>
-      </div>
+      </AdminToolbar>
 
       {error ? <div style={{ marginTop: 16, border: "1px solid #b91c1c", background: "#fff7f7", color: "#991b1b", borderRadius: 14, padding: 14 }}>{error}</div> : null}
 
@@ -253,7 +242,7 @@ export function AssetLibrary() {
           {activeAsset ? <AssetInspector asset={activeAsset} /> : <div style={{ padding: 24, color: "#737373" }}>Select an asset to inspect it.</div>}
         </aside>
       </div>
-    </div>
+    </AdminPage>
   );
 }
 
@@ -324,8 +313,9 @@ function AssetInspector({ asset }: { asset: AssetRecord }) {
 const selectStyle: CSSProperties = {
   width: "100%",
   border: "1px solid rgba(0,0,0,.15)",
-  borderRadius: 12,
-  padding: "10px 11px",
+  borderRadius: 8,
+  minHeight: 34,
+  padding: "0 9px",
   background: "#fff",
   outline: 0,
   minWidth: 0,
@@ -333,8 +323,9 @@ const selectStyle: CSSProperties = {
 
 const buttonStyle: CSSProperties = {
   border: "1px solid rgba(0,0,0,.18)",
-  borderRadius: 999,
-  padding: "9px 13px",
+  borderRadius: 8,
+  minHeight: 34,
+  padding: "0 11px",
   background: "#fff",
   display: "inline-flex",
   alignItems: "center",
