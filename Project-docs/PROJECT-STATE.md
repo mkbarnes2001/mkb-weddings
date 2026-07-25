@@ -1,9 +1,18 @@
 # Project State
 
 ## Version
-Current release: **v1.5.8 — Global Admin UI System & Visual Refresh**.  
+Current release: **v1.5.9 — Compact Venue Location Selector**.  
 Database schema version: **19**.
 
+
+
+## Compact Venue Location Selector — v1.5.9
+- Replaces the long Venue Management location checkbox lists with one compact grouped dropdown.
+- The dropdown is grouped by configured Location Intelligence type, including county, region, destination and custom areas.
+- Already assigned locations are removed from the available dropdown choices.
+- Current assignments appear underneath as small removable chips showing both location name and type.
+- Adding or removing a location continues to save through the existing Location Intelligence API; no data model or route changes are introduced.
+- No D1 migration; schema remains **19**.
 
 ## Global Admin UI System & Visual Refresh — v1.5.8
 - Introduces shared Admin UI primitives for page headers, panels, toolbars, actions, icon buttons, tabs, status badges, fields and empty states.

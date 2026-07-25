@@ -1,5 +1,12 @@
 # MKB Intelligence — Changelog
 
+## v1.5.9 — Compact Venue Location Selector
+- Replaced the large county/region/destination checkbox lists in Venue Management with one grouped location dropdown.
+- Excluded already selected locations from the dropdown to prevent duplicate assignments.
+- Added compact selected-location chips beneath the dropdown with an accessible remove action.
+- Preserved immediate saving through the existing Location Intelligence service.
+- No migration; schema remains 19.
+
 ## v1.5.8 — Global Admin UI System & Visual Refresh
 - Added reusable Admin UI primitives in `src/admin/components/ui/AdminUI.tsx`.
 - Added shared visual tokens and global legacy-control normalisation in `src/admin/admin-theme.css`.

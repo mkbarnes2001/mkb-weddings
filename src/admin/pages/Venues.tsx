@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Building2, Check, GripVertical, Images, MapPin, Plus, Save, Search } from "lucide-react";
+import { Building2, GripVertical, Images, MapPin, Plus, Save, Search, X } from "lucide-react";
 import { AdminApiService, type LocationArea, type LocationTypeDefinition } from "../services/AdminApiService";
 import type { VenueSummary } from "../types/venue";
 import { AdminPage, AdminPageHeader, AdminToolbar } from "../components/ui/AdminUI";
@@ -50,6 +50,17 @@ export function Venues() {
     if (!active) return new Set<string>();
     return new Set(locations.filter((location) => location.venueSlugs.includes(active.slug)).map((location) => location.id));
   }, [active, locations]);
+
+  const activeLocations = useMemo(() => {
+    if (!active) return [];
+    return locations
+      .filter((location) => location.status === "active" && location.venueSlugs.includes(active.slug))
+      .sort((a, b) => {
+        const typeA = locationTypes.find((type) => type.key === a.areaType)?.sortOrder || 999;
+        const typeB = locationTypes.find((type) => type.key === b.areaType)?.sortOrder || 999;
+        return typeA - typeB || a.name.localeCompare(b.name);
+      });
+  }, [active, locations, locationTypes]);
 
   const groupedLocations = useMemo(() => {
     const groups = new Map<string, LocationArea[]>();
@@ -178,26 +189,58 @@ export function Venues() {
                   </div>
                   {locationSaving ? <span className="text-xs text-neutral-400">Saving…</span> : null}
                 </div>
-                <div className="mt-4 space-y-4">
-                  {groupedLocations.length ? groupedLocations.map(([type, items]) => (
-                    <div key={type}>
-                      <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-neutral-400">{locationTypeLabel(type)}</p>
-                      <div className="space-y-2">
-                        {items.map((location) => {
-                          const checked = activeLocationIds.has(location.id);
-                          return (
-                            <label key={location.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-black/10 px-3 py-2 text-sm">
-                              <span>{location.name}</span>
-                              <span className="flex items-center gap-2">
-                                {checked ? <Check className="h-4 w-4" /> : null}
-                                <input type="checkbox" checked={checked} disabled={locationSaving} onChange={(event) => void toggleVenueLocation(location.id, event.target.checked)} />
+                <div className="mt-4 space-y-3">
+                  {groupedLocations.length ? (
+                    <>
+                      <label className="block">
+                        <span className="sr-only">Add a location</span>
+                        <select
+                          value=""
+                          disabled={locationSaving || groupedLocations.every(([, items]) => items.every((location) => activeLocationIds.has(location.id)))}
+                          onChange={(event) => {
+                            const locationId = event.target.value;
+                            if (locationId) void toggleVenueLocation(locationId, true);
+                          }}
+                          className="h-[34px] w-full rounded-md border border-black/10 bg-white px-3 text-[11px] text-neutral-700"
+                        >
+                          <option value="">{locationSaving ? "Saving location…" : "Select a location to add…"}</option>
+                          {groupedLocations.map(([type, items]) => {
+                            const available = items.filter((location) => !activeLocationIds.has(location.id));
+                            if (!available.length) return null;
+                            return (
+                              <optgroup key={type} label={locationTypeLabel(type)}>
+                                {available.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
+                              </optgroup>
+                            );
+                          })}
+                        </select>
+                      </label>
+
+                      {activeLocations.length ? (
+                        <div>
+                          <p className="mb-2 text-[10px] uppercase tracking-[0.12em] text-neutral-400">Selected locations</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {activeLocations.map((location) => (
+                              <span key={location.id} className="inline-flex max-w-full items-center gap-1 rounded-full border border-black/10 bg-neutral-50 px-2 py-1 text-[10px] text-neutral-700">
+                                <span className="truncate">{location.name}</span>
+                                <span className="text-[9px] text-neutral-400">{locationTypeLabel(location.areaType)}</span>
+                                <button
+                                  type="button"
+                                  disabled={locationSaving}
+                                  onClick={() => void toggleVenueLocation(location.id, false)}
+                                  className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-neutral-400 hover:bg-black hover:text-white disabled:opacity-40"
+                                  aria-label={`Remove ${location.name}`}
+                                  title={`Remove ${location.name}`}
+                                >
+                                  <X className="h-2.5 w-2.5" />
+                                </button>
                               </span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )) : <p className="text-sm text-neutral-500">No location areas have been created yet. Add them in Admin → Locations.</p>}
+                            ))}
+                          </div>
+                        </div>
+                      ) : <p className="text-[11px] text-neutral-500">No locations assigned yet.</p>}
+                    </>
+                  ) : <p className="text-sm text-neutral-500">No location areas have been created yet. Add them in Admin → Locations.</p>}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3"><Mini label="Weddings" value={active.weddingCount} /><Mini label="Images" value={active.imageCount} /></div>

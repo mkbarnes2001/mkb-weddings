@@ -1,7 +1,16 @@
 # Next Steps
 
 ## Current baseline
-v1.5.8 completes the shared Admin UI system and global visual refresh. Schema version is 19.
+v1.5.9 adds the compact Venue Management location selector on top of the shared Admin UI system. Schema version is 19.
+
+
+## v1.5.9 validation
+1. Open Admin → Venues and select a venue with existing county/region assignments.
+2. Confirm current assignments appear as compact chips rather than a long checkbox list.
+3. Add a county, region or destination from the grouped dropdown and confirm it saves immediately.
+4. Confirm the newly selected location disappears from the dropdown and appears as a chip.
+5. Remove a chip and confirm the location becomes available in the dropdown again.
+6. Switch between several venues and confirm each venue shows only its own selected locations.
 
 ## v1.5.8 validation
 1. Check Dashboard, Weddings, Venues, Suppliers, Locations, Gallery Management, Asset Library and Client Galleries at normal desktop width.
