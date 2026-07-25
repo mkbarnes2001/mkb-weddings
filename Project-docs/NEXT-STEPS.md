@@ -1,7 +1,14 @@
 # Next Steps
 
 ## Current baseline
-v1.5.6 completes the Client Gallery photo-card and ordering refinement. Schema version is 19.
+v1.5.7 completes the Client Gallery compact-control and filename refinement. Schema version is 19.
+
+## v1.5.7 validation
+1. Confirm the Photos toolbar stays on one row at normal desktop widths and no labels collide.
+2. Confirm Import, Library, ordering, search, Select all and Upload still work.
+3. Confirm long filenames remain one discreet line below each image card and show the full value on hover.
+4. Confirm the photo options menu, selection circle and Custom-order drag handle remain usable.
+5. Confirm the global Blog / Website header actions are compact and clear.
 
 ## v1.5.6 validation
 1. Run migration 019 and confirm both ordering tables exist before deployment.

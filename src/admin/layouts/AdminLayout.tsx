@@ -114,7 +114,7 @@ export function AdminLayout() {
           }}
         >
           <header className="sticky top-0 z-20 border-b border-black/10 bg-[#f5f3ef]/90 backdrop-blur-xl">
-            <div className="flex items-center justify-between px-8 py-5">
+            <div className="flex items-center justify-between px-8" style={{ paddingTop: 12, paddingBottom: 12 }}>
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-neutral-500">
                   Photography Intelligence
@@ -124,18 +124,20 @@ export function AdminLayout() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                 <a
                   href="https://www.mkbweddings.co.uk/blog"
-                  className="rounded-full border border-black/10 bg-white/60 px-5 py-2.5 text-sm hover:bg-white"
+                  title="Open MKB Weddings blog"
+                  style={{ height: 32, borderRadius: 8, border: "1px solid rgba(0,0,0,.12)", background: "rgba(255,255,255,.72)", padding: "0 10px", fontSize: 10, display: "inline-flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" }}
                 >
-                  View blog
+                  <FileText style={{ width: 13, height: 13 }} /> Blog
                 </a>
                 <a
                   href="https://www.mkbweddings.co.uk/"
-                  className="rounded-full bg-black px-5 py-2.5 text-sm text-white hover:bg-black/90"
+                  title="Open MKB Weddings website"
+                  style={{ height: 32, borderRadius: 8, background: "#111", color: "#fff", padding: "0 10px", fontSize: 10, display: "inline-flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" }}
                 >
-                  View site
+                  <Globe2 style={{ width: 13, height: 13 }} /> Website
                 </a>
               </div>
             </div>

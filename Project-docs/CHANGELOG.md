@@ -1,5 +1,13 @@
 # MKB Intelligence — Changelog
 
+## v1.5.7 — Client Gallery Compact Controls
+- Reworked the Client Gallery photo toolbar into one compact grid row with consistent 32px controls and 10px labels.
+- Tightened the global Admin header actions to compact Blog / Website buttons.
+- Moved photo options onto the image card and filenames beneath the card in discreet single-line text.
+- Filenames now use explicit inline truncation so long generated names cannot expand card height.
+- Preserved selection, custom drag ordering, image menus and album behaviour.
+- No D1 migration required; schema version remains 19.
+
 ## v1.5.6 — Client Gallery Card & Photo Ordering Refinement
 - Simplified Client Gallery photo cards and removed persistent storage-status text.
 - Moved filenames into a discreet compact footer with the photo options icon.

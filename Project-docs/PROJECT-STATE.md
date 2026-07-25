@@ -1,9 +1,17 @@
 # Project State
 
 ## Version
-Current release: **v1.5.6 — Client Gallery Card & Photo Ordering Refinement**.  
+Current release: **v1.5.7 — Client Gallery Compact Controls**.  
 Database schema version: **19**.
 
+
+## Client Gallery Compact Controls — v1.5.7
+- The Photos toolbar uses a fixed compact control system: 32px height, 10px labels and one-row grid alignment.
+- Import, Asset Library, ordering, search, selection and upload remain visible without colliding or wrapping at normal desktop widths.
+- Photo cards now contain only the image and overlay controls; filenames sit below the card as discreet, centred, single-line text with ellipsis truncation.
+- Photo options and custom-order drag handles remain available as image overlays.
+- Global Admin Blog / Website actions are smaller rounded rectangles with icons rather than oversized pill buttons.
+- No D1 migration; schema version remains **19**.
 
 ## Client Gallery Card & Photo Ordering Refinement — v1.5.6
 - Photo cards now use a ShootProof-style compact footer: discreet filename, selection circle, drag handle and one options menu.

@@ -436,16 +436,66 @@ export function ClientGalleryEditor() {
 
           {activeTab === "photos" ? <section className="mt-5">
             <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <div className="flex items-end justify-between gap-3">
-                <div style={{ minWidth: 130 }}><h3 className="text-xl font-semibold">{activeAlbum?.name || "All Photos"}</h3><p className="mt-1 text-xs text-neutral-500">{visiblePhotos.length} photo{visiblePhotos.length === 1 ? "" : "s"}{activeAlbum ? " in this album" : ""}</p></div>
-                <div className="flex items-center gap-1.5" style={{ flexWrap: "nowrap", whiteSpace: "nowrap" }}>
-                  <button disabled={busy || !draft.weddingSlug} title="Import images already linked to this wedding" onClick={() => mutateAssets({ action: "importWedding" }, "Wedding assets imported.")} className="rounded-lg border border-black/15 px-2.5 py-2 text-xs inline-flex items-center gap-1.5 disabled:opacity-40"><ImagePlus className="h-3.5 w-3.5" /> Import</button>
-                  <details className="relative" style={{ position: "relative" }}><summary title="Add from Asset Library" className="list-none cursor-pointer rounded-lg border border-black/15 px-2.5 py-2 text-xs inline-flex items-center gap-1.5"><Images className="h-3.5 w-3.5" /> Library</summary><div className="rounded-xl border border-black/10 bg-white p-3 shadow-lg" style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", width: "min(720px, 72vw)", zIndex: 60 }}><div className="flex gap-2"><input value={assetSearch} onChange={(e) => setAssetSearch(e.target.value)} placeholder="Search filename, caption or alt…" className="min-w-0 flex-1 rounded-lg border border-black/15 px-3 py-2 text-sm" /><button onClick={searchAssets} disabled={busy} className="rounded-lg border border-black px-4 py-2 text-sm">Search</button></div>{assetResults.length ? <div className="mt-3" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))", gap: 8 }}>{assetResults.map((asset) => <button key={asset.id} onClick={() => mutateAssets({ action: "add", assetIds: [asset.id] }, "Image added.")} className="text-left rounded-lg border border-black/10 overflow-hidden"><img src={asset.files.thumb || asset.files.web} alt="" style={{ width: "100%", height: 80, objectFit: "cover" }} /><span className="block p-2 text-[10px] truncate">+ {asset.filename}</span></button>)}</div> : null}</div></details>
-                  <label className="rounded-lg border border-black/15 bg-white px-2 py-2 flex items-center gap-1.5" title="Choose gallery photo order"><ArrowUpDown className="h-3.5 w-3.5 text-neutral-400" /><select value={gallery.sortMode} onChange={(event) => setPhotoSortMode(event.target.value as "custom" | "capture_time" | "filename")} disabled={busy} className="bg-transparent outline-none text-xs"><option value="custom">Custom order</option><option value="capture_time">Capture time</option><option value="filename">Filename</option></select></label>
-                  <div className="rounded-lg border border-black/15 bg-white px-2.5 py-2 flex items-center gap-1.5"><Search className="h-3.5 w-3.5 text-neutral-400" /><input value={photoSearch} onChange={(e) => setPhotoSearch(e.target.value)} placeholder="Search photos" className="outline-none text-xs" style={{ width: 118 }} /></div>
-                  <button onClick={selectAllVisible} className="rounded-lg border border-black/15 px-2.5 py-2 text-xs inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5" /> {selectedAssets.size === visiblePhotos.length && visiblePhotos.length ? "Clear" : "Select all"}</button>
-                  <label className="rounded-lg bg-black text-white px-2.5 py-2 text-xs inline-flex items-center gap-1.5 cursor-pointer"><UploadCloud className="h-3.5 w-3.5" /> Upload<input type="file" multiple accept="image/jpeg,.jpg,.jpeg" onChange={(event) => { addOriginalFiles(event.target.files); event.currentTarget.value = ""; }} style={{ display: "none" }} /></label>
+              <div>
+                <h3 className="text-xl font-semibold">{activeAlbum?.name || "All Photos"}</h3>
+                <p className="mt-1 text-xs text-neutral-500">{visiblePhotos.length} photo{visiblePhotos.length === 1 ? "" : "s"}{activeAlbum ? " in this album" : ""}</p>
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "auto auto minmax(118px, 145px) minmax(150px, 1fr) auto auto",
+                  gap: 6,
+                  alignItems: "center",
+                  marginTop: 12,
+                  paddingTop: 12,
+                  borderTop: "1px solid rgba(0,0,0,.08)",
+                }}
+              >
+                <button
+                  disabled={busy || !draft.weddingSlug}
+                  title="Import images already linked to this wedding"
+                  onClick={() => mutateAssets({ action: "importWedding" }, "Wedding assets imported.")}
+                  className="disabled:opacity-40"
+                  style={{ height: 32, border: "1px solid rgba(0,0,0,.15)", borderRadius: 8, background: "#fff", padding: "0 9px", fontSize: 10, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5, whiteSpace: "nowrap" }}
+                >
+                  <ImagePlus style={{ width: 13, height: 13 }} /> Import
+                </button>
+                <details style={{ position: "relative" }}>
+                  <summary
+                    title="Add from Asset Library"
+                    className="list-none cursor-pointer"
+                    style={{ height: 32, border: "1px solid rgba(0,0,0,.15)", borderRadius: 8, background: "#fff", padding: "0 9px", fontSize: 10, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5, whiteSpace: "nowrap" }}
+                  >
+                    <Images style={{ width: 13, height: 13 }} /> Library
+                  </summary>
+                  <div className="rounded-xl border border-black/10 bg-white p-3 shadow-lg" style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", width: "min(720px, 72vw)", zIndex: 60 }}>
+                    <div className="flex gap-2"><input value={assetSearch} onChange={(e) => setAssetSearch(e.target.value)} placeholder="Search filename, caption or alt…" className="min-w-0 flex-1 rounded-lg border border-black/15 px-3 py-2 text-sm" /><button onClick={searchAssets} disabled={busy} className="rounded-lg border border-black px-4 py-2 text-sm">Search</button></div>
+                    {assetResults.length ? <div className="mt-3" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))", gap: 8 }}>{assetResults.map((asset) => <button key={asset.id} onClick={() => mutateAssets({ action: "add", assetIds: [asset.id] }, "Image added.")} className="text-left rounded-lg border border-black/10 overflow-hidden"><img src={asset.files.thumb || asset.files.web} alt="" style={{ width: "100%", height: 80, objectFit: "cover" }} /><span className="block p-2 text-[10px] truncate">+ {asset.filename}</span></button>)}</div> : null}
+                  </div>
+                </details>
+                <label title="Choose gallery photo order" style={{ height: 32, minWidth: 0, border: "1px solid rgba(0,0,0,.15)", borderRadius: 8, background: "#fff", padding: "0 8px", display: "flex", alignItems: "center", gap: 4 }}>
+                  <ArrowUpDown style={{ width: 13, height: 13, color: "#a3a3a3", flex: "0 0 auto" }} />
+                  <select value={gallery.sortMode} onChange={(event) => setPhotoSortMode(event.target.value as "custom" | "capture_time" | "filename")} disabled={busy} style={{ minWidth: 0, width: "100%", border: 0, background: "transparent", outline: "none", fontSize: 10 }}>
+                    <option value="custom">Custom order</option><option value="capture_time">Capture time</option><option value="filename">Filename</option>
+                  </select>
+                </label>
+                <div style={{ height: 32, minWidth: 0, border: "1px solid rgba(0,0,0,.15)", borderRadius: 8, background: "#fff", padding: "0 9px", display: "flex", alignItems: "center", gap: 5 }}>
+                  <Search style={{ width: 13, height: 13, color: "#a3a3a3", flex: "0 0 auto" }} />
+                  <input value={photoSearch} onChange={(e) => setPhotoSearch(e.target.value)} placeholder="Search photos" style={{ minWidth: 0, width: "100%", border: 0, outline: "none", fontSize: 10, background: "transparent" }} />
                 </div>
+                <button
+                  onClick={selectAllVisible}
+                  style={{ height: 32, border: "1px solid rgba(0,0,0,.15)", borderRadius: 8, background: "#fff", padding: "0 9px", fontSize: 10, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5, whiteSpace: "nowrap" }}
+                >
+                  <Check style={{ width: 13, height: 13 }} /> {selectedAssets.size === visiblePhotos.length && visiblePhotos.length ? "Clear" : "Select all"}
+                </button>
+                <label
+                  title="Upload full-resolution JPEGs"
+                  style={{ height: 32, borderRadius: 8, background: "#111", color: "#fff", padding: "0 10px", fontSize: 10, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5, whiteSpace: "nowrap", cursor: "pointer" }}
+                >
+                  <UploadCloud style={{ width: 13, height: 13 }} /> Upload
+                  <input type="file" multiple accept="image/jpeg,.jpg,.jpeg" onChange={(event) => { addOriginalFiles(event.target.files); event.currentTarget.value = ""; }} style={{ display: "none" }} />
+                </label>
               </div>
               {gallery.sortMode === "custom" ? <p className="mt-3 text-[11px] text-neutral-400">Drag photographs using the handle to set a custom order{photoSearch.trim() ? ". Clear search before dragging." : "."}</p> : gallery.sortMode === "capture_time" ? <p className="mt-3 text-[11px] text-neutral-400">Capture-time order uses EXIF when available; older images fall back to their import time.</p> : null}
 
@@ -455,7 +505,7 @@ export function ClientGalleryEditor() {
 
             </div>
 
-            <div className="mt-4" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))", gap: 12 }}>
+            <div className="mt-4" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", columnGap: 14, rowGap: 18 }}>
               {visiblePhotos.map((asset) => {
                 const canDrag = gallery.sortMode === "custom" && !photoSearch.trim();
                 const isDragging = draggedAssetId === asset.assetId;
@@ -468,21 +518,19 @@ export function ClientGalleryEditor() {
                   onDragLeave={() => { if (dragOverAssetId === asset.assetId) setDragOverAssetId(""); }}
                   onDrop={(event) => { event.preventDefault(); reorderVisiblePhotos(asset.assetId); }}
                   onDragEnd={() => { setDraggedAssetId(""); setDragOverAssetId(""); }}
-                  className="rounded-xl bg-white"
-                  style={{ position: "relative", border: isDragTarget ? "2px solid #111" : "1px solid rgba(0,0,0,.10)", boxShadow: "0 1px 3px rgba(0,0,0,.06)", opacity: isDragging ? .48 : 1 }}
+                  style={{ minWidth: 0, position: "relative", opacity: isDragging ? .48 : 1 }}
                 >
-                  <div style={{ aspectRatio: "4/3", position: "relative", background: "#eee", overflow: "hidden", borderRadius: "12px 12px 0 0" }}>
-                    <img src={asset.thumbSrc || asset.webSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: asset.hidden ? .42 : 1 }} />
-                    <button aria-label={selectedAssets.has(asset.assetId) ? "Deselect photo" : "Select photo"} onClick={() => toggleSelected(asset.assetId)} style={{ position: "absolute", top: 9, right: 9, width: 26, height: 26, borderRadius: 999, display: "grid", placeItems: "center", border: selectedAssets.has(asset.assetId) ? "1px solid #111" : "1px solid rgba(0,0,0,.25)", background: selectedAssets.has(asset.assetId) ? "#111" : "rgba(255,255,255,.94)", color: selectedAssets.has(asset.assetId) ? "#fff" : "#111" }}>{selectedAssets.has(asset.assetId) ? <Check className="h-3.5 w-3.5" /> : null}</button>
-                    {gallery.coverAssetId === asset.assetId ? <span className="absolute top-2 left-2 rounded-full bg-black text-white px-2 py-1 text-[9px] uppercase">Cover</span> : null}
-                    {asset.hidden ? <span title="Hidden from client gallery" className="absolute bottom-2 left-2 rounded-full bg-white/95 p-1.5 text-neutral-700"><EyeOff className="h-3.5 w-3.5" /></span> : null}
-                  </div>
-                  <div className="px-2.5 py-1.5 flex items-center justify-between gap-1.5">
-                    <p className="min-w-0 flex-1 truncate text-[9px] leading-4 text-neutral-500" title={asset.filename}>{asset.filename}</p>
-                    <div className="flex items-center gap-0.5">
-                      {canDrag ? <span title="Drag to reorder" aria-label="Drag to reorder" className="cursor-grab rounded-md p-1 text-neutral-400 active:cursor-grabbing"><GripVertical className="h-3.5 w-3.5" /></span> : null}
-                      <div data-photo-menu style={{ position: "relative" }}>
-                        <button type="button" aria-label={`Open options for ${asset.filename}`} title="Photo options" onClick={(event) => { event.stopPropagation(); setPhotoMenuAlbumId(""); setOpenPhotoMenuId((current) => current === asset.assetId ? "" : asset.assetId); }} className="rounded-md p-1.5 hover:bg-neutral-100"><MoreVertical className="h-3.5 w-3.5" /></button>
+                  <div style={{ position: "relative", border: isDragTarget ? "2px solid #111" : "1px solid rgba(0,0,0,.10)", borderRadius: 10, background: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,.08)", overflow: "visible" }}>
+                    <div style={{ aspectRatio: "4/3", position: "relative", background: "#eee", overflow: "visible", borderRadius: 9 }}>
+                      <img src={asset.thumbSrc || asset.webSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: asset.hidden ? .42 : 1, display: "block", borderRadius: 9 }} />
+                      <button aria-label={selectedAssets.has(asset.assetId) ? "Deselect photo" : "Select photo"} onClick={() => toggleSelected(asset.assetId)} style={{ position: "absolute", top: 8, right: 8, width: 24, height: 24, borderRadius: 999, display: "grid", placeItems: "center", border: selectedAssets.has(asset.assetId) ? "1px solid #111" : "1px solid rgba(0,0,0,.25)", background: selectedAssets.has(asset.assetId) ? "#111" : "rgba(255,255,255,.94)", color: selectedAssets.has(asset.assetId) ? "#fff" : "#111" }}>{selectedAssets.has(asset.assetId) ? <Check style={{ width: 13, height: 13 }} /> : null}</button>
+                      {gallery.coverAssetId === asset.assetId ? <span style={{ position: "absolute", top: 8, left: 8, borderRadius: 999, background: "#111", color: "#fff", padding: "4px 8px", fontSize: 9, lineHeight: 1, letterSpacing: ".08em", textTransform: "uppercase" }}>Cover</span> : null}
+                      <div style={{ position: "absolute", left: 7, bottom: 7, display: "flex", alignItems: "center", gap: 4 }}>
+                        {asset.hidden ? <span title="Hidden from client gallery" style={{ width: 25, height: 25, borderRadius: 7, background: "rgba(255,255,255,.94)", display: "grid", placeItems: "center", color: "#525252", boxShadow: "0 1px 3px rgba(0,0,0,.12)" }}><EyeOff style={{ width: 13, height: 13 }} /></span> : null}
+                        {canDrag ? <span title="Drag to reorder" aria-label="Drag to reorder" style={{ width: 25, height: 25, borderRadius: 7, background: "rgba(255,255,255,.94)", display: "grid", placeItems: "center", color: "#737373", cursor: "grab", boxShadow: "0 1px 3px rgba(0,0,0,.12)" }}><GripVertical style={{ width: 13, height: 13 }} /></span> : null}
+                      </div>
+                      <div data-photo-menu style={{ position: "absolute", right: 7, bottom: 7 }}>
+                        <button type="button" aria-label={`Open options for ${asset.filename}`} title="Photo options" onClick={(event) => { event.stopPropagation(); setPhotoMenuAlbumId(""); setOpenPhotoMenuId((current) => current === asset.assetId ? "" : asset.assetId); }} style={{ width: 27, height: 27, borderRadius: 7, background: "rgba(255,255,255,.95)", display: "grid", placeItems: "center", color: "#111", boxShadow: "0 1px 4px rgba(0,0,0,.16)" }}><MoreVertical style={{ width: 14, height: 14 }} /></button>
                         {openPhotoMenuId === asset.assetId ? <div className="rounded-xl border border-black/10 bg-white p-1 shadow-xl" style={{ position: "absolute", right: 0, bottom: "calc(100% + 6px)", width: 220, zIndex: 50 }}>
                           <button type="button" onClick={() => { setPreviewAssetId(asset.assetId); setOpenPhotoMenuId(""); }} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50"><Eye className="h-4 w-4" /> View photo</button>
                           {asset.hasOriginal ? <a href={AdminApiService.clientGalleryOriginalDownloadUrl(id, asset.assetId)} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50"><Download className="h-4 w-4" /> Download original</a> : <span className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 text-neutral-400"><Download className="h-4 w-4" /> Original unavailable</span>}
@@ -494,6 +542,12 @@ export function ClientGalleryEditor() {
                       </div>
                     </div>
                   </div>
+                  <p
+                    title={asset.filename}
+                    style={{ margin: "6px 7px 0", fontSize: 9, lineHeight: "12px", fontWeight: 400, color: "#737373", textAlign: "center", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                  >
+                    {asset.filename}
+                  </p>
                 </article>;
               })}
             </div>
