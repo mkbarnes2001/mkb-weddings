@@ -383,6 +383,28 @@ export function createUploadEndpoint({
         rating: 0,
         moments: [],
         tags: [],
+        aiTags: [],
+        aiAlt: "",
+        aiCaption: "",
+        thumbSrc: processed.thumbSrc,
+        fullSrc: processed.fullSrc,
+        source: {
+          type:
+            processed.storage === "r2"
+              ? "r2-processed-upload"
+              : "local-processed-upload",
+          originalFilename,
+          originalMimeType: mimeType,
+          venueSlug,
+          storage: processed.storage,
+          fullKey: processed.fullKey,
+          thumbKey: processed.thumbKey,
+          fullPath: processed.fullSrc,
+          thumbPath: processed.thumbSrc,
+          width: processed.width,
+          height: processed.height,
+          orientation: processed.orientation,
+        },
         display: {
           venue: false,
           moments: false,
@@ -402,19 +424,14 @@ export function createUploadEndpoint({
       filename: processed.filename,
       weddingSlug,
       venueSlug,
+      storage: processed.storage,
       fullSrc: processed.fullSrc,
       thumbSrc: processed.thumbSrc,
+      fullKey: processed.fullKey,
+      thumbKey: processed.thumbKey,
       width: processed.width,
       height: processed.height,
       orientation: processed.orientation,
-      localFullPath: path.relative(
-        projectRoot,
-        processed.fullPath,
-      ),
-      localThumbPath: path.relative(
-        projectRoot,
-        processed.thumbPath,
-      ),
     };
   }
 

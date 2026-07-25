@@ -57,13 +57,19 @@ Completed and in production:
 - Legacy detail/editor pages inherit the visual system without route, API or data changes.
 - Future Print Store, CRM and Lightroom modules should use these primitives from their first release.
 
-## Next — Print Store Foundation
-- Workspace product catalogue and price lists
-- Print sizes, products and studio markup
-- Cart and crop choices
-- Orders and payment-provider boundary
-- Photographer approval before lab fulfilment
-- Lab connector interface with Loxley as the first target subject to partner/API access
+## Completed — Print Store Foundation (v1.6.0)
+- Workspace product catalogue, variants and price lists
+- Print sizes, products, studio costs and gross markup
+- Per-gallery store settings and minimum order
+- Persistent cart, quantity and non-destructive crop choices
+- Order snapshots and photographer approval workflow
+- Provider-neutral payment-event and professional-lab boundaries
+
+## Next — Checkout & Professional Lab Fulfilment
+- Hosted payment checkout and idempotent webhook adapter
+- Photographer crop-review/approval preview
+- Extensible lab-connector interface with manual fulfilment fallback
+- Loxley Colour as the initial UK integration target, subject to commercial/API access
 
 ## Print Store & Professional Lab Fulfilment
 - Product catalogues and workspace price lists
@@ -133,7 +139,7 @@ Required behaviour:
 - Guest view/favourite access with separate download policy
 - Visitor activity tracking without raw IP storage
 
-Next delivery/commerce work should build client selections, print-store ordering and lab fulfilment on top of this identified visitor model.
+Client selections and Print Store ordering now use this identified visitor model. Next delivery/commerce work should add hosted payment and professional-lab fulfilment adapters without changing canonical client or asset identity.
 
 ## v1.5.2 — Favourite Review & Full-Resolution Download
 - Admin favourite thumbnail review.

@@ -1,7 +1,16 @@
 # Next Steps
 
 ## Current baseline
-v1.5.9 adds the compact Venue Management location selector on top of the shared Admin UI system. Schema version is 19.
+v1.6.0 adds the Print Store foundation across Admin and private Client Galleries. Schema version is 20. Payment capture and professional-lab submission are intentionally provider-neutral boundaries rather than live integrations in this release.
+
+## v1.6.0 validation
+1. Apply migration `020_print_store_foundation.sql` and confirm `schema_meta.schema_version` is `20`.
+2. Open Admin → Print Store and create the starter catalogue, then edit products, variants, retail prices and studio costs.
+3. Open a Client Gallery → Print Store, select an active price list, enable ordering and save the gallery settings.
+4. Open the private client gallery, add a photograph/product option, change quantity and crop coordinates, then refresh and confirm the cart persists for the same visitor or verified identity.
+5. Submit an order and confirm it appears in Admin → Print Store → Orders with canonical filename, product snapshot, total, crop data and client notes.
+6. Change the order status, payment reference, lab connector/reference and internal notes; refresh and confirm the update persists.
+7. Confirm no card is charged and no lab order is submitted: v1.6.0 records the workflow boundary only.
 
 
 ## v1.5.9 validation
@@ -45,11 +54,12 @@ v1.5.9 adds the compact Venue Management location selector on top of the shared 
 8. Reset to studio defaults and confirm the workspace logo/accent return.
 
 ## Next engineering sequence
-1. Print Store foundation: products, sizes, workspace price lists/markup, cart, crop choices, order records and payment-provider boundary.
-2. Professional lab connector interface; pursue Loxley Colour first subject to commercial/API access.
-3. Lightroom Classic Publish Plugin using the same private-original ingestion and canonical asset APIs, then direct selection sync.
-4. CRM / Client Portal foundation, reusing `client_identities` for persistent client access and including supplier questionnaires.
-5. Large-download/background job service for ZIP64 or very large gallery exports beyond the direct streaming limit.
+1. Payment-provider adapter and hosted checkout/webhook flow, keeping provider event IDs idempotent and order totals server-authoritative.
+2. Professional lab connector interface with manual fulfilment fallback; pursue Loxley Colour first subject to commercial/API access.
+3. Photographer crop-review/approval preview and per-line fulfilment submission controls.
+4. Lightroom Classic Publish Plugin using the same private-original ingestion and canonical asset APIs, then direct selection sync.
+5. CRM / Client Portal foundation, reusing `client_identities` for persistent client access and including supplier questionnaires.
+6. Large-download/background job service for ZIP64 or very large gallery exports beyond the direct streaming limit.
 
 ## Guardrails
 - One photograph = one canonical asset.
@@ -57,3 +67,6 @@ v1.5.9 adds the compact Venue Management location selector on top of the shared 
 - Branding accepts validated theme tokens only, never arbitrary CSS/JavaScript.
 - Custom logos live in public branding storage; wedding originals remain private.
 - Filename is never asset identity.
+- Cart and order lines reference canonical `assets.id`; product/order snapshots never create duplicate image files.
+- Prices and availability are revalidated server-side before an order is created.
+- Payment and lab credentials/events must remain behind provider adapters and must never be exposed in public gallery payloads.

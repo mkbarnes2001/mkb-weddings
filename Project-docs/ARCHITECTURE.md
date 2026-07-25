@@ -255,3 +255,22 @@ Shared primitives live in `src/admin/components/ui/AdminUI.tsx` and cover:
 Design tokens and legacy compatibility rules live in `src/admin/admin-theme.css`. This allows older detail/editor pages to adopt the same control heights, typography, radii, form treatment and table density without changing their data or API workflows.
 
 New Admin modules must use the shared primitives first. Feature-specific inline styles should be limited to layouts that cannot be expressed by the shared system, such as responsive image grids or drag-and-drop workspaces. Client-facing gallery branding remains separate and must never inherit Admin theme rules.
+
+
+## Print Store commerce boundary — v1.6.0
+The first commerce path is deliberately layered on the existing workspace, identity, Client Gallery and canonical asset boundaries:
+
+`Workspace → Catalogue / Price List → Client Gallery Store Settings → Visitor or Client Identity Cart → Order Snapshot → Payment / Lab Adapters`
+
+Key invariants:
+- a cart item references one canonical `assets.id` already visible in that Client Gallery;
+- public requests cannot supply authoritative prices, product names or totals;
+- the server resolves the active gallery price list and revalidates price/availability immediately before order creation;
+- the order header, immutable lines and cart conversion are committed together through one D1 batch;
+- crop choices are instructions only and never modify or duplicate the stored original;
+- order lines are immutable commercial snapshots of sell price, studio cost, crop and lab mapping, while catalogue records remain editable for future sales;
+- a converted cart is retained for audit and a later visit starts a new active cart;
+- `commerce_payment_events` is the payment-provider webhook/idempotency boundary;
+- lab connector keys and references are fulfilment metadata, not direct coupling to one laboratory.
+
+v1.6.0 stops at recorded order submission. A later payment adapter may move an order through `awaiting_payment`/`paid`, and a later lab adapter may move approved lines through fulfilment. Manual payment and manual fulfilment remain valid fallbacks.

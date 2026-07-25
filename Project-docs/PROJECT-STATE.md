@@ -1,9 +1,20 @@
 # Project State
 
 ## Version
-Current release: **v1.5.9 — Compact Venue Location Selector**.  
-Database schema version: **19**.
+Current release: **v1.6.0 — Print Store Foundation**.
+Database schema version: **20**.
 
+
+
+## Print Store Foundation — v1.6.0
+- Adds a workspace-owned Print Store catalogue with products, variants, sizes, finishes, crop requirements and provider-neutral lab mapping fields.
+- Adds workspace price lists with retail price, studio cost, gross markup, active/default state and currency handling.
+- Adds a dedicated Admin Print Store workspace for catalogue, pricing and order review.
+- Adds per-Client-Gallery Print Store settings: enable/disable, price list, minimum order, crop permission, photographer approval and client-facing introduction.
+- Adds a private client cart using canonical `assets.id`, stored non-destructive crop coordinates and quantity controls.
+- Adds immutable order-line snapshots for product, sell price, studio cost, crop and lab mapping, plus order status workflow and payment references/events.
+- The foundation deliberately records orders without charging cards or submitting to a lab. Payment and lab providers remain replaceable adapters for later releases.
+- Adds migration `020_print_store_foundation.sql`; schema advances to **20**.
 
 
 ## Compact Venue Location Selector — v1.5.9

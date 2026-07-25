@@ -8,6 +8,7 @@ import type { VenueDocument, VenueSummary } from "../types/venue";
 import type { AssetLibraryFilters, AssetLibraryPayload } from "../types/asset";
 import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, ClientGalleryListPayload, ClientGalleryRecord, PrivateOriginalUploadSession, PrivateOriginalUploadedPart } from "../types/clientGallery";
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
+import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
 import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
@@ -435,6 +436,57 @@ export class AdminApiService {
       "/api/assets/sync",
       { method: "POST" },
     );
+  }
+
+
+  static async getPrintStore() {
+    const result = await request<{ ok: true } & PrintStoreAdminPayload>("/api/print-store");
+    const { ok: _ok, ...payload } = result;
+    return payload;
+  }
+
+  static async mutatePrintStore(payload: Record<string, unknown>) {
+    const result = await request<{ ok: true } & PrintStoreAdminPayload>("/api/print-store", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    const { ok: _ok, ...store } = result;
+    return store;
+  }
+
+  static async savePrintStoreProduct(product: Partial<PrintStoreProduct>) {
+    return this.mutatePrintStore({ action: "saveProduct", product });
+  }
+
+  static async savePrintStorePriceList(priceList: Partial<PrintStorePriceList>) {
+    return this.mutatePrintStore({ action: "savePriceList", priceList });
+  }
+
+  static async updatePrintStoreOrder(orderId: string, input: {
+    status: PrintStoreOrderStatus;
+    internalNotes?: string;
+    paymentReference?: string;
+    labConnectorKey?: string;
+    labReference?: string;
+  }) {
+    return this.mutatePrintStore({ action: "updateOrder", orderId, ...input });
+  }
+
+  static async getClientGalleryStore(id: string) {
+    const result = await request<{ ok: true } & ClientGalleryStoreAdminPayload>(
+      `/api/client-galleries/${encodeURIComponent(id)}/store`,
+    );
+    const { ok: _ok, ...payload } = result;
+    return payload;
+  }
+
+  static async updateClientGalleryStore(id: string, settings: Partial<ClientGalleryStoreSettings>) {
+    const result = await request<{ ok: true } & ClientGalleryStoreAdminPayload>(
+      `/api/client-galleries/${encodeURIComponent(id)}/store`,
+      { method: "POST", body: JSON.stringify(settings) },
+    );
+    const { ok: _ok, ...payload } = result;
+    return payload;
   }
 
 

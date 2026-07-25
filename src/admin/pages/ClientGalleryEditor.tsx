@@ -26,6 +26,7 @@ import {
   Save,
   Search,
   Settings,
+  ShoppingBag,
   ShieldCheck,
   Star,
   Trash2,
@@ -38,6 +39,7 @@ import { AdminApiService } from "../services/AdminApiService";
 import { uploadPrivateOriginal } from "../lib/privateOriginalUpload";
 import type { AssetRecord } from "../types/asset";
 import type { ClientGalleryAlbum, ClientGalleryDetailPayload, ClientGalleryRecord } from "../types/clientGallery";
+import type { ClientGalleryStoreAdminPayload } from "../types/printStore";
 
 function publicUrl(token: string) {
   return `${window.location.protocol}//${window.location.host.replace(/^admin\./, "www.")}/client-gallery/${token}`;
@@ -78,13 +80,13 @@ type UploadItem = {
   error: string;
 };
 
-type WorkspaceTab = "photos" | "activity" | "access" | "branding" | "settings";
+type WorkspaceTab = "photos" | "activity" | "access" | "branding" | "store" | "settings";
 
 export function ClientGalleryEditor() {
   const { id = "" } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const rawTab = searchParams.get("tab");
-  const activeTab: WorkspaceTab = rawTab === "activity" || rawTab === "access" || rawTab === "branding" || rawTab === "settings" ? rawTab : "photos";
+  const activeTab: WorkspaceTab = rawTab === "activity" || rawTab === "access" || rawTab === "branding" || rawTab === "store" || rawTab === "settings" ? rawTab : "photos";
   const [detail, setDetail] = useState<ClientGalleryDetailPayload | null>(null);
   const [draft, setDraft] = useState<Partial<ClientGalleryRecord> & { pin?: string }>({});
   const [assetSearch, setAssetSearch] = useState("");
@@ -109,6 +111,8 @@ export function ClientGalleryEditor() {
   const [dragOverAssetId, setDragOverAssetId] = useState("");
   const [contactDraft, setContactDraft] = useState({ email: "", displayName: "", role: "client", allowOriginalDownloads: true });
   const [selectionDraft, setSelectionDraft] = useState({ name: "Album Selection", instructions: "Choose the photographs you would like included.", minImages: 0, maxImages: 0 });
+  const [storeData, setStoreData] = useState<ClientGalleryStoreAdminPayload | null>(null);
+  const [storeDraft, setStoreDraft] = useState<ClientGalleryStoreAdminPayload["settings"] | null>(null);
 
   const load = async () => {
     setError("");
@@ -122,7 +126,19 @@ export function ClientGalleryEditor() {
     }
   };
 
+  const loadStore = async () => {
+    setError("");
+    try {
+      const next = await AdminApiService.getClientGalleryStore(id);
+      setStoreData(next);
+      setStoreDraft({ ...next.settings });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to load gallery store settings.");
+    }
+  };
+
   useEffect(() => { load(); }, [id]);
+  useEffect(() => { if (activeTab === "store") loadStore(); }, [id, activeTab]);
   useEffect(() => { setSelectedAssets(new Set()); setOpenPhotoMenuId(""); setDraggedAssetId(""); setDragOverAssetId(""); }, [activeAlbumId, activeTab]);
   useEffect(() => {
     const close = (event: MouseEvent) => {
@@ -355,6 +371,19 @@ export function ClientGalleryEditor() {
     await mutateAssets({ action: "setSortMode", sortMode }, sortMode === "custom" ? "Custom photo order enabled." : sortMode === "filename" ? "Photos ordered by filename." : "Photos ordered by capture time.");
   };
 
+  const saveStoreSettings = async () => {
+    if (!storeDraft) return;
+    setBusy(true); setError(""); setMessage("");
+    try {
+      const next = await AdminApiService.updateClientGalleryStore(id, storeDraft);
+      setStoreData(next);
+      setStoreDraft({ ...next.settings });
+      setMessage(storeDraft.enabled ? "Print Store enabled for this gallery." : "Print Store settings saved.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to save gallery store settings.");
+    } finally { setBusy(false); }
+  };
+
   const reorderVisiblePhotos = async (targetAssetId: string) => {
     const sourceAssetId = draggedAssetId;
     setDraggedAssetId("");
@@ -383,6 +412,7 @@ export function ClientGalleryEditor() {
     { key: "activity", label: "Client Activity", icon: Activity },
     { key: "access", label: "Access", icon: ShieldCheck },
     { key: "branding", label: "Branding", icon: Palette },
+    { key: "store", label: "Print Store", icon: ShoppingBag },
     { key: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -570,6 +600,25 @@ export function ClientGalleryEditor() {
           {activeTab === "branding" && brandingDraft ? <section className="mt-5" style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(360px, .8fr)", gap: 18, alignItems: "start" }}>
             <div className="rounded-2xl border border-black/10 bg-white p-5"><div className="flex items-center gap-2"><Palette className="h-5 w-5" /><h3 className="text-xl font-semibold">Client gallery branding</h3></div><p className="mt-2 text-sm text-neutral-600">Change the logo and colour scheme clients see. These choices affect only this private Client Gallery.</p><div className="mt-5"><p className="text-xs uppercase tracking-[.12em] text-neutral-500">Logo</p><div className="mt-2 grid grid-cols-3 gap-2">{([['workspace','Studio logo'],['custom','Custom logo'],['hidden','No logo']] as const).map(([value,label]) => <button key={value} type="button" onClick={() => setBrandingDraft({ ...brandingDraft, logoMode: value })} className="rounded-xl border px-3 py-3 text-sm" style={{ borderColor: brandingDraft.logoMode === value ? '#111' : 'rgba(0,0,0,.12)', background: brandingDraft.logoMode === value ? '#f5f5f5' : '#fff', fontWeight: brandingDraft.logoMode === value ? 600 : 400 }}>{label}</button>)}</div>{brandingDraft.logoMode === 'custom' ? <div className="mt-3 rounded-xl border border-black/10 bg-neutral-50 p-4"><div className="flex items-center gap-3">{brandingDraft.customLogoUrl ? <img src={brandingDraft.customLogoUrl} alt="Current custom logo" style={{ maxWidth: 180, maxHeight: 70, objectFit: 'contain' }} /> : <div className="text-sm text-neutral-500">No custom logo uploaded yet.</div>}</div><label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-black/15 bg-white px-3 py-2 text-sm">{brandingUploading ? 'Uploading…' : 'Upload logo'}<input type="file" accept="image/png,image/jpeg,image/webp" disabled={brandingUploading} onChange={(event) => { uploadBrandingLogo(event.target.files?.[0] || null); event.currentTarget.value = ''; }} style={{ display: 'none' }} /></label><p className="mt-2 text-xs text-neutral-400">PNG, JPEG or WebP. Maximum 2 MB. Transparent PNG is recommended.</p></div> : null}</div><div className="mt-6"><p className="text-xs uppercase tracking-[.12em] text-neutral-500">Colour presets</p><div className="mt-2 grid grid-cols-2 gap-2">{BRANDING_PRESETS.map((preset) => <button type="button" key={preset.name} onClick={() => setBrandingDraft({ ...brandingDraft, ...preset })} className="rounded-xl border border-black/10 p-3 text-left"><span className="flex items-center gap-2"><span style={{ width: 22, height: 22, borderRadius: 999, background: preset.accentColor, border: '1px solid rgba(0,0,0,.12)' }} /><strong className="text-sm">{preset.name}</strong></span><span className="mt-2 flex gap-1">{[preset.backgroundColor,preset.surfaceColor,preset.textColor].map((color) => <span key={color} style={{ width: 20, height: 12, borderRadius: 3, background: color, border: '1px solid rgba(0,0,0,.1)' }} />)}</span></button>)}</div></div><div className="mt-6 grid grid-cols-2 gap-4">{([['accentColor','Accent'],['backgroundColor','Page background'],['surfaceColor','Cards / header'],['textColor','Text']] as const).map(([key,label]) => <label key={key} className="block"><span className="text-xs uppercase tracking-[.1em] text-neutral-500">{label}</span><div className="mt-1 flex items-center gap-2 rounded-lg border border-black/15 px-2 py-2"><input type="color" value={brandingDraft[key]} onChange={(event) => setBrandingDraft({ ...brandingDraft, [key]: event.target.value })} style={{ width: 34, height: 28, border: 0, padding: 0, background: 'transparent' }} /><input value={brandingDraft[key]} onChange={(event) => setBrandingDraft({ ...brandingDraft, [key]: event.target.value })} className="min-w-0 flex-1 text-sm outline-none" /></div></label>)}</div><div className="mt-5 grid grid-cols-2 gap-4"><label className="block"><span className="text-xs uppercase tracking-[.1em] text-neutral-500">Heading style</span><select value={brandingDraft.headingFont} onChange={(event) => setBrandingDraft({ ...brandingDraft, headingFont: event.target.value as any })} className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2.5"><option value="editorial">Editorial serif</option><option value="modern">Modern sans serif</option><option value="classic">Classic serif</option></select></label><label className="flex items-center gap-3 rounded-xl border border-black/10 p-4 mt-5"><input type="checkbox" checked={brandingDraft.showStudioName} onChange={(event) => setBrandingDraft({ ...brandingDraft, showStudioName: event.target.checked })} /><span className="text-sm">Show studio name beside logo</span></label></div><div className="mt-6 flex items-center gap-3 flex-wrap"><button type="button" onClick={saveBranding} disabled={busy} className="rounded-lg bg-black text-white px-5 py-3 inline-flex items-center gap-2 disabled:opacity-50"><Save className="h-4 w-4" /> Save branding</button><button type="button" onClick={resetBranding} disabled={busy} className="rounded-lg border border-black/15 px-5 py-3 inline-flex items-center gap-2 disabled:opacity-50"><RotateCcw className="h-4 w-4" /> Reset to studio defaults</button></div></div>
             <aside className="rounded-2xl border border-black/10 overflow-hidden" style={{ background: brandingDraft.backgroundColor, color: brandingDraft.textColor, position: 'sticky', top: 20 }}><div className="px-5 py-4 flex items-center gap-3" style={{ background: brandingDraft.surfaceColor, borderBottom: `1px solid ${brandingDraft.textColor}22` }}>{brandingDraft.logoMode !== 'hidden' && (brandingDraft.logoMode === 'custom' ? brandingDraft.customLogoUrl : brandingDraft.workspaceLogoUrl) ? <img src={brandingDraft.logoMode === 'custom' ? brandingDraft.customLogoUrl : brandingDraft.workspaceLogoUrl} alt="" style={{ maxHeight: 34, maxWidth: 150, objectFit: 'contain' }} /> : null}{brandingDraft.showStudioName ? <strong className="text-sm">{brandingDraft.businessName}</strong> : null}</div><div style={{ aspectRatio: '16/9', background: '#ddd', overflow: 'hidden' }}>{gallery.coverWeb || gallery.coverThumb ? <img src={gallery.coverWeb || gallery.coverThumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : null}</div><div className="p-6 text-center"><p className="text-[10px] uppercase tracking-[.22em]" style={{ opacity: .62 }}>Private gallery</p><h4 className="mt-2" style={{ fontFamily: headingFontFamily(brandingDraft.headingFont), fontSize: 30, fontWeight: 500 }}>{gallery.title}</h4><p className="mt-2 text-sm" style={{ opacity: .7 }}>{gallery.intro || 'Your wedding photographs, privately delivered.'}</p><div className="mt-5 flex items-center justify-center gap-2"><span className="rounded-lg px-4 py-2 text-sm" style={{ background: brandingDraft.accentColor, color: contrastText(brandingDraft.accentColor) }}>All Photos</span><span className="rounded-lg border px-4 py-2 text-sm" style={{ borderColor: `${brandingDraft.textColor}33`, background: brandingDraft.surfaceColor }}>Ceremony</span></div></div></aside>
+          </section> : null}
+
+          {activeTab === "store" ? <section className="mt-5" style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 340px", gap: 18, alignItems: "start" }}>
+            <div className="rounded-2xl border border-black/10 bg-white p-5">
+              <div className="flex items-center gap-2"><ShoppingBag className="h-5 w-5" /><h3 className="text-xl font-semibold">Gallery Print Store</h3></div>
+              <p className="mt-2 text-sm text-neutral-600">Enable product ordering for this gallery using a workspace price list. Client orders are captured for payment and photographer approval before lab fulfilment.</p>
+              {!storeDraft || !storeData ? <p className="mt-5 text-sm text-neutral-500">Loading Print Store settings…</p> : <>
+                <div className="mt-5 grid grid-cols-2 gap-4">
+                  <label className="col-span-2 flex items-start gap-3 rounded-xl border border-black/10 bg-neutral-50 p-4"><input type="checkbox" checked={storeDraft.enabled} onChange={(event) => setStoreDraft({ ...storeDraft, enabled: event.target.checked })} /><span><strong className="block text-sm">Enable Print Store</strong><span className="mt-1 block text-xs text-neutral-500">Shows a Shop Prints action in the private client gallery.</span></span></label>
+                  <label className="block"><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Price list</span><select value={storeDraft.priceListId} onChange={(event) => setStoreDraft({ ...storeDraft, priceListId: event.target.value })} className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2.5"><option value="">Choose a price list</option>{storeData.priceLists.map((priceList) => <option key={priceList.id} value={priceList.id}>{priceList.name} · {priceList.currency}</option>)}</select></label>
+                  <label className="block"><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Minimum order</span><div className="mt-1 flex items-center rounded-lg border border-black/15 bg-white"><span className="px-3 text-xs font-medium text-neutral-500">{storeData.priceLists.find((priceList) => priceList.id === storeDraft.priceListId)?.currency || "GBP"}</span><input type="number" min="0" step="0.01" value={(storeDraft.minimumOrderMinor / 100).toFixed(2)} onChange={(event) => setStoreDraft({ ...storeDraft, minimumOrderMinor: Math.round(Number(event.target.value || 0) * 100) })} className="min-w-0 flex-1 border-0 px-1 py-2.5" /></div></label>
+                  <label className="flex items-start gap-3 rounded-xl border border-black/10 p-4"><input type="checkbox" checked={storeDraft.allowCrop} onChange={(event) => setStoreDraft({ ...storeDraft, allowCrop: event.target.checked })} /><span><strong className="block text-sm">Allow crop choices</strong><span className="mt-1 block text-xs text-neutral-500">Stores a non-destructive crop rectangle with each order line.</span></span></label>
+                  <label className="flex items-start gap-3 rounded-xl border border-black/10 p-4"><input type="checkbox" checked={storeDraft.requirePhotographerApproval} onChange={(event) => setStoreDraft({ ...storeDraft, requirePhotographerApproval: event.target.checked })} /><span><strong className="block text-sm">Photographer approval</strong><span className="mt-1 block text-xs text-neutral-500">Orders enter review before lab fulfilment.</span></span></label>
+                  <label className="col-span-2 block"><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Store introduction</span><textarea rows={4} value={storeDraft.intro} onChange={(event) => setStoreDraft({ ...storeDraft, intro: event.target.value })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5" placeholder="Order professional prints and wall art directly from your gallery." /></label>
+                </div>
+                <div className="mt-5 flex items-center gap-3"><button type="button" onClick={saveStoreSettings} disabled={busy || (storeDraft.enabled && !storeDraft.priceListId)} className="rounded-lg bg-black px-5 py-3 text-white inline-flex items-center gap-2 disabled:opacity-40"><Save className="h-4 w-4" /> Save Print Store</button><Link to="/admin/print-store" className="rounded-lg border border-black/15 px-5 py-3 inline-flex items-center gap-2"><ShoppingBag className="h-4 w-4" /> Manage catalogue</Link></div>
+              </>}
+            </div>
+            <aside className="rounded-2xl border border-black/10 bg-white p-5"><p className="text-xs uppercase tracking-[.14em] text-neutral-400">Commerce status</p><div className="mt-4 space-y-3 text-sm"><div className="flex items-center justify-between"><span>Gallery store</span><strong>{storeDraft?.enabled ? "Enabled" : "Disabled"}</strong></div><div className="flex items-center justify-between"><span>Active price lists</span><strong>{storeData?.priceLists.length || 0}</strong></div><div className="flex items-center justify-between"><span>Payment provider</span><strong>Manual boundary</strong></div><div className="flex items-center justify-between"><span>Lab connector</span><strong>Not connected</strong></div></div><p className="mt-5 rounded-xl bg-neutral-50 p-3 text-xs leading-relaxed text-neutral-500">This release captures carts, crops and order records without sending work to a lab or charging a card. Provider and lab references are managed in Admin → Print Store.</p></aside>
           </section> : null}
 
           {activeTab === "settings" ? <section className="mt-5 rounded-2xl border border-black/10 bg-white p-5" style={{ maxWidth: 880 }}><div className="flex items-center gap-2"><Settings className="h-5 w-5" /><h3 className="text-xl font-semibold">Gallery settings</h3></div><p className="mt-2 text-sm text-neutral-600">General gallery identity and wedding linkage. Access and security now live in the Access tab.</p><div className="mt-5" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 16 }}><label className="block"><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Title</span><input value={draft.title || ""} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5" /></label><label className="block"><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Status</span><select value={draft.status || "draft"} onChange={(e) => setDraft({ ...draft, status: e.target.value as any })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5 bg-white"><option value="draft">Draft</option><option value="live">Live</option><option value="archived">Archived</option></select></label><label className="block"><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Client name</span><input value={draft.clientName || ""} onChange={(e) => setDraft({ ...draft, clientName: e.target.value })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5" /></label><label className="block"><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Primary client email</span><input value={draft.clientEmail || ""} onChange={(e) => setDraft({ ...draft, clientEmail: e.target.value })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5" /></label><label className="block" style={{ gridColumn: "1 / -1" }}><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Wedding</span><select value={draft.weddingSlug || ""} onChange={(e) => setDraft({ ...draft, weddingSlug: e.target.value })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5 bg-white"><option value="">No linked wedding</option>{detail.weddings.map((wedding) => <option key={wedding.slug} value={wedding.slug}>{wedding.title || wedding.couple || wedding.slug}</option>)}</select></label><label className="block" style={{ gridColumn: "1 / -1" }}><span className="text-xs uppercase tracking-[.12em] text-neutral-500">Gallery introduction</span><textarea value={draft.intro || ""} onChange={(e) => setDraft({ ...draft, intro: e.target.value })} rows={5} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5" /></label></div><div className="mt-5 flex items-center gap-3"><button onClick={save} disabled={busy} className="rounded-lg bg-black text-white px-5 py-3 inline-flex items-center gap-2 disabled:opacity-50"><Save className="h-4 w-4" /> Save settings</button>{gallery.status === "live" ? <button onClick={() => navigator.clipboard?.writeText(shareUrl)} className="rounded-lg border border-black/15 px-5 py-3 inline-flex items-center gap-2"><Copy className="h-4 w-4" /> Copy private link</button> : null}</div></section> : null}

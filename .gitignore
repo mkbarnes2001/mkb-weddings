@@ -11,3 +11,5 @@ backups/
 .env.local
 .env.*.local
 d1/generated/
+
+build-admin

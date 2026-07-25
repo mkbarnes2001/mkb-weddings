@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, ClipboardList, Download, Heart, LockKeyhole, LogIn, LogOut, Mail, Send, ShieldCheck, X } from "lucide-react";
+import { Check, ClipboardList, Crop, Download, Heart, LockKeyhole, LogIn, LogOut, Mail, Minus, Plus, Send, ShieldCheck, ShoppingBag, Trash2, X } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { resolveAssetUrl } from "../lib/assetUrl";
@@ -89,6 +89,61 @@ type ClientGalleryPayload = {
   selectionRequests?: ClientGallerySelectionRequest[];
   albums?: ClientGalleryAlbum[];
 };
+
+type PrintStoreVariant = {
+  id: string;
+  sku: string;
+  name: string;
+  widthMm: number;
+  heightMm: number;
+  orientation: string;
+  finish: string;
+  priceMinor: number;
+  currency: string;
+};
+
+type PrintStoreProduct = {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  fulfilmentType: string;
+  requiresCrop: boolean;
+  variants: PrintStoreVariant[];
+};
+
+type PrintStoreCartItem = {
+  id: string;
+  assetId: string;
+  filename: string;
+  thumbSrc: string;
+  productId: string;
+  productName: string;
+  variantId: string;
+  variantName: string;
+  quantity: number;
+  unitPriceMinor: number;
+  lineTotalMinor: number;
+  crop: { x?: number; y?: number; width?: number; height?: number; rotation?: number };
+  notes: string;
+};
+
+type PrintStorePayload = {
+  enabled: boolean;
+  galleryId: string;
+  intro: string;
+  currency: string;
+  allowCrop: boolean;
+  requirePhotographerApproval: boolean;
+  minimumOrderMinor: number;
+  products: PrintStoreProduct[];
+  cart: { id: string; status: string; currency: string; subtotalMinor: number; itemCount: number; items: PrintStoreCartItem[] };
+  order?: { id: string; orderNumber: string; status: string; currency: string; totalMinor: number; message: string };
+};
+
+function formatStoreMoney(minor: number, currency = "GBP") {
+  return new Intl.NumberFormat("en-GB", { style: "currency", currency }).format((Number(minor) || 0) / 100);
+}
 
 function headingFontFamily(value: string) {
   if (value === "modern") return '"Montserrat", "Avenir Next", Avenir, Arial, sans-serif';
@@ -219,6 +274,16 @@ export function ClientGallery() {
   const [showSecureSignIn, setShowSecureSignIn] = useState(false);
   const [secureSignInBusy, setSecureSignInBusy] = useState(false);
   const [secureSignInMessage, setSecureSignInMessage] = useState("");
+  const [store, setStore] = useState<PrintStorePayload | null>(null);
+  const [showStore, setShowStore] = useState(false);
+  const [storeBusy, setStoreBusy] = useState(false);
+  const [storeMessage, setStoreMessage] = useState("");
+  const [storeAssetId, setStoreAssetId] = useState("");
+  const [storeVariantId, setStoreVariantId] = useState("");
+  const [storeQuantity, setStoreQuantity] = useState(1);
+  const [storeCrop, setStoreCrop] = useState({ x: 0, y: 0, width: 1, height: 1, rotation: 0 });
+  const [checkoutName, setCheckoutName] = useState("");
+  const [checkoutNotes, setCheckoutNotes] = useState("");
 
   const load = async (attemptPin = "", attemptEmail = "") => {
     setError("");
@@ -422,6 +487,81 @@ export function ClientGallery() {
     }
   };
 
+  const storeRequest = async (action: string, extra: Record<string, unknown> = {}) => {
+    const response = await fetch(`/api/public/client-galleries/${encodeURIComponent(token)}/store`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin, email, visitorKey: visitor, displayName: checkoutName, action, ...extra }),
+      cache: "no-store",
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body?.error || "Unable to update the Print Store.");
+    setStore(body as PrintStorePayload);
+    return body as PrintStorePayload;
+  };
+
+  const loadStore = async () => {
+    try {
+      const next = await storeRequest("load");
+      if (next.enabled && !storeVariantId) setStoreVariantId(next.products[0]?.variants[0]?.id || "");
+      return next;
+    } catch {
+      setStore({ enabled: false, galleryId: payload?.id || "", intro: "", currency: "GBP", allowCrop: true, requirePhotographerApproval: true, minimumOrderMinor: 0, products: [], cart: { id: "", status: "active", currency: "GBP", subtotalMinor: 0, itemCount: 0, items: [] } });
+      return null;
+    }
+  };
+
+  const openStoreForAsset = async (assetId = "") => {
+    setStoreMessage("");
+    if (assetId) setStoreAssetId(assetId);
+    setShowStore(true);
+    setStoreBusy(true);
+    try {
+      const next = store || await loadStore();
+      if (next?.enabled && !storeVariantId) setStoreVariantId(next.products[0]?.variants[0]?.id || "");
+    } finally { setStoreBusy(false); }
+  };
+
+  const addStoreItem = async () => {
+    if (!storeAssetId || !storeVariantId) { setStoreMessage("Choose a photograph and product option."); return; }
+    setStoreBusy(true); setStoreMessage("");
+    try {
+      await storeRequest("addItem", { assetId: storeAssetId, variantId: storeVariantId, quantity: storeQuantity, crop: storeCrop });
+      setStoreMessage("Added to cart.");
+    } catch (err) { setStoreMessage(err instanceof Error ? err.message : "Unable to add item."); }
+    finally { setStoreBusy(false); }
+  };
+
+  const updateStoreItem = async (item: PrintStoreCartItem, quantity: number) => {
+    setStoreBusy(true); setStoreMessage("");
+    try {
+      await storeRequest("updateItem", { itemId: item.id, quantity, crop: item.crop, notes: item.notes });
+    } catch (err) { setStoreMessage(err instanceof Error ? err.message : "Unable to update cart."); }
+    finally { setStoreBusy(false); }
+  };
+
+  const removeStoreItem = async (itemId: string) => {
+    setStoreBusy(true); setStoreMessage("");
+    try { await storeRequest("removeItem", { itemId }); }
+    catch (err) { setStoreMessage(err instanceof Error ? err.message : "Unable to remove item."); }
+    finally { setStoreBusy(false); }
+  };
+
+  const submitStoreOrder = async () => {
+    const targetEmail = String(email || payload?.visitorEmail || payload?.authenticatedEmail || "").trim();
+    if (!targetEmail) { setStoreMessage("Enter your email address before submitting the order."); return; }
+    setStoreBusy(true); setStoreMessage("");
+    try {
+      const next = await storeRequest("submitOrder", { email: targetEmail, clientName: checkoutName || payload?.clientName || "", clientNotes: checkoutNotes });
+      setStoreMessage(next.order?.message || "Order submitted.");
+    } catch (err) { setStoreMessage(err instanceof Error ? err.message : "Unable to submit order."); }
+    finally { setStoreBusy(false); }
+  };
+
+  useEffect(() => {
+    if (payload && !payload.locked && !store) loadStore();
+  }, [payload?.id, payload?.locked]);
+
   const images = payload?.assets || [];
   const albums = payload?.albums || [];
   const displayImages = activeAlbumId
@@ -438,6 +578,9 @@ export function ClientGallery() {
   const activeSelectionRequest = selectionRequests.find((request) => request.id === activeSelectionRequestId) || selectionRequests[0] || null;
   const activeSelection = activeSelectionRequest?.selection || null;
   const selectedAssetIds = new Set(activeSelection?.assetIds || []);
+  const selectedStoreProduct = store?.products.find((product) => product.variants.some((variant) => variant.id === storeVariantId)) || null;
+  const selectedStoreVariant = selectedStoreProduct?.variants.find((variant) => variant.id === storeVariantId) || null;
+  const showStoreCrop = Boolean(store?.allowCrop && selectedStoreProduct?.requiresCrop);
   const publicAssetOrigin = payload?.websiteUrl || "https://www.mkbweddings.co.uk";
   const branding = payload?.branding || {
     logoMode: "workspace" as const,
@@ -521,6 +664,7 @@ export function ClientGallery() {
             ) : payload.secureSignInAvailable ? (
               <button type="button" onClick={() => { setShowSecureSignIn(true); setSecureSignInMessage(""); }} className="rounded-lg border border-black/15 bg-white px-3 py-2 text-xs inline-flex items-center gap-1.5"><LogIn size={14} /> Sign in</button>
             ) : null}
+            {store?.enabled ? <button type="button" onClick={() => openStoreForAsset()} className="rounded-lg border border-black/15 bg-white px-3 py-2 text-xs inline-flex items-center gap-1.5"><ShoppingBag size={14} /> Shop prints{store.cart.itemCount ? ` (${store.cart.itemCount})` : ""}</button> : null}
             {payload.allowFavourites ? <div className="text-xs md:text-sm inline-flex items-center gap-2 whitespace-nowrap"><Heart className="h-4 w-4" /> {favourites.size} favourites</div> : null}
           </div>
         </div>
@@ -665,6 +809,7 @@ export function ClientGallery() {
                     <Check size={15} strokeWidth={2} />
                   </button>
                 ) : null}
+                {store?.enabled ? <button type="button" onClick={(event) => { event.stopPropagation(); openStoreForAsset(image.assetId); }} aria-label="Order a print" title="Order a print" style={{ width: 32, height: 32, borderRadius: 999, border: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,.92)", color: "#111", boxShadow: "0 3px 16px rgba(0,0,0,.14)" }}><ShoppingBag size={15} /></button> : null}
                 <DownloadControl compact enabled={payload.allowDownloads && image.hasOriginal} busy={downloading.has(image.assetId)} onClick={() => downloadOriginal(image)} />
                 {payload.allowFavourites ? (
                   <button onClick={() => toggleFavourite(image.assetId)} aria-label={favourites.has(image.assetId) ? "Remove favourite" : "Add favourite"} title={favourites.has(image.assetId) ? "Remove favourite" : "Add favourite"} style={{ width: 32, height: 32, borderRadius: 999, border: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,.92)", color: "#111", boxShadow: "0 3px 16px rgba(0,0,0,.14)", cursor: "pointer" }}>
@@ -677,6 +822,35 @@ export function ClientGallery() {
         </div>
         {!displayImages.length ? <div className="text-center py-20 text-neutral-500">{activeAlbumId ? "This album does not contain any visible images yet." : "This gallery does not contain any visible images yet."}</div> : null}
       </main>
+
+      {showStore && store?.enabled ? (
+        <div style={{ position: "fixed", inset: 0, zIndex: 1250, background: "rgba(0,0,0,.5)", display: "flex", justifyContent: "flex-end" }} onMouseDown={() => setShowStore(false)}>
+          <aside className="h-full w-full max-w-2xl overflow-y-auto bg-white shadow-2xl" style={{ color: "#111" }} onMouseDown={(event) => event.stopPropagation()}>
+            <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-black/10 bg-white px-5 py-4"><div><div className="flex items-center gap-2"><ShoppingBag size={18} /><h2 className="text-lg font-semibold">Shop prints</h2></div><p className="mt-1 text-xs text-neutral-500">{store.intro || "Order professional prints from your private gallery."}</p></div><button type="button" onClick={() => setShowStore(false)} aria-label="Close Print Store"><X size={19} /></button></div>
+            <div className="p-5">
+              {store.order ? <div className="mb-5 rounded-2xl border border-green-200 bg-green-50 p-5"><strong className="text-sm">Order {store.order.orderNumber}</strong><p className="mt-2 text-sm">{store.order.message}</p><p className="mt-2 text-xs text-neutral-500">Total {formatStoreMoney(store.order.totalMinor, store.order.currency)} · {store.order.status.replaceAll("_", " ")}</p></div> : null}
+              <section>
+                <div className="flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">1. Choose a photograph</h3><p className="mt-1 text-xs text-neutral-500">The photograph remains linked to its canonical gallery asset.</p></div>{storeAssetId ? <button type="button" onClick={() => setStoreAssetId("")} className="text-xs underline">Change</button> : null}</div>
+                {storeAssetId ? (() => { const image = images.find((candidate) => candidate.assetId === storeAssetId); return image ? <div className="mt-3 flex items-center gap-3 rounded-xl border border-black/10 p-3"><div className="h-24 w-32 overflow-hidden rounded-lg bg-neutral-100"><GalleryImage image={image} baseOrigin={publicAssetOrigin} mode="tile" /></div><div className="min-w-0"><strong className="text-sm">Selected photograph</strong><p className="mt-1 truncate text-xs text-neutral-500">{image.filename}</p></div></div> : null; })() : <div className="mt-3 grid grid-cols-4 gap-2">{images.slice(0, 80).map((image) => <button key={image.assetId} type="button" onClick={() => setStoreAssetId(image.assetId)} className="overflow-hidden rounded-lg border border-black/10" style={{ aspectRatio: "1/1" }}><GalleryImage image={image} baseOrigin={publicAssetOrigin} mode="tile" /></button>)}</div>}
+              </section>
+              <section className="mt-6 border-t border-black/10 pt-5"><h3 className="text-sm font-semibold">2. Choose a product</h3><select value={storeVariantId} onChange={(event) => { setStoreVariantId(event.target.value); setStoreCrop({ x: 0, y: 0, width: 1, height: 1, rotation: 0 }); }} className="mt-3 w-full rounded-xl border border-black/15 bg-white px-4 py-3">{store.products.map((product) => <optgroup key={product.id} label={product.name}>{product.variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.name} · {formatStoreMoney(variant.priceMinor, variant.currency)}</option>)}</optgroup>)}</select>
+                {selectedStoreVariant ? <p className="mt-2 text-xs text-neutral-500">{selectedStoreVariant.widthMm && selectedStoreVariant.heightMm ? `${selectedStoreVariant.widthMm} × ${selectedStoreVariant.heightMm} mm` : selectedStoreVariant.finish || "Product option"}</p> : null}
+                {showStoreCrop ? <div className="mt-4 rounded-xl border border-black/10 bg-neutral-50 p-4"><div className="flex items-center gap-2"><Crop size={15} /><strong className="text-sm">Crop choice</strong></div><p className="mt-1 text-xs text-neutral-500">Non-destructive crop coordinates are stored with the order for approval.</p><div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                  <label><span>Horizontal start</span><input type="range" min="0" max={Math.max(0, 1 - storeCrop.width)} step="0.01" value={storeCrop.x} onChange={(event) => setStoreCrop((current) => ({ ...current, x: Math.min(Number(event.target.value), Math.max(0, 1 - current.width)) }))} className="mt-1 w-full" /></label>
+                  <label><span>Vertical start</span><input type="range" min="0" max={Math.max(0, 1 - storeCrop.height)} step="0.01" value={storeCrop.y} onChange={(event) => setStoreCrop((current) => ({ ...current, y: Math.min(Number(event.target.value), Math.max(0, 1 - current.height)) }))} className="mt-1 w-full" /></label>
+                  <label><span>Width</span><input type="range" min="0.01" max={Math.max(0.01, 1 - storeCrop.x)} step="0.01" value={storeCrop.width} onChange={(event) => setStoreCrop((current) => ({ ...current, width: Math.min(Math.max(0.01, Number(event.target.value)), Math.max(0.01, 1 - current.x)) }))} className="mt-1 w-full" /></label>
+                  <label><span>Height</span><input type="range" min="0.01" max={Math.max(0.01, 1 - storeCrop.y)} step="0.01" value={storeCrop.height} onChange={(event) => setStoreCrop((current) => ({ ...current, height: Math.min(Math.max(0.01, Number(event.target.value)), Math.max(0.01, 1 - current.y)) }))} className="mt-1 w-full" /></label>
+                </div></div> : null}
+                <div className="mt-4 flex items-center gap-3"><div className="inline-flex items-center rounded-lg border border-black/15"><button type="button" onClick={() => setStoreQuantity((value) => Math.max(1, value - 1))} className="p-2"><Minus size={14} /></button><span className="min-w-9 text-center text-sm">{storeQuantity}</span><button type="button" onClick={() => setStoreQuantity((value) => Math.min(99, value + 1))} className="p-2"><Plus size={14} /></button></div><button type="button" onClick={addStoreItem} disabled={storeBusy || !storeAssetId || !storeVariantId} className="flex-1 rounded-xl bg-black px-5 py-3 text-sm text-white disabled:opacity-40">{storeBusy ? "Saving…" : "Add to cart"}</button></div>
+              </section>
+              <section className="mt-6 border-t border-black/10 pt-5"><div className="flex items-center justify-between"><h3 className="text-sm font-semibold">Cart</h3><strong>{formatStoreMoney(store.cart.subtotalMinor, store.currency)}</strong></div>{store.minimumOrderMinor > 0 ? <p className="mt-1 text-xs text-neutral-500">Minimum order {formatStoreMoney(store.minimumOrderMinor, store.currency)}</p> : null}<div className="mt-3 space-y-2">{store.cart.items.map((item) => <div key={item.id} className="flex items-center gap-3 rounded-xl border border-black/10 p-3"><div className="h-14 w-16 overflow-hidden rounded-lg bg-neutral-100">{item.thumbSrc ? <img src={resolveAssetUrl(item.thumbSrc, publicAssetOrigin)} alt="" className="h-full w-full object-cover" /> : null}</div><div className="min-w-0 flex-1"><strong className="text-sm">{item.productName} · {item.variantName}</strong><p className="mt-1 truncate text-xs text-neutral-500">{item.filename}</p><p className="mt-1 text-xs">{formatStoreMoney(item.lineTotalMinor, store.currency)}</p></div><div className="flex items-center gap-1"><button type="button" onClick={() => updateStoreItem(item, Math.max(1, item.quantity - 1))} className="rounded p-1"><Minus size={13} /></button><span className="w-5 text-center text-xs">{item.quantity}</span><button type="button" onClick={() => updateStoreItem(item, Math.min(99, item.quantity + 1))} className="rounded p-1"><Plus size={13} /></button><button type="button" onClick={() => removeStoreItem(item.id)} className="ml-1 rounded p-1 text-red-700"><Trash2 size={14} /></button></div></div>)}{!store.cart.items.length ? <p className="rounded-xl bg-neutral-50 p-4 text-sm text-neutral-500">Your cart is empty.</p> : null}</div>
+              </section>
+              {store.cart.items.length ? <section className="mt-6 border-t border-black/10 pt-5"><h3 className="text-sm font-semibold">3. Submit order</h3><div className="mt-3 grid grid-cols-2 gap-3"><input value={checkoutName} onChange={(event) => setCheckoutName(event.target.value)} placeholder="Your name" className="rounded-xl border border-black/15 px-4 py-3" /><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email address" className="rounded-xl border border-black/15 px-4 py-3" /><textarea value={checkoutNotes} onChange={(event) => setCheckoutNotes(event.target.value)} placeholder="Order notes (optional)" rows={3} className="col-span-2 rounded-xl border border-black/15 px-4 py-3" /></div><button type="button" onClick={submitStoreOrder} disabled={storeBusy || store.cart.subtotalMinor < store.minimumOrderMinor} className="mt-3 w-full rounded-xl px-5 py-3 text-sm text-white disabled:opacity-40" style={{ background: branding.accentColor, color: accentTextColor }}>{storeBusy ? "Submitting…" : store.requirePhotographerApproval ? "Submit for photographer approval" : "Create order"}</button><p className="mt-3 text-[11px] leading-relaxed text-neutral-500">Payment is not taken in this foundation release. Your photographer will review the crop and product choices before fulfilment.</p></section> : null}
+              {storeMessage ? <p className="mt-4 rounded-xl bg-neutral-100 p-3 text-sm">{storeMessage}</p> : null}
+            </div>
+          </aside>
+        </div>
+      ) : null}
 
       {showSecureSignIn && !payload.authenticated && payload.secureSignInAvailable ? (
         <div style={{ position: "fixed", inset: 0, zIndex: 1200, background: "rgba(0,0,0,.42)", display: "grid", placeItems: "center", padding: 20 }} onMouseDown={() => setShowSecureSignIn(false)}>
@@ -702,6 +876,7 @@ export function ClientGallery() {
           </div>
           <div style={{ position: "absolute", bottom: 22, display: "flex", alignItems: "center", gap: 9 }}>
             {activeSelectionRequest ? <button type="button" disabled={selectionBusy || activeSelection?.status === "submitted"} onClick={() => updateSelection(displayImages[lightboxIndex].assetId, !selectedAssetIds.has(displayImages[lightboxIndex].assetId))} className="rounded-full bg-white px-4 py-2 inline-flex items-center gap-2 text-sm disabled:opacity-50"><Check className="h-4 w-4" /> {selectedAssetIds.has(displayImages[lightboxIndex].assetId) ? "Selected" : "Select"}</button> : null}
+            {store?.enabled ? <button type="button" onClick={() => { setLightboxIndex(null); openStoreForAsset(displayImages[lightboxIndex].assetId); }} className="rounded-full bg-white px-4 py-2 inline-flex items-center gap-2 text-sm"><ShoppingBag className="h-4 w-4" /> Order print</button> : null}
             <DownloadControl enabled={payload.allowDownloads && displayImages[lightboxIndex].hasOriginal} busy={downloading.has(displayImages[lightboxIndex].assetId)} onClick={() => downloadOriginal(displayImages[lightboxIndex])} />
             {payload.allowFavourites ? <button onClick={() => toggleFavourite(displayImages[lightboxIndex].assetId)} className="rounded-full bg-white px-4 py-2 inline-flex items-center gap-2 text-sm"><Heart className="h-4 w-4" fill={favourites.has(displayImages[lightboxIndex].assetId) ? "currentColor" : "none"} /> Favourite</button> : null}
           </div>

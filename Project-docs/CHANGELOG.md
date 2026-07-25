@@ -1,5 +1,16 @@
 # MKB Intelligence — Changelog
 
+## v1.6.0 — Print Store Foundation
+- Added migration 020 and workspace-owned catalogue, variant, price-list, cart, order and payment-event tables.
+- Added Admin → Print Store with catalogue editing, sizes/variants, lab mapping fields, price lists, studio costs/markup and order review.
+- Added a Print Store tab to each Client Gallery for price-list assignment, minimum order, crop and photographer-approval settings.
+- Added private client-gallery product browsing, per-photo ordering, persistent carts, quantity controls and non-destructive crop coordinates.
+- Added server-authoritative price and gallery-membership validation before order creation.
+- Added batched order creation so the order header, line snapshots and cart conversion are committed together.
+- Added immutable order-line product, sell-price, studio-cost, crop and lab-mapping snapshots, plus status workflow and payment references/events.
+- Added a provider-neutral foundation only: no live card charge or professional-lab submission is performed in v1.6.0.
+- Schema advances to 20.
+
 ## v1.5.9 — Compact Venue Location Selector
 - Replaced the large county/region/destination checkbox lists in Venue Management with one grouped location dropdown.
 - Excluded already selected locations from the dropdown to prevent duplicate assignments.

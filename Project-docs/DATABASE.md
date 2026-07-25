@@ -210,3 +210,30 @@ Adds:
 - `asset_capture_metadata`
 
 `client_gallery_display_settings.sort_mode` controls Custom / Capture time / Filename presentation. Custom order continues to use existing relationship `sort_order` fields. `asset_capture_metadata` stores EXIF or file-time data independently from filenames and asset identity.
+
+
+## Schema version 20
+Migration: `020_print_store_foundation.sql`
+
+Adds:
+- `commerce_products`
+- `commerce_product_variants`
+- `commerce_price_lists`
+- `commerce_price_list_items`
+- `client_gallery_store_settings`
+- `commerce_carts`
+- `commerce_cart_items`
+- `commerce_orders`
+- `commerce_order_items`
+- `commerce_payment_events`
+
+Ownership and identity rules:
+- products, price lists, carts and orders are workspace-owned;
+- gallery store settings belong to one existing `client_galleries.id`;
+- cart/order image choices reference canonical `assets.id`, never filenames or duplicate files;
+- crop state is stored as normalised non-destructive JSON coordinates;
+- order items snapshot product name, variant, SKU, quantity, unit price, studio cost, crop and lab mapping so later catalogue, pricing or connector edits do not rewrite historical orders;
+- payment events are provider-neutral and support idempotent provider event IDs;
+- lab connector/product/reference fields are integration boundaries only and do not imply a live lab submission.
+
+Migration 020 does not copy, rename or delete any R2 object. Existing Client Galleries receive disabled default store settings.

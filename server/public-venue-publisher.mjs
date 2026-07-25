@@ -16,18 +16,6 @@ function titleFromSlug(value) {
     .join(" ");
 }
 
-function stringList(value) {
-  return Array.isArray(value)
-    ? [
-        ...new Set(
-          value
-            .map(text)
-            .filter(Boolean),
-        ),
-      ]
-    : [];
-}
-
 function inferCountry(county) {
   const value = text(county).toLowerCase();
 
@@ -52,18 +40,17 @@ function inferCountry(county) {
 }
 
 function publicImage(item, venue) {
-  const moments = stringList(item?.moments);
-  const tags = stringList(item?.tags);
-  const aiTags = stringList(item?.aiTags);
+  const moments = Array.isArray(item?.moments)
+    ? item.moments.map(text).filter(Boolean)
+    : [];
+
+  const tags = Array.isArray(item?.tags)
+    ? item.tags.map(text).filter(Boolean)
+    : [];
 
   const momentLabel =
     text(item?.source?.category) ||
     titleFromSlug(moments[0]);
-
-  const fallbackAlt =
-    `${text(venue?.name)} wedding photography${
-      momentLabel ? ` – ${momentLabel}` : ""
-    }`;
 
   return {
     assetId: text(item?.assetId),
@@ -74,11 +61,11 @@ function publicImage(item, venue) {
     rating: Number(item?.rating || 0),
     moments,
     tags,
-    aiTags,
     thumbSrc: text(item?.thumbSrc),
     fullSrc: text(item?.fullSrc),
-    alt: text(item?.aiAlt) || fallbackAlt,
-    caption: text(item?.aiCaption),
+    alt: `${text(venue?.name)} wedding photography${
+      momentLabel ? ` – ${momentLabel}` : ""
+    }`,
   };
 }
 
@@ -267,10 +254,6 @@ export function createPublicVenuePublisher({
             venue.gallery.heroAssetId,
           coverThumb: hero?.thumbSrc || "",
           coverFull: hero?.fullSrc || "",
-          coverAlt:
-            hero?.alt ||
-            `${venue.name} wedding photography`,
-          coverCaption: hero?.caption || "",
         };
       }),
     };
