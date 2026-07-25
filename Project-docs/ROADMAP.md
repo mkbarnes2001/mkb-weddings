@@ -43,6 +43,13 @@ Completed and in production:
 - Copy filenames and CSV export for Lightroom/manual workflows
 - Canonical asset references only; no duplicate image storage
 
+## Completed — Client Gallery Workspace Refinement
+- Persistent workspace navigation, albums, client activity, access and branding
+- Compact photo menus and ShootProof-style card treatment
+- Custom, capture-time and filename ordering
+- Drag-and-drop All Photos and album sequences
+- EXIF/file-time metadata for future uploads with deterministic legacy fallback
+
 ## Next — Print Store Foundation
 - Workspace product catalogue and price lists
 - Print sizes, products and studio markup

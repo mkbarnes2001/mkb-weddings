@@ -1,7 +1,14 @@
 # Next Steps
 
 ## Current baseline
-v1.5.5 completes the Client Gallery workspace consolidation with compact photo action menus and per-gallery client-facing branding. Schema version is 18.
+v1.5.6 completes the Client Gallery photo-card and ordering refinement. Schema version is 19.
+
+## v1.5.6 validation
+1. Run migration 019 and confirm both ordering tables exist before deployment.
+2. Confirm all photo controls stay on one row at normal desktop widths.
+3. Test Filename and Capture time ordering in Admin and the client gallery.
+4. Switch to Custom, drag images in All Photos and an album, then refresh both Admin and client views.
+5. Upload a JPEG with EXIF capture time and confirm it sorts correctly.
 
 ## v1.5.5 validation
 1. Run migration 018 and confirm `client_gallery_branding` exists before setting schema version 18.

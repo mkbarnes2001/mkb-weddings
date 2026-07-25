@@ -99,6 +99,10 @@ export async function createPrivateOriginalUpload(
   const width = number(input?.width);
   const height = number(input?.height);
   const fingerprint = text(input?.fingerprint).slice(0, 240);
+  const capturedAtInput = text(input?.capturedAt).slice(0, 40);
+  const capturedAt = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(capturedAtInput) ? capturedAtInput : '';
+  const captureSourceInput = text(input?.captureSource);
+  const captureSource = captureSourceInput === 'exif' || captureSourceInput === 'file_modified' ? captureSourceInput : 'created_at_fallback';
 
   if (!originalFilename) throw new Error("Original filename is required.");
   if (mimeType !== "image/jpeg") throw new Error("Private original upload currently supports full-resolution JPEG files only.");
@@ -163,6 +167,14 @@ export async function createPrivateOriginalUpload(
           access_level, status, created_at, updated_at
         ) VALUES (?, 'original', ?, '', 'image/jpeg', ?, ?, ?, 'private', 'processing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `).bind(assetId, privateStorageKey, width || null, height || null, fileSize),
+      db.prepare(`
+        INSERT INTO asset_capture_metadata (asset_id, captured_at, capture_source, updated_at)
+        VALUES (?, COALESCE(NULLIF(?, ''), STRFTIME('%Y-%m-%dT%H:%M:%S', 'now')), ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(asset_id) DO UPDATE SET
+          captured_at = excluded.captured_at,
+          capture_source = excluded.capture_source,
+          updated_at = CURRENT_TIMESTAMP
+      `).bind(assetId, capturedAt, captureSource),
       db.prepare(`
         INSERT INTO client_gallery_assets (gallery_id, asset_id, sort_order, hidden, created_at)
         VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP)

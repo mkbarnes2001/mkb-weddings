@@ -14,6 +14,88 @@ function canvasBlob(canvas: HTMLCanvasElement, quality: number) {
   });
 }
 
+
+function normaliseExifDate(value: string) {
+  const match = value.trim().match(/^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
+  return match ? `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}` : "";
+}
+
+async function readCaptureMetadata(file: File) {
+  const fallback = file.lastModified > 0 ? new Date(file.lastModified).toISOString() : "";
+  try {
+    const buffer = await file.slice(0, Math.min(file.size, 1024 * 1024)).arrayBuffer();
+    const view = new DataView(buffer);
+    if (view.byteLength < 4 || view.getUint16(0, false) !== 0xffd8) {
+      return { capturedAt: fallback, captureSource: fallback ? "file_modified" : "" };
+    }
+
+    let offset = 2;
+    while (offset + 4 <= view.byteLength) {
+      if (view.getUint8(offset) !== 0xff) { offset += 1; continue; }
+      const marker = view.getUint8(offset + 1);
+      if (marker === 0xd9 || marker === 0xda) break;
+      const length = view.getUint16(offset + 2, false);
+      if (length < 2 || offset + 2 + length > view.byteLength) break;
+      if (marker === 0xe1) {
+        const payload = offset + 4;
+        if (payload + 6 <= view.byteLength &&
+          view.getUint8(payload) === 0x45 && view.getUint8(payload + 1) === 0x78 &&
+          view.getUint8(payload + 2) === 0x69 && view.getUint8(payload + 3) === 0x66 &&
+          view.getUint8(payload + 4) === 0 && view.getUint8(payload + 5) === 0) {
+          const tiff = payload + 6;
+          if (tiff + 8 > view.byteLength) break;
+          const byteOrder = String.fromCharCode(view.getUint8(tiff), view.getUint8(tiff + 1));
+          const little = byteOrder === "II";
+          if (!little && byteOrder !== "MM") break;
+          const u16 = (at: number) => view.getUint16(at, little);
+          const u32 = (at: number) => view.getUint32(at, little);
+          if (u16(tiff + 2) !== 42) break;
+
+          const readAscii = (entry: number, count: number) => {
+            const dataOffset = count <= 4 ? entry + 8 : tiff + u32(entry + 8);
+            if (dataOffset < 0 || dataOffset + count > view.byteLength) return "";
+            let value = "";
+            for (let i = 0; i < count; i += 1) {
+              const code = view.getUint8(dataOffset + i);
+              if (!code) break;
+              value += String.fromCharCode(code);
+            }
+            return value;
+          };
+
+          const readIfd = (relativeOffset: number) => {
+            const found: Record<number, string | number> = {};
+            const ifd = tiff + relativeOffset;
+            if (ifd < 0 || ifd + 2 > view.byteLength) return found;
+            const count = u16(ifd);
+            for (let i = 0; i < count; i += 1) {
+              const entry = ifd + 2 + i * 12;
+              if (entry + 12 > view.byteLength) break;
+              const tag = u16(entry);
+              const type = u16(entry + 2);
+              const valueCount = u32(entry + 4);
+              if (type === 2 && valueCount > 0 && valueCount < 256) found[tag] = readAscii(entry, valueCount);
+              else if (type === 4 && valueCount === 1) found[tag] = u32(entry + 8);
+            }
+            return found;
+          };
+
+          const ifd0 = readIfd(u32(tiff + 4));
+          const exifOffset = typeof ifd0[0x8769] === "number" ? ifd0[0x8769] as number : 0;
+          const exifIfd = exifOffset ? readIfd(exifOffset) : {};
+          const raw = String(exifIfd[0x9003] || exifIfd[0x9004] || ifd0[0x0132] || "");
+          const capturedAt = normaliseExifDate(raw);
+          if (capturedAt) return { capturedAt, captureSource: "exif" };
+        }
+      }
+      offset += 2 + length;
+    }
+  } catch {
+    // Fall back to the file modification timestamp when EXIF is unavailable.
+  }
+  return { capturedAt: fallback, captureSource: fallback ? "file_modified" : "" };
+}
+
 async function decodeImage(file: File) {
   if (typeof createImageBitmap === "function") {
     try {
@@ -95,7 +177,7 @@ export async function uploadPrivateOriginal(input: {
 }) {
   const { galleryId, file, onProgress = () => {} } = input;
   onProgress(2, "Preparing previews");
-  const prepared = await preparePrivateOriginal(file);
+  const [prepared, capture] = await Promise.all([preparePrivateOriginal(file), readCaptureMetadata(file)]);
   const fingerprint = `${file.name}:${file.size}:${file.lastModified}`;
   const created = await AdminApiService.createPrivateOriginalUpload(galleryId, {
     filename: file.name,
@@ -104,6 +186,8 @@ export async function uploadPrivateOriginal(input: {
     width: prepared.width,
     height: prepared.height,
     fingerprint,
+    capturedAt: capture.capturedAt,
+    captureSource: capture.captureSource,
   });
   const session = created.session;
   const partSize = session.partSize;

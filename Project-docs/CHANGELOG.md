@@ -1,5 +1,15 @@
 # MKB Intelligence — Changelog
 
+## v1.5.6 — Client Gallery Card & Photo Ordering Refinement
+- Simplified Client Gallery photo cards and removed persistent storage-status text.
+- Moved filenames into a discreet compact footer with the photo options icon.
+- Added persistent Custom / Capture time / Filename ordering.
+- Added drag-and-drop custom ordering for All Photos and album views.
+- Added EXIF/file-time capture metadata for future private uploads with safe fallback for existing assets.
+- Consolidated import, library, ordering, search, selection and upload controls into one row.
+- Adds migration 019 and advances schema version to 19.
+
+
 ## v1.1.2 — ShootProof-style Client Gallery Hero
 - Replaced the client-gallery hero serif heading with a compact geometric sans-serif treatment using Montserrat.
 - Matched the reference more closely with uppercase lettering, medium weight, wider tracking, centred positioning, divider line and photograph count.

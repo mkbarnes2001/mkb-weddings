@@ -558,7 +558,7 @@ export class AdminApiService {
 
   static async createPrivateOriginalUpload(
     galleryId: string,
-    input: { filename: string; mimeType: string; fileSize: number; width: number; height: number; fingerprint: string },
+    input: { filename: string; mimeType: string; fileSize: number; width: number; height: number; fingerprint: string; capturedAt?: string; captureSource?: string },
   ) {
     return request<{ ok: true; resumed: boolean; session: PrivateOriginalUploadSession }>(
       `/api/client-galleries/${encodeURIComponent(galleryId)}/uploads`,

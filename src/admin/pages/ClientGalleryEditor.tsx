@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   Activity,
   AlertCircle,
+  ArrowUpDown,
   ArrowLeft,
   Check,
   CheckCircle2,
@@ -13,6 +14,7 @@ import {
   Eye,
   EyeOff,
   FolderPlus,
+  GripVertical,
   Heart,
   ImagePlus,
   Images,
@@ -103,6 +105,8 @@ export function ClientGalleryEditor() {
   const [newAlbumName, setNewAlbumName] = useState("");
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
   const [bulkAlbumId, setBulkAlbumId] = useState("");
+  const [draggedAssetId, setDraggedAssetId] = useState("");
+  const [dragOverAssetId, setDragOverAssetId] = useState("");
   const [contactDraft, setContactDraft] = useState({ email: "", displayName: "", role: "client", allowOriginalDownloads: true });
   const [selectionDraft, setSelectionDraft] = useState({ name: "Album Selection", instructions: "Choose the photographs you would like included.", minImages: 0, maxImages: 0 });
 
@@ -119,7 +123,7 @@ export function ClientGalleryEditor() {
   };
 
   useEffect(() => { load(); }, [id]);
-  useEffect(() => { setSelectedAssets(new Set()); setOpenPhotoMenuId(""); }, [activeAlbumId, activeTab]);
+  useEffect(() => { setSelectedAssets(new Set()); setOpenPhotoMenuId(""); setDraggedAssetId(""); setDragOverAssetId(""); }, [activeAlbumId, activeTab]);
   useEffect(() => {
     const close = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
@@ -141,12 +145,25 @@ export function ClientGalleryEditor() {
   const activeAlbum = useMemo(() => activeAlbums.find((album) => album.id === activeAlbumId) || null, [activeAlbums, activeAlbumId]);
   const visiblePhotos = useMemo(() => {
     const query = photoSearch.trim().toLowerCase();
-    return (detail?.assets || []).filter((asset) => {
+    const photos = (detail?.assets || []).filter((asset) => {
       if (activeAlbumId && !asset.albumIds.includes(activeAlbumId)) return false;
       if (query && !asset.filename.toLowerCase().includes(query)) return false;
       return true;
     });
-  }, [detail?.assets, activeAlbumId, photoSearch]);
+    const sortMode = detail?.gallery.sortMode || "custom";
+    return photos.slice().sort((left, right) => {
+      if (sortMode === "filename") {
+        return left.filename.localeCompare(right.filename, undefined, { numeric: true, sensitivity: "base" });
+      }
+      if (sortMode === "capture_time") {
+        return String(left.capturedAt || "").localeCompare(String(right.capturedAt || ""))
+          || left.filename.localeCompare(right.filename, undefined, { numeric: true, sensitivity: "base" });
+      }
+      const leftOrder = activeAlbumId ? left.albumSortOrders[activeAlbumId] ?? Number.MAX_SAFE_INTEGER : left.sortOrder;
+      const rightOrder = activeAlbumId ? right.albumSortOrders[activeAlbumId] ?? Number.MAX_SAFE_INTEGER : right.sortOrder;
+      return leftOrder - rightOrder || left.filename.localeCompare(right.filename, undefined, { numeric: true, sensitivity: "base" });
+    });
+  }, [detail?.assets, detail?.gallery.sortMode, activeAlbumId, photoSearch]);
 
   const setTab = (tab: WorkspaceTab) => {
     const next = new URLSearchParams(searchParams);
@@ -334,6 +351,27 @@ export function ClientGalleryEditor() {
     await mutateAlbum({ action: "removeAssets", albumId: activeAlbumId, assetIds: Array.from(selectedAssets) }, `${selectedAssets.size} image${selectedAssets.size === 1 ? "" : "s"} removed from album.`); setSelectedAssets(new Set());
   };
 
+  const setPhotoSortMode = async (sortMode: "custom" | "capture_time" | "filename") => {
+    await mutateAssets({ action: "setSortMode", sortMode }, sortMode === "custom" ? "Custom photo order enabled." : sortMode === "filename" ? "Photos ordered by filename." : "Photos ordered by capture time.");
+  };
+
+  const reorderVisiblePhotos = async (targetAssetId: string) => {
+    const sourceAssetId = draggedAssetId;
+    setDraggedAssetId("");
+    setDragOverAssetId("");
+    if (!sourceAssetId || sourceAssetId === targetAssetId || detail?.gallery.sortMode !== "custom" || photoSearch.trim()) return;
+    const assetIds = visiblePhotos.map((asset) => asset.assetId);
+    const fromIndex = assetIds.indexOf(sourceAssetId);
+    const toIndex = assetIds.indexOf(targetAssetId);
+    if (fromIndex < 0 || toIndex < 0) return;
+    assetIds.splice(toIndex, 0, assetIds.splice(fromIndex, 1)[0]);
+    if (activeAlbumId) {
+      await mutateAlbum({ action: "reorderAssets", albumId: activeAlbumId, assetIds }, "Album photo order updated.");
+    } else {
+      await mutateAssets({ action: "reorder", assetIds }, "Gallery photo order updated.");
+    }
+  };
+
   if (!detail) return <div className="p-8">{error || "Loading client gallery…"}</div>;
 
   const gallery = detail.gallery;
@@ -398,27 +436,66 @@ export function ClientGalleryEditor() {
 
           {activeTab === "photos" ? <section className="mt-5">
             <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <div><h3 className="text-xl font-semibold">{activeAlbum?.name || "All Photos"}</h3><p className="mt-1 text-xs text-neutral-500">{visiblePhotos.length} photo{visiblePhotos.length === 1 ? "" : "s"}{activeAlbum ? " in this album" : ""}</p></div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="rounded-lg border border-black/15 bg-white px-3 py-2 flex items-center gap-2"><Search className="h-4 w-4 text-neutral-400" /><input value={photoSearch} onChange={(e) => setPhotoSearch(e.target.value)} placeholder="Search photos" className="outline-none text-sm" style={{ width: 160 }} /></div>
-                  <button onClick={selectAllVisible} className="rounded-lg border border-black/15 px-3 py-2 text-sm inline-flex items-center gap-2"><Check className="h-4 w-4" /> {selectedAssets.size === visiblePhotos.length && visiblePhotos.length ? "Clear" : "Select all"}</button>
-                  <label className="rounded-lg bg-black text-white px-3 py-2 text-sm inline-flex items-center gap-2 cursor-pointer"><UploadCloud className="h-4 w-4" /> Upload photos<input type="file" multiple accept="image/jpeg,.jpg,.jpeg" onChange={(event) => { addOriginalFiles(event.target.files); event.currentTarget.value = ""; }} style={{ display: "none" }} /></label>
+              <div className="flex items-end justify-between gap-3">
+                <div style={{ minWidth: 130 }}><h3 className="text-xl font-semibold">{activeAlbum?.name || "All Photos"}</h3><p className="mt-1 text-xs text-neutral-500">{visiblePhotos.length} photo{visiblePhotos.length === 1 ? "" : "s"}{activeAlbum ? " in this album" : ""}</p></div>
+                <div className="flex items-center gap-1.5" style={{ flexWrap: "nowrap", whiteSpace: "nowrap" }}>
+                  <button disabled={busy || !draft.weddingSlug} title="Import images already linked to this wedding" onClick={() => mutateAssets({ action: "importWedding" }, "Wedding assets imported.")} className="rounded-lg border border-black/15 px-2.5 py-2 text-xs inline-flex items-center gap-1.5 disabled:opacity-40"><ImagePlus className="h-3.5 w-3.5" /> Import</button>
+                  <details className="relative" style={{ position: "relative" }}><summary title="Add from Asset Library" className="list-none cursor-pointer rounded-lg border border-black/15 px-2.5 py-2 text-xs inline-flex items-center gap-1.5"><Images className="h-3.5 w-3.5" /> Library</summary><div className="rounded-xl border border-black/10 bg-white p-3 shadow-lg" style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", width: "min(720px, 72vw)", zIndex: 60 }}><div className="flex gap-2"><input value={assetSearch} onChange={(e) => setAssetSearch(e.target.value)} placeholder="Search filename, caption or alt…" className="min-w-0 flex-1 rounded-lg border border-black/15 px-3 py-2 text-sm" /><button onClick={searchAssets} disabled={busy} className="rounded-lg border border-black px-4 py-2 text-sm">Search</button></div>{assetResults.length ? <div className="mt-3" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))", gap: 8 }}>{assetResults.map((asset) => <button key={asset.id} onClick={() => mutateAssets({ action: "add", assetIds: [asset.id] }, "Image added.")} className="text-left rounded-lg border border-black/10 overflow-hidden"><img src={asset.files.thumb || asset.files.web} alt="" style={{ width: "100%", height: 80, objectFit: "cover" }} /><span className="block p-2 text-[10px] truncate">+ {asset.filename}</span></button>)}</div> : null}</div></details>
+                  <label className="rounded-lg border border-black/15 bg-white px-2 py-2 flex items-center gap-1.5" title="Choose gallery photo order"><ArrowUpDown className="h-3.5 w-3.5 text-neutral-400" /><select value={gallery.sortMode} onChange={(event) => setPhotoSortMode(event.target.value as "custom" | "capture_time" | "filename")} disabled={busy} className="bg-transparent outline-none text-xs"><option value="custom">Custom order</option><option value="capture_time">Capture time</option><option value="filename">Filename</option></select></label>
+                  <div className="rounded-lg border border-black/15 bg-white px-2.5 py-2 flex items-center gap-1.5"><Search className="h-3.5 w-3.5 text-neutral-400" /><input value={photoSearch} onChange={(e) => setPhotoSearch(e.target.value)} placeholder="Search photos" className="outline-none text-xs" style={{ width: 118 }} /></div>
+                  <button onClick={selectAllVisible} className="rounded-lg border border-black/15 px-2.5 py-2 text-xs inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5" /> {selectedAssets.size === visiblePhotos.length && visiblePhotos.length ? "Clear" : "Select all"}</button>
+                  <label className="rounded-lg bg-black text-white px-2.5 py-2 text-xs inline-flex items-center gap-1.5 cursor-pointer"><UploadCloud className="h-3.5 w-3.5" /> Upload<input type="file" multiple accept="image/jpeg,.jpg,.jpeg" onChange={(event) => { addOriginalFiles(event.target.files); event.currentTarget.value = ""; }} style={{ display: "none" }} /></label>
                 </div>
               </div>
+              {gallery.sortMode === "custom" ? <p className="mt-3 text-[11px] text-neutral-400">Drag photographs using the handle to set a custom order{photoSearch.trim() ? ". Clear search before dragging." : "."}</p> : gallery.sortMode === "capture_time" ? <p className="mt-3 text-[11px] text-neutral-400">Capture-time order uses EXIF when available; older images fall back to their import time.</p> : null}
 
               {selectedAssets.size ? <div className="mt-4 rounded-xl border border-black/10 bg-neutral-50 p-3 flex items-center justify-between gap-3 flex-wrap"><strong className="text-sm">{selectedAssets.size} selected</strong><div className="flex items-center gap-2 flex-wrap"><select value={bulkAlbumId} onChange={(e) => setBulkAlbumId(e.target.value)} className="rounded-lg border border-black/15 bg-white px-3 py-2 text-sm"><option value="">Choose album…</option>{activeAlbums.map((album) => <option key={album.id} value={album.id}>{album.name}</option>)}</select><button disabled={!bulkAlbumId || busy} onClick={addSelectedToAlbum} className="rounded-lg border border-black/15 bg-white px-3 py-2 text-sm inline-flex items-center gap-2 disabled:opacity-40"><FolderPlus className="h-4 w-4" /> Add to album</button>{activeAlbumId ? <button disabled={busy} onClick={removeSelectedFromAlbum} className="rounded-lg border border-black/15 bg-white px-3 py-2 text-sm">Remove from this album</button> : null}<button onClick={() => setSelectedAssets(new Set())} className="rounded-lg p-2"><X className="h-4 w-4" /></button></div></div> : null}
 
               {uploads.length ? <div className="mt-4 rounded-xl border border-black/10 p-3"><div className="space-y-2">{uploads.map((item) => <div key={item.id} className="rounded-lg bg-neutral-50 p-3" style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 80px 36px", gap: 10, alignItems: "center" }}><div className="min-w-0"><div className="flex items-center gap-2">{item.status === "done" ? <CheckCircle2 className="h-4 w-4 text-green-700" /> : item.status === "error" ? <AlertCircle className="h-4 w-4 text-red-700" /> : <UploadCloud className="h-4 w-4 text-neutral-500" />}<span className="text-xs truncate">{item.file.name}</span></div><div className="mt-2" style={{ height: 4, borderRadius: 99, background: "#ddd" }}><div style={{ width: `${item.progress}%`, height: "100%", background: item.status === "error" ? "#b91c1c" : "#111", borderRadius: 99 }} /></div><p className="mt-1 text-[10px] text-neutral-500">{item.error || item.stage}</p></div><span className="text-xs text-right">{item.progress}%</span>{item.status === "error" ? <button onClick={() => updateUpload(item.id, { status: "queued", progress: 0, stage: "Ready", error: "" })}><RefreshCw className="h-4 w-4" /></button> : <button disabled={item.status === "uploading" || uploading} onClick={() => setUploads((current) => current.filter((upload) => upload.id !== item.id))}><X className="h-4 w-4" /></button>}</div>)}</div><div className="mt-3 flex justify-end"><button disabled={uploading || queuedCount === 0} onClick={uploadQueuedOriginals} className="rounded-lg bg-black text-white px-4 py-2 text-sm disabled:opacity-40">{uploading ? "Uploading…" : `Upload ${queuedCount} original${queuedCount === 1 ? "" : "s"}`}</button></div></div> : null}
 
-              <div className="mt-4 flex items-center gap-2 flex-wrap"><button disabled={busy || !draft.weddingSlug} onClick={() => mutateAssets({ action: "importWedding" }, "Wedding assets imported.")} className="rounded-lg border border-black/15 px-3 py-2 text-sm inline-flex items-center gap-2 disabled:opacity-40"><ImagePlus className="h-4 w-4" /> Import wedding assets</button><details className="relative"><summary className="list-none cursor-pointer rounded-lg border border-black/15 px-3 py-2 text-sm">Add from Asset Library</summary><div className="mt-2 rounded-xl border border-black/10 bg-white p-3 shadow-lg" style={{ width: "min(720px, 75vw)" }}><div className="flex gap-2"><input value={assetSearch} onChange={(e) => setAssetSearch(e.target.value)} placeholder="Search filename, caption or alt…" className="min-w-0 flex-1 rounded-lg border border-black/15 px-3 py-2 text-sm" /><button onClick={searchAssets} disabled={busy} className="rounded-lg border border-black px-4 py-2 text-sm">Search</button></div>{assetResults.length ? <div className="mt-3" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))", gap: 8 }}>{assetResults.map((asset) => <button key={asset.id} onClick={() => mutateAssets({ action: "add", assetIds: [asset.id] }, "Image added.")} className="text-left rounded-lg border border-black/10 overflow-hidden"><img src={asset.files.thumb || asset.files.web} alt="" style={{ width: "100%", height: 80, objectFit: "cover" }} /><span className="block p-2 text-[10px] truncate">+ {asset.filename}</span></button>)}</div> : null}</div></details></div>
             </div>
 
             <div className="mt-4" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))", gap: 12 }}>
-              {visiblePhotos.map((asset) => <article key={asset.assetId} className="rounded-xl border border-black/10 bg-white" style={{ position: "relative" }}>
-                <div style={{ aspectRatio: "4/3", position: "relative", background: "#eee", overflow: "hidden", borderRadius: "12px 12px 0 0" }}><img src={asset.thumbSrc || asset.webSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: asset.hidden ? .42 : 1 }} /><button aria-label={selectedAssets.has(asset.assetId) ? "Deselect photo" : "Select photo"} onClick={() => toggleSelected(asset.assetId)} style={{ position: "absolute", top: 9, right: 9, width: 28, height: 28, borderRadius: 999, display: "grid", placeItems: "center", border: selectedAssets.has(asset.assetId) ? "1px solid #111" : "1px solid rgba(0,0,0,.25)", background: selectedAssets.has(asset.assetId) ? "#111" : "rgba(255,255,255,.94)", color: selectedAssets.has(asset.assetId) ? "#fff" : "#111" }}>{selectedAssets.has(asset.assetId) ? <Check className="h-4 w-4" /> : null}</button>{gallery.coverAssetId === asset.assetId ? <span className="absolute top-2 left-2 rounded-full bg-black text-white px-2 py-1 text-[9px] uppercase">Cover</span> : null}</div>
-                <div className="p-3 flex items-center justify-between gap-2"><div className="min-w-0"><p className="text-xs truncate" title={asset.filename}>{asset.filename}</p><p className="mt-1 text-[9px] uppercase tracking-[.08em] text-neutral-400">{asset.hidden ? "Hidden" : asset.hasOriginal ? "Original stored" : "Preview only"}</p></div><div data-photo-menu style={{ position: "relative" }}><button type="button" aria-label={`Open options for ${asset.filename}`} title="Photo options" onClick={(event) => { event.stopPropagation(); setPhotoMenuAlbumId(""); setOpenPhotoMenuId((current) => current === asset.assetId ? "" : asset.assetId); }} className="rounded-lg p-2 hover:bg-neutral-100"><MoreVertical className="h-4 w-4" /></button>{openPhotoMenuId === asset.assetId ? <div className="rounded-xl border border-black/10 bg-white p-1 shadow-xl" style={{ position: "absolute", right: 0, bottom: "calc(100% + 6px)", width: 220, zIndex: 50 }}><button type="button" onClick={() => { setPreviewAssetId(asset.assetId); setOpenPhotoMenuId(""); }} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50"><Eye className="h-4 w-4" /> View photo</button>{asset.hasOriginal ? <a href={AdminApiService.clientGalleryOriginalDownloadUrl(id, asset.assetId)} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50"><Download className="h-4 w-4" /> Download original</a> : <span className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 text-neutral-400"><Download className="h-4 w-4" /> Original unavailable</span>}<button type="button" disabled={gallery.coverAssetId === asset.assetId} onClick={() => runPhotoAction({ action: "setCover", assetId: asset.assetId }, "Cover updated.")} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50 disabled:text-neutral-400"><Star className="h-4 w-4" /> {gallery.coverAssetId === asset.assetId ? "Current cover" : "Set as gallery cover"}</button><button type="button" onClick={() => runPhotoAction({ action: "setHidden", assetId: asset.assetId, hidden: !asset.hidden }, asset.hidden ? "Image shown." : "Image hidden.")} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50">{asset.hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />} {asset.hidden ? "Show in client gallery" : "Hide from client gallery"}</button>{activeAlbums.length ? <div className="mt-1 border-t border-black/5 p-2"><label className="text-[10px] uppercase tracking-[.1em] text-neutral-400">Add to album</label><div className="mt-1 flex gap-1"><select value={photoMenuAlbumId} onChange={(event) => setPhotoMenuAlbumId(event.target.value)} className="min-w-0 flex-1 rounded-lg border border-black/15 bg-white px-2 py-1.5 text-xs"><option value="">Choose…</option>{activeAlbums.map((album) => <option key={album.id} value={album.id}>{album.name}</option>)}</select><button type="button" disabled={!photoMenuAlbumId} onClick={() => addPhotoToAlbum(asset.assetId)} className="rounded-lg border border-black/15 p-2 disabled:opacity-30"><FolderPlus className="h-3.5 w-3.5" /></button></div></div> : null}<div className="mt-1 border-t border-black/5 pt-1"><button type="button" onClick={() => { if (window.confirm(`Remove ${asset.filename} from this client gallery? The canonical Asset Library image and private original will be preserved.`)) runPhotoAction({ action: "remove", assetId: asset.assetId }, "Image removed."); }} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 text-red-700 hover:bg-red-50"><Trash2 className="h-4 w-4" /> Remove from gallery</button></div></div> : null}</div></div>
-              </article>)}
+              {visiblePhotos.map((asset) => {
+                const canDrag = gallery.sortMode === "custom" && !photoSearch.trim();
+                const isDragging = draggedAssetId === asset.assetId;
+                const isDragTarget = dragOverAssetId === asset.assetId && draggedAssetId && draggedAssetId !== asset.assetId;
+                return <article
+                  key={asset.assetId}
+                  draggable={canDrag}
+                  onDragStart={(event) => { if (!canDrag) return; setDraggedAssetId(asset.assetId); event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", asset.assetId); }}
+                  onDragOver={(event) => { if (!canDrag || !draggedAssetId) return; event.preventDefault(); event.dataTransfer.dropEffect = "move"; setDragOverAssetId(asset.assetId); }}
+                  onDragLeave={() => { if (dragOverAssetId === asset.assetId) setDragOverAssetId(""); }}
+                  onDrop={(event) => { event.preventDefault(); reorderVisiblePhotos(asset.assetId); }}
+                  onDragEnd={() => { setDraggedAssetId(""); setDragOverAssetId(""); }}
+                  className="rounded-xl bg-white"
+                  style={{ position: "relative", border: isDragTarget ? "2px solid #111" : "1px solid rgba(0,0,0,.10)", boxShadow: "0 1px 3px rgba(0,0,0,.06)", opacity: isDragging ? .48 : 1 }}
+                >
+                  <div style={{ aspectRatio: "4/3", position: "relative", background: "#eee", overflow: "hidden", borderRadius: "12px 12px 0 0" }}>
+                    <img src={asset.thumbSrc || asset.webSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: asset.hidden ? .42 : 1 }} />
+                    <button aria-label={selectedAssets.has(asset.assetId) ? "Deselect photo" : "Select photo"} onClick={() => toggleSelected(asset.assetId)} style={{ position: "absolute", top: 9, right: 9, width: 26, height: 26, borderRadius: 999, display: "grid", placeItems: "center", border: selectedAssets.has(asset.assetId) ? "1px solid #111" : "1px solid rgba(0,0,0,.25)", background: selectedAssets.has(asset.assetId) ? "#111" : "rgba(255,255,255,.94)", color: selectedAssets.has(asset.assetId) ? "#fff" : "#111" }}>{selectedAssets.has(asset.assetId) ? <Check className="h-3.5 w-3.5" /> : null}</button>
+                    {gallery.coverAssetId === asset.assetId ? <span className="absolute top-2 left-2 rounded-full bg-black text-white px-2 py-1 text-[9px] uppercase">Cover</span> : null}
+                    {asset.hidden ? <span title="Hidden from client gallery" className="absolute bottom-2 left-2 rounded-full bg-white/95 p-1.5 text-neutral-700"><EyeOff className="h-3.5 w-3.5" /></span> : null}
+                  </div>
+                  <div className="px-2.5 py-1.5 flex items-center justify-between gap-1.5">
+                    <p className="min-w-0 flex-1 truncate text-[9px] leading-4 text-neutral-500" title={asset.filename}>{asset.filename}</p>
+                    <div className="flex items-center gap-0.5">
+                      {canDrag ? <span title="Drag to reorder" aria-label="Drag to reorder" className="cursor-grab rounded-md p-1 text-neutral-400 active:cursor-grabbing"><GripVertical className="h-3.5 w-3.5" /></span> : null}
+                      <div data-photo-menu style={{ position: "relative" }}>
+                        <button type="button" aria-label={`Open options for ${asset.filename}`} title="Photo options" onClick={(event) => { event.stopPropagation(); setPhotoMenuAlbumId(""); setOpenPhotoMenuId((current) => current === asset.assetId ? "" : asset.assetId); }} className="rounded-md p-1.5 hover:bg-neutral-100"><MoreVertical className="h-3.5 w-3.5" /></button>
+                        {openPhotoMenuId === asset.assetId ? <div className="rounded-xl border border-black/10 bg-white p-1 shadow-xl" style={{ position: "absolute", right: 0, bottom: "calc(100% + 6px)", width: 220, zIndex: 50 }}>
+                          <button type="button" onClick={() => { setPreviewAssetId(asset.assetId); setOpenPhotoMenuId(""); }} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50"><Eye className="h-4 w-4" /> View photo</button>
+                          {asset.hasOriginal ? <a href={AdminApiService.clientGalleryOriginalDownloadUrl(id, asset.assetId)} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50"><Download className="h-4 w-4" /> Download original</a> : <span className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 text-neutral-400"><Download className="h-4 w-4" /> Original unavailable</span>}
+                          <button type="button" disabled={gallery.coverAssetId === asset.assetId} onClick={() => runPhotoAction({ action: "setCover", assetId: asset.assetId }, "Cover updated.")} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50 disabled:text-neutral-400"><Star className="h-4 w-4" /> {gallery.coverAssetId === asset.assetId ? "Current cover" : "Set as gallery cover"}</button>
+                          <button type="button" onClick={() => runPhotoAction({ action: "setHidden", assetId: asset.assetId, hidden: !asset.hidden }, asset.hidden ? "Image shown." : "Image hidden.")} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 hover:bg-neutral-50">{asset.hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />} {asset.hidden ? "Show in client gallery" : "Hide from client gallery"}</button>
+                          {activeAlbums.length ? <div className="mt-1 border-t border-black/5 p-2"><label className="text-[10px] uppercase tracking-[.1em] text-neutral-400">Add to album</label><div className="mt-1 flex gap-1"><select value={photoMenuAlbumId} onChange={(event) => setPhotoMenuAlbumId(event.target.value)} className="min-w-0 flex-1 rounded-lg border border-black/15 bg-white px-2 py-1.5 text-xs"><option value="">Choose…</option>{activeAlbums.map((album) => <option key={album.id} value={album.id}>{album.name}</option>)}</select><button type="button" disabled={!photoMenuAlbumId} onClick={() => addPhotoToAlbum(asset.assetId)} className="rounded-lg border border-black/15 p-2 disabled:opacity-30"><FolderPlus className="h-3.5 w-3.5" /></button></div></div> : null}
+                          <div className="mt-1 border-t border-black/5 pt-1"><button type="button" onClick={() => { if (window.confirm(`Remove ${asset.filename} from this client gallery? The canonical Asset Library image and private original will be preserved.`)) runPhotoAction({ action: "remove", assetId: asset.assetId }, "Image removed."); }} className="w-full rounded-lg px-3 py-2 text-left text-sm inline-flex items-center gap-2 text-red-700 hover:bg-red-50"><Trash2 className="h-4 w-4" /> Remove from gallery</button></div>
+                        </div> : null}
+                      </div>
+                    </div>
+                  </div>
+                </article>;
+              })}
             </div>
             {!visiblePhotos.length ? <div className="mt-4 rounded-2xl border border-dashed border-black/15 bg-white p-12 text-center text-sm text-neutral-500">{activeAlbum ? "This album is empty. Select photographs from All Photos and add them here." : "No photographs match this view."}</div> : null}
             {activeAlbum ? <div className="mt-5 text-right"><button onClick={() => mutateAlbum({ action: "archive", albumId: activeAlbum.id }, "Album archived.").then(() => setActiveAlbumId(""))} className="text-xs text-red-700 underline underline-offset-4">Archive this album</button></div> : null}

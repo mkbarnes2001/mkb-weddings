@@ -234,3 +234,11 @@ The workspace logo/accent remains the default. `client_gallery_branding` can ove
 
 Custom branding logos use the public `MKB_IMAGES` bucket because clients must be able to render them. They are stored separately from canonical wedding assets and never enter the Asset Library. Private originals continue to use `MKB_PRIVATE_ASSETS`. Replacing or resetting a managed custom logo removes the superseded R2 object where possible.
 
+
+
+## Client Gallery ordering — v1.5.6
+- `client_gallery_display_settings` stores the gallery-level presentation order: `custom`, `capture_time`, or `filename`.
+- `client_gallery_assets.sort_order` is the custom order for All Photos.
+- `client_gallery_album_assets.sort_order` is the custom order inside each album.
+- `asset_capture_metadata` stores capture timestamps separately from canonical `assets`, preserving the one-asset identity rule.
+- Future private uploads attempt EXIF DateTimeOriginal first and then use the source file modification timestamp. Existing assets use `assets.created_at` as a deterministic fallback.

@@ -1,4 +1,5 @@
 export type ClientGalleryStatus = "draft" | "live" | "archived";
+export type ClientGallerySortMode = "custom" | "capture_time" | "filename";
 
 export type ClientGalleryWeddingOption = {
   slug: string;
@@ -96,6 +97,7 @@ export type ClientGalleryRecord = {
   downloadCount: number;
   visitorCount: number;
   authorisedContactCount: number;
+  sortMode: ClientGallerySortMode;
   createdAt: string;
   updatedAt: string;
 };
@@ -142,7 +144,10 @@ export type ClientGalleryAsset = {
   sortOrder: number;
   hidden: boolean;
   hasOriginal: boolean;
+  capturedAt: string;
+  captureSource: string;
   albumIds: string[];
+  albumSortOrders: Record<string, number>;
 };
 
 

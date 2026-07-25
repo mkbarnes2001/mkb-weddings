@@ -40,6 +40,11 @@ function cleanStatus(value: unknown) {
   return status === "live" || status === "archived" ? status : "draft";
 }
 
+function cleanSortMode(value: unknown) {
+  const mode = text(value);
+  return mode === "capture_time" || mode === "filename" ? mode : "custom";
+}
+
 function cleanHexColor(value: unknown, fallback = "") {
   const raw = text(value).toLowerCase();
   if (/^#[0-9a-f]{6}$/.test(raw)) return raw;
@@ -168,6 +173,7 @@ function mapGallery(row: any) {
     downloadCount,
     visitorCount: number(row?.visitor_count),
     authorisedContactCount: number(row?.authorised_contact_count),
+    sortMode: cleanSortMode(row?.sort_mode),
     createdAt: text(row?.created_at),
     updatedAt: text(row?.updated_at),
   };
@@ -344,6 +350,7 @@ async function galleryBaseRow(db: D1Db, id: string, workspaceId: string) {
       COUNT(DISTINCT CASE WHEN cgc.status = 'active' THEN cgc.email_normalized END) AS authorised_contact_count,
       COALESCE(cgas.require_email, 0) AS require_email,
       COALESCE(cgas.allow_guest_downloads, 0) AS allow_guest_downloads,
+      COALESCE(cgds.sort_mode, 'custom') AS sort_mode,
       COALESCE(cover_thumb.url, '') AS cover_thumb,
       COALESCE(cover_web.url, '') AS cover_web
     FROM client_galleries cg
@@ -353,6 +360,7 @@ async function galleryBaseRow(db: D1Db, id: string, workspaceId: string) {
     LEFT JOIN client_identity_gallery_visitors cigv ON cigv.gallery_id = cgf.gallery_id AND cigv.visitor_key = cgf.visitor_key
     LEFT JOIN asset_download_events ade ON ade.gallery_id = cg.id
     LEFT JOIN client_gallery_access_settings cgas ON cgas.gallery_id = cg.id
+    LEFT JOIN client_gallery_display_settings cgds ON cgds.gallery_id = cg.id
     LEFT JOIN client_gallery_visitors cgv ON cgv.gallery_id = cg.id
     LEFT JOIN client_gallery_contacts cgc ON cgc.gallery_id = cg.id
     LEFT JOIN asset_files cover_thumb
@@ -402,6 +410,7 @@ export async function listClientGalleries(db: D1Db) {
         COUNT(DISTINCT CASE WHEN cgc.status = 'active' THEN cgc.email_normalized END) AS authorised_contact_count,
         COALESCE(cgas.require_email, 0) AS require_email,
         COALESCE(cgas.allow_guest_downloads, 0) AS allow_guest_downloads,
+        COALESCE(cgds.sort_mode, 'custom') AS sort_mode,
         COALESCE(cover_thumb.url, '') AS cover_thumb,
         COALESCE(cover_web.url, '') AS cover_web
       FROM client_galleries cg
@@ -411,6 +420,7 @@ export async function listClientGalleries(db: D1Db) {
       LEFT JOIN client_identity_gallery_visitors cigv ON cigv.gallery_id = cgf.gallery_id AND cigv.visitor_key = cgf.visitor_key
       LEFT JOIN asset_download_events ade ON ade.gallery_id = cg.id
       LEFT JOIN client_gallery_access_settings cgas ON cgas.gallery_id = cg.id
+      LEFT JOIN client_gallery_display_settings cgds ON cgds.gallery_id = cg.id
       LEFT JOIN client_gallery_visitors cgv ON cgv.gallery_id = cg.id
       LEFT JOIN client_gallery_contacts cgc ON cgc.gallery_id = cg.id
       LEFT JOIN asset_files cover_thumb
@@ -476,6 +486,11 @@ export async function createClientGallery(db: D1Db, input: any) {
     bool(input?.requireEmail, false) ? 1 : 0,
     bool(input?.allowGuestDownloads, false) ? 1 : 0,
   ).run();
+
+  await db.prepare(`
+    INSERT OR IGNORE INTO client_gallery_display_settings (gallery_id, sort_mode, updated_at)
+    VALUES (?, 'custom', CURRENT_TIMESTAMP)
+  `).bind(id).run();
 
   const initialClientEmail = text(input?.clientEmail);
   if (initialClientEmail && validEmail(initialClientEmail)) {
@@ -949,6 +964,13 @@ export async function mutateClientGalleryAlbums(db: D1Db, galleryId: string, inp
     const albumIds = Array.isArray(input?.albumIds) ? input.albumIds.map(text).filter(Boolean) : [];
     const statements = albumIds.map((albumId: string, index: number) => db.prepare(`UPDATE client_gallery_albums SET sort_order = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND gallery_id = ?`).bind(index, albumId, galleryId));
     if (statements.length) await db.batch(statements);
+  } else if (action === 'reorderAssets') {
+    const albumId = text(input?.albumId);
+    const album = await db.prepare(`SELECT id FROM client_gallery_albums WHERE id = ? AND gallery_id = ? LIMIT 1`).bind(albumId, galleryId).first();
+    if (!album) throw new Error('Album not found.');
+    const assetIds = Array.isArray(input?.assetIds) ? input.assetIds.map(text).filter(Boolean) : [];
+    const statements = assetIds.map((assetId: string, index: number) => db.prepare(`UPDATE client_gallery_album_assets SET sort_order = ? WHERE album_id = ? AND asset_id = ?`).bind(index, albumId, assetId));
+    if (statements.length) await db.batch(statements);
   } else {
     throw new Error('Unsupported client gallery album action.');
   }
@@ -966,6 +988,8 @@ async function adminGalleryAssets(db: D1Db, galleryId: string) {
       a.original_filename,
       a.width,
       a.height,
+      COALESCE(acm.captured_at, REPLACE(a.created_at, ' ', 'T')) AS captured_at,
+      COALESCE(acm.capture_source, 'created_at_fallback') AS capture_source,
       COALESCE(tf.url, '') AS thumb_url,
       COALESCE(wf.url, '') AS web_url,
       CASE WHEN of.variant IS NULL THEN 0 ELSE 1 END AS has_original,
@@ -974,27 +998,45 @@ async function adminGalleryAssets(db: D1Db, galleryId: string) {
         FROM client_gallery_album_assets cgaa
         JOIN client_gallery_albums cgal ON cgal.id = cgaa.album_id
         WHERE cgaa.asset_id = cga.asset_id AND cgal.gallery_id = cga.gallery_id AND cgal.status = 'active'
-      ), '') AS album_ids
+      ), '') AS album_ids,
+      COALESCE((
+        SELECT GROUP_CONCAT(cgaa.album_id || ':' || cgaa.sort_order, '|')
+        FROM client_gallery_album_assets cgaa
+        JOIN client_gallery_albums cgal ON cgal.id = cgaa.album_id
+        WHERE cgaa.asset_id = cga.asset_id AND cgal.gallery_id = cga.gallery_id AND cgal.status = 'active'
+      ), '') AS album_sort_orders
     FROM client_gallery_assets cga
     JOIN assets a ON a.id = cga.asset_id
+    LEFT JOIN asset_capture_metadata acm ON acm.asset_id = a.id
     LEFT JOIN asset_files tf ON tf.asset_id = a.id AND tf.variant = 'thumb' AND tf.status = 'active'
     LEFT JOIN asset_files wf ON wf.asset_id = a.id AND wf.variant = 'web' AND wf.status = 'active'
     LEFT JOIN asset_files of ON of.asset_id = a.id AND of.variant = 'original' AND of.status = 'active'
     WHERE cga.gallery_id = ? AND a.status = 'active'
     ORDER BY cga.sort_order ASC, a.filename COLLATE NOCASE ASC
   `).bind(galleryId).all();
-  return (result.results || []).map((row: any) => ({
-    assetId: text(row.asset_id),
-    filename: text(row.filename || row.original_filename),
-    thumbSrc: text(row.thumb_url || row.web_url),
-    webSrc: text(row.web_url || row.thumb_url),
-    width: number(row.width),
-    height: number(row.height),
-    sortOrder: number(row.sort_order),
-    hidden: number(row.hidden) === 1,
-    hasOriginal: number(row.has_original) === 1,
-    albumIds: text(row.album_ids).split(',').map((value) => value.trim()).filter(Boolean),
-  }));
+  return (result.results || []).map((row: any) => {
+    const albumSortOrders = Object.fromEntries(
+      text(row.album_sort_orders).split('|').map((part) => part.trim()).filter(Boolean).map((part) => {
+        const separator = part.lastIndexOf(':');
+        return separator > 0 ? [part.slice(0, separator), number(part.slice(separator + 1))] : ['', 0];
+      }).filter(([albumId]) => Boolean(albumId)),
+    );
+    return {
+      assetId: text(row.asset_id),
+      filename: text(row.filename || row.original_filename),
+      thumbSrc: text(row.thumb_url || row.web_url),
+      webSrc: text(row.web_url || row.thumb_url),
+      width: number(row.width),
+      height: number(row.height),
+      sortOrder: number(row.sort_order),
+      hidden: number(row.hidden) === 1,
+      hasOriginal: number(row.has_original) === 1,
+      capturedAt: text(row.captured_at),
+      captureSource: text(row.capture_source),
+      albumIds: text(row.album_ids).split(',').map((value) => value.trim()).filter(Boolean),
+      albumSortOrders,
+    };
+  });
 }
 
 export async function getClientGalleryAdmin(db: D1Db, id: string) {
@@ -1107,6 +1149,13 @@ export async function mutateClientGalleryAssets(db: D1Db, galleryId: string, inp
     const assetIds = Array.isArray(input?.assetIds) ? input.assetIds.map(text).filter(Boolean) : [];
     const statements = assetIds.map((assetId: string, index: number) => db.prepare(`UPDATE client_gallery_assets SET sort_order = ? WHERE gallery_id = ? AND asset_id = ?`).bind(index, galleryId, assetId));
     if (statements.length) await db.batch(statements);
+  } else if (action === "setSortMode") {
+    const sortMode = cleanSortMode(input?.sortMode);
+    await db.prepare(`
+      INSERT INTO client_gallery_display_settings (gallery_id, sort_mode, updated_at)
+      VALUES (?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(gallery_id) DO UPDATE SET sort_mode = excluded.sort_mode, updated_at = CURRENT_TIMESTAMP
+    `).bind(galleryId, sortMode).run();
   } else {
     throw new Error("Unsupported client gallery asset action.");
   }
@@ -1121,6 +1170,7 @@ async function publicGalleryRow(db: D1Db, token: string) {
       cg.*,
       COALESCE(cgas.require_email, 0) AS require_email,
       COALESCE(cgas.allow_guest_downloads, 0) AS allow_guest_downloads,
+      COALESCE(cgds.sort_mode, 'custom') AS sort_mode,
       ws.business_name,
       ws.logo_url AS workspace_logo_url,
       ws.accent_color AS workspace_accent_color,
@@ -1138,6 +1188,7 @@ async function publicGalleryRow(db: D1Db, token: string) {
       w.wedding_date
     FROM client_galleries cg
     LEFT JOIN client_gallery_access_settings cgas ON cgas.gallery_id = cg.id
+    LEFT JOIN client_gallery_display_settings cgds ON cgds.gallery_id = cg.id
     LEFT JOIN workspace_settings ws ON ws.workspace_id = cg.workspace_id
     LEFT JOIN client_gallery_branding cgb ON cgb.gallery_id = cg.id
     LEFT JOIN weddings w ON w.slug = cg.wedding_slug
@@ -1260,6 +1311,13 @@ async function verifyPublicAccess(
 }
 
 async function publicAssets(db: D1Db, galleryId: string) {
+  const settings = await db.prepare(`SELECT sort_mode FROM client_gallery_display_settings WHERE gallery_id = ? LIMIT 1`).bind(galleryId).first();
+  const sortMode = cleanSortMode(settings?.sort_mode);
+  const orderBy = sortMode === 'filename'
+    ? `a.filename COLLATE NOCASE ASC, cga.sort_order ASC`
+    : sortMode === 'capture_time'
+      ? `COALESCE(acm.captured_at, REPLACE(a.created_at, ' ', 'T')) ASC, a.filename COLLATE NOCASE ASC`
+      : `cga.sort_order ASC, a.filename COLLATE NOCASE ASC`;
   const result = await db.prepare(`
     SELECT
       cga.asset_id,
@@ -1275,14 +1333,21 @@ async function publicAssets(db: D1Db, galleryId: string) {
         FROM client_gallery_album_assets cgaa
         JOIN client_gallery_albums cgal ON cgal.id = cgaa.album_id
         WHERE cgaa.asset_id = cga.asset_id AND cgal.gallery_id = cga.gallery_id AND cgal.status = 'active'
-      ), '') AS album_ids
+      ), '') AS album_ids,
+      COALESCE((
+        SELECT GROUP_CONCAT(cgaa.album_id || ':' || cgaa.sort_order, '|')
+        FROM client_gallery_album_assets cgaa
+        JOIN client_gallery_albums cgal ON cgal.id = cgaa.album_id
+        WHERE cgaa.asset_id = cga.asset_id AND cgal.gallery_id = cga.gallery_id AND cgal.status = 'active'
+      ), '') AS album_sort_orders
     FROM client_gallery_assets cga
     JOIN assets a ON a.id = cga.asset_id
+    LEFT JOIN asset_capture_metadata acm ON acm.asset_id = a.id
     LEFT JOIN asset_files tf ON tf.asset_id = a.id AND tf.variant = 'thumb' AND tf.status = 'active'
     LEFT JOIN asset_files wf ON wf.asset_id = a.id AND wf.variant = 'web' AND wf.status = 'active'
     LEFT JOIN asset_files of ON of.asset_id = a.id AND of.variant = 'original' AND of.status = 'active'
     WHERE cga.gallery_id = ? AND cga.hidden = 0 AND a.status = 'active'
-    ORDER BY cga.sort_order ASC, a.filename COLLATE NOCASE ASC
+    ORDER BY ${orderBy}
   `).bind(galleryId).all();
   return (result.results || []).map((row: any) => ({
     assetId: text(row.asset_id),
@@ -1293,6 +1358,12 @@ async function publicAssets(db: D1Db, galleryId: string) {
     height: number(row.height),
     hasOriginal: number(row.has_original) === 1,
     albumIds: text(row.album_ids).split(',').map((value) => value.trim()).filter(Boolean),
+    albumSortOrders: Object.fromEntries(
+      text(row.album_sort_orders).split('|').map((part) => part.trim()).filter(Boolean).map((part) => {
+        const separator = part.lastIndexOf(':');
+        return separator > 0 ? [part.slice(0, separator), number(part.slice(separator + 1))] : ['', 0];
+      }).filter(([albumId]) => Boolean(albumId)),
+    ),
   }));
 }
 
@@ -1568,6 +1639,7 @@ export async function getPublicClientGallery(db: D1Db, token: string, pin = '', 
     allowFavourites: number(row.allow_favourites, 1) === 1,
     allowDownloads: effectiveDownloadPermission(row, identity),
     galleryDownloadsEnabled: number(row.allow_downloads) === 1,
+    sortMode: cleanSortMode(row.sort_mode),
     requireEmail,
     requiresEmail: requireEmail,
     emailRequired: requireEmail && !identity?.emailNormalized,

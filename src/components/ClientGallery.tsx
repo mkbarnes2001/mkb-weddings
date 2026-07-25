@@ -13,6 +13,7 @@ type ClientGalleryImage = {
   height: number;
   hasOriginal: boolean;
   albumIds?: string[];
+  albumSortOrders?: Record<string, number>;
 };
 
 type ClientGalleryAlbum = {
@@ -70,6 +71,7 @@ type ClientGalleryPayload = {
   allowFavourites: boolean;
   allowDownloads: boolean;
   galleryDownloadsEnabled?: boolean;
+  sortMode?: "custom" | "capture_time" | "filename";
   requireEmail?: boolean;
   requiresEmail?: boolean;
   emailRequired?: boolean;
@@ -422,7 +424,14 @@ export function ClientGallery() {
 
   const images = payload?.assets || [];
   const albums = payload?.albums || [];
-  const displayImages = activeAlbumId ? images.filter((image) => (image.albumIds || []).includes(activeAlbumId)) : images;
+  const displayImages = activeAlbumId
+    ? images.filter((image) => (image.albumIds || []).includes(activeAlbumId)).slice().sort((left, right) => {
+        if (payload?.sortMode !== "custom") return 0;
+        const leftOrder = left.albumSortOrders?.[activeAlbumId] ?? Number.MAX_SAFE_INTEGER;
+        const rightOrder = right.albumSortOrders?.[activeAlbumId] ?? Number.MAX_SAFE_INTEGER;
+        return leftOrder - rightOrder;
+      })
+    : images;
   const cover = payload?.cover || images[0] || null;
   const favouriteImages = useMemo(() => images.filter((image) => favourites.has(image.assetId)), [images, favourites]);
   const selectionRequests = payload?.selectionRequests || [];

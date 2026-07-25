@@ -1,8 +1,19 @@
 # Project State
 
 ## Version
-Current release: **v1.5.4 — Client Gallery Workspace**.  
-Database schema version: **17**.
+Current release: **v1.5.6 — Client Gallery Card & Photo Ordering Refinement**.  
+Database schema version: **19**.
+
+
+## Client Gallery Card & Photo Ordering Refinement — v1.5.6
+- Photo cards now use a ShootProof-style compact footer: discreet filename, selection circle, drag handle and one options menu.
+- Removed persistent “Preview only” / “Original stored” labels from cards; original availability remains visible in the photo menu and download actions.
+- Photos can be ordered by **Custom**, **Capture time**, or **Filename**.
+- Custom order supports drag-and-drop in All Photos and individual albums.
+- Client-facing album order respects the album-specific custom sequence.
+- `client_gallery_display_settings` stores the gallery sort mode.
+- `asset_capture_metadata` stores EXIF/file timestamp metadata without changing canonical asset identity. Existing assets receive a deterministic created-at fallback.
+- Photo import, Asset Library, ordering, search, selection and upload controls now share one compact toolbar row.
 
 ## Client Gallery Workspace — v1.5.4
 Client Gallery administration is now an operational workspace rather than one long editor form.

@@ -3,7 +3,7 @@
 Always inspect the actual migration files before assuming a table/column exists.
 
 ## Schema version
-Current target schema version: **11**. Read migrations in sequence when reconstructing production state; migrations 010–011 establish canonical assets and private client delivery.
+Current target schema version: **19**. Read migrations in sequence; migrations 017–019 add Client Gallery albums, branding and photo ordering metadata.
 
 ## Core domains
 - `venues`
@@ -200,3 +200,13 @@ Adds `client_gallery_branding`, one optional row per Client Gallery. Fields stor
 
 No data backfill is required. Existing galleries automatically resolve workspace branding defaults until an override is saved. Canonical assets and private originals are unchanged.
 
+
+
+## Schema version 19
+Migration: `019_client_gallery_photo_ordering.sql`
+
+Adds:
+- `client_gallery_display_settings`
+- `asset_capture_metadata`
+
+`client_gallery_display_settings.sort_mode` controls Custom / Capture time / Filename presentation. Custom order continues to use existing relationship `sort_order` fields. `asset_capture_metadata` stores EXIF or file-time data independently from filenames and asset identity.
