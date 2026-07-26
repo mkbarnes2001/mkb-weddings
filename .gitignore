@@ -13,3 +13,5 @@ backups/
 d1/generated/
 
 build-admin
+
+.wrangler

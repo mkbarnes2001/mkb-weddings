@@ -274,3 +274,22 @@ Key invariants:
 - lab connector keys and references are fulfilment metadata, not direct coupling to one laboratory.
 
 v1.6.0 stops at recorded order submission. A later payment adapter may move an order through `awaiting_payment`/`paid`, and a later lab adapter may move approved lines through fulfilment. Manual payment and manual fulfilment remain valid fallbacks.
+
+## Stripe payment boundary — v1.6.1
+The hosted payment path is:
+
+`Canonical cart → server-authoritative order snapshot → Stripe Checkout Session → signed/idempotent payment event → paid order → photographer review → future lab adapter`
+
+Security and consistency invariants:
+- raw card data never enters MKB Intelligence; the browser is redirected to Stripe-hosted Checkout;
+- Checkout line items, currency and total are built from the D1 order snapshot, not browser-supplied prices;
+- Checkout creation uses an idempotency key scoped to order and attempt;
+- webhook verification uses the untouched request body, `Stripe-Signature` header and endpoint signing secret;
+- browser success/cancel redirects are presentation only; the server retrieves the Stripe Session or processes a signed webhook before changing payment state;
+- provider event IDs are unique and duplicate delivery is safe;
+- amount/currency mismatch is recorded as rejected and cannot mark the order paid;
+- stale failed/expired events and older Checkout attempts cannot regress a verified paid/refunded order;
+- secrets exist only in Cloudflare environment configuration and are never returned in public/Admin payloads;
+- stored event payloads are sanitised operational snapshots, not raw Stripe objects or payment-method data.
+
+Payment and fulfilment remain separate adapters. A paid order is not automatically submitted to Prodigi. Photographer approval, print-ready rendering and lab submission remain explicit future stages.

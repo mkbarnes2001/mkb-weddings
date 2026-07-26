@@ -1,9 +1,21 @@
 # Project State
 
 ## Version
-Current release: **v1.6.0 — Print Store Foundation**.
-Database schema version: **20**.
+Current release: **v1.6.1 — Stripe Hosted Checkout**.
+Database schema version: **21**.
 
+
+
+## Stripe Hosted Checkout — v1.6.1
+- Adds Stripe-hosted Checkout for private Client Gallery Print Store carts; the application never handles raw card details.
+- Creates the order and immutable line snapshots before redirecting to Stripe, using only server-resolved products, prices, currency and totals.
+- Adds signed webhook verification against the raw request body and an idempotent provider-event ledger.
+- Handles successful, processing, failed, expired and fully refunded payment states without allowing stale events to regress a paid/refunded order.
+- Collects delivery name, phone and address through Stripe Checkout and stores them on the order for later fulfilment.
+- Adds retryable Checkout attempts, server-side Session reconciliation on return, and Admin payment history/reference visibility.
+- Blocks photographer approval and fulfilment until payment has been verified; Stripe orders cannot be manually marked paid/refunded.
+- Keeps payment separate from fulfilment: v1.6.1 does not submit to Prodigi or any professional lab.
+- Adds migration `021_stripe_checkout.sql`; schema advances to **21**.
 
 
 ## Print Store Foundation — v1.6.0

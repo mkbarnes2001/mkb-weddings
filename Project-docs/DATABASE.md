@@ -3,7 +3,7 @@
 Always inspect the actual migration files before assuming a table/column exists.
 
 ## Schema version
-Current target schema version: **19**. Read migrations in sequence; migrations 017–019 add Client Gallery albums, branding and photo ordering metadata.
+Current target schema version: **21**. Read migrations in sequence; migrations 020–021 add Print Store commerce and Stripe payment lifecycle fields.
 
 ## Core domains
 - `venues`
@@ -237,3 +237,24 @@ Ownership and identity rules:
 - lab connector/product/reference fields are integration boundaries only and do not imply a live lab submission.
 
 Migration 020 does not copy, rename or delete any R2 object. Existing Client Galleries receive disabled default store settings.
+
+## Schema version 21
+Migration: `021_stripe_checkout.sql`
+
+Adds to `commerce_orders`:
+- immutable photographer-approval requirement snapshot;
+- `payment_status` (`unpaid`, `processing`, `paid`, `failed`, `expired`, `refunded`);
+- Stripe Checkout Session and Payment Intent identifiers;
+- Checkout-attempt count;
+- paid, payment-failed and refunded timestamps;
+- delivery name, phone and normalised address JSON.
+
+Adds indexes for Checkout Session uniqueness, payment-state review and Payment Intent lookup. Existing v1.6.0 orders are backfilled from their order status without changing order lines or R2 assets.
+
+Payment rules:
+- `commerce_orders.total_minor` and currency are compared with the trusted Stripe object before a paid/refunded transition;
+- `commerce_payment_events(provider, provider_event_id)` is the idempotency key;
+- sanitised provider metadata is retained for audit, not raw card/payment-method details;
+- signed Stripe webhooks and server-to-Stripe Session reconciliation are the only automatic payment-state writers;
+- stale failed/expired events cannot regress a paid/refunded order;
+- delivery details are fulfilment snapshots and do not create a new client identity or asset.

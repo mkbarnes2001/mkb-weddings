@@ -9,6 +9,9 @@ Upload the latest complete project ZIP and say:
 
 The current source, D1 migrations and these documents are authoritative. Chat history is supplementary.
 
+## Current deployment guide
+For the v1.6.1 payment release, follow `STRIPE-SETUP.md` after reading `PROJECT-STATE.md` and `NEXT-STEPS.md`.
+
 ## End-of-release checklist
 1. Update `PROJECT-STATE.md`.
 2. Add the release to `CHANGELOG.md`.

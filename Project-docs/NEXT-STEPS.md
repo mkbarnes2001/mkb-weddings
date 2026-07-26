@@ -1,16 +1,19 @@
 # Next Steps
 
 ## Current baseline
-v1.6.0 adds the Print Store foundation across Admin and private Client Galleries. Schema version is 20. Payment capture and professional-lab submission are intentionally provider-neutral boundaries rather than live integrations in this release.
+v1.6.1 adds Stripe-hosted Checkout to the Print Store. Schema version is 21. The server creates immutable order snapshots and authoritative totals, Stripe collects payment and delivery details, and only a signed Stripe event or server-side Stripe reconciliation can change payment state. Prodigi remains the preferred future lab provider, but no order is sent to a lab in this release.
 
-## v1.6.0 validation
-1. Apply migration `020_print_store_foundation.sql` and confirm `schema_meta.schema_version` is `20`.
-2. Open Admin → Print Store and create the starter catalogue, then edit products, variants, retail prices and studio costs.
-3. Open a Client Gallery → Print Store, select an active price list, enable ordering and save the gallery settings.
-4. Open the private client gallery, add a photograph/product option, change quantity and crop coordinates, then refresh and confirm the cart persists for the same visitor or verified identity.
-5. Submit an order and confirm it appears in Admin → Print Store → Orders with canonical filename, product snapshot, total, crop data and client notes.
-6. Change the order status, payment reference, lab connector/reference and internal notes; refresh and confirm the update persists.
-7. Confirm no card is charged and no lab order is submitted: v1.6.0 records the workflow boundary only.
+## v1.6.1 validation
+1. Apply migration `021_stripe_checkout.sql` and confirm `schema_meta.schema_version` is `21`.
+2. Add Stripe **test-mode** `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` values to the public Cloudflare Pages project.
+3. Configure the Stripe webhook endpoint as `https://www.mkbweddings.co.uk/api/webhooks/stripe` with the event types listed in the root `README.md`.
+4. Open an enabled private Client Gallery, add a product and select **Pay securely with Stripe**.
+5. Complete a test payment and confirm the return page reports payment confirmation rather than trusting the browser redirect alone.
+6. Open Admin → Print Store → Orders and confirm the order shows `paid`, Stripe Checkout/Payment Intent references, delivery details and payment-event history.
+7. Confirm an unpaid order cannot be approved or fulfilled, and a paid order requiring photographer approval moves to `in_review`.
+8. Cancel or allow a test Checkout Session to expire, then confirm the saved order can open a new secure payment attempt.
+9. Send a duplicate webhook event and confirm only one provider event ID is recorded.
+10. Confirm no Prodigi/lab order is created: fulfilment remains manual and photographer-controlled.
 
 
 ## v1.5.9 validation
@@ -54,9 +57,9 @@ v1.6.0 adds the Print Store foundation across Admin and private Client Galleries
 8. Reset to studio defaults and confirm the workspace logo/accent return.
 
 ## Next engineering sequence
-1. Payment-provider adapter and hosted checkout/webhook flow, keeping provider event IDs idempotent and order totals server-authoritative.
-2. Professional lab connector interface with manual fulfilment fallback; pursue Loxley Colour first subject to commercial/API access.
-3. Photographer crop-review/approval preview and per-line fulfilment submission controls.
+1. Prodigi lab-connector adapter in sandbox mode, with manual photographer approval and manual fulfilment fallback.
+2. Photographer crop-review/approval preview, print-resolution validation and per-line lab submission controls.
+3. Prodigi status/tracking webhooks, retry/cancel controls and one physical sample order before live client fulfilment.
 4. Lightroom Classic Publish Plugin using the same private-original ingestion and canonical asset APIs, then direct selection sync.
 5. CRM / Client Portal foundation, reusing `client_identities` for persistent client access and including supplier questionnaires.
 6. Large-download/background job service for ZIP64 or very large gallery exports beyond the direct streaming limit.

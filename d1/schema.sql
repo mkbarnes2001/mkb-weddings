@@ -1169,6 +1169,19 @@ CREATE TABLE IF NOT EXISTS commerce_orders (
   total_minor INTEGER NOT NULL DEFAULT 0 CHECK (total_minor >= 0),
   payment_provider TEXT NOT NULL DEFAULT 'manual',
   payment_reference TEXT NOT NULL DEFAULT '',
+  requires_photographer_approval INTEGER NOT NULL DEFAULT 1
+    CHECK (requires_photographer_approval IN (0, 1)),
+  payment_status TEXT NOT NULL DEFAULT 'unpaid'
+    CHECK (payment_status IN ('unpaid', 'processing', 'paid', 'failed', 'expired', 'refunded')),
+  checkout_session_id TEXT NOT NULL DEFAULT '',
+  checkout_attempt INTEGER NOT NULL DEFAULT 0 CHECK (checkout_attempt >= 0),
+  payment_intent_id TEXT NOT NULL DEFAULT '',
+  paid_at TEXT,
+  payment_failed_at TEXT,
+  refunded_at TEXT,
+  shipping_name TEXT NOT NULL DEFAULT '',
+  shipping_phone TEXT NOT NULL DEFAULT '',
+  shipping_address_json TEXT NOT NULL DEFAULT '{}',
   lab_connector_key TEXT NOT NULL DEFAULT '',
   lab_reference TEXT NOT NULL DEFAULT '',
   client_notes TEXT NOT NULL DEFAULT '',
@@ -1187,6 +1200,14 @@ CREATE INDEX IF NOT EXISTS idx_commerce_orders_workspace
   ON commerce_orders(workspace_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_commerce_orders_gallery
   ON commerce_orders(gallery_id, created_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_commerce_orders_checkout_session
+  ON commerce_orders(checkout_session_id)
+  WHERE trim(checkout_session_id) <> '';
+CREATE INDEX IF NOT EXISTS idx_commerce_orders_payment_status
+  ON commerce_orders(workspace_id, payment_status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_commerce_orders_payment_intent
+  ON commerce_orders(payment_intent_id)
+  WHERE trim(payment_intent_id) <> '';
 
 CREATE TABLE IF NOT EXISTS commerce_order_items (
   id TEXT PRIMARY KEY,
@@ -1238,7 +1259,7 @@ INSERT OR IGNORE INTO client_gallery_store_settings (gallery_id, enabled, allow_
 SELECT id, 0, 1, 1 FROM client_galleries;
 
 INSERT INTO schema_meta (key, value, updated_at)
-VALUES ('schema_version', '20', CURRENT_TIMESTAMP)
+VALUES ('schema_version', '21', CURRENT_TIMESTAMP)
 ON CONFLICT(key) DO UPDATE SET
   value = excluded.value,
   updated_at = CURRENT_TIMESTAMP;

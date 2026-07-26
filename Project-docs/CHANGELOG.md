@@ -1,5 +1,17 @@
 # MKB Intelligence — Changelog
 
+## v1.6.1 — Stripe Hosted Checkout
+- Added migration 021 with payment lifecycle, Checkout Session, Payment Intent, delivery-address and payment timestamp fields.
+- Added Stripe-hosted Checkout creation with server-authoritative line items/totals and per-attempt idempotency keys.
+- Added a signed raw-body Stripe webhook endpoint with duplicate-event protection and sanitised event snapshots.
+- Added success, asynchronous success/failure, expiry, Payment Intent and full-refund state handling.
+- Prevented stale failed/expired events from regressing a verified paid or refunded order.
+- Added secure Checkout return reconciliation, retryable cancelled/expired payments and cross-gallery order/session validation.
+- Added client payment-status messaging and Admin Stripe references, delivery details and payment history.
+- Added payment guards so unpaid Stripe orders cannot be approved/fulfilled or manually marked paid/refunded.
+- Prodigi/lab submission remains disabled and separate from payment in this release.
+- Schema advances to 21.
+
 ## v1.6.0 — Print Store Foundation
 - Added migration 020 and workspace-owned catalogue, variant, price-list, cart, order and payment-event tables.
 - Added Admin → Print Store with catalogue editing, sizes/variants, lab mapping fields, price lists, studio costs/markup and order review.

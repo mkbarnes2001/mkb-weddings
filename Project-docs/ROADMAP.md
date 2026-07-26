@@ -65,18 +65,25 @@ Completed and in production:
 - Order snapshots and photographer approval workflow
 - Provider-neutral payment-event and professional-lab boundaries
 
-## Next — Checkout & Professional Lab Fulfilment
-- Hosted payment checkout and idempotent webhook adapter
-- Photographer crop-review/approval preview
-- Extensible lab-connector interface with manual fulfilment fallback
-- Loxley Colour as the initial UK integration target, subject to commercial/API access
+## Completed — Stripe Hosted Checkout (v1.6.1)
+- Stripe-hosted payment page with server-authoritative totals
+- Signed, idempotent payment webhooks and secure Session reconciliation
+- Paid/processing/failed/expired/refunded lifecycle
+- Delivery-detail capture, Admin payment history and approval guards
+- Payment remains separate from professional-lab fulfilment
+
+## Next — Prodigi Professional Lab Fulfilment
+- Prodigi sandbox adapter behind the provider-neutral lab interface
+- Photographer crop-review/approval preview and print-resolution checks
+- Per-line submission, retry/cancel controls and manual fulfilment fallback
+- Production/tracking webhooks and a physical sample-order gate before live use
 
 ## Print Store & Professional Lab Fulfilment
 - Product catalogues and workspace price lists
 - Cart, crop selection, checkout and order management
 - Photographer approval workflow
 - Extensible lab-connector architecture
-- Loxley Colour as the initial UK lab integration target, subject to commercial/API access
+- Prodigi as the preferred first API lab, beginning in sandbox mode
 - Manual fulfilment fallback so the store is not coupled to one lab
 
 ## Lightroom Classic Publish Plugin
@@ -139,7 +146,7 @@ Required behaviour:
 - Guest view/favourite access with separate download policy
 - Visitor activity tracking without raw IP storage
 
-Client selections and Print Store ordering now use this identified visitor model. Next delivery/commerce work should add hosted payment and professional-lab fulfilment adapters without changing canonical client or asset identity.
+Client selections and Print Store ordering now use this identified visitor model. Stripe hosted payment is complete; the next commerce step is a Prodigi sandbox fulfilment adapter without changing canonical client or asset identity.
 
 ## v1.5.2 — Favourite Review & Full-Resolution Download
 - Admin favourite thumbnail review.

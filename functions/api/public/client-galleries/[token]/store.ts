@@ -1,8 +1,9 @@
 import { getAuthenticatedClientIdentity } from "../../../../../serverless/client-auth-d1";
 import { getPublicClientGallery } from "../../../../../serverless/client-gallery-d1";
 import { getPublicPrintStore, mutatePublicPrintStore } from "../../../../../serverless/print-store-d1";
+import { stripeCheckoutConfigured } from "../../../../../serverless/stripe-payments";
 
-type Env = { MKB_DB: D1Database };
+type Env = { MKB_DB: D1Database; STRIPE_SECRET_KEY?: string; STRIPE_CHECKOUT_ENABLED?: string };
 
 function tokenOf(context: any) {
   return String(context.params.token || "").trim();
@@ -43,7 +44,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const access = await authorise(context, input);
     if (access.response) return access.response;
     return Response.json(
-      { ok: true, ...(await getPublicPrintStore(context.env.MKB_DB, access.galleryId, input.visitorKey, access.identity)) },
+      { ok: true, paymentProvider: "stripe", checkoutEnabled: stripeCheckoutConfigured(context.env), ...(await getPublicPrintStore(context.env.MKB_DB, access.galleryId, input.visitorKey, access.identity)) },
       { headers: { "Cache-Control": "private, no-store" } },
     );
   } catch (error) {
@@ -57,7 +58,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const access = await authorise(context, body || {});
     if (access.response) return access.response;
     return Response.json(
-      { ok: true, ...(await mutatePublicPrintStore(context.env.MKB_DB, access.galleryId, String(body?.visitorKey || ""), access.identity, body || {})) },
+      { ok: true, paymentProvider: "stripe", checkoutEnabled: stripeCheckoutConfigured(context.env), ...(await mutatePublicPrintStore(context.env.MKB_DB, access.galleryId, String(body?.visitorKey || ""), access.identity, body || {})) },
       { headers: { "Cache-Control": "private, no-store" } },
     );
   } catch (error) {

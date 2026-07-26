@@ -128,8 +128,24 @@ type PrintStoreCartItem = {
   notes: string;
 };
 
+type PrintStoreOrderSummary = {
+  id: string;
+  orderNumber: string;
+  status: string;
+  paymentStatus: string;
+  paymentProvider: string;
+  currency: string;
+  totalMinor: number;
+  requiresPhotographerApproval: boolean;
+  checkoutSessionId?: string;
+  paymentIntentId?: string;
+  paidAt?: string;
+};
+
 type PrintStorePayload = {
   enabled: boolean;
+  checkoutEnabled: boolean;
+  paymentProvider: string;
   galleryId: string;
   intro: string;
   currency: string;
@@ -138,7 +154,6 @@ type PrintStorePayload = {
   minimumOrderMinor: number;
   products: PrintStoreProduct[];
   cart: { id: string; status: string; currency: string; subtotalMinor: number; itemCount: number; items: PrintStoreCartItem[] };
-  order?: { id: string; orderNumber: string; status: string; currency: string; totalMinor: number; message: string };
 };
 
 function formatStoreMoney(minor: number, currency = "GBP") {
@@ -284,6 +299,8 @@ export function ClientGallery() {
   const [storeCrop, setStoreCrop] = useState({ x: 0, y: 0, width: 1, height: 1, rotation: 0 });
   const [checkoutName, setCheckoutName] = useState("");
   const [checkoutNotes, setCheckoutNotes] = useState("");
+  const [checkoutOrder, setCheckoutOrder] = useState<PrintStoreOrderSummary | null>(null);
+  const [pendingCheckoutOrderId, setPendingCheckoutOrderId] = useState("");
 
   const load = async (attemptPin = "", attemptEmail = "") => {
     setError("");
@@ -506,7 +523,7 @@ export function ClientGallery() {
       if (next.enabled && !storeVariantId) setStoreVariantId(next.products[0]?.variants[0]?.id || "");
       return next;
     } catch {
-      setStore({ enabled: false, galleryId: payload?.id || "", intro: "", currency: "GBP", allowCrop: true, requirePhotographerApproval: true, minimumOrderMinor: 0, products: [], cart: { id: "", status: "active", currency: "GBP", subtotalMinor: 0, itemCount: 0, items: [] } });
+      setStore({ enabled: false, checkoutEnabled: false, paymentProvider: "stripe", galleryId: payload?.id || "", intro: "", currency: "GBP", allowCrop: true, requirePhotographerApproval: true, minimumOrderMinor: 0, products: [], cart: { id: "", status: "active", currency: "GBP", subtotalMinor: 0, itemCount: 0, items: [] } });
       return null;
     }
   };
@@ -547,19 +564,108 @@ export function ClientGallery() {
     finally { setStoreBusy(false); }
   };
 
-  const submitStoreOrder = async () => {
+  const checkoutRequest = async (orderId = "") => {
     const targetEmail = String(email || payload?.visitorEmail || payload?.authenticatedEmail || "").trim();
-    if (!targetEmail) { setStoreMessage("Enter your email address before submitting the order."); return; }
+    if (!targetEmail) throw new Error("Enter your email address before continuing to payment.");
+    const response = await fetch(`/api/public/client-galleries/${encodeURIComponent(token)}/checkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pin,
+        email: targetEmail,
+        visitorKey: visitor,
+        displayName: checkoutName,
+        orderId,
+        clientName: checkoutName || payload?.clientName || "",
+        clientNotes: checkoutNotes,
+      }),
+      cache: "no-store",
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body?.error || "Unable to open secure payment.");
+    if (body?.order) {
+      setCheckoutOrder(body.order as PrintStoreOrderSummary);
+      setPendingCheckoutOrderId(String(body.order.id || ""));
+    }
+    if (body?.checkoutUrl) {
+      window.location.assign(String(body.checkoutUrl));
+      return;
+    }
+    const paymentStatus = String(body?.order?.paymentStatus || "");
+    setStoreMessage(paymentStatus === "paid"
+      ? "Payment confirmed. Your order is now with the photographer for review."
+      : "Your order is already recorded.");
+  };
+
+  const submitStoreOrder = async () => {
     setStoreBusy(true); setStoreMessage("");
-    try {
-      const next = await storeRequest("submitOrder", { email: targetEmail, clientName: checkoutName || payload?.clientName || "", clientNotes: checkoutNotes });
-      setStoreMessage(next.order?.message || "Order submitted.");
-    } catch (err) { setStoreMessage(err instanceof Error ? err.message : "Unable to submit order."); }
+    try { await checkoutRequest(); }
+    catch (err) { setStoreMessage(err instanceof Error ? err.message : "Unable to open secure payment."); }
     finally { setStoreBusy(false); }
+  };
+
+  const resumeStorePayment = async () => {
+    if (!pendingCheckoutOrderId) return;
+    setStoreBusy(true); setStoreMessage("");
+    try { await checkoutRequest(pendingCheckoutOrderId); }
+    catch (err) { setStoreMessage(err instanceof Error ? err.message : "Unable to resume secure payment."); }
+    finally { setStoreBusy(false); }
+  };
+
+  const loadCheckoutStatus = async (orderId: string, sessionId = "") => {
+    const params = new URLSearchParams({
+      pin,
+      email: String(email || payload?.visitorEmail || payload?.authenticatedEmail || ""),
+      visitor,
+      order: orderId,
+    });
+    if (sessionId) params.set("session_id", sessionId);
+    const response = await fetch(`/api/public/client-galleries/${encodeURIComponent(token)}/checkout?${params.toString()}`, { cache: "no-store" });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body?.error || "Unable to confirm payment status.");
+    if (body?.order) {
+      const order = body.order as PrintStoreOrderSummary;
+      setCheckoutOrder(order);
+      setPendingCheckoutOrderId(order.id);
+      if (order.paymentStatus === "paid") {
+        setStoreMessage(order.requiresPhotographerApproval
+          ? "Payment confirmed. Your order is now awaiting photographer approval."
+          : "Payment confirmed. Your order has been received.");
+      } else if (order.paymentStatus === "processing") {
+        setStoreMessage("Stripe is still processing the payment. The order will update automatically when payment completes.");
+      } else {
+        setStoreMessage("Payment was not completed. Your order is saved and payment can be resumed.");
+      }
+    }
   };
 
   useEffect(() => {
     if (payload && !payload.locked && !store) loadStore();
+  }, [payload?.id, payload?.locked]);
+
+  useEffect(() => {
+    if (!payload || payload.locked) return;
+    const params = new URLSearchParams(window.location.search);
+    const checkoutState = params.get("checkout") || "";
+    const orderId = params.get("order") || "";
+    const sessionId = params.get("session_id") || "";
+    if (!checkoutState || !orderId) return;
+    setShowStore(true);
+    setPendingCheckoutOrderId(orderId);
+    if (checkoutState === "cancelled" || checkoutState === "success") {
+      setStoreBusy(true);
+      loadCheckoutStatus(orderId, checkoutState === "success" ? sessionId : "")
+        .then(() => {
+          if (checkoutState === "cancelled") setStoreMessage("Payment was cancelled. Your order is saved and payment can be resumed.");
+        })
+        .catch((err) => setStoreMessage(err instanceof Error ? err.message : "Unable to confirm payment status."))
+        .finally(() => setStoreBusy(false));
+    }
+    params.delete("checkout");
+    params.delete("order");
+    params.delete("session_id");
+    const query = params.toString();
+    window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
   }, [payload?.id, payload?.locked]);
 
   const images = payload?.assets || [];
@@ -828,7 +934,7 @@ export function ClientGallery() {
           <aside className="h-full w-full max-w-2xl overflow-y-auto bg-white shadow-2xl" style={{ color: "#111" }} onMouseDown={(event) => event.stopPropagation()}>
             <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-black/10 bg-white px-5 py-4"><div><div className="flex items-center gap-2"><ShoppingBag size={18} /><h2 className="text-lg font-semibold">Shop prints</h2></div><p className="mt-1 text-xs text-neutral-500">{store.intro || "Order professional prints from your private gallery."}</p></div><button type="button" onClick={() => setShowStore(false)} aria-label="Close Print Store"><X size={19} /></button></div>
             <div className="p-5">
-              {store.order ? <div className="mb-5 rounded-2xl border border-green-200 bg-green-50 p-5"><strong className="text-sm">Order {store.order.orderNumber}</strong><p className="mt-2 text-sm">{store.order.message}</p><p className="mt-2 text-xs text-neutral-500">Total {formatStoreMoney(store.order.totalMinor, store.order.currency)} · {store.order.status.replaceAll("_", " ")}</p></div> : null}
+              {checkoutOrder ? <div className={`mb-5 rounded-2xl border p-5 ${checkoutOrder.paymentStatus === "paid" ? "border-green-200 bg-green-50" : "border-amber-200 bg-amber-50"}`}><strong className="text-sm">Order {checkoutOrder.orderNumber}</strong><p className="mt-2 text-sm">{checkoutOrder.paymentStatus === "paid" ? (checkoutOrder.requiresPhotographerApproval ? "Payment confirmed. Awaiting photographer approval." : "Payment confirmed. Order received.") : checkoutOrder.paymentStatus === "processing" ? "Payment is being processed by Stripe." : "Payment has not been completed."}</p><p className="mt-2 text-xs text-neutral-500">Total {formatStoreMoney(checkoutOrder.totalMinor, checkoutOrder.currency)} · {checkoutOrder.status.replaceAll("_", " ")} · {checkoutOrder.paymentStatus.replaceAll("_", " ")}</p>{["unpaid", "failed", "expired"].includes(checkoutOrder.paymentStatus) ? <button type="button" onClick={resumeStorePayment} disabled={storeBusy || !store.checkoutEnabled} className="mt-3 rounded-xl bg-black px-4 py-2 text-xs text-white disabled:opacity-40">{storeBusy ? "Opening…" : "Resume secure payment"}</button> : null}</div> : null}
               <section>
                 <div className="flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">1. Choose a photograph</h3><p className="mt-1 text-xs text-neutral-500">The photograph remains linked to its canonical gallery asset.</p></div>{storeAssetId ? <button type="button" onClick={() => setStoreAssetId("")} className="text-xs underline">Change</button> : null}</div>
                 {storeAssetId ? (() => { const image = images.find((candidate) => candidate.assetId === storeAssetId); return image ? <div className="mt-3 flex items-center gap-3 rounded-xl border border-black/10 p-3"><div className="h-24 w-32 overflow-hidden rounded-lg bg-neutral-100"><GalleryImage image={image} baseOrigin={publicAssetOrigin} mode="tile" /></div><div className="min-w-0"><strong className="text-sm">Selected photograph</strong><p className="mt-1 truncate text-xs text-neutral-500">{image.filename}</p></div></div> : null; })() : <div className="mt-3 grid grid-cols-4 gap-2">{images.slice(0, 80).map((image) => <button key={image.assetId} type="button" onClick={() => setStoreAssetId(image.assetId)} className="overflow-hidden rounded-lg border border-black/10" style={{ aspectRatio: "1/1" }}><GalleryImage image={image} baseOrigin={publicAssetOrigin} mode="tile" /></button>)}</div>}
@@ -845,7 +951,7 @@ export function ClientGallery() {
               </section>
               <section className="mt-6 border-t border-black/10 pt-5"><div className="flex items-center justify-between"><h3 className="text-sm font-semibold">Cart</h3><strong>{formatStoreMoney(store.cart.subtotalMinor, store.currency)}</strong></div>{store.minimumOrderMinor > 0 ? <p className="mt-1 text-xs text-neutral-500">Minimum order {formatStoreMoney(store.minimumOrderMinor, store.currency)}</p> : null}<div className="mt-3 space-y-2">{store.cart.items.map((item) => <div key={item.id} className="flex items-center gap-3 rounded-xl border border-black/10 p-3"><div className="h-14 w-16 overflow-hidden rounded-lg bg-neutral-100">{item.thumbSrc ? <img src={resolveAssetUrl(item.thumbSrc, publicAssetOrigin)} alt="" className="h-full w-full object-cover" /> : null}</div><div className="min-w-0 flex-1"><strong className="text-sm">{item.productName} · {item.variantName}</strong><p className="mt-1 truncate text-xs text-neutral-500">{item.filename}</p><p className="mt-1 text-xs">{formatStoreMoney(item.lineTotalMinor, store.currency)}</p></div><div className="flex items-center gap-1"><button type="button" onClick={() => updateStoreItem(item, Math.max(1, item.quantity - 1))} className="rounded p-1"><Minus size={13} /></button><span className="w-5 text-center text-xs">{item.quantity}</span><button type="button" onClick={() => updateStoreItem(item, Math.min(99, item.quantity + 1))} className="rounded p-1"><Plus size={13} /></button><button type="button" onClick={() => removeStoreItem(item.id)} className="ml-1 rounded p-1 text-red-700"><Trash2 size={14} /></button></div></div>)}{!store.cart.items.length ? <p className="rounded-xl bg-neutral-50 p-4 text-sm text-neutral-500">Your cart is empty.</p> : null}</div>
               </section>
-              {store.cart.items.length ? <section className="mt-6 border-t border-black/10 pt-5"><h3 className="text-sm font-semibold">3. Submit order</h3><div className="mt-3 grid grid-cols-2 gap-3"><input value={checkoutName} onChange={(event) => setCheckoutName(event.target.value)} placeholder="Your name" className="rounded-xl border border-black/15 px-4 py-3" /><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email address" className="rounded-xl border border-black/15 px-4 py-3" /><textarea value={checkoutNotes} onChange={(event) => setCheckoutNotes(event.target.value)} placeholder="Order notes (optional)" rows={3} className="col-span-2 rounded-xl border border-black/15 px-4 py-3" /></div><button type="button" onClick={submitStoreOrder} disabled={storeBusy || store.cart.subtotalMinor < store.minimumOrderMinor} className="mt-3 w-full rounded-xl px-5 py-3 text-sm text-white disabled:opacity-40" style={{ background: branding.accentColor, color: accentTextColor }}>{storeBusy ? "Submitting…" : store.requirePhotographerApproval ? "Submit for photographer approval" : "Create order"}</button><p className="mt-3 text-[11px] leading-relaxed text-neutral-500">Payment is not taken in this foundation release. Your photographer will review the crop and product choices before fulfilment.</p></section> : null}
+              {store.cart.items.length ? <section className="mt-6 border-t border-black/10 pt-5"><h3 className="text-sm font-semibold">3. Secure checkout</h3><div className="mt-3 grid grid-cols-2 gap-3"><input value={checkoutName} onChange={(event) => setCheckoutName(event.target.value)} placeholder="Your name" className="rounded-xl border border-black/15 px-4 py-3" /><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email address" className="rounded-xl border border-black/15 px-4 py-3" /><textarea value={checkoutNotes} onChange={(event) => setCheckoutNotes(event.target.value)} placeholder="Order notes (optional)" rows={3} className="col-span-2 rounded-xl border border-black/15 px-4 py-3" /></div><button type="button" onClick={submitStoreOrder} disabled={storeBusy || !store.checkoutEnabled || store.cart.subtotalMinor < store.minimumOrderMinor} className="mt-3 w-full rounded-xl px-5 py-3 text-sm text-white disabled:opacity-40" style={{ background: branding.accentColor, color: accentTextColor }}>{storeBusy ? "Opening secure payment…" : "Pay securely with Stripe"}</button><p className="mt-3 text-[11px] leading-relaxed text-neutral-500">Stripe securely collects payment and delivery details. MKB validates the order total on the server, and only a verified Stripe payment updates the order. {store.requirePhotographerApproval ? "Your crop and product choices then move to photographer review." : "The order is recorded as paid after confirmation."}</p>{!store.checkoutEnabled ? <p className="mt-2 text-xs text-amber-700">Secure payment is not configured yet. Please contact the photographer.</p> : null}</section> : null}
               {storeMessage ? <p className="mt-4 rounded-xl bg-neutral-100 p-3 text-sm">{storeMessage}</p> : null}
             </div>
           </aside>

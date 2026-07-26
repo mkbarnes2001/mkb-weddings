@@ -75,6 +75,11 @@ function cleanOrderStatus(value: unknown) {
   ].includes(status) ? status : "pending";
 }
 
+function cleanPaymentStatus(value: unknown) {
+  const status = text(value);
+  return ["unpaid", "processing", "paid", "failed", "expired", "refunded"].includes(status) ? status : "unpaid";
+}
+
 function json(value: unknown, fallback: any = {}) {
   try {
     if (typeof value === "string") return JSON.parse(value || "{}");
@@ -219,7 +224,7 @@ async function listPriceLists(db: D1Db, workspaceId: string, includeArchived = t
 }
 
 async function listOrders(db: D1Db, workspaceId: string) {
-  const [orderResult, itemResult] = await Promise.all([
+  const [orderResult, itemResult, eventResult] = await Promise.all([
     db.prepare(`
       SELECT co.*, cg.title AS gallery_title, cg.client_name AS gallery_client_name
       FROM commerce_orders co
@@ -237,6 +242,13 @@ async function listOrders(db: D1Db, workspaceId: string) {
       LEFT JOIN asset_files web ON web.asset_id = coi.asset_id AND web.variant = 'web' AND web.status = 'active'
       WHERE co.workspace_id = ?
       ORDER BY coi.order_id, coi.created_at ASC
+    `).bind(workspaceId).all(),
+    db.prepare(`
+      SELECT cpe.*
+      FROM commerce_payment_events cpe
+      JOIN commerce_orders co ON co.id = cpe.order_id
+      WHERE co.workspace_id = ?
+      ORDER BY cpe.created_at DESC
     `).bind(workspaceId).all(),
   ]);
   const itemsByOrder = new Map<string, any[]>();
@@ -264,6 +276,23 @@ async function listOrders(db: D1Db, workspaceId: string) {
     });
     itemsByOrder.set(orderId, items);
   }
+  const eventsByOrder = new Map<string, any[]>();
+  for (const row of eventResult.results || []) {
+    const orderId = text((row as any).order_id);
+    const events = eventsByOrder.get(orderId) || [];
+    events.push({
+      id: text((row as any).id),
+      provider: text((row as any).provider),
+      providerEventId: text((row as any).provider_event_id),
+      eventType: text((row as any).event_type),
+      status: text((row as any).status),
+      amountMinor: integer((row as any).amount_minor),
+      currency: text((row as any).currency || "GBP"),
+      payload: json((row as any).payload_json, {}),
+      createdAt: text((row as any).created_at),
+    });
+    eventsByOrder.set(orderId, events);
+  }
   return (orderResult.results || []).map((row: any) => ({
     id: text(row.id),
     workspaceId: text(row.workspace_id),
@@ -282,6 +311,17 @@ async function listOrders(db: D1Db, workspaceId: string) {
     totalMinor: integer(row.total_minor),
     paymentProvider: text(row.payment_provider || "manual"),
     paymentReference: text(row.payment_reference),
+    requiresPhotographerApproval: Number(row.requires_photographer_approval ?? 1) === 1,
+    paymentStatus: cleanPaymentStatus(row.payment_status),
+    checkoutSessionId: text(row.checkout_session_id),
+    checkoutAttempt: integer(row.checkout_attempt),
+    paymentIntentId: text(row.payment_intent_id),
+    paidAt: text(row.paid_at),
+    paymentFailedAt: text(row.payment_failed_at),
+    refundedAt: text(row.refunded_at),
+    shippingName: text(row.shipping_name),
+    shippingPhone: text(row.shipping_phone),
+    shippingAddress: json(row.shipping_address_json, {}),
     labConnectorKey: text(row.lab_connector_key),
     labReference: text(row.lab_reference),
     clientNotes: text(row.client_notes),
@@ -292,6 +332,7 @@ async function listOrders(db: D1Db, workspaceId: string) {
     createdAt: text(row.created_at),
     updatedAt: text(row.updated_at),
     items: itemsByOrder.get(text(row.id)) || [],
+    paymentEvents: eventsByOrder.get(text(row.id)) || [],
   }));
 }
 
@@ -565,8 +606,23 @@ export async function mutatePrintStoreAdmin(db: D1Db, input: any) {
     const orderId = text(input?.orderId);
     if (!orderId) throw httpError("Order is required.");
     const status = cleanOrderStatus(input?.status);
-    const existing = await db.prepare(`SELECT status FROM commerce_orders WHERE id = ? AND workspace_id = ? LIMIT 1`).bind(orderId, workspaceId).first();
+    const existing = await db.prepare(`
+      SELECT status, payment_status, payment_provider, payment_reference
+      FROM commerce_orders WHERE id = ? AND workspace_id = ? LIMIT 1
+    `).bind(orderId, workspaceId).first();
     if (!existing) throw httpError("Order not found.", 404);
+    const paymentStatus = cleanPaymentStatus(existing.payment_status);
+    const paymentProvider = text(existing.payment_provider || "manual");
+    if (["approved", "in_fulfilment", "fulfilled"].includes(status) && paymentStatus !== "paid") {
+      throw httpError("A verified payment is required before this order can be approved or fulfilled.", 409);
+    }
+    if (paymentProvider === "stripe" && status === "paid" && paymentStatus !== "paid") {
+      throw httpError("Stripe orders are marked paid only by a verified Stripe event.", 409);
+    }
+    if (paymentProvider === "stripe" && status === "refunded" && paymentStatus !== "refunded") {
+      throw httpError("Refund the payment in Stripe first; the verified webhook will update this order.", 409);
+    }
+    const paymentReference = paymentProvider === "stripe" ? text(existing.payment_reference) : text(input?.paymentReference);
     await db.prepare(`
       UPDATE commerce_orders SET
         status = ?, internal_notes = ?, payment_reference = ?, lab_connector_key = ?, lab_reference = ?,
@@ -577,7 +633,7 @@ export async function mutatePrintStoreAdmin(db: D1Db, input: any) {
     `).bind(
       status,
       text(input?.internalNotes),
-      text(input?.paymentReference),
+      paymentReference,
       text(input?.labConnectorKey),
       text(input?.labReference),
       status,
@@ -985,106 +1041,426 @@ export async function mutatePublicPrintStore(
     const itemId = text(input?.itemId);
     await db.prepare(`DELETE FROM commerce_cart_items WHERE id = ? AND cart_id = ?`).bind(itemId, text(cart.id)).run();
   } else if (action === "submitOrder") {
-    const hydrated = await hydrateCart(db, cart);
-    if (!hydrated.items.length) throw httpError("Your cart is empty.");
-    if (hydrated.subtotalMinor < integer(config.minimum_order_minor)) {
-      throw httpError("The cart has not reached this gallery's minimum order value.");
-    }
-    const email = text(identity?.email || input?.email || cart.email);
-    const emailNormalized = normalizeEmail(email);
-    if (!validEmail(email)) throw httpError("Enter a valid email address before submitting the order.");
-    const clientName = text(identity?.displayName || input?.clientName);
-    const pricedItems: Array<{ item: any; variant: any }> = [];
-    for (const item of hydrated.items) {
-      const variant = await pricedVariant(db, galleryId, item.variantId);
-      if (!variant) throw httpError("One of the product options is no longer available. Reload the store and try again.", 409);
-      if (integer(variant.retail_price_minor) !== item.unitPriceMinor || text(variant.currency).toUpperCase() !== text(hydrated.currency).toUpperCase()) {
-        throw httpError("A product price or currency has changed. Reload the store and review your cart before ordering.", 409);
-      }
-      pricedItems.push({ item, variant });
-    }
-    const orderId = `order_${crypto.randomUUID()}`;
-    const orderStatus = Number(config.require_photographer_approval ?? 1) === 1 ? "in_review" : "awaiting_payment";
-    const labConnectors = Array.from(new Set(pricedItems.map(({ variant }) => text(variant.lab_connector_key)).filter(Boolean)));
-    const labConnector = labConnectors.length === 1 ? labConnectors[0] : "";
-    let generatedNumber = orderNumber();
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      const duplicate = await db.prepare(`SELECT id FROM commerce_orders WHERE order_number = ? LIMIT 1`).bind(generatedNumber).first();
-      if (!duplicate) break;
-      generatedNumber = orderNumber();
-    }
-    const orderStatements = [db.prepare(`
-      INSERT INTO commerce_orders (
-        id, workspace_id, gallery_id, cart_id, identity_id, order_number,
-        email, email_normalized, client_name, status, currency,
-        subtotal_minor, shipping_minor, tax_minor, total_minor,
-        payment_provider, lab_connector_key, client_notes,
-        submitted_at, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, 'manual', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    `).bind(
-      orderId,
-      text(config.workspace_id),
-      galleryId,
-      text(cart.id),
-      identity?.id || null,
-      generatedNumber,
-      email,
-      emailNormalized,
-      clientName,
-      orderStatus,
-      hydrated.currency,
-      hydrated.subtotalMinor,
-      hydrated.subtotalMinor,
-      labConnector,
-      text(input?.clientNotes),
-    )];
-
-    for (const { item, variant } of pricedItems) {
-      orderStatements.push(db.prepare(`
-        INSERT INTO commerce_order_items (
-          id, order_id, asset_id, product_id, variant_id, product_name, variant_name, sku,
-          quantity, unit_price_minor, studio_cost_minor, line_total_minor,
-          lab_connector_key, lab_product_code, crop_json, fulfilment_status, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
-      `).bind(
-        `order_item_${crypto.randomUUID()}`,
-        orderId,
-        item.assetId,
-        text(variant.product_id),
-        item.variantId,
-        text(variant.product_name),
-        text(variant.variant_name),
-        text(variant.sku),
-        item.quantity,
-        item.unitPriceMinor,
-        integer(variant.studio_cost_minor),
-        item.lineTotalMinor,
-        text(variant.lab_connector_key),
-        text(variant.lab_product_code),
-        safeJson(item.crop),
-      ));
-    }
-    orderStatements.push(db.prepare(`
-      UPDATE commerce_carts SET status = 'converted', email = ?, email_normalized = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
-    `).bind(email, emailNormalized, text(cart.id)));
-    await db.batch(orderStatements);
-    return {
-      ...(await getPublicPrintStore(db, galleryId, visitorKey, identity)),
-      order: {
-        id: orderId,
-        orderNumber: generatedNumber,
-        status: orderStatus,
-        currency: hydrated.currency,
-        totalMinor: hydrated.subtotalMinor,
-        message: orderStatus === "in_review"
-          ? "Your order has been submitted for photographer approval."
-          : "Your order has been created and is awaiting payment setup.",
-      },
-    };
+    throw httpError("Use the secure hosted checkout to submit this order.", 409);
   } else {
     throw httpError("Unsupported store action.");
   }
 
   await db.prepare(`UPDATE commerce_carts SET updated_at = CURRENT_TIMESTAMP WHERE id = ?`).bind(text(cart.id)).run();
   return getPublicPrintStore(db, galleryId, visitorKey, identity);
+}
+
+async function checkoutOrderForClient(
+  db: D1Db,
+  galleryId: string,
+  orderId: string,
+  visitorKey: string,
+  identity: ClientAuthIdentity | null,
+) {
+  const cleanVisitor = text(visitorKey).slice(0, 160);
+  const row = await db.prepare(`
+    SELECT co.*, cc.visitor_key
+    FROM commerce_orders co
+    LEFT JOIN commerce_carts cc ON cc.id = co.cart_id
+    WHERE co.id = ? AND co.gallery_id = ?
+    LIMIT 1
+  `).bind(orderId, galleryId).first();
+  if (!row) throw httpError("Order not found.", 404);
+  const identityMatches = Boolean(identity?.id && text(row.identity_id) === identity.id)
+    || Boolean(identity?.emailNormalized && text(row.email_normalized) === identity.emailNormalized);
+  const visitorMatches = Boolean(cleanVisitor && text(row.visitor_key) === cleanVisitor);
+  if (!identityMatches && !visitorMatches) throw httpError("This order is not available to the current gallery visitor.", 403);
+
+  const itemResult = await db.prepare(`
+    SELECT coi.*, a.filename
+    FROM commerce_order_items coi
+    JOIN assets a ON a.id = coi.asset_id
+    WHERE coi.order_id = ?
+    ORDER BY coi.created_at ASC, coi.id ASC
+  `).bind(orderId).all();
+  const items = (itemResult.results || []).map((item: any) => ({
+    id: text(item.id),
+    assetId: text(item.asset_id),
+    filename: text(item.filename),
+    productName: text(item.product_name),
+    variantName: text(item.variant_name),
+    quantity: quantity(item.quantity, 1),
+    unitPriceMinor: integer(item.unit_price_minor),
+    lineTotalMinor: integer(item.line_total_minor),
+  }));
+  return {
+    id: text(row.id),
+    orderNumber: text(row.order_number),
+    galleryId: text(row.gallery_id),
+    email: text(row.email),
+    clientName: text(row.client_name),
+    status: cleanOrderStatus(row.status),
+    paymentStatus: cleanPaymentStatus(row.payment_status),
+    paymentProvider: text(row.payment_provider || "stripe"),
+    paymentReference: text(row.payment_reference),
+    currency: text(row.currency || "GBP"),
+    subtotalMinor: integer(row.subtotal_minor),
+    shippingMinor: integer(row.shipping_minor),
+    taxMinor: integer(row.tax_minor),
+    totalMinor: integer(row.total_minor),
+    requiresPhotographerApproval: Number(row.requires_photographer_approval ?? 1) === 1,
+    checkoutSessionId: text(row.checkout_session_id),
+    checkoutAttempt: integer(row.checkout_attempt),
+    paymentIntentId: text(row.payment_intent_id),
+    paidAt: text(row.paid_at),
+    submittedAt: text(row.submitted_at),
+    items,
+  };
+}
+
+export async function preparePublicCheckoutOrder(
+  db: D1Db,
+  galleryId: string,
+  visitorKey: string,
+  identity: ClientAuthIdentity | null,
+  input: any,
+) {
+  const existingOrderId = text(input?.orderId);
+  if (existingOrderId) return checkoutOrderForClient(db, galleryId, existingOrderId, visitorKey, identity);
+
+  const config = await publicStoreConfiguration(db, galleryId);
+  if (Number(config.enabled || 0) !== 1 || !text(config.price_list_id)) {
+    throw httpError("Print ordering is not enabled for this gallery.", 404);
+  }
+  const cart = await resolveCart(db, config, visitorKey, identity, false);
+  if (!cart) throw httpError("Your cart could not be found.", 404);
+
+  const prior = await db.prepare(`
+    SELECT id FROM commerce_orders
+    WHERE cart_id = ? AND gallery_id = ?
+    ORDER BY created_at DESC LIMIT 1
+  `).bind(text(cart.id), galleryId).first();
+  if (prior?.id) return checkoutOrderForClient(db, galleryId, text(prior.id), visitorKey, identity);
+
+  const hydrated = await hydrateCart(db, cart);
+  if (!hydrated.items.length) throw httpError("Your cart is empty.");
+  if (hydrated.subtotalMinor < integer(config.minimum_order_minor)) {
+    throw httpError("The cart has not reached this gallery's minimum order value.");
+  }
+  const email = text(identity?.email || input?.email || cart.email);
+  const emailNormalized = normalizeEmail(email);
+  if (!validEmail(email)) throw httpError("Enter a valid email address before continuing to payment.");
+  const clientName = text(identity?.displayName || input?.clientName);
+  const pricedItems: Array<{ item: any; variant: any }> = [];
+  for (const item of hydrated.items) {
+    const variant = await pricedVariant(db, galleryId, item.variantId);
+    if (!variant) throw httpError("One of the product options is no longer available. Reload the store and try again.", 409);
+    if (integer(variant.retail_price_minor) !== item.unitPriceMinor || text(variant.currency).toUpperCase() !== text(hydrated.currency).toUpperCase()) {
+      throw httpError("A product price or currency has changed. Reload the store and review your cart before ordering.", 409);
+    }
+    pricedItems.push({ item, variant });
+  }
+
+  const orderId = `order_${crypto.randomUUID()}`;
+  const requiresApproval = Number(config.require_photographer_approval ?? 1) === 1;
+  const labConnectors = Array.from(new Set(pricedItems.map(({ variant }) => text(variant.lab_connector_key)).filter(Boolean)));
+  const labConnector = labConnectors.length === 1 ? labConnectors[0] : "";
+  let generatedNumber = orderNumber();
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const duplicate = await db.prepare(`SELECT id FROM commerce_orders WHERE order_number = ? LIMIT 1`).bind(generatedNumber).first();
+    if (!duplicate) break;
+    generatedNumber = orderNumber();
+  }
+
+  const statements = [db.prepare(`
+    INSERT INTO commerce_orders (
+      id, workspace_id, gallery_id, cart_id, identity_id, order_number,
+      email, email_normalized, client_name, status, currency,
+      subtotal_minor, shipping_minor, tax_minor, total_minor,
+      payment_provider, requires_photographer_approval, payment_status,
+      lab_connector_key, client_notes,
+      submitted_at, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'awaiting_payment', ?, ?, 0, 0, ?, 'stripe', ?, 'unpaid', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `).bind(
+    orderId,
+    text(config.workspace_id),
+    galleryId,
+    text(cart.id),
+    identity?.id || null,
+    generatedNumber,
+    email,
+    emailNormalized,
+    clientName,
+    hydrated.currency,
+    hydrated.subtotalMinor,
+    hydrated.subtotalMinor,
+    requiresApproval ? 1 : 0,
+    labConnector,
+    text(input?.clientNotes),
+  )];
+
+  for (const { item, variant } of pricedItems) {
+    statements.push(db.prepare(`
+      INSERT INTO commerce_order_items (
+        id, order_id, asset_id, product_id, variant_id, product_name, variant_name, sku,
+        quantity, unit_price_minor, studio_cost_minor, line_total_minor,
+        lab_connector_key, lab_product_code, crop_json, fulfilment_status, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
+    `).bind(
+      `order_item_${crypto.randomUUID()}`,
+      orderId,
+      item.assetId,
+      text(variant.product_id),
+      item.variantId,
+      text(variant.product_name),
+      text(variant.variant_name),
+      text(variant.sku),
+      item.quantity,
+      item.unitPriceMinor,
+      integer(variant.studio_cost_minor),
+      item.lineTotalMinor,
+      text(variant.lab_connector_key),
+      text(variant.lab_product_code),
+      safeJson(item.crop),
+    ));
+  }
+  statements.push(db.prepare(`
+    UPDATE commerce_carts
+    SET status = 'converted', email = ?, email_normalized = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).bind(email, emailNormalized, text(cart.id)));
+  await db.batch(statements);
+  return checkoutOrderForClient(db, galleryId, orderId, visitorKey, identity);
+}
+
+export async function attachStripeCheckoutSession(
+  db: D1Db,
+  orderId: string,
+  session: any,
+  attempt: number,
+) {
+  const sessionId = text(session?.id);
+  const paymentIntentId = text(typeof session?.payment_intent === "string" ? session.payment_intent : session?.payment_intent?.id);
+  if (!sessionId) throw httpError("Stripe did not return a Checkout Session ID.", 502);
+  const result = await db.prepare(`
+    UPDATE commerce_orders SET
+      status = CASE WHEN status IN ('pending', 'awaiting_payment') THEN 'awaiting_payment' ELSE status END,
+      payment_provider = 'stripe',
+      payment_status = 'unpaid',
+      payment_reference = CASE WHEN ? <> '' THEN ? ELSE ? END,
+      checkout_session_id = ?,
+      checkout_attempt = ?,
+      payment_intent_id = CASE WHEN ? <> '' THEN ? ELSE '' END,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ? AND payment_status NOT IN ('paid', 'refunded')
+  `).bind(
+    paymentIntentId,
+    paymentIntentId,
+    sessionId,
+    sessionId,
+    integer(attempt),
+    paymentIntentId,
+    paymentIntentId,
+    orderId,
+  ).run();
+  if (!Number(result?.meta?.changes || 0)) {
+    const order = await db.prepare(`SELECT id FROM commerce_orders WHERE id = ? LIMIT 1`).bind(orderId).first();
+    if (!order) throw httpError("Order not found.", 404);
+  }
+}
+
+export async function getPublicCheckoutOrder(
+  db: D1Db,
+  galleryId: string,
+  orderId: string,
+  visitorKey: string,
+  identity: ClientAuthIdentity | null,
+) {
+  return checkoutOrderForClient(db, galleryId, orderId, visitorKey, identity);
+}
+
+function stripeObjectPaymentIntentId(object: any) {
+  if (typeof object?.payment_intent === "string") return text(object.payment_intent);
+  if (object?.payment_intent?.id) return text(object.payment_intent.id);
+  if (object?.object === "payment_intent") return text(object.id);
+  return text(object?.payment_intent_id);
+}
+
+function stripeObjectOrderId(object: any) {
+  return text(object?.metadata?.order_id || object?.client_reference_id);
+}
+
+function stripeObjectAmount(object: any) {
+  return integer(object?.amount_total ?? object?.amount_received ?? object?.amount);
+}
+
+function stripeObjectCurrency(object: any) {
+  return text(object?.currency).toUpperCase();
+}
+
+function stripeShipping(object: any) {
+  const shipping = object?.collected_information?.shipping_details || object?.shipping_details || object?.shipping || null;
+  return {
+    name: text(shipping?.name || object?.customer_details?.name),
+    phone: text(object?.customer_details?.phone || shipping?.phone),
+    address: shipping?.address && typeof shipping.address === "object" ? shipping.address : {},
+  };
+}
+
+export async function processStripePaymentEvent(db: D1Db, event: any, payload: any) {
+  const eventId = text(event?.id);
+  const eventType = text(event?.type);
+  const object = event?.data?.object || {};
+  if (!eventId || !eventType) throw httpError("Stripe event is invalid.", 400);
+
+  const duplicate = await db.prepare(`
+    SELECT id FROM commerce_payment_events
+    WHERE provider = 'stripe' AND provider_event_id = ? LIMIT 1
+  `).bind(eventId).first();
+  if (duplicate) return { duplicate: true, processed: false, orderId: "" };
+
+  const orderIdFromMetadata = stripeObjectOrderId(object);
+  const sessionId = object?.object === "checkout.session" ? text(object.id) : "";
+  const paymentIntentId = stripeObjectPaymentIntentId(object);
+  let order: any = null;
+  if (orderIdFromMetadata) {
+    order = await db.prepare(`SELECT * FROM commerce_orders WHERE id = ? LIMIT 1`).bind(orderIdFromMetadata).first();
+  }
+  if (!order && sessionId) {
+    order = await db.prepare(`SELECT * FROM commerce_orders WHERE checkout_session_id = ? LIMIT 1`).bind(sessionId).first();
+  }
+  if (!order && paymentIntentId) {
+    order = await db.prepare(`SELECT * FROM commerce_orders WHERE payment_intent_id = ? LIMIT 1`).bind(paymentIntentId).first();
+  }
+  if (!order) return { duplicate: false, processed: false, ignored: true, orderId: "" };
+
+  const orderId = text(order.id);
+  const amount = stripeObjectAmount(object);
+  const currency = stripeObjectCurrency(object) || text(order.currency).toUpperCase();
+  const orderAmount = integer(order.total_minor);
+  const orderCurrency = text(order.currency).toUpperCase();
+  const paidEvent = eventType === "checkout.session.async_payment_succeeded"
+    || eventType === "payment_intent.succeeded"
+    || ((eventType === "checkout.session.completed" || eventType === "checkout.session.reconciled") && text(object?.payment_status) === "paid");
+  const processingEvent = (eventType === "checkout.session.completed" || eventType === "checkout.session.reconciled")
+    && text(object?.payment_status) !== "paid";
+  const failedEvent = eventType === "checkout.session.async_payment_failed" || eventType === "payment_intent.payment_failed";
+  const expiredEvent = eventType === "checkout.session.expired";
+  const refundedEvent = eventType === "charge.refunded" && Boolean(object?.refunded);
+  const currentPaymentStatus = cleanPaymentStatus(order.payment_status);
+  const staleSessionState = Boolean(
+    sessionId
+      && text(order.checkout_session_id)
+      && sessionId !== text(order.checkout_session_id)
+      && (processingEvent || failedEvent || expiredEvent),
+  );
+  const staleIntentState = Boolean(
+    paymentIntentId
+      && text(order.payment_intent_id)
+      && paymentIntentId !== text(order.payment_intent_id)
+      && failedEvent,
+  );
+  const terminalStateRegression = (currentPaymentStatus === "paid" || currentPaymentStatus === "refunded")
+    && (processingEvent || failedEvent || expiredEvent || (currentPaymentStatus === "refunded" && paidEvent));
+  const ignoredStateEvent = staleSessionState || staleIntentState || terminalStateRegression;
+  const amountRequired = paidEvent || refundedEvent;
+  const amountMatches = !amountRequired || (amount === orderAmount && currency === orderCurrency);
+  const recognisedStateEvent = paidEvent || processingEvent || failedEvent || expiredEvent || refundedEvent;
+  const eventStatus = !amountMatches
+    ? "rejected"
+    : ignoredStateEvent
+      ? "ignored"
+      : recognisedStateEvent ? "processed" : "received";
+  const shipping = stripeShipping(object);
+  const resolvedPaymentIntentId = paymentIntentId || text(order.payment_intent_id);
+  const resolvedSessionId = sessionId || text(order.checkout_session_id);
+  const eventStatement = db.prepare(`
+    INSERT INTO commerce_payment_events (
+      id, order_id, provider, provider_event_id, event_type, status,
+      amount_minor, currency, payload_json, created_at
+    ) VALUES (?, ?, 'stripe', ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+  `).bind(
+    `payment_event_${crypto.randomUUID()}`,
+    orderId,
+    eventId,
+    eventType,
+    eventStatus,
+    amount,
+    currency || orderCurrency,
+    safeJson(payload),
+  );
+
+  const statements: any[] = [eventStatement];
+  if (amountMatches && !ignoredStateEvent && recognisedStateEvent) {
+    let paymentStatus = cleanPaymentStatus(order.payment_status);
+    if (paidEvent) paymentStatus = "paid";
+    else if (processingEvent) paymentStatus = "processing";
+    else if (failedEvent) paymentStatus = "failed";
+    else if (expiredEvent) paymentStatus = "expired";
+    else if (refundedEvent) paymentStatus = "refunded";
+    const targetStatus = paidEvent
+      ? (Number(order.requires_photographer_approval ?? 1) === 1 ? "in_review" : "paid")
+      : refundedEvent ? "refunded" : "awaiting_payment";
+    statements.push(db.prepare(`
+      UPDATE commerce_orders SET
+        status = CASE
+          WHEN ? = 'paid' AND status IN ('approved', 'in_fulfilment', 'fulfilled') THEN status
+          WHEN ? = 'paid' AND status = 'refunded' THEN status
+          WHEN ? = 'processing' AND status NOT IN ('pending', 'awaiting_payment') THEN status
+          ELSE ?
+        END,
+        payment_status = CASE
+          WHEN payment_status = 'refunded' AND ? <> 'refunded' THEN payment_status
+          WHEN payment_status = 'paid' AND ? NOT IN ('paid', 'refunded') THEN payment_status
+          ELSE ?
+        END,
+        payment_provider = 'stripe',
+        payment_reference = CASE WHEN ? <> '' THEN ? WHEN ? <> '' THEN ? ELSE payment_reference END,
+        checkout_session_id = CASE WHEN ? <> '' THEN ? ELSE checkout_session_id END,
+        payment_intent_id = CASE WHEN ? <> '' THEN ? ELSE payment_intent_id END,
+        paid_at = CASE WHEN ? = 'paid' AND paid_at IS NULL THEN CURRENT_TIMESTAMP ELSE paid_at END,
+        payment_failed_at = CASE WHEN ? = 'failed' AND payment_status NOT IN ('paid', 'refunded') THEN CURRENT_TIMESTAMP ELSE payment_failed_at END,
+        refunded_at = CASE WHEN ? = 'refunded' THEN CURRENT_TIMESTAMP ELSE refunded_at END,
+        shipping_name = CASE WHEN ? <> '' THEN ? ELSE shipping_name END,
+        shipping_phone = CASE WHEN ? <> '' THEN ? ELSE shipping_phone END,
+        shipping_address_json = CASE WHEN ? <> '{}' THEN ? ELSE shipping_address_json END,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).bind(
+      paymentStatus,
+      paymentStatus,
+      paymentStatus,
+      targetStatus,
+      paymentStatus,
+      paymentStatus,
+      paymentStatus,
+      resolvedPaymentIntentId,
+      resolvedPaymentIntentId,
+      resolvedSessionId,
+      resolvedSessionId,
+      resolvedSessionId,
+      resolvedSessionId,
+      resolvedPaymentIntentId,
+      resolvedPaymentIntentId,
+      paymentStatus,
+      paymentStatus,
+      paymentStatus,
+      shipping.name,
+      shipping.name,
+      shipping.phone,
+      shipping.phone,
+      safeJson(shipping.address),
+      safeJson(shipping.address),
+      orderId,
+    ));
+  }
+
+  try {
+    await db.batch(statements);
+  } catch (error: any) {
+    if (/unique|constraint/i.test(text(error?.message))) {
+      const repeated = await db.prepare(`
+        SELECT id FROM commerce_payment_events
+        WHERE provider = 'stripe' AND provider_event_id = ? LIMIT 1
+      `).bind(eventId).first();
+      if (repeated) return { duplicate: true, processed: false, orderId };
+    }
+    throw error;
+  }
+  return { duplicate: false, processed: eventStatus === "processed", rejected: eventStatus === "rejected", orderId };
 }

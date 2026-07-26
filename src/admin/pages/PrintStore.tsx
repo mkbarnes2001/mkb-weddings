@@ -31,6 +31,7 @@ import type {
   PrintStoreAdminPayload,
   PrintStoreOrder,
   PrintStoreOrderStatus,
+  PrintStorePaymentStatus,
   PrintStorePriceList,
   PrintStorePriceListItem,
   PrintStoreProduct,
@@ -97,6 +98,26 @@ function orderTone(status: PrintStoreOrderStatus): "neutral" | "success" | "warn
   if (["cancelled", "refunded"].includes(status)) return "danger";
   if (["in_review", "awaiting_payment", "in_fulfilment"].includes(status)) return "warning";
   return "neutral";
+}
+
+function paymentTone(status: PrintStorePaymentStatus): "neutral" | "success" | "warning" | "danger" | "info" {
+  if (status === "paid") return "success";
+  if (status === "refunded") return "info";
+  if (["failed", "expired"].includes(status)) return "danger";
+  if (status === "processing") return "warning";
+  return "neutral";
+}
+
+function addressSummary(address: Record<string, string>) {
+  return [address?.line1, address?.line2, address?.city, address?.state, address?.postal_code || address?.postalCode, address?.country]
+    .filter(Boolean)
+    .join(", ") || "Not collected yet";
+}
+
+function displayDate(value: string) {
+  if (!value) return "—";
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString("en-GB");
 }
 
 function cloneProduct(product: PrintStoreProduct) {
@@ -242,9 +263,9 @@ export function PrintStore() {
       <AdminPageHeader
         eyebrow="Commerce"
         title="Print Store"
-        description="Manage products, sizes, pricing, gallery ordering and photographer-approved fulfilment."
+        description="Manage products, pricing, Stripe payments, gallery ordering and photographer-approved fulfilment."
         actions={<AdminButton icon={RefreshCw} onClick={load} disabled={busy}>Refresh</AdminButton>}
-        meta={<div className="flex items-center gap-2"><AdminStatus tone="info">Schema 20</AdminStatus><span>{data?.orders.length || 0} orders</span><span>{activeProducts.length} active products</span></div>}
+        meta={<div className="flex items-center gap-2"><AdminStatus tone="info">Schema 21</AdminStatus><span>{data?.orders.length || 0} orders</span><span>{activeProducts.length} active products</span></div>}
       />
 
       {error ? <div className="admin-alert admin-alert--danger">{error}</div> : null}
@@ -309,28 +330,52 @@ export function PrintStore() {
 
       {tab === "orders" ? (
         <div className="mt-4" style={{ display: "grid", gridTemplateColumns: "minmax(300px,.85fr) minmax(0,1.35fr)", gap: 16, alignItems: "start" }}>
-          <AdminPanel title="Orders" description="Client submissions awaiting payment, approval or fulfilment." icon={ShoppingBag}>
-            {!data?.orders.length ? <AdminEmptyState icon={ShoppingBag} title="No orders yet" description="Orders will appear after a Client Gallery store is enabled and a client submits a cart." /> : <div className="space-y-2">{data.orders.map((order) => <button key={order.id} type="button" onClick={() => { setSelectedOrderId(order.id); setOrderDraft({ ...order }); }} className="w-full rounded-lg border border-black/10 bg-white p-3 text-left hover:bg-neutral-50" style={{ outline: selectedOrderId === order.id ? "2px solid #111" : "none" }}><div className="flex items-start justify-between gap-3"><div><strong className="text-sm">{order.orderNumber}</strong><p className="mt-1 text-xs text-neutral-500">{order.clientName || order.email} · {order.galleryTitle}</p><p className="mt-1 text-xs">{money(order.totalMinor, order.currency)} · {order.items.length} line{order.items.length === 1 ? "" : "s"}</p></div><AdminStatus tone={orderTone(order.status)}>{order.status.replaceAll("_", " ")}</AdminStatus></div></button>)}</div>}
+          <AdminPanel title="Orders" description="Stripe payment, photographer approval and fulfilment status." icon={ShoppingBag}>
+            {!data?.orders.length ? <AdminEmptyState icon={ShoppingBag} title="No orders yet" description="Orders will appear after a client starts secure checkout from an enabled Client Gallery." /> : (
+              <div className="space-y-2">
+                {data.orders.map((order) => (
+                  <button key={order.id} type="button" onClick={() => { setSelectedOrderId(order.id); setOrderDraft({ ...order }); }} className="w-full rounded-lg border border-black/10 bg-white p-3 text-left hover:bg-neutral-50" style={{ outline: selectedOrderId === order.id ? "2px solid #111" : "none" }}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div><strong className="text-sm">{order.orderNumber}</strong><p className="mt-1 text-xs text-neutral-500">{order.clientName || order.email} · {order.galleryTitle}</p><p className="mt-1 text-xs">{money(order.totalMinor, order.currency)} · {order.items.length} line{order.items.length === 1 ? "" : "s"}</p></div>
+                      <div className="flex flex-col items-end gap-1"><AdminStatus tone={paymentTone(order.paymentStatus)}>{order.paymentStatus.replaceAll("_", " ")}</AdminStatus><AdminStatus tone={orderTone(order.status)}>{order.status.replaceAll("_", " ")}</AdminStatus></div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </AdminPanel>
           {selectedOrder ? <AdminPanel title={selectedOrder.orderNumber} description={`${selectedOrder.galleryTitle} · ${selectedOrder.email}`} icon={PackageCheck} actions={<a href={`/admin/client-galleries/${encodeURIComponent(selectedOrder.galleryId)}`} className="admin-button admin-button--secondary admin-button--sm"><ExternalLink size={14} /> Gallery</a>}>
-            <div className="grid grid-cols-2 gap-4"><AdminField label="Order status"><select value={selectedOrder.status} onChange={(event) => setOrderDraft({ ...selectedOrder, status: event.target.value as PrintStoreOrderStatus })}>{["pending","awaiting_payment","paid","in_review","approved","in_fulfilment","fulfilled","cancelled","refunded"].map((status) => <option key={status} value={status}>{status.replaceAll("_", " ")}</option>)}</select></AdminField><AdminField label="Total"><input value={money(selectedOrder.totalMinor, selectedOrder.currency)} readOnly /></AdminField><AdminField label="Payment reference"><input value={selectedOrder.paymentReference} onChange={(event) => setOrderDraft({ ...selectedOrder, paymentReference: event.target.value })} placeholder="Provider payment ID" /></AdminField><AdminField label="Lab connector"><input value={selectedOrder.labConnectorKey} onChange={(event) => setOrderDraft({ ...selectedOrder, labConnectorKey: event.target.value })} placeholder="loxley" /></AdminField><AdminField label="Lab reference"><input value={selectedOrder.labReference} onChange={(event) => setOrderDraft({ ...selectedOrder, labReference: event.target.value })} /></AdminField><AdminField label="Client notes"><textarea rows={2} value={selectedOrder.clientNotes} readOnly /></AdminField><AdminField label="Internal notes" className="col-span-2"><textarea rows={3} value={selectedOrder.internalNotes} onChange={(event) => setOrderDraft({ ...selectedOrder, internalNotes: event.target.value })} /></AdminField></div>
+            <div className="mb-5 flex flex-wrap items-center gap-2 rounded-xl border border-black/10 bg-neutral-50 p-4"><CreditCard size={16} /><strong className="text-sm">Stripe payment</strong><AdminStatus tone={paymentTone(selectedOrder.paymentStatus)}>{selectedOrder.paymentStatus.replaceAll("_", " ")}</AdminStatus><span className="text-xs text-neutral-500">{selectedOrder.paidAt ? `Paid ${displayDate(selectedOrder.paidAt)}` : "Awaiting verified payment"}</span></div>
+            <div className="grid grid-cols-2 gap-4">
+              <AdminField label="Order status"><select value={selectedOrder.status} onChange={(event) => setOrderDraft({ ...selectedOrder, status: event.target.value as PrintStoreOrderStatus })}>{["pending","awaiting_payment","paid","in_review","approved","in_fulfilment","fulfilled","cancelled","refunded"].map((status) => <option key={status} value={status}>{status.replaceAll("_", " ")}</option>)}</select></AdminField>
+              <AdminField label="Total"><input value={money(selectedOrder.totalMinor, selectedOrder.currency)} readOnly /></AdminField>
+              <AdminField label="Payment provider"><input value={selectedOrder.paymentProvider || "stripe"} readOnly /></AdminField>
+              <AdminField label="Payment status"><input value={selectedOrder.paymentStatus.replaceAll("_", " ")} readOnly /></AdminField>
+              <AdminField label="Payment Intent"><input value={selectedOrder.paymentIntentId || "Not assigned yet"} readOnly /></AdminField>
+              <AdminField label="Checkout Session"><input value={selectedOrder.checkoutSessionId || "Not assigned yet"} readOnly /></AdminField>
+              <AdminField label="Payment reference"><input value={selectedOrder.paymentReference} readOnly={selectedOrder.paymentProvider === "stripe"} onChange={(event) => setOrderDraft({ ...selectedOrder, paymentReference: event.target.value })} placeholder="Provider payment ID" /></AdminField>
+              <AdminField label="Photographer approval"><input value={selectedOrder.requiresPhotographerApproval ? "Required" : "Not required"} readOnly /></AdminField>
+              <AdminField label="Delivery name"><input value={selectedOrder.shippingName || "Not collected yet"} readOnly /></AdminField>
+              <AdminField label="Delivery phone"><input value={selectedOrder.shippingPhone || "Not collected yet"} readOnly /></AdminField>
+              <AdminField label="Delivery address" className="col-span-2"><textarea rows={2} value={addressSummary(selectedOrder.shippingAddress)} readOnly /></AdminField>
+              <AdminField label="Lab connector"><input value={selectedOrder.labConnectorKey} onChange={(event) => setOrderDraft({ ...selectedOrder, labConnectorKey: event.target.value })} placeholder="prodigi" /></AdminField>
+              <AdminField label="Lab reference"><input value={selectedOrder.labReference} onChange={(event) => setOrderDraft({ ...selectedOrder, labReference: event.target.value })} /></AdminField>
+              <AdminField label="Client notes" className="col-span-2"><textarea rows={2} value={selectedOrder.clientNotes} readOnly /></AdminField>
+              <AdminField label="Internal notes" className="col-span-2"><textarea rows={3} value={selectedOrder.internalNotes} onChange={(event) => setOrderDraft({ ...selectedOrder, internalNotes: event.target.value })} /></AdminField>
+            </div>
             <div className="mt-5 space-y-2">{selectedOrder.items.map((item) => {
               const lineCost = item.studioCostMinor * item.quantity;
               const grossMargin = item.lineTotalMinor - lineCost;
               const labMapping = [item.labConnectorKey, item.labProductCode].filter(Boolean).join(" · ") || "Manual / unassigned";
               return <div key={item.id} className="flex items-center gap-3 rounded-xl border border-black/10 p-3">
                 <div className="h-16 w-20 overflow-hidden rounded-lg bg-neutral-100">{item.thumbSrc ? <img src={item.thumbSrc} alt="" className="h-full w-full object-cover" /> : null}</div>
-                <div className="min-w-0 flex-1">
-                  <strong className="text-sm">{item.productName} · {item.variantName}</strong>
-                  <p className="mt-1 truncate text-xs text-neutral-500">{item.filename}</p>
-                  <p className="mt-1 text-xs">Qty {item.quantity} · Sell {money(item.lineTotalMinor, selectedOrder.currency)} · Cost {money(lineCost, selectedOrder.currency)} · Gross {money(grossMargin, selectedOrder.currency)}</p>
-                  <p className="mt-1 text-[11px] text-neutral-500">Crop: {cropSummary(item.crop)} · Lab: {labMapping}</p>
-                </div>
+                <div className="min-w-0 flex-1"><strong className="text-sm">{item.productName} · {item.variantName}</strong><p className="mt-1 truncate text-xs text-neutral-500">{item.filename}</p><p className="mt-1 text-xs">Qty {item.quantity} · Sell {money(item.lineTotalMinor, selectedOrder.currency)} · Cost {money(lineCost, selectedOrder.currency)} · Gross {money(grossMargin, selectedOrder.currency)}</p><p className="mt-1 text-[11px] text-neutral-500">Crop: {cropSummary(item.crop)} · Lab: {labMapping}</p></div>
                 <AdminStatus tone="neutral">{item.fulfilmentStatus}</AdminStatus>
               </div>;
             })}</div>
+            <div className="mt-5 rounded-xl border border-black/10 p-4"><div className="flex items-center justify-between"><h3 className="text-sm font-semibold">Payment history</h3><span className="text-xs text-neutral-500">{selectedOrder.paymentEvents.length} event{selectedOrder.paymentEvents.length === 1 ? "" : "s"}</span></div>{selectedOrder.paymentEvents.length ? <div className="mt-3 space-y-2">{selectedOrder.paymentEvents.slice(0, 12).map((event) => <div key={event.id} className="flex items-start justify-between gap-3 border-t border-black/5 pt-2 first:border-0 first:pt-0"><div><strong className="text-xs">{event.eventType}</strong><p className="mt-1 text-[11px] text-neutral-500">{event.providerEventId || "Manual event"} · {displayDate(event.createdAt)}</p></div><AdminStatus tone={event.status === "processed" ? "success" : event.status === "rejected" ? "danger" : "neutral"}>{event.status}</AdminStatus></div>)}</div> : <p className="mt-2 text-xs text-neutral-500">No payment events recorded yet.</p>}</div>
             <AdminToolbar className="mt-5"><AdminButton variant="primary" icon={Save} onClick={saveOrder} disabled={busy}>Save order</AdminButton>{selectedOrder.status === "approved" || selectedOrder.status === "fulfilled" ? <AdminStatus tone="success"><CheckCircle2 size={13} /> {selectedOrder.status}</AdminStatus> : null}</AdminToolbar>
-          </AdminPanel> : <AdminPanel><AdminEmptyState icon={ShoppingBag} title="Select an order" description="Review product choices, crop data, payment references and fulfilment status." /></AdminPanel>}
+          </AdminPanel> : <AdminPanel><AdminEmptyState icon={ShoppingBag} title="Select an order" description="Review verified Stripe payment, delivery details, crop data and fulfilment status." /></AdminPanel>}
         </div>
       ) : null}
     </AdminPage>

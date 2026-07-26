@@ -1,4 +1,18 @@
 export type PrintStoreProductStatus = "draft" | "active" | "archived";
+export type PrintStorePaymentStatus = "unpaid" | "processing" | "paid" | "failed" | "expired" | "refunded";
+
+export type PrintStorePaymentEvent = {
+  id: string;
+  provider: string;
+  providerEventId: string;
+  eventType: string;
+  status: string;
+  amountMinor: number;
+  currency: string;
+  payload: Record<string, unknown>;
+  createdAt: string;
+};
+
 export type PrintStorePriceListStatus = "draft" | "active" | "archived";
 export type PrintStoreOrderStatus =
   | "pending"
@@ -105,6 +119,17 @@ export type PrintStoreOrder = {
   totalMinor: number;
   paymentProvider: string;
   paymentReference: string;
+  requiresPhotographerApproval: boolean;
+  paymentStatus: PrintStorePaymentStatus;
+  checkoutSessionId: string;
+  checkoutAttempt: number;
+  paymentIntentId: string;
+  paidAt: string;
+  paymentFailedAt: string;
+  refundedAt: string;
+  shippingName: string;
+  shippingPhone: string;
+  shippingAddress: Record<string, string>;
   labConnectorKey: string;
   labReference: string;
   clientNotes: string;
@@ -115,6 +140,7 @@ export type PrintStoreOrder = {
   createdAt: string;
   updatedAt: string;
   items: PrintStoreOrderItem[];
+  paymentEvents: PrintStorePaymentEvent[];
 };
 
 export type PrintStoreAdminPayload = {
