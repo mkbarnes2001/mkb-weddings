@@ -971,7 +971,7 @@ export function ClientGallery() {
 
       {showStore && store?.enabled ? (
         <div
-          className="fixed inset-0 z-[1250] flex overflow-hidden items-end justify-center bg-black/55 backdrop-blur-[2px] sm:items-center sm:justify-end sm:p-4"
+          className="fixed inset-0 z-[1250] flex items-stretch justify-end overflow-hidden bg-black/55 backdrop-blur-[2px]"
           role="presentation"
           onMouseDown={() => setShowStore(false)}
         >
@@ -979,11 +979,20 @@ export function ClientGallery() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="print-store-title"
-            className="flex h-[100dvh] max-h-[100dvh] min-h-0 w-full flex-col overflow-hidden bg-[#f7f6f3] shadow-2xl sm:h-[calc(100dvh-2rem)] sm:max-h-[calc(100dvh-2rem)] sm:max-w-xl sm:rounded-3xl"
-            style={{ color: "#111" }}
+            className="relative w-full max-w-2xl overflow-y-auto overscroll-contain bg-[#f7f6f3] shadow-2xl sm:my-4 sm:mr-4 sm:rounded-3xl"
+            style={{
+              color: "#111",
+              height: "100dvh",
+              maxHeight: "100dvh",
+              WebkitOverflowScrolling: "touch",
+              overscrollBehavior: "contain",
+              touchAction: "pan-y",
+            }}
             onMouseDown={(event) => event.stopPropagation()}
+            onWheel={(event) => event.stopPropagation()}
+            onTouchMove={(event) => event.stopPropagation()}
           >
-            <div className="z-10 flex shrink-0 items-start justify-between gap-4 border-b border-black/10 bg-white/95 px-4 py-4 backdrop-blur sm:px-6">
+            <div className="sticky top-0 z-20 flex items-start justify-between gap-4 border-b border-black/10 bg-white/95 px-4 py-4 backdrop-blur sm:px-6">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-white"><ShoppingBag size={17} /></span>
@@ -998,16 +1007,8 @@ export function ClientGallery() {
             </div>
 
             <div
-              className="min-h-0 flex-1 overflow-y-scroll px-4 py-4 sm:px-6 sm:py-6"
-              style={{
-                WebkitOverflowScrolling: "touch",
-                overscrollBehaviorY: "contain",
-                touchAction: "pan-y",
-                scrollbarGutter: "stable",
-                paddingBottom: "1.5rem",
-              }}
-              onWheel={(event) => event.stopPropagation()}
-              onTouchMove={(event) => event.stopPropagation()}
+              className="px-4 py-4 sm:px-6 sm:py-6"
+              style={{ paddingBottom: store.cart.items.length ? "2rem" : "max(2rem, env(safe-area-inset-bottom))" }}
             >
               {checkoutOrder ? (
                 <div className={`mb-4 rounded-2xl border p-4 shadow-sm sm:p-5 ${checkoutOrder.paymentStatus === "paid" ? "border-green-200 bg-green-50" : "border-amber-200 bg-amber-50"}`}>
@@ -1101,7 +1102,7 @@ export function ClientGallery() {
 
             {store.cart.items.length ? (
               <div
-                className="shrink-0 border-t border-black/10 bg-white/95 px-4 pt-3 shadow-[0_-8px_24px_rgba(0,0,0,0.07)] backdrop-blur sm:px-6"
+                className="sticky bottom-0 z-20 border-t border-black/10 bg-white/95 px-4 pt-3 shadow-[0_-8px_24px_rgba(0,0,0,0.07)] backdrop-blur sm:px-6"
                 style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
               >
                 {storeMessage ? <p aria-live="polite" className="mb-2 line-clamp-2 text-xs leading-relaxed text-neutral-600">{storeMessage}</p> : null}
