@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, ClipboardList, Crop, Download, Heart, LockKeyhole, LogIn, LogOut, Mail, Minus, Plus, Send, ShieldCheck, ShoppingBag, Trash2, X } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -301,6 +301,7 @@ export function ClientGallery() {
   const [checkoutNotes, setCheckoutNotes] = useState("");
   const [checkoutOrder, setCheckoutOrder] = useState<PrintStoreOrderSummary | null>(null);
   const [pendingCheckoutOrderId, setPendingCheckoutOrderId] = useState("");
+  const checkoutSectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!showStore) return;
@@ -636,7 +637,10 @@ export function ClientGallery() {
   const submitStoreOrder = async () => {
     setStoreBusy(true); setStoreMessage("");
     try { await checkoutRequest(); }
-    catch (err) { setStoreMessage(err instanceof Error ? err.message : "Unable to open secure payment."); }
+    catch (err) {
+      setStoreMessage(err instanceof Error ? err.message : "Unable to open secure payment.");
+      window.setTimeout(() => checkoutSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 0);
+    }
     finally { setStoreBusy(false); }
   };
 
@@ -967,7 +971,7 @@ export function ClientGallery() {
 
       {showStore && store?.enabled ? (
         <div
-          className="fixed inset-0 z-[1250] flex items-end justify-center bg-black/55 backdrop-blur-[2px] sm:items-center sm:justify-end sm:p-4"
+          className="fixed inset-0 z-[1250] flex overflow-hidden items-end justify-center bg-black/55 backdrop-blur-[2px] sm:items-center sm:justify-end sm:p-4"
           role="presentation"
           onMouseDown={() => setShowStore(false)}
         >
@@ -975,7 +979,7 @@ export function ClientGallery() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="print-store-title"
-            className="flex h-screen h-[100dvh] w-full flex-col overflow-hidden bg-[#f7f6f3] shadow-2xl sm:h-[calc(100dvh-2rem)] sm:max-w-xl sm:rounded-3xl"
+            className="flex h-[100dvh] max-h-[100dvh] min-h-0 w-full flex-col overflow-hidden bg-[#f7f6f3] shadow-2xl sm:h-[calc(100dvh-2rem)] sm:max-h-[calc(100dvh-2rem)] sm:max-w-xl sm:rounded-3xl"
             style={{ color: "#111" }}
             onMouseDown={(event) => event.stopPropagation()}
           >
@@ -994,8 +998,14 @@ export function ClientGallery() {
             </div>
 
             <div
-              className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-6"
-              style={{ WebkitOverflowScrolling: "touch", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
+              className="min-h-0 flex-1 overflow-y-scroll px-4 py-4 sm:px-6 sm:py-6"
+              style={{
+                WebkitOverflowScrolling: "touch",
+                overscrollBehaviorY: "contain",
+                touchAction: "pan-y",
+                scrollbarGutter: "stable",
+                paddingBottom: "1.5rem",
+              }}
               onWheel={(event) => event.stopPropagation()}
               onTouchMove={(event) => event.stopPropagation()}
             >
@@ -1073,7 +1083,7 @@ export function ClientGallery() {
               </section>
 
               {store.cart.items.length ? (
-                <section className="mt-4 rounded-2xl border border-black/10 bg-white p-4 shadow-sm sm:p-5">
+                <section ref={checkoutSectionRef} className="mt-4 rounded-2xl border border-black/10 bg-white p-4 shadow-sm sm:p-5">
                   <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">Step 3</p>
                   <h3 className="mt-1 text-base font-semibold">Secure checkout</h3>
                   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -1081,14 +1091,38 @@ export function ClientGallery() {
                     <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email address" className="rounded-xl border border-black/15 px-4 py-3.5 text-sm outline-none focus:border-black" />
                     <textarea value={checkoutNotes} onChange={(event) => setCheckoutNotes(event.target.value)} placeholder="Order notes (optional)" rows={3} className="rounded-xl border border-black/15 px-4 py-3.5 text-sm outline-none focus:border-black sm:col-span-2" />
                   </div>
-                  <button type="button" onClick={submitStoreOrder} disabled={storeBusy || !store.checkoutEnabled || store.cart.subtotalMinor < store.minimumOrderMinor} className="mt-3 w-full rounded-xl px-5 py-3.5 text-sm font-medium shadow-sm transition disabled:opacity-40" style={{ background: branding.accentColor, color: accentTextColor }}>{storeBusy ? "Opening secure payment…" : `Pay ${formatStoreMoney(store.cart.subtotalMinor, store.currency)} securely`}</button>
                   <div className="mt-3 rounded-xl bg-neutral-50 p-3"><p className="text-[11px] leading-relaxed text-neutral-500">Stripe securely collects payment and delivery details. MKB validates the total on the server. {store.requirePhotographerApproval ? "Your crop and product choices then move to photographer review." : "The order is recorded as paid after confirmation."}</p></div>
                   {!store.checkoutEnabled ? <p className="mt-2 text-xs text-amber-700">Secure payment is not configured yet. Please contact the photographer.</p> : null}
                 </section>
               ) : null}
 
-              {storeMessage ? <p className="mt-4 rounded-2xl border border-black/10 bg-white p-4 text-sm shadow-sm">{storeMessage}</p> : null}
+              {storeMessage ? <p aria-live="polite" className="mt-4 rounded-2xl border border-black/10 bg-white p-4 text-sm shadow-sm">{storeMessage}</p> : null}
             </div>
+
+            {store.cart.items.length ? (
+              <div
+                className="shrink-0 border-t border-black/10 bg-white/95 px-4 pt-3 shadow-[0_-8px_24px_rgba(0,0,0,0.07)] backdrop-blur sm:px-6"
+                style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+              >
+                {storeMessage ? <p aria-live="polite" className="mb-2 line-clamp-2 text-xs leading-relaxed text-neutral-600">{storeMessage}</p> : null}
+                <div className="flex items-center gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">Secure Stripe checkout</p>
+                    <p className="mt-0.5 text-lg font-semibold">{formatStoreMoney(store.cart.subtotalMinor, store.currency)}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={submitStoreOrder}
+                    disabled={storeBusy || !store.checkoutEnabled || store.cart.subtotalMinor < store.minimumOrderMinor}
+                    className="min-h-12 min-w-[10.5rem] rounded-xl px-5 py-3 text-sm font-medium shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
+                    style={{ background: branding.accentColor, color: accentTextColor }}
+                  >
+                    {storeBusy ? "Opening payment…" : "Continue to payment"}
+                  </button>
+                </div>
+                {!store.checkoutEnabled ? <p className="mt-2 text-xs text-amber-700">Secure payment is not configured yet. Please contact the photographer.</p> : null}
+              </div>
+            ) : null}
           </aside>
         </div>
       ) : null}
