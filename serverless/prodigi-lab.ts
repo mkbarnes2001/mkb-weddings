@@ -63,11 +63,31 @@ export function prodigiConfigured(env: ProdigiEnv) {
   return truthy(env.PRODIGI_ENABLED, false) && text(env.PRODIGI_API_KEY).length >= 12;
 }
 
-function prodigiError(payload: any, status: number) {
+function collectProdigiErrorDetails(value: unknown, prefix = "", depth = 0): string[] {
+  if (depth > 4 || value === null || value === undefined) return [];
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    const clean = text(value);
+    return clean ? [`${prefix ? `${prefix}: ` : ""}${clean}`] : [];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap((item, index) => collectProdigiErrorDetails(item, prefix || `item ${index + 1}`, depth + 1));
+  }
+  if (typeof value === "object") {
+    return Object.entries(value as Record<string, unknown>).flatMap(([key, item]) => {
+      const nextPrefix = [prefix, key].filter(Boolean).join(".");
+      return collectProdigiErrorDetails(item, nextPrefix, depth + 1);
+    });
+  }
+  return [];
+}
+
+function prodigiError(payload: any, status: number, responseText = "") {
   const message = text(payload?.statusText || payload?.message || payload?.error || `Prodigi request failed (${status}).`);
-  const details = Array.isArray(payload?.data?.errors)
-    ? payload.data.errors.map((item: any) => text(item?.message || item)).filter(Boolean)
-    : [];
+  const details = [
+    ...collectProdigiErrorDetails(payload?.data),
+    ...(!payload?.data && responseText ? [responseText.slice(0, 500)] : []),
+    ...(text(payload?.traceParent) ? [`Prodigi trace: ${text(payload.traceParent)}`] : []),
+  ].filter((value, index, all) => value && all.indexOf(value) === index);
   return httpError(message, status >= 400 && status < 500 ? 400 : 502, details);
 }
 
@@ -81,8 +101,14 @@ async function prodigiRequest(env: ProdigiEnv, path: string, options: RequestIni
       ...(options.headers || {}),
     },
   });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw prodigiError(payload, response.status);
+  const responseText = await response.text();
+  let payload: any = {};
+  try {
+    payload = responseText ? JSON.parse(responseText) : {};
+  } catch {
+    payload = {};
+  }
+  if (!response.ok) throw prodigiError(payload, response.status, responseText);
   return payload;
 }
 
@@ -331,24 +357,35 @@ async function orderForLab(db: D1Db, orderIdInput: string, selectedItemIds: stri
 }
 
 function shippingAddress(order: any) {
-  const address = json(order.shipping_address_json, {});
-  const recipient = {
-    name: text(order.shipping_name || order.client_name),
-    email: text(order.email),
-    phoneNumber: text(order.shipping_phone),
-    address: {
-      line1: text(address.line1),
-      line2: text(address.line2),
-      postalOrZipCode: text(address.postal_code || address.postalCode),
-      countryCode: text(address.country).toUpperCase(),
-      townOrCity: text(address.city),
-      stateOrCounty: text(address.state),
-    },
-  };
-  const missing = [recipient.name, recipient.address.line1, recipient.address.postalOrZipCode, recipient.address.countryCode, recipient.address.townOrCity]
+  const source = json(order.shipping_address_json, {});
+  const name = text(order.shipping_name || order.client_name);
+  const email = text(order.email);
+  const phoneNumber = text(order.shipping_phone);
+  const line1 = text(source.line1);
+  const line2 = text(source.line2);
+  const postalOrZipCode = text(source.postal_code || source.postalCode);
+  const countryCode = text(source.country).toUpperCase();
+  const townOrCity = text(source.city);
+  const stateOrCounty = text(source.state);
+  const missing = [name, line1, postalOrZipCode, countryCode, townOrCity]
     .map((value, index) => value ? "" : ["recipient name", "address line 1", "postcode", "country", "town/city"][index])
     .filter(Boolean);
   if (missing.length) throw httpError("The delivery address is incomplete.", 409, missing);
+  if (!/^[A-Z]{2}$/.test(countryCode)) throw httpError("The delivery country must use a two-letter country code.", 409);
+
+  const recipient: Record<string, any> = {
+    name,
+    address: {
+      line1,
+      postalOrZipCode,
+      countryCode,
+      townOrCity,
+      ...(line2 ? { line2 } : {}),
+      ...(stateOrCounty ? { stateOrCounty } : {}),
+    },
+    ...(email ? { email } : {}),
+    ...(phoneNumber ? { phoneNumber } : {}),
+  };
   return recipient;
 }
 
@@ -431,9 +468,8 @@ export async function quoteProdigiOrder(db: D1Db, env: ProdigiEnv, input: any) {
   };
 }
 
-function submissionIdempotency(orderId: string, itemIds: string[]) {
-  const suffix = itemIds.map(text).sort().join("-").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 120);
-  return `mkb-${orderId}-${suffix}`.slice(0, 240);
+function submissionIdempotency(_orderId: string, _itemIds: string[]) {
+  return crypto.randomUUID();
 }
 
 export async function submitProdigiOrder(db: D1Db, env: ProdigiEnv, input: any) {
@@ -465,10 +501,14 @@ export async function submitProdigiOrder(db: D1Db, env: ProdigiEnv, input: any) 
     && candidateRefs.every((value: string, index: number) => value === requestedRefs[index])
   );
   const submissionId = canRetry ? text(retryCandidate.id) : `lab_submission_${crypto.randomUUID()}`;
-  const requestPayload = canRetry ? candidatePayload : {
+  const candidateIdempotencyKey = text(candidatePayload?.idempotencyKey);
+  const retryIdempotencyKey = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(candidateIdempotencyKey)
+    ? candidateIdempotencyKey
+    : submissionIdempotency(text(order.id), [...itemIds, submissionId]);
+  const requestPayload = {
     merchantReference: text(order.order_number),
     shippingMethod,
-    idempotencyKey: submissionIdempotency(text(order.id), [...itemIds, submissionId]),
+    idempotencyKey: retryIdempotencyKey,
     callbackUrl: callbackUrl(env),
     recipient,
     items: providerItems,
@@ -482,8 +522,10 @@ export async function submitProdigiOrder(db: D1Db, env: ProdigiEnv, input: any) 
 
   if (canRetry) {
     await db.prepare(`
-      UPDATE commerce_lab_submissions SET status = 'draft', last_error = '', updated_at = CURRENT_TIMESTAMP WHERE id = ?
-    `).bind(submissionId).run();
+      UPDATE commerce_lab_submissions SET
+        status = 'draft', shipping_method = ?, request_json = ?, last_error = '', updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).bind(shippingMethod, safeJson(requestPayload), submissionId).run();
   } else {
     await db.prepare(`
       INSERT INTO commerce_lab_submissions (
@@ -526,9 +568,11 @@ export async function submitProdigiOrder(db: D1Db, env: ProdigiEnv, input: any) 
     await db.batch(statements);
     return { submissionId, providerOrderId, outcome, status, mode: prodigiMode(env), response };
   } catch (error) {
+    const typed = error as Error & { details?: string[] };
+    const storedError = [typed?.message || "Prodigi submission failed.", ...(typed?.details || [])].filter(Boolean).join(" ").slice(0, 2000);
     await db.prepare(`
       UPDATE commerce_lab_submissions SET status = 'error', last_error = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
-    `).bind(error instanceof Error ? error.message : "Prodigi submission failed.", submissionId).run();
+    `).bind(storedError, submissionId).run();
     throw error;
   }
 }
