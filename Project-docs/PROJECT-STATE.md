@@ -1,8 +1,23 @@
 # Project State
 
 ## Version
-Current release: **v1.6.1 — Stripe Hosted Checkout**.
-Database schema version: **21**.
+Current release: **v1.7.0 — Prodigi Professional Lab Fulfilment**.
+Database schema version: **22**.
+
+
+## Prodigi Professional Lab Fulfilment — v1.7.0
+- Adds a Prodigi sandbox adapter behind the provider-neutral Print Store lab boundary.
+- Keeps fulfilment explicitly photographer-controlled: payment never triggers automatic lab submission.
+- Adds per-variant Prodigi SKU, attributes, print-area, sizing and verified recommended-pixel mappings.
+- Copies mapping snapshots into new order lines and provides an explicit refresh action for existing unsubmitted orders.
+- Adds browser-side crop/rotation rendering from the authorised private original at the exact verified output dimensions.
+- Stores separate prepared JPEGs in private R2 without modifying canonical originals or public gallery derivatives.
+- Exposes prepared files to Prodigi only through random expiring token URLs with no-store response headers.
+- Adds quote, per-line/batch submit, retry-safe idempotency, direct status reconciliation and cancellation controls.
+- Adds CloudEvent callback ingestion protected by a random callback token, source checks, duplicate-event protection and provider API reconciliation.
+- Shows Prodigi order state, shipment carrier, dispatch and tracking data in Admin.
+- Adds migration `022_prodigi_fulfilment.sql`; schema advances to **22**.
+- Sandbox remains the required first environment; a physical sample order is required before live client fulfilment.
 
 
 
@@ -368,4 +383,3 @@ Client Gallery Admin photo cards now use one compact vertical-options icon inste
 A dedicated **Branding** workspace tab now controls the client-facing private gallery presentation. Each gallery can use the workspace logo, upload a gallery-specific logo, or hide the logo. Safe theme tokens control accent, background, surface and text colours plus a limited heading-font choice. Arbitrary CSS is not accepted. A live preview and reset-to-studio-defaults action are included.
 
 Custom logos are stored in public `MKB_IMAGES` R2 under managed branding keys. Private wedding originals remain isolated in `MKB_PRIVATE_ASSETS`. Schema version advances to **18**.
-

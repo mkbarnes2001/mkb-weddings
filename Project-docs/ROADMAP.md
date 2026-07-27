@@ -72,11 +72,20 @@ Completed and in production:
 - Delivery-detail capture, Admin payment history and approval guards
 - Payment remains separate from professional-lab fulfilment
 
-## Next — Prodigi Professional Lab Fulfilment
+## Completed — Prodigi Professional Lab Fulfilment (v1.7.0)
 - Prodigi sandbox adapter behind the provider-neutral lab interface
-- Photographer crop-review/approval preview and print-resolution checks
-- Per-line submission, retry/cancel controls and manual fulfilment fallback
-- Production/tracking webhooks and a physical sample-order gate before live use
+- Verified SKU/attribute/print-area mappings and recommended pixel dimensions
+- Photographer crop review, exact-size private JPEG preparation and resolution validation
+- Explicit per-line/batch submission, retry-safe idempotency, reconciliation and cancellation
+- CloudEvent status callbacks plus shipment/tracking visibility
+- Manual fulfilment fallback and a physical sample-order gate before live use
+
+## Next — Commercial Platform Foundation (v1.8)
+- Studio/tenant ownership, user memberships, roles and plan entitlements
+- Tenant-isolation audit across D1, R2, Admin, public routes and downloads
+- Stripe Connect hosted onboarding and connected-account event handling
+- Stripe Billing subscriptions for studios, separate from client payments
+- Commercial onboarding, audit logs, support access controls, export and deletion foundations
 
 ## Print Store & Professional Lab Fulfilment
 - Product catalogues and workspace price lists
@@ -146,7 +155,7 @@ Required behaviour:
 - Guest view/favourite access with separate download policy
 - Visitor activity tracking without raw IP storage
 
-Client selections and Print Store ordering now use this identified visitor model. Stripe hosted payment is complete; the next commerce step is a Prodigi sandbox fulfilment adapter without changing canonical client or asset identity.
+Client selections and Print Store ordering now use this identified visitor model. Stripe hosted payment and photographer-controlled Prodigi sandbox fulfilment are complete. The next commercial step is tenant hardening and Stripe Connect before CRM or online booking is opened to external studios.
 
 ## v1.5.2 — Favourite Review & Full-Resolution Download
 - Admin favourite thumbnail review.
@@ -166,4 +175,3 @@ The Client Gallery management surface has been consolidated before commerce work
 - Managed public R2 logo upload, live preview and safe theme tokens.
 
 The Client Gallery workspace is now ready for Print Store navigation and product controls without further crowding the Photos screen.
-

@@ -1,19 +1,21 @@
 # Next Steps
 
 ## Current baseline
-v1.6.1 adds Stripe-hosted Checkout to the Print Store. Schema version is 21. The server creates immutable order snapshots and authoritative totals, Stripe collects payment and delivery details, and only a signed Stripe event or server-side Stripe reconciliation can change payment state. Prodigi remains the preferred future lab provider, but no order is sent to a lab in this release.
+v1.7.0 completes the first end-to-end Print Store path in sandbox: canonical gallery asset → Stripe payment → photographer approval → exact-size prepared JPEG → explicit Prodigi submission → status/tracking reconciliation. Schema version is 22. Fulfilment remains manual by default and no paid order is submitted automatically.
 
-## v1.6.1 validation
-1. Apply migration `021_stripe_checkout.sql` and confirm `schema_meta.schema_version` is `21`.
-2. Add Stripe **test-mode** `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` values to the public Cloudflare Pages project.
-3. Configure the Stripe webhook endpoint as `https://www.mkbweddings.co.uk/api/webhooks/stripe` with the event types listed in the root `README.md`.
-4. Open an enabled private Client Gallery, add a product and select **Pay securely with Stripe**.
-5. Complete a test payment and confirm the return page reports payment confirmation rather than trusting the browser redirect alone.
-6. Open Admin → Print Store → Orders and confirm the order shows `paid`, Stripe Checkout/Payment Intent references, delivery details and payment-event history.
-7. Confirm an unpaid order cannot be approved or fulfilled, and a paid order requiring photographer approval moves to `in_review`.
-8. Cancel or allow a test Checkout Session to expire, then confirm the saved order can open a new secure payment attempt.
-9. Send a duplicate webhook event and confirm only one provider event ID is recorded.
-10. Confirm no Prodigi/lab order is created: fulfilment remains manual and photographer-controlled.
+## v1.7.0 validation
+1. Apply migration `022_prodigi_fulfilment.sql` and confirm `schema_meta.schema_version` is `22`.
+2. Configure the same Prodigi sandbox API key and callback token on the Admin and public Cloudflare Pages projects, initially with `PRODIGI_ENABLED=false`.
+3. Redeploy both projects, then set `PRODIGI_ENABLED=true` and redeploy both again.
+4. Verify one simple Prodigi photographic-print SKU in Admin → Print Store → Catalogue and confirm recommended pixel dimensions are stored.
+5. Create a paid Stripe sandbox order using that option, approve it and refresh its mapping snapshot when necessary.
+6. Prepare the line and confirm the generated private JPEG exactly matches the verified dimensions while the canonical original remains unchanged.
+7. Request a quote and confirm production plus shipping cost is shown without altering the client order total.
+8. Submit the prepared line explicitly and confirm an `ord_...` provider reference is stored.
+9. Confirm the Prodigi sandbox dashboard contains one order with the MKB order/item merchant references.
+10. Refresh status and exercise a callback; confirm duplicate events are safe and local state is reconciled from Prodigi before changing.
+11. Test a cancellation attempt and a retryable failed submission.
+12. Keep live fulfilment disabled until one physical sample order has been inspected.
 
 
 ## v1.5.9 validation
@@ -57,12 +59,13 @@ v1.6.1 adds Stripe-hosted Checkout to the Print Store. Schema version is 21. The
 8. Reset to studio defaults and confirm the workspace logo/accent return.
 
 ## Next engineering sequence
-1. Prodigi lab-connector adapter in sandbox mode, with manual photographer approval and manual fulfilment fallback.
-2. Photographer crop-review/approval preview, print-resolution validation and per-line lab submission controls.
-3. Prodigi status/tracking webhooks, retry/cancel controls and one physical sample order before live client fulfilment.
-4. Lightroom Classic Publish Plugin using the same private-original ingestion and canonical asset APIs, then direct selection sync.
-5. CRM / Client Portal foundation, reusing `client_identities` for persistent client access and including supplier questionnaires.
-6. Large-download/background job service for ZIP64 or very large gallery exports beyond the direct streaming limit.
+1. Complete the v1.7 Prodigi sandbox checklist and one controlled physical sample order; do not enable automatic submission.
+2. Build the v1.8 Commercial Platform Foundation: studios/tenants, users, memberships, roles, plan entitlements and a full tenant-isolation audit.
+3. Add Stripe Connect hosted onboarding and connected-account webhooks so each future studio receives its own client payments; retain the current single-account flow for MKB Weddings during migration.
+4. Add Stripe Billing for photographers' platform subscriptions separately from client-to-studio payments.
+5. Build the CRM / Client Portal foundation on the tenant model, reusing `client_identities` and adding enquiries, contacts, jobs, tasks, questionnaires, quotes, contracts and invoices.
+6. Add online booking only after CRM, availability, contract and connected-payment ownership are established.
+7. Move Lightroom Classic publishing and very-large background jobs after the commercial tenancy/payment foundation.
 
 ## Guardrails
 - One photograph = one canonical asset.

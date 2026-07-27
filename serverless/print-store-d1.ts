@@ -125,6 +125,14 @@ function mapVariant(row: any) {
     status: text(row?.status) === "archived" ? "archived" : "active",
     sortOrder: number(row?.sort_order),
     metadata: json(row?.metadata_json, {}),
+    labSku: text(row?.lab_sku),
+    labAttributes: json(row?.lab_attributes_json, {}),
+    labPrintArea: text(row?.lab_print_area || 'default'),
+    labSizing: ['fitPrintArea', 'stretchToPrintArea'].includes(text(row?.lab_sizing)) ? text(row?.lab_sizing) : 'fillPrintArea',
+    recommendedWidthPx: integer(row?.recommended_width_px),
+    recommendedHeightPx: integer(row?.recommended_height_px),
+    labMappingStatus: ['verified', 'invalid'].includes(text(row?.lab_mapping_status)) ? text(row?.lab_mapping_status) : 'unverified',
+    labMappingCheckedAt: text(row?.lab_mapping_checked_at),
     createdAt: text(row?.created_at),
     updatedAt: text(row?.updated_at),
   };
@@ -224,7 +232,7 @@ async function listPriceLists(db: D1Db, workspaceId: string, includeArchived = t
 }
 
 async function listOrders(db: D1Db, workspaceId: string) {
-  const [orderResult, itemResult, eventResult] = await Promise.all([
+  const [orderResult, itemResult, eventResult, printAssetResult, submissionResult, submissionItemResult, labEventResult] = await Promise.all([
     db.prepare(`
       SELECT co.*, cg.title AS gallery_title, cg.client_name AS gallery_client_name
       FROM commerce_orders co
@@ -250,7 +258,48 @@ async function listOrders(db: D1Db, workspaceId: string) {
       WHERE co.workspace_id = ?
       ORDER BY cpe.created_at DESC
     `).bind(workspaceId).all(),
+    db.prepare(`
+      SELECT cpa.*
+      FROM commerce_print_assets cpa
+      JOIN commerce_order_items coi ON coi.id = cpa.order_item_id
+      JOIN commerce_orders co ON co.id = coi.order_id
+      WHERE co.workspace_id = ?
+    `).bind(workspaceId).all(),
+    db.prepare(`
+      SELECT cls.*
+      FROM commerce_lab_submissions cls
+      WHERE cls.workspace_id = ?
+      ORDER BY cls.created_at DESC
+    `).bind(workspaceId).all(),
+    db.prepare(`
+      SELECT clsi.*
+      FROM commerce_lab_submission_items clsi
+      JOIN commerce_lab_submissions cls ON cls.id = clsi.submission_id
+      WHERE cls.workspace_id = ?
+    `).bind(workspaceId).all(),
+    db.prepare(`
+      SELECT cle.*
+      FROM commerce_lab_events cle
+      JOIN commerce_lab_submissions cls ON cls.id = cle.submission_id
+      WHERE cls.workspace_id = ?
+      ORDER BY cle.created_at DESC
+    `).bind(workspaceId).all(),
   ]);
+  const printAssetsByItem = new Map<string, any>();
+  for (const row of printAssetResult.results || []) {
+    printAssetsByItem.set(text((row as any).order_item_id), {
+      id: text((row as any).id),
+      status: text((row as any).status),
+      widthPx: integer((row as any).width_px),
+      heightPx: integer((row as any).height_px),
+      sourceWidthPx: integer((row as any).source_width_px),
+      sourceHeightPx: integer((row as any).source_height_px),
+      fileSize: integer((row as any).file_size),
+      tokenExpiresAt: text((row as any).token_expires_at),
+      createdAt: text((row as any).created_at),
+      updatedAt: text((row as any).updated_at),
+    });
+  }
   const itemsByOrder = new Map<string, any[]>();
   for (const row of itemResult.results || []) {
     const orderId = text((row as any).order_id);
@@ -271,8 +320,15 @@ async function listOrders(db: D1Db, workspaceId: string) {
       lineTotalMinor: integer((row as any).line_total_minor),
       labConnectorKey: text((row as any).lab_connector_key),
       labProductCode: text((row as any).lab_product_code),
+      labSku: text((row as any).lab_sku),
+      labAttributes: json((row as any).lab_attributes_json, {}),
+      labPrintArea: text((row as any).lab_print_area || 'default'),
+      labSizing: text((row as any).lab_sizing || 'fillPrintArea'),
+      recommendedWidthPx: integer((row as any).recommended_width_px),
+      recommendedHeightPx: integer((row as any).recommended_height_px),
       crop: json((row as any).crop_json, {}),
       fulfilmentStatus: text((row as any).fulfilment_status || "pending"),
+      printAsset: printAssetsByItem.get(text((row as any).id)) || null,
     });
     itemsByOrder.set(orderId, items);
   }
@@ -292,6 +348,69 @@ async function listOrders(db: D1Db, workspaceId: string) {
       createdAt: text((row as any).created_at),
     });
     eventsByOrder.set(orderId, events);
+  }
+  const submissionItemsBySubmission = new Map<string, any[]>();
+  for (const row of submissionItemResult.results || []) {
+    const submissionId = text((row as any).submission_id);
+    const values = submissionItemsBySubmission.get(submissionId) || [];
+    values.push({
+      orderItemId: text((row as any).order_item_id),
+      providerItemId: text((row as any).provider_item_id),
+      status: text((row as any).status),
+      updatedAt: text((row as any).updated_at),
+    });
+    submissionItemsBySubmission.set(submissionId, values);
+  }
+  const labEventsBySubmission = new Map<string, any[]>();
+  for (const row of labEventResult.results || []) {
+    const submissionId = text((row as any).submission_id);
+    const values = labEventsBySubmission.get(submissionId) || [];
+    values.push({
+      id: text((row as any).id),
+      providerEventId: text((row as any).provider_event_id),
+      eventType: text((row as any).event_type),
+      status: text((row as any).status),
+      createdAt: text((row as any).created_at),
+    });
+    labEventsBySubmission.set(submissionId, values);
+  }
+  const submissionsByOrder = new Map<string, any[]>();
+  for (const row of submissionResult.results || []) {
+    const orderId = text((row as any).order_id);
+    const values = submissionsByOrder.get(orderId) || [];
+    const response = json((row as any).response_json, {});
+    const providerOrder = response?.order || response || {};
+    const shipments = (Array.isArray(providerOrder?.shipments) ? providerOrder.shipments : []).map((shipment: any) => ({
+      id: text(shipment?.id),
+      status: text(shipment?.status),
+      dispatchDate: text(shipment?.dispatchDate),
+      carrierName: text(shipment?.carrier?.name),
+      carrierService: text(shipment?.carrier?.service),
+      trackingNumber: text(shipment?.tracking?.number),
+      trackingUrl: text(shipment?.tracking?.url),
+      fulfilmentCountry: text(shipment?.fulfillmentLocation?.countryCode),
+      labCode: text(shipment?.fulfillmentLocation?.labCode),
+    }));
+    values.push({
+      id: text((row as any).id),
+      provider: text((row as any).provider),
+      providerOrderId: text((row as any).provider_order_id),
+      providerOutcome: text((row as any).provider_outcome),
+      status: text((row as any).status),
+      providerStage: text(providerOrder?.status?.stage),
+      shippingMethod: text((row as any).shipping_method),
+      quoteAmountMinor: integer((row as any).quote_amount_minor),
+      quoteCurrency: text((row as any).quote_currency || 'GBP'),
+      lastError: text((row as any).last_error),
+      submittedAt: text((row as any).submitted_at),
+      completedAt: text((row as any).completed_at),
+      createdAt: text((row as any).created_at),
+      updatedAt: text((row as any).updated_at),
+      items: submissionItemsBySubmission.get(text((row as any).id)) || [],
+      events: labEventsBySubmission.get(text((row as any).id)) || [],
+      shipments,
+    });
+    submissionsByOrder.set(orderId, values);
   }
   return (orderResult.results || []).map((row: any) => ({
     id: text(row.id),
@@ -333,6 +452,7 @@ async function listOrders(db: D1Db, workspaceId: string) {
     updatedAt: text(row.updated_at),
     items: itemsByOrder.get(text(row.id)) || [],
     paymentEvents: eventsByOrder.get(text(row.id)) || [],
+    labSubmissions: submissionsByOrder.get(text(row.id)) || [],
   }));
 }
 
@@ -410,8 +530,9 @@ async function saveProduct(db: D1Db, workspaceId: string, incoming: any) {
     await db.prepare(`
       INSERT INTO commerce_product_variants (
         id, product_id, sku, name, width_mm, height_mm, orientation, finish,
-        status, sort_order, metadata_json, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        status, sort_order, metadata_json, lab_sku, lab_attributes_json, lab_print_area, lab_sizing,
+        recommended_width_px, recommended_height_px, lab_mapping_status, lab_mapping_checked_at, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       ON CONFLICT(id) DO UPDATE SET
         sku = excluded.sku,
         name = excluded.name,
@@ -422,6 +543,14 @@ async function saveProduct(db: D1Db, workspaceId: string, incoming: any) {
         status = excluded.status,
         sort_order = excluded.sort_order,
         metadata_json = excluded.metadata_json,
+        lab_sku = excluded.lab_sku,
+        lab_attributes_json = excluded.lab_attributes_json,
+        lab_print_area = excluded.lab_print_area,
+        lab_sizing = excluded.lab_sizing,
+        recommended_width_px = excluded.recommended_width_px,
+        recommended_height_px = excluded.recommended_height_px,
+        lab_mapping_status = excluded.lab_mapping_status,
+        lab_mapping_checked_at = excluded.lab_mapping_checked_at,
         updated_at = CURRENT_TIMESTAMP
     `).bind(
       variantId,
@@ -435,6 +564,14 @@ async function saveProduct(db: D1Db, workspaceId: string, incoming: any) {
       text(variant.status) === "archived" ? "archived" : "active",
       number(variant.sortOrder, index),
       safeJson(variant.metadata),
+      text(variant.labSku),
+      safeJson(variant.labAttributes),
+      text(variant.labPrintArea || 'default') || 'default',
+      ['fitPrintArea', 'stretchToPrintArea'].includes(text(variant.labSizing)) ? text(variant.labSizing) : 'fillPrintArea',
+      integer(variant.recommendedWidthPx),
+      integer(variant.recommendedHeightPx),
+      ['verified', 'invalid'].includes(text(variant.labMappingStatus)) ? text(variant.labMappingStatus) : 'unverified',
+      text(variant.labMappingCheckedAt) || null,
     ).run();
   }
   if (retainedIds.length) {
@@ -641,6 +778,42 @@ export async function mutatePrintStoreAdmin(db: D1Db, input: any) {
       orderId,
       workspaceId,
     ).run();
+    if (status === "approved") {
+      await db.prepare(`
+        UPDATE commerce_order_items SET fulfilment_status = 'approved'
+        WHERE order_id = ? AND fulfilment_status = 'pending'
+      `).bind(orderId).run();
+    }
+  } else if (action === "refreshOrderMappings") {
+    const orderId = text(input?.orderId);
+    if (!orderId) throw httpError("Order is required.");
+    const order = await db.prepare(`SELECT id FROM commerce_orders WHERE id = ? AND workspace_id = ? LIMIT 1`).bind(orderId, workspaceId).first();
+    if (!order) throw httpError("Order not found.", 404);
+    await db.prepare(`
+      UPDATE commerce_order_items SET
+        lab_connector_key = COALESCE((
+          SELECT cp.lab_connector_key FROM commerce_product_variants cpv
+          JOIN commerce_products cp ON cp.id = cpv.product_id
+          WHERE cpv.id = commerce_order_items.variant_id
+        ), lab_connector_key),
+        lab_product_code = COALESCE((
+          SELECT cp.lab_product_code FROM commerce_product_variants cpv
+          JOIN commerce_products cp ON cp.id = cpv.product_id
+          WHERE cpv.id = commerce_order_items.variant_id
+        ), lab_product_code),
+        lab_sku = COALESCE((SELECT cpv.lab_sku FROM commerce_product_variants cpv WHERE cpv.id = commerce_order_items.variant_id), lab_sku),
+        lab_attributes_json = COALESCE((SELECT cpv.lab_attributes_json FROM commerce_product_variants cpv WHERE cpv.id = commerce_order_items.variant_id), lab_attributes_json),
+        lab_print_area = COALESCE((SELECT cpv.lab_print_area FROM commerce_product_variants cpv WHERE cpv.id = commerce_order_items.variant_id), lab_print_area),
+        lab_sizing = COALESCE((SELECT cpv.lab_sizing FROM commerce_product_variants cpv WHERE cpv.id = commerce_order_items.variant_id), lab_sizing),
+        recommended_width_px = COALESCE((SELECT cpv.recommended_width_px FROM commerce_product_variants cpv WHERE cpv.id = commerce_order_items.variant_id), recommended_width_px),
+        recommended_height_px = COALESCE((SELECT cpv.recommended_height_px FROM commerce_product_variants cpv WHERE cpv.id = commerce_order_items.variant_id), recommended_height_px)
+      WHERE order_id = ? AND fulfilment_status IN ('pending', 'approved', 'cancelled')
+        AND EXISTS (
+          SELECT 1 FROM commerce_product_variants cpv
+          WHERE cpv.id = commerce_order_items.variant_id AND cpv.lab_mapping_status = 'verified'
+        )
+        AND NOT EXISTS (SELECT 1 FROM commerce_print_assets cpa WHERE cpa.order_item_id = commerce_order_items.id)
+    `).bind(orderId).run();
   } else if (action === "recordPaymentEvent") {
     const orderId = text(input?.orderId);
     const provider = text(input?.provider || "manual");
@@ -1199,8 +1372,9 @@ export async function preparePublicCheckoutOrder(
       INSERT INTO commerce_order_items (
         id, order_id, asset_id, product_id, variant_id, product_name, variant_name, sku,
         quantity, unit_price_minor, studio_cost_minor, line_total_minor,
-        lab_connector_key, lab_product_code, crop_json, fulfilment_status, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
+        lab_connector_key, lab_product_code, lab_sku, lab_attributes_json, lab_print_area, lab_sizing,
+        recommended_width_px, recommended_height_px, crop_json, fulfilment_status, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
     `).bind(
       `order_item_${crypto.randomUUID()}`,
       orderId,
@@ -1216,6 +1390,12 @@ export async function preparePublicCheckoutOrder(
       item.lineTotalMinor,
       text(variant.lab_connector_key),
       text(variant.lab_product_code),
+      text(variant.lab_sku),
+      safeJson(json(variant.lab_attributes_json, {})),
+      text(variant.lab_print_area || 'default'),
+      text(variant.lab_sizing || 'fillPrintArea'),
+      integer(variant.recommended_width_px),
+      integer(variant.recommended_height_px),
       safeJson(item.crop),
     ));
   }

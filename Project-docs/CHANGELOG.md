@@ -1,5 +1,17 @@
 # MKB Intelligence — Changelog
 
+## v1.7.0 — Prodigi Professional Lab Fulfilment
+- Added migration 022 with verified per-variant lab mappings, immutable order-line mapping snapshots, prepared print assets, provider-neutral lab submissions/items and idempotent lab-event history.
+- Added Prodigi sandbox product verification against SKU, attributes, print area and recommended pixel dimensions.
+- Added secure print-ready JPEG preparation from the private original using the saved crop/rotation and exact Prodigi dimensions.
+- Kept prepared files in private R2 and exposed them only through random expiring token URLs.
+- Added photographer-controlled quote, per-line/batch submission, retry-safe idempotency, reconciliation and cancellation actions.
+- Added Prodigi CloudEvent callback handling with a secret callback token, source validation, duplicate-event protection and direct provider reconciliation.
+- Added Admin fulfilment status, provider references, shipment carrier, dispatch and tracking details.
+- Preserved manual fulfilment and prevented unpaid/unapproved orders from being submitted.
+- No automatic lab submission is performed when Stripe payment succeeds.
+- Schema advances to 22.
+
 ## v1.6.1 — Stripe Hosted Checkout
 - Added migration 021 with payment lifecycle, Checkout Session, Payment Intent, delivery-address and payment timestamp fields.
 - Added Stripe-hosted Checkout creation with server-authoritative line items/totals and per-attempt idempotency keys.
@@ -369,4 +381,3 @@
 - Added light colour presets, individual colour controls, limited heading styles, studio-name visibility and a live client-gallery preview.
 - Applied branding to the private gallery header, access screen, page surfaces, album navigation and primary actions.
 - Added migration 018; schema version advances to 18.
-

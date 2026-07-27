@@ -258,3 +258,51 @@ Payment rules:
 - signed Stripe webhooks and server-to-Stripe Session reconciliation are the only automatic payment-state writers;
 - stale failed/expired events cannot regress a paid/refunded order;
 - delivery details are fulfilment snapshots and do not create a new client identity or asset.
+
+## Schema version 22
+Migration: `022_prodigi_fulfilment.sql`
+
+Adds verified mapping fields to `commerce_product_variants`:
+- Prodigi/lab SKU;
+- attributes JSON;
+- print-area and sizing strategy;
+- recommended width/height in pixels;
+- mapping verification status and timestamp.
+
+Adds the same immutable mapping snapshot fields to `commerce_order_items`. New orders copy these values at order creation. Existing unsubmitted lines may be refreshed explicitly from their current variant; prepared/submitted lines are not automatically changed.
+
+New tables:
+
+### `commerce_print_assets`
+- one managed prepared JPEG per order line;
+- workspace, canonical asset and order-item ownership;
+- private R2 storage key;
+- random access token and expiry;
+- exact prepared dimensions, original source dimensions, file size and crop snapshot;
+- prepared/submitted/revoked/error lifecycle.
+
+### `commerce_lab_submissions`
+- provider-neutral order submission record;
+- workspace and commerce-order ownership;
+- provider order ID/outcome/status;
+- shipping method, optional quote fields, request/response snapshots and failure detail;
+- submitted/completed timestamps;
+- unique non-empty provider order ID.
+
+### `commerce_lab_submission_items`
+- selected order lines for each lab submission;
+- provider item ID and current provider status;
+- composite submission/order-item identity.
+
+### `commerce_lab_events`
+- provider callback/reconciliation event ledger;
+- unique non-empty provider event ID for idempotency;
+- event type, processing state and payload snapshot.
+
+Storage and integrity rules:
+- the private R2 object is not the canonical photograph; it is a disposable fulfilment derivative linked back to `assets.id`;
+- deleting gallery membership never deletes the canonical original or its prepared fulfilment audit record;
+- a paid and approved order is required before submission;
+- product mapping changes do not rewrite historical submitted lines;
+- provider callbacks are reconciled against the provider API before order/line status changes;
+- migration 022 does not copy, rename or delete existing R2 originals.

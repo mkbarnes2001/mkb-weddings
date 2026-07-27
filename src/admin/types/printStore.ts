@@ -37,6 +37,14 @@ export type PrintStoreProductVariant = {
   status: "active" | "archived";
   sortOrder: number;
   metadata: Record<string, unknown>;
+  labSku: string;
+  labAttributes: Record<string, string>;
+  labPrintArea: string;
+  labSizing: "fillPrintArea" | "fitPrintArea" | "stretchToPrintArea";
+  recommendedWidthPx: number;
+  recommendedHeightPx: number;
+  labMappingStatus: "unverified" | "verified" | "invalid";
+  labMappingCheckedAt: string;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -81,6 +89,49 @@ export type PrintStorePriceList = {
   updatedAt?: string;
 };
 
+export type PrintStorePreparedAsset = {
+  id: string;
+  status: string;
+  widthPx: number;
+  heightPx: number;
+  sourceWidthPx: number;
+  sourceHeightPx: number;
+  fileSize: number;
+  tokenExpiresAt: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PrintStoreLabSubmission = {
+  id: string;
+  provider: string;
+  providerOrderId: string;
+  providerOutcome: string;
+  status: string;
+  providerStage: string;
+  shippingMethod: string;
+  quoteAmountMinor: number;
+  quoteCurrency: string;
+  lastError: string;
+  submittedAt: string;
+  completedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  items: Array<{ orderItemId: string; providerItemId: string; status: string; updatedAt: string }>;
+  events: Array<{ id: string; providerEventId: string; eventType: string; status: string; createdAt: string }>;
+  shipments: Array<{
+    id: string;
+    status: string;
+    dispatchDate: string;
+    carrierName: string;
+    carrierService: string;
+    trackingNumber: string;
+    trackingUrl: string;
+    fulfilmentCountry: string;
+    labCode: string;
+  }>;
+};
+
 export type PrintStoreOrderItem = {
   id: string;
   assetId: string;
@@ -97,8 +148,15 @@ export type PrintStoreOrderItem = {
   lineTotalMinor: number;
   labConnectorKey: string;
   labProductCode: string;
+  labSku: string;
+  labAttributes: Record<string, string>;
+  labPrintArea: string;
+  labSizing: "fillPrintArea" | "fitPrintArea" | "stretchToPrintArea";
+  recommendedWidthPx: number;
+  recommendedHeightPx: number;
   crop: Record<string, number>;
   fulfilmentStatus: string;
+  printAsset: PrintStorePreparedAsset | null;
 };
 
 export type PrintStoreOrder = {
@@ -141,6 +199,7 @@ export type PrintStoreOrder = {
   updatedAt: string;
   items: PrintStoreOrderItem[];
   paymentEvents: PrintStorePaymentEvent[];
+  labSubmissions: PrintStoreLabSubmission[];
 };
 
 export type PrintStoreAdminPayload = {

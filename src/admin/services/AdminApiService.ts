@@ -472,6 +472,51 @@ export class AdminApiService {
     return this.mutatePrintStore({ action: "updateOrder", orderId, ...input });
   }
 
+  static async verifyProdigiVariantMapping(input: {
+    variantId: string;
+    sku: string;
+    attributes?: Record<string, string>;
+    printArea?: string;
+    sizing?: string;
+  }) {
+    return request<{ ok: true; mapping: Record<string, unknown> }>("/api/print-store/prodigi/product", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  }
+
+  static async uploadPreparedPrintAsset(input: {
+    orderId: string;
+    itemId: string;
+    blob: Blob;
+    sourceWidthPx: number;
+    sourceHeightPx: number;
+  }) {
+    return request<{ ok: true; printAsset: Record<string, unknown> }>(
+      `/api/print-store/orders/${encodeURIComponent(input.orderId)}/items/${encodeURIComponent(input.itemId)}/print-asset`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "image/jpeg",
+          "X-Source-Width-Px": String(input.sourceWidthPx || 0),
+          "X-Source-Height-Px": String(input.sourceHeightPx || 0),
+        },
+        body: input.blob,
+      },
+    );
+  }
+
+  static async prodigiLabAction(orderId: string, input: {
+    action: "quote" | "submit" | "refresh" | "cancel";
+    itemIds?: string[];
+    shippingMethod?: string;
+  }) {
+    return request<Record<string, unknown> & { ok: true }>(
+      `/api/print-store/orders/${encodeURIComponent(orderId)}/lab`,
+      { method: "POST", body: JSON.stringify(input) },
+    );
+  }
+
   static async getClientGalleryStore(id: string) {
     const result = await request<{ ok: true } & ClientGalleryStoreAdminPayload>(
       `/api/client-galleries/${encodeURIComponent(id)}/store`,

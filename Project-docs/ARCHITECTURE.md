@@ -293,3 +293,24 @@ Security and consistency invariants:
 - stored event payloads are sanitised operational snapshots, not raw Stripe objects or payment-method data.
 
 Payment and fulfilment remain separate adapters. A paid order is not automatically submitted to Prodigi. Photographer approval, print-ready rendering and lab submission remain explicit future stages.
+
+## Prodigi fulfilment boundary — v1.7.0
+The first professional-lab path is:
+
+`Paid immutable order → photographer approval → verified product mapping → prepared private JPEG → explicit Prodigi order → callback/API reconciliation → shipment/tracking`
+
+Architecture rules:
+- Stripe payment and lab fulfilment remain independent state machines; a payment event cannot call Prodigi.
+- Catalogue mappings are editable for future orders, while every order line stores an immutable lab SKU, attributes, print area, sizing and recommended-pixel snapshot.
+- Existing unsubmitted order lines can explicitly refresh from the current verified mapping; prepared or submitted lines are not silently rewritten.
+- Crop/rotation instructions remain normalised metadata on the order line. Admin renders a separate exact-size JPEG from the authorised private original; the canonical asset and public derivatives are unchanged.
+- Prepared JPEGs live under managed `MKB_PRIVATE_ASSETS` keys. Prodigi receives only a random expiring URL; the endpoint discloses neither storage keys nor credentials and returns `private, no-store`.
+- Every lab submission has its own provider-neutral record, immutable request snapshot, response snapshot, selected order-line links and provider event ledger.
+- Create-order idempotency is retained across retry of an ambiguous failed request.
+- Prodigi callback documentation does not define a signature header. The callback URL therefore includes a high-entropy secret token; MKB also validates CloudEvent identity/source and retrieves the current order from Prodigi before applying state.
+- Manual status refresh uses the same reconciliation function as callbacks.
+- Shipment/tracking data is derived from the provider response snapshot rather than becoming canonical client or asset data.
+- Cancellation is best-effort and must never be represented as guaranteed once production has started.
+- `PRODIGI_ENABLED` is a kill switch for provider API activity. Sandbox is the default environment and live use requires a physical sample gate.
+
+The provider-neutral tables and route/service boundary allow another lab adapter later without replacing cart, payment, order or canonical asset models.
