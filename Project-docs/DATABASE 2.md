@@ -1,0 +1,239 @@
+# MKB Intelligence — Database Notes
+
+Always inspect the actual migration files before assuming a table/column exists.
+
+## Schema version
+Current target schema version: **19**. Read migrations in sequence; migrations 017–019 add Client Gallery albums, branding and photo ordering metadata.
+
+## Core domains
+- `venues`
+- `weddings`
+- `images`
+- `venue_images`
+- `wedding_images`
+- `story_images`
+- `published_story_images`
+- `moments`
+- `custom_collections`
+- `collection_images`
+- `content_pages`
+
+## Supplier domain
+Legacy compatibility:
+- `wedding_suppliers`
+
+Master model added in schema v5:
+- `suppliers`
+- `wedding_supplier_links`
+
+`suppliers` stores reusable business data.
+`wedding_supplier_links` stores wedding relationships, role and order. Its relationship key is `(wedding_slug, supplier_id, role)` so one supplier can legitimately serve multiple roles on the same wedding.
+
+Migration 005 seeds master suppliers by normalised existing supplier name and creates links from existing `wedding_suppliers` rows.
+
+## Editorial fields added in schema v5
+`venues`:
+- `gallery_visible`
+- `gallery_sort_order`
+
+`weddings`:
+- `story_sort_order`
+- `story_list_visible`
+
+## Database rules
+1. Prefer stable IDs/relations over duplicated names.
+2. Never identify an image by filename alone.
+3. Preserve existing relationships during migrations.
+4. Migrations must be documented and production-run before code that depends on them.
+5. Do not remove compatibility data until public/admin consumers have been audited.
+6. Future commercial entities must be designed around tenant ownership.
+
+## Schema version 7
+Migration: `007_commercial_workspace_foundation.sql`
+
+Adds:
+- `workspaces`
+- `workspace_settings`
+- `workspace_domains`
+- `workspace_memberships`
+- `schema_meta.default_workspace_id`
+
+Seeds `workspace_mkb_weddings` as the current default workspace. No existing wedding, venue, supplier, image, moment or collection rows are rewritten by this migration.
+
+## Schema version 8
+Migration: `008_location_gallery_foundation.sql`
+
+Adds:
+- `location_gallery_settings`
+- `location_areas`
+- `venue_location_links`
+
+MKB county data was recovered/migrated into the generic location model while preserving the legacy `counties` table for compatibility.
+
+## Schema version 9
+Migration: `009_location_types_and_gallery_sources.sql`
+
+Adds:
+- `location_types`
+
+`location_types` is workspace-owned and defines the reusable geography/destination taxonomy. `type_key` remains the stable value stored by `location_areas.area_type` and `location_gallery_settings.grouping_level`.
+
+The MKB seed keeps `county` as the only gallery-eligible source initially, preserving Explore by County. Other standard types remain available for Location Intelligence and can be enabled as gallery sources through Admin.
+
+## Schema version 10
+Migration: `010_workspace_asset_library_foundation.sql`
+
+Adds the workspace-owned canonical asset layer:
+- `assets`
+- `asset_files`
+- `asset_wedding_links`
+- `asset_venue_links`
+- `asset_moment_links`
+- `asset_gallery_links`
+
+Migration behaviour:
+- registers existing `images.asset_key` records as canonical assets using deterministic IDs: `asset:<legacy_asset_key>`;
+- registers `images.full_src` as `web` derivatives and `images.thumb_src` as `thumb` derivatives;
+- does not create an `original` variant for existing public images because the current browser pipeline stores processed derivatives rather than the private camera-original JPEG;
+- snapshots current wedding, venue, moment and custom-gallery relationships;
+- does not copy, rename or delete R2 objects;
+- leaves existing image/gallery tables in place as compatibility authority during phased cutover.
+
+New commercial image features should use `assets.id` as canonical identity and `workspace_id` as the ownership boundary.
+
+## Schema version 11
+Migration: `011_private_client_galleries_foundation.sql`
+
+Adds:
+- `client_galleries`
+- `client_gallery_assets`
+- `client_gallery_favourites`
+
+Rules:
+- every client gallery is workspace-owned;
+- public access uses a high-entropy `access_token` rather than exposing internal IDs;
+- optional PINs are stored only as salted PBKDF2 hashes;
+- gallery membership references canonical `assets.id` and never filenames;
+- existing `web`/`thumb` derivatives may be used as previews, but private originals are not implied or fabricated;
+- secure original download authorization is deferred until `asset_files.variant = 'original'` is populated by the high-volume upload pipeline.
+
+## Schema version 12
+Migration: `012_private_original_upload_and_secure_delivery.sql`
+
+Adds:
+- `asset_upload_sessions`
+- `asset_download_events`
+
+`asset_upload_sessions` stores workspace/gallery/asset ownership, client file fingerprint, private object key, R2 multipart upload ID, part size, accepted part ETags, processing state and completion timestamps.
+
+`asset_download_events` records authorised original deliveries by workspace, gallery, canonical asset and browser visitor key. It records delivery bytes and user agent, but does not store raw client IP addresses.
+
+No existing asset, image, gallery or R2 object is rewritten by migration 012.
+
+
+## Wedding preview sets — schema 13
+`wedding_preview_sets` provides a reusable named selection boundary for post-wedding preview workflows. The initial built-in set is `wedding-day-previews`, but the model permits additional sets later.
+
+`wedding_preview_assets` links canonical `assets.id` values to a preview set with exact ordering.
+
+Preview-set membership does not copy image files and does not imply public visibility. Publishing destinations are applied separately and use only safe `web` / `thumb` derivatives.
+
+## Schema version 14
+Migration: `014_gallery_visitor_identity_permissions.sql`
+
+Adds:
+- `client_gallery_access_settings`
+- `client_gallery_contacts`
+- `client_gallery_visitors`
+
+`client_gallery_access_settings` stores email-gating and guest-download policy without altering legacy `client_galleries` columns.
+
+`client_gallery_contacts` stores gallery-specific authorised email identities and per-contact original-download entitlement. It does not replace the future CRM contact model; it is a delivery permission boundary that can later link to CRM contacts.
+
+`client_gallery_visitors` stores gallery/browser visitor keys, email identity, first/last seen timestamps and visit counts. Raw IP addresses are not stored.
+
+## Schema version 15
+Migration: `015_client_selections_and_shortlists.sql`
+
+Adds:
+- `client_gallery_selection_requests`
+- `client_gallery_selections`
+- `client_gallery_selection_assets`
+
+A selection request belongs to one Client Gallery and defines a named task plus optional minimum/maximum image counts. A visitor selection belongs to a request and visitor/email identity and moves from `draft` to `submitted`. Selected images reference canonical `assets.id` only. Submitted selections are immutable to the client until Admin reopens them.
+
+No R2 objects are copied or deleted by this migration.
+
+
+## Schema version 16
+Migration: `016_persistent_client_identity_magic_links.sql`
+
+Adds:
+- `client_identities`
+- `client_identity_gallery_visitors`
+- `client_identity_magic_links`
+- `client_identity_sessions`
+
+`client_identities` is a workspace-level verified email identity boundary for future Client Portal/commerce work. `client_identity_gallery_visitors` maps historical/browser visitor keys to a verified identity on a per-gallery basis so existing favourites can be reused without copying asset records.
+
+Magic-link and session credentials are stored as SHA-256 hashes only. Magic links are one-time and expire after 15 minutes. Sessions expire after 30 days and may be explicitly revoked by sign-out. The browser session token is delivered only through an HttpOnly, SameSite=Lax cookie.
+
+No R2 object is copied, renamed or deleted by migration 016. Existing favourites and selections remain in their original tables.
+
+
+## v1.5.4 Client Gallery Albums — schema 17
+`client_gallery_albums` stores workspace-gallery presentation sections such as Getting Ready, Ceremony, Portraits, Reception and Evening.
+
+`client_gallery_album_assets` is a relationship table only. It references existing canonical `assets.id` records and never creates duplicate image files or asset identities. An asset may belong to multiple albums. `All Photos` is not stored as an album; it remains the virtual complete gallery membership from `client_gallery_assets`.
+
+Migration: `d1/migrations/017_client_gallery_workspace_albums.sql`.
+
+## Schema version 18
+Migration: `018_client_gallery_branding.sql`
+
+Adds `client_gallery_branding`, one optional row per Client Gallery. Fields store:
+- logo mode (`workspace`, `custom`, `hidden`);
+- managed custom logo URL/storage key;
+- validated accent, page background, surface and text colours;
+- limited heading-font choice;
+- studio-name visibility.
+
+No data backfill is required. Existing galleries automatically resolve workspace branding defaults until an override is saved. Canonical assets and private originals are unchanged.
+
+
+
+## Schema version 19
+Migration: `019_client_gallery_photo_ordering.sql`
+
+Adds:
+- `client_gallery_display_settings`
+- `asset_capture_metadata`
+
+`client_gallery_display_settings.sort_mode` controls Custom / Capture time / Filename presentation. Custom order continues to use existing relationship `sort_order` fields. `asset_capture_metadata` stores EXIF or file-time data independently from filenames and asset identity.
+
+
+## Schema version 20
+Migration: `020_print_store_foundation.sql`
+
+Adds:
+- `commerce_products`
+- `commerce_product_variants`
+- `commerce_price_lists`
+- `commerce_price_list_items`
+- `client_gallery_store_settings`
+- `commerce_carts`
+- `commerce_cart_items`
+- `commerce_orders`
+- `commerce_order_items`
+- `commerce_payment_events`
+
+Ownership and identity rules:
+- products, price lists, carts and orders are workspace-owned;
+- gallery store settings belong to one existing `client_galleries.id`;
+- cart/order image choices reference canonical `assets.id`, never filenames or duplicate files;
+- crop state is stored as normalised non-destructive JSON coordinates;
+- order items snapshot product name, variant, SKU, quantity, unit price, studio cost, crop and lab mapping so later catalogue, pricing or connector edits do not rewrite historical orders;
+- payment events are provider-neutral and support idempotent provider event IDs;
+- lab connector/product/reference fields are integration boundaries only and do not imply a live lab submission.
+
+Migration 020 does not copy, rename or delete any R2 object. Existing Client Galleries receive disabled default store settings.

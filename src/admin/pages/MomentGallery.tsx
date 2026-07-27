@@ -323,8 +323,15 @@ export function MomentGallery() {
       };
 
       const visibleAssetKeys = images
-        .filter((image) => !hiddenSet.has(image.assetKey))
+        .filter(
+          (image) =>
+            !hiddenSet.has(image.assetKey) && Boolean(image.display.moments),
+        )
         .map((image) => image.assetKey);
+
+      // Save moment metadata first. If this fails, no public image visibility
+      // is changed. The previous order could leave a partially saved gallery.
+      const result = await AdminApiService.saveMoments(nextDocument);
 
       await AdminApiService.enableMomentGalleryImages(
         slug,
@@ -336,11 +343,12 @@ export function MomentGallery() {
           display: {
             ...image.display,
             venue: image.included,
-            moments: (image.moments || []).length > 0,
+            // Preserve the stored public-visibility decision. Reordering a
+            // gallery must not silently expose legacy or incomplete assets.
+            moments: Boolean(image.display.moments),
           },
         })),
       );
-      const result = await AdminApiService.saveMoments(nextDocument);
 
       if (customMembershipDirty.size) {
         await AdminApiService.saveCustomCollectionMemberships(
@@ -357,11 +365,11 @@ export function MomentGallery() {
       setDocument(result.document);
       setMoment(savedMoment || nextMoment);
       setImages((current) =>
-        current.map((image) =>
-          hiddenSet.has(image.assetKey)
-            ? image
-            : { ...image, globallyEnabled: true },
-        ),
+        current.map((image) => ({
+          ...image,
+          globallyEnabled:
+            !hiddenSet.has(image.assetKey) && Boolean(image.display.moments),
+        })),
       );
       setCustomMembershipDirty(new Set());
       setDirty(false);
