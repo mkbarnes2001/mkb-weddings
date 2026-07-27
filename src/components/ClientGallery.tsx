@@ -302,6 +302,42 @@ export function ClientGallery() {
   const [checkoutOrder, setCheckoutOrder] = useState<PrintStoreOrderSummary | null>(null);
   const [pendingCheckoutOrderId, setPendingCheckoutOrderId] = useState("");
 
+  useEffect(() => {
+    if (!showStore) return;
+
+    const body = document.body;
+    const root = document.documentElement;
+    const scrollY = window.scrollY;
+    const previousBody = {
+      overflow: body.style.overflow,
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+    };
+    const previousRootOverflow = root.style.overflow;
+
+    body.style.overflow = "hidden";
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.width = "100%";
+    root.style.overflow = "hidden";
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowStore(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      window.removeEventListener("keydown", closeOnEscape);
+      body.style.overflow = previousBody.overflow;
+      body.style.position = previousBody.position;
+      body.style.top = previousBody.top;
+      body.style.width = previousBody.width;
+      root.style.overflow = previousRootOverflow;
+      window.scrollTo(0, scrollY);
+    };
+  }, [showStore]);
+
   const load = async (attemptPin = "", attemptEmail = "") => {
     setError("");
     const endpoint = `/api/public/client-galleries/${encodeURIComponent(token)}`;
@@ -930,29 +966,128 @@ export function ClientGallery() {
       </main>
 
       {showStore && store?.enabled ? (
-        <div style={{ position: "fixed", inset: 0, zIndex: 1250, background: "rgba(0,0,0,.5)", display: "flex", justifyContent: "flex-end" }} onMouseDown={() => setShowStore(false)}>
-          <aside className="h-full w-full max-w-2xl overflow-y-auto bg-white shadow-2xl" style={{ color: "#111" }} onMouseDown={(event) => event.stopPropagation()}>
-            <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-black/10 bg-white px-5 py-4"><div><div className="flex items-center gap-2"><ShoppingBag size={18} /><h2 className="text-lg font-semibold">Shop prints</h2></div><p className="mt-1 text-xs text-neutral-500">{store.intro || "Order professional prints from your private gallery."}</p></div><button type="button" onClick={() => setShowStore(false)} aria-label="Close Print Store"><X size={19} /></button></div>
-            <div className="p-5">
-              {checkoutOrder ? <div className={`mb-5 rounded-2xl border p-5 ${checkoutOrder.paymentStatus === "paid" ? "border-green-200 bg-green-50" : "border-amber-200 bg-amber-50"}`}><strong className="text-sm">Order {checkoutOrder.orderNumber}</strong><p className="mt-2 text-sm">{checkoutOrder.paymentStatus === "paid" ? (checkoutOrder.requiresPhotographerApproval ? "Payment confirmed. Awaiting photographer approval." : "Payment confirmed. Order received.") : checkoutOrder.paymentStatus === "processing" ? "Payment is being processed by Stripe." : "Payment has not been completed."}</p><p className="mt-2 text-xs text-neutral-500">Total {formatStoreMoney(checkoutOrder.totalMinor, checkoutOrder.currency)} · {checkoutOrder.status.replaceAll("_", " ")} · {checkoutOrder.paymentStatus.replaceAll("_", " ")}</p>{["unpaid", "failed", "expired"].includes(checkoutOrder.paymentStatus) ? <button type="button" onClick={resumeStorePayment} disabled={storeBusy || !store.checkoutEnabled} className="mt-3 rounded-xl bg-black px-4 py-2 text-xs text-white disabled:opacity-40">{storeBusy ? "Opening…" : "Resume secure payment"}</button> : null}</div> : null}
-              <section>
-                <div className="flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">1. Choose a photograph</h3><p className="mt-1 text-xs text-neutral-500">The photograph remains linked to its canonical gallery asset.</p></div>{storeAssetId ? <button type="button" onClick={() => setStoreAssetId("")} className="text-xs underline">Change</button> : null}</div>
-                {storeAssetId ? (() => { const image = images.find((candidate) => candidate.assetId === storeAssetId); return image ? <div className="mt-3 flex items-center gap-3 rounded-xl border border-black/10 p-3"><div className="h-24 w-32 overflow-hidden rounded-lg bg-neutral-100"><GalleryImage image={image} baseOrigin={publicAssetOrigin} mode="tile" /></div><div className="min-w-0"><strong className="text-sm">Selected photograph</strong><p className="mt-1 truncate text-xs text-neutral-500">{image.filename}</p></div></div> : null; })() : <div className="mt-3 grid grid-cols-4 gap-2">{images.slice(0, 80).map((image) => <button key={image.assetId} type="button" onClick={() => setStoreAssetId(image.assetId)} className="overflow-hidden rounded-lg border border-black/10" style={{ aspectRatio: "1/1" }}><GalleryImage image={image} baseOrigin={publicAssetOrigin} mode="tile" /></button>)}</div>}
+        <div
+          className="fixed inset-0 z-[1250] flex items-end justify-center bg-black/55 backdrop-blur-[2px] sm:items-center sm:justify-end sm:p-4"
+          role="presentation"
+          onMouseDown={() => setShowStore(false)}
+        >
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="print-store-title"
+            className="flex h-screen h-[100dvh] w-full flex-col overflow-hidden bg-[#f7f6f3] shadow-2xl sm:h-[calc(100dvh-2rem)] sm:max-w-xl sm:rounded-3xl"
+            style={{ color: "#111" }}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="z-10 flex shrink-0 items-start justify-between gap-4 border-b border-black/10 bg-white/95 px-4 py-4 backdrop-blur sm:px-6">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-white"><ShoppingBag size={17} /></span>
+                  <div>
+                    <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">Private gallery store</p>
+                    <h2 id="print-store-title" className="text-xl font-semibold leading-tight">Shop prints</h2>
+                  </div>
+                </div>
+                <p className="mt-2 max-w-md text-xs leading-relaxed text-neutral-500">{store.intro || "Order professional prints from your private gallery."}</p>
+              </div>
+              <button type="button" onClick={() => setShowStore(false)} aria-label="Close Print Store" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white transition hover:bg-neutral-100"><X size={19} /></button>
+            </div>
+
+            <div
+              className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-6"
+              style={{ WebkitOverflowScrolling: "touch", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
+              onWheel={(event) => event.stopPropagation()}
+              onTouchMove={(event) => event.stopPropagation()}
+            >
+              {checkoutOrder ? (
+                <div className={`mb-4 rounded-2xl border p-4 shadow-sm sm:p-5 ${checkoutOrder.paymentStatus === "paid" ? "border-green-200 bg-green-50" : "border-amber-200 bg-amber-50"}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div><p className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-500">Recent order</p><strong className="mt-1 block text-sm">{checkoutOrder.orderNumber}</strong></div>
+                    <span className="rounded-full bg-white/80 px-3 py-1 text-[10px] font-medium uppercase tracking-wide">{checkoutOrder.paymentStatus.replaceAll("_", " ")}</span>
+                  </div>
+                  <p className="mt-3 text-sm leading-relaxed">{checkoutOrder.paymentStatus === "paid" ? (checkoutOrder.requiresPhotographerApproval ? "Payment confirmed. Awaiting photographer approval." : "Payment confirmed. Order received.") : checkoutOrder.paymentStatus === "processing" ? "Payment is being processed by Stripe." : "Payment has not been completed."}</p>
+                  <p className="mt-2 text-xs text-neutral-500">Total {formatStoreMoney(checkoutOrder.totalMinor, checkoutOrder.currency)} · {checkoutOrder.status.replaceAll("_", " ")}</p>
+                  {["unpaid", "failed", "expired"].includes(checkoutOrder.paymentStatus) ? <button type="button" onClick={resumeStorePayment} disabled={storeBusy || !store.checkoutEnabled} className="mt-3 rounded-xl bg-black px-4 py-2.5 text-xs font-medium text-white disabled:opacity-40">{storeBusy ? "Opening…" : "Resume secure payment"}</button> : null}
+                </div>
+              ) : null}
+
+              <section className="rounded-2xl border border-black/10 bg-white p-4 shadow-sm sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div><p className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">Step 1</p><h3 className="mt-1 text-base font-semibold">Choose a photograph</h3><p className="mt-1 text-xs leading-relaxed text-neutral-500">Select the image you would like printed.</p></div>
+                  {storeAssetId ? <button type="button" onClick={() => setStoreAssetId("")} className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium hover:bg-neutral-50">Change</button> : null}
+                </div>
+                {storeAssetId ? (() => {
+                  const image = images.find((candidate) => candidate.assetId === storeAssetId);
+                  return image ? (
+                    <div className="mt-4 flex items-center gap-3 rounded-2xl bg-neutral-50 p-3">
+                      <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-neutral-100 sm:w-32"><GalleryImage image={image} baseOrigin={publicAssetOrigin} mode="tile" /></div>
+                      <div className="min-w-0"><strong className="text-sm">Selected photograph</strong><p className="mt-1 break-words text-xs leading-relaxed text-neutral-500">{image.filename}</p></div>
+                    </div>
+                  ) : null;
+                })() : (
+                  <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                    {images.slice(0, 80).map((image) => <button key={image.assetId} type="button" onClick={() => setStoreAssetId(image.assetId)} className="overflow-hidden rounded-xl border border-black/10 bg-neutral-100 transition hover:-translate-y-0.5 hover:shadow-md" style={{ aspectRatio: "1/1" }}><GalleryImage image={image} baseOrigin={publicAssetOrigin} mode="tile" /></button>)}
+                  </div>
+                )}
               </section>
-              <section className="mt-6 border-t border-black/10 pt-5"><h3 className="text-sm font-semibold">2. Choose a product</h3><select value={storeVariantId} onChange={(event) => { setStoreVariantId(event.target.value); setStoreCrop({ x: 0, y: 0, width: 1, height: 1, rotation: 0 }); }} className="mt-3 w-full rounded-xl border border-black/15 bg-white px-4 py-3">{store.products.map((product) => <optgroup key={product.id} label={product.name}>{product.variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.name} · {formatStoreMoney(variant.priceMinor, variant.currency)}</option>)}</optgroup>)}</select>
-                {selectedStoreVariant ? <p className="mt-2 text-xs text-neutral-500">{selectedStoreVariant.widthMm && selectedStoreVariant.heightMm ? `${selectedStoreVariant.widthMm} × ${selectedStoreVariant.heightMm} mm` : selectedStoreVariant.finish || "Product option"}</p> : null}
-                {showStoreCrop ? <div className="mt-4 rounded-xl border border-black/10 bg-neutral-50 p-4"><div className="flex items-center gap-2"><Crop size={15} /><strong className="text-sm">Crop choice</strong></div><p className="mt-1 text-xs text-neutral-500">Non-destructive crop coordinates are stored with the order for approval.</p><div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                  <label><span>Horizontal start</span><input type="range" min="0" max={Math.max(0, 1 - storeCrop.width)} step="0.01" value={storeCrop.x} onChange={(event) => setStoreCrop((current) => ({ ...current, x: Math.min(Number(event.target.value), Math.max(0, 1 - current.width)) }))} className="mt-1 w-full" /></label>
-                  <label><span>Vertical start</span><input type="range" min="0" max={Math.max(0, 1 - storeCrop.height)} step="0.01" value={storeCrop.y} onChange={(event) => setStoreCrop((current) => ({ ...current, y: Math.min(Number(event.target.value), Math.max(0, 1 - current.height)) }))} className="mt-1 w-full" /></label>
-                  <label><span>Width</span><input type="range" min="0.01" max={Math.max(0.01, 1 - storeCrop.x)} step="0.01" value={storeCrop.width} onChange={(event) => setStoreCrop((current) => ({ ...current, width: Math.min(Math.max(0.01, Number(event.target.value)), Math.max(0.01, 1 - current.x)) }))} className="mt-1 w-full" /></label>
-                  <label><span>Height</span><input type="range" min="0.01" max={Math.max(0.01, 1 - storeCrop.y)} step="0.01" value={storeCrop.height} onChange={(event) => setStoreCrop((current) => ({ ...current, height: Math.min(Math.max(0.01, Number(event.target.value)), Math.max(0.01, 1 - current.y)) }))} className="mt-1 w-full" /></label>
-                </div></div> : null}
-                <div className="mt-4 flex items-center gap-3"><div className="inline-flex items-center rounded-lg border border-black/15"><button type="button" onClick={() => setStoreQuantity((value) => Math.max(1, value - 1))} className="p-2"><Minus size={14} /></button><span className="min-w-9 text-center text-sm">{storeQuantity}</span><button type="button" onClick={() => setStoreQuantity((value) => Math.min(99, value + 1))} className="p-2"><Plus size={14} /></button></div><button type="button" onClick={addStoreItem} disabled={storeBusy || !storeAssetId || !storeVariantId} className="flex-1 rounded-xl bg-black px-5 py-3 text-sm text-white disabled:opacity-40">{storeBusy ? "Saving…" : "Add to cart"}</button></div>
+
+              <section className="mt-4 rounded-2xl border border-black/10 bg-white p-4 shadow-sm sm:p-5">
+                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">Step 2</p>
+                <h3 className="mt-1 text-base font-semibold">Choose a product</h3>
+                <select value={storeVariantId} onChange={(event) => { setStoreVariantId(event.target.value); setStoreCrop({ x: 0, y: 0, width: 1, height: 1, rotation: 0 }); }} className="mt-4 w-full rounded-xl border border-black/15 bg-white px-4 py-3.5 text-sm shadow-sm outline-none focus:border-black">{store.products.map((product) => <optgroup key={product.id} label={product.name}>{product.variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.name} · {formatStoreMoney(variant.priceMinor, variant.currency)}</option>)}</optgroup>)}</select>
+                {selectedStoreVariant ? <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-neutral-500"><span className="rounded-full bg-neutral-100 px-3 py-1.5">{selectedStoreVariant.widthMm && selectedStoreVariant.heightMm ? `${selectedStoreVariant.widthMm} × ${selectedStoreVariant.heightMm} mm` : selectedStoreVariant.finish || "Product option"}</span>{selectedStoreVariant.finish ? <span className="rounded-full bg-neutral-100 px-3 py-1.5">{selectedStoreVariant.finish}</span> : null}</div> : null}
+
+                {showStoreCrop ? (
+                  <div className="mt-4 rounded-2xl border border-black/10 bg-neutral-50 p-4">
+                    <div className="flex items-center gap-2"><span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white"><Crop size={15} /></span><div><strong className="text-sm">Crop choice</strong><p className="text-[11px] text-neutral-500">Your photographer reviews the final crop before fulfilment.</p></div></div>
+                    <div className="mt-4 grid grid-cols-1 gap-4 text-xs sm:grid-cols-2">
+                      <label className="rounded-xl bg-white p-3"><span className="font-medium">Horizontal start</span><input type="range" min="0" max={Math.max(0, 1 - storeCrop.width)} step="0.01" value={storeCrop.x} onChange={(event) => setStoreCrop((current) => ({ ...current, x: Math.min(Number(event.target.value), Math.max(0, 1 - current.width)) }))} className="mt-2 h-6 w-full accent-black" /></label>
+                      <label className="rounded-xl bg-white p-3"><span className="font-medium">Vertical start</span><input type="range" min="0" max={Math.max(0, 1 - storeCrop.height)} step="0.01" value={storeCrop.y} onChange={(event) => setStoreCrop((current) => ({ ...current, y: Math.min(Number(event.target.value), Math.max(0, 1 - current.height)) }))} className="mt-2 h-6 w-full accent-black" /></label>
+                      <label className="rounded-xl bg-white p-3"><span className="font-medium">Width</span><input type="range" min="0.01" max={Math.max(0.01, 1 - storeCrop.x)} step="0.01" value={storeCrop.width} onChange={(event) => setStoreCrop((current) => ({ ...current, width: Math.min(Math.max(0.01, Number(event.target.value)), Math.max(0.01, 1 - current.x)) }))} className="mt-2 h-6 w-full accent-black" /></label>
+                      <label className="rounded-xl bg-white p-3"><span className="font-medium">Height</span><input type="range" min="0.01" max={Math.max(0.01, 1 - storeCrop.y)} step="0.01" value={storeCrop.height} onChange={(event) => setStoreCrop((current) => ({ ...current, height: Math.min(Math.max(0.01, Number(event.target.value)), Math.max(0.01, 1 - current.y)) }))} className="mt-2 h-6 w-full accent-black" /></label>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <div className="inline-flex h-12 items-center justify-between rounded-xl border border-black/15 bg-white sm:w-32"><button type="button" onClick={() => setStoreQuantity((value) => Math.max(1, value - 1))} className="inline-flex h-full w-11 items-center justify-center rounded-l-xl hover:bg-neutral-50" aria-label="Decrease quantity"><Minus size={15} /></button><span className="min-w-9 text-center text-sm font-medium">{storeQuantity}</span><button type="button" onClick={() => setStoreQuantity((value) => Math.min(99, value + 1))} className="inline-flex h-full w-11 items-center justify-center rounded-r-xl hover:bg-neutral-50" aria-label="Increase quantity"><Plus size={15} /></button></div>
+                  <button type="button" onClick={addStoreItem} disabled={storeBusy || !storeAssetId || !storeVariantId} className="h-12 flex-1 rounded-xl bg-black px-5 text-sm font-medium text-white shadow-sm transition hover:bg-neutral-800 disabled:opacity-40">{storeBusy ? "Saving…" : "Add to cart"}</button>
+                </div>
               </section>
-              <section className="mt-6 border-t border-black/10 pt-5"><div className="flex items-center justify-between"><h3 className="text-sm font-semibold">Cart</h3><strong>{formatStoreMoney(store.cart.subtotalMinor, store.currency)}</strong></div>{store.minimumOrderMinor > 0 ? <p className="mt-1 text-xs text-neutral-500">Minimum order {formatStoreMoney(store.minimumOrderMinor, store.currency)}</p> : null}<div className="mt-3 space-y-2">{store.cart.items.map((item) => <div key={item.id} className="flex items-center gap-3 rounded-xl border border-black/10 p-3"><div className="h-14 w-16 overflow-hidden rounded-lg bg-neutral-100">{item.thumbSrc ? <img src={resolveAssetUrl(item.thumbSrc, publicAssetOrigin)} alt="" className="h-full w-full object-cover" /> : null}</div><div className="min-w-0 flex-1"><strong className="text-sm">{item.productName} · {item.variantName}</strong><p className="mt-1 truncate text-xs text-neutral-500">{item.filename}</p><p className="mt-1 text-xs">{formatStoreMoney(item.lineTotalMinor, store.currency)}</p></div><div className="flex items-center gap-1"><button type="button" onClick={() => updateStoreItem(item, Math.max(1, item.quantity - 1))} className="rounded p-1"><Minus size={13} /></button><span className="w-5 text-center text-xs">{item.quantity}</span><button type="button" onClick={() => updateStoreItem(item, Math.min(99, item.quantity + 1))} className="rounded p-1"><Plus size={13} /></button><button type="button" onClick={() => removeStoreItem(item.id)} className="ml-1 rounded p-1 text-red-700"><Trash2 size={14} /></button></div></div>)}{!store.cart.items.length ? <p className="rounded-xl bg-neutral-50 p-4 text-sm text-neutral-500">Your cart is empty.</p> : null}</div>
+
+              <section className="mt-4 rounded-2xl border border-black/10 bg-white p-4 shadow-sm sm:p-5">
+                <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">Your order</p><h3 className="mt-1 text-base font-semibold">Cart</h3></div><strong className="text-lg">{formatStoreMoney(store.cart.subtotalMinor, store.currency)}</strong></div>
+                {store.minimumOrderMinor > 0 ? <p className="mt-1 text-xs text-neutral-500">Minimum order {formatStoreMoney(store.minimumOrderMinor, store.currency)}</p> : null}
+                <div className="mt-4 space-y-3">
+                  {store.cart.items.map((item) => (
+                    <div key={item.id} className="rounded-2xl border border-black/10 p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-neutral-100">{item.thumbSrc ? <img src={resolveAssetUrl(item.thumbSrc, publicAssetOrigin)} alt="" className="h-full w-full object-cover" /> : null}</div>
+                        <div className="min-w-0 flex-1"><strong className="block text-sm leading-snug">{item.productName} · {item.variantName}</strong><p className="mt-1 break-words text-[11px] leading-relaxed text-neutral-500">{item.filename}</p><p className="mt-2 text-sm font-medium">{formatStoreMoney(item.lineTotalMinor, store.currency)}</p></div>
+                      </div>
+                      <div className="mt-3 flex items-center justify-end gap-1 border-t border-black/5 pt-2"><button type="button" onClick={() => updateStoreItem(item, Math.max(1, item.quantity - 1))} className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-neutral-100" aria-label="Decrease item quantity"><Minus size={13} /></button><span className="w-7 text-center text-xs font-medium">{item.quantity}</span><button type="button" onClick={() => updateStoreItem(item, Math.min(99, item.quantity + 1))} className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-neutral-100" aria-label="Increase item quantity"><Plus size={13} /></button><button type="button" onClick={() => removeStoreItem(item.id)} className="ml-2 inline-flex h-9 w-9 items-center justify-center rounded-full text-red-700 hover:bg-red-50" aria-label="Remove item"><Trash2 size={14} /></button></div>
+                    </div>
+                  ))}
+                  {!store.cart.items.length ? <p className="rounded-2xl bg-neutral-50 p-5 text-center text-sm text-neutral-500">Your cart is empty.</p> : null}
+                </div>
               </section>
-              {store.cart.items.length ? <section className="mt-6 border-t border-black/10 pt-5"><h3 className="text-sm font-semibold">3. Secure checkout</h3><div className="mt-3 grid grid-cols-2 gap-3"><input value={checkoutName} onChange={(event) => setCheckoutName(event.target.value)} placeholder="Your name" className="rounded-xl border border-black/15 px-4 py-3" /><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email address" className="rounded-xl border border-black/15 px-4 py-3" /><textarea value={checkoutNotes} onChange={(event) => setCheckoutNotes(event.target.value)} placeholder="Order notes (optional)" rows={3} className="col-span-2 rounded-xl border border-black/15 px-4 py-3" /></div><button type="button" onClick={submitStoreOrder} disabled={storeBusy || !store.checkoutEnabled || store.cart.subtotalMinor < store.minimumOrderMinor} className="mt-3 w-full rounded-xl px-5 py-3 text-sm text-white disabled:opacity-40" style={{ background: branding.accentColor, color: accentTextColor }}>{storeBusy ? "Opening secure payment…" : "Pay securely with Stripe"}</button><p className="mt-3 text-[11px] leading-relaxed text-neutral-500">Stripe securely collects payment and delivery details. MKB validates the order total on the server, and only a verified Stripe payment updates the order. {store.requirePhotographerApproval ? "Your crop and product choices then move to photographer review." : "The order is recorded as paid after confirmation."}</p>{!store.checkoutEnabled ? <p className="mt-2 text-xs text-amber-700">Secure payment is not configured yet. Please contact the photographer.</p> : null}</section> : null}
-              {storeMessage ? <p className="mt-4 rounded-xl bg-neutral-100 p-3 text-sm">{storeMessage}</p> : null}
+
+              {store.cart.items.length ? (
+                <section className="mt-4 rounded-2xl border border-black/10 bg-white p-4 shadow-sm sm:p-5">
+                  <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">Step 3</p>
+                  <h3 className="mt-1 text-base font-semibold">Secure checkout</h3>
+                  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <input value={checkoutName} onChange={(event) => setCheckoutName(event.target.value)} placeholder="Your name" className="rounded-xl border border-black/15 px-4 py-3.5 text-sm outline-none focus:border-black" />
+                    <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email address" className="rounded-xl border border-black/15 px-4 py-3.5 text-sm outline-none focus:border-black" />
+                    <textarea value={checkoutNotes} onChange={(event) => setCheckoutNotes(event.target.value)} placeholder="Order notes (optional)" rows={3} className="rounded-xl border border-black/15 px-4 py-3.5 text-sm outline-none focus:border-black sm:col-span-2" />
+                  </div>
+                  <button type="button" onClick={submitStoreOrder} disabled={storeBusy || !store.checkoutEnabled || store.cart.subtotalMinor < store.minimumOrderMinor} className="mt-3 w-full rounded-xl px-5 py-3.5 text-sm font-medium shadow-sm transition disabled:opacity-40" style={{ background: branding.accentColor, color: accentTextColor }}>{storeBusy ? "Opening secure payment…" : `Pay ${formatStoreMoney(store.cart.subtotalMinor, store.currency)} securely`}</button>
+                  <div className="mt-3 rounded-xl bg-neutral-50 p-3"><p className="text-[11px] leading-relaxed text-neutral-500">Stripe securely collects payment and delivery details. MKB validates the total on the server. {store.requirePhotographerApproval ? "Your crop and product choices then move to photographer review." : "The order is recorded as paid after confirmation."}</p></div>
+                  {!store.checkoutEnabled ? <p className="mt-2 text-xs text-amber-700">Secure payment is not configured yet. Please contact the photographer.</p> : null}
+                </section>
+              ) : null}
+
+              {storeMessage ? <p className="mt-4 rounded-2xl border border-black/10 bg-white p-4 text-sm shadow-sm">{storeMessage}</p> : null}
             </div>
           </aside>
         </div>
