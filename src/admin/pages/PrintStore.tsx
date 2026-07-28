@@ -480,13 +480,13 @@ export function PrintStore() {
   };
 
   return (
-    <AdminPage>
+    <AdminPage className="print-store-admin-page">
       <AdminPageHeader
         eyebrow="Commerce"
         title="Print Store"
         description="Manage products, pricing, Stripe payments, gallery ordering and photographer-approved fulfilment."
         actions={<AdminButton icon={RefreshCw} onClick={load} disabled={busy}>Refresh</AdminButton>}
-        meta={<div className="flex items-center gap-2"><AdminStatus tone="info">Schema 22</AdminStatus><span>{data?.orders.length || 0} orders</span><span>{activeProducts.length} active products</span></div>}
+        meta={<div className="flex flex-wrap items-center gap-2"><AdminStatus tone="info">Schema 22</AdminStatus><span>{data?.orders.length || 0} orders</span><span>{activeProducts.length} active products</span></div>}
       />
 
       {error ? <div className="admin-alert admin-alert--danger">{error}</div> : null}
@@ -499,7 +499,7 @@ export function PrintStore() {
       </AdminTabs>
 
       {tab === "catalogue" ? (
-        <div className="mt-4" style={{ display: "grid", gridTemplateColumns: "minmax(270px,.72fr) minmax(0,1.35fr)", gap: 16, alignItems: "start" }}>
+        <div className="mt-4 grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(270px,.72fr)_minmax(0,1.35fr)]">
           <AdminPanel
             title="Products"
             description="Workspace catalogue shared by Client Galleries."
@@ -518,15 +518,15 @@ export function PrintStore() {
           </AdminPanel>
 
           <AdminPanel title={productDraft.id ? "Edit product" : "New product"} description="Products are reusable; prices belong to price lists." icon={Printer}>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <AdminField label="Product name"><input value={productDraft.name} onChange={(event) => setProductDraft({ ...productDraft, name: event.target.value })} /></AdminField>
               <AdminField label="Category"><input value={productDraft.category} onChange={(event) => setProductDraft({ ...productDraft, category: event.target.value })} /></AdminField>
               <AdminField label="Fulfilment type"><select value={productDraft.fulfilmentType} onChange={(event) => setProductDraft({ ...productDraft, fulfilmentType: event.target.value as PrintStoreProduct["fulfilmentType"] })}><option value="print">Print</option><option value="wall_art">Wall art</option><option value="album">Album</option><option value="digital">Digital</option><option value="other">Other</option></select></AdminField>
               <AdminField label="Status"><select value={productDraft.status} onChange={(event) => setProductDraft({ ...productDraft, status: event.target.value as PrintStoreProduct["status"] })}><option value="draft">Draft</option><option value="active">Active</option><option value="archived">Archived</option></select></AdminField>
               <AdminField label="Lab connector key" help="Use prodigi after at least one option has been verified."><input value={productDraft.labConnectorKey} onChange={(event) => setProductDraft({ ...productDraft, labConnectorKey: event.target.value })} placeholder="prodigi" /></AdminField>
               <AdminField label="Lab product code"><input value={productDraft.labProductCode} onChange={(event) => setProductDraft({ ...productDraft, labProductCode: event.target.value })} /></AdminField>
-              <AdminField label="Description" className="col-span-2"><textarea rows={3} value={productDraft.description} onChange={(event) => setProductDraft({ ...productDraft, description: event.target.value })} /></AdminField>
-              <label className="col-span-2 flex items-center gap-2 text-sm"><input type="checkbox" checked={productDraft.requiresCrop} onChange={(event) => setProductDraft({ ...productDraft, requiresCrop: event.target.checked })} /> Require a crop choice for this product</label>
+              <AdminField label="Description" className="md:col-span-2"><textarea rows={3} value={productDraft.description} onChange={(event) => setProductDraft({ ...productDraft, description: event.target.value })} /></AdminField>
+              <label className="md:col-span-2 flex items-center gap-2 text-sm"><input type="checkbox" checked={productDraft.requiresCrop} onChange={(event) => setProductDraft({ ...productDraft, requiresCrop: event.target.checked })} /> Require a crop choice for this product</label>
             </div>
 
             <div className="mt-5 flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">Sizes / variants</h3><p className="text-xs text-neutral-500">Each option can map to a future lab SKU.</p></div><AdminButton size="sm" icon={Plus} onClick={() => setProductDraft({ ...productDraft, variants: [...productDraft.variants, blankVariant()] })}>Add option</AdminButton></div>
@@ -561,12 +561,12 @@ export function PrintStore() {
       ) : null}
 
       {tab === "pricing" ? (
-        <div className="mt-4" style={{ display: "grid", gridTemplateColumns: "minmax(270px,.72fr) minmax(0,1.4fr)", gap: 16, alignItems: "start" }}>
+        <div className="mt-4 grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(270px,.72fr)_minmax(0,1.4fr)]">
           <AdminPanel title="Price lists" description="Assign one active list to each Client Gallery." icon={CreditCard} actions={<AdminButton size="sm" icon={Plus} onClick={() => setPriceListDraft(blankPriceList(data?.currency || "GBP"))}>New</AdminButton>}>
             {!data?.priceLists.filter((list) => list.status !== "archived").length ? <AdminEmptyState icon={CreditCard} title="No price lists" description="Create a price list after adding catalogue products." /> : <div className="space-y-2">{data.priceLists.filter((list) => list.status !== "archived").map((list) => <button key={list.id} type="button" onClick={() => setPriceListDraft(clonePriceList(list))} className="w-full rounded-lg border border-black/10 bg-white p-3 text-left hover:bg-neutral-50" style={{ outline: priceListDraft.id === list.id ? "2px solid #111" : "none" }}><div className="flex items-start justify-between gap-3"><div><strong className="text-sm">{list.name}</strong><p className="mt-1 text-xs text-neutral-500">{list.currency} · {list.items.filter((item) => item.active).length} priced options</p></div><div className="flex gap-1">{list.isDefault ? <AdminStatus tone="info">default</AdminStatus> : null}<AdminStatus tone={list.status === "active" ? "success" : "neutral"}>{list.status}</AdminStatus></div></div></button>)}</div>}
           </AdminPanel>
           <AdminPanel title={priceListDraft.id ? "Edit price list" : "New price list"} description="Retail and studio cost are stored in minor currency units; markup is calculated automatically." icon={CreditCard}>
-            <div className="grid grid-cols-2 gap-4"><AdminField label="Name"><input value={priceListDraft.name} onChange={(event) => setPriceListDraft({ ...priceListDraft, name: event.target.value })} /></AdminField><AdminField label="Currency"><input value={priceListDraft.currency} maxLength={3} onChange={(event) => setPriceListDraft({ ...priceListDraft, currency: event.target.value.toUpperCase() })} /></AdminField><AdminField label="Status"><select value={priceListDraft.status} onChange={(event) => setPriceListDraft({ ...priceListDraft, status: event.target.value as PrintStorePriceList["status"] })}><option value="draft">Draft</option><option value="active">Active</option><option value="archived">Archived</option></select></AdminField><div className="flex flex-col gap-2 pt-5"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={priceListDraft.isDefault} onChange={(event) => setPriceListDraft({ ...priceListDraft, isDefault: event.target.checked })} /> Default workspace list</label><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={priceListDraft.taxInclusive} onChange={(event) => setPriceListDraft({ ...priceListDraft, taxInclusive: event.target.checked })} /> Prices include tax</label></div></div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2"><AdminField label="Name"><input value={priceListDraft.name} onChange={(event) => setPriceListDraft({ ...priceListDraft, name: event.target.value })} /></AdminField><AdminField label="Currency"><input value={priceListDraft.currency} maxLength={3} onChange={(event) => setPriceListDraft({ ...priceListDraft, currency: event.target.value.toUpperCase() })} /></AdminField><AdminField label="Status"><select value={priceListDraft.status} onChange={(event) => setPriceListDraft({ ...priceListDraft, status: event.target.value as PrintStorePriceList["status"] })}><option value="draft">Draft</option><option value="active">Active</option><option value="archived">Archived</option></select></AdminField><div className="flex flex-col gap-2 pt-5"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={priceListDraft.isDefault} onChange={(event) => setPriceListDraft({ ...priceListDraft, isDefault: event.target.checked })} /> Default workspace list</label><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={priceListDraft.taxInclusive} onChange={(event) => setPriceListDraft({ ...priceListDraft, taxInclusive: event.target.checked })} /> Prices include tax</label></div></div>
             <div className="mt-5 overflow-x-auto"><table className="admin-table"><thead><tr><th>Product</th><th>Option</th><th>Sell</th><th>Studio cost</th><th>Gross markup</th><th>Available</th></tr></thead><tbody>{allVariants.map(({ product, variant }) => { const item = priceItem(variant.id); return <tr key={variant.id}><td>{product.name}</td><td><strong>{variant.name}</strong><div className="text-[10px] text-neutral-400">{variant.sku}</div></td><td><input type="number" min="0" step="0.01" value={(item.retailPriceMinor / 100).toFixed(2)} onChange={(event) => patchPriceItem(variant.id, { retailPriceMinor: Math.round(Number(event.target.value || 0) * 100), active: true })} /></td><td><input type="number" min="0" step="0.01" value={(item.studioCostMinor / 100).toFixed(2)} onChange={(event) => patchPriceItem(variant.id, { studioCostMinor: Math.round(Number(event.target.value || 0) * 100) })} /></td><td>{money(Math.max(0, item.retailPriceMinor - item.studioCostMinor), priceListDraft.currency || data?.currency)}</td><td><input type="checkbox" checked={item.active} onChange={(event) => patchPriceItem(variant.id, { active: event.target.checked })} /></td></tr>; })}</tbody></table>{!allVariants.length ? <AdminEmptyState icon={Printer} title="No active product options" description="Add catalogue products before creating a price list." /> : null}</div>
             <AdminToolbar className="mt-5"><AdminButton variant="primary" icon={Save} onClick={savePriceList} disabled={busy || !priceListDraft.name.trim()}>Save price list</AdminButton>{priceListDraft.id ? <AdminButton variant="danger" icon={Archive} onClick={archivePriceList} disabled={busy}>Archive</AdminButton> : null}</AdminToolbar>
           </AdminPanel>
@@ -574,15 +574,17 @@ export function PrintStore() {
       ) : null}
 
       {tab === "orders" ? (
-        <div className="mt-4" style={{ display: "grid", gridTemplateColumns: "minmax(300px,.85fr) minmax(0,1.35fr)", gap: 16, alignItems: "start" }}>
-          <AdminPanel title="Orders" description="Stripe payment, photographer approval and fulfilment status." icon={ShoppingBag}>
+        <div className="mt-4 grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(300px,.78fr)_minmax(0,1.45fr)]">
+          <AdminPanel title="Orders" description="Stripe payment, photographer approval and fulfilment status." icon={ShoppingBag} className="xl:sticky xl:top-[78px]">
             {!data?.orders.length ? <AdminEmptyState icon={ShoppingBag} title="No orders yet" description="Orders will appear after a client starts secure checkout from an enabled Client Gallery." /> : (
-              <div className="space-y-2">
+              <div className="max-h-[58vh] space-y-2 overflow-y-auto pr-1 xl:max-h-[calc(100vh-230px)]">
                 {data.orders.map((order) => (
                   <button key={order.id} type="button" onClick={() => { setSelectedOrderId(order.id); setOrderDraft({ ...order }); }} className="w-full rounded-lg border border-black/10 bg-white p-3 text-left hover:bg-neutral-50" style={{ outline: selectedOrderId === order.id ? "2px solid #111" : "none" }}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div><strong className="text-sm">{order.orderNumber}</strong><p className="mt-1 text-xs text-neutral-500">{order.clientName || order.email} · {order.galleryTitle}</p><p className="mt-1 text-xs">{money(order.totalMinor, order.currency)} · {order.items.length} line{order.items.length === 1 ? "" : "s"}</p></div>
-                      <div className="flex flex-col items-end gap-1"><AdminStatus tone={paymentTone(order.paymentStatus)}>{order.paymentStatus.replaceAll("_", " ")}</AdminStatus><AdminStatus tone={orderTone(order.status)}>{order.status.replaceAll("_", " ")}</AdminStatus></div>
+                    <div className="min-w-0">
+                      <strong className="block truncate text-sm">{order.orderNumber}</strong>
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-neutral-500">{order.clientName || order.email} · {order.galleryTitle}</p>
+                      <p className="mt-1 text-xs">{money(order.totalMinor, order.currency)} · {order.items.length} line{order.items.length === 1 ? "" : "s"}</p>
+                      <div className="mt-2 flex flex-wrap gap-1"><AdminStatus tone={paymentTone(order.paymentStatus)}>{order.paymentStatus.replaceAll("_", " ")}</AdminStatus><AdminStatus tone={orderTone(order.status)}>{order.status.replaceAll("_", " ")}</AdminStatus></div>
                     </div>
                   </button>
                 ))}
@@ -591,7 +593,7 @@ export function PrintStore() {
           </AdminPanel>
           {selectedOrder ? <AdminPanel title={selectedOrder.orderNumber} description={`${selectedOrder.galleryTitle} · ${selectedOrder.email}`} icon={PackageCheck} actions={<a href={`/admin/client-galleries/${encodeURIComponent(selectedOrder.galleryId)}`} className="admin-button admin-button--secondary admin-button--sm"><ExternalLink size={14} /> Gallery</a>}>
             <div className="mb-5 flex flex-wrap items-center gap-2 rounded-xl border border-black/10 bg-neutral-50 p-4"><CreditCard size={16} /><strong className="text-sm">Stripe payment</strong><AdminStatus tone={paymentTone(selectedOrder.paymentStatus)}>{selectedOrder.paymentStatus.replaceAll("_", " ")}</AdminStatus><span className="text-xs text-neutral-500">{selectedOrder.paidAt ? `Paid ${displayDate(selectedOrder.paidAt)}` : "Awaiting verified payment"}</span></div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <AdminField label="Order status"><select value={selectedOrder.status} onChange={(event) => setOrderDraft({ ...selectedOrder, status: event.target.value as PrintStoreOrderStatus })}>{["pending","awaiting_payment","paid","in_review","approved","in_fulfilment","fulfilled","cancelled","refunded"].map((status) => <option key={status} value={status}>{status.replaceAll("_", " ")}</option>)}</select></AdminField>
               <AdminField label="Total"><input value={money(selectedOrder.totalMinor, selectedOrder.currency)} readOnly /></AdminField>
               <AdminField label="Payment provider"><input value={selectedOrder.paymentProvider || "stripe"} readOnly /></AdminField>
@@ -602,11 +604,11 @@ export function PrintStore() {
               <AdminField label="Photographer approval"><input value={selectedOrder.requiresPhotographerApproval ? "Required" : "Not required"} readOnly /></AdminField>
               <AdminField label="Delivery name"><input value={selectedOrder.shippingName || "Not collected yet"} readOnly /></AdminField>
               <AdminField label="Delivery phone"><input value={selectedOrder.shippingPhone || "Not collected yet"} readOnly /></AdminField>
-              <AdminField label="Delivery address" className="col-span-2"><textarea rows={2} value={addressSummary(selectedOrder.shippingAddress)} readOnly /></AdminField>
+              <AdminField label="Delivery address" className="md:col-span-2"><textarea rows={2} value={addressSummary(selectedOrder.shippingAddress)} readOnly /></AdminField>
               <AdminField label="Lab connector"><input value={selectedOrder.labConnectorKey} onChange={(event) => setOrderDraft({ ...selectedOrder, labConnectorKey: event.target.value })} placeholder="prodigi" /></AdminField>
               <AdminField label="Lab reference"><input value={selectedOrder.labReference} onChange={(event) => setOrderDraft({ ...selectedOrder, labReference: event.target.value })} /></AdminField>
-              <AdminField label="Client notes" className="col-span-2"><textarea rows={2} value={selectedOrder.clientNotes} readOnly /></AdminField>
-              <AdminField label="Internal notes" className="col-span-2"><textarea rows={3} value={selectedOrder.internalNotes} onChange={(event) => setOrderDraft({ ...selectedOrder, internalNotes: event.target.value })} /></AdminField>
+              <AdminField label="Client notes" className="md:col-span-2"><textarea rows={2} value={selectedOrder.clientNotes} readOnly /></AdminField>
+              <AdminField label="Internal notes" className="md:col-span-2"><textarea rows={3} value={selectedOrder.internalNotes} onChange={(event) => setOrderDraft({ ...selectedOrder, internalNotes: event.target.value })} /></AdminField>
             </div>
             <div className="mt-5 rounded-xl border border-black/10 bg-neutral-50 p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -615,7 +617,7 @@ export function PrintStore() {
               </div>
               {!labReadyOrder && selectedOrder.status !== "fulfilled" ? <div className="admin-alert admin-alert--warning mt-3">Set the order status to approved and save it before requesting a quote or submitting to Prodigi.</div> : null}
               <div className="mt-4 flex flex-wrap items-end gap-3">
-                <AdminField label="Shipping method" className="min-w-[180px]"><select value={shippingMethod} onChange={(event) => { setShippingMethod(event.target.value); setLabQuote(null); }}><option value="Budget">Budget</option><option value="Standard">Standard</option><option value="StandardPlus">Standard Plus</option><option value="Express">Express</option><option value="Overnight">Overnight</option></select></AdminField>
+                <AdminField label="Shipping method" className="w-full sm:w-auto sm:min-w-[180px]"><select value={shippingMethod} onChange={(event) => { setShippingMethod(event.target.value); setLabQuote(null); }}><option value="Budget">Budget</option><option value="Standard">Standard</option><option value="StandardPlus">Standard Plus</option><option value="Express">Express</option><option value="Overnight">Overnight</option></select></AdminField>
                 <AdminButton size="sm" icon={PackageSearch} onClick={() => labAction("quote", mappedOrderItems.map((item) => item.id))} disabled={busy || !labReadyOrder || !mappedOrderItems.length}>Quote mapped lines</AdminButton>
                 <AdminButton size="sm" variant="primary" icon={Send} onClick={() => labAction("submit", preparedOrderItems.map((item) => item.id))} disabled={busy || !labReadyOrder || !preparedOrderItems.length}>Submit prepared lines</AdminButton>
                 {latestLabSubmission?.providerOrderId ? <AdminButton size="sm" icon={RefreshCw} onClick={() => labAction("refresh")} disabled={busy}>Refresh lab status</AdminButton> : null}
@@ -628,18 +630,18 @@ export function PrintStore() {
               const lineCost = item.studioCostMinor * item.quantity;
               const grossMargin = item.lineTotalMinor - lineCost;
               const mapped = item.labConnectorKey.toLowerCase() === "prodigi" && Boolean(item.labSku && item.recommendedWidthPx && item.recommendedHeightPx);
-              const prepared = item.printAsset?.status === "prepared";
+              const prepared = ["prepared", "submitted"].includes(String(item.printAsset?.status || "")) || ["submitted", "fulfilled"].includes(item.fulfilmentStatus);
               const canPrepare = selectedOrder.paymentStatus === "paid" && ["in_review", "approved", "in_fulfilment"].includes(selectedOrder.status) && mapped && !["submitted", "fulfilled"].includes(item.fulfilmentStatus);
               const canSubmitLine = labReadyOrder && prepared && !["submitted", "fulfilled"].includes(item.fulfilmentStatus);
               return <div key={item.id} className="rounded-xl border border-black/10 p-3">
-                <div className="flex items-start gap-3">
-                  <div className="h-20 w-24 shrink-0 overflow-hidden rounded-lg bg-neutral-100">{item.thumbSrc ? <img src={item.thumbSrc} alt="" className="h-full w-full object-cover" /> : null}</div>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                  <div className="h-44 w-full shrink-0 overflow-hidden rounded-lg bg-neutral-100 sm:h-20 sm:w-24">{item.thumbSrc ? <img src={item.thumbSrc} alt="" className="h-full w-full object-cover" /> : null}</div>
                   <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><strong className="text-sm">{item.productName} · {item.variantName}</strong><AdminStatus tone={labTone(item.fulfilmentStatus)}>{item.fulfilmentStatus}</AdminStatus></div><p className="mt-1 truncate text-xs text-neutral-500">{item.filename}</p><p className="mt-1 text-xs">Qty {item.quantity} · Sell {money(item.lineTotalMinor, selectedOrder.currency)} · Cost {money(lineCost, selectedOrder.currency)} · Gross {money(grossMargin, selectedOrder.currency)}</p><p className="mt-1 text-[11px] text-neutral-500">Crop: {cropSummary(item.crop)}</p><p className="mt-1 text-[11px] text-neutral-500">Prodigi: {mapped ? `${item.labSku} · ${item.recommendedWidthPx} × ${item.recommendedHeightPx}px · ${item.labSizing}` : "mapping not verified"}</p>{item.printAsset ? <p className="mt-1 text-[11px] text-neutral-500">Prepared file: {item.printAsset.widthPx} × {item.printAsset.heightPx}px · {fileSize(item.printAsset.fileSize)} · {item.printAsset.status}</p> : null}</div>
                 </div>
-                <AdminToolbar className="mt-3"><AdminButton size="sm" icon={Scissors} onClick={() => preparePrintItem(item)} disabled={!canPrepare || lineBusy === `prepare-${item.id}`}>{lineBusy === `prepare-${item.id}` ? "Preparing…" : item.printAsset ? "Rebuild JPEG" : "Prepare JPEG"}</AdminButton><AdminButton size="sm" icon={PackageSearch} onClick={() => labAction("quote", [item.id])} disabled={busy || !labReadyOrder || !mapped}>Quote line</AdminButton><AdminButton size="sm" variant="primary" icon={FileCheck2} onClick={() => labAction("submit", [item.id])} disabled={busy || !canSubmitLine}>Submit line</AdminButton>{prepared ? <AdminStatus tone="success"><CheckCircle2 size={13} /> Print-ready</AdminStatus> : mapped ? <AdminStatus tone="warning">JPEG required</AdminStatus> : <AdminStatus tone="danger">Mapping required</AdminStatus>}</AdminToolbar>
+                <AdminToolbar className="mt-3"><AdminButton size="sm" icon={Scissors} onClick={() => preparePrintItem(item)} disabled={!canPrepare || lineBusy === `prepare-${item.id}`}>{lineBusy === `prepare-${item.id}` ? "Preparing…" : item.printAsset ? "Rebuild JPEG" : "Prepare JPEG"}</AdminButton><AdminButton size="sm" icon={PackageSearch} onClick={() => labAction("quote", [item.id])} disabled={busy || !labReadyOrder || !mapped}>Quote line</AdminButton><AdminButton size="sm" variant="primary" icon={FileCheck2} onClick={() => labAction("submit", [item.id])} disabled={busy || !canSubmitLine}>Submit line</AdminButton>{["submitted", "fulfilled"].includes(item.fulfilmentStatus) ? <AdminStatus tone="success"><CheckCircle2 size={13} /> {item.fulfilmentStatus}</AdminStatus> : prepared ? <AdminStatus tone="success"><CheckCircle2 size={13} /> Print-ready</AdminStatus> : mapped ? <AdminStatus tone="warning">JPEG required</AdminStatus> : <AdminStatus tone="danger">Mapping required</AdminStatus>}</AdminToolbar>
               </div>;
             })}</div>
-            <div className="mt-5 rounded-xl border border-black/10 p-4"><div className="flex items-center justify-between"><h3 className="text-sm font-semibold">Payment history</h3><span className="text-xs text-neutral-500">{selectedOrder.paymentEvents.length} event{selectedOrder.paymentEvents.length === 1 ? "" : "s"}</span></div>{selectedOrder.paymentEvents.length ? <div className="mt-3 space-y-2">{selectedOrder.paymentEvents.slice(0, 12).map((event) => <div key={event.id} className="flex items-start justify-between gap-3 border-t border-black/5 pt-2 first:border-0 first:pt-0"><div><strong className="text-xs">{event.eventType}</strong><p className="mt-1 text-[11px] text-neutral-500">{event.providerEventId || "Manual event"} · {displayDate(event.createdAt)}</p></div><AdminStatus tone={event.status === "processed" ? "success" : event.status === "rejected" ? "danger" : "neutral"}>{event.status}</AdminStatus></div>)}</div> : <p className="mt-2 text-xs text-neutral-500">No payment events recorded yet.</p>}</div>
+            <div className="mt-5 rounded-xl border border-black/10 p-4"><div className="flex items-center justify-between"><h3 className="text-sm font-semibold">Payment history</h3><span className="text-xs text-neutral-500">{selectedOrder.paymentEvents.length} event{selectedOrder.paymentEvents.length === 1 ? "" : "s"}</span></div>{selectedOrder.paymentEvents.length ? <div className="mt-3 space-y-2">{selectedOrder.paymentEvents.slice(0, 12).map((event) => <div key={event.id} className="flex items-start justify-between gap-3 border-t border-black/5 pt-2 first:border-0 first:pt-0"><div><strong className="text-xs">{event.eventType}</strong><p className="mt-1 break-all text-[11px] leading-relaxed text-neutral-500">{event.providerEventId || "Manual event"} · {displayDate(event.createdAt)}</p></div><AdminStatus tone={event.status === "processed" ? "success" : event.status === "rejected" ? "danger" : "neutral"}>{event.status}</AdminStatus></div>)}</div> : <p className="mt-2 text-xs text-neutral-500">No payment events recorded yet.</p>}</div>
             <AdminToolbar className="mt-5"><AdminButton variant="primary" icon={Save} onClick={saveOrder} disabled={busy}>Save order</AdminButton>{selectedOrder.status === "approved" || selectedOrder.status === "fulfilled" ? <AdminStatus tone="success"><CheckCircle2 size={13} /> {selectedOrder.status}</AdminStatus> : null}</AdminToolbar>
           </AdminPanel> : <AdminPanel><AdminEmptyState icon={ShoppingBag} title="Select an order" description="Review verified Stripe payment, delivery details, crop data and fulfilment status." /></AdminPanel>}
         </div>

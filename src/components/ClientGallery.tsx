@@ -160,6 +160,59 @@ function formatStoreMoney(minor: number, currency = "GBP") {
   return new Intl.NumberFormat("en-GB", { style: "currency", currency }).format((Number(minor) || 0) / 100);
 }
 
+type NormalizedCrop = { x: number; y: number; width: number; height: number; rotation: number };
+
+function clamp(value: number, minimum = 0, maximum = 1) {
+  return Math.min(maximum, Math.max(minimum, Number.isFinite(value) ? value : minimum));
+}
+
+function targetPrintAspect(image: ClientGalleryImage | null, variant: PrintStoreVariant | null) {
+  const width = Number(variant?.widthMm || 0);
+  const height = Number(variant?.heightMm || 0);
+  if (!(width > 0 && height > 0)) return image?.width && image?.height ? image.width / image.height : 1;
+
+  let aspect = width / height;
+  const orientation = String(variant?.orientation || "any").toLowerCase();
+  const imageIsPortrait = Boolean(image?.width && image?.height && image.height > image.width);
+  if (orientation === "portrait" && aspect > 1) aspect = 1 / aspect;
+  if (orientation === "landscape" && aspect < 1) aspect = 1 / aspect;
+  if (orientation === "square") aspect = 1;
+  if (orientation === "any" && imageIsPortrait && aspect > 1) aspect = 1 / aspect;
+  return aspect > 0 ? aspect : 1;
+}
+
+function cropFromControls(
+  image: ClientGalleryImage | null,
+  variant: PrintStoreVariant | null,
+  zoom: number,
+  focusX: number,
+  focusY: number,
+): NormalizedCrop {
+  if (!image?.width || !image?.height) return { x: 0, y: 0, width: 1, height: 1, rotation: 0 };
+
+  const imageAspect = image.width / image.height;
+  const printAspect = targetPrintAspect(image, variant);
+  let baseWidth = 1;
+  let baseHeight = 1;
+
+  if (imageAspect > printAspect) baseWidth = printAspect / imageAspect;
+  else if (imageAspect < printAspect) baseHeight = imageAspect / printAspect;
+
+  const safeZoom = clamp(zoom, 1, 3);
+  const width = clamp(baseWidth / safeZoom, 0.02, 1);
+  const height = clamp(baseHeight / safeZoom, 0.02, 1);
+  const x = clamp((1 - width) * clamp(focusX), 0, 1 - width);
+  const y = clamp((1 - height) * clamp(focusY), 0, 1 - height);
+
+  return {
+    x: Number(x.toFixed(4)),
+    y: Number(y.toFixed(4)),
+    width: Number(width.toFixed(4)),
+    height: Number(height.toFixed(4)),
+    rotation: 0,
+  };
+}
+
 function headingFontFamily(value: string) {
   if (value === "modern") return '"Montserrat", "Avenir Next", Avenir, Arial, sans-serif';
   if (value === "classic") return 'Georgia, "Times New Roman", serif';
@@ -296,7 +349,9 @@ export function ClientGallery() {
   const [storeAssetId, setStoreAssetId] = useState("");
   const [storeVariantId, setStoreVariantId] = useState("");
   const [storeQuantity, setStoreQuantity] = useState(1);
-  const [storeCrop, setStoreCrop] = useState({ x: 0, y: 0, width: 1, height: 1, rotation: 0 });
+  const [storeCrop, setStoreCrop] = useState<NormalizedCrop>({ x: 0, y: 0, width: 1, height: 1, rotation: 0 });
+  const [storeCropZoom, setStoreCropZoom] = useState(1);
+  const [storeCropFocus, setStoreCropFocus] = useState({ x: 0.5, y: 0.5 });
   const [checkoutName, setCheckoutName] = useState("");
   const [checkoutNotes, setCheckoutNotes] = useState("");
   const [checkoutOrder, setCheckoutOrder] = useState<PrintStoreOrderSummary | null>(null);
@@ -308,19 +363,10 @@ export function ClientGallery() {
 
     const body = document.body;
     const root = document.documentElement;
-    const scrollY = window.scrollY;
-    const previousBody = {
-      overflow: body.style.overflow,
-      position: body.style.position,
-      top: body.style.top,
-      width: body.style.width,
-    };
+    const previousBodyOverflow = body.style.overflow;
     const previousRootOverflow = root.style.overflow;
 
     body.style.overflow = "hidden";
-    body.style.position = "fixed";
-    body.style.top = `-${scrollY}px`;
-    body.style.width = "100%";
     root.style.overflow = "hidden";
 
     const closeOnEscape = (event: KeyboardEvent) => {
@@ -330,12 +376,8 @@ export function ClientGallery() {
 
     return () => {
       window.removeEventListener("keydown", closeOnEscape);
-      body.style.overflow = previousBody.overflow;
-      body.style.position = previousBody.position;
-      body.style.top = previousBody.top;
-      body.style.width = previousBody.width;
+      body.style.overflow = previousBodyOverflow;
       root.style.overflow = previousRootOverflow;
-      window.scrollTo(0, scrollY);
     };
   }, [showStore]);
 
@@ -726,7 +768,33 @@ export function ClientGallery() {
   const selectedAssetIds = new Set(activeSelection?.assetIds || []);
   const selectedStoreProduct = store?.products.find((product) => product.variants.some((variant) => variant.id === storeVariantId)) || null;
   const selectedStoreVariant = selectedStoreProduct?.variants.find((variant) => variant.id === storeVariantId) || null;
+  const selectedStoreImage = images.find((image) => image.assetId === storeAssetId) || null;
   const showStoreCrop = Boolean(store?.allowCrop && selectedStoreProduct?.requiresCrop);
+  const cropPreviewAspect = targetPrintAspect(selectedStoreImage, selectedStoreVariant);
+
+  const applyStoreCropControls = (zoom: number, focus: { x: number; y: number }) => {
+    const nextZoom = clamp(zoom, 1, 3);
+    const nextFocus = { x: clamp(focus.x), y: clamp(focus.y) };
+    setStoreCropZoom(nextZoom);
+    setStoreCropFocus(nextFocus);
+    setStoreCrop(cropFromControls(selectedStoreImage, selectedStoreVariant, nextZoom, nextFocus.x, nextFocus.y));
+  };
+
+  const resetStoreCrop = () => applyStoreCropControls(1, { x: 0.5, y: 0.5 });
+
+  useEffect(() => {
+    if (!showStoreCrop || !selectedStoreImage || !selectedStoreVariant) {
+      setStoreCrop({ x: 0, y: 0, width: 1, height: 1, rotation: 0 });
+      setStoreCropZoom(1);
+      setStoreCropFocus({ x: 0.5, y: 0.5 });
+      return;
+    }
+    const focus = { x: 0.5, y: 0.5 };
+    setStoreCropZoom(1);
+    setStoreCropFocus(focus);
+    setStoreCrop(cropFromControls(selectedStoreImage, selectedStoreVariant, 1, focus.x, focus.y));
+  }, [storeAssetId, storeVariantId, showStoreCrop]);
+
   const publicAssetOrigin = payload?.websiteUrl || "https://www.mkbweddings.co.uk";
   const branding = payload?.branding || {
     logoMode: "workspace" as const,
@@ -971,27 +1039,20 @@ export function ClientGallery() {
 
       {showStore && store?.enabled ? (
         <div
-          className="fixed inset-0 z-[1250] flex items-stretch justify-end overflow-hidden bg-black/55 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[1250] overflow-y-auto overscroll-contain bg-black/55 backdrop-blur-[2px]"
           role="presentation"
+          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
           onMouseDown={() => setShowStore(false)}
         >
-          <aside
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="print-store-title"
-            className="relative w-full max-w-2xl overflow-y-auto overscroll-contain bg-[#f7f6f3] shadow-2xl sm:my-4 sm:mr-4 sm:rounded-3xl"
-            style={{
-              color: "#111",
-              height: "100dvh",
-              maxHeight: "100dvh",
-              WebkitOverflowScrolling: "touch",
-              overscrollBehavior: "contain",
-              touchAction: "pan-y",
-            }}
-            onMouseDown={(event) => event.stopPropagation()}
-            onWheel={(event) => event.stopPropagation()}
-            onTouchMove={(event) => event.stopPropagation()}
-          >
+          <div className="flex min-h-full items-stretch justify-end sm:p-4">
+            <aside
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="print-store-title"
+              className="relative min-h-[100dvh] w-full max-w-2xl bg-[#f7f6f3] shadow-2xl sm:min-h-0 sm:rounded-3xl"
+              style={{ color: "#111" }}
+              onMouseDown={(event) => event.stopPropagation()}
+            >
             <div className="sticky top-0 z-20 flex items-start justify-between gap-4 border-b border-black/10 bg-white/95 px-4 py-4 backdrop-blur sm:px-6">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -1045,18 +1106,66 @@ export function ClientGallery() {
               <section className="mt-4 rounded-2xl border border-black/10 bg-white p-4 shadow-sm sm:p-5">
                 <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">Step 2</p>
                 <h3 className="mt-1 text-base font-semibold">Choose a product</h3>
-                <select value={storeVariantId} onChange={(event) => { setStoreVariantId(event.target.value); setStoreCrop({ x: 0, y: 0, width: 1, height: 1, rotation: 0 }); }} className="mt-4 w-full rounded-xl border border-black/15 bg-white px-4 py-3.5 text-sm shadow-sm outline-none focus:border-black">{store.products.map((product) => <optgroup key={product.id} label={product.name}>{product.variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.name} · {formatStoreMoney(variant.priceMinor, variant.currency)}</option>)}</optgroup>)}</select>
+                <select value={storeVariantId} onChange={(event) => setStoreVariantId(event.target.value)} className="mt-4 w-full rounded-xl border border-black/15 bg-white px-4 py-3.5 text-sm shadow-sm outline-none focus:border-black">{store.products.map((product) => <optgroup key={product.id} label={product.name}>{product.variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.name} · {formatStoreMoney(variant.priceMinor, variant.currency)}</option>)}</optgroup>)}</select>
                 {selectedStoreVariant ? <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-neutral-500"><span className="rounded-full bg-neutral-100 px-3 py-1.5">{selectedStoreVariant.widthMm && selectedStoreVariant.heightMm ? `${selectedStoreVariant.widthMm} × ${selectedStoreVariant.heightMm} mm` : selectedStoreVariant.finish || "Product option"}</span>{selectedStoreVariant.finish ? <span className="rounded-full bg-neutral-100 px-3 py-1.5">{selectedStoreVariant.finish}</span> : null}</div> : null}
 
                 {showStoreCrop ? (
                   <div className="mt-4 rounded-2xl border border-black/10 bg-neutral-50 p-4">
-                    <div className="flex items-center gap-2"><span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white"><Crop size={15} /></span><div><strong className="text-sm">Crop choice</strong><p className="text-[11px] text-neutral-500">Your photographer reviews the final crop before fulfilment.</p></div></div>
-                    <div className="mt-4 grid grid-cols-1 gap-4 text-xs sm:grid-cols-2">
-                      <label className="rounded-xl bg-white p-3"><span className="font-medium">Horizontal start</span><input type="range" min="0" max={Math.max(0, 1 - storeCrop.width)} step="0.01" value={storeCrop.x} onChange={(event) => setStoreCrop((current) => ({ ...current, x: Math.min(Number(event.target.value), Math.max(0, 1 - current.width)) }))} className="mt-2 h-6 w-full accent-black" /></label>
-                      <label className="rounded-xl bg-white p-3"><span className="font-medium">Vertical start</span><input type="range" min="0" max={Math.max(0, 1 - storeCrop.height)} step="0.01" value={storeCrop.y} onChange={(event) => setStoreCrop((current) => ({ ...current, y: Math.min(Number(event.target.value), Math.max(0, 1 - current.height)) }))} className="mt-2 h-6 w-full accent-black" /></label>
-                      <label className="rounded-xl bg-white p-3"><span className="font-medium">Width</span><input type="range" min="0.01" max={Math.max(0.01, 1 - storeCrop.x)} step="0.01" value={storeCrop.width} onChange={(event) => setStoreCrop((current) => ({ ...current, width: Math.min(Math.max(0.01, Number(event.target.value)), Math.max(0.01, 1 - current.x)) }))} className="mt-2 h-6 w-full accent-black" /></label>
-                      <label className="rounded-xl bg-white p-3"><span className="font-medium">Height</span><input type="range" min="0.01" max={Math.max(0.01, 1 - storeCrop.y)} step="0.01" value={storeCrop.height} onChange={(event) => setStoreCrop((current) => ({ ...current, height: Math.min(Math.max(0.01, Number(event.target.value)), Math.max(0.01, 1 - current.y)) }))} className="mt-2 h-6 w-full accent-black" /></label>
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white"><Crop size={15} /></span>
+                        <div><strong className="text-sm">Adjust your crop</strong><p className="text-[11px] text-neutral-500">Zoom and move the image inside the print shape. Your photographer reviews it before fulfilment.</p></div>
+                      </div>
+                      <button type="button" onClick={resetStoreCrop} disabled={!selectedStoreImage} className="rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-medium hover:bg-neutral-100 disabled:opacity-40">Reset</button>
                     </div>
+
+                    {selectedStoreImage ? (
+                      <div className="mt-4 grid gap-4 sm:grid-cols-[minmax(0,1.15fr)_minmax(220px,.85fr)]">
+                        <div>
+                          <div
+                            className="relative mx-auto w-full max-w-md overflow-hidden rounded-xl bg-neutral-200 shadow-inner"
+                            style={{ aspectRatio: String(cropPreviewAspect || 1) }}
+                          >
+                            <img
+                              src={resolveAssetUrl(selectedStoreImage.webSrc || selectedStoreImage.thumbSrc, publicAssetOrigin)}
+                              alt="Crop preview"
+                              draggable={false}
+                              className="pointer-events-none absolute max-w-none select-none"
+                              style={{
+                                width: `${100 / Math.max(storeCrop.width, 0.01)}%`,
+                                height: `${100 / Math.max(storeCrop.height, 0.01)}%`,
+                                left: `${-(storeCrop.x / Math.max(storeCrop.width, 0.01)) * 100}%`,
+                                top: `${-(storeCrop.y / Math.max(storeCrop.height, 0.01)) * 100}%`,
+                              }}
+                            />
+                            <div className="pointer-events-none absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-45">
+                              {Array.from({ length: 9 }).map((_, index) => <span key={index} className="border border-white/55" />)}
+                            </div>
+                            <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-black/20" />
+                          </div>
+                          <div className="mt-2 flex items-center justify-between text-[10px] text-neutral-500">
+                            <span>Print preview</span>
+                            <span>{Math.round(storeCrop.width * 100)}% × {Math.round(storeCrop.height * 100)}% of original</span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3 text-xs">
+                          <label className="block rounded-xl bg-white p-3">
+                            <span className="flex items-center justify-between gap-3 font-medium"><span>Zoom</span><span>{storeCropZoom.toFixed(2)}×</span></span>
+                            <input type="range" min="1" max="3" step="0.01" value={storeCropZoom} onChange={(event) => applyStoreCropControls(Number(event.target.value), storeCropFocus)} className="mt-2 h-7 w-full accent-black" />
+                          </label>
+                          <label className="block rounded-xl bg-white p-3">
+                            <span className="flex items-center justify-between gap-3 font-medium"><span>Move left / right</span><span>{Math.round(storeCropFocus.x * 100)}%</span></span>
+                            <input type="range" min="0" max="1" step="0.01" value={storeCropFocus.x} disabled={storeCrop.width >= 0.999} onChange={(event) => applyStoreCropControls(storeCropZoom, { ...storeCropFocus, x: Number(event.target.value) })} className="mt-2 h-7 w-full accent-black disabled:opacity-35" />
+                          </label>
+                          <label className="block rounded-xl bg-white p-3">
+                            <span className="flex items-center justify-between gap-3 font-medium"><span>Move up / down</span><span>{Math.round(storeCropFocus.y * 100)}%</span></span>
+                            <input type="range" min="0" max="1" step="0.01" value={storeCropFocus.y} disabled={storeCrop.height >= 0.999} onChange={(event) => applyStoreCropControls(storeCropZoom, { ...storeCropFocus, y: Number(event.target.value) })} className="mt-2 h-7 w-full accent-black disabled:opacity-35" />
+                          </label>
+                          <p className="rounded-xl bg-white p-3 text-[11px] leading-relaxed text-neutral-500">The crop is non-destructive. The private high-resolution original remains unchanged.</p>
+                        </div>
+                      </div>
+                    ) : <p className="mt-4 rounded-xl bg-white p-4 text-sm text-neutral-500">Choose a photograph above to preview and adjust its crop.</p>}
                   </div>
                 ) : null}
 
@@ -1084,7 +1193,7 @@ export function ClientGallery() {
               </section>
 
               {store.cart.items.length ? (
-                <section ref={checkoutSectionRef} className="mt-4 rounded-2xl border border-black/10 bg-white p-4 shadow-sm sm:p-5">
+                <section ref={checkoutSectionRef} className="mt-4 scroll-mb-32 rounded-2xl border border-black/10 bg-white p-4 shadow-sm sm:p-5">
                   <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">Step 3</p>
                   <h3 className="mt-1 text-base font-semibold">Secure checkout</h3>
                   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -1106,7 +1215,7 @@ export function ClientGallery() {
                 style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
               >
                 {storeMessage ? <p aria-live="polite" className="mb-2 line-clamp-2 text-xs leading-relaxed text-neutral-600">{storeMessage}</p> : null}
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-400">Secure Stripe checkout</p>
                     <p className="mt-0.5 text-lg font-semibold">{formatStoreMoney(store.cart.subtotalMinor, store.currency)}</p>
@@ -1115,7 +1224,7 @@ export function ClientGallery() {
                     type="button"
                     onClick={submitStoreOrder}
                     disabled={storeBusy || !store.checkoutEnabled || store.cart.subtotalMinor < store.minimumOrderMinor}
-                    className="min-h-12 min-w-[10.5rem] rounded-xl px-5 py-3 text-sm font-medium shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="min-h-12 w-full rounded-xl px-5 py-3 text-sm font-medium shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:min-w-[10.5rem]"
                     style={{ background: branding.accentColor, color: accentTextColor }}
                   >
                     {storeBusy ? "Opening payment…" : "Continue to payment"}
@@ -1124,7 +1233,8 @@ export function ClientGallery() {
                 {!store.checkoutEnabled ? <p className="mt-2 text-xs text-amber-700">Secure payment is not configured yet. Please contact the photographer.</p> : null}
               </div>
             ) : null}
-          </aside>
+            </aside>
+          </div>
         </div>
       ) : null}
 

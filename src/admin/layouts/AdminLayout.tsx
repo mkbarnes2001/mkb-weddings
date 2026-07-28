@@ -92,8 +92,8 @@ export function AdminLayout() {
         </aside>
 
         <section className="admin-main-region">
-          <header className="admin-topbar sticky top-0 z-20 border-b border-black/10 bg-[#f5f3ef]/92 backdrop-blur-xl">
-            <div className="flex min-h-[54px] items-center justify-between gap-4 px-6">
+          <header className="admin-topbar sticky top-0 z-40 border-b border-black/10 bg-[#f5f3ef] shadow-[0_4px_18px_rgba(17,17,17,0.04)]">
+            <div className="flex min-h-[62px] items-center justify-between gap-4 px-6">
               <div className="min-w-0">
                 <p className="truncate text-[9px] uppercase tracking-[0.2em] text-neutral-500">Photography Intelligence</p>
                 <p className="mt-0.5 truncate text-[10px] text-neutral-500">Wedding content, assets, AI and publishing</p>
