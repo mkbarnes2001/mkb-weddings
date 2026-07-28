@@ -211,18 +211,16 @@ export function Weddings() {
 
             <div className="admin-wedding-status-row"><StatusBadge status={active.status} /><span className={`admin-status ${publicationToneClass(active.publicationStatus)}`}>{active.publicationStatus}</span></div>
 
-            <Link to={`/admin/weddings/${active.slug}/workspace`} className="admin-button admin-button--primary w-full"><LayoutDashboard className="admin-button__icon" strokeWidth={1.6} />Open Wedding Workspace</Link>
-
-            <div className="admin-summary-action-grid admin-wedding-action-grid">
-              <Link to={`/admin/weddings/${active.slug}/story`} className="admin-button admin-button--secondary admin-button--sm"><FileText className="admin-button__icon" strokeWidth={1.6} />Story</Link>
-              <Link to={`/admin/weddings/${active.slug}/images`} className="admin-button admin-button--secondary admin-button--sm"><ImageIcon className="admin-button__icon" strokeWidth={1.6} />Images</Link>
-              <Link to={`/admin/weddings/${active.slug}/suppliers`} className="admin-button admin-button--secondary admin-button--sm"><Users className="admin-button__icon" strokeWidth={1.6} />Suppliers</Link>
-              <Link to={`/admin/weddings/${active.slug}/publish`} className="admin-button admin-button--secondary admin-button--sm"><Upload className="admin-button__icon" strokeWidth={1.6} />Publish</Link>
-            </div>
-
-            <div className="admin-summary-action-grid admin-wedding-action-grid">
-              <button type="button" disabled={destructiveBusy || active.publicationStatus === "archived"} onClick={() => archiveWedding(active)} className="admin-button admin-button--secondary admin-button--sm"><Archive className="admin-button__icon" strokeWidth={1.6} />{active.publicationStatus === "archived" ? "Archived" : "Archive"}</button>
-              <button type="button" disabled={destructiveBusy} onClick={() => { setDeleteTarget(active); setDeleteConfirm(""); setError(""); }} className="admin-button admin-button--danger admin-button--sm"><Trash2 className="admin-button__icon" strokeWidth={1.6} />Delete</button>
+            <div className="admin-wedding-action-panel" aria-label="Wedding actions">
+              <Link to={`/admin/weddings/${active.slug}/workspace`} className="admin-button admin-button--primary admin-wedding-workspace-button"><LayoutDashboard className="admin-button__icon" strokeWidth={1.6} />Open Wedding Workspace</Link>
+              <div className="admin-summary-action-grid admin-wedding-action-grid">
+                <Link to={`/admin/weddings/${active.slug}/story`} className="admin-button admin-button--secondary admin-button--sm"><FileText className="admin-button__icon" strokeWidth={1.6} />Story</Link>
+                <Link to={`/admin/weddings/${active.slug}/images`} className="admin-button admin-button--secondary admin-button--sm"><ImageIcon className="admin-button__icon" strokeWidth={1.6} />Images</Link>
+                <Link to={`/admin/weddings/${active.slug}/suppliers`} className="admin-button admin-button--secondary admin-button--sm"><Users className="admin-button__icon" strokeWidth={1.6} />Suppliers</Link>
+                <Link to={`/admin/weddings/${active.slug}/publish`} className="admin-button admin-button--secondary admin-button--sm"><Upload className="admin-button__icon" strokeWidth={1.6} />Publish</Link>
+                <button type="button" disabled={destructiveBusy || active.publicationStatus === "archived"} onClick={() => archiveWedding(active)} className="admin-button admin-button--secondary admin-button--sm"><Archive className="admin-button__icon" strokeWidth={1.6} />{active.publicationStatus === "archived" ? "Archived" : "Archive"}</button>
+                <button type="button" disabled={destructiveBusy} onClick={() => { setDeleteTarget(active); setDeleteConfirm(""); setError(""); }} className="admin-button admin-button--danger admin-button--sm"><Trash2 className="admin-button__icon" strokeWidth={1.6} />Delete</button>
+              </div>
             </div>
 
             <div className="admin-summary-metrics">
