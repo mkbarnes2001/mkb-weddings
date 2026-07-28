@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   Activity,
@@ -98,6 +99,7 @@ export function ClientGalleryEditor() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [showShare, setShowShare] = useState(false);
+  const [topbarPortal, setTopbarPortal] = useState<HTMLElement | null>(null);
   const [brandingDraft, setBrandingDraft] = useState<ClientGalleryDetailPayload["branding"] | null>(null);
   const [brandingUploading, setBrandingUploading] = useState(false);
   const [openPhotoMenuId, setOpenPhotoMenuId] = useState("");
@@ -139,6 +141,9 @@ export function ClientGalleryEditor() {
 
   useEffect(() => { load(); }, [id]);
   useEffect(() => { if (activeTab === "store") loadStore(); }, [id, activeTab]);
+  useEffect(() => {
+    setTopbarPortal(document.getElementById("admin-page-actions"));
+  }, []);
   useEffect(() => { setSelectedAssets(new Set()); setOpenPhotoMenuId(""); setDraggedAssetId(""); setDragOverAssetId(""); }, [activeAlbumId, activeTab]);
   useEffect(() => {
     const close = (event: MouseEvent) => {
@@ -425,14 +430,47 @@ export function ClientGalleryEditor() {
       <style>{`
         .client-gallery-editor-shell {
           display: grid;
-          grid-template-columns: 280px minmax(0, 1fr);
+          grid-template-columns: 310px minmax(0, 1fr);
           gap: 24px;
           align-items: start;
         }
         .client-gallery-editor-sidebar {
           position: sticky;
           top: 18px;
+          min-width: 0;
           overflow: hidden;
+        }
+        .client-gallery-topbar-actions {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .client-gallery-topbar-action {
+          width: 30px;
+          height: 30px;
+          flex: 0 0 30px;
+          display: inline-grid;
+          place-items: center;
+          border: 1px solid rgba(17,17,17,.12);
+          border-radius: 8px;
+          background: #fff;
+          color: #171717;
+          transition: background-color .15s ease, border-color .15s ease, transform .15s ease;
+        }
+        .client-gallery-topbar-action:hover {
+          border-color: rgba(17,17,17,.25);
+          background: #f7f7f6;
+          transform: translateY(-1px);
+        }
+        .client-gallery-topbar-action[data-primary="true"] {
+          border-color: #111;
+          background: #111;
+          color: #fff;
+        }
+        .client-gallery-topbar-action[aria-disabled="true"] {
+          pointer-events: none;
+          opacity: .38;
         }
         .client-gallery-primary-tabs {
           display: grid;
@@ -480,17 +518,16 @@ export function ClientGalleryEditor() {
         }
         .client-gallery-activity-stats {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
-          gap: 10px;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
         }
         .client-gallery-activity-stat {
           min-width: 0;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          padding: 13px 14px;
-          border-radius: 14px;
+          gap: 10px;
+          padding: 10px 12px;
+          border-radius: 12px;
           text-align: left;
           transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
         }
@@ -500,12 +537,12 @@ export function ClientGalleryEditor() {
           transform: translateY(-1px);
         }
         .client-gallery-activity-stat-icon {
-          width: 34px;
-          height: 34px;
-          flex: 0 0 34px;
+          width: 30px;
+          height: 30px;
+          flex: 0 0 30px;
           display: grid;
           place-items: center;
-          border-radius: 10px;
+          border-radius: 9px;
           background: #f5f5f5;
           color: #262626;
         }
@@ -515,17 +552,69 @@ export function ClientGalleryEditor() {
         }
         .client-gallery-activity-stat-value {
           display: block;
-          font-size: 18px;
+          font-size: 15px;
           line-height: 1;
           font-weight: 650;
           color: #171717;
         }
         .client-gallery-activity-stat-label {
           display: block;
-          margin-top: 4px;
-          font-size: 10.5px;
-          line-height: 1.25;
+          margin-top: 3px;
+          overflow: hidden;
+          font-size: 9.5px;
+          line-height: 1.2;
           color: #737373;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .client-gallery-section-title {
+          margin: 0;
+          font-size: 13px !important;
+          line-height: 1.2 !important;
+          font-weight: 650 !important;
+          letter-spacing: 0 !important;
+        }
+        .client-gallery-section-icon {
+          width: 14px !important;
+          height: 14px !important;
+          flex: 0 0 14px;
+        }
+        .client-gallery-section-description {
+          margin-top: 5px;
+          max-width: 720px;
+          font-size: 10.5px !important;
+          line-height: 1.45 !important;
+          color: #737373;
+        }
+        .client-gallery-selection-meta {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 5px;
+          margin-top: 7px;
+        }
+        .client-gallery-selection-meta span {
+          display: inline-flex;
+          min-height: 19px;
+          align-items: center;
+          border: 1px solid rgba(17,17,17,.09);
+          border-radius: 999px;
+          background: #fafafa;
+          padding: 0 7px;
+          color: #737373;
+          font-size: 8.5px;
+          font-weight: 600;
+          letter-spacing: .035em;
+          line-height: 1;
+          text-transform: uppercase;
+        }
+        .client-gallery-visitors-table {
+          font-size: 10.5px;
+          line-height: 1.35;
+        }
+        .client-gallery-visitors-table th {
+          font-size: 8px;
+          letter-spacing: .075em;
         }
         .client-gallery-panel-header {
           display: flex;
@@ -541,10 +630,22 @@ export function ClientGalleryEditor() {
           gap: 5px;
           flex-wrap: wrap;
         }
-        .client-gallery-panel-actions > *,
-        .client-gallery-response-actions > * {
+        .client-gallery-panel-actions > * {
           flex: 0 0 auto;
           white-space: nowrap;
+        }
+        .client-gallery-response-actions > * {
+          width: 25px;
+          height: 25px;
+          flex: 0 0 25px;
+          display: inline-grid;
+          place-items: center;
+          padding: 0 !important;
+          white-space: nowrap;
+        }
+        .client-gallery-response-actions svg {
+          width: 12px !important;
+          height: 12px !important;
         }
         .client-gallery-response-row {
           display: flex;
@@ -578,40 +679,43 @@ export function ClientGalleryEditor() {
           grid-template-columns: repeat(2, minmax(0,1fr));
           gap: 16px;
         }
-        @media (max-width: 1180px) {
-          .client-gallery-editor-shell { grid-template-columns: 245px minmax(0,1fr); gap: 18px; }
-          .client-gallery-branding-grid { grid-template-columns: minmax(0,1fr); }
-          .client-gallery-branding-grid aside { position: static !important; }
-          .client-gallery-activity-split { grid-template-columns: minmax(0,1fr); }
-          .client-gallery-photo-toolbar { grid-template-columns: repeat(3, minmax(0,1fr)); }
-          .client-gallery-editor-actions { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(132px, max-content)); justify-content: end; }
-          .client-gallery-editor-actions > * { min-width: 0; }
+        @media (max-width: 1320px) {
+          .client-gallery-editor-shell { grid-template-columns: 290px minmax(0,1fr); gap: 18px; }
+          .client-gallery-primary-tab { font-size: 9.5px; }
         }
-        @media (max-width: 860px) {
+        @media (max-width: 1120px) {
           .client-gallery-editor-shell { grid-template-columns: minmax(0,1fr); }
           .client-gallery-editor-sidebar { position: static; }
           .client-gallery-sidebar-overview {
             display: grid;
-            grid-template-columns: minmax(180px, .9fr) minmax(0, 1.1fr);
+            grid-template-columns: minmax(260px, .82fr) minmax(0, 1.18fr);
           }
           .client-gallery-sidebar-cover { min-height: 100%; }
           .client-gallery-sidebar-cover img { min-height: 100%; }
           .client-gallery-context-menu { max-height: none; }
-          .client-gallery-activity-stats { grid-template-columns: repeat(3, minmax(150px,1fr)); }
+          .client-gallery-activity-stats { grid-template-columns: repeat(3, minmax(0,1fr)); }
+          .client-gallery-branding-grid { grid-template-columns: minmax(0,1fr); }
+          .client-gallery-branding-grid aside { position: static !important; }
+          .client-gallery-activity-split { grid-template-columns: minmax(0,1fr); }
+          .client-gallery-photo-toolbar { grid-template-columns: repeat(3, minmax(0,1fr)); }
+        }
+        @media (max-width: 820px) {
+          .client-gallery-sidebar-overview {
+            grid-template-columns: minmax(210px, .9fr) minmax(0, 1.1fr);
+          }
+          .client-gallery-activity-split { grid-template-columns: minmax(0,1fr); }
         }
         @media (max-width: 640px) {
           .client-gallery-editor-page { padding-left: 12px !important; padding-right: 12px !important; }
-          .client-gallery-editor-topbar { align-items: stretch; }
-          .client-gallery-editor-actions { width: 100%; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)) !important; justify-content: stretch !important; }
-          .client-gallery-editor-actions > a,
-          .client-gallery-editor-actions > button { width: 100%; min-height: 40px; justify-content: center; white-space: nowrap; }
+          .client-gallery-editor-topbar { align-items: center; }
+          .client-gallery-topbar-action { width: 28px; height: 28px; flex-basis: 28px; border-radius: 7px; }
           .client-gallery-editor-shell { gap: 14px; }
           .client-gallery-sidebar-overview { grid-template-columns: minmax(0,1fr); }
           .client-gallery-primary-tabs { position: sticky; top: 0; z-index: 5; background: #fff; }
           .client-gallery-primary-tab { padding: 9px 3px; font-size: 9px; }
           .client-gallery-context-menu { padding: 10px; }
           .client-gallery-activity-stats { grid-template-columns: minmax(0,1fr); }
-          .client-gallery-activity-stat { padding: 12px 13px; }
+          .client-gallery-activity-stat { padding: 10px 12px; }
           .client-gallery-panel-actions { width: 100%; }
           .client-gallery-panel-actions > * { flex: 1 1 118px; justify-content: center; }
           .client-gallery-response-actions { width: 100%; }
@@ -628,19 +732,43 @@ export function ClientGalleryEditor() {
           .client-gallery-branding-grid > aside { border-radius: 14px; }
         }
       `}</style>
-      <div className="client-gallery-editor-topbar flex items-center justify-between gap-4 flex-wrap">
-        <Link to="/admin/client-galleries" className="inline-flex items-center gap-2 text-sm text-neutral-600"><ArrowLeft className="h-4 w-4" /> Client Galleries</Link>
-        <div className="client-gallery-editor-actions flex items-center gap-2 flex-wrap" style={{ position: "relative" }}>
-          {draft.weddingSlug ? <Link to={`/admin/weddings/${encodeURIComponent(String(draft.weddingSlug))}/workspace`} className="rounded-lg border border-black/15 bg-white px-3 py-2 text-sm">Wedding Workspace</Link> : null}
-          <a href={gallery.status === "live" ? shareUrl : undefined} target="_blank" rel="noreferrer" aria-disabled={gallery.status !== "live"} className={`rounded-lg border border-black/15 bg-white px-3 py-2 text-sm inline-flex items-center gap-2 ${gallery.status !== "live" ? "pointer-events-none opacity-40" : ""}`}><Eye className="h-4 w-4" /> Preview</a>
-          <button type="button" onClick={() => setShowShare((value) => !value)} className="rounded-lg bg-black text-white px-4 py-2 text-sm inline-flex items-center gap-2"><Copy className="h-4 w-4" /> Share</button>
-          {showShare ? <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-xl" style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", width: "min(330px, calc(100vw - 24px))", zIndex: 30 }}>
+      {topbarPortal ? createPortal(
+        <div className="client-gallery-topbar-actions">
+          {draft.weddingSlug ? <Link
+            to={`/admin/weddings/${encodeURIComponent(String(draft.weddingSlug))}/workspace`}
+            className="client-gallery-topbar-action"
+            title="Open wedding workspace"
+            aria-label="Open wedding workspace"
+          ><ExternalLink className="h-3.5 w-3.5" /></Link> : null}
+          <a
+            href={gallery.status === "live" ? shareUrl : undefined}
+            target="_blank"
+            rel="noreferrer"
+            aria-disabled={gallery.status !== "live"}
+            className="client-gallery-topbar-action"
+            title="Preview client gallery"
+            aria-label="Preview client gallery"
+          ><Eye className="h-3.5 w-3.5" /></a>
+          <button
+            type="button"
+            onClick={() => setShowShare((value) => !value)}
+            className="client-gallery-topbar-action"
+            data-primary="true"
+            title="Share client gallery"
+            aria-label="Share client gallery"
+          ><Copy className="h-3.5 w-3.5" /></button>
+          {showShare ? <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-xl" style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", width: "min(330px, calc(100vw - 24px))", zIndex: 80 }}>
             <div className="flex items-center justify-between gap-3"><strong className="text-sm">Share private gallery</strong><button onClick={() => setShowShare(false)}><X className="h-4 w-4" /></button></div>
             <p className="mt-3 text-xs text-neutral-500 break-all">{shareUrl}</p>
             <button disabled={gallery.status !== "live"} onClick={async () => { await navigator.clipboard?.writeText(shareUrl); setMessage("Private gallery link copied."); setShowShare(false); }} className="mt-3 w-full rounded-lg bg-black text-white px-3 py-2 text-sm disabled:opacity-40">Copy gallery link</button>
             <div className="mt-3 rounded-lg bg-neutral-50 p-3 text-xs text-neutral-600">Status: <strong>{gallery.status.toUpperCase()}</strong><br />PIN: <strong>{gallery.pinEnabled ? "Enabled" : "Not enabled"}</strong><br />Email access: <strong>{gallery.requireEmail ? "Required" : "Optional"}</strong></div>
           </div> : null}
-        </div>
+        </div>,
+        topbarPortal,
+      ) : null}
+
+      <div className="client-gallery-editor-topbar flex items-center justify-between gap-4">
+        <Link to="/admin/client-galleries" className="inline-flex items-center gap-2 text-sm text-neutral-600"><ArrowLeft className="h-4 w-4" /> Client Galleries</Link>
       </div>
 
       <div className="client-gallery-editor-shell mt-5">
@@ -821,8 +949,8 @@ export function ClientGalleryEditor() {
             <section id="favourites-panel" className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
               <div className="client-gallery-panel-header">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2"><Heart className="h-4 w-4" /><h3 className="text-base font-semibold">Favourites</h3></div>
-                  <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-neutral-500">Review client favourites as thumbnails or download secure full-resolution originals for album design.</p>
+                  <div className="flex items-center gap-1.5"><Heart className="client-gallery-section-icon" /><h3 className="client-gallery-section-title">Favourites</h3></div>
+                  <p className="client-gallery-section-description">Review client favourites as thumbnails or download secure full-resolution originals for album design.</p>
                 </div>
                 <div className="client-gallery-panel-actions">
                   <Link to={`/admin/client-galleries/${id}/review?source=favourites&group=combined`} className="rounded-lg border border-black/15 px-3 py-2 text-xs inline-flex items-center gap-1.5"><Eye className="h-3.5 w-3.5" /> View</Link>
@@ -832,7 +960,7 @@ export function ClientGalleryEditor() {
             </section>
 
             <section id="selections-panel" className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
-              <div className="flex items-center gap-2"><ClipboardList className="h-4 w-4" /><h3 className="text-base font-semibold">Client selections</h3></div>
+              <div className="flex items-center gap-1.5"><ClipboardList className="client-gallery-section-icon" /><h3 className="client-gallery-section-title">Client selections</h3></div>
               <div className="client-gallery-activity-split mt-3">
                 <div className="space-y-2.5">
                   {detail.selectionRequests.length ? detail.selectionRequests.map((request) => {
@@ -840,16 +968,16 @@ export function ClientGalleryEditor() {
                     return <div key={request.id} className="rounded-xl border border-black/10 p-3.5">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <strong className="text-xs font-semibold">{request.name}</strong>
-                          <p className="mt-1 text-[11px] leading-relaxed text-neutral-500">{request.instructions || "No instructions"}</p>
-                          <p className="mt-1.5 text-[9px] uppercase tracking-[.08em] text-neutral-400">{responses.length} response{responses.length === 1 ? "" : "s"} · {request.status}</p>
+                          <strong className="text-[11px] font-semibold">{request.name}</strong>
+                          <p className="mt-1 text-[10px] leading-relaxed text-neutral-500">{request.instructions || "No instructions"}</p>
+                          <div className="client-gallery-selection-meta"><span>{responses.length} response{responses.length === 1 ? "" : "s"}</span><span>{request.status}</span></div>
                         </div>
                         {request.status === "active" ? <button onClick={() => mutateSelection({ action: "archiveRequest", requestId: request.id }, "Selection request archived.")} title="Archive" className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100"><Trash2 className="h-3.5 w-3.5" /></button> : null}
                       </div>
                       {responses.map((selection) => <div key={selection.id} className="client-gallery-response-row mt-2.5 rounded-lg bg-neutral-50 p-2.5">
                         <div className="min-w-0">
-                          <p className="truncate text-xs font-medium">{selection.displayName || selection.email || "Anonymous visitor"}</p>
-                          <p className="mt-0.5 text-[9px] uppercase tracking-[.04em] text-neutral-400">{selection.selectedCount} selected · {selection.status}</p>
+                          <p className="truncate text-[11px] font-medium">{selection.displayName || selection.email || "Anonymous visitor"}</p>
+                          <div className="client-gallery-selection-meta"><span>{selection.selectedCount} selected</span><span>{selection.status}</span></div>
                         </div>
                         <div className="client-gallery-response-actions">
                           <Link title="View thumbnails" to={`/admin/client-galleries/${id}/review?source=selection&selectionId=${encodeURIComponent(selection.id)}`} className="rounded-md border border-black/10 p-1.5"><Eye className="h-3.5 w-3.5" /></Link>
@@ -873,8 +1001,8 @@ export function ClientGalleryEditor() {
             </section>
 
             <section id="visitors-panel" className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
-              <div className="flex items-center gap-2"><Users className="h-4 w-4" /><h3 className="text-base font-semibold">Recent visitors</h3></div>
-              {detail.visitors.length ? <div className="mt-3 overflow-x-auto"><table className="w-full min-w-[560px] text-xs"><thead><tr className="text-left text-[9px] uppercase tracking-[.08em] text-neutral-400"><th className="py-2">Visitor</th><th>Role</th><th>Visits</th><th>Last visit</th><th>Originals</th></tr></thead><tbody>{detail.visitors.slice(0, 50).map((visitor) => <tr key={visitor.visitorKey} className="border-t border-black/5"><td className="py-2.5 pr-3">{visitor.displayName || visitor.email || "Anonymous"}<span className="block max-w-[240px] truncate text-[10px] text-neutral-400">{visitor.email}</span></td><td className="pr-3 capitalize">{visitor.role.replaceAll("_", " ")}</td><td className="pr-3">{visitor.visitCount}</td><td className="pr-3">{formatDate(visitor.lastSeenAt)}</td><td>{visitor.canDownloadOriginals ? "Allowed" : "View only"}</td></tr>)}</tbody></table></div> : <p className="mt-3 text-xs text-neutral-500">No identified visitors yet.</p>}
+              <div className="flex items-center gap-1.5"><Users className="client-gallery-section-icon" /><h3 className="client-gallery-section-title">Recent visitors</h3></div>
+              {detail.visitors.length ? <div className="mt-3 overflow-x-auto"><table className="client-gallery-visitors-table w-full min-w-[560px]"><thead><tr className="text-left text-[9px] uppercase tracking-[.08em] text-neutral-400"><th className="py-2">Visitor</th><th>Role</th><th>Visits</th><th>Last visit</th><th>Originals</th></tr></thead><tbody>{detail.visitors.slice(0, 50).map((visitor) => <tr key={visitor.visitorKey} className="border-t border-black/5"><td className="py-2.5 pr-3">{visitor.displayName || visitor.email || "Anonymous"}<span className="block max-w-[240px] truncate text-[10px] text-neutral-400">{visitor.email}</span></td><td className="pr-3 capitalize">{visitor.role.replaceAll("_", " ")}</td><td className="pr-3">{visitor.visitCount}</td><td className="pr-3">{formatDate(visitor.lastSeenAt)}</td><td>{visitor.canDownloadOriginals ? "Allowed" : "View only"}</td></tr>)}</tbody></table></div> : <p className="mt-3 text-xs text-neutral-500">No identified visitors yet.</p>}
             </section>
           </section> : null}
 

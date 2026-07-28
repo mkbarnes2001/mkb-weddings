@@ -93,26 +93,30 @@ export function AdminLayout() {
 
         <section className="admin-main-region">
           <header className="admin-topbar sticky top-0 z-40 border-b border-black/10 bg-[#f5f3ef] shadow-[0_4px_18px_rgba(17,17,17,0.04)]">
-            <div className="flex min-h-[62px] items-center justify-between gap-4 px-6">
-              <div className="min-w-0">
+            <div className="flex min-h-[62px] items-center justify-between gap-3 px-4 sm:px-6">
+              <div className="hidden min-w-0 sm:block">
                 <p className="truncate text-[9px] uppercase tracking-[0.2em] text-neutral-500">Photography Intelligence</p>
                 <p className="mt-0.5 truncate text-[10px] text-neutral-500">Wedding content, assets, AI and publishing</p>
               </div>
 
-              <div className="flex items-center gap-1.5">
+              <div className="ml-auto flex min-w-0 items-center gap-1.5">
+                <div id="admin-page-actions" className="flex min-w-0 items-center gap-1.5" />
+                <span className="mx-0.5 hidden h-5 w-px bg-black/10 sm:block" aria-hidden="true" />
                 <a
                   href="https://www.mkbweddings.co.uk/blog"
                   title="Open MKB Weddings blog"
-                  className="admin-button admin-button--secondary admin-button--sm"
+                  aria-label="Open MKB Weddings blog"
+                  className="inline-grid h-[30px] w-[30px] flex-none place-items-center rounded-lg border border-black/10 bg-white text-neutral-700 transition hover:-translate-y-px hover:border-black/25 hover:bg-neutral-50"
                 >
-                  <FileText className="admin-button__icon" /> Blog
+                  <FileText className="admin-button__icon" />
                 </a>
                 <a
                   href="https://www.mkbweddings.co.uk/"
                   title="Open MKB Weddings website"
-                  className="admin-button admin-button--primary admin-button--sm"
+                  aria-label="Open MKB Weddings website"
+                  className="inline-grid h-[30px] w-[30px] flex-none place-items-center rounded-lg border border-black bg-black text-white transition hover:-translate-y-px hover:bg-neutral-800"
                 >
-                  <Globe2 className="admin-button__icon" /> Website
+                  <Globe2 className="admin-button__icon" />
                 </a>
               </div>
             </div>
