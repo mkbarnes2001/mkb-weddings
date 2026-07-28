@@ -480,8 +480,78 @@ export function ClientGalleryEditor() {
         }
         .client-gallery-activity-stats {
           display: grid;
-          grid-template-columns: repeat(3, minmax(0,1fr));
+          grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+          gap: 10px;
+        }
+        .client-gallery-activity-stat {
+          min-width: 0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
           gap: 12px;
+          padding: 13px 14px;
+          border-radius: 14px;
+          text-align: left;
+          transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+        }
+        .client-gallery-activity-stat:hover {
+          border-color: rgba(0,0,0,.22);
+          box-shadow: 0 8px 22px rgba(0,0,0,.055);
+          transform: translateY(-1px);
+        }
+        .client-gallery-activity-stat-icon {
+          width: 34px;
+          height: 34px;
+          flex: 0 0 34px;
+          display: grid;
+          place-items: center;
+          border-radius: 10px;
+          background: #f5f5f5;
+          color: #262626;
+        }
+        .client-gallery-activity-stat-copy {
+          min-width: 0;
+          flex: 1 1 auto;
+        }
+        .client-gallery-activity-stat-value {
+          display: block;
+          font-size: 18px;
+          line-height: 1;
+          font-weight: 650;
+          color: #171717;
+        }
+        .client-gallery-activity-stat-label {
+          display: block;
+          margin-top: 4px;
+          font-size: 10.5px;
+          line-height: 1.25;
+          color: #737373;
+        }
+        .client-gallery-panel-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .client-gallery-panel-actions,
+        .client-gallery-response-actions {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          flex-wrap: wrap;
+        }
+        .client-gallery-panel-actions > *,
+        .client-gallery-response-actions > * {
+          flex: 0 0 auto;
+          white-space: nowrap;
+        }
+        .client-gallery-response-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          flex-wrap: wrap;
         }
         .client-gallery-activity-split {
           display: grid;
@@ -514,6 +584,8 @@ export function ClientGalleryEditor() {
           .client-gallery-branding-grid aside { position: static !important; }
           .client-gallery-activity-split { grid-template-columns: minmax(0,1fr); }
           .client-gallery-photo-toolbar { grid-template-columns: repeat(3, minmax(0,1fr)); }
+          .client-gallery-editor-actions { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(132px, max-content)); justify-content: end; }
+          .client-gallery-editor-actions > * { min-width: 0; }
         }
         @media (max-width: 860px) {
           .client-gallery-editor-shell { grid-template-columns: minmax(0,1fr); }
@@ -525,20 +597,25 @@ export function ClientGalleryEditor() {
           .client-gallery-sidebar-cover { min-height: 100%; }
           .client-gallery-sidebar-cover img { min-height: 100%; }
           .client-gallery-context-menu { max-height: none; }
-          .client-gallery-activity-stats { grid-template-columns: repeat(3, minmax(0,1fr)); }
+          .client-gallery-activity-stats { grid-template-columns: repeat(3, minmax(150px,1fr)); }
         }
         @media (max-width: 640px) {
           .client-gallery-editor-page { padding-left: 12px !important; padding-right: 12px !important; }
           .client-gallery-editor-topbar { align-items: stretch; }
-          .client-gallery-editor-actions { width: 100%; }
+          .client-gallery-editor-actions { width: 100%; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)) !important; justify-content: stretch !important; }
           .client-gallery-editor-actions > a,
-          .client-gallery-editor-actions > button { flex: 1 1 auto; justify-content: center; }
+          .client-gallery-editor-actions > button { width: 100%; min-height: 40px; justify-content: center; white-space: nowrap; }
           .client-gallery-editor-shell { gap: 14px; }
           .client-gallery-sidebar-overview { grid-template-columns: minmax(0,1fr); }
           .client-gallery-primary-tabs { position: sticky; top: 0; z-index: 5; background: #fff; }
           .client-gallery-primary-tab { padding: 9px 3px; font-size: 9px; }
           .client-gallery-context-menu { padding: 10px; }
           .client-gallery-activity-stats { grid-template-columns: minmax(0,1fr); }
+          .client-gallery-activity-stat { padding: 12px 13px; }
+          .client-gallery-panel-actions { width: 100%; }
+          .client-gallery-panel-actions > * { flex: 1 1 118px; justify-content: center; }
+          .client-gallery-response-actions { width: 100%; }
+          .client-gallery-response-actions > * { flex: 0 0 auto; }
           .client-gallery-photo-toolbar { grid-template-columns: repeat(2, minmax(0,1fr)); }
           .client-gallery-photo-toolbar > * { width: 100%; }
           .client-gallery-form-grid,
@@ -725,11 +802,80 @@ export function ClientGalleryEditor() {
             {activeAlbum ? <div className="mt-5 text-right"><button onClick={() => mutateAlbum({ action: "archive", albumId: activeAlbum.id }, "Album archived.").then(() => setActiveAlbumId(""))} className="text-xs text-red-700 underline underline-offset-4">Archive this album</button></div> : null}
           </section> : null}
 
-          {activeTab === "activity" ? <section className="mt-5 space-y-5">
-            <div className="client-gallery-activity-stats"><button onClick={() => document.getElementById("favourites-panel")?.scrollIntoView({ behavior: "smooth" })} className="rounded-2xl border border-black/10 bg-white p-5 text-left"><Heart className="h-5 w-5" /><strong className="block mt-3 text-2xl">{gallery.favouriteCount}</strong><span className="text-xs text-neutral-500">Favourites</span></button><button onClick={() => document.getElementById("selections-panel")?.scrollIntoView({ behavior: "smooth" })} className="rounded-2xl border border-black/10 bg-white p-5 text-left"><ClipboardList className="h-5 w-5" /><strong className="block mt-3 text-2xl">{detail.selections.length}</strong><span className="text-xs text-neutral-500">Selection responses</span></button><button onClick={() => document.getElementById("visitors-panel")?.scrollIntoView({ behavior: "smooth" })} className="rounded-2xl border border-black/10 bg-white p-5 text-left"><Users className="h-5 w-5" /><strong className="block mt-3 text-2xl">{gallery.visitorCount || detail.visitors.length}</strong><span className="text-xs text-neutral-500">Visitors</span></button></div>
-            <section id="favourites-panel" className="rounded-2xl border border-black/10 bg-white p-5"><div className="flex items-start justify-between gap-4 flex-wrap"><div><div className="flex items-center gap-2"><Heart className="h-5 w-5" /><h3 className="text-xl font-semibold">Favourites</h3></div><p className="mt-2 text-sm text-neutral-600">Review client favourites as thumbnails or download secure full-resolution originals for album design.</p></div><div className="flex gap-2"><Link to={`/admin/client-galleries/${id}/review?source=favourites&group=combined`} className="rounded-lg border border-black/15 px-4 py-2.5 text-sm inline-flex items-center gap-2"><Eye className="h-4 w-4" /> View</Link>{gallery.favouriteCount > 0 ? <a href={AdminApiService.clientGalleryBulkDownloadUrl(id, { source: "favourites", group: "combined" })} className="rounded-lg bg-black text-white px-4 py-2.5 text-sm inline-flex items-center gap-2"><Download className="h-4 w-4" /> Download all</a> : null}</div></div></section>
-            <section id="selections-panel" className="rounded-2xl border border-black/10 bg-white p-5"><div className="flex items-center gap-2"><ClipboardList className="h-5 w-5" /><h3 className="text-xl font-semibold">Client selections</h3></div><div className="client-gallery-activity-split mt-4"><div className="space-y-3">{detail.selectionRequests.length ? detail.selectionRequests.map((request) => { const responses = detail.selections.filter((selection) => selection.requestId === request.id); return <div key={request.id} className="rounded-xl border border-black/10 p-4"><div className="flex items-start justify-between gap-3"><div><strong className="text-sm">{request.name}</strong><p className="mt-1 text-xs text-neutral-500">{request.instructions || "No instructions"}</p><p className="mt-2 text-[10px] uppercase tracking-[.08em] text-neutral-400">{responses.length} response{responses.length === 1 ? "" : "s"} · {request.status}</p></div>{request.status === "active" ? <button onClick={() => mutateSelection({ action: "archiveRequest", requestId: request.id }, "Selection request archived.")} title="Archive"><Trash2 className="h-4 w-4" /></button> : null}</div>{responses.map((selection) => <div key={selection.id} className="mt-3 rounded-lg bg-neutral-50 p-3 flex items-center justify-between gap-3 flex-wrap"><div><p className="text-sm">{selection.displayName || selection.email || "Anonymous visitor"}</p><p className="text-[10px] uppercase text-neutral-400">{selection.selectedCount} selected · {selection.status}</p></div><div className="flex gap-1"><Link title="View thumbnails" to={`/admin/client-galleries/${id}/review?source=selection&selectionId=${encodeURIComponent(selection.id)}`} className="rounded-lg border border-black/10 p-2"><Eye className="h-4 w-4" /></Link>{selection.assets.length ? <a title="Download originals" href={AdminApiService.clientGalleryBulkDownloadUrl(id, { source: "selection", selectionId: selection.id })} className="rounded-lg border border-black/10 p-2"><Download className="h-4 w-4" /></a> : null}<button title="Copy filenames" disabled={!selection.assets.length} onClick={() => copySelectionFilenames(selection.assets.map((asset) => asset.filename))} className="rounded-lg border border-black/10 p-2 disabled:opacity-30"><Copy className="h-4 w-4" /></button><button title="Download CSV" disabled={!selection.assets.length} onClick={() => downloadSelectionCsv(selection)} className="rounded-lg border border-black/10 p-2 disabled:opacity-30"><Download className="h-4 w-4" /></button>{selection.status === "submitted" ? <button title="Reopen" onClick={() => mutateSelection({ action: "reopenSelection", selectionId: selection.id }, "Selection reopened for editing.")} className="rounded-lg border border-black/10 p-2"><RotateCcw className="h-4 w-4" /></button> : null}</div></div>)}</div>; }) : <p className="text-sm text-neutral-500">No selection requests yet.</p>}</div><aside className="rounded-xl bg-neutral-50 border border-black/10 p-4"><div className="flex items-center gap-2"><Plus className="h-4 w-4" /><strong className="text-sm">New selection request</strong></div><input value={selectionDraft.name} onChange={(e) => setSelectionDraft({ ...selectionDraft, name: e.target.value })} className="mt-3 w-full rounded-lg border border-black/15 px-3 py-2 text-sm" placeholder="Selection name" /><textarea value={selectionDraft.instructions} onChange={(e) => setSelectionDraft({ ...selectionDraft, instructions: e.target.value })} className="mt-2 w-full rounded-lg border border-black/15 px-3 py-2 text-sm" rows={3} /><div className="mt-2 grid grid-cols-2 gap-2"><input type="number" min="0" value={selectionDraft.minImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, minImages: Math.max(0, Number(e.target.value) || 0) })} className="rounded-lg border border-black/15 px-3 py-2 text-sm" placeholder="Min" /><input type="number" min="0" value={selectionDraft.maxImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, maxImages: Math.max(0, Number(e.target.value) || 0) })} className="rounded-lg border border-black/15 px-3 py-2 text-sm" placeholder="Max" /></div><button disabled={busy || !selectionDraft.name.trim()} onClick={createSelectionRequest} className="mt-3 w-full rounded-lg bg-black text-white px-4 py-2.5 text-sm disabled:opacity-40">Create request</button></aside></div></section>
-            <section id="visitors-panel" className="rounded-2xl border border-black/10 bg-white p-5"><div className="flex items-center gap-2"><Users className="h-5 w-5" /><h3 className="text-xl font-semibold">Recent visitors</h3></div>{detail.visitors.length ? <div className="mt-4 overflow-x-auto"><table className="w-full text-sm"><thead><tr className="text-left text-[10px] uppercase tracking-[.08em] text-neutral-400"><th className="py-2">Visitor</th><th>Role</th><th>Visits</th><th>Last visit</th><th>Originals</th></tr></thead><tbody>{detail.visitors.slice(0, 50).map((visitor) => <tr key={visitor.visitorKey} className="border-t border-black/5"><td className="py-3">{visitor.displayName || visitor.email || "Anonymous"}<span className="block text-xs text-neutral-400">{visitor.email}</span></td><td>{visitor.role.replaceAll("_", " ")}</td><td>{visitor.visitCount}</td><td>{formatDate(visitor.lastSeenAt)}</td><td>{visitor.canDownloadOriginals ? "Allowed" : "View only"}</td></tr>)}</tbody></table></div> : <p className="mt-3 text-sm text-neutral-500">No identified visitors yet.</p>}</section>
+          {activeTab === "activity" ? <section className="mt-5 space-y-4">
+            <div className="client-gallery-activity-stats">
+              <button onClick={() => document.getElementById("favourites-panel")?.scrollIntoView({ behavior: "smooth" })} className="client-gallery-activity-stat border border-black/10 bg-white">
+                <span className="client-gallery-activity-stat-icon"><Heart className="h-4 w-4" /></span>
+                <span className="client-gallery-activity-stat-copy"><strong className="client-gallery-activity-stat-value">{gallery.favouriteCount}</strong><span className="client-gallery-activity-stat-label">Favourites</span></span>
+              </button>
+              <button onClick={() => document.getElementById("selections-panel")?.scrollIntoView({ behavior: "smooth" })} className="client-gallery-activity-stat border border-black/10 bg-white">
+                <span className="client-gallery-activity-stat-icon"><ClipboardList className="h-4 w-4" /></span>
+                <span className="client-gallery-activity-stat-copy"><strong className="client-gallery-activity-stat-value">{detail.selections.length}</strong><span className="client-gallery-activity-stat-label">Client selections</span></span>
+              </button>
+              <button onClick={() => document.getElementById("visitors-panel")?.scrollIntoView({ behavior: "smooth" })} className="client-gallery-activity-stat border border-black/10 bg-white">
+                <span className="client-gallery-activity-stat-icon"><Users className="h-4 w-4" /></span>
+                <span className="client-gallery-activity-stat-copy"><strong className="client-gallery-activity-stat-value">{gallery.visitorCount || detail.visitors.length}</strong><span className="client-gallery-activity-stat-label">Recent visitors</span></span>
+              </button>
+            </div>
+
+            <section id="favourites-panel" className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
+              <div className="client-gallery-panel-header">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2"><Heart className="h-4 w-4" /><h3 className="text-base font-semibold">Favourites</h3></div>
+                  <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-neutral-500">Review client favourites as thumbnails or download secure full-resolution originals for album design.</p>
+                </div>
+                <div className="client-gallery-panel-actions">
+                  <Link to={`/admin/client-galleries/${id}/review?source=favourites&group=combined`} className="rounded-lg border border-black/15 px-3 py-2 text-xs inline-flex items-center gap-1.5"><Eye className="h-3.5 w-3.5" /> View</Link>
+                  {gallery.favouriteCount > 0 ? <a href={AdminApiService.clientGalleryBulkDownloadUrl(id, { source: "favourites", group: "combined" })} className="rounded-lg bg-black text-white px-3 py-2 text-xs inline-flex items-center gap-1.5"><Download className="h-3.5 w-3.5" /> Download all</a> : null}
+                </div>
+              </div>
+            </section>
+
+            <section id="selections-panel" className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
+              <div className="flex items-center gap-2"><ClipboardList className="h-4 w-4" /><h3 className="text-base font-semibold">Client selections</h3></div>
+              <div className="client-gallery-activity-split mt-3">
+                <div className="space-y-2.5">
+                  {detail.selectionRequests.length ? detail.selectionRequests.map((request) => {
+                    const responses = detail.selections.filter((selection) => selection.requestId === request.id);
+                    return <div key={request.id} className="rounded-xl border border-black/10 p-3.5">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <strong className="text-xs font-semibold">{request.name}</strong>
+                          <p className="mt-1 text-[11px] leading-relaxed text-neutral-500">{request.instructions || "No instructions"}</p>
+                          <p className="mt-1.5 text-[9px] uppercase tracking-[.08em] text-neutral-400">{responses.length} response{responses.length === 1 ? "" : "s"} · {request.status}</p>
+                        </div>
+                        {request.status === "active" ? <button onClick={() => mutateSelection({ action: "archiveRequest", requestId: request.id }, "Selection request archived.")} title="Archive" className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100"><Trash2 className="h-3.5 w-3.5" /></button> : null}
+                      </div>
+                      {responses.map((selection) => <div key={selection.id} className="client-gallery-response-row mt-2.5 rounded-lg bg-neutral-50 p-2.5">
+                        <div className="min-w-0">
+                          <p className="truncate text-xs font-medium">{selection.displayName || selection.email || "Anonymous visitor"}</p>
+                          <p className="mt-0.5 text-[9px] uppercase tracking-[.04em] text-neutral-400">{selection.selectedCount} selected · {selection.status}</p>
+                        </div>
+                        <div className="client-gallery-response-actions">
+                          <Link title="View thumbnails" to={`/admin/client-galleries/${id}/review?source=selection&selectionId=${encodeURIComponent(selection.id)}`} className="rounded-md border border-black/10 p-1.5"><Eye className="h-3.5 w-3.5" /></Link>
+                          {selection.assets.length ? <a title="Download originals" href={AdminApiService.clientGalleryBulkDownloadUrl(id, { source: "selection", selectionId: selection.id })} className="rounded-md border border-black/10 p-1.5"><Download className="h-3.5 w-3.5" /></a> : null}
+                          <button title="Copy filenames" disabled={!selection.assets.length} onClick={() => copySelectionFilenames(selection.assets.map((asset) => asset.filename))} className="rounded-md border border-black/10 p-1.5 disabled:opacity-30"><Copy className="h-3.5 w-3.5" /></button>
+                          <button title="Download CSV" disabled={!selection.assets.length} onClick={() => downloadSelectionCsv(selection)} className="rounded-md border border-black/10 p-1.5 disabled:opacity-30"><Download className="h-3.5 w-3.5" /></button>
+                          {selection.status === "submitted" ? <button title="Reopen" onClick={() => mutateSelection({ action: "reopenSelection", selectionId: selection.id }, "Selection reopened for editing.")} className="rounded-md border border-black/10 p-1.5"><RotateCcw className="h-3.5 w-3.5" /></button> : null}
+                        </div>
+                      </div>)}
+                    </div>;
+                  }) : <p className="text-xs text-neutral-500">No selection requests yet.</p>}
+                </div>
+                <aside className="rounded-xl bg-neutral-50 border border-black/10 p-3.5">
+                  <div className="flex items-center gap-2"><Plus className="h-3.5 w-3.5" /><strong className="text-xs">New selection request</strong></div>
+                  <input value={selectionDraft.name} onChange={(e) => setSelectionDraft({ ...selectionDraft, name: e.target.value })} className="mt-3 w-full rounded-lg border border-black/15 px-3 py-2 text-xs" placeholder="Selection name" />
+                  <textarea value={selectionDraft.instructions} onChange={(e) => setSelectionDraft({ ...selectionDraft, instructions: e.target.value })} className="mt-2 w-full rounded-lg border border-black/15 px-3 py-2 text-xs" rows={3} />
+                  <div className="mt-2 grid grid-cols-2 gap-2"><input type="number" min="0" value={selectionDraft.minImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, minImages: Math.max(0, Number(e.target.value) || 0) })} className="min-w-0 rounded-lg border border-black/15 px-3 py-2 text-xs" placeholder="Min" /><input type="number" min="0" value={selectionDraft.maxImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, maxImages: Math.max(0, Number(e.target.value) || 0) })} className="min-w-0 rounded-lg border border-black/15 px-3 py-2 text-xs" placeholder="Max" /></div>
+                  <button disabled={busy || !selectionDraft.name.trim()} onClick={createSelectionRequest} className="mt-3 w-full rounded-lg bg-black text-white px-4 py-2.5 text-xs disabled:opacity-40">Create request</button>
+                </aside>
+              </div>
+            </section>
+
+            <section id="visitors-panel" className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
+              <div className="flex items-center gap-2"><Users className="h-4 w-4" /><h3 className="text-base font-semibold">Recent visitors</h3></div>
+              {detail.visitors.length ? <div className="mt-3 overflow-x-auto"><table className="w-full min-w-[560px] text-xs"><thead><tr className="text-left text-[9px] uppercase tracking-[.08em] text-neutral-400"><th className="py-2">Visitor</th><th>Role</th><th>Visits</th><th>Last visit</th><th>Originals</th></tr></thead><tbody>{detail.visitors.slice(0, 50).map((visitor) => <tr key={visitor.visitorKey} className="border-t border-black/5"><td className="py-2.5 pr-3">{visitor.displayName || visitor.email || "Anonymous"}<span className="block max-w-[240px] truncate text-[10px] text-neutral-400">{visitor.email}</span></td><td className="pr-3 capitalize">{visitor.role.replaceAll("_", " ")}</td><td className="pr-3">{visitor.visitCount}</td><td className="pr-3">{formatDate(visitor.lastSeenAt)}</td><td>{visitor.canDownloadOriginals ? "Allowed" : "View only"}</td></tr>)}</tbody></table></div> : <p className="mt-3 text-xs text-neutral-500">No identified visitors yet.</p>}
+            </section>
           </section> : null}
 
           {activeTab === "access" ? <section className="client-gallery-settings-column mt-5">
