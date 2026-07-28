@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Archive, FileText, GripVertical, Image as ImageIcon, LayoutDashboard, Plus, Save, Search, Trash2, Users, X } from "lucide-react";
+import { Archive, FileText, GripVertical, Image as ImageIcon, LayoutDashboard, Plus, Save, Search, Trash2, Upload, Users, X } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import { WeddingService } from "../services/WeddingService";
 import type { WeddingPublicationStatus, WeddingRecord } from "../types/wedding";
@@ -165,10 +165,10 @@ export function Weddings() {
                   {!wedding.storyListVisible && wedding.storyStatus === "published" ? <span className="absolute left-2.5 top-2.5 rounded-full bg-black/80 px-2.5 py-1 text-[10px] text-white">Story hidden</span> : null}
                 </div>
                 <div className="p-3">
-                  <p className="truncate font-serif text-lg">{wedding.couple}</p>
+                  <p className="line-clamp-2 min-h-[30px] text-[12px] font-semibold leading-[1.25] tracking-[-0.01em]">{wedding.couple}</p>
                   <div className="mt-2 flex items-center justify-between gap-2">
                     <span className={`rounded-full border px-2.5 py-1 text-[10px] ${publicationClasses(wedding.publicationStatus)}`}>{wedding.publicationStatus}</span>
-                    <Link to={`/admin/weddings/${wedding.slug}/workspace`} onClick={(event) => event.stopPropagation()} aria-label={`Open ${wedding.couple} workspace`} title="Open Wedding Workspace" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-black/10 text-neutral-700 hover:bg-neutral-50"><LayoutDashboard className="h-4 w-4" /></Link>
+                    <Link to={`/admin/weddings/${wedding.slug}/workspace`} onClick={(event) => event.stopPropagation()} aria-label={`Open ${wedding.couple} workspace`} title="Open Wedding Workspace" className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-black/10 bg-white text-neutral-500 hover:border-black/20 hover:text-neutral-900"><LayoutDashboard className="h-3.5 w-3.5" strokeWidth={1.6} /></Link>
                   </div>
                 </div>
               </article>
@@ -176,28 +176,54 @@ export function Weddings() {
           })}
         </div>
 
-        <aside className="admin-summary-panel rounded-[24px] border border-black/10 bg-white p-5">
-          {!active ? <p className="text-sm text-neutral-500">Select a wedding to view details.</p> : <div className="space-y-5">
-            {coverFor(active) ? <img src={coverFor(active)?.thumbSrc || coverFor(active)?.fullSrc} alt={active.couple} className="max-h-[260px] w-full rounded-2xl object-cover" /> : null}
-            <div><p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Wedding</p><h2 className="mt-2 font-serif text-3xl">{active.couple}</h2><p className="mt-2 text-sm text-neutral-500">{active.venue} · {active.weddingDate}</p></div>
+        <aside className="admin-summary-panel admin-record-summary rounded-[18px] border border-black/10 bg-white p-4">
+          {!active ? <p className="text-[11px] text-neutral-500">Select a wedding to view details.</p> : <div className="space-y-3.5">
+            {coverFor(active) ? <img src={coverFor(active)?.thumbSrc || coverFor(active)?.fullSrc} alt={active.couple} className="max-h-[230px] w-full rounded-xl object-cover" /> : null}
 
-            <label className={`flex items-center justify-between gap-4 rounded-2xl border p-4 ${active.storyStatus === "published" ? "border-black/10" : "border-amber-200 bg-amber-50"}`}><div><span className="text-sm">Show story on Stories & Reviews</span>{active.storyStatus !== "published" ? <p className="mt-1 text-xs text-amber-800">Publish the wedding story first to enable this.</p> : null}</div><input type="checkbox" checked={active.storyListVisible} disabled={active.storyStatus !== "published"} onChange={(event) => toggleStory(active.slug, event.target.checked)} /></label>
-
-            <div className="rounded-2xl bg-neutral-50 p-4 text-sm text-neutral-700 space-y-2"><p><span className="text-neutral-400">Title:</span> {active.title}</p><p><span className="text-neutral-400">Venue:</span> {active.venue}</p><p><span className="text-neutral-400">Date:</span> {active.weddingDate}</p><p><span className="text-neutral-400">Storage:</span> {active.storage}</p><p><span className="text-neutral-400">Story status:</span> {active.storyStatus}</p><p><span className="text-neutral-400">Public order:</span> {weddings.findIndex((wedding) => wedding.slug === active.slug) + 1}</p></div>
-
-            <div className="grid grid-cols-2 gap-3"><Small label="Images" value={active.imageCount} /><Small label="AI rows" value={active.aiRows} /></div>
-            <div className="space-y-3"><ProgressBar label="Tags" done={active.tagsComplete} total={active.imageCount} /><ProgressBar label="Alt" done={active.altComplete} total={active.imageCount} /><ProgressBar label="Captions" done={active.captionComplete} total={active.imageCount} /></div>
-            <div className="flex items-center gap-2"><StatusBadge status={active.status} /><span className={`rounded-full border px-3 py-1 text-xs ${publicationClasses(active.publicationStatus)}`}>{active.publicationStatus}</span></div>
-
-            <Link to={`/admin/weddings/${active.slug}/workspace`} className="block w-full rounded-full bg-black px-5 py-3 text-center text-sm text-white">Open Wedding Workspace</Link>
-            <div className="grid grid-cols-2 gap-2"><Link to={`/admin/weddings/${active.slug}/story`} className="flex items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm"><FileText className="h-4 w-4" />Story</Link><Link to={`/admin/weddings/${active.slug}/images`} className="flex items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm"><ImageIcon className="h-4 w-4" />Images</Link><Link to={`/admin/weddings/${active.slug}/suppliers`} className="flex items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm"><Users className="h-4 w-4" />Suppliers</Link><Link to={`/admin/weddings/${active.slug}/publish`} className="flex items-center justify-center rounded-full border border-black/10 px-4 py-2.5 text-sm">Publish</Link></div>
-            <div className="border-t border-black/10 pt-4">
-              <p className="mb-2 text-[11px] uppercase tracking-[0.12em] text-neutral-400">Record actions</p>
-              <div className="grid grid-cols-2 gap-2">
-                <button type="button" disabled={destructiveBusy || active.publicationStatus === "archived"} onClick={() => archiveWedding(active)} className="admin-action-secondary text-xs"><Archive className="h-4 w-4" />{active.publicationStatus === "archived" ? "Archived" : "Archive"}</button>
-                <button type="button" disabled={destructiveBusy} onClick={() => { setDeleteTarget(active); setDeleteConfirm(""); setError(""); }} className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 hover:bg-red-100"><Trash2 className="h-4 w-4" />Delete</button>
-              </div>
+            <div className="min-w-0">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-400">Wedding</p>
+              <h2 className="mt-1.5 break-words text-[19px] font-semibold leading-[1.15] tracking-[-0.025em]">{active.couple}</h2>
+              <p className="mt-1.5 text-[10px] leading-4 text-neutral-500">{active.venue} · {active.weddingDate}</p>
             </div>
+
+            <label className={`admin-summary-toggle ${active.storyStatus !== "published" ? "admin-summary-toggle--warning" : ""}`}>
+              <div className="min-w-0">
+                <span className="block text-[11px] font-medium text-neutral-800">Show on Stories & Reviews</span>
+                {active.storyStatus !== "published" ? <p className="mt-0.5 text-[9px] leading-4 text-amber-800">Publish the story first to enable this.</p> : null}
+              </div>
+              <input type="checkbox" checked={active.storyListVisible} disabled={active.storyStatus !== "published"} onChange={(event) => toggleStory(active.slug, event.target.checked)} />
+            </label>
+
+            <dl className="admin-compact-details">
+              <div><dt>Title</dt><dd>{active.title}</dd></div>
+              <div><dt>Venue</dt><dd>{active.venue}</dd></div>
+              <div><dt>Date</dt><dd>{active.weddingDate}</dd></div>
+              <div><dt>Storage</dt><dd>{active.storage}</dd></div>
+              <div><dt>Story</dt><dd>{active.storyStatus}</dd></div>
+              <div><dt>Order</dt><dd>{weddings.findIndex((wedding) => wedding.slug === active.slug) + 1}</dd></div>
+            </dl>
+
+            <div className="flex flex-wrap items-center gap-1.5"><StatusBadge status={active.status} /><span className={`rounded-full border px-2 py-0.5 text-[9px] ${publicationClasses(active.publicationStatus)}`}>{active.publicationStatus}</span></div>
+
+            <Link to={`/admin/weddings/${active.slug}/workspace`} className="admin-button admin-button--primary w-full"><LayoutDashboard className="admin-button__icon" strokeWidth={1.6} />Open Wedding Workspace</Link>
+
+            <div className="admin-summary-action-grid">
+              <Link to={`/admin/weddings/${active.slug}/story`} className="admin-button admin-button--secondary admin-button--sm"><FileText className="admin-button__icon" strokeWidth={1.6} />Story</Link>
+              <Link to={`/admin/weddings/${active.slug}/images`} className="admin-button admin-button--secondary admin-button--sm"><ImageIcon className="admin-button__icon" strokeWidth={1.6} />Images</Link>
+              <Link to={`/admin/weddings/${active.slug}/suppliers`} className="admin-button admin-button--secondary admin-button--sm"><Users className="admin-button__icon" strokeWidth={1.6} />Suppliers</Link>
+              <Link to={`/admin/weddings/${active.slug}/publish`} className="admin-button admin-button--secondary admin-button--sm"><Upload className="admin-button__icon" strokeWidth={1.6} />Publish</Link>
+            </div>
+
+            <div className="admin-summary-action-grid">
+              <button type="button" disabled={destructiveBusy || active.publicationStatus === "archived"} onClick={() => archiveWedding(active)} className="admin-button admin-button--secondary admin-button--sm"><Archive className="admin-button__icon" strokeWidth={1.6} />{active.publicationStatus === "archived" ? "Archived" : "Archive"}</button>
+              <button type="button" disabled={destructiveBusy} onClick={() => { setDeleteTarget(active); setDeleteConfirm(""); setError(""); }} className="admin-button admin-button--danger admin-button--sm"><Trash2 className="admin-button__icon" strokeWidth={1.6} />Delete</button>
+            </div>
+
+            <div className="admin-summary-metrics">
+              <div className="admin-summary-metric"><span>Images</span><strong>{active.imageCount}</strong></div>
+              <div className="admin-summary-metric"><span>AI rows</span><strong>{active.aiRows}</strong></div>
+            </div>
+            <div className="space-y-2.5 rounded-xl bg-neutral-50 p-3"><ProgressBar label="Tags" done={active.tagsComplete} total={active.imageCount} /><ProgressBar label="Alt" done={active.altComplete} total={active.imageCount} /><ProgressBar label="Captions" done={active.captionComplete} total={active.imageCount} /></div>
           </div>}
         </aside>
       </section>
@@ -228,5 +254,4 @@ export function Weddings() {
   );
 }
 
-function MiniStat({ label, value }: { label: string; value: number }) { return <div className="rounded-[24px] border border-black/10 bg-white/75 p-5"><p className="text-xs uppercase tracking-[0.16em] text-neutral-500">{label}</p><p className="mt-2 font-serif text-4xl">{value}</p></div>; }
-function Small({ label, value }: { label: string; value: number }) { return <div className="rounded-2xl border border-black/10 p-3"><p className="text-xs text-neutral-500">{label}</p><p className="mt-1 font-serif text-2xl">{value}</p></div>; }
+function MiniStat({ label, value }: { label: string; value: number }) { return <div className="admin-stat-card"><p>{label}</p><strong>{value}</strong></div>; }

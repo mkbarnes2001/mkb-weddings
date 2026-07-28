@@ -90,8 +90,8 @@ export function Suppliers() {
     } finally { setSaving(false); }
   }
 
-  const activeCount = suppliers.filter((s) => s.status !== "archived").length;
-  const linkedWeddingCount = new Set(suppliers.flatMap((s) => s.linkedWeddings.map((w) => w.slug))).size;
+  const activeCount = suppliers.filter((supplier) => supplier.status !== "archived").length;
+  const linkedWeddingCount = new Set(suppliers.flatMap((supplier) => supplier.linkedWeddings.map((wedding) => wedding.slug))).size;
 
   return (
     <AdminPage>
@@ -102,65 +102,65 @@ export function Suppliers() {
         actions={<button type="button" onClick={newSupplier} className="admin-button admin-button--primary"><Plus className="admin-button__icon" />New supplier</button>}
       />
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <section className="admin-stat-grid">
         <Stat label="Master suppliers" value={suppliers.length} />
         <Stat label="Active" value={activeCount} />
         <Stat label="Weddings linked" value={linkedWeddingCount} />
       </section>
 
-      {message ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{message}</div> : null}
-      {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{error}</div> : null}
+      {message ? <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-[11px] text-emerald-900">{message}</div> : null}
+      {error ? <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-[11px] text-red-900">{error}</div> : null}
 
       <section className="admin-master-detail admin-master-detail--390">
-        <div className="admin-master-detail__main space-y-4">
+        <div className="admin-master-detail__main space-y-3">
           <AdminToolbar>
             <div className="relative min-w-[220px] flex-1">
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name, category, county or Instagram..." className="h-[34px] w-full border border-black/10 bg-white pl-9 pr-3 text-[11px]" />
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, category, county or Instagram..." className="h-[34px] w-full border border-black/10 bg-white pl-9 pr-3 text-[11px]" />
             </div>
           </AdminToolbar>
 
-          <div className="overflow-hidden rounded-[24px] border border-black/10 bg-white/80">
+          <div className="admin-supplier-table">
+            <div className="admin-supplier-table__header" aria-hidden="true">
+              <span>Supplier</span><span>Category / location</span><span>Status</span><span>Weddings</span>
+            </div>
             {filtered.length ? filtered.map((supplier) => (
-              <button key={supplier.id} type="button" onClick={() => selectSupplier(supplier)} className={`block w-full border-b border-black/5 p-4 text-left last:border-b-0 ${activeId === supplier.id ? "bg-neutral-100" : "hover:bg-white"}`}>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">{supplier.displayName || supplier.name}</p>
-                    <p className="mt-1 text-xs text-neutral-500">{supplier.category || "Uncategorised"}{supplier.county ? ` · ${supplier.county}` : ""}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className={`rounded-full border px-2.5 py-1 text-[10px] ${supplier.status === "archived" ? "border-neutral-200 bg-neutral-100 text-neutral-500" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>{supplier.status}</span>
-                    <p className="mt-2 text-xs text-neutral-400">{supplier.linkedWeddingCount} weddings</p>
-                  </div>
-                </div>
+              <button key={supplier.id} type="button" onClick={() => selectSupplier(supplier)} className={`admin-supplier-row ${activeId === supplier.id ? "admin-supplier-row--active" : ""}`}>
+                <span className="admin-supplier-row__name">{supplier.displayName || supplier.name}</span>
+                <span className="admin-supplier-row__category">{supplier.category || "Uncategorised"}{supplier.county ? ` · ${supplier.county}` : supplier.location ? ` · ${supplier.location}` : ""}</span>
+                <span className={`admin-supplier-row__status ${supplier.status === "archived" ? "is-archived" : ""}`}>{supplier.status}</span>
+                <span className="admin-supplier-row__count">{supplier.linkedWeddingCount}</span>
               </button>
-            )) : <div className="p-8 text-center text-sm text-neutral-500">No suppliers found.</div>}
+            )) : <div className="p-8 text-center text-[11px] text-neutral-500">No suppliers found.</div>}
           </div>
         </div>
 
-        <aside className="admin-summary-panel rounded-[24px] border border-black/10 bg-white p-5">
-          {!draft ? <div className="text-sm text-neutral-500">Select a supplier or create a new one.</div> : (
-            <div className="space-y-5">
+        <aside className="admin-summary-panel admin-record-summary rounded-[18px] border border-black/10 bg-white p-4">
+          {!draft ? <div className="text-[11px] text-neutral-500">Select a supplier or create a new one.</div> : (
+            <div className="space-y-3.5">
               <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">Supplier details</p>
-                <h2 className="mt-2 font-serif text-3xl">{draft.id ? draft.name : "New supplier"}</h2>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-400">Supplier details</p>
+                <h2 className="mt-1.5 break-words text-[19px] font-semibold leading-[1.15] tracking-[-0.025em]">{draft.id ? draft.name : "New supplier"}</h2>
               </div>
-              <Field label="Business name" value={draft.name} onChange={(value) => patch({ name: value, displayName: draft.displayName || value })} />
-              <Field label="Display name" value={draft.displayName} onChange={(value) => patch({ displayName: value })} />
-              <label className="block"><span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">Category</span><select value={draft.category} onChange={(e) => patch({ category: e.target.value })} className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"><option value="">Select category…</option>{draft.category && !CATEGORIES.includes(draft.category) ? <option value={draft.category}>{draft.category}</option> : null}{CATEGORIES.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
-              <Field label="Website" value={draft.website} onChange={(value) => patch({ website: value })} placeholder="https://..." />
-              <Field label="Instagram" value={draft.instagram} onChange={(value) => patch({ instagram: value.replace(/^@/, "") })} placeholder="supplierhandle" />
-              <Field label="Email" value={draft.email} onChange={(value) => patch({ email: value })} />
-              <Field label="Phone" value={draft.phone} onChange={(value) => patch({ phone: value })} />
-              <Field label="Location" value={draft.location} onChange={(value) => patch({ location: value })} />
-              <Field label="County" value={draft.county} onChange={(value) => patch({ county: value })} />
-              <Area label="Description" value={draft.description} onChange={(value) => patch({ description: value })} />
-              <Area label="Internal notes" value={draft.notes} onChange={(value) => patch({ notes: value })} />
 
-              <button type="button" onClick={save} disabled={saving} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"><Save className="h-4 w-4" />{saving ? "Saving…" : draft.id ? "Save supplier" : "Create supplier"}</button>
-              {draft.id && draft.status !== "archived" ? <button type="button" onClick={archive} disabled={saving} className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-red-200 px-5 py-3 text-sm text-red-700"><Archive className="h-4 w-4" />Archive supplier</button> : null}
+              <div className="admin-quiet-form">
+                <Field label="Business name" value={draft.name} onChange={(value) => patch({ name: value, displayName: draft.displayName || value })} />
+                <Field label="Display name" value={draft.displayName} onChange={(value) => patch({ displayName: value })} />
+                <label className="admin-quiet-field"><span>Category</span><select value={draft.category} onChange={(event) => patch({ category: event.target.value })}><option value="">Select category…</option>{draft.category && !CATEGORIES.includes(draft.category) ? <option value={draft.category}>{draft.category}</option> : null}{CATEGORIES.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
+                <Field label="Website" value={draft.website} onChange={(value) => patch({ website: value })} placeholder="https://..." />
+                <Field label="Instagram" value={draft.instagram} onChange={(value) => patch({ instagram: value.replace(/^@/, "") })} placeholder="supplierhandle" />
+                <Field label="Email" value={draft.email} onChange={(value) => patch({ email: value })} />
+                <Field label="Phone" value={draft.phone} onChange={(value) => patch({ phone: value })} />
+                <Field label="Location" value={draft.location} onChange={(value) => patch({ location: value })} />
+                <Field label="County" value={draft.county} onChange={(value) => patch({ county: value })} />
+                <Area label="Description" value={draft.description} onChange={(value) => patch({ description: value })} />
+                <Area label="Internal notes" value={draft.notes} onChange={(value) => patch({ notes: value })} />
+              </div>
 
-              {draft.id ? <div className="border-t border-black/10 pt-5"><div className="mb-3 flex items-center gap-2"><Users className="h-4 w-4" /><p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Linked weddings ({draft.linkedWeddingCount})</p></div>{draft.linkedWeddings.length ? <div className="space-y-2">{draft.linkedWeddings.map((wedding) => <a key={`${wedding.slug}-${wedding.role}`} href={`/admin/weddings/${wedding.slug}/suppliers`} className="block rounded-2xl border border-black/10 p-3 text-sm hover:bg-neutral-50"><div className="flex items-center justify-between gap-3"><div><p className="font-medium">{wedding.couple || wedding.title}</p><p className="mt-1 text-xs text-neutral-500">{wedding.role}{wedding.weddingDate ? ` · ${wedding.weddingDate}` : ""}</p></div><ExternalLink className="h-4 w-4 text-neutral-400" /></div></a>)}</div> : <p className="text-sm text-neutral-500">Not linked to a wedding yet.</p>}</div> : null}
+              <button type="button" onClick={save} disabled={saving} className="admin-button admin-button--primary w-full"><Save className="admin-button__icon" />{saving ? "Saving…" : draft.id ? "Save supplier" : "Create supplier"}</button>
+              {draft.id && draft.status !== "archived" ? <button type="button" onClick={archive} disabled={saving} className="admin-button admin-button--danger w-full"><Archive className="admin-button__icon" />Archive supplier</button> : null}
+
+              {draft.id ? <div className="rounded-xl bg-neutral-50 p-3"><div className="mb-2 flex items-center gap-2"><Users className="h-3.5 w-3.5 text-neutral-400" strokeWidth={1.6} /><p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-neutral-500">Linked weddings ({draft.linkedWeddingCount})</p></div>{draft.linkedWeddings.length ? <div className="space-y-1.5">{draft.linkedWeddings.map((wedding) => <a key={`${wedding.slug}-${wedding.role}`} href={`/admin/weddings/${wedding.slug}/suppliers`} className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 text-[10px] hover:bg-neutral-100"><span className="min-w-0"><strong className="block truncate font-medium">{wedding.couple || wedding.title}</strong><span className="mt-0.5 block truncate text-[9px] text-neutral-500">{wedding.role}{wedding.weddingDate ? ` · ${wedding.weddingDate}` : ""}</span></span><ExternalLink className="h-3.5 w-3.5 shrink-0 text-neutral-400" strokeWidth={1.6} /></a>)}</div> : <p className="text-[10px] text-neutral-500">Not linked to a wedding yet.</p>}</div> : null}
             </div>
           )}
         </aside>
@@ -169,6 +169,14 @@ export function Suppliers() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) { return <div className="rounded-[24px] border border-black/10 bg-white/75 p-5"><p className="text-xs uppercase tracking-[0.16em] text-neutral-500">{label}</p><p className="mt-2 font-serif text-4xl">{value}</p></div>; }
-function Field({ label, value, onChange, placeholder = "" }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string }) { return <label className="block"><span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">{label}</span><input value={value || ""} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full rounded-2xl border border-black/10 px-4 py-3 text-sm" /></label>; }
-function Area({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) { return <label className="block"><span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">{label}</span><textarea value={value || ""} onChange={(e) => onChange(e.target.value)} rows={3} className="w-full rounded-2xl border border-black/10 px-4 py-3 text-sm" /></label>; }
+function Stat({ label, value }: { label: string; value: number }) {
+  return <div className="admin-stat-card"><p>{label}</p><strong>{value}</strong></div>;
+}
+
+function Field({ label, value, onChange, placeholder = "" }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string }) {
+  return <label className="admin-quiet-field"><span>{label}</span><input value={value || ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} /></label>;
+}
+
+function Area({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return <label className="admin-quiet-field"><span>{label}</span><textarea value={value || ""} onChange={(event) => onChange(event.target.value)} rows={3} /></label>;
+}

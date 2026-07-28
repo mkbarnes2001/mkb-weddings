@@ -154,14 +154,12 @@ export function AdminLayout() {
                   to={item.to}
                   end={item.end}
                   className={({ isActive }) =>
-                    `group flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs transition-all ${
-                      isActive
-                        ? "bg-white text-black shadow-sm"
-                        : "text-white/62 hover:bg-white/10 hover:text-white"
-                    }`
+                    `admin-nav-link ${isActive ? "admin-nav-link--active" : ""}`
                   }
                 >
-                  <Icon className="h-3.5 w-3.5 flex-none" />
+                  <span className="admin-nav-link__icon" aria-hidden="true">
+                    <Icon strokeWidth={1.65} />
+                  </span>
                   <span className="whitespace-nowrap">{item.label}</span>
                 </NavLink>
               );

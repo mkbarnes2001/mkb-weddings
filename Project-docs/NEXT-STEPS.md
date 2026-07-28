@@ -1,7 +1,15 @@
 # Next Steps
 
 ## Current baseline
-v1.7.14 keeps the completed Stripe/Prodigi sandbox workflow and adds a shared responsive Admin workspace system. Weddings, Venues, Suppliers, Asset Library and the main gallery/workspace inspectors now use responsive master/detail layouts. Schema version remains 22; fulfilment remains manual by default and no paid order is submitted automatically.
+v1.7.15 keeps the completed Stripe/Prodigi sandbox workflow, the shared responsive Admin workspace system and the final repository UI polish. Weddings, Venues, Suppliers, Asset Library and the main gallery/workspace inspectors now use responsive master/detail layouts. Schema version remains 22; fulfilment remains manual by default and no paid order is submitted automatically.
+
+
+## v1.7.15 validation
+1. Open Weddings and confirm long couple names fit the cards, the summary is condensed, the workspace/action buttons align and the completion metrics appear below the actions.
+2. Open Venues and confirm long venue names fit, only current location assignments are shown in the summary, public-order text is absent and both actions are centred.
+3. Open Suppliers and confirm the list reads as a compact table, summary numbers fit their cards and detail fields use quiet borderless backgrounds.
+4. Open Client Galleries and confirm multiple compact cards fit per row, metrics remain legible and action buttons are evenly spaced and centred.
+5. Check the left navigation at desktop and mobile widths and confirm the lighter icon treatment remains readable.
 
 ## v1.7.14 validation
 1. Open Weddings and Venues at normal desktop width and confirm the card/list area and summary panel remain side by side.

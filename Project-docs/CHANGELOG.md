@@ -1,5 +1,14 @@
 # MKB Intelligence — Changelog
 
+## v1.7.15 — Admin Repository Final Polish
+- Refined Weddings and Venues cards so longer names and locations fit without crowding.
+- Condensed Wedding and Venue summary panels, moved completion metrics lower, removed redundant divider labels and standardised action buttons.
+- Replaced Venue-list location editing with a compact read-only summary; location changes remain in venue details.
+- Reworked Suppliers into a compact table-style repository with smaller summary numbers and borderless muted form controls.
+- Rebuilt Client Gallery list cards into a smaller responsive grid with consistent metrics and centred actions.
+- Lightened and standardised the left-navigation icon treatment while preserving the list layout.
+- No migration; schema remains 22.
+
 ## v1.7.14 — Global Admin Responsive Workspaces
 - Added a shared responsive master/detail layout for Admin repositories and workspaces.
 - Converted Weddings, Venues, Suppliers, Asset Library, Wedding Workspace, Moment Gallery, Venue Gallery, Custom Collections and Creative Flash to the shared layout.

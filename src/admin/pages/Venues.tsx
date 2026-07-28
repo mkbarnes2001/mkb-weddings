@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Building2, GripVertical, Images, MapPin, Plus, Save, Search, X } from "lucide-react";
+import { Building2, GripVertical, Images, MapPin, Plus, Save, Search } from "lucide-react";
 import { AdminApiService, type LocationArea, type LocationTypeDefinition } from "../services/AdminApiService";
 import type { VenueSummary } from "../types/venue";
 import { AdminPage, AdminPageHeader, AdminToolbar } from "../components/ui/AdminUI";
@@ -23,7 +23,6 @@ export function Venues() {
   const [saving, setSaving] = useState(false);
   const [locationTypes, setLocationTypes] = useState<LocationTypeDefinition[]>([]);
   const [locations, setLocations] = useState<LocationArea[]>([]);
-  const [locationSaving, setLocationSaving] = useState(false);
 
   useEffect(() => {
     Promise.all([AdminApiService.listVenues(), AdminApiService.getLocations()])
@@ -46,11 +45,6 @@ export function Venues() {
   const active = venues.find((venue) => venue.slug === activeSlug) || null;
 
 
-  const activeLocationIds = useMemo(() => {
-    if (!active) return new Set<string>();
-    return new Set(locations.filter((location) => location.venueSlugs.includes(active.slug)).map((location) => location.id));
-  }, [active, locations]);
-
   const activeLocations = useMemo(() => {
     if (!active) return [];
     return locations
@@ -62,41 +56,8 @@ export function Venues() {
       });
   }, [active, locations, locationTypes]);
 
-  const groupedLocations = useMemo(() => {
-    const groups = new Map<string, LocationArea[]>();
-    for (const location of locations.filter((item) => item.status === "active")) {
-      const key = location.areaType || "custom";
-      groups.set(key, [...(groups.get(key) || []), location]);
-    }
-    const typeOrder = new Map<string, number>(locationTypes.map((type) => [type.key, type.sortOrder] as const));
-    return Array.from(groups.entries()).sort(([a], [b]) => (typeOrder.get(a) || 999) - (typeOrder.get(b) || 999) || a.localeCompare(b));
-  }, [locations, locationTypes]);
-
   function locationTypeLabel(key: string) {
     return locationTypes.find((type) => type.key === key)?.label || key.replace(/(^|[-_ ])\w/g, (m) => m.toUpperCase());
-  }
-
-  async function toggleVenueLocation(locationId: string, checked: boolean) {
-    if (!active) return;
-    const nextLocations = locations.map((location) => {
-      if (location.id !== locationId) return location;
-      const venueSlugs = checked
-        ? Array.from(new Set([...location.venueSlugs, active.slug]))
-        : location.venueSlugs.filter((slug) => slug !== active.slug);
-      return { ...location, venueSlugs };
-    });
-    setLocations(nextLocations);
-    setLocationSaving(true); setError(""); setMessage("");
-    try {
-      const saved = await AdminApiService.saveLocations({ locations: nextLocations });
-      setLocationTypes(saved.types || []);
-      setLocations(saved.locations);
-      setMessage(`Location assignments saved for ${active.name}.`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to save venue locations.");
-      const fresh = await AdminApiService.getLocations().catch(() => null);
-      if (fresh) { setLocationTypes(fresh.types || []); setLocations(fresh.locations); }
-    } finally { setLocationSaving(false); }
   }
 
   function dropOn(targetSlug: string) {
@@ -170,83 +131,50 @@ export function Venues() {
                     <div draggable onDragStart={(event) => { event.stopPropagation(); event.dataTransfer.effectAllowed = "move"; setDraggedSlug(venue.slug); }} onDragEnd={() => setDraggedSlug(null)} style={{ position: "absolute", right: "10px", bottom: "10px", width: "38px", height: "38px", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "999px", background: "#fff", boxShadow: "0 6px 18px rgba(0,0,0,0.22)", cursor: "grab" }} title="Drag to reorder"><GripVertical className="h-5 w-5" /></div>
                     {venue.galleryVisible === false ? <span className="absolute left-2.5 top-2.5 rounded-full bg-black/80 px-2.5 py-1 text-[10px] text-white">Hidden</span> : null}
                   </div>
-                  <div className="p-3"><h2 className="truncate font-serif text-lg">{venue.name}</h2><p className="mt-1 truncate text-xs text-neutral-500">{[venue.town, venue.county].filter(Boolean).join(", ") || "Location not set"}</p></div>
+                  <div className="p-3"><h2 className="line-clamp-2 min-h-[30px] text-[12px] font-semibold leading-[1.25] tracking-[-0.01em]">{venue.name}</h2><p className="mt-1 line-clamp-2 text-[9px] leading-3.5 text-neutral-500">{[venue.town, venue.county].filter(Boolean).join(", ") || "Location not set"}</p></div>
                 </article>
               );
             })}
           </div>
 
-          <aside className="admin-summary-panel rounded-[24px] border border-black/10 bg-white p-5">
-            {!active ? <p className="text-sm text-neutral-500">Select a venue to view details.</p> : <div className="space-y-5">
-              {venueHero(active) ? <img src={venueHero(active)?.thumbSrc || venueHero(active)?.fullSrc} alt={active.name} className="max-h-[220px] w-full rounded-2xl object-cover" /> : null}
-              <div><p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Venue</p><h2 className="mt-2 font-serif text-3xl">{active.name}</h2><p className="mt-2 text-sm text-neutral-500">{[active.town, active.county, active.country].filter(Boolean).join(", ")}</p></div>
-              <label className="flex items-center justify-between gap-4 rounded-2xl border border-black/10 p-4"><span className="text-sm">Show on Gallery by Venue</span><input type="checkbox" checked={active.galleryVisible !== false} onChange={(event) => toggleVisible(active.slug, event.target.checked)} /></label>
-              <div className="rounded-2xl border border-black/10 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="flex items-center gap-2 text-sm font-medium"><MapPin className="h-4 w-4" />Locations</p>
-                    <p className="mt-1 text-xs text-neutral-500">Assign this venue to any county, region, destination or custom location.</p>
-                  </div>
-                  {locationSaving ? <span className="text-xs text-neutral-400">Saving…</span> : null}
-                </div>
-                <div className="mt-4 space-y-3">
-                  {groupedLocations.length ? (
-                    <>
-                      <label className="block">
-                        <span className="sr-only">Add a location</span>
-                        <select
-                          value=""
-                          disabled={locationSaving || groupedLocations.every(([, items]) => items.every((location) => activeLocationIds.has(location.id)))}
-                          onChange={(event) => {
-                            const locationId = event.target.value;
-                            if (locationId) void toggleVenueLocation(locationId, true);
-                          }}
-                          className="h-[34px] w-full rounded-md border border-black/10 bg-white px-3 text-[11px] text-neutral-700"
-                        >
-                          <option value="">{locationSaving ? "Saving location…" : "Select a location to add…"}</option>
-                          {groupedLocations.map(([type, items]) => {
-                            const available = items.filter((location) => !activeLocationIds.has(location.id));
-                            if (!available.length) return null;
-                            return (
-                              <optgroup key={type} label={locationTypeLabel(type)}>
-                                {available.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
-                              </optgroup>
-                            );
-                          })}
-                        </select>
-                      </label>
-
-                      {activeLocations.length ? (
-                        <div>
-                          <p className="mb-2 text-[10px] uppercase tracking-[0.12em] text-neutral-400">Selected locations</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {activeLocations.map((location) => (
-                              <span key={location.id} className="inline-flex max-w-full items-center gap-1 rounded-full border border-black/10 bg-neutral-50 px-2 py-1 text-[10px] text-neutral-700">
-                                <span className="truncate">{location.name}</span>
-                                <span className="text-[9px] text-neutral-400">{locationTypeLabel(location.areaType)}</span>
-                                <button
-                                  type="button"
-                                  disabled={locationSaving}
-                                  onClick={() => void toggleVenueLocation(location.id, false)}
-                                  className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-neutral-400 hover:bg-black hover:text-white disabled:opacity-40"
-                                  aria-label={`Remove ${location.name}`}
-                                  title={`Remove ${location.name}`}
-                                >
-                                  <X className="h-2.5 w-2.5" />
-                                </button>
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      ) : <p className="text-[11px] text-neutral-500">No locations assigned yet.</p>}
-                    </>
-                  ) : <p className="text-sm text-neutral-500">No location areas have been created yet. Add them in Admin → Locations.</p>}
-                </div>
+          <aside className="admin-summary-panel admin-record-summary rounded-[18px] border border-black/10 bg-white p-4">
+            {!active ? <p className="text-[11px] text-neutral-500">Select a venue to view details.</p> : <div className="space-y-3.5">
+              {venueHero(active) ? <img src={venueHero(active)?.thumbSrc || venueHero(active)?.fullSrc} alt={active.name} className="max-h-[210px] w-full rounded-xl object-cover" /> : null}
+              <div className="min-w-0">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-400">Venue</p>
+                <h2 className="mt-1.5 break-words text-[19px] font-semibold leading-[1.15] tracking-[-0.025em]">{active.name}</h2>
+                <p className="mt-1.5 text-[10px] leading-4 text-neutral-500">{[active.town, active.county, active.country].filter(Boolean).join(", ")}</p>
               </div>
-              <div className="grid grid-cols-2 gap-3"><Mini label="Weddings" value={active.weddingCount} /><Mini label="Images" value={active.imageCount} /></div>
-              <div className="rounded-2xl bg-neutral-50 p-4 text-sm text-neutral-600"><p><span className="text-neutral-400">Status:</span> {active.status}</p><p className="mt-2"><span className="text-neutral-400">Public order:</span> {venues.findIndex((venue) => venue.slug === active.slug) + 1}</p></div>
-              <Link to={`/admin/venues/${active.slug}`} className="block w-full rounded-full bg-black px-5 py-3 text-center text-sm text-white">Open venue</Link>
-              <Link to={`/admin/venues/${active.slug}/gallery`} className="flex w-full items-center justify-center gap-2 rounded-full border border-black/10 px-5 py-3 text-sm"><Images className="h-4 w-4" />Manage gallery</Link>
+
+              <label className="admin-summary-toggle">
+                <span className="text-[11px] font-medium text-neutral-800">Show on Gallery by Venue</span>
+                <input type="checkbox" checked={active.galleryVisible !== false} onChange={(event) => toggleVisible(active.slug, event.target.checked)} />
+              </label>
+
+              <div className="rounded-xl bg-neutral-50 p-3">
+                <div className="flex items-center gap-2 text-[10px] font-semibold text-neutral-700"><MapPin className="h-3.5 w-3.5 text-neutral-400" strokeWidth={1.6} />Assigned location</div>
+                {activeLocations.length ? (
+                  <div className="mt-2 space-y-1.5">
+                    {activeLocations.map((location) => (
+                      <div key={location.id} className="flex min-w-0 items-center justify-between gap-3 text-[10px]">
+                        <span className="truncate font-medium text-neutral-700">{location.name}</span>
+                        <span className="shrink-0 text-[8px] uppercase tracking-[0.08em] text-neutral-400">{locationTypeLabel(location.areaType)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : <p className="mt-2 text-[10px] text-neutral-500">No location assigned.</p>}
+                <p className="mt-2 text-[9px] leading-4 text-neutral-400">Update location assignments in the venue details page.</p>
+              </div>
+
+              <div className="admin-summary-metrics">
+                <div className="admin-summary-metric"><span>Weddings</span><strong>{active.weddingCount}</strong></div>
+                <div className="admin-summary-metric"><span>Images</span><strong>{active.imageCount}</strong></div>
+              </div>
+
+              <dl className="admin-compact-details"><div><dt>Status</dt><dd>{active.status}</dd></div></dl>
+
+              <Link to={`/admin/venues/${active.slug}`} className="admin-button admin-button--primary w-full"><Building2 className="admin-button__icon" strokeWidth={1.6} />Open venue</Link>
+              <Link to={`/admin/venues/${active.slug}/gallery`} className="admin-button admin-button--secondary w-full"><Images className="admin-button__icon" strokeWidth={1.6} />Manage gallery</Link>
             </div>}
           </aside>
         </section>
@@ -254,5 +182,3 @@ export function Venues() {
     </AdminPage>
   );
 }
-
-function Mini({ label, value }: { label: string; value: number }) { return <div className="rounded-2xl border border-black/10 p-3"><p className="text-xs text-neutral-500">{label}</p><p className="mt-1 font-serif text-2xl">{value}</p></div>; }

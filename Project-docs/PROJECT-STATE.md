@@ -1,8 +1,17 @@
 # Project State
 
 ## Version
-Current release: **v1.7.14 — Global Admin Responsive Workspaces**.
+Current release: **v1.7.15 — Admin Repository Final Polish**.
 Database schema version: **22**.
+
+## Admin Repository Final Polish — v1.7.15
+- Applies the final annotated UI pass to Weddings, Venues, Suppliers and Client Galleries.
+- Uses smaller, denser cards and summaries with consistent typography, controls and icon treatment.
+- Keeps Venue location membership read-only on the repository summary and directs editing to venue details.
+- Uses a compact tabular Suppliers list and quiet borderless fields in the supplier inspector.
+- Uses a multi-card Client Gallery grid with aligned metrics and actions.
+- No routes, APIs or database structures change; schema remains **22**.
+
 
 
 ## Global Admin Responsive Workspaces — v1.7.14

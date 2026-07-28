@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Copy, ExternalLink, Images, LockKeyhole, Mail, Plus, RefreshCcw, Users } from "lucide-react";
+import { Copy, ExternalLink, Images, LockKeyhole, Mail, Plus, RefreshCcw } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import type { ClientGalleryListPayload } from "../types/clientGallery";
 import { AdminPage, AdminPageHeader, AdminPanel } from "../components/ui/AdminUI";
@@ -26,9 +26,7 @@ export function ClientGalleries() {
     }
   };
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   const selectedWedding = useMemo(
     () => payload?.weddings.find((wedding) => wedding.slug === weddingSlug),
@@ -63,71 +61,57 @@ export function ClientGalleries() {
         actions={<button onClick={load} className="admin-button admin-button--secondary"><RefreshCcw className="admin-button__icon" />Refresh</button>}
       />
 
-      <AdminPanel title="New client gallery" description="Link a wedding to import its existing assets automatically." icon={Plus}>
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(220px,1fr) minmax(260px,1fr) auto", gap: 12 }}>
+      <AdminPanel title="New client gallery" description="Link a wedding to import its existing assets automatically." icon={Plus} compact>
+        <div className="admin-client-gallery-create">
           <input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             placeholder="Gallery title (optional if wedding selected)"
-            className="rounded-xl border border-black/20 px-4 py-3"
           />
-          <select
-            value={weddingSlug}
-            onChange={(event) => setWeddingSlug(event.target.value)}
-            className="rounded-xl border border-black/20 px-4 py-3 bg-white"
-          >
+          <select value={weddingSlug} onChange={(event) => setWeddingSlug(event.target.value)}>
             <option value="">No linked wedding yet</option>
             {(payload?.weddings || []).map((wedding) => (
               <option key={wedding.slug} value={wedding.slug}>{wedding.title || wedding.couple || wedding.slug}</option>
             ))}
           </select>
-          <button disabled={busy} onClick={create} className="rounded-xl bg-black text-white px-6 py-3 disabled:opacity-50">
+          <button disabled={busy} onClick={create} className="admin-button admin-button--primary">
             {busy ? "Creating…" : "Create gallery"}
           </button>
         </div>
-        {weddingSlug ? (
-          <p className="mt-3 text-sm text-neutral-500">Wedding assets will be imported automatically into the new gallery.</p>
-        ) : null}
-        {error ? <p className="mt-4 text-sm text-red-700">{error}</p> : null}
+        {weddingSlug ? <p className="mt-2 text-[10px] text-neutral-500">Wedding assets will be imported automatically into the new gallery.</p> : null}
+        {error ? <p className="mt-3 text-[11px] text-red-700">{error}</p> : null}
       </AdminPanel>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+      <div className="admin-client-gallery-grid">
         {(payload?.galleries || []).map((gallery) => {
           const shareUrl = publicUrl(gallery.accessToken);
+          const accessLabel = gallery.requireEmail ? "Email required" : gallery.pinEnabled ? "PIN" : "Private link";
+          const AccessIcon = gallery.requireEmail ? Mail : LockKeyhole;
+
           return (
-            <article key={gallery.id} className="rounded-3xl overflow-hidden border border-black/15 bg-white">
-              <div style={{ height: 180, background: "#e9e6df" }}>
+            <article key={gallery.id} className="admin-client-gallery-card">
+              <div className="admin-client-gallery-card__media">
                 {gallery.coverThumb || gallery.coverWeb ? (
-                  <img src={gallery.coverThumb || gallery.coverWeb} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={gallery.coverThumb || gallery.coverWeb} alt="" />
                 ) : (
-                  <div className="h-full flex items-center justify-center text-neutral-400"><Images className="h-10 w-10" /></div>
+                  <div className="admin-client-gallery-card__placeholder"><Images /></div>
                 )}
+                <span className={`admin-client-gallery-card__status ${gallery.status === "live" ? "is-live" : ""}`}>{gallery.status}</span>
               </div>
-              <div className="p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs uppercase tracking-[0.18em] text-neutral-500">{gallery.status}</span>
-                  <span className="inline-flex items-center gap-1 text-xs text-neutral-500">{gallery.requireEmail ? <Mail className="h-3.5 w-3.5" /> : <LockKeyhole className="h-3.5 w-3.5" />} {gallery.requireEmail ? "Email required" : gallery.pinEnabled ? "PIN" : "Private link"}</span>
+
+              <div className="admin-client-gallery-card__body">
+                <div className="admin-client-gallery-card__access"><AccessIcon strokeWidth={1.6} />{accessLabel}</div>
+                <h2>{gallery.title}</h2>
+                <p className="admin-client-gallery-card__client">{gallery.clientName || gallery.weddingTitle || "No client assigned"}</p>
+                <div className="admin-client-gallery-card__metrics">
+                  <span>{gallery.assetCount}<small>Images</small></span>
+                  <span>{gallery.favouriteCount}<small>Favourites</small></span>
+                  <span>{gallery.visitorCount || 0}<small>Visitors</small></span>
                 </div>
-                <h2 className="font-serif text-2xl mt-2">{gallery.title}</h2>
-                <p className="text-sm text-neutral-600 mt-1">{gallery.clientName || gallery.weddingTitle || "No client assigned"}</p>
-                <div className="mt-4 text-sm text-neutral-600 flex gap-4 flex-wrap">
-                  <span>{gallery.assetCount} images</span>
-                  <span>{gallery.favouriteCount} favourites</span>
-                  <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" />{gallery.visitorCount || 0} visitors</span>
-                </div>
-                <div className="mt-5 flex gap-2 flex-wrap">
-                  <Link to={`/admin/client-galleries/${gallery.id}`} className="rounded-full bg-black text-white px-4 py-2 text-sm">Manage</Link>
-                  <button
-                    onClick={() => navigator.clipboard?.writeText(shareUrl)}
-                    className="rounded-full border border-black/20 px-4 py-2 text-sm inline-flex items-center gap-2"
-                  >
-                    <Copy className="h-3.5 w-3.5" /> Copy link
-                  </button>
-                  {gallery.status === "live" ? (
-                    <a href={shareUrl} target="_blank" rel="noreferrer" className="rounded-full border border-black/20 px-4 py-2 text-sm inline-flex items-center gap-2">
-                      <ExternalLink className="h-3.5 w-3.5" /> Open
-                    </a>
-                  ) : null}
+                <div className="admin-client-gallery-card__actions">
+                  <Link to={`/admin/client-galleries/${gallery.id}`} className="admin-button admin-button--primary admin-button--sm">Manage</Link>
+                  <button onClick={() => navigator.clipboard?.writeText(shareUrl)} className="admin-button admin-button--secondary admin-button--sm"><Copy className="admin-button__icon" />Copy link</button>
+                  {gallery.status === "live" ? <a href={shareUrl} target="_blank" rel="noreferrer" className="admin-button admin-button--secondary admin-button--sm"><ExternalLink className="admin-button__icon" />Open</a> : null}
                 </div>
               </div>
             </article>
@@ -136,7 +120,7 @@ export function ClientGalleries() {
       </div>
 
       {payload && payload.galleries.length === 0 ? (
-        <div className="mt-10 rounded-3xl border border-dashed border-black/20 p-12 text-center text-neutral-500">
+        <div className="mt-6 rounded-xl border border-dashed border-black/15 p-10 text-center text-[11px] text-neutral-500">
           No client galleries yet. Create one above and link it to a wedding to import its assets automatically.
         </div>
       ) : null}
