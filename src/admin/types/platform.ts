@@ -63,6 +63,7 @@ export type WedPlannedMember = {
   invitedAt?: string;
   acceptedAt?: string;
   lastActiveAt?: string;
+  invitationLastSentAt?: string;
 };
 
 export type WedPlannedEntitlement = {
@@ -105,4 +106,41 @@ export type WedPlannedPlatformPayload = {
   entitlements: WedPlannedEntitlement[];
   scopeReadiness: WedPlannedScopeReadiness[];
   recentAudit: WedPlannedAuditEvent[];
+};
+
+
+export type ProfessionalMembershipSummary = {
+  id: string;
+  workspaceId: string;
+  workspaceSlug: string;
+  businessName: string;
+  marketplaceSlug: string;
+  role: string;
+  status: string;
+};
+
+export type ProfessionalAuthState = {
+  accessGranted: boolean;
+  authenticated: boolean;
+  enforced: boolean;
+  mode: "session" | "bootstrap" | "none";
+  userId: string;
+  email: string;
+  displayName: string;
+  platformRole: string;
+  membershipId: string;
+  workspaceId: string;
+  workspaceSlug: string;
+  businessName: string;
+  marketplaceSlug: string;
+  role: string;
+  permissions: string[];
+  memberships: ProfessionalMembershipSummary[];
+};
+
+export type ProfessionalInvitationResult = {
+  membershipId: string;
+  delivery: "sent" | "manual";
+  invitationUrl?: string;
+  expiresAt: string;
 };

@@ -87,3 +87,9 @@ MKB Weddings is seeded as:
 - Marketplace publication is private by default.
 - Stripe Connect is not enabled by this migration.
 - Existing MKB Stripe and Prodigi flows remain unchanged.
+
+
+## v1.8.1 extension
+Professional identity is now active at the platform layer. One-time invitations/sign-in links, hashed sessions, role permissions and server-resolved active-business context are documented in `WEDPLANNED-AUTH.md`.
+
+The remaining commercial blocker is legacy tenant ownership. External businesses must not be onboarded until Weddings, Venues, Suppliers, Moments and public collection definitions are workspace-owned and pass cross-tenant tests.

@@ -1,5 +1,18 @@
 # MKB Intelligence — Changelog
 
+## v1.8.1 — Professional Identity & Tenant Context
+- Added passwordless professional sign-in with single-use, SHA-256-hashed links and secure HttpOnly sessions.
+- Added invitation acceptance, resend/manual delivery status and role-aware team access.
+- Added server-owned active-business resolution from authenticated memberships; browser-supplied workspace IDs are no longer authoritative for the WedPlanned platform API.
+- Added owner/admin/manager/content/finance/staff/viewer permission enforcement for WedPlanned business, service-area and team mutations.
+- Added multi-business workspace switching restricted to active memberships.
+- Added Admin sign-in, professional identity, active business selector and sign-out controls.
+- Added optional Resend delivery for invitations and sign-in links, plus a disabled-by-default development-link mode.
+- Added an Admin-project middleware gate controlled by `WEDPLANNED_AUTH_ENFORCED`, preserving a rollback-safe bootstrap mode during deployment.
+- Added audit events for invitations, accepted links, sign-ins and workspace switching.
+- Added migration 024; schema version advances to 24.
+- Legacy Weddings, Venues, Suppliers, Moments and public collection definitions remain MKB-only until the next ownership migration; external business onboarding remains blocked.
+
 ## v1.8.0 — WedPlanned Platform Foundation
 - Added neutral WedPlanned business profiles on top of the existing workspace tenant boundary.
 - Added platform users and business memberships with owner, admin, manager, content, finance, staff and viewer roles.

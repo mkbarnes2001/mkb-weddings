@@ -3,7 +3,7 @@
 Always inspect the actual migration files before assuming a table/column exists.
 
 ## Schema version
-Current target schema version: **23**. Read migrations in sequence; migrations 020–023 add Print Store commerce, Stripe payments, Prodigi fulfilment and the WedPlanned commercial business foundation.
+Current target schema version: **24**. Read migrations in sequence; migrations 020–023 add Print Store commerce, Stripe payments, Prodigi fulfilment and the WedPlanned commercial business foundation.
 
 ## Core domains
 - `venues`
@@ -328,3 +328,29 @@ Compatibility rules:
 - Marketplace state defaults to private.
 - Team invitation records do not grant access until professional authentication and membership enforcement are implemented.
 - Existing MKB content and R2 objects are not copied, renamed or deleted.
+
+
+## Schema version 24
+Migration: `024_professional_identity_tenant_context.sql`
+
+Adds professional authentication and server-owned business context:
+- `platform_users.verified_at`, `last_authenticated_at` and `last_login_method`;
+- `business_memberships.invited_by_user_id` and `invitation_last_sent_at`;
+- `platform_auth_links` for one-time login/invitation links;
+- `platform_sessions` for professional Admin sessions and active business selection.
+
+Security rules:
+- raw link and session tokens are never stored; D1 stores SHA-256 hashes only;
+- login links expire after 20 minutes and invitations after seven days;
+- links are single-use and may be revoked when replaced;
+- sessions expire after 14 days and use an HttpOnly, SameSite=Lax cookie;
+- active business context is resolved from an active `business_memberships` row;
+- switching business requires an active membership for the same user;
+- role permissions are enforced server-side for WedPlanned platform mutations;
+- the final active owner cannot be disabled or demoted through the platform API.
+
+Migration compatibility:
+- existing `workspace_memberships` are copied additively into `platform_users`/`business_memberships` where possible;
+- a valid existing workspace contact email is seeded as the first owner only when no active owner exists;
+- no existing MKB rows or R2 objects are deleted, renamed or moved;
+- legacy Weddings, Venues, Suppliers, Moments and public collection records remain pending workspace-ownership migration.

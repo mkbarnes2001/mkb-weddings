@@ -9,6 +9,7 @@ import {
   Globe2,
   Images,
   LockKeyhole,
+  LogOut,
   MapPinned,
   Settings,
   ShoppingBag,
@@ -16,6 +17,7 @@ import {
   Truck,
   Users,
 } from "lucide-react";
+import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: Gauge, end: true },
@@ -35,6 +37,8 @@ const navItems = [
 ];
 
 export function AdminLayout() {
+  const { auth, signOut, switchWorkspace } = useProfessionalAuth();
+
   return (
     <div className="admin-shell min-h-screen bg-[#f5f3ef] text-neutral-950">
       <style>{`
@@ -140,9 +144,19 @@ export function AdminLayout() {
             <p className="mt-3 text-[10px] text-white/42">Powered by MKB Weddings</p>
 
             <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3">
-              <p className="text-[9px] uppercase tracking-[0.12em] text-white/40">Workspace</p>
-              <p className="mt-1 truncate text-xs font-medium">MKB Weddings</p>
-              <p className="mt-1 text-[10px] text-white/40">Wedding Engine v0.2</p>
+              <p className="text-[9px] uppercase tracking-[0.12em] text-white/40">Business workspace</p>
+              <p className="mt-1 truncate text-xs font-medium">{auth.businessName || "MKB Weddings"}</p>
+              <p className="mt-1 text-[10px] capitalize text-white/40">{auth.mode === "bootstrap" ? "Setup mode · authentication not enforced" : `${auth.role || "member"} · secure session`}</p>
+              {auth.memberships.length > 1 ? (
+                <select
+                  value={auth.workspaceId}
+                  onChange={(event) => void switchWorkspace(event.target.value)}
+                  className="mt-3 h-8 w-full rounded-lg border border-white/10 bg-white/[0.08] px-2 text-[10px] text-white outline-none"
+                  aria-label="Switch business workspace"
+                >
+                  {auth.memberships.map((membership) => <option key={membership.workspaceId} value={membership.workspaceId} className="text-black">{membership.businessName}</option>)}
+                </select>
+              ) : null}
             </div>
           </div>
 
@@ -169,6 +183,12 @@ export function AdminLayout() {
           </nav>
 
           <div className="admin-sidebar-external border-t border-white/10 p-3">
+            {auth.authenticated ? (
+              <div className="mb-3 flex items-center justify-between gap-3 rounded-lg bg-white/[0.04] px-2.5 py-2">
+                <div className="min-w-0"><p className="truncate text-[10px] font-medium text-white/80">{auth.displayName || auth.email}</p><p className="truncate text-[9px] text-white/38">{auth.email}</p></div>
+                <button onClick={() => void signOut()} className="rounded-md p-1.5 text-white/45 hover:bg-white/10 hover:text-white" title="Sign out" aria-label="Sign out"><LogOut size={13} /></button>
+              </div>
+            ) : null}
             <div className="admin-external-links">
               <a href="https://www.mkbweddings.co.uk/blog" className="admin-external-link" target="_blank" rel="noreferrer">
                 <FileText /> <span>Blog</span>

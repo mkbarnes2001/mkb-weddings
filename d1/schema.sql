@@ -1374,6 +1374,9 @@ CREATE TABLE IF NOT EXISTS platform_users (
   platform_role TEXT NOT NULL DEFAULT 'member' CHECK (platform_role IN ('member', 'support', 'platform_admin')),
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'invited', 'disabled')),
   last_signed_in_at TEXT,
+  verified_at TEXT,
+  last_authenticated_at TEXT,
+  last_login_method TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -1416,6 +1419,8 @@ CREATE TABLE IF NOT EXISTS business_memberships (
   invited_at TEXT,
   accepted_at TEXT,
   last_active_at TEXT,
+  invited_by_user_id TEXT,
+  invitation_last_sent_at TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (workspace_id, email_normalized),
@@ -1424,6 +1429,42 @@ CREATE TABLE IF NOT EXISTS business_memberships (
 );
 CREATE INDEX IF NOT EXISTS idx_business_memberships_workspace ON business_memberships(workspace_id, status, role);
 CREATE INDEX IF NOT EXISTS idx_business_memberships_user ON business_memberships(user_id, status);
+
+
+CREATE TABLE IF NOT EXISTS platform_auth_links (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  membership_id TEXT,
+  email_normalized TEXT NOT NULL,
+  purpose TEXT NOT NULL CHECK (purpose IN ('login', 'invitation')),
+  token_hash TEXT NOT NULL UNIQUE,
+  return_path TEXT NOT NULL DEFAULT '/admin',
+  expires_at TEXT NOT NULL,
+  consumed_at TEXT,
+  revoked_at TEXT,
+  delivery_status TEXT NOT NULL DEFAULT 'pending' CHECK (delivery_status IN ('pending', 'sent', 'manual', 'failed')),
+  delivery_error TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES platform_users(id),
+  FOREIGN KEY (membership_id) REFERENCES business_memberships(id)
+);
+CREATE INDEX IF NOT EXISTS idx_platform_auth_links_email ON platform_auth_links(email_normalized, purpose, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_platform_auth_links_expiry ON platform_auth_links(expires_at, consumed_at, revoked_at);
+
+CREATE TABLE IF NOT EXISTS platform_sessions (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  token_hash TEXT NOT NULL UNIQUE,
+  active_workspace_id TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  revoked_at TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES platform_users(id),
+  FOREIGN KEY (active_workspace_id) REFERENCES workspaces(id)
+);
+CREATE INDEX IF NOT EXISTS idx_platform_sessions_user ON platform_sessions(user_id, revoked_at, expires_at);
+CREATE INDEX IF NOT EXISTS idx_platform_sessions_workspace ON platform_sessions(active_workspace_id, revoked_at, expires_at);
 
 CREATE TABLE IF NOT EXISTS platform_categories (
   category_key TEXT PRIMARY KEY,
@@ -1564,5 +1605,5 @@ INSERT OR IGNORE INTO workspace_entitlements (workspace_id, feature_key, source,
 SELECT 'workspace_mkb_weddings', feature_key, 'internal', 1, NULL FROM platform_features;
 
 INSERT INTO schema_meta (key, value, updated_at)
-VALUES ('schema_version', '23', CURRENT_TIMESTAMP)
+VALUES ('schema_version', '24', CURRENT_TIMESTAMP)
 ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP;

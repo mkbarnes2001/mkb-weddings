@@ -1,12 +1,30 @@
+import { getProfessionalContext, professionalAuthEnforced } from "../serverless/platform-auth-d1";
+
 // functions/middleware.ts
 export async function onRequest(context: any) {
-  const url = new URL(context.request.url);
+  const request = context.request as Request;
+  const url = new URL(request.url);
 
   const isGet = context.request.method === "GET";
   const accept = context.request.headers.get("accept") || "";
   const wantsHtml = accept.includes("text/html");
 
   const path = url.pathname;
+
+  // When professional authentication is enabled on the Admin Pages project,
+  // every API request in that deployment is session-gated before it reaches a
+  // legacy handler. Using the environment gate rather than one hostname also
+  // protects the project's pages.dev/preview hostnames. Do not set this flag on
+  // the public Pages project. Legacy data routes are still limited to the MKB
+  // workspace until their workspace migrations are completed.
+  const authExempt = path.startsWith("/api/platform-auth/") || path === "/api/health" || path === "/api/db-health";
+  if (path.startsWith("/api/") && !authExempt && professionalAuthEnforced(context.env as any)) {
+    const auth = await getProfessionalContext((context.env as any).MKB_DB, request, context.env as any);
+    if (!auth.accessGranted) {
+      return Response.json({ error: "Professional sign-in required." }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
+    }
+    context.data = { ...(context.data || {}), professionalContext: auth };
+  }
 
   // Don’t touch static files / assets (IMPORTANT: don’t rewrite JSON requests)
   const isStatic =

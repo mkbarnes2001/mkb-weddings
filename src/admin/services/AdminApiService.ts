@@ -9,7 +9,7 @@ import type { AssetLibraryFilters, AssetLibraryPayload } from "../types/asset";
 import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, ClientGalleryListPayload, ClientGalleryRecord, PrivateOriginalUploadSession, PrivateOriginalUploadedPart } from "../types/clientGallery";
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
-import type { WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedServiceArea } from "../types/platform";
+import type { ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedServiceArea } from "../types/platform";
 import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
@@ -20,6 +20,7 @@ type ApiErrorPayload = { error?: string; details?: string[] };
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
+    credentials: "include",
     ...options,
     headers: { "Content-Type": "application/json", ...(options?.headers || {}) },
   });
@@ -1088,33 +1089,57 @@ export class AdminApiService {
 
 
 
+  static async getProfessionalSession() {
+    const result = await request<{ ok: true; auth: ProfessionalAuthState }>("/api/platform-auth/session");
+    return result.auth;
+  }
+
+  static async requestProfessionalSignIn(email: string, returnPath = "/admin") {
+    return request<{ ok: true; message: string; debugUrl?: string }>("/api/platform-auth/request-link", {
+      method: "POST",
+      body: JSON.stringify({ email, returnPath }),
+    });
+  }
+
+  static async signOutProfessional() {
+    return request<{ ok: true }>("/api/platform-auth/sign-out", { method: "POST", body: "{}" });
+  }
+
+  static async switchProfessionalWorkspace(workspaceId: string) {
+    const result = await request<{ ok: true; auth: ProfessionalAuthState }>("/api/platform-auth/switch-workspace", {
+      method: "POST",
+      body: JSON.stringify({ workspaceId }),
+    });
+    return result.auth;
+  }
+
   static async getWedPlannedPlatform() {
-    const result = await request<{ ok: true; platform: WedPlannedPlatformPayload }>("/api/platform");
+    const result = await request<{ ok: true; platform: WedPlannedPlatformPayload; auth: ProfessionalAuthState }>("/api/platform");
     return result.platform;
   }
 
   static async mutateWedPlannedPlatform(payload: Record<string, unknown>) {
-    const result = await request<{ ok: true; platform: WedPlannedPlatformPayload }>("/api/platform", {
+    const result = await request<{ ok: true; platform: WedPlannedPlatformPayload; auth: ProfessionalAuthState; invitation?: ProfessionalInvitationResult }>("/api/platform", {
       method: "POST",
       body: JSON.stringify(payload),
     });
-    return result.platform;
+    return result;
   }
 
   static async saveWedPlannedBusiness(business: WedPlannedBusiness) {
-    return this.mutateWedPlannedPlatform({ action: "saveBusiness", business });
+    return (await this.mutateWedPlannedPlatform({ action: "saveBusiness", business })).platform;
   }
 
   static async saveWedPlannedCategories(categoryKeys: string[], primaryCategoryKey: string) {
-    return this.mutateWedPlannedPlatform({ action: "saveCategories", categoryKeys, primaryCategoryKey });
+    return (await this.mutateWedPlannedPlatform({ action: "saveCategories", categoryKeys, primaryCategoryKey })).platform;
   }
 
   static async saveWedPlannedServiceArea(serviceArea: Partial<WedPlannedServiceArea>) {
-    return this.mutateWedPlannedPlatform({ action: "saveServiceArea", serviceArea });
+    return (await this.mutateWedPlannedPlatform({ action: "saveServiceArea", serviceArea })).platform;
   }
 
   static async archiveWedPlannedServiceArea(id: string) {
-    return this.mutateWedPlannedPlatform({ action: "archiveServiceArea", id });
+    return (await this.mutateWedPlannedPlatform({ action: "archiveServiceArea", id })).platform;
   }
 
   static async inviteWedPlannedMember(member: Partial<WedPlannedMember> & { email: string }) {
@@ -1122,7 +1147,7 @@ export class AdminApiService {
   }
 
   static async updateWedPlannedMember(member: Partial<WedPlannedMember> & { id: string }) {
-    return this.mutateWedPlannedPlatform({ action: "updateMember", member });
+    return (await this.mutateWedPlannedPlatform({ action: "updateMember", member })).platform;
   }
 
   static async getWorkspace() {

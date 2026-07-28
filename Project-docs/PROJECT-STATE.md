@@ -1,8 +1,23 @@
 # Project State
 
 ## Version
-Current release: **v1.8.0 — WedPlanned Platform Foundation**.
-Database schema version: **23**.
+Current release: **v1.8.1 — Professional Identity & Tenant Context**.
+Database schema version: **24**.
+
+
+## Professional Identity & Tenant Context — v1.8.1
+- Adds secure passwordless professional sign-in and invitation acceptance.
+- Stores only SHA-256 token hashes for one-time links and professional sessions; raw tokens are never stored in D1.
+- Uses a 20-minute login-link lifetime, seven-day invitation lifetime and 14-day HttpOnly session lifetime.
+- Resolves the active WedPlanned business on the server from an authenticated `business_memberships` record.
+- Adds role-aware permission checks for business profile, services/areas and team administration.
+- Supports professionals belonging to more than one business and restricts workspace switching to active memberships.
+- Adds a professional sign-in screen, identity summary, business switcher and sign-out controls to Admin.
+- Adds Resend as the first professional-auth email adapter, while keeping provider boundaries explicit.
+- Adds a rollout-safe bootstrap mode. Admin authentication is only enforced when `WEDPLANNED_AUTH_ENFORCED=true` on the Admin Pages project.
+- Gates Admin-project API requests before legacy handlers when enforcement is active. Public website APIs and Stripe/Prodigi callbacks are unaffected.
+- Adds migration `024_professional_identity_tenant_context.sql`; schema advances to **24**.
+- External businesses must still not be onboarded: legacy Weddings, Venues, Suppliers, Moments and public collection definitions require workspace ownership and query scoping in v1.8.2.
 
 
 ## WedPlanned Platform Foundation — v1.8.0

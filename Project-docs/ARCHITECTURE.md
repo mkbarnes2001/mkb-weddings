@@ -49,6 +49,33 @@ The tenant-readiness audit divides the application into:
 
 MKB Weddings remains the default and first operating WedPlanned business. Existing single-account Stripe Checkout and Prodigi flows continue unchanged until connected-account ownership is implemented.
 
+
+## Professional identity and tenant context — v1.8.1
+Professional Admin access uses passwordless, one-time links and an HttpOnly session cookie. `platform_auth_links` and `platform_sessions` store SHA-256 token hashes only. The raw token exists only in the email/link and browser cookie.
+
+Request resolution is:
+
+```text
+Professional session cookie
+→ hashed session lookup
+→ active platform user
+→ active business membership
+→ server-owned workspace/business context
+→ role permission check
+→ business-scoped service operation
+```
+
+`WEDPLANNED_AUTH_ENFORCED` is a deployment gate on the Admin Pages project. While false, the existing MKB Admin runs in bootstrap mode so the first owner can be confirmed and email delivery tested. When true, Admin-project `/api/*` requests are rejected before reaching legacy handlers unless a valid professional session exists. Authentication routes and health routes are exempt; public-site APIs and provider webhooks are unaffected because enforcement is configured only on the Admin Pages project.
+
+Role permissions are intentionally conservative:
+- owner/admin: business, services and team management;
+- manager/content: business/services updates and team visibility;
+- finance/staff/viewer: platform/team visibility only in this foundation.
+
+Multi-business users can switch only to a workspace returned by their active memberships. Platform APIs ignore client-supplied workspace identifiers and use the middleware/session context.
+
+This release secures access to the current MKB Admin but does not make legacy content multi-tenant. Weddings, Venues, Suppliers, Moments and public collection definitions remain MKB-only until v1.8.2 adds ownership columns, backfills and scoped queries.
+
 ## Core rule
 Structured relationships/editorial state belong in D1. Binary image assets belong in R2.
 

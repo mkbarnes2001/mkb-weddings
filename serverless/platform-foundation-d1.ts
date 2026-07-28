@@ -126,6 +126,7 @@ function hydrateMember(row: any) {
     invitedAt: row.invited_at || undefined,
     acceptedAt: row.accepted_at || undefined,
     lastActiveAt: row.last_active_at || undefined,
+    invitationLastSentAt: row.invitation_last_sent_at || undefined,
   };
 }
 
@@ -219,12 +220,12 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
     { key: "venues", label: "Venues", status: "migration", detail: "Legacy venue records still require business ownership migration." },
     { key: "suppliers", label: "Supplier records", status: "migration", detail: "Current supplier records are MKB operational data, not marketplace businesses." },
     { key: "galleries", label: "Moments and public galleries", status: "migration", detail: "Legacy gallery definitions require business ownership migration." },
-    { key: "authentication", label: "Professional authentication", status: "planned", detail: "User sign-in and invitation acceptance will be introduced before external onboarding." },
+    { key: "authentication", label: "Professional identity and sessions", status: "scoped", detail: "Passwordless sign-in, one-time invitations, business membership resolution and server-owned workspace context are available. Legacy modules remain restricted to MKB until their ownership migrations are complete." },
     { key: "connect", label: "Stripe Connect", status: "planned", detail: "Connected account onboarding follows business authentication and ownership enforcement." },
   ];
 
   return {
-    schemaVersion: 23,
+    schemaVersion: 24,
     brand: {
       name: "WedPlanned",
       primaryDomain: "wedplanned.com",
@@ -334,13 +335,14 @@ export async function updateBusinessProfile(db: D1Db, input: any) {
     entityType: "business",
     entityId: workspaceId,
     summary: `Updated business profile for ${publicName}.`,
+    actorEmail: input?.actorEmail,
   });
   return getPlatformFoundation(db, workspaceId);
 }
 
 export async function saveBusinessCategories(db: D1Db, input: any) {
   const workspaceId = text(input?.workspaceId) || (await getDefaultWorkspaceId(db));
-  const keys = Array.from(new Set((Array.isArray(input?.categoryKeys) ? input.categoryKeys : []).map(text).filter(Boolean)));
+  const keys: string[] = Array.from(new Set<string>((Array.isArray(input?.categoryKeys) ? input.categoryKeys : []).map(text).filter(Boolean)));
   const primaryKey = text(input?.primaryCategoryKey);
   if (!keys.length) throw httpError("Select at least one wedding-business category.");
   if (primaryKey && !keys.includes(primaryKey)) throw httpError("The primary category must also be selected.");
@@ -368,6 +370,7 @@ export async function saveBusinessCategories(db: D1Db, input: any) {
     entityId: workspaceId,
     summary: `Updated ${keys.length} business categor${keys.length === 1 ? "y" : "ies"}.`,
     metadata: { categoryKeys: keys, primaryCategoryKey: primaryKey || keys[0] },
+    actorEmail: input?.actorEmail,
   });
   return getPlatformFoundation(db, workspaceId);
 }
@@ -428,6 +431,7 @@ export async function saveBusinessServiceArea(db: D1Db, input: any) {
     entityType: "service_area",
     entityId: areaId,
     summary: `Saved service area ${label}.`,
+    actorEmail: input?.actorEmail,
   });
   return getPlatformFoundation(db, workspaceId);
 }
@@ -447,6 +451,7 @@ export async function archiveBusinessServiceArea(db: D1Db, input: any) {
     entityType: "service_area",
     entityId: areaId,
     summary: "Archived a business service area.",
+    actorEmail: input?.actorEmail,
   });
   return getPlatformFoundation(db, workspaceId);
 }
@@ -540,6 +545,7 @@ export async function updateBusinessMember(db: D1Db, input: any) {
     entityType: "membership",
     entityId: membershipId,
     summary: `Updated team membership (${role}, ${status}).`,
+    actorEmail: input?.actorEmail,
   });
   return getPlatformFoundation(db, workspaceId);
 }

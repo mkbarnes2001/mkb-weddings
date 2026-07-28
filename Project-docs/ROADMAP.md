@@ -93,14 +93,21 @@ Completed and in production:
 - Feature entitlements and platform audit events
 - Admin WedPlanned foundation workspace and tenant-readiness audit
 
-## Next — Professional Identity & Tenant Enforcement (v1.8.1)
-- Professional sign-in, invitation acceptance and secure session handling
-- Server-resolved business context from authenticated memberships
-- Tenant-enforcement tests across D1, R2, Admin, public routes and downloads
-- Controlled workspace ownership migration for Weddings, Venues, Suppliers and public galleries
-- Support-access controls, audit logging, export and deletion foundations
+## Completed — Professional Identity & Tenant Context (v1.8.1)
+- Passwordless professional sign-in and single-use invitation acceptance
+- Secure hashed sessions and Admin sign-out
+- Server-resolved active business from authenticated memberships
+- Role-aware WedPlanned platform permissions
+- Restricted multi-business switching
+- Rollback-safe Admin authentication enforcement gate
 
-## Following — Connected Payments & Commercial Billing (v1.8.2)
+## Next — Legacy Tenant Ownership Migration (v1.8.2)
+- Add and backfill workspace ownership for Weddings, Venues, Suppliers, Moments and public collection definitions
+- Scope Admin/public queries, publishing and R2 access to the resolved business
+- Cross-tenant read/write/publish/download regression tests
+- Support access, data export and deletion foundations
+
+## Following — Connected Payments & Commercial Billing (v1.8.3)
 - Stripe Connect hosted onboarding and connected-account webhooks
 - Stripe Billing subscriptions for businesses, separate from couple/client payments
 - Plan limits, trials, billing state and feature enforcement
