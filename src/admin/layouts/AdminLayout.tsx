@@ -95,6 +95,7 @@ export function AdminLayout() {
           flex: 0 0 13px;
         }
         .admin-topbar {
+          display: none;
           position: relative;
           z-index: 30;
           background: #f5f3ef;
@@ -106,6 +107,7 @@ export function AdminLayout() {
           .admin-topbar-copy p:first-child { font-size: 8px !important; }
           .admin-topbar-copy p:last-child { display: none; }
           .admin-topbar {
+            display: block;
             position: sticky;
             top: 0;
             z-index: 40;

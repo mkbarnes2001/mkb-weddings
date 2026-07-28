@@ -425,6 +425,7 @@ export function ClientGalleryEditor() {
         .client-gallery-editor-page {
           width: 100%;
           margin-inline: auto;
+          padding-top: 12px !important;
         }
         .client-gallery-editor-header {
           position: relative;
@@ -526,11 +527,12 @@ export function ClientGalleryEditor() {
           display: grid;
           grid-template-columns: 310px minmax(0, 1fr);
           gap: 20px;
+          margin-top: 16px !important;
           align-items: start;
         }
         .client-gallery-editor-sidebar {
           position: sticky;
-          top: 78px;
+          top: 14px;
           min-width: 0;
           overflow: hidden;
         }
@@ -609,9 +611,116 @@ export function ClientGalleryEditor() {
         .client-gallery-settings-column {
           display: grid;
           grid-template-columns: minmax(0, 1fr);
-          gap: 18px;
+          gap: 16px;
           max-width: 960px;
           align-items: start;
+        }
+        .client-gallery-summary-details {
+          padding: 12px 14px 14px;
+          font-size: 11px;
+        }
+        .client-gallery-summary-card {
+          border: 0 !important;
+          border-radius: 10px;
+          background: #fafafa;
+          padding: 9px 10px;
+        }
+        .client-gallery-summary-card + .client-gallery-summary-card {
+          margin-top: 7px;
+        }
+        .client-gallery-summary-label {
+          margin: 0;
+          color: #a3a3a3;
+          font-size: 8px;
+          font-weight: 600;
+          letter-spacing: .11em;
+          line-height: 1.1;
+          text-transform: uppercase;
+        }
+        .client-gallery-summary-value {
+          margin-top: 4px;
+          font-size: 11px;
+          font-weight: 500;
+          line-height: 1.25;
+        }
+        .client-gallery-summary-secondary {
+          margin-top: 2px;
+          color: #737373;
+          font-size: 9.5px;
+          line-height: 1.25;
+        }
+        .client-gallery-access-panel {
+          padding: 18px !important;
+        }
+        .client-gallery-access-list {
+          display: grid;
+          gap: 8px;
+          margin-top: 14px;
+        }
+        .client-gallery-access-option {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          border: 0 !important;
+          border-radius: 10px;
+          background: #fafafa;
+          padding: 11px 12px !important;
+        }
+        .client-gallery-access-option input[type="checkbox"] {
+          margin-top: 2px;
+          flex: 0 0 auto;
+        }
+        .client-gallery-access-option strong {
+          font-size: 12px !important;
+          line-height: 1.25;
+        }
+        .client-gallery-access-option .client-gallery-access-help {
+          display: block;
+          margin-top: 3px;
+          color: #737373;
+          font-size: 10px;
+          line-height: 1.4;
+        }
+        .client-gallery-access-advanced {
+          border: 0 !important;
+          border-radius: 10px;
+          background: #fafafa;
+          padding: 11px 12px !important;
+        }
+        .client-gallery-access-advanced summary {
+          font-size: 10.5px !important;
+        }
+        .client-gallery-access-save {
+          width: auto;
+          margin-left: 8px;
+          padding: 9px 13px !important;
+          font-size: 10px;
+        }
+        .client-gallery-authorised-panel {
+          padding: 18px !important;
+        }
+        .client-gallery-contact-card {
+          border: 0 !important;
+          border-radius: 10px;
+          background: #fafafa !important;
+          padding: 10px !important;
+        }
+        .client-gallery-contact-remove {
+          width: 24px;
+          height: 24px;
+          flex: 0 0 24px;
+          display: inline-grid;
+          place-items: center;
+          border-radius: 7px;
+          color: #737373;
+        }
+        .client-gallery-contact-remove:hover {
+          background: #ececec;
+          color: #111;
+        }
+        .client-gallery-contact-remove svg {
+          width: 12px;
+          height: 12px;
         }
         .client-gallery-branding-grid {
           display: grid;
@@ -871,7 +980,7 @@ export function ClientGalleryEditor() {
           .client-gallery-activity-split { grid-template-columns: minmax(0,1fr); }
         }
         @media (max-width: 640px) {
-          .client-gallery-editor-page { padding-left: 12px !important; padding-right: 12px !important; }
+          .client-gallery-editor-page { padding: 10px 12px 18px !important; }
           .client-gallery-editor-header {
             align-items: stretch;
             flex-direction: column;
@@ -970,9 +1079,16 @@ export function ClientGalleryEditor() {
                 <div className="flex items-start justify-between gap-2"><div className="min-w-0"><h1 className="text-lg font-semibold leading-tight break-words">{gallery.title}</h1><p className="mt-1 text-xs text-neutral-500 break-words">{selectedWedding?.venue || gallery.weddingTitle || "Private client gallery"}</p></div><span className={`shrink-0 rounded-full px-2 py-1 text-[10px] uppercase tracking-[.08em] ${gallery.status === "live" ? "bg-green-50 text-green-800" : "bg-neutral-100 text-neutral-600"}`}>{gallery.status}</span></div>
                 <div className="mt-4 grid grid-cols-2 gap-2 text-xs"><div className="rounded-lg bg-neutral-50 p-2"><span className="block text-neutral-400">Photos</span><strong>{gallery.assetCount}</strong></div><div className="rounded-lg bg-neutral-50 p-2"><span className="block text-neutral-400">Shoot date</span><strong>{formatDate(selectedWedding?.weddingDate || "")}</strong></div></div>
               </div>
-              <div className="p-4 border-b border-black/10 text-sm">
-                <div className="rounded-xl border border-black/10 p-3"><p className="text-[10px] uppercase tracking-[.12em] text-neutral-400">Client</p><p className="mt-1 font-medium break-words">{gallery.clientName || "Not assigned"}</p><p className="text-xs text-neutral-500 break-all">{gallery.clientEmail || "No primary email"}</p></div>
-                <div className="mt-3 rounded-xl border border-black/10 p-3"><p className="text-[10px] uppercase tracking-[.12em] text-neutral-400">Last visit</p><p className="mt-1 text-sm">{lastVisitor ? formatDate(lastVisitor.lastSeenAt) : "No visits yet"}</p></div>
+              <div className="client-gallery-summary-details">
+                <div className="client-gallery-summary-card">
+                  <p className="client-gallery-summary-label">Client</p>
+                  <p className="client-gallery-summary-value break-words">{gallery.clientName || "Not assigned"}</p>
+                  <p className="client-gallery-summary-secondary break-all">{gallery.clientEmail || "No primary email"}</p>
+                </div>
+                <div className="client-gallery-summary-card">
+                  <p className="client-gallery-summary-label">Last visit</p>
+                  <p className="client-gallery-summary-value">{lastVisitor ? formatDate(lastVisitor.lastSeenAt) : "No visits yet"}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -1202,9 +1318,108 @@ export function ClientGalleryEditor() {
             </section>
           </section> : null}
 
-          {activeTab === "access" ? <section className="client-gallery-settings-column mt-5">
-            <div className="rounded-2xl border border-black/10 bg-white p-5"><div className="flex items-center gap-2"><ShieldCheck className="h-5 w-5" /><h3 className="text-xl font-semibold">Gallery access</h3></div><p className="mt-2 text-sm text-neutral-600">Control email identification, PIN protection, expiry and full-resolution permissions.</p><div className="mt-5 space-y-4"><label className="flex items-start gap-3 rounded-xl border border-black/10 p-4"><input type="checkbox" checked={draft.requireEmail ?? false} onChange={(e) => setDraft({ ...draft, requireEmail: e.target.checked })} /><span><strong className="block text-sm">Require email to enter</strong><span className="block text-xs text-neutral-500 mt-1">Visitors identify themselves before viewing. Secure magic-link sign-in can then sync activity across devices.</span></span></label><label className="flex items-start gap-3 rounded-xl border border-black/10 p-4"><input type="checkbox" checked={draft.allowFavourites ?? true} onChange={(e) => setDraft({ ...draft, allowFavourites: e.target.checked })} /><span><strong className="block text-sm">Allow favourites</strong><span className="block text-xs text-neutral-500 mt-1">Clients and guests can heart photographs.</span></span></label><label className="flex items-start gap-3 rounded-xl border border-black/10 p-4"><input type="checkbox" checked={draft.allowDownloads ?? false} onChange={(e) => setDraft({ ...draft, allowDownloads: e.target.checked })} /><span><strong className="block text-sm">Enable original downloads</strong><span className="block text-xs text-neutral-500 mt-1">Master switch for secure full-resolution delivery.</span></span></label><label className="flex items-start gap-3 rounded-xl border border-black/10 p-4"><input type="checkbox" disabled={!draft.requireEmail || !draft.allowDownloads} checked={draft.allowGuestDownloads ?? false} onChange={(e) => setDraft({ ...draft, allowGuestDownloads: e.target.checked })} /><span><strong className="block text-sm">Allow guest full-resolution downloads</strong><span className="block text-xs text-neutral-500 mt-1">Leave off to reserve originals for authorised client emails.</span></span></label><details className="rounded-xl border border-black/10 p-4"><summary className="cursor-pointer text-sm font-medium">Advanced security</summary><div className="mt-4 space-y-3"><label className="block text-xs uppercase tracking-[.1em] text-neutral-500">New / replacement PIN<input value={draft.pin || ""} onChange={(e) => setDraft({ ...draft, pin: e.target.value })} placeholder={gallery.pinEnabled ? "Leave blank to keep current PIN" : "Optional"} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5 text-sm normal-case tracking-normal" /></label><label className="block text-xs uppercase tracking-[.1em] text-neutral-500">Expiry<input type="datetime-local" value={(draft.expiresAt || "").slice(0,16)} onChange={(e) => setDraft({ ...draft, expiresAt: e.target.value })} className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2.5 text-sm normal-case tracking-normal" /></label></div></details><button onClick={save} disabled={busy} className="rounded-lg bg-black text-white px-5 py-3 inline-flex items-center gap-2 disabled:opacity-50"><Save className="h-4 w-4" /> Save access settings</button></div></div>
-            <aside className="rounded-2xl border border-black/10 bg-white p-5"><div className="flex items-center gap-2"><UserPlus className="h-5 w-5" /><h3 className="text-lg font-semibold">Authorised client emails</h3></div><p className="mt-2 text-xs text-neutral-500">Contacts can receive client-level permissions and secure sign-in.</p><div className="mt-4 space-y-2">{detail.contacts.map((contact) => <div key={contact.emailNormalized} className="rounded-xl border border-black/10 bg-neutral-50 p-3"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-sm font-medium truncate">{contact.displayName || contact.email}</p><p className="text-xs text-neutral-500 truncate">{contact.email}</p><p className="mt-1 text-[10px] uppercase tracking-[.08em] text-neutral-400">{contact.role.replaceAll("_", " ")} · {contact.allowOriginalDownloads ? "originals allowed" : "view only"}</p></div><button title="Remove" onClick={() => mutateContact({ action: "remove", email: contact.email }, "Access contact removed.")}><X className="h-4 w-4" /></button></div></div>)}</div><div className="mt-4 rounded-xl border border-black/10 p-3 space-y-2"><input value={contactDraft.displayName} onChange={(e) => setContactDraft({ ...contactDraft, displayName: e.target.value })} placeholder="Name (optional)" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm" /><input type="email" value={contactDraft.email} onChange={(e) => setContactDraft({ ...contactDraft, email: e.target.value })} placeholder="client@example.com" className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm" /><div className="grid grid-cols-2 gap-2"><select value={contactDraft.role} onChange={(e) => setContactDraft({ ...contactDraft, role: e.target.value })} className="rounded-lg border border-black/15 px-3 py-2 text-sm bg-white"><option value="client">Client</option><option value="primary_client">Primary client</option><option value="family">Family</option><option value="other">Other</option></select><label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={contactDraft.allowOriginalDownloads} onChange={(e) => setContactDraft({ ...contactDraft, allowOriginalDownloads: e.target.checked })} /> Full-res</label></div><button disabled={busy || !contactDraft.email.trim()} onClick={addContact} className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm inline-flex items-center justify-center gap-2 disabled:opacity-40"><UserPlus className="h-4 w-4" /> Add contact</button></div></aside>
+          {activeTab === "access" ? <section className="client-gallery-settings-column">
+            <div className="client-gallery-access-panel rounded-2xl border border-black/10 bg-white">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4" />
+                <h3 className="text-[17px] font-semibold">Gallery access</h3>
+              </div>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-neutral-500">Control email identification, PIN protection, expiry and full-resolution permissions.</p>
+
+              <div className="client-gallery-access-list">
+                <label className="client-gallery-access-option">
+                  <input type="checkbox" checked={draft.requireEmail ?? false} onChange={(e) => setDraft({ ...draft, requireEmail: e.target.checked })} />
+                  <span>
+                    <strong className="block">Require email to enter</strong>
+                    <span className="client-gallery-access-help">Visitors identify themselves before viewing. Secure magic-link sign-in can then sync activity across devices.</span>
+                  </span>
+                </label>
+
+                <label className="client-gallery-access-option">
+                  <input type="checkbox" checked={draft.allowFavourites ?? true} onChange={(e) => setDraft({ ...draft, allowFavourites: e.target.checked })} />
+                  <span>
+                    <strong className="block">Allow favourites</strong>
+                    <span className="client-gallery-access-help">Clients and guests can heart photographs.</span>
+                  </span>
+                </label>
+
+                <label className="client-gallery-access-option">
+                  <input type="checkbox" checked={draft.allowDownloads ?? false} onChange={(e) => setDraft({ ...draft, allowDownloads: e.target.checked })} />
+                  <span>
+                    <strong className="block">Enable original downloads</strong>
+                    <span className="client-gallery-access-help">Master switch for secure full-resolution delivery.</span>
+                  </span>
+                </label>
+
+                <label className="client-gallery-access-option">
+                  <input type="checkbox" disabled={!draft.requireEmail || !draft.allowDownloads} checked={draft.allowGuestDownloads ?? false} onChange={(e) => setDraft({ ...draft, allowGuestDownloads: e.target.checked })} />
+                  <span>
+                    <strong className="block">Allow guest full-resolution downloads</strong>
+                    <span className="client-gallery-access-help">Leave off to reserve originals for authorised client emails.</span>
+                  </span>
+                </label>
+
+                <details className="client-gallery-access-advanced">
+                  <summary className="cursor-pointer font-medium">Advanced security</summary>
+                  <div className="mt-4 space-y-3">
+                    <label className="block text-[9px] uppercase tracking-[.1em] text-neutral-500">
+                      New / replacement PIN
+                      <input value={draft.pin || ""} onChange={(e) => setDraft({ ...draft, pin: e.target.value })} placeholder={gallery.pinEnabled ? "Leave blank to keep current PIN" : "Optional"} className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2.5 text-xs normal-case tracking-normal" />
+                    </label>
+                    <label className="block text-[9px] uppercase tracking-[.1em] text-neutral-500">
+                      Expiry
+                      <input type="datetime-local" value={(draft.expiresAt || "").slice(0,16)} onChange={(e) => setDraft({ ...draft, expiresAt: e.target.value })} className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2.5 text-xs normal-case tracking-normal" />
+                    </label>
+                  </div>
+                </details>
+
+                <button onClick={save} disabled={busy} className="client-gallery-access-save rounded-lg bg-black text-white inline-flex items-center justify-center gap-2 disabled:opacity-50">
+                  <Save className="h-3.5 w-3.5" /> Save access settings
+                </button>
+              </div>
+            </div>
+
+            <aside className="client-gallery-authorised-panel rounded-2xl border border-black/10 bg-white">
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-4 w-4" />
+                <h3 className="text-[16px] font-semibold">Authorised client emails</h3>
+              </div>
+              <p className="mt-1.5 text-[10px] leading-relaxed text-neutral-500">Contacts can receive client-level permissions and secure sign-in.</p>
+
+              <div className="mt-3 space-y-2">
+                {detail.contacts.map((contact) => <div key={contact.emailNormalized} className="client-gallery-contact-card">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-[11px] font-medium">{contact.displayName || contact.email}</p>
+                      <p className="truncate text-[9.5px] text-neutral-500">{contact.email}</p>
+                      <p className="mt-1 text-[8px] uppercase tracking-[.07em] text-neutral-400">{contact.role.replaceAll("_", " ")} · {contact.allowOriginalDownloads ? "originals allowed" : "view only"}</p>
+                    </div>
+                    <button className="client-gallery-contact-remove" title="Remove" aria-label={`Remove ${contact.displayName || contact.email}`} onClick={() => mutateContact({ action: "remove", email: contact.email }, "Access contact removed.")}>
+                      <X />
+                    </button>
+                  </div>
+                </div>)}
+              </div>
+
+              <div className="mt-4 rounded-xl bg-neutral-50 p-3 space-y-2">
+                <input value={contactDraft.displayName} onChange={(e) => setContactDraft({ ...contactDraft, displayName: e.target.value })} placeholder="Name (optional)" className="w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-xs" />
+                <input type="email" value={contactDraft.email} onChange={(e) => setContactDraft({ ...contactDraft, email: e.target.value })} placeholder="client@example.com" className="w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-xs" />
+                <div className="grid grid-cols-2 gap-2">
+                  <select value={contactDraft.role} onChange={(e) => setContactDraft({ ...contactDraft, role: e.target.value })} className="rounded-lg border border-black/15 bg-white px-3 py-2 text-xs">
+                    <option value="client">Client</option>
+                    <option value="primary_client">Primary client</option>
+                    <option value="family">Family</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <label className="flex items-center gap-2 text-[10px]">
+                    <input type="checkbox" checked={contactDraft.allowOriginalDownloads} onChange={(e) => setContactDraft({ ...contactDraft, allowOriginalDownloads: e.target.checked })} /> Full-res
+                  </label>
+                </div>
+                <button disabled={busy || !contactDraft.email.trim()} onClick={addContact} className="w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-[10px] inline-flex items-center justify-center gap-2 disabled:opacity-40">
+                  <UserPlus className="h-3.5 w-3.5" /> Add contact
+                </button>
+              </div>
+            </aside>
           </section> : null}
 
           {activeTab === "branding" && brandingDraft ? <section className="client-gallery-branding-grid mt-5">
