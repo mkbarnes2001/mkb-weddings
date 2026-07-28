@@ -4,6 +4,7 @@ import {
   BriefcaseBusiness,
   Building2,
   Check,
+  ChevronDown,
   CircleDashed,
   Globe2,
   MapPinned,
@@ -13,6 +14,7 @@ import {
   Sparkles,
   Trash2,
   Users,
+  X,
 } from "lucide-react";
 import {
   AdminButton,
@@ -49,6 +51,26 @@ const emptyMember: Partial<WedPlannedMember> & { email: string } = {
   jobTitle: "",
   role: "staff",
 };
+
+type ServiceAreaPreset = {
+  key: string;
+  label: string;
+  areaType: WedPlannedServiceArea["areaType"];
+  countryCode?: string;
+  regionCode?: string;
+  remoteAvailable?: boolean;
+};
+
+const serviceAreaPresets: ServiceAreaPreset[] = [
+  { key: "northern-ireland", label: "Northern Ireland", areaType: "region", countryCode: "GB", regionCode: "NIR" },
+  { key: "republic-of-ireland", label: "Republic of Ireland", areaType: "country", countryCode: "IE" },
+  { key: "england", label: "England", areaType: "region", countryCode: "GB", regionCode: "ENG" },
+  { key: "scotland", label: "Scotland", areaType: "region", countryCode: "GB", regionCode: "SCT" },
+  { key: "wales", label: "Wales", areaType: "region", countryCode: "GB", regionCode: "WLS" },
+  { key: "united-kingdom", label: "United Kingdom", areaType: "country", countryCode: "GB" },
+  { key: "destination", label: "Destination weddings", areaType: "destination" },
+  { key: "remote", label: "Remote / online", areaType: "remote", remoteAvailable: true },
+];
 
 function FieldInput({ value, onChange, placeholder = "", type = "text" }: {
   value: string | number | null | undefined;
@@ -102,6 +124,7 @@ export function WedPlannedPlatform() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [primaryCategory, setPrimaryCategory] = useState("");
   const [serviceArea, setServiceArea] = useState(emptyArea);
+  const [serviceAreaPreset, setServiceAreaPreset] = useState("");
   const [member, setMember] = useState(emptyMember);
 
   function apply(next: WedPlannedPlatformPayload) {
@@ -163,12 +186,42 @@ export function WedPlannedPlatform() {
     );
   }
 
+  function chooseServiceAreaPreset(key: string) {
+    setServiceAreaPreset(key);
+    if (!key) {
+      setServiceArea({ ...emptyArea, countryCode: business?.defaultCountry || "GB" });
+      return;
+    }
+    if (key === "custom") {
+      setServiceArea({ ...emptyArea, areaType: "custom", countryCode: business?.defaultCountry || "GB" });
+      return;
+    }
+    const preset = serviceAreaPresets.find((item) => item.key === key);
+    if (!preset) return;
+    setServiceArea({
+      ...emptyArea,
+      label: preset.label,
+      areaType: preset.areaType,
+      countryCode: preset.countryCode || business?.defaultCountry || "GB",
+      regionCode: preset.regionCode || "",
+      remoteAvailable: Boolean(preset.remoteAvailable),
+    });
+  }
+
   async function addServiceArea() {
+    const duplicate = platform?.serviceAreas.some((area) => area.label.trim().toLowerCase() === String(serviceArea.label || "").trim().toLowerCase());
+    if (duplicate) {
+      setError("That service area is already selected.");
+      return;
+    }
     const saved = await run(
       () => AdminApiService.saveWedPlannedServiceArea(serviceArea),
       "Service area saved.",
     );
-    if (saved) setServiceArea(emptyArea);
+    if (saved) {
+      setServiceArea({ ...emptyArea, countryCode: business?.defaultCountry || "GB" });
+      setServiceAreaPreset("");
+    }
   }
 
   async function inviteMember() {
@@ -286,67 +339,121 @@ export function WedPlannedPlatform() {
       ) : null}
 
       {tab === "services" ? (
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(300px,.75fr)]">
-          <AdminPanel title="Wedding-professional categories" description="Select every service the business provides and choose one primary marketplace category." icon={BriefcaseBusiness}>
-            <div className="space-y-5">
-              {categoryGroups.map(([group, categories]) => (
-                <div key={group}>
-                  <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-500">{group}</h3>
-                  <div className="grid gap-2 md:grid-cols-2">
-                    {categories.map((category) => {
-                      const selected = selectedCategories.includes(category.key);
-                      return (
-                        <label key={category.key} className={`flex cursor-pointer gap-3 rounded-xl p-3 ring-1 transition ${selected ? "bg-black text-white ring-black" : "bg-white ring-black/[0.08] hover:ring-black/20"}`}>
-                          <input
-                            type="checkbox"
-                            checked={selected}
-                            onChange={(event) => {
-                              const next = event.target.checked ? [...selectedCategories, category.key] : selectedCategories.filter((key) => key !== category.key);
-                              setSelectedCategories(next);
-                              if (!event.target.checked && primaryCategory === category.key) setPrimaryCategory(next[0] || "");
-                            }}
-                            className="mt-0.5"
-                          />
-                          <span className="min-w-0"><span className="block text-xs font-semibold">{category.name}</span><span className={`mt-1 block text-[10px] leading-4 ${selected ? "text-white/65" : "text-neutral-500"}`}>{category.description}</span></span>
-                        </label>
-                      );
-                    })}
+        <div className="space-y-5">
+          <AdminPanel title="Services" description="Choose the services this business offers without filling the page with every category." icon={BriefcaseBusiness} className="!overflow-visible">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,.55fr)] lg:items-start">
+              <AdminField label="Services offered" help="Open the menu and select one or more wedding-professional services.">
+                <details className="group relative">
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl border border-black/[0.10] bg-white px-3.5 py-2.5 text-xs font-medium outline-none transition hover:border-black/25 focus-visible:ring-2 focus-visible:ring-black/20 [&::-webkit-details-marker]:hidden">
+                    <span>{selectedCategories.length ? `${selectedCategories.length} service${selectedCategories.length === 1 ? "" : "s"} selected` : "Choose services"}</span>
+                    <ChevronDown size={15} className="shrink-0 text-neutral-400 transition group-open:rotate-180" />
+                  </summary>
+                  <div className="absolute left-0 right-0 z-30 mt-2 max-h-[360px] overflow-y-auto rounded-2xl border border-black/[0.08] bg-white p-3 shadow-xl">
+                    <div className="space-y-4">
+                      {categoryGroups.map(([group, categories]) => (
+                        <div key={group}>
+                          <p className="mb-1.5 px-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-400">{group}</p>
+                          <div className="space-y-1">
+                            {categories.map((category) => {
+                              const selected = selectedCategories.includes(category.key);
+                              return (
+                                <label key={category.key} className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs transition ${selected ? "bg-black text-white" : "hover:bg-[#f5f3ef]"}`}>
+                                  <input
+                                    type="checkbox"
+                                    checked={selected}
+                                    onChange={(event) => {
+                                      const next = event.target.checked ? [...selectedCategories, category.key] : selectedCategories.filter((key) => key !== category.key);
+                                      setSelectedCategories(next);
+                                      if (!event.target.checked && primaryCategory === category.key) setPrimaryCategory(next[0] || "");
+                                    }}
+                                    className="h-3.5 w-3.5 shrink-0"
+                                  />
+                                  <span className="min-w-0 truncate font-medium">{category.name}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-5 grid gap-3 border-t border-black/[0.06] pt-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-              <AdminField label="Primary category">
+                </details>
+              </AdminField>
+
+              <AdminField label="Primary service" help="This will lead the future WedPlanned marketplace profile.">
                 <FieldSelect value={primaryCategory} onChange={setPrimaryCategory}>
-                  <option value="">Choose primary category</option>
+                  <option value="">Choose primary service</option>
                   {platform.categories.filter((category) => selectedCategories.includes(category.key)).map((category) => <option key={category.key} value={category.key}>{category.name}</option>)}
                 </FieldSelect>
               </AdminField>
-              <AdminButton variant="primary" icon={Save} onClick={saveCategories} disabled={saving || !selectedCategories.length}>Save categories</AdminButton>
+            </div>
+
+            <div className="mt-4 flex min-h-8 flex-wrap gap-2">
+              {platform.categories.filter((category) => selectedCategories.includes(category.key)).map((category) => (
+                <span key={category.key} className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium ${primaryCategory === category.key ? "bg-black text-white" : "bg-[#f2eee7] text-neutral-700"}`}>
+                  {category.name}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = selectedCategories.filter((key) => key !== category.key);
+                      setSelectedCategories(next);
+                      if (primaryCategory === category.key) setPrimaryCategory(next[0] || "");
+                    }}
+                    className="rounded-full p-0.5 opacity-60 hover:bg-black/10 hover:opacity-100"
+                    aria-label={`Remove ${category.name}`}
+                  >
+                    <X size={10} />
+                  </button>
+                </span>
+              ))}
+              {!selectedCategories.length ? <span className="text-[10px] text-neutral-400">No services selected.</span> : null}
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <AdminButton variant="primary" icon={Save} onClick={saveCategories} disabled={saving || !selectedCategories.length}>Save services</AdminButton>
             </div>
           </AdminPanel>
 
-          <div className="space-y-5">
-            <AdminPanel title="Service areas" description="Where this business works. These are separate from MKB's venue-location intelligence." icon={MapPinned}>
-              <div className="space-y-3">
-                {platform.serviceAreas.length ? platform.serviceAreas.map((area) => (
-                  <div key={area.id} className="flex items-start justify-between gap-3 rounded-xl bg-[#f5f3ef] p-3">
-                    <div><p className="text-xs font-semibold">{area.label}</p><p className="mt-1 text-[10px] text-neutral-500">{area.areaType} · {area.countryCode}{area.radiusMiles != null ? ` · ${area.radiusMiles} miles` : ""}</p></div>
-                    <button type="button" onClick={() => run(() => AdminApiService.archiveWedPlannedServiceArea(area.id), "Service area removed." )} className="rounded-lg p-2 text-neutral-400 hover:bg-white hover:text-red-600" aria-label={`Remove ${area.label}`}><Trash2 size={14} /></button>
-                  </div>
-                )) : <p className="text-xs text-neutral-500">No service areas added yet.</p>}
+          <AdminPanel title="Service areas" description="Select the regions this business covers. Use a custom area only when a preset does not fit." icon={MapPinned}>
+            <div className="flex flex-wrap gap-2">
+              {platform.serviceAreas.length ? platform.serviceAreas.map((area) => (
+                <span key={area.id} className="inline-flex items-center gap-2 rounded-full bg-[#f2eee7] px-3 py-1.5 text-[10px] font-medium text-neutral-700">
+                  <span>{area.label}</span>
+                  <span className="text-neutral-400">{area.areaType}</span>
+                  <button type="button" onClick={() => run(() => AdminApiService.archiveWedPlannedServiceArea(area.id), "Service area removed.")} className="rounded-full p-0.5 text-neutral-400 hover:bg-white hover:text-red-600" aria-label={`Remove ${area.label}`}><X size={11} /></button>
+                </span>
+              )) : <span className="text-xs text-neutral-500">No service areas selected.</span>}
+            </div>
+
+            <div className="mt-5 rounded-2xl bg-[#f7f5f1] p-4">
+              <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+                <AdminField label="Add a service area">
+                  <FieldSelect value={serviceAreaPreset} onChange={chooseServiceAreaPreset}>
+                    <option value="">Choose an area</option>
+                    {serviceAreaPresets.map((preset) => <option key={preset.key} value={preset.key}>{preset.label}</option>)}
+                    <option value="custom">Custom area…</option>
+                  </FieldSelect>
+                </AdminField>
+                <AdminButton variant="secondary" icon={Plus} onClick={addServiceArea} disabled={saving || !serviceArea.label}>Add area</AdminButton>
               </div>
-              <div className="mt-5 space-y-3 border-t border-black/[0.06] pt-5">
-                <AdminField label="Area name"><FieldInput value={serviceArea.label} onChange={(value) => setServiceArea({ ...serviceArea, label: value })} placeholder="Northern Ireland" /></AdminField>
-                <div className="grid gap-3 sm:grid-cols-2">
+
+              {serviceAreaPreset && serviceAreaPreset !== "custom" ? (
+                <div className="mt-3 rounded-xl bg-white px-3 py-2.5 text-xs">
+                  <span className="font-semibold">{serviceArea.label}</span>
+                  <span className="ml-2 text-[10px] text-neutral-500">{serviceArea.areaType} · {serviceArea.countryCode}</span>
+                </div>
+              ) : null}
+
+              {serviceAreaPreset === "custom" ? (
+                <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <AdminField label="Area name" className="md:col-span-2"><FieldInput value={serviceArea.label} onChange={(value) => setServiceArea({ ...serviceArea, label: value })} placeholder="County Down" /></AdminField>
                   <AdminField label="Area type"><FieldSelect value={String(serviceArea.areaType)} onChange={(value) => setServiceArea({ ...serviceArea, areaType: value as WedPlannedServiceArea["areaType"] })}><option value="local">Local</option><option value="city">City</option><option value="county">County</option><option value="region">Region</option><option value="country">Country</option><option value="destination">Destination</option><option value="remote">Remote</option><option value="custom">Custom</option></FieldSelect></AdminField>
-                  <AdminField label="Country code"><FieldInput value={serviceArea.countryCode} onChange={(value) => setServiceArea({ ...serviceArea, countryCode: value.toUpperCase() })} /></AdminField>
+                  <AdminField label="Country code"><FieldInput value={serviceArea.countryCode} onChange={(value) => setServiceArea({ ...serviceArea, countryCode: value.toUpperCase().slice(0, 2) })} /></AdminField>
                   <AdminField label="Radius (miles)"><FieldInput type="number" value={serviceArea.radiusMiles} onChange={(value) => setServiceArea({ ...serviceArea, radiusMiles: value ? Number(value) : null })} /></AdminField>
                 </div>
-                <AdminButton variant="secondary" icon={Plus} onClick={addServiceArea} disabled={saving || !serviceArea.label}>Add service area</AdminButton>
-              </div>
-            </AdminPanel>
-          </div>
+              ) : null}
+            </div>
+          </AdminPanel>
         </div>
       ) : null}
 
