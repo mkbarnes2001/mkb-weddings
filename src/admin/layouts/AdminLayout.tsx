@@ -51,9 +51,9 @@ export function AdminLayout() {
           gap: 6px;
         }
         .admin-toolbar-button {
-          width: 84px;
+          width: 92px;
           height: 32px;
-          flex: 0 0 84px;
+          flex: 0 0 92px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -63,8 +63,9 @@ export function AdminLayout() {
           background: #fff;
           color: #262626;
           padding: 0 8px;
-          font-size: 9px;
-          font-weight: 650;
+          font-family: inherit;
+          font-size: 8.5px;
+          font-weight: 600;
           line-height: 1;
           text-decoration: none;
           transition: background-color .15s ease, border-color .15s ease, transform .15s ease;
@@ -89,10 +90,15 @@ export function AdminLayout() {
           flex: 0 0 13px;
         }
         .admin-toolbar-button-label {
+          min-width: 0;
           overflow: hidden;
           text-overflow: ellipsis;
         }
-        @media (max-width: 1080px) {
+        .admin-toolbar-button[data-primary="true"] .admin-toolbar-button-label {
+          font-size: 8.5px;
+          font-weight: 600;
+        }
+        @media (max-width: 1200px) {
           .admin-toolbar-button {
             width: 32px;
             flex-basis: 32px;

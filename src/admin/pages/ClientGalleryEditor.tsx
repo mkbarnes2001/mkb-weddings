@@ -428,6 +428,17 @@ export function ClientGalleryEditor() {
   return (
     <div className="client-gallery-editor-page p-4 sm:p-6 lg:p-8" style={{ maxWidth: 1680 }}>
       <style>{`
+        .client-gallery-editor-page {
+          width: 100%;
+          margin-inline: auto;
+        }
+        /* On the editor, keep the global action row in normal document flow so it never covers gallery content while scrolling. */
+        .admin-topbar {
+          position: relative !important;
+          top: auto !important;
+          background: #fff !important;
+          box-shadow: none !important;
+        }
         .client-gallery-editor-shell {
           display: grid;
           grid-template-columns: 310px minmax(0, 1fr);
@@ -714,9 +725,21 @@ export function ClientGalleryEditor() {
           .client-gallery-activity-split { grid-template-columns: minmax(0,1fr); }
           .client-gallery-photo-toolbar { grid-template-columns: repeat(3, minmax(0,1fr)); }
         }
+        @media (max-width: 1020px) {
+          .client-gallery-sidebar-overview {
+            grid-template-columns: minmax(0, 1fr);
+          }
+          .client-gallery-sidebar-cover {
+            min-height: 0;
+            aspect-ratio: 16 / 9 !important;
+          }
+          .client-gallery-sidebar-cover img {
+            min-height: 0;
+          }
+        }
         @media (max-width: 820px) {
           .client-gallery-sidebar-overview {
-            grid-template-columns: minmax(210px, .9fr) minmax(0, 1.1fr);
+            grid-template-columns: minmax(0, 1fr);
           }
           .client-gallery-activity-split { grid-template-columns: minmax(0,1fr); }
         }
