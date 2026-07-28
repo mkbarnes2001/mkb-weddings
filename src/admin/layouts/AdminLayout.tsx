@@ -36,24 +36,45 @@ export function AdminLayout() {
   return (
     <div className="admin-shell min-h-screen bg-[#f5f3ef] text-neutral-950">
       <style>{`
-        .admin-toolbar-actions {
-          display: flex;
-          min-width: 0;
-          align-items: center;
-          justify-content: flex-end;
-          gap: 6px;
-          white-space: nowrap;
-        }
-        .admin-page-action-slot {
-          display: flex;
-          min-width: 0;
-          align-items: center;
+        .admin-external-links {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 6px;
         }
-        .admin-toolbar-button {
-          width: 92px;
+        .admin-external-link {
+          min-width: 0;
+          height: 34px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          border: 1px solid rgba(255,255,255,.14);
+          border-radius: 8px;
+          background: rgba(255,255,255,.06);
+          color: #fff;
+          padding: 0 8px;
+          font-size: 9px;
+          font-weight: 600;
+          line-height: 1;
+          text-decoration: none;
+          transition: background-color .15s ease, border-color .15s ease;
+        }
+        .admin-external-link:hover {
+          border-color: rgba(255,255,255,.28);
+          background: rgba(255,255,255,.12);
+        }
+        .admin-external-link svg {
+          width: 13px;
+          height: 13px;
+          flex: 0 0 13px;
+        }
+        .admin-mobile-external-actions {
+          display: none;
+          align-items: center;
+          gap: 6px;
+        }
+        .admin-mobile-external-link {
           height: 32px;
-          flex: 0 0 92px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -62,59 +83,30 @@ export function AdminLayout() {
           border-radius: 8px;
           background: #fff;
           color: #262626;
-          padding: 0 8px;
-          font-family: inherit;
-          font-size: 8.5px;
+          padding: 0 9px;
+          font-size: 9px;
           font-weight: 600;
           line-height: 1;
           text-decoration: none;
-          transition: background-color .15s ease, border-color .15s ease, transform .15s ease;
         }
-        .admin-toolbar-button:hover {
-          border-color: rgba(17,17,17,.26);
-          background: #fafafa;
-          transform: translateY(-1px);
-        }
-        .admin-toolbar-button[data-primary="true"] {
-          border-color: #111;
-          background: #111;
-          color: #fff;
-        }
-        .admin-toolbar-button[aria-disabled="true"] {
-          pointer-events: none;
-          opacity: .38;
-        }
-        .admin-toolbar-button-icon {
+        .admin-mobile-external-link svg {
           width: 13px;
           height: 13px;
           flex: 0 0 13px;
         }
-        .admin-toolbar-button-label {
-          min-width: 0;
-          overflow: hidden;
-          text-overflow: ellipsis;
+        @media (max-width: 760px) {
+          .admin-sidebar-external { display: none; }
+          .admin-mobile-external-actions { display: flex; }
+          .admin-topbar-copy { display: block !important; }
+          .admin-topbar-copy p:first-child { font-size: 8px !important; }
+          .admin-topbar-copy p:last-child { display: none; }
         }
-        .admin-toolbar-button[data-primary="true"] .admin-toolbar-button-label {
-          font-size: 8.5px;
-          font-weight: 600;
-        }
-        @media (max-width: 1200px) {
-          .admin-toolbar-button {
+        @media (max-width: 420px) {
+          .admin-mobile-external-link {
             width: 32px;
-            flex-basis: 32px;
             padding: 0;
           }
-          .admin-toolbar-button-label { display: none; }
-        }
-        @media (max-width: 640px) {
-          .admin-toolbar-actions,
-          .admin-page-action-slot { gap: 4px; }
-          .admin-toolbar-button {
-            width: 30px;
-            height: 30px;
-            flex-basis: 30px;
-            border-radius: 7px;
-          }
+          .admin-mobile-external-link span { display: none; }
         }
       `}</style>
       <div className="admin-layout-grid">
@@ -163,43 +155,44 @@ export function AdminLayout() {
             })}
           </nav>
 
-          <div className="border-t border-white/10 p-3">
-            <a
-              href="https://www.mkbweddings.co.uk/"
-              className="flex h-8 items-center justify-center gap-2 rounded-lg bg-white px-3 text-[10px] font-semibold text-black hover:bg-white/90"
-            >
-              <Globe2 className="h-3.5 w-3.5" /> Website
-            </a>
+          <div className="admin-sidebar-external border-t border-white/10 p-3">
+            <div className="admin-external-links">
+              <a href="https://www.mkbweddings.co.uk/blog" className="admin-external-link" target="_blank" rel="noreferrer">
+                <FileText /> <span>Blog</span>
+              </a>
+              <a href="https://www.mkbweddings.co.uk/" className="admin-external-link" target="_blank" rel="noreferrer">
+                <Globe2 /> <span>Website</span>
+              </a>
+            </div>
           </div>
         </aside>
 
         <section className="admin-main-region">
           <header className="admin-topbar sticky top-0 z-40 border-b border-black/10 bg-[#f5f3ef] shadow-[0_4px_18px_rgba(17,17,17,0.04)]">
             <div className="flex min-h-[62px] items-center justify-between gap-3 px-4 sm:px-6">
-              <div className="hidden min-w-0 sm:block">
+              <div className="admin-topbar-copy hidden min-w-0 sm:block">
                 <p className="truncate text-[9px] uppercase tracking-[0.2em] text-neutral-500">Photography Intelligence</p>
                 <p className="mt-0.5 truncate text-[10px] text-neutral-500">Wedding content, assets, AI and publishing</p>
               </div>
 
-              <div className="admin-toolbar-actions ml-auto">
-                <div id="admin-page-actions" className="admin-page-action-slot" />
+              <div className="admin-mobile-external-actions ml-auto">
                 <a
                   href="https://www.mkbweddings.co.uk/blog"
-                  title="Open MKB Weddings blog"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="admin-mobile-external-link"
                   aria-label="Open MKB Weddings blog"
-                  className="admin-toolbar-button"
                 >
-                  <FileText className="admin-toolbar-button-icon" />
-                  <span className="admin-toolbar-button-label">Blog</span>
+                  <FileText /> <span>Blog</span>
                 </a>
                 <a
                   href="https://www.mkbweddings.co.uk/"
-                  title="Open MKB Weddings website"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="admin-mobile-external-link"
                   aria-label="Open MKB Weddings website"
-                  className="admin-toolbar-button"
                 >
-                  <Globe2 className="admin-toolbar-button-icon" />
-                  <span className="admin-toolbar-button-label">Website</span>
+                  <Globe2 /> <span>Website</span>
                 </a>
               </div>
             </div>

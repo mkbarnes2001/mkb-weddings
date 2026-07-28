@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   Activity,
@@ -99,7 +98,6 @@ export function ClientGalleryEditor() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [showShare, setShowShare] = useState(false);
-  const [topbarPortal, setTopbarPortal] = useState<HTMLElement | null>(null);
   const [brandingDraft, setBrandingDraft] = useState<ClientGalleryDetailPayload["branding"] | null>(null);
   const [brandingUploading, setBrandingUploading] = useState(false);
   const [openPhotoMenuId, setOpenPhotoMenuId] = useState("");
@@ -141,9 +139,6 @@ export function ClientGalleryEditor() {
 
   useEffect(() => { load(); }, [id]);
   useEffect(() => { if (activeTab === "store") loadStore(); }, [id, activeTab]);
-  useEffect(() => {
-    setTopbarPortal(document.getElementById("admin-page-actions"));
-  }, []);
   useEffect(() => { setSelectedAssets(new Set()); setOpenPhotoMenuId(""); setDraggedAssetId(""); setDragOverAssetId(""); }, [activeAlbumId, activeTab]);
   useEffect(() => {
     const close = (event: MouseEvent) => {
@@ -432,12 +427,96 @@ export function ClientGalleryEditor() {
           width: 100%;
           margin-inline: auto;
         }
-        /* On the editor, keep the global action row in normal document flow so it never covers gallery content while scrolling. */
-        .admin-topbar {
-          position: relative !important;
-          top: auto !important;
-          background: #fff !important;
-          box-shadow: none !important;
+        .client-gallery-editor-header {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 18px;
+          padding: 16px 18px;
+          border: 1px solid rgba(17,17,17,.1);
+          border-radius: 14px;
+          background: rgba(255,255,255,.92);
+          box-shadow: 0 10px 30px rgba(17,17,17,.04);
+        }
+        .client-gallery-editor-header-copy {
+          min-width: 0;
+        }
+        .client-gallery-editor-kicker {
+          margin: 0 0 3px;
+          color: #737373;
+          font-size: 8.5px;
+          font-weight: 650;
+          letter-spacing: .14em;
+          line-height: 1.2;
+          text-transform: uppercase;
+        }
+        .client-gallery-editor-title {
+          margin: 0;
+          font-size: 20px;
+          font-weight: 650;
+          letter-spacing: -.025em;
+          line-height: 1.1;
+        }
+        .client-gallery-editor-subtitle {
+          margin: 5px 0 0;
+          overflow: hidden;
+          color: #737373;
+          font-size: 10.5px;
+          line-height: 1.35;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .client-gallery-editor-actions {
+          position: relative;
+          display: flex;
+          flex: 0 0 auto;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 7px;
+        }
+        .client-gallery-editor-action {
+          min-width: 104px;
+          height: 36px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          border: 1px solid rgba(17,17,17,.12);
+          border-radius: 9px;
+          background: #fff;
+          color: #262626;
+          padding: 0 12px;
+          font-size: 9.5px;
+          font-weight: 600;
+          line-height: 1;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+        .client-gallery-editor-action:hover {
+          border-color: rgba(17,17,17,.28);
+          background: #fafafa;
+        }
+        .client-gallery-editor-action[data-primary="true"] {
+          border-color: #111;
+          background: #111;
+          color: #fff;
+        }
+        .client-gallery-editor-action[aria-disabled="true"] {
+          pointer-events: none;
+          opacity: .38;
+        }
+        .client-gallery-editor-action svg {
+          width: 14px;
+          height: 14px;
+          flex: 0 0 14px;
+        }
+        .client-gallery-share-popover {
+          position: absolute;
+          right: 0;
+          top: calc(100% + 8px);
+          z-index: 80;
+          width: min(330px, calc(100vw - 24px));
         }
         .client-gallery-editor-shell {
           display: grid;
@@ -447,15 +526,9 @@ export function ClientGalleryEditor() {
         }
         .client-gallery-editor-sidebar {
           position: sticky;
-          top: 18px;
+          top: 78px;
           min-width: 0;
           overflow: hidden;
-        }
-        .client-gallery-topbar-actions {
-          position: relative;
-          display: flex;
-          align-items: center;
-          gap: 6px;
         }
         .client-gallery-primary-tabs {
           display: grid;
@@ -710,6 +783,15 @@ export function ClientGalleryEditor() {
           .client-gallery-primary-tab { font-size: 9.5px; }
         }
         @media (max-width: 1120px) {
+          .client-gallery-editor-header {
+            align-items: flex-start;
+          }
+          .client-gallery-editor-actions {
+            flex-wrap: wrap;
+          }
+          .client-gallery-editor-action {
+            min-width: 96px;
+          }
           .client-gallery-editor-shell { grid-template-columns: minmax(0,1fr); }
           .client-gallery-editor-sidebar { position: static; }
           .client-gallery-sidebar-overview {
@@ -745,7 +827,29 @@ export function ClientGalleryEditor() {
         }
         @media (max-width: 640px) {
           .client-gallery-editor-page { padding-left: 12px !important; padding-right: 12px !important; }
-          .client-gallery-editor-topbar { align-items: center; }
+          .client-gallery-editor-header {
+            align-items: stretch;
+            flex-direction: column;
+            padding: 14px;
+          }
+          .client-gallery-editor-title { font-size: 18px; }
+          .client-gallery-editor-subtitle { white-space: normal; }
+          .client-gallery-editor-actions {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0,1fr));
+          }
+          .client-gallery-editor-action {
+            width: 100%;
+            min-width: 0;
+            padding-inline: 7px;
+            font-size: 9px;
+          }
+          .client-gallery-share-popover {
+            left: 0;
+            right: auto;
+            width: min(330px, calc(100vw - 52px));
+          }
           .client-gallery-editor-shell { gap: 14px; }
           .client-gallery-sidebar-overview { grid-template-columns: minmax(0,1fr); }
           .client-gallery-primary-tabs { position: sticky; top: 0; z-index: 5; background: #fff; }
@@ -773,44 +877,45 @@ export function ClientGalleryEditor() {
           .client-gallery-branding-grid > aside { border-radius: 14px; }
         }
       `}</style>
-      {topbarPortal ? createPortal(
-        <div className="client-gallery-topbar-actions">
+      <section className="client-gallery-editor-header">
+        <div className="client-gallery-editor-header-copy">
+          <Link to="/admin/client-galleries" className="inline-flex items-center gap-1.5 text-[10px] text-neutral-500 hover:text-neutral-900">
+            <ArrowLeft className="h-3.5 w-3.5" /> Client Galleries
+          </Link>
+          <p className="client-gallery-editor-kicker mt-3">Gallery workspace</p>
+          <h1 className="client-gallery-editor-title">Client Gallery Admin</h1>
+          <p className="client-gallery-editor-subtitle">{gallery.title}</p>
+        </div>
+
+        <div className="client-gallery-editor-actions">
           {draft.weddingSlug ? <Link
             to={`/admin/weddings/${encodeURIComponent(String(draft.weddingSlug))}/workspace`}
-            className="admin-toolbar-button"
+            className="client-gallery-editor-action"
             title="Open wedding workspace"
-            aria-label="Open wedding workspace"
-          ><ExternalLink className="admin-toolbar-button-icon" /><span className="admin-toolbar-button-label">Workspace</span></Link> : null}
+          ><ExternalLink /><span>Workspace</span></Link> : <span className="client-gallery-editor-action" aria-disabled="true"><ExternalLink /><span>Workspace</span></span>}
           <a
             href={gallery.status === "live" ? shareUrl : undefined}
             target="_blank"
             rel="noreferrer"
             aria-disabled={gallery.status !== "live"}
-            className="admin-toolbar-button"
+            className="client-gallery-editor-action"
             title="Preview client gallery"
-            aria-label="Preview client gallery"
-          ><Eye className="admin-toolbar-button-icon" /><span className="admin-toolbar-button-label">Preview</span></a>
+          ><Eye /><span>Preview</span></a>
           <button
             type="button"
             onClick={() => setShowShare((value) => !value)}
-            className="admin-toolbar-button"
+            className="client-gallery-editor-action"
             data-primary="true"
             title="Share client gallery"
-            aria-label="Share client gallery"
-          ><Copy className="admin-toolbar-button-icon" /><span className="admin-toolbar-button-label">Share</span></button>
-          {showShare ? <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-xl" style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", width: "min(330px, calc(100vw - 24px))", zIndex: 80 }}>
+          ><Copy /><span>Share</span></button>
+          {showShare ? <div className="client-gallery-share-popover rounded-2xl border border-black/10 bg-white p-4 shadow-xl">
             <div className="flex items-center justify-between gap-3"><strong className="text-sm">Share private gallery</strong><button onClick={() => setShowShare(false)}><X className="h-4 w-4" /></button></div>
             <p className="mt-3 text-xs text-neutral-500 break-all">{shareUrl}</p>
             <button disabled={gallery.status !== "live"} onClick={async () => { await navigator.clipboard?.writeText(shareUrl); setMessage("Private gallery link copied."); setShowShare(false); }} className="mt-3 w-full rounded-lg bg-black text-white px-3 py-2 text-sm disabled:opacity-40">Copy gallery link</button>
             <div className="mt-3 rounded-lg bg-neutral-50 p-3 text-xs text-neutral-600">Status: <strong>{gallery.status.toUpperCase()}</strong><br />PIN: <strong>{gallery.pinEnabled ? "Enabled" : "Not enabled"}</strong><br />Email access: <strong>{gallery.requireEmail ? "Required" : "Optional"}</strong></div>
           </div> : null}
-        </div>,
-        topbarPortal,
-      ) : null}
-
-      <div className="client-gallery-editor-topbar flex items-center justify-between gap-4">
-        <Link to="/admin/client-galleries" className="inline-flex items-center gap-2 text-sm text-neutral-600"><ArrowLeft className="h-4 w-4" /> Client Galleries</Link>
-      </div>
+        </div>
+      </section>
 
       <div className="client-gallery-editor-shell mt-5">
         <aside className="client-gallery-editor-sidebar rounded-2xl border border-black/10 bg-white">
