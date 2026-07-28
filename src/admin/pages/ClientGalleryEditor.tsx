@@ -446,32 +446,6 @@ export function ClientGalleryEditor() {
           align-items: center;
           gap: 6px;
         }
-        .client-gallery-topbar-action {
-          width: 30px;
-          height: 30px;
-          flex: 0 0 30px;
-          display: inline-grid;
-          place-items: center;
-          border: 1px solid rgba(17,17,17,.12);
-          border-radius: 8px;
-          background: #fff;
-          color: #171717;
-          transition: background-color .15s ease, border-color .15s ease, transform .15s ease;
-        }
-        .client-gallery-topbar-action:hover {
-          border-color: rgba(17,17,17,.25);
-          background: #f7f7f6;
-          transform: translateY(-1px);
-        }
-        .client-gallery-topbar-action[data-primary="true"] {
-          border-color: #111;
-          background: #111;
-          color: #fff;
-        }
-        .client-gallery-topbar-action[aria-disabled="true"] {
-          pointer-events: none;
-          opacity: .38;
-        }
         .client-gallery-primary-tabs {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -654,10 +628,51 @@ export function ClientGalleryEditor() {
           gap: 10px;
           flex-wrap: wrap;
         }
+        .client-gallery-selection-stack {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          gap: 14px;
+          margin-top: 12px;
+        }
+        .client-gallery-selection-create {
+          border: 1px solid rgba(17,17,17,.1);
+          border-radius: 12px;
+          background: #fafafa;
+          padding: 14px;
+        }
+        .client-gallery-selection-create-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0,1fr)) auto;
+          gap: 8px;
+          align-items: end;
+          margin-top: 10px;
+        }
+        .client-gallery-selection-create-name,
+        .client-gallery-selection-create-instructions {
+          grid-column: 1 / -1;
+        }
+        .client-gallery-selection-create label > span {
+          display: block;
+          margin-bottom: 4px;
+          color: #737373;
+          font-size: 8.5px;
+          font-weight: 650;
+          letter-spacing: .07em;
+          text-transform: uppercase;
+        }
+        .client-gallery-selection-create button {
+          min-width: 126px;
+          height: 34px;
+        }
+        .client-gallery-selection-list {
+          display: grid;
+          grid-template-columns: minmax(0,1fr);
+          gap: 10px;
+        }
         .client-gallery-activity-split {
           display: grid;
-          grid-template-columns: minmax(0,1fr) 330px;
-          gap: 18px;
+          grid-template-columns: minmax(0,1fr);
+          gap: 14px;
           align-items: start;
         }
         .client-gallery-photo-toolbar {
@@ -708,7 +723,6 @@ export function ClientGalleryEditor() {
         @media (max-width: 640px) {
           .client-gallery-editor-page { padding-left: 12px !important; padding-right: 12px !important; }
           .client-gallery-editor-topbar { align-items: center; }
-          .client-gallery-topbar-action { width: 28px; height: 28px; flex-basis: 28px; border-radius: 7px; }
           .client-gallery-editor-shell { gap: 14px; }
           .client-gallery-sidebar-overview { grid-template-columns: minmax(0,1fr); }
           .client-gallery-primary-tabs { position: sticky; top: 0; z-index: 5; background: #fff; }
@@ -720,6 +734,10 @@ export function ClientGalleryEditor() {
           .client-gallery-panel-actions > * { flex: 1 1 118px; justify-content: center; }
           .client-gallery-response-actions { width: 100%; }
           .client-gallery-response-actions > * { flex: 0 0 auto; }
+          .client-gallery-selection-create-grid { grid-template-columns: minmax(0,1fr); }
+          .client-gallery-selection-create-name,
+          .client-gallery-selection-create-instructions { grid-column: auto; }
+          .client-gallery-selection-create button { width: 100%; }
           .client-gallery-photo-toolbar { grid-template-columns: repeat(2, minmax(0,1fr)); }
           .client-gallery-photo-toolbar > * { width: 100%; }
           .client-gallery-form-grid,
@@ -736,27 +754,27 @@ export function ClientGalleryEditor() {
         <div className="client-gallery-topbar-actions">
           {draft.weddingSlug ? <Link
             to={`/admin/weddings/${encodeURIComponent(String(draft.weddingSlug))}/workspace`}
-            className="client-gallery-topbar-action"
+            className="admin-toolbar-button"
             title="Open wedding workspace"
             aria-label="Open wedding workspace"
-          ><ExternalLink className="h-3.5 w-3.5" /></Link> : null}
+          ><ExternalLink className="admin-toolbar-button-icon" /><span className="admin-toolbar-button-label">Workspace</span></Link> : null}
           <a
             href={gallery.status === "live" ? shareUrl : undefined}
             target="_blank"
             rel="noreferrer"
             aria-disabled={gallery.status !== "live"}
-            className="client-gallery-topbar-action"
+            className="admin-toolbar-button"
             title="Preview client gallery"
             aria-label="Preview client gallery"
-          ><Eye className="h-3.5 w-3.5" /></a>
+          ><Eye className="admin-toolbar-button-icon" /><span className="admin-toolbar-button-label">Preview</span></a>
           <button
             type="button"
             onClick={() => setShowShare((value) => !value)}
-            className="client-gallery-topbar-action"
+            className="admin-toolbar-button"
             data-primary="true"
             title="Share client gallery"
             aria-label="Share client gallery"
-          ><Copy className="h-3.5 w-3.5" /></button>
+          ><Copy className="admin-toolbar-button-icon" /><span className="admin-toolbar-button-label">Share</span></button>
           {showShare ? <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-xl" style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", width: "min(330px, calc(100vw - 24px))", zIndex: 80 }}>
             <div className="flex items-center justify-between gap-3"><strong className="text-sm">Share private gallery</strong><button onClick={() => setShowShare(false)}><X className="h-4 w-4" /></button></div>
             <p className="mt-3 text-xs text-neutral-500 break-all">{shareUrl}</p>
@@ -961,8 +979,19 @@ export function ClientGalleryEditor() {
 
             <section id="selections-panel" className="rounded-2xl border border-black/10 bg-white p-4 sm:p-5">
               <div className="flex items-center gap-1.5"><ClipboardList className="client-gallery-section-icon" /><h3 className="client-gallery-section-title">Client selections</h3></div>
-              <div className="client-gallery-activity-split mt-3">
-                <div className="space-y-2.5">
+              <div className="client-gallery-selection-stack">
+                <aside className="client-gallery-selection-create">
+                  <div className="flex items-center gap-2"><Plus className="h-3.5 w-3.5" /><strong className="text-xs">New selection request</strong></div>
+                  <div className="client-gallery-selection-create-grid">
+                    <label className="client-gallery-selection-create-name"><span>Selection name</span><input value={selectionDraft.name} onChange={(e) => setSelectionDraft({ ...selectionDraft, name: e.target.value })} className="w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-xs" placeholder="Selection name" /></label>
+                    <label className="client-gallery-selection-create-instructions"><span>Instructions</span><textarea value={selectionDraft.instructions} onChange={(e) => setSelectionDraft({ ...selectionDraft, instructions: e.target.value })} className="w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-xs" rows={3} /></label>
+                    <label><span>Minimum images</span><input type="number" min="0" value={selectionDraft.minImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, minImages: Math.max(0, Number(e.target.value) || 0) })} className="w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-xs" placeholder="Min" /></label>
+                    <label><span>Maximum images</span><input type="number" min="0" value={selectionDraft.maxImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, maxImages: Math.max(0, Number(e.target.value) || 0) })} className="w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-xs" placeholder="Max" /></label>
+                    <button disabled={busy || !selectionDraft.name.trim()} onClick={createSelectionRequest} className="rounded-lg bg-black px-4 py-2 text-xs text-white disabled:opacity-40">Create request</button>
+                  </div>
+                </aside>
+
+                <div className="client-gallery-selection-list">
                   {detail.selectionRequests.length ? detail.selectionRequests.map((request) => {
                     const responses = detail.selections.filter((selection) => selection.requestId === request.id);
                     return <div key={request.id} className="rounded-xl border border-black/10 p-3.5">
@@ -988,15 +1017,8 @@ export function ClientGalleryEditor() {
                         </div>
                       </div>)}
                     </div>;
-                  }) : <p className="text-xs text-neutral-500">No selection requests yet.</p>}
+                  }) : <p className="rounded-xl border border-dashed border-black/15 p-5 text-xs text-neutral-500">No selection requests yet.</p>}
                 </div>
-                <aside className="rounded-xl bg-neutral-50 border border-black/10 p-3.5">
-                  <div className="flex items-center gap-2"><Plus className="h-3.5 w-3.5" /><strong className="text-xs">New selection request</strong></div>
-                  <input value={selectionDraft.name} onChange={(e) => setSelectionDraft({ ...selectionDraft, name: e.target.value })} className="mt-3 w-full rounded-lg border border-black/15 px-3 py-2 text-xs" placeholder="Selection name" />
-                  <textarea value={selectionDraft.instructions} onChange={(e) => setSelectionDraft({ ...selectionDraft, instructions: e.target.value })} className="mt-2 w-full rounded-lg border border-black/15 px-3 py-2 text-xs" rows={3} />
-                  <div className="mt-2 grid grid-cols-2 gap-2"><input type="number" min="0" value={selectionDraft.minImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, minImages: Math.max(0, Number(e.target.value) || 0) })} className="min-w-0 rounded-lg border border-black/15 px-3 py-2 text-xs" placeholder="Min" /><input type="number" min="0" value={selectionDraft.maxImages} onChange={(e) => setSelectionDraft({ ...selectionDraft, maxImages: Math.max(0, Number(e.target.value) || 0) })} className="min-w-0 rounded-lg border border-black/15 px-3 py-2 text-xs" placeholder="Max" /></div>
-                  <button disabled={busy || !selectionDraft.name.trim()} onClick={createSelectionRequest} className="mt-3 w-full rounded-lg bg-black text-white px-4 py-2.5 text-xs disabled:opacity-40">Create request</button>
-                </aside>
               </div>
             </section>
 

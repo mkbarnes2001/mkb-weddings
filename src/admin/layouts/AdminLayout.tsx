@@ -35,6 +35,82 @@ const navItems = [
 export function AdminLayout() {
   return (
     <div className="admin-shell min-h-screen bg-[#f5f3ef] text-neutral-950">
+      <style>{`
+        .admin-toolbar-actions {
+          display: flex;
+          min-width: 0;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 6px;
+          white-space: nowrap;
+        }
+        .admin-page-action-slot {
+          display: flex;
+          min-width: 0;
+          align-items: center;
+          gap: 6px;
+        }
+        .admin-toolbar-button {
+          width: 84px;
+          height: 32px;
+          flex: 0 0 84px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          border: 1px solid rgba(17,17,17,.12);
+          border-radius: 8px;
+          background: #fff;
+          color: #262626;
+          padding: 0 8px;
+          font-size: 9px;
+          font-weight: 650;
+          line-height: 1;
+          text-decoration: none;
+          transition: background-color .15s ease, border-color .15s ease, transform .15s ease;
+        }
+        .admin-toolbar-button:hover {
+          border-color: rgba(17,17,17,.26);
+          background: #fafafa;
+          transform: translateY(-1px);
+        }
+        .admin-toolbar-button[data-primary="true"] {
+          border-color: #111;
+          background: #111;
+          color: #fff;
+        }
+        .admin-toolbar-button[aria-disabled="true"] {
+          pointer-events: none;
+          opacity: .38;
+        }
+        .admin-toolbar-button-icon {
+          width: 13px;
+          height: 13px;
+          flex: 0 0 13px;
+        }
+        .admin-toolbar-button-label {
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        @media (max-width: 1080px) {
+          .admin-toolbar-button {
+            width: 32px;
+            flex-basis: 32px;
+            padding: 0;
+          }
+          .admin-toolbar-button-label { display: none; }
+        }
+        @media (max-width: 640px) {
+          .admin-toolbar-actions,
+          .admin-page-action-slot { gap: 4px; }
+          .admin-toolbar-button {
+            width: 30px;
+            height: 30px;
+            flex-basis: 30px;
+            border-radius: 7px;
+          }
+        }
+      `}</style>
       <div className="admin-layout-grid">
         <aside className="admin-sidebar flex flex-col border-r border-black" style={{ backgroundColor: "#111111", color: "#ffffff" }}>
           <div className="border-b border-white/10 px-4 py-5">
@@ -99,24 +175,25 @@ export function AdminLayout() {
                 <p className="mt-0.5 truncate text-[10px] text-neutral-500">Wedding content, assets, AI and publishing</p>
               </div>
 
-              <div className="ml-auto flex min-w-0 items-center gap-1.5">
-                <div id="admin-page-actions" className="flex min-w-0 items-center gap-1.5" />
-                <span className="mx-0.5 hidden h-5 w-px bg-black/10 sm:block" aria-hidden="true" />
+              <div className="admin-toolbar-actions ml-auto">
+                <div id="admin-page-actions" className="admin-page-action-slot" />
                 <a
                   href="https://www.mkbweddings.co.uk/blog"
                   title="Open MKB Weddings blog"
                   aria-label="Open MKB Weddings blog"
-                  className="inline-grid h-[30px] w-[30px] flex-none place-items-center rounded-lg border border-black/10 bg-white text-neutral-700 transition hover:-translate-y-px hover:border-black/25 hover:bg-neutral-50"
+                  className="admin-toolbar-button"
                 >
-                  <FileText className="admin-button__icon" />
+                  <FileText className="admin-toolbar-button-icon" />
+                  <span className="admin-toolbar-button-label">Blog</span>
                 </a>
                 <a
                   href="https://www.mkbweddings.co.uk/"
                   title="Open MKB Weddings website"
                   aria-label="Open MKB Weddings website"
-                  className="inline-grid h-[30px] w-[30px] flex-none place-items-center rounded-lg border border-black bg-black text-white transition hover:-translate-y-px hover:bg-neutral-800"
+                  className="admin-toolbar-button"
                 >
-                  <Globe2 className="admin-button__icon" />
+                  <Globe2 className="admin-toolbar-button-icon" />
+                  <span className="admin-toolbar-button-label">Website</span>
                 </a>
               </div>
             </div>
