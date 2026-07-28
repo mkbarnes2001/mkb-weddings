@@ -1,7 +1,15 @@
 # Next Steps
 
 ## Current baseline
-v1.7.0 completes the first end-to-end Print Store path in sandbox: canonical gallery asset → Stripe payment → photographer approval → exact-size prepared JPEG → explicit Prodigi submission → status/tracking reconciliation. Schema version is 22. Fulfilment remains manual by default and no paid order is submitted automatically.
+v1.7.14 keeps the completed Stripe/Prodigi sandbox workflow and adds a shared responsive Admin workspace system. Weddings, Venues, Suppliers, Asset Library and the main gallery/workspace inspectors now use responsive master/detail layouts. Schema version remains 22; fulfilment remains manual by default and no paid order is submitted automatically.
+
+## v1.7.14 validation
+1. Open Weddings and Venues at normal desktop width and confirm the card/list area and summary panel remain side by side.
+2. Resize below 920px and confirm the summary panel becomes part of the normal page flow rather than hovering over the repository.
+3. Test Suppliers, Asset Library and Wedding Workspace on a phone-sized viewport and confirm every form/control remains reachable by normal page scrolling.
+4. Test Moment Gallery, Venue Gallery, Custom Collections and Creative Flash on tablet/mobile widths and confirm image inspectors no longer obscure the image grid.
+5. Confirm page-header actions wrap without clipping and search/filter toolbars remain usable.
+6. Recheck Client Gallery Admin and Print Store to confirm their existing responsive layouts are unchanged.
 
 ## v1.7.0 validation
 1. Apply migration `022_prodigi_fulfilment.sql` and confirm `schema_meta.schema_version` is `22`.

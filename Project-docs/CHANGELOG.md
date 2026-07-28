@@ -1,5 +1,13 @@
 # MKB Intelligence — Changelog
 
+## v1.7.14 — Global Admin Responsive Workspaces
+- Added a shared responsive master/detail layout for Admin repositories and workspaces.
+- Converted Weddings, Venues, Suppliers, Asset Library, Wedding Workspace, Moment Gallery, Venue Gallery, Custom Collections and Creative Flash to the shared layout.
+- Summary and inspector panels remain compact and sticky on larger desktop screens, but become normal in-flow panels on tablets and phones.
+- Added a safe mobile fallback for remaining legacy inline sticky inspectors so they cannot hover over or obscure content.
+- Tightened mobile headers, actions, toolbars, card grids, summary typography and table density.
+- Preserved all existing data, routes and workflows. No migration; schema remains 22.
+
 ## v1.7.0 — Prodigi Professional Lab Fulfilment
 - Added migration 022 with verified per-variant lab mappings, immutable order-line mapping snapshots, prepared print assets, provider-neutral lab submissions/items and idempotent lab-event history.
 - Added Prodigi sandbox product verification against SKU, attributes, print area and recommended pixel dimensions.

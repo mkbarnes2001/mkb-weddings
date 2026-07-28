@@ -1159,14 +1159,7 @@ export function VenueGallery() {
           </p>
         </section>
       ) : (
-        <section
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) 320px",
-            gap: "24px",
-            alignItems: "start",
-          }}
-        >
+        <section className="admin-master-detail admin-master-detail--320">
           <div
             style={{
               display: "grid",
@@ -1351,15 +1344,12 @@ export function VenueGallery() {
           </div>
 
           <aside
+            className="admin-summary-panel"
             style={{
-              position: "sticky",
-              top: "112px",
               borderRadius: "28px",
               border: "1px solid rgba(0,0,0,0.12)",
               background: "#fff",
               padding: "20px",
-              maxHeight: "calc(100vh - 128px)",
-              overflowY: "auto",
             }}
           >
             {!activeAsset || !activeItem ? (

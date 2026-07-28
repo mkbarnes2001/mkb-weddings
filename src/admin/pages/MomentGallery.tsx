@@ -514,14 +514,7 @@ export function MomentGallery() {
       </section>
 
       {orderedImages.length ? (
-        <section
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) 320px",
-            gap: "20px",
-            alignItems: "start",
-          }}
-        >
+        <section className="admin-master-detail admin-master-detail--320">
           <div
             style={{
               display: "grid",
@@ -699,15 +692,12 @@ export function MomentGallery() {
           </div>
 
           <aside
+            className="admin-summary-panel"
             style={{
-              position: "sticky",
-              top: "112px",
               borderRadius: "22px",
               border: "1px solid rgba(0,0,0,0.12)",
               background: "#ffffff",
               padding: "16px",
-              maxHeight: "calc(100vh - 128px)",
-              overflowY: "auto",
             }}
           >
             {!activeImage ? (

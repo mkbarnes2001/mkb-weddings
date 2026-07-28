@@ -484,14 +484,7 @@ export function CustomCollectionGallery() {
         ) : null}
       </section>
 
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) 320px",
-          gap: "20px",
-          alignItems: "start",
-        }}
-      >
+      <section className="admin-master-detail admin-master-detail--320">
         <div
           style={{
             display: "grid",
@@ -611,15 +604,12 @@ export function CustomCollectionGallery() {
         </div>
 
         <aside
+          className="admin-summary-panel"
           style={{
-            position: "sticky",
-            top: 112,
             borderRadius: 24,
             border: "1px solid rgba(0,0,0,.12)",
             background: "#fff",
             padding: 16,
-            maxHeight: "calc(100vh - 128px)",
-            overflowY: "auto",
           }}
         >
           {!activeImage ? (

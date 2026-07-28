@@ -111,8 +111,8 @@ export function Suppliers() {
       {message ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{message}</div> : null}
       {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{error}</div> : null}
 
-      <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 390px", gap: "24px", alignItems: "start" }}>
-        <div className="space-y-4">
+      <section className="admin-master-detail admin-master-detail--390">
+        <div className="admin-master-detail__main space-y-4">
           <AdminToolbar>
             <div className="relative min-w-[220px] flex-1">
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
@@ -138,7 +138,7 @@ export function Suppliers() {
           </div>
         </div>
 
-        <aside style={{ position: "sticky", top: "112px", maxHeight: "calc(100vh - 128px)", overflowY: "auto" }} className="rounded-[24px] border border-black/10 bg-white p-5">
+        <aside className="admin-summary-panel rounded-[24px] border border-black/10 bg-white p-5">
           {!draft ? <div className="text-sm text-neutral-500">Select a supplier or create a new one.</div> : (
             <div className="space-y-5">
               <div>

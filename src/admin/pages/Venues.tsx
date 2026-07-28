@@ -158,8 +158,8 @@ export function Venues() {
       {!filtered.length ? (
         <section className="rounded-[28px] border border-black/10 bg-white/75 p-10 text-center"><Building2 className="mx-auto h-9 w-9 text-neutral-400" /><h2 className="mt-4 font-serif text-3xl">No venues found</h2></section>
       ) : (
-        <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 340px", gap: "24px", alignItems: "start" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "14px" }}>
+        <section className="admin-master-detail admin-master-detail--340">
+          <div className="admin-master-detail__main admin-card-grid admin-card-grid--landscape">
             {filtered.map((venue) => {
               const hero = venueHero(venue);
               const selected = venue.slug === activeSlug;
@@ -176,7 +176,7 @@ export function Venues() {
             })}
           </div>
 
-          <aside style={{ position: "sticky", top: "112px" }} className="rounded-[24px] border border-black/10 bg-white p-5">
+          <aside className="admin-summary-panel rounded-[24px] border border-black/10 bg-white p-5">
             {!active ? <p className="text-sm text-neutral-500">Select a venue to view details.</p> : <div className="space-y-5">
               {venueHero(active) ? <img src={venueHero(active)?.thumbSrc || venueHero(active)?.fullSrc} alt={active.name} className="max-h-[220px] w-full rounded-2xl object-cover" /> : null}
               <div><p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Venue</p><h2 className="mt-2 font-serif text-3xl">{active.name}</h2><p className="mt-2 text-sm text-neutral-500">{[active.town, active.county, active.country].filter(Boolean).join(", ")}</p></div>

@@ -658,8 +658,8 @@ export function WeddingWorkspace() {
       {message ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{message}</div> : null}
       {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{error}</div> : null}
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(320px,420px)", gap: 24, alignItems: "start" }}>
-        <main className="space-y-7">
+      <div className="admin-master-detail admin-master-detail--420">
+        <main className="admin-master-detail__main space-y-7">
           <section className="rounded-[26px] border border-black/10 bg-white p-6">
             <div className="flex items-start justify-between gap-5 flex-wrap">
               <div>
@@ -844,7 +844,7 @@ export function WeddingWorkspace() {
           </section>
         </main>
 
-        <aside className="space-y-7" style={{ position: "sticky", top: 96 }}>
+        <aside className="admin-summary-panel space-y-7">
           <section className="rounded-[26px] border border-black/10 bg-white p-6">
             <div className="flex items-center gap-3"><Instagram className="h-5 w-5" /><div><p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Social</p><h2 className="text-xl" style={{ fontWeight: 600 }}>Instagram preview post</h2></div></div>
             <p className="mt-3 text-sm text-neutral-600">Generated from the wedding, venue and reusable supplier records. Edit freely before copying.</p>

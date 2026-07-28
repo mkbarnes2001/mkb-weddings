@@ -1,8 +1,19 @@
 # Project State
 
 ## Version
-Current release: **v1.7.0 — Prodigi Professional Lab Fulfilment**.
+Current release: **v1.7.14 — Global Admin Responsive Workspaces**.
 Database schema version: **22**.
+
+
+## Global Admin Responsive Workspaces — v1.7.14
+- Extends the proven Client Gallery responsive layout system across the wider Admin application.
+- Adds one shared master/detail grid for repository pages with cards or lists beside a summary/inspector panel.
+- Keeps summary panels sticky only when there is sufficient desktop space.
+- Moves summary and inspector panels into normal document flow on tablets and phones so they cannot hover over or block page content.
+- Applies the shared layout to Weddings, Venues, Suppliers, Asset Library, Wedding Workspace, Moment Gallery, Venue Gallery, Custom Collections and Creative Flash.
+- Adds a compatibility fallback for remaining legacy sticky inspectors on narrow viewports.
+- Tightens mobile page headers, actions, toolbars, cards, tables and content padding without changing routes or workflows.
+- No D1 migration; schema remains **22**.
 
 
 ## Prodigi Professional Lab Fulfilment — v1.7.0

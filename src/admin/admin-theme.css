@@ -516,6 +516,7 @@
 .admin-empty-state p { max-width: 440px; margin: 5px 0 0; color: #737373; font-size: 11px; line-height: 1.5; }
 .admin-empty-state__action { margin-top: 12px; }
 
+
 /* Global retrofit for legacy admin pages. These rules keep existing workflows intact while making controls consistent. */
 .admin-shell .rounded-\[32px\] { border-radius: 16px !important; }
 .admin-shell .rounded-\[28px\] { border-radius: 14px !important; }
@@ -716,4 +717,185 @@
 .admin-shell summary:focus-visible {
   outline: 2px solid #111;
   outline-offset: 2px;
+}
+
+/* v1.7.14 — responsive master/detail system shared by all Admin workspaces */
+.admin-master-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: 18px;
+  align-items: start;
+  min-width: 0;
+}
+
+.admin-master-detail--320 { grid-template-columns: minmax(0, 1fr) minmax(280px, 320px); }
+.admin-master-detail--340 { grid-template-columns: minmax(0, 1fr) minmax(300px, 340px); }
+.admin-master-detail--360 { grid-template-columns: minmax(0, 1fr) minmax(320px, 360px); }
+.admin-master-detail--380 { grid-template-columns: minmax(0, 1fr) minmax(320px, 380px); }
+.admin-master-detail--390 { grid-template-columns: minmax(0, 1fr) minmax(330px, 390px); }
+.admin-master-detail--420 { grid-template-columns: minmax(0, 1fr) minmax(340px, 420px); }
+
+.admin-master-detail > * {
+  min-width: 0;
+}
+
+.admin-master-detail__main {
+  min-width: 0;
+}
+
+.admin-summary-panel {
+  position: sticky;
+  top: 18px;
+  align-self: start;
+  min-width: 0;
+  max-width: 100%;
+  max-height: calc(100dvh - 36px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.admin-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 14px;
+  min-width: 0;
+  align-items: start;
+}
+
+.admin-card-grid--landscape {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.admin-shell main aside[style*="position: sticky"],
+.admin-shell main div[style*="position: sticky"] {
+  scrollbar-gutter: stable;
+}
+
+@media (max-width: 1180px) {
+  .admin-master-detail,
+  .admin-master-detail--320,
+  .admin-master-detail--340,
+  .admin-master-detail--360,
+  .admin-master-detail--380,
+  .admin-master-detail--390,
+  .admin-master-detail--420 {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+    gap: 14px;
+  }
+}
+
+@media (max-width: 920px) {
+  .admin-master-detail,
+  .admin-master-detail--320,
+  .admin-master-detail--340,
+  .admin-master-detail--360,
+  .admin-master-detail--380,
+  .admin-master-detail--390,
+  .admin-master-detail--420 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-summary-panel {
+    position: static;
+    top: auto;
+    order: -1;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* Legacy sticky inspectors also join normal document flow on phones/tablets. */
+  .admin-shell main aside[style*="position: sticky"],
+  .admin-shell main div[style*="position: sticky"] {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .admin-card-grid,
+  .admin-card-grid--landscape {
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+    gap: 10px;
+  }
+
+  .admin-page-header {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .admin-page-title {
+    font-size: clamp(1.35rem, 5vw, 1.75rem);
+  }
+
+  .admin-page-description {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-main-content {
+    padding: 10px 10px 24px;
+  }
+
+  .admin-page {
+    gap: 12px;
+  }
+
+  .admin-page-header {
+    border-radius: 12px;
+  }
+
+  .admin-page-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-page-actions > * {
+    width: 100%;
+  }
+
+  .admin-toolbar {
+    padding: 7px;
+  }
+
+  .admin-toolbar > .relative,
+  .admin-toolbar > [class*="min-w-"] {
+    min-width: 100% !important;
+  }
+
+  .admin-card-grid,
+  .admin-card-grid--landscape {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-summary-panel {
+    border-radius: 12px !important;
+    padding: 14px !important;
+  }
+
+  .admin-summary-panel .text-3xl {
+    font-size: 1.35rem !important;
+  }
+
+  .admin-summary-panel .space-y-5 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.9rem;
+  }
+
+  .admin-shell table {
+    font-size: 10px;
+  }
+
+  .admin-shell th,
+  .admin-shell td {
+    padding: 7px 8px;
+  }
 }

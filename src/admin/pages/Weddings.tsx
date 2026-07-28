@@ -152,8 +152,8 @@ export function Weddings() {
         <div className="flex flex-wrap gap-1.5">{(["all", "draft", "published", "archived"] as StatusFilter[]).map((status) => <button key={status} type="button" onClick={() => setStatusFilter(status)} className={`admin-button admin-button--sm ${statusFilter === status ? "admin-button--primary" : "admin-button--secondary"}`}>{status}</button>)}</div>
       </AdminToolbar>
 
-      <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 360px", gap: "24px", alignItems: "start" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(145px, 1fr))", gap: "14px" }}>
+      <section className="admin-master-detail admin-master-detail--360">
+        <div className="admin-master-detail__main admin-card-grid admin-card-grid--portrait">
           {filteredWeddings.map((wedding) => {
             const cover = coverFor(wedding);
             const selected = wedding.slug === activeSlug;
@@ -176,7 +176,7 @@ export function Weddings() {
           })}
         </div>
 
-        <aside style={{ position: "sticky", top: "112px", maxHeight: "calc(100vh - 128px)", overflowY: "auto" }} className="rounded-[24px] border border-black/10 bg-white p-5">
+        <aside className="admin-summary-panel rounded-[24px] border border-black/10 bg-white p-5">
           {!active ? <p className="text-sm text-neutral-500">Select a wedding to view details.</p> : <div className="space-y-5">
             {coverFor(active) ? <img src={coverFor(active)?.thumbSrc || coverFor(active)?.fullSrc} alt={active.couple} className="max-h-[260px] w-full rounded-2xl object-cover" /> : null}
             <div><p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Wedding</p><h2 className="mt-2 font-serif text-3xl">{active.couple}</h2><p className="mt-2 text-sm text-neutral-500">{active.venue} · {active.weddingDate}</p></div>

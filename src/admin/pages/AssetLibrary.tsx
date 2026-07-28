@@ -215,8 +215,8 @@ export function AssetLibrary() {
 
       {error ? <div style={{ marginTop: 16, border: "1px solid #b91c1c", background: "#fff7f7", color: "#991b1b", borderRadius: 14, padding: 14 }}>{error}</div> : null}
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 20, marginTop: 20, alignItems: "flex-start" }}>
-        <div style={{ flex: "1 1 760px", minWidth: 0 }}>
+      <div className="admin-master-detail admin-master-detail--380 admin-master-detail--asset" style={{ marginTop: 20 }}>
+        <div className="admin-master-detail__main">
           {loading ? (
             <div style={{ padding: 50, textAlign: "center", color: "#737373" }}>Loading assets…</div>
           ) : payload.assets.length ? (
@@ -238,7 +238,7 @@ export function AssetLibrary() {
           </div>
         </div>
 
-        <aside style={{ position: "sticky", top: 110, flex: "1 1 320px", maxWidth: 380, minWidth: 280, border: "1px solid rgba(0,0,0,.13)", borderRadius: 20, background: "rgba(255,255,255,.78)", overflow: "hidden" }}>
+        <aside className="admin-summary-panel" style={{ border: "1px solid rgba(0,0,0,.13)", borderRadius: 20, background: "rgba(255,255,255,.78)", overflow: "hidden" }}>
           {activeAsset ? <AssetInspector asset={activeAsset} /> : <div style={{ padding: 24, color: "#737373" }}>Select an asset to inspect it.</div>}
         </aside>
       </div>

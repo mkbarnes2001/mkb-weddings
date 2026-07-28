@@ -7,6 +7,21 @@
 - Structured data: Cloudflare D1
 - Assets: Cloudflare R2
 
+## Admin responsive workspace boundary — v1.7.14
+Admin repository and editor pages use one shared presentation pattern:
+
+`Page header → toolbar/status → master content → optional summary/inspector`
+
+The summary/inspector is sticky only on sufficiently wide desktop viewports. At tablet and phone widths it becomes a normal in-flow panel with no viewport-height lock or nested page-level scrolling. This prevents mobile overlays while preserving quick desktop access.
+
+The shared CSS classes are:
+- `admin-master-detail` for the responsive two-column shell;
+- `admin-master-detail__main` for the primary repository/editor area;
+- `admin-summary-panel` for the secondary summary/inspector;
+- `admin-card-grid` for responsive repository cards.
+
+Legacy inline sticky inspectors receive the same mobile fallback until their pages are fully migrated. This is a presentation boundary only and does not alter data ownership, routes or APIs.
+
 ## Core rule
 Structured relationships/editorial state belong in D1. Binary image assets belong in R2.
 

@@ -57,6 +57,12 @@ Completed and in production:
 - Legacy detail/editor pages inherit the visual system without route, API or data changes.
 - Future Print Store, CRM and Lightroom modules should use these primitives from their first release.
 
+## Completed — Responsive Admin Workspaces (v1.7.14)
+- Shared master/detail layout for repository lists, cards and inspector panels.
+- Desktop-only sticky summaries with normal in-flow tablet/mobile behaviour.
+- Weddings, Venues, Suppliers, Asset Library and major gallery/workspace inspectors migrated.
+- Global mobile compatibility fallback for remaining legacy sticky panels.
+
 ## Completed — Print Store Foundation (v1.6.0)
 - Workspace product catalogue, variants and price lists
 - Print sizes, products, studio costs and gross markup
