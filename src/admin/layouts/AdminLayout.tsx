@@ -94,12 +94,23 @@ export function AdminLayout() {
           height: 13px;
           flex: 0 0 13px;
         }
+        .admin-topbar {
+          position: relative;
+          z-index: 30;
+          background: #f5f3ef;
+        }
         @media (max-width: 760px) {
           .admin-sidebar-external { display: none; }
           .admin-mobile-external-actions { display: flex; }
           .admin-topbar-copy { display: block !important; }
           .admin-topbar-copy p:first-child { font-size: 8px !important; }
           .admin-topbar-copy p:last-child { display: none; }
+          .admin-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            border-bottom: 1px solid rgba(17,17,17,.08);
+          }
         }
         @media (max-width: 420px) {
           .admin-mobile-external-link {
@@ -168,8 +179,8 @@ export function AdminLayout() {
         </aside>
 
         <section className="admin-main-region">
-          <header className="admin-topbar sticky top-0 z-40 border-b border-black/10 bg-[#f5f3ef] shadow-[0_4px_18px_rgba(17,17,17,0.04)]">
-            <div className="flex min-h-[62px] items-center justify-between gap-3 px-4 sm:px-6">
+          <header className="admin-topbar">
+            <div className="flex min-h-[46px] items-center justify-between gap-3 px-4 sm:px-5">
               <div className="admin-topbar-copy hidden min-w-0 sm:block">
                 <p className="truncate text-[9px] uppercase tracking-[0.2em] text-neutral-500">Photography Intelligence</p>
                 <p className="mt-0.5 truncate text-[10px] text-neutral-500">Wedding content, assets, AI and publishing</p>

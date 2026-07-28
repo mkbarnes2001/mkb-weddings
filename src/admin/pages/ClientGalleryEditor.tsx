@@ -4,7 +4,6 @@ import {
   Activity,
   AlertCircle,
   ArrowUpDown,
-  ArrowLeft,
   Check,
   CheckCircle2,
   ClipboardList,
@@ -406,10 +405,10 @@ export function ClientGalleryEditor() {
   const shareUrl = publicUrl(gallery.accessToken);
   const queuedCount = uploads.filter((item) => item.status === "queued").length;
   const previewAsset = detail.assets.find((asset) => asset.assetId === previewAssetId) || null;
-  const settingsTabs: Array<{ key: Extract<WorkspaceTab, "settings" | "access" | "store">; label: string; description: string }> = [
-    { key: "settings", label: "General", description: "Identity, status and wedding details" },
-    { key: "access", label: "Access & privacy", description: "Email, PIN, downloads and contacts" },
-    { key: "store", label: "Shopping cart / store", description: "Products, pricing and client ordering" },
+  const settingsTabs: Array<{ key: Extract<WorkspaceTab, "settings" | "access" | "store">; label: string; description: string; icon: typeof Settings }> = [
+    { key: "settings", label: "General", description: "Identity, status and wedding details", icon: Settings },
+    { key: "access", label: "Access & privacy", description: "Email, PIN, downloads and contacts", icon: ShieldCheck },
+    { key: "store", label: "Shopping cart / store", description: "Products, pricing and client ordering", icon: ShoppingBag },
   ];
   const isSettingsArea = activeTab === "settings" || activeTab === "access" || activeTab === "store";
   const primaryTab = isSettingsArea ? "settings" : activeTab;
@@ -432,18 +431,18 @@ export function ClientGalleryEditor() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 18px;
-          padding: 16px 18px;
-          border: 1px solid rgba(17,17,17,.1);
-          border-radius: 14px;
-          background: rgba(255,255,255,.92);
-          box-shadow: 0 10px 30px rgba(17,17,17,.04);
+          gap: 14px;
+          padding: 10px 14px;
+          border: 1px solid rgba(17,17,17,.09);
+          border-radius: 12px;
+          background: rgba(255,255,255,.95);
+          box-shadow: 0 6px 18px rgba(17,17,17,.035);
         }
         .client-gallery-editor-header-copy {
           min-width: 0;
         }
         .client-gallery-editor-kicker {
-          margin: 0 0 3px;
+          margin: 0 0 2px;
           color: #737373;
           font-size: 8.5px;
           font-weight: 650;
@@ -453,16 +452,16 @@ export function ClientGalleryEditor() {
         }
         .client-gallery-editor-title {
           margin: 0;
-          font-size: 20px;
+          font-size: 17px;
           font-weight: 650;
           letter-spacing: -.025em;
           line-height: 1.1;
         }
         .client-gallery-editor-subtitle {
-          margin: 5px 0 0;
+          margin: 3px 0 0;
           overflow: hidden;
           color: #737373;
-          font-size: 10.5px;
+          font-size: 9.5px;
           line-height: 1.35;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -473,11 +472,11 @@ export function ClientGalleryEditor() {
           flex: 0 0 auto;
           align-items: center;
           justify-content: flex-end;
-          gap: 7px;
+          gap: 6px;
         }
         .client-gallery-editor-action {
-          min-width: 104px;
-          height: 36px;
+          min-width: 92px;
+          height: 32px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -486,9 +485,9 @@ export function ClientGalleryEditor() {
           border-radius: 9px;
           background: #fff;
           color: #262626;
-          padding: 0 12px;
-          font-size: 9.5px;
-          font-weight: 600;
+          padding: 0 10px;
+          font-size: 9px !important;
+          font-weight: 600 !important;
           line-height: 1;
           text-decoration: none;
           white-space: nowrap;
@@ -506,10 +505,15 @@ export function ClientGalleryEditor() {
           pointer-events: none;
           opacity: .38;
         }
+        .client-gallery-editor-action span {
+          font-size: 9px !important;
+          font-weight: 600 !important;
+          line-height: 1 !important;
+        }
         .client-gallery-editor-action svg {
-          width: 14px;
-          height: 14px;
-          flex: 0 0 14px;
+          width: 13px;
+          height: 13px;
+          flex: 0 0 13px;
         }
         .client-gallery-share-popover {
           position: absolute;
@@ -521,7 +525,7 @@ export function ClientGalleryEditor() {
         .client-gallery-editor-shell {
           display: grid;
           grid-template-columns: 310px minmax(0, 1fr);
-          gap: 24px;
+          gap: 20px;
           align-items: start;
         }
         .client-gallery-editor-sidebar {
@@ -534,18 +538,18 @@ export function ClientGalleryEditor() {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 4px;
-          padding: 12px;
+          padding: 10px;
           border-bottom: 1px solid rgba(0,0,0,.08);
         }
         .client-gallery-primary-tab {
           min-width: 0;
           border-radius: 10px;
-          padding: 10px 5px;
+          padding: 8px 4px;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 5px;
-          font-size: 10px;
+          gap: 4px;
+          font-size: 8.75px;
           line-height: 1.1;
           color: #737373;
         }
@@ -560,6 +564,47 @@ export function ClientGalleryEditor() {
         .client-gallery-context-menu button,
         .client-gallery-context-menu a {
           width: 100%;
+        }
+        .client-gallery-settings-nav-button {
+          display: grid;
+          grid-template-columns: 26px minmax(0,1fr);
+          align-items: center;
+          gap: 9px;
+          min-height: 48px;
+          margin-top: 5px;
+          padding: 8px 10px;
+          border-radius: 10px;
+          text-align: left;
+        }
+        .client-gallery-settings-nav-icon {
+          width: 26px;
+          height: 26px;
+          display: grid;
+          place-items: center;
+          border-radius: 8px;
+          background: rgba(17,17,17,.055);
+        }
+        .client-gallery-settings-nav-icon svg {
+          width: 13px;
+          height: 13px;
+        }
+        .client-gallery-settings-nav-button[data-active="true"] .client-gallery-settings-nav-icon {
+          background: rgba(255,255,255,.14);
+        }
+        .client-gallery-settings-nav-label {
+          display: block;
+          font-size: 10.5px;
+          font-weight: 650;
+          line-height: 1.15;
+        }
+        .client-gallery-settings-nav-description {
+          display: block;
+          margin-top: 2px;
+          font-size: 8.75px;
+          line-height: 1.25;
+        }
+        .client-gallery-editor-main > section:first-child {
+          margin-top: 0 !important;
         }
         .client-gallery-settings-column {
           display: grid;
@@ -830,9 +875,9 @@ export function ClientGalleryEditor() {
           .client-gallery-editor-header {
             align-items: stretch;
             flex-direction: column;
-            padding: 14px;
+            padding: 11px 12px;
           }
-          .client-gallery-editor-title { font-size: 18px; }
+          .client-gallery-editor-title { font-size: 16px; }
           .client-gallery-editor-subtitle { white-space: normal; }
           .client-gallery-editor-actions {
             width: 100%;
@@ -853,7 +898,7 @@ export function ClientGalleryEditor() {
           .client-gallery-editor-shell { gap: 14px; }
           .client-gallery-sidebar-overview { grid-template-columns: minmax(0,1fr); }
           .client-gallery-primary-tabs { position: sticky; top: 0; z-index: 5; background: #fff; }
-          .client-gallery-primary-tab { padding: 9px 3px; font-size: 9px; }
+          .client-gallery-primary-tab { padding: 8px 3px; font-size: 8.5px; }
           .client-gallery-context-menu { padding: 10px; }
           .client-gallery-activity-stats { grid-template-columns: minmax(0,1fr); }
           .client-gallery-activity-stat { padding: 10px 12px; }
@@ -879,10 +924,7 @@ export function ClientGalleryEditor() {
       `}</style>
       <section className="client-gallery-editor-header">
         <div className="client-gallery-editor-header-copy">
-          <Link to="/admin/client-galleries" className="inline-flex items-center gap-1.5 text-[10px] text-neutral-500 hover:text-neutral-900">
-            <ArrowLeft className="h-3.5 w-3.5" /> Client Galleries
-          </Link>
-          <p className="client-gallery-editor-kicker mt-3">Gallery workspace</p>
+          <p className="client-gallery-editor-kicker">Gallery workspace</p>
           <h1 className="client-gallery-editor-title">Client Gallery Admin</h1>
           <p className="client-gallery-editor-subtitle">{gallery.title}</p>
         </div>
@@ -917,7 +959,7 @@ export function ClientGalleryEditor() {
         </div>
       </section>
 
-      <div className="client-gallery-editor-shell mt-5">
+      <div className="client-gallery-editor-shell mt-4">
         <aside className="client-gallery-editor-sidebar rounded-2xl border border-black/10 bg-white">
           <div className="client-gallery-sidebar-overview">
             <div className="client-gallery-sidebar-cover" style={{ aspectRatio: "4/3", background: "#eee", overflow: "hidden" }}>
@@ -936,7 +978,7 @@ export function ClientGalleryEditor() {
           </div>
 
           <div className="client-gallery-primary-tabs" aria-label="Client gallery workspace sections">
-            {primaryTabs.map(({ key, label, icon: Icon }) => <button key={key} type="button" data-active={primaryTab === key ? "true" : "false"} onClick={() => setTab(key === "settings" ? (isSettingsArea ? activeTab : "settings") : key)} className="client-gallery-primary-tab"><Icon className="h-5 w-5" /><span>{label}</span></button>)}
+            {primaryTabs.map(({ key, label, icon: Icon }) => <button key={key} type="button" data-active={primaryTab === key ? "true" : "false"} onClick={() => setTab(key === "settings" ? (isSettingsArea ? activeTab : "settings") : key)} className="client-gallery-primary-tab"><Icon className="h-4 w-4" /><span>{label}</span></button>)}
           </div>
 
           {activeTab === "photos" ? <div className="client-gallery-context-menu">
@@ -955,7 +997,11 @@ export function ClientGalleryEditor() {
 
           {isSettingsArea ? <div className="client-gallery-context-menu">
             <p className="px-2 py-2 text-[10px] uppercase tracking-[.14em] text-neutral-400">Settings</p>
-            {settingsTabs.map((item) => <button key={item.key} type="button" onClick={() => setTab(item.key)} className={`mt-1 rounded-lg px-3 py-3 text-left ${activeTab === item.key ? "bg-black text-white" : "hover:bg-neutral-50"}`}><strong className="block text-sm font-medium">{item.label}</strong><span className={`mt-1 block text-[11px] leading-snug ${activeTab === item.key ? "text-white/65" : "text-neutral-400"}`}>{item.description}</span></button>)}
+            {settingsTabs.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.key;
+              return <button key={item.key} type="button" data-active={isActive ? "true" : "false"} onClick={() => setTab(item.key)} className={`client-gallery-settings-nav-button ${isActive ? "bg-black text-white" : "hover:bg-neutral-50"}`}><span className="client-gallery-settings-nav-icon"><Icon /></span><span className="min-w-0"><span className="client-gallery-settings-nav-label">{item.label}</span><span className={`client-gallery-settings-nav-description ${isActive ? "text-white/65" : "text-neutral-400"}`}>{item.description}</span></span></button>;
+            })}
           </div> : null}
 
           {activeTab === "branding" ? <div className="client-gallery-context-menu"><p className="px-2 py-2 text-[10px] uppercase tracking-[.14em] text-neutral-400">Branding</p><div className="rounded-xl bg-neutral-50 p-3 text-xs leading-relaxed text-neutral-500">Logo, colours and typography for this private gallery.</div></div> : null}
