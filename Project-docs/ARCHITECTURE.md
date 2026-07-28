@@ -22,6 +22,33 @@ The shared CSS classes are:
 
 Legacy inline sticky inspectors receive the same mobile fallback until their pages are fully migrated. This is a presentation boundary only and does not alter data ownership, routes or APIs.
 
+
+## WedPlanned business boundary — v1.8.0
+WedPlanned uses the existing workspace boundary as its durable tenant key. Product language now describes a workspace as a **business**, but database ownership remains `workspace_id` to preserve compatibility and avoid a high-risk global rename.
+
+The new hierarchy is:
+
+```text
+WedPlanned platform
+└── Business (`workspaces.id`)
+    ├── Business profile
+    ├── Professional categories
+    ├── Service areas
+    ├── Team memberships and roles
+    ├── Feature entitlements
+    ├── Audit events
+    └── Business-owned operational data
+```
+
+`platform_users` represents a professional identity across WedPlanned. `business_memberships` links that identity/email to one business and role. v1.8.0 stores intended memberships but does not authenticate them. A later release must resolve every request from a verified user session to an allowed business membership; a browser-supplied workspace ID can never be treated as authority.
+
+The tenant-readiness audit divides the application into:
+- already scoped: workspaces, canonical assets, Client Galleries, Location Intelligence and commerce/fulfilment;
+- controlled migration required: legacy Weddings, Venues, Suppliers, Moments and public collection definitions;
+- planned: professional authentication, Stripe Connect and external-business onboarding.
+
+MKB Weddings remains the default and first operating WedPlanned business. Existing single-account Stripe Checkout and Prodigi flows continue unchanged until connected-account ownership is implemented.
+
 ## Core rule
 Structured relationships/editorial state belong in D1. Binary image assets belong in R2.
 
@@ -95,7 +122,7 @@ Wedding repository:
 - `story_list_visible`
 
 ## Future commercial hierarchy
-Studio / Tenant
+Business / Tenant
 - Users
 - Leads
 - Clients

@@ -18,6 +18,7 @@ import { Collections } from "../pages/Collections";
 import { SEOCentre } from "../pages/SEOCentre";
 import { PlaceholderPage } from "../pages/PlaceholderPage";
 import { Settings } from "../pages/Settings";
+import { WedPlannedPlatform } from "../pages/WedPlannedPlatform";
 import { AssetLibrary } from "../pages/AssetLibrary";
 import { ClientGalleries } from "../pages/ClientGalleries";
 import { ClientGalleryEditor } from "../pages/ClientGalleryEditor";
@@ -44,6 +45,7 @@ export function AdminApp() {
     <Routes>
       <Route element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
+        <Route path="wedplanned" element={<WedPlannedPlatform />} />
         <Route path="weddings" element={<Weddings />} />
         <Route path="weddings/new" element={<NewWeddingWizard />} />
         <Route path="weddings/:slug" element={<WeddingDetail />} />

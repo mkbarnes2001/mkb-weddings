@@ -86,12 +86,24 @@ Completed and in production:
 - CloudEvent status callbacks plus shipment/tracking visibility
 - Manual fulfilment fallback and a physical sample-order gate before live use
 
-## Next — Commercial Platform Foundation (v1.8)
-- Studio/tenant ownership, user memberships, roles and plan entitlements
-- Tenant-isolation audit across D1, R2, Admin, public routes and downloads
-- Stripe Connect hosted onboarding and connected-account event handling
-- Stripe Billing subscriptions for studios, separate from client payments
-- Commercial onboarding, audit logs, support access controls, export and deletion foundations
+## Completed — WedPlanned Platform Foundation (v1.8.0)
+- Neutral business profiles on the existing workspace/tenant boundary
+- Platform users and business memberships with expanded professional roles
+- Wedding-industry categories, primary category selection and business service areas
+- Feature entitlements and platform audit events
+- Admin WedPlanned foundation workspace and tenant-readiness audit
+
+## Next — Professional Identity & Tenant Enforcement (v1.8.1)
+- Professional sign-in, invitation acceptance and secure session handling
+- Server-resolved business context from authenticated memberships
+- Tenant-enforcement tests across D1, R2, Admin, public routes and downloads
+- Controlled workspace ownership migration for Weddings, Venues, Suppliers and public galleries
+- Support-access controls, audit logging, export and deletion foundations
+
+## Following — Connected Payments & Commercial Billing (v1.8.2)
+- Stripe Connect hosted onboarding and connected-account webhooks
+- Stripe Billing subscriptions for businesses, separate from couple/client payments
+- Plan limits, trials, billing state and feature enforcement
 
 ## Print Store & Professional Lab Fulfilment
 - Product catalogues and workspace price lists

@@ -59,13 +59,13 @@ export function Settings() {
       <AdminPageHeader
         eyebrow="Commercial foundation"
         title="Workspace settings"
-        description="Configure the studio identity and tenant boundary used by client galleries, storage, users and future commercial modules."
+        description="Configure the operational workspace used by MKB. WedPlanned business identity, categories, team and commercial access are managed in the dedicated platform area."
       />
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1.3fr_0.7fr]">
         <div className="rounded-[28px] border border-black/10 bg-white/75 p-7">
           <div className="mb-7">
-            <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Studio identity</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Workspace identity</p>
             <h2 className="mt-2 font-serif text-3xl">{workspace.name}</h2>
             <p className="mt-2 text-sm text-neutral-500">Workspace ID: {workspace.id}</p>
           </div>
@@ -121,7 +121,7 @@ export function Settings() {
         <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Migration strategy</p>
         <h2 className="mt-2 font-serif text-3xl">Add tenant boundaries without destabilising MKB.</h2>
         <p className="mt-3 max-w-4xl text-sm leading-6 text-neutral-600">
-          Existing wedding, venue, supplier and gallery tables remain untouched in this release. New commercial modules will be workspace-scoped from day one. Existing tables will be migrated in controlled phases only after each path is verified, so MKB continues to operate as the default workspace throughout the transition.
+          MKB remains the default operational workspace. WedPlanned extends this tenant boundary with neutral business profiles, categories, teams, service areas and feature entitlements. Legacy content tables will be scoped in controlled phases before external businesses are invited.
         </p>
       </section>
     </AdminPage>

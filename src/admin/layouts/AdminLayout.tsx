@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import {
   BarChart3,
+  Building2,
   Bot,
   Database,
   FileText,
@@ -18,6 +19,7 @@ import {
 
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: Gauge, end: true },
+  { to: "/admin/wedplanned", label: "WedPlanned", icon: Building2 },
   { to: "/admin/weddings", label: "Weddings", icon: FileText },
   { to: "/admin/gallery", label: "Gallery Management", icon: Images },
   { to: "/admin/venues", label: "Venues", icon: Globe2 },

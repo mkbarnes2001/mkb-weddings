@@ -1,7 +1,19 @@
 # Next Steps
 
 ## Current baseline
-v1.7.16 keeps the completed Stripe/Prodigi sandbox workflow and completes the final Weddings/Venues repository density pass. Venue cards and summaries are more compact, Wedding cards no longer box their text area, summary metadata uses the standard Admin typography, status chips and actions are uniform, and completion labels are smaller. Schema version remains 22; fulfilment remains manual by default and no paid order is submitted automatically.
+v1.8.0 establishes the WedPlanned commercial foundation while preserving MKB Weddings as the first live business. Schema 23 adds neutral business profiles, users, memberships, professional categories, service areas, feature entitlements and audit events. Admin now includes a WedPlanned workspace for managing the foundation and viewing tenant readiness. External access remains disabled: staged members do not receive sign-in rights, legacy MKB content routes are not yet fully tenant-enforced, and Stripe Connect is not enabled.
+
+## v1.8.0 validation
+1. Apply migration `023_wedplanned_platform_foundation.sql` and confirm schema version 23.
+2. Run `PRAGMA foreign_key_check;` and confirm no problem rows.
+3. Open Admin → WedPlanned and confirm MKB Weddings appears as the first private business.
+4. Save the business profile and confirm the existing Workspace Settings identity remains synchronised.
+5. Select multiple categories, set Photographer as primary and refresh to confirm persistence.
+6. Add and remove a service area.
+7. Stage a team member, change their role and confirm the record remains isolated to MKB Weddings.
+8. Confirm feature entitlements are visible and the tenant-readiness report accurately marks legacy modules as migration-required.
+9. Recheck Client Galleries, Print Store, Stripe test checkout and Prodigi status views to confirm no regression.
+10. Do not invite external professionals or publish marketplace profiles until professional authentication and legacy-route tenant enforcement are complete.
 
 ## v1.7.16 validation
 1. Open Venues and confirm venue names and locations use the smaller hierarchy without clipping.
@@ -82,15 +94,17 @@ v1.7.16 keeps the completed Stripe/Prodigi sandbox workflow and completes the fi
 8. Reset to studio defaults and confirm the workspace logo/accent return.
 
 ## Next engineering sequence
-1. Complete the v1.7 Prodigi sandbox checklist and one controlled physical sample order; do not enable automatic submission.
-2. Begin **v1.8 WedPlanned Platform Foundation** for all wedding professionals: businesses/organisations, users, memberships, roles, categories, service areas, plan entitlements and a full tenant-isolation audit.
-3. Generalise future ownership from photography-specific "studio" language to neutral `business_id` / workspace ownership while preserving MKB Weddings as the first operating business.
-4. Add Stripe Connect hosted onboarding and connected-account webhooks so each WedPlanned business receives its own client payments; retain the current single-account MKB flow during migration.
-5. Add Stripe Billing for professional subscriptions separately from couple-to-supplier booking and order payments.
-6. Build the universal CRM and client/couple portal on the tenant model: enquiries, contacts, weddings/jobs, tasks, messages, questionnaires, quotes, contracts and invoices.
-7. Add services, packages, availability and online booking only after CRM, contract and connected-payment ownership are established.
-8. Add the public supplier marketplace, advertising, content creation and collaborative real-wedding publishing after the private business platform is secure.
-9. Move Lightroom Classic publishing and very-large background jobs after the commercial tenancy/payment foundation.
+1. Build **v1.8.1 Professional Identity & Tenant Enforcement**: professional sign-in, invitation acceptance, sessions, membership resolution and server-owned business context.
+2. Add `workspace_id` ownership and enforced query scoping to legacy Weddings, Venues, Suppliers, Moments and public collection definitions using controlled migrations and regression tests.
+3. Add cross-tenant security tests proving Business A cannot read, mutate, download or publish Business B data.
+4. Add support-access controls, explicit audit events, data export and account-deletion foundations.
+5. Build **v1.8.2 Stripe Connect & Billing** only after authenticated business ownership is enforced.
+6. Add hosted connected-account onboarding and connected-account webhooks so each wedding professional receives their own client payments.
+7. Add Stripe Billing for WedPlanned subscriptions separately from couple-to-professional payments.
+8. Build the universal CRM and couple/client portal: enquiries, contacts, weddings/jobs, tasks, messages, questionnaires, quotes, contracts and invoices.
+9. Add services, packages, availability and online booking after CRM, contract and connected-payment ownership are established.
+10. Add the public marketplace, advertising, content creation and collaborative real-wedding publishing after the private business platform is secure.
+11. Keep Lightroom Classic publishing and very-large background jobs after the commercial tenancy/payment foundation.
 
 ## Guardrails
 - One photograph = one canonical asset.

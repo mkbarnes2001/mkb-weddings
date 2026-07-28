@@ -1,8 +1,21 @@
 # Project State
 
 ## Version
-Current release: **v1.7.15 — Admin Repository Final Polish**.
-Database schema version: **22**.
+Current release: **v1.8.0 — WedPlanned Platform Foundation**.
+Database schema version: **23**.
+
+
+## WedPlanned Platform Foundation — v1.8.0
+- Establishes WedPlanned as the neutral commercial product for all wedding professionals while preserving MKB Weddings as the first operating business.
+- Keeps `workspaces.id` as the durable tenant key and adds a neutral `business_profiles` layer rather than performing a destabilising rename.
+- Adds platform users, business memberships, expanded staff roles, wedding-industry categories, business category links and service areas.
+- Adds feature definitions, workspace entitlements and platform audit events.
+- Seeds MKB Weddings as a private photographer business with internal entitlements.
+- Adds Admin → WedPlanned with Business, Services & areas, Team and Platform access views.
+- Includes an explicit tenant-readiness audit distinguishing scoped modules, legacy migrations and planned authentication/Stripe Connect work.
+- Team invitations are staged records only; they do not grant access until professional authentication is implemented.
+- Existing Stripe Checkout, Prodigi fulfilment, MKB routes and public content remain unchanged.
+- Adds migration `023_wedplanned_platform_foundation.sql`; schema advances to **23**.
 
 ## Admin Repository Final Polish — v1.7.15
 - Applies the final annotated UI pass to Weddings, Venues, Suppliers and Client Galleries.

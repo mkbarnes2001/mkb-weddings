@@ -1,5 +1,16 @@
 # MKB Intelligence — Changelog
 
+## v1.8.0 — WedPlanned Platform Foundation
+- Added neutral WedPlanned business profiles on top of the existing workspace tenant boundary.
+- Added platform users and business memberships with owner, admin, manager, content, finance, staff and viewer roles.
+- Added a seeded wedding-industry category taxonomy and per-business primary/additional category selection.
+- Added business service areas independent from the MKB venue/location gallery model.
+- Added feature definitions, workspace entitlements and platform audit events.
+- Seeded MKB Weddings as the first private WedPlanned photographer business with internal entitlements.
+- Added Admin → WedPlanned for business identity, categories, service areas, staged team invitations, entitlements and tenant-readiness reporting.
+- Preserved all existing MKB Stripe, Prodigi, Client Gallery and publishing behaviour.
+- Added migration 023; schema version advances to 23.
+
 ## v1.7.16 — Final Weddings and Venues UI Polish
 - Reduced Venue card name and location typography for a denser repository grid.
 - Reduced Venue summary visibility and assigned-location labels and removed the redundant location-editing instruction.

@@ -3,7 +3,7 @@
 Always inspect the actual migration files before assuming a table/column exists.
 
 ## Schema version
-Current target schema version: **21**. Read migrations in sequence; migrations 020–021 add Print Store commerce and Stripe payment lifecycle fields.
+Current target schema version: **23**. Read migrations in sequence; migrations 020–023 add Print Store commerce, Stripe payments, Prodigi fulfilment and the WedPlanned commercial business foundation.
 
 ## Core domains
 - `venues`
@@ -306,3 +306,25 @@ Storage and integrity rules:
 - product mapping changes do not rewrite historical submitted lines;
 - provider callbacks are reconciled against the provider API before order/line status changes;
 - migration 022 does not copy, rename or delete existing R2 originals.
+
+## Schema version 23
+Migration: `023_wedplanned_platform_foundation.sql`
+
+Adds the neutral commercial platform layer:
+- `platform_users` — global professional identities; authentication is not yet enabled.
+- `business_profiles` — public/legal identity and future marketplace state for one workspace/business.
+- `business_memberships` — workspace-owned team membership, role and invitation state.
+- `platform_categories` — shared wedding-professional taxonomy.
+- `business_category_links` — selected and primary categories per business.
+- `business_service_areas` — where a professional works; separate from venue-location gallery intelligence.
+- `platform_features` — stable feature keys for commercial access control.
+- `workspace_entitlements` — feature access and limits by workspace.
+- `platform_audit_events` — business/platform mutation ledger.
+
+Compatibility rules:
+- `workspaces.id` remains the ownership key and is presented as a business in WedPlanned product language.
+- `workspace_memberships` remains untouched for compatibility; new commercial team records use `business_memberships`.
+- MKB Weddings is seeded as the first business and `photographer` is its primary category.
+- Marketplace state defaults to private.
+- Team invitation records do not grant access until professional authentication and membership enforcement are implemented.
+- Existing MKB content and R2 objects are not copied, renamed or deleted.
