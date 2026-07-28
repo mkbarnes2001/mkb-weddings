@@ -131,7 +131,7 @@ export function Venues() {
                     <div draggable onDragStart={(event) => { event.stopPropagation(); event.dataTransfer.effectAllowed = "move"; setDraggedSlug(venue.slug); }} onDragEnd={() => setDraggedSlug(null)} style={{ position: "absolute", right: "10px", bottom: "10px", width: "38px", height: "38px", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "999px", background: "#fff", boxShadow: "0 6px 18px rgba(0,0,0,0.22)", cursor: "grab" }} title="Drag to reorder"><GripVertical className="h-5 w-5" /></div>
                     {venue.galleryVisible === false ? <span className="absolute left-2.5 top-2.5 rounded-full bg-black/80 px-2.5 py-1 text-[10px] text-white">Hidden</span> : null}
                   </div>
-                  <div className="p-3"><h2 className="line-clamp-2 min-h-[30px] text-[12px] font-semibold leading-[1.25] tracking-[-0.01em]">{venue.name}</h2><p className="mt-1 line-clamp-2 text-[9px] leading-3.5 text-neutral-500">{[venue.town, venue.county].filter(Boolean).join(", ") || "Location not set"}</p></div>
+                  <div className="admin-venue-card__body"><h2 className="admin-venue-card__title line-clamp-2">{venue.name}</h2><p className="admin-venue-card__location line-clamp-2">{[venue.town, venue.county].filter(Boolean).join(", ") || "Location not set"}</p></div>
                 </article>
               );
             })}
@@ -146,15 +146,15 @@ export function Venues() {
                 <p className="mt-1.5 text-[10px] leading-4 text-neutral-500">{[active.town, active.county, active.country].filter(Boolean).join(", ")}</p>
               </div>
 
-              <label className="admin-summary-toggle">
-                <span className="text-[11px] font-medium text-neutral-800">Show on Gallery by Venue</span>
+              <label className="admin-summary-toggle admin-venue-visibility-toggle">
+                <span>Show on Gallery by Venue</span>
                 <input type="checkbox" checked={active.galleryVisible !== false} onChange={(event) => toggleVisible(active.slug, event.target.checked)} />
               </label>
 
               <div className="rounded-xl bg-neutral-50 p-3">
-                <div className="flex items-center gap-2 text-[10px] font-semibold text-neutral-700"><MapPin className="h-3.5 w-3.5 text-neutral-400" strokeWidth={1.6} />Assigned location</div>
+                <div className="admin-venue-location-heading"><MapPin className="h-3 w-3 text-neutral-400" strokeWidth={1.6} />Assigned location</div>
                 {activeLocations.length ? (
-                  <div className="mt-2 space-y-1.5">
+                  <div className="admin-venue-location-list mt-2 space-y-1.5">
                     {activeLocations.map((location) => (
                       <div key={location.id} className="flex min-w-0 items-center justify-between gap-3 text-[10px]">
                         <span className="truncate font-medium text-neutral-700">{location.name}</span>
@@ -163,7 +163,6 @@ export function Venues() {
                     ))}
                   </div>
                 ) : <p className="mt-2 text-[10px] text-neutral-500">No location assigned.</p>}
-                <p className="mt-2 text-[9px] leading-4 text-neutral-400">Update location assignments in the venue details page.</p>
               </div>
 
               <div className="admin-summary-metrics">
@@ -171,7 +170,7 @@ export function Venues() {
                 <div className="admin-summary-metric"><span>Images</span><strong>{active.imageCount}</strong></div>
               </div>
 
-              <dl className="admin-compact-details"><div><dt>Status</dt><dd>{active.status}</dd></div></dl>
+              <dl className="admin-compact-details admin-venue-status"><div><dt>Status</dt><dd>{active.status}</dd></div></dl>
 
               <Link to={`/admin/venues/${active.slug}`} className="admin-button admin-button--primary w-full"><Building2 className="admin-button__icon" strokeWidth={1.6} />Open venue</Link>
               <Link to={`/admin/venues/${active.slug}/gallery`} className="admin-button admin-button--secondary w-full"><Images className="admin-button__icon" strokeWidth={1.6} />Manage gallery</Link>

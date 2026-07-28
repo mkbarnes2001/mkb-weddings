@@ -1,5 +1,17 @@
 # MKB Intelligence — Changelog
 
+## v1.7.16 — Final Weddings and Venues UI Polish
+- Reduced Venue card name and location typography for a denser repository grid.
+- Reduced Venue summary visibility and assigned-location labels and removed the redundant location-editing instruction.
+- Aligned Venue Status label/value typography and increased readability slightly.
+- Removed the boxed lower-text treatment from Wedding cards while retaining clear selected-card feedback.
+- Standardised Wedding summary title, venue, date and metadata typography with the shared Admin font system.
+- Matched Draft/Published status chips to Ready/Missing-data chips using compact uppercase styling.
+- Normalised Story, Images, Suppliers, Publish, Archive and Delete action dimensions, padding and icon sizes.
+- Reduced Tags, Alt and Captions completion typography.
+- Confirmed the next major phase as the WedPlanned multi-business platform foundation.
+- No D1 migration; schema version remains 22.
+
 ## v1.7.15 — Admin Repository Final Polish
 - Refined Weddings and Venues cards so longer names and locations fit without crowding.
 - Condensed Wedding and Venue summary panels, moved completion metrics lower, removed redundant divider labels and standardised action buttons.

@@ -1478,3 +1478,228 @@
   }
 
 }
+
+
+/* v1.7.16 - final Weddings and Venues density polish */
+.admin-venue-card__body {
+  padding: 8px 9px 9px;
+}
+
+.admin-venue-card__title {
+  min-height: 25px;
+  margin: 0;
+  color: #262626;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: -0.008em;
+  line-height: 1.25;
+}
+
+.admin-venue-card__location {
+  margin: 3px 0 0;
+  color: #8a8a8a;
+  font-size: 7.5px;
+  line-height: 1.3;
+}
+
+.admin-venue-visibility-toggle {
+  padding: 8px 10px;
+}
+
+.admin-venue-visibility-toggle > span {
+  color: #525252;
+  font-size: 9px;
+  font-weight: 550;
+  line-height: 1.25;
+}
+
+.admin-venue-location-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #737373;
+  font-size: 8.5px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.admin-venue-location-list > div {
+  font-size: 8.5px !important;
+}
+
+.admin-venue-location-list > div > span:first-child {
+  font-size: 8.5px;
+  font-weight: 550;
+}
+
+.admin-venue-location-list > div > span:last-child {
+  font-size: 7px !important;
+  letter-spacing: 0.06em !important;
+}
+
+.admin-venue-status {
+  padding: 7px 9px;
+}
+
+.admin-venue-status > div {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  padding: 0;
+}
+
+.admin-venue-status dt,
+.admin-venue-status dd {
+  color: #525252;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.25;
+  text-transform: none;
+}
+
+.admin-venue-status dd {
+  color: #262626;
+  text-transform: capitalize;
+}
+
+.admin-wedding-card {
+  transition: box-shadow 120ms ease, opacity 120ms ease;
+}
+
+.admin-wedding-card__body {
+  padding: 8px 3px 4px;
+}
+
+.admin-wedding-card__title {
+  min-height: 27px;
+  margin: 0;
+  color: #262626;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.admin-wedding-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.admin-wedding-card__status {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 7.5px;
+  font-weight: 650;
+  letter-spacing: 0.055em;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-wedding-summary-heading > p {
+  margin: 0;
+  color: #a3a3a3;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.admin-wedding-summary-heading > h2 {
+  margin: 5px 0 0;
+  color: #262626;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.18;
+}
+
+.admin-wedding-summary-heading > span {
+  display: block;
+  margin-top: 5px;
+  color: #737373;
+  font-size: 9.5px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.admin-wedding-details dt,
+.admin-wedding-details dd {
+  font-family: "Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif !important;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.admin-wedding-details dt {
+  color: #8a8a8a;
+  font-size: 8.5px;
+  font-weight: 500;
+}
+
+.admin-wedding-details dd {
+  color: #404040;
+  font-size: 9.5px;
+  font-weight: 500;
+}
+
+.admin-wedding-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.admin-wedding-status-row .admin-status,
+.admin-wedding-status-row .admin-status-badge {
+  min-height: 18px;
+  padding: 1px 6px;
+  font-size: 7.5px;
+  letter-spacing: 0.055em;
+}
+
+.admin-wedding-action-grid {
+  gap: 6px;
+}
+
+.admin-wedding-action-grid .admin-button {
+  width: 100%;
+  height: 30px;
+  min-height: 30px !important;
+  gap: 5px;
+  border-radius: 7px !important;
+  padding: 0 8px !important;
+  font-size: 9px !important;
+  font-weight: 600 !important;
+}
+
+.admin-wedding-action-grid .admin-button__icon {
+  width: 11px;
+  height: 11px;
+  flex-basis: 11px;
+}
+
+.admin-wedding-progress > div > div:first-child {
+  margin-bottom: 4px !important;
+  font-size: 8px !important;
+  line-height: 1.2 !important;
+}
+
+.admin-wedding-progress > div > div:last-child {
+  height: 4px !important;
+}
+
+@media (max-width: 760px) {
+  .admin-venue-card__title,
+  .admin-wedding-card__title {
+    font-size: 10px;
+  }
+
+  .admin-wedding-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

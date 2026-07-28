@@ -10,10 +10,16 @@ import { AdminPage, AdminPageHeader, AdminToolbar } from "../components/ui/Admin
 
  type StatusFilter = "all" | WeddingPublicationStatus;
 
-function publicationClasses(status: WeddingPublicationStatus) {
-  if (status === "published") return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (status === "archived") return "border-neutral-200 bg-neutral-100 text-neutral-600";
-  return "border-amber-200 bg-amber-50 text-amber-700";
+function publicationToneClass(status: WeddingPublicationStatus) {
+  if (status === "published") return "admin-status--success";
+  if (status === "archived") return "admin-status--neutral";
+  return "admin-status--warning";
+}
+
+function publicationTextClass(status: WeddingPublicationStatus) {
+  if (status === "published") return "text-emerald-700";
+  if (status === "archived") return "text-neutral-500";
+  return "text-amber-700";
 }
 
 function coverFor(wedding: WeddingRecord) {
@@ -158,16 +164,16 @@ export function Weddings() {
             const cover = coverFor(wedding);
             const selected = wedding.slug === activeSlug;
             return (
-              <article key={wedding.slug} onDragOver={(event) => event.preventDefault()} onDrop={() => dropOn(wedding.slug)} onClick={() => setActiveSlug(wedding.slug)} style={{ overflow: "hidden", borderRadius: "18px", border: selected ? "2px solid #111" : "1px solid rgba(0,0,0,0.12)", background: "#fff", opacity: wedding.storyListVisible || wedding.storyStatus !== "published" ? 1 : 0.62, cursor: "pointer" }}>
+              <article className="admin-wedding-card" key={wedding.slug} onDragOver={(event) => event.preventDefault()} onDrop={() => dropOn(wedding.slug)} onClick={() => setActiveSlug(wedding.slug)} style={{ overflow: "hidden", borderRadius: "18px", border: 0, boxShadow: selected ? "0 0 0 2px #111" : "none", background: "transparent", opacity: wedding.storyListVisible || wedding.storyStatus !== "published" ? 1 : 0.62, cursor: "pointer" }}>
                 <div style={{ position: "relative", aspectRatio: "4 / 5", background: "#f5f5f5", overflow: "hidden" }}>
                   {cover ? <img src={cover.thumbSrc || cover.fullSrc} alt={cover.aiAlt || wedding.couple} draggable={false} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /> : <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}><ImageIcon className="h-7 w-7 text-neutral-300" /></div>}
                   <div draggable onDragStart={(event) => { event.stopPropagation(); event.dataTransfer.effectAllowed = "move"; setDraggedSlug(wedding.slug); }} onDragEnd={() => setDraggedSlug(null)} style={{ position: "absolute", right: "10px", bottom: "10px", width: "38px", height: "38px", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "999px", background: "#fff", boxShadow: "0 6px 18px rgba(0,0,0,0.22)", cursor: "grab" }} title="Drag to reorder"><GripVertical className="h-5 w-5" /></div>
                   {!wedding.storyListVisible && wedding.storyStatus === "published" ? <span className="absolute left-2.5 top-2.5 rounded-full bg-black/80 px-2.5 py-1 text-[10px] text-white">Story hidden</span> : null}
                 </div>
-                <div className="p-3">
-                  <p className="line-clamp-2 min-h-[30px] text-[12px] font-semibold leading-[1.25] tracking-[-0.01em]">{wedding.couple}</p>
-                  <div className="mt-2 flex items-center justify-between gap-2">
-                    <span className={`rounded-full border px-2.5 py-1 text-[10px] ${publicationClasses(wedding.publicationStatus)}`}>{wedding.publicationStatus}</span>
+                <div className="admin-wedding-card__body">
+                  <p className="admin-wedding-card__title line-clamp-2">{wedding.couple}</p>
+                  <div className="admin-wedding-card__footer">
+                    <span className={`admin-wedding-card__status ${publicationTextClass(wedding.publicationStatus)}`}>{wedding.publicationStatus}</span>
                     <Link to={`/admin/weddings/${wedding.slug}/workspace`} onClick={(event) => event.stopPropagation()} aria-label={`Open ${wedding.couple} workspace`} title="Open Wedding Workspace" className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-black/10 bg-white text-neutral-500 hover:border-black/20 hover:text-neutral-900"><LayoutDashboard className="h-3.5 w-3.5" strokeWidth={1.6} /></Link>
                   </div>
                 </div>
@@ -180,10 +186,10 @@ export function Weddings() {
           {!active ? <p className="text-[11px] text-neutral-500">Select a wedding to view details.</p> : <div className="space-y-3.5">
             {coverFor(active) ? <img src={coverFor(active)?.thumbSrc || coverFor(active)?.fullSrc} alt={active.couple} className="max-h-[230px] w-full rounded-xl object-cover" /> : null}
 
-            <div className="min-w-0">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-400">Wedding</p>
-              <h2 className="mt-1.5 break-words text-[19px] font-semibold leading-[1.15] tracking-[-0.025em]">{active.couple}</h2>
-              <p className="mt-1.5 text-[10px] leading-4 text-neutral-500">{active.venue} · {active.weddingDate}</p>
+            <div className="admin-wedding-summary-heading min-w-0">
+              <p>Wedding</p>
+              <h2>{active.couple}</h2>
+              <span>{active.venue} · {active.weddingDate}</span>
             </div>
 
             <label className={`admin-summary-toggle ${active.storyStatus !== "published" ? "admin-summary-toggle--warning" : ""}`}>
@@ -194,7 +200,7 @@ export function Weddings() {
               <input type="checkbox" checked={active.storyListVisible} disabled={active.storyStatus !== "published"} onChange={(event) => toggleStory(active.slug, event.target.checked)} />
             </label>
 
-            <dl className="admin-compact-details">
+            <dl className="admin-compact-details admin-wedding-details">
               <div><dt>Title</dt><dd>{active.title}</dd></div>
               <div><dt>Venue</dt><dd>{active.venue}</dd></div>
               <div><dt>Date</dt><dd>{active.weddingDate}</dd></div>
@@ -203,18 +209,18 @@ export function Weddings() {
               <div><dt>Order</dt><dd>{weddings.findIndex((wedding) => wedding.slug === active.slug) + 1}</dd></div>
             </dl>
 
-            <div className="flex flex-wrap items-center gap-1.5"><StatusBadge status={active.status} /><span className={`rounded-full border px-2 py-0.5 text-[9px] ${publicationClasses(active.publicationStatus)}`}>{active.publicationStatus}</span></div>
+            <div className="admin-wedding-status-row"><StatusBadge status={active.status} /><span className={`admin-status ${publicationToneClass(active.publicationStatus)}`}>{active.publicationStatus}</span></div>
 
             <Link to={`/admin/weddings/${active.slug}/workspace`} className="admin-button admin-button--primary w-full"><LayoutDashboard className="admin-button__icon" strokeWidth={1.6} />Open Wedding Workspace</Link>
 
-            <div className="admin-summary-action-grid">
+            <div className="admin-summary-action-grid admin-wedding-action-grid">
               <Link to={`/admin/weddings/${active.slug}/story`} className="admin-button admin-button--secondary admin-button--sm"><FileText className="admin-button__icon" strokeWidth={1.6} />Story</Link>
               <Link to={`/admin/weddings/${active.slug}/images`} className="admin-button admin-button--secondary admin-button--sm"><ImageIcon className="admin-button__icon" strokeWidth={1.6} />Images</Link>
               <Link to={`/admin/weddings/${active.slug}/suppliers`} className="admin-button admin-button--secondary admin-button--sm"><Users className="admin-button__icon" strokeWidth={1.6} />Suppliers</Link>
               <Link to={`/admin/weddings/${active.slug}/publish`} className="admin-button admin-button--secondary admin-button--sm"><Upload className="admin-button__icon" strokeWidth={1.6} />Publish</Link>
             </div>
 
-            <div className="admin-summary-action-grid">
+            <div className="admin-summary-action-grid admin-wedding-action-grid">
               <button type="button" disabled={destructiveBusy || active.publicationStatus === "archived"} onClick={() => archiveWedding(active)} className="admin-button admin-button--secondary admin-button--sm"><Archive className="admin-button__icon" strokeWidth={1.6} />{active.publicationStatus === "archived" ? "Archived" : "Archive"}</button>
               <button type="button" disabled={destructiveBusy} onClick={() => { setDeleteTarget(active); setDeleteConfirm(""); setError(""); }} className="admin-button admin-button--danger admin-button--sm"><Trash2 className="admin-button__icon" strokeWidth={1.6} />Delete</button>
             </div>
@@ -223,7 +229,7 @@ export function Weddings() {
               <div className="admin-summary-metric"><span>Images</span><strong>{active.imageCount}</strong></div>
               <div className="admin-summary-metric"><span>AI rows</span><strong>{active.aiRows}</strong></div>
             </div>
-            <div className="space-y-2.5 rounded-xl bg-neutral-50 p-3"><ProgressBar label="Tags" done={active.tagsComplete} total={active.imageCount} /><ProgressBar label="Alt" done={active.altComplete} total={active.imageCount} /><ProgressBar label="Captions" done={active.captionComplete} total={active.imageCount} /></div>
+            <div className="admin-wedding-progress space-y-2 rounded-xl bg-neutral-50 p-3"><ProgressBar label="Tags" done={active.tagsComplete} total={active.imageCount} /><ProgressBar label="Alt" done={active.altComplete} total={active.imageCount} /><ProgressBar label="Captions" done={active.captionComplete} total={active.imageCount} /></div>
           </div>}
         </aside>
       </section>

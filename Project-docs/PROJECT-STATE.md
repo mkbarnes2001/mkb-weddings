@@ -403,3 +403,9 @@ Client Gallery Admin photo cards now use one compact vertical-options icon inste
 A dedicated **Branding** workspace tab now controls the client-facing private gallery presentation. Each gallery can use the workspace logo, upload a gallery-specific logo, or hide the logo. Safe theme tokens control accent, background, surface and text colours plus a limited heading-font choice. Arbitrary CSS is not accepted. A live preview and reset-to-studio-defaults action are included.
 
 Custom logos are stored in public `MKB_IMAGES` R2 under managed branding keys. Private wedding originals remain isolated in `MKB_PRIVATE_ASSETS`. Schema version advances to **18**.
+
+
+## v1.7.16 — Final Weddings and Venues Repository Polish
+The Weddings and Venues repository interfaces now complete the shared Admin visual pass. Venue cards use a smaller title/location hierarchy; Venue summary visibility, location and status rows are denser. Wedding cards use a borderless text area, summary metadata follows the standard Admin type system, status chips match, action controls are dimensionally uniform and AI-completion labels are reduced.
+
+The next major engineering phase is **WedPlanned v1.8 Platform Foundation**, designed around neutral wedding-business tenants rather than photography studios. It will introduce business ownership, users, memberships, roles, categories, entitlements and tenant-isolation guarantees before Stripe Connect, CRM, bookings and the marketplace are added. Schema remains **22**.
