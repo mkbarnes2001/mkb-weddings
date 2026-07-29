@@ -172,7 +172,7 @@ export function Collections() {
         AdminApiService.getLocations(),
         AdminApiService.getCreativeFlashGallery(),
         AdminApiService.getGalleryLandingSettings(),
-        fetch("/api/public/gallery-master-heroes?refresh=1", { cache: "no-store" }).then(
+        fetch("/api/gallery-master-heroes?refresh=1", { cache: "no-store" }).then(
           async (response) => {
             if (!response.ok) throw new Error("Unable to load gallery hero previews.");
             return response.json();

@@ -16,8 +16,33 @@ async function loadSettings(env: Env, workspaceId: string) {
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   if (!adminApiRequestAllowed(context.env as any, context.request)) return notFoundResponse();
-  try { const workspaceId = await resolveAdminWorkspaceId(context); return Response.json({ ok: true, settings: await loadSettings(context.env, workspaceId) }); }
-  catch (error) { return errorResponse(error); }
+  try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
+    const settings = await loadSettings(context.env, workspaceId);
+    async function resolve(id: string) {
+      if (!id) return null;
+      const image: any = await context.env.MKB_DB.prepare(
+        `SELECT asset_key, image_id, thumb_src, full_src, alt FROM images WHERE workspace_id = ? AND (asset_key = ? OR image_id = ?) LIMIT 1`,
+      ).bind(workspaceId, id, id).first();
+      return image
+        ? {
+            assetKey: String(image.asset_key || ""),
+            imageId: String(image.image_id || ""),
+            thumbSrc: String(image.thumb_src || ""),
+            fullSrc: String(image.full_src || ""),
+            alt: String(image.alt || ""),
+          }
+        : null;
+    }
+    const [venue, moments, landing] = await Promise.all([
+      resolve(settings.venueHeroImageId),
+      resolve(settings.momentsHeroImageId),
+      resolve(settings.landingHeroImageId),
+    ]);
+    return Response.json({ ok: true, settings, venue, moments, landing });
+  } catch (error) {
+    return errorResponse(error);
+  }
 };
 
 export const onRequestPut: PagesFunction<Env> = async (context) => {
