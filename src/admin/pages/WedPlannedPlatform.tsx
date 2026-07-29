@@ -5,9 +5,11 @@ import {
   Building2,
   Check,
   ChevronDown,
+  Copy,
   CircleDashed,
   Globe2,
   MapPinned,
+  MailCheck,
   Plus,
   Save,
   ShieldCheck,
@@ -27,7 +29,9 @@ import {
   AdminTabs,
 } from "../components/ui/AdminUI";
 import { AdminApiService } from "../services/AdminApiService";
+import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import type {
+  ProfessionalInvitationResult,
   WedPlannedBusiness,
   WedPlannedMember,
   WedPlannedPlatformPayload,
@@ -35,6 +39,11 @@ import type {
 } from "../types/platform";
 
 type TabKey = "business" | "services" | "team" | "access";
+
+function initialTab(): TabKey {
+  const value = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("tab") : "";
+  return value === "services" || value === "team" || value === "access" ? value : "business";
+}
 
 const emptyArea: Partial<WedPlannedServiceArea> = {
   label: "",
@@ -114,9 +123,10 @@ function labelForScope(status: string) {
 }
 
 export function WedPlannedPlatform() {
+  const { auth } = useProfessionalAuth();
   const [platform, setPlatform] = useState<WedPlannedPlatformPayload | null>(null);
   const [business, setBusiness] = useState<WedPlannedBusiness | null>(null);
-  const [tab, setTab] = useState<TabKey>("business");
+  const [tab, setTab] = useState<TabKey>(initialTab);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -126,6 +136,10 @@ export function WedPlannedPlatform() {
   const [serviceArea, setServiceArea] = useState(emptyArea);
   const [serviceAreaPreset, setServiceAreaPreset] = useState("");
   const [member, setMember] = useState(emptyMember);
+  const [lastInvitation, setLastInvitation] = useState<ProfessionalInvitationResult | null>(null);
+  const canEditBusiness = auth.permissions.includes("business:update");
+  const canEditServices = auth.permissions.includes("services:update");
+  const canManageMembers = auth.permissions.includes("members:manage");
 
   function apply(next: WedPlannedPlatformPayload) {
     setPlatform(next);
@@ -225,11 +239,21 @@ export function WedPlannedPlatform() {
   }
 
   async function inviteMember() {
-    const saved = await run(
-      () => AdminApiService.inviteWedPlannedMember(member),
-      "Team invitation staged. Email delivery will be enabled with professional authentication.",
-    );
-    if (saved) setMember(emptyMember);
+    setSaving(true);
+    setError("");
+    setMessage("");
+    setLastInvitation(null);
+    try {
+      const result = await AdminApiService.inviteWedPlannedMember(member);
+      apply(result.platform);
+      if (result.invitation) setLastInvitation(result.invitation);
+      setMessage(result.invitation?.delivery === "sent" ? "Invitation email sent." : "Invitation created. Copy the secure link below if email delivery is not configured.");
+      setMember(emptyMember);
+    } catch (inviteError) {
+      setError(inviteError instanceof Error ? inviteError.message : "Unable to invite the team member.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (loading) return <div className="admin-page text-sm text-neutral-500">Loading WedPlanned foundation…</div>;
@@ -317,7 +341,7 @@ export function WedPlannedPlatform() {
                 <AdminField label="Currency"><FieldInput value={business.currency} onChange={(value) => updateBusiness("currency", value.toUpperCase())} /></AdminField>
               </div>
             </div>
-            <div className="mt-5"><AdminButton variant="primary" icon={Save} onClick={saveBusiness} disabled={saving}>{saving ? "Saving…" : "Save business"}</AdminButton></div>
+            <div className="mt-5"><AdminButton variant="primary" icon={Save} onClick={saveBusiness} disabled={saving || !canEditBusiness}>{saving ? "Saving…" : "Save business"}</AdminButton></div>
           </AdminPanel>
 
           <div className="space-y-5">
@@ -410,7 +434,7 @@ export function WedPlannedPlatform() {
             </div>
 
             <div className="mt-4 flex justify-end">
-              <AdminButton variant="primary" icon={Save} onClick={saveCategories} disabled={saving || !selectedCategories.length}>Save services</AdminButton>
+              <AdminButton variant="primary" icon={Save} onClick={saveCategories} disabled={saving || !canEditServices || !selectedCategories.length}>Save services</AdminButton>
             </div>
           </AdminPanel>
 
@@ -420,7 +444,7 @@ export function WedPlannedPlatform() {
                 <span key={area.id} className="inline-flex items-center gap-2 rounded-full bg-[#f2eee7] px-3 py-1.5 text-[10px] font-medium text-neutral-700">
                   <span>{area.label}</span>
                   <span className="text-neutral-400">{area.areaType}</span>
-                  <button type="button" onClick={() => run(() => AdminApiService.archiveWedPlannedServiceArea(area.id), "Service area removed.")} className="rounded-full p-0.5 text-neutral-400 hover:bg-white hover:text-red-600" aria-label={`Remove ${area.label}`}><X size={11} /></button>
+                  <button type="button" disabled={!canEditServices} onClick={() => run(() => AdminApiService.archiveWedPlannedServiceArea(area.id), "Service area removed.")} className="rounded-full p-0.5 text-neutral-400 hover:bg-white hover:text-red-600" aria-label={`Remove ${area.label}`}><X size={11} /></button>
                 </span>
               )) : <span className="text-xs text-neutral-500">No service areas selected.</span>}
             </div>
@@ -434,7 +458,7 @@ export function WedPlannedPlatform() {
                     <option value="custom">Custom area…</option>
                   </FieldSelect>
                 </AdminField>
-                <AdminButton variant="secondary" icon={Plus} onClick={addServiceArea} disabled={saving || !serviceArea.label}>Add area</AdminButton>
+                <AdminButton variant="secondary" icon={Plus} onClick={addServiceArea} disabled={saving || !canEditServices || !serviceArea.label}>Add area</AdminButton>
               </div>
 
               {serviceAreaPreset && serviceAreaPreset !== "custom" ? (
@@ -459,26 +483,35 @@ export function WedPlannedPlatform() {
 
       {tab === "team" ? (
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,.8fr)]">
-          <AdminPanel title="Business team" description="Memberships are business-owned. Sign-in and invitation delivery arrive in the professional-authentication phase." icon={Users}>
+          <AdminPanel title="Business team" description="Memberships are business-owned. Invitations are one-time, role-scoped and activate a secure professional session." icon={Users}>
             <div className="space-y-3">
               {platform.members.length ? platform.members.map((teamMember) => (
                 <div key={teamMember.id} className="grid gap-3 rounded-xl bg-[#f5f3ef] p-4 md:grid-cols-[minmax(0,1fr)_150px_120px_auto] md:items-center">
                   <div className="min-w-0"><p className="truncate text-xs font-semibold">{teamMember.displayName || teamMember.email}</p><p className="mt-1 truncate text-[10px] text-neutral-500">{teamMember.email}{teamMember.jobTitle ? ` · ${teamMember.jobTitle}` : ""}</p></div>
-                  <select value={teamMember.role} onChange={(event) => run(() => AdminApiService.updateWedPlannedMember({ ...teamMember, role: event.target.value as WedPlannedMember["role"] }), "Team role updated.")} className="admin-select text-xs"><option value="owner">Owner</option><option value="admin">Admin</option><option value="manager">Manager</option><option value="content">Content</option><option value="finance">Finance</option><option value="staff">Staff</option><option value="viewer">Viewer</option></select>
+                  <select disabled={!canManageMembers} value={teamMember.role} onChange={(event) => run(() => AdminApiService.updateWedPlannedMember({ ...teamMember, role: event.target.value as WedPlannedMember["role"] }), "Team role updated.")} className="admin-select text-xs"><option value="owner">Owner</option><option value="admin">Admin</option><option value="manager">Manager</option><option value="content">Content</option><option value="finance">Finance</option><option value="staff">Staff</option><option value="viewer">Viewer</option></select>
                   <AdminStatus tone={teamMember.status === "active" ? "success" : "warning"}>{teamMember.status}</AdminStatus>
-                  <button type="button" onClick={() => run(() => AdminApiService.updateWedPlannedMember({ ...teamMember, status: "disabled" }), "Team member disabled.")} className="rounded-lg p-2 text-neutral-400 hover:bg-white hover:text-red-600" aria-label={`Disable ${teamMember.email}`}><Trash2 size={14} /></button>
+                  <button type="button" disabled={!canManageMembers} onClick={() => run(() => AdminApiService.updateWedPlannedMember({ ...teamMember, status: "disabled" }), "Team member disabled.")} className="rounded-lg p-2 text-neutral-400 hover:bg-white hover:text-red-600" aria-label={`Disable ${teamMember.email}`}><Trash2 size={14} /></button>
                 </div>
               )) : <p className="text-xs text-neutral-500">No team memberships have been added.</p>}
             </div>
           </AdminPanel>
 
-          <AdminPanel title="Stage an invitation" description="This records the intended member and role. It does not send an email until authentication is enabled." icon={Plus}>
+          <AdminPanel title="Invite a team member" description="Send an invitation email when delivery is configured, or copy the one-time secure link manually." icon={Plus}>
             <div className="space-y-3">
               <AdminField label="Email"><FieldInput type="email" value={member.email} onChange={(value) => setMember({ ...member, email: value })} /></AdminField>
               <AdminField label="Name"><FieldInput value={member.displayName} onChange={(value) => setMember({ ...member, displayName: value })} /></AdminField>
               <AdminField label="Job title"><FieldInput value={member.jobTitle} onChange={(value) => setMember({ ...member, jobTitle: value })} /></AdminField>
               <AdminField label="Role"><FieldSelect value={String(member.role)} onChange={(value) => setMember({ ...member, role: value as WedPlannedMember["role"] })}><option value="owner">Owner</option><option value="admin">Admin</option><option value="manager">Manager</option><option value="content">Content</option><option value="finance">Finance</option><option value="staff">Staff</option><option value="viewer">Viewer</option></FieldSelect></AdminField>
-              <AdminButton variant="primary" icon={Plus} onClick={inviteMember} disabled={saving || !member.email}>Stage invitation</AdminButton>
+              <AdminButton variant="primary" icon={Plus} onClick={inviteMember} disabled={saving || !canManageMembers || !member.email}>Send invitation</AdminButton>
+              {lastInvitation ? (
+                <div className={`rounded-xl p-3 text-xs ${lastInvitation.delivery === "sent" ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-900"}`}>
+                  <div className="flex items-center gap-2 font-semibold"><MailCheck size={14} />{lastInvitation.delivery === "sent" ? "Invitation email sent" : "Manual invitation link ready"}</div>
+                  <p className="mt-1 text-[10px] leading-4 opacity-75">Expires {new Date(lastInvitation.expiresAt).toLocaleString("en-GB")}.</p>
+                  {lastInvitation.delivery === "manual" ? (
+                    <button type="button" onClick={() => lastInvitation.invitationUrl && navigator.clipboard?.writeText(lastInvitation.invitationUrl)} className="mt-2 inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-[10px] font-semibold text-black ring-1 ring-black/10"><Copy size={12} /> Copy secure invitation link</button>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </AdminPanel>
         </div>
@@ -498,6 +531,15 @@ export function WedPlannedPlatform() {
           </AdminPanel>
 
           <div className="space-y-5">
+            <AdminPanel title="Professional access" description="Session and business context are resolved on the server." icon={ShieldCheck} compact>
+              <div className="space-y-3 text-xs">
+                <div className="flex items-center justify-between gap-4"><span className="text-neutral-500">Mode</span><AdminStatus tone={auth.authenticated ? "success" : "warning"}>{auth.mode === "bootstrap" ? "Setup mode" : auth.authenticated ? "Secure session" : "Sign-in required"}</AdminStatus></div>
+                <div className="flex items-center justify-between gap-4"><span className="text-neutral-500">Enforcement</span><span className="font-medium">{auth.enforced ? "Enabled" : "Not enabled"}</span></div>
+                <div className="flex items-center justify-between gap-4"><span className="text-neutral-500">Business context</span><span className="truncate text-right font-medium">{auth.businessName}</span></div>
+                <div className="flex items-center justify-between gap-4"><span className="text-neutral-500">Role</span><span className="capitalize font-medium">{auth.role}</span></div>
+              </div>
+              {!auth.enforced ? <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-[10px] leading-4 text-amber-900">Keep external onboarding disabled until authentication is enforced and legacy Weddings, Venues, Suppliers and public-gallery routes are tenant-scoped.</p> : null}
+            </AdminPanel>
             <AdminPanel title="Feature entitlements" description="MKB is an internal founder business, so all foundation features are enabled while commercial plans are designed." icon={BadgeCheck}>
               <div className="space-y-2">
                 {platform.entitlements.map((feature) => (
