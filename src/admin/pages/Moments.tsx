@@ -47,16 +47,63 @@ export function Moments() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/public/moments?refresh=1", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        const next: Record<string, { thumbSrc: string; fullSrc: string; alt: string }> = {};
-        for (const item of Array.isArray(data?.moments) ? data.moments : []) {
-          if (item?.slug && item?.image) next[String(item.slug)] = item.image;
+    let cancelled = false;
+    const moments = document?.moments || [];
+
+    if (!moments.length) {
+      setHeroImages({});
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    Promise.all(
+      moments.map(async (moment) => {
+        try {
+          const gallery = await AdminApiService.getMomentGallery(moment.slug);
+          const hidden = new Set((gallery.moment.hiddenImageIds || []).map(String));
+          const eligible = gallery.images.filter(
+            (image) => image.globallyEnabled && !hidden.has(image.assetKey),
+          );
+          const wanted = String(
+            gallery.moment.cardImageId || gallery.moment.heroImageId || "",
+          );
+          const hero =
+            eligible.find(
+              (image) =>
+                wanted &&
+                (image.assetKey === wanted || image.imageId === wanted),
+            ) || eligible[0] || null;
+
+          return hero
+            ? {
+                slug: moment.slug,
+                image: {
+                  thumbSrc: hero.thumbSrc,
+                  fullSrc: hero.fullSrc,
+                  alt: hero.alt || `${moment.name} hero`,
+                },
+              }
+            : null;
+        } catch {
+          return null;
         }
-        setHeroImages(next);
-      })
-      .catch(() => {});
+      }),
+    ).then((items) => {
+      if (cancelled) return;
+      const next: Record<
+        string,
+        { thumbSrc: string; fullSrc: string; alt: string }
+      > = {};
+      for (const item of items) {
+        if (item) next[item.slug] = item.image;
+      }
+      setHeroImages(next);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [document?.updatedAt]);
 
   const sortedMoments = useMemo(
