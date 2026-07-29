@@ -10,6 +10,8 @@ import {
   updateAdminVenue,
 } from "../../../serverless/venue-d1";
 
+import { resolveAdminWorkspaceId } from "../../../serverless/tenant-context";
+
 type Env = {
   MKB_DB: D1Database;
   ADMIN_API_ENABLED?: string; ADMIN_HOSTNAME?: string;
@@ -22,6 +24,7 @@ function segments(context: any) {
 
 export const onRequest: PagesFunction<Env> = async (context) => {
   if (!adminApiRequestAllowed(context.env as any, context.request)) return notFoundResponse();
+  const workspaceId = await resolveAdminWorkspaceId(context);
   const parts = segments(context);
 
   /*
@@ -37,6 +40,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           ok: true,
           venues: await listAdminVenues(
             context.env.MKB_DB,
+            workspaceId,
           ),
         });
       }
@@ -48,6 +52,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         const venue = await createAdminVenue(
           context.env.MKB_DB,
           payload?.venue,
+          workspaceId,
         );
 
         return Response.json(
@@ -81,7 +86,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   try {
     if (context.request.method === "GET" && !action) {
-      const venue = await getAdminVenue(context.env.MKB_DB, slug);
+      const venue = await getAdminVenue(context.env.MKB_DB, slug, workspaceId);
       return venue
         ? Response.json({ ok: true, venue })
         : Response.json({ error: "Venue not found." }, { status: 404 });
@@ -89,17 +94,17 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     if (context.request.method === "PUT" && !action) {
       const payload = await context.request.json<any>();
-      const venue = await updateAdminVenue(context.env.MKB_DB, slug, payload?.venue);
+      const venue = await updateAdminVenue(context.env.MKB_DB, slug, payload?.venue, workspaceId);
       return Response.json({ ok: true, venue, backupPath: null });
     }
 
     if (context.request.method === "DELETE" && !action) {
-      const venue = await archiveAdminVenue(context.env.MKB_DB, slug);
+      const venue = await archiveAdminVenue(context.env.MKB_DB, slug, workspaceId);
       return Response.json({ ok: true, venue, backupPath: null });
     }
 
     if (context.request.method === "POST" && action === "publish") {
-      const publish = await publishAdminVenue(context.env.MKB_DB, slug);
+      const publish = await publishAdminVenue(context.env.MKB_DB, slug, workspaceId);
       return Response.json({ ok: true, publish });
     }
 

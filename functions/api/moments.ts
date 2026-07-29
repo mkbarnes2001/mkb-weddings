@@ -1,13 +1,15 @@
 import { adminApiRequestAllowed, errorResponse, notFoundResponse } from "../../serverless/venue-d1";
+import { resolveAdminWorkspaceId } from "../../serverless/tenant-context";
 
 type Env = { MKB_DB: D1Database; ADMIN_API_ENABLED?: string };
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   if (!adminApiRequestAllowed(context.env as any, context.request)) return notFoundResponse();
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const result = await context.env.MKB_DB.prepare(`
-      SELECT document_json, updated_at FROM moments ORDER BY sort_order ASC, name COLLATE NOCASE ASC
-    `).all();
+      SELECT document_json, updated_at FROM moments WHERE workspace_id = ? ORDER BY sort_order ASC, name COLLATE NOCASE ASC
+    `).bind(workspaceId).all();
     const rows = result.results || [];
     const moments = rows.map((row: any) => {
       try { return JSON.parse(String(row.document_json || "{}")); }
@@ -22,6 +24,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   if (!adminApiRequestAllowed(context.env as any, context.request)) return notFoundResponse();
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const body: any = await context.request.json();
     const document = body?.document || {};
     const incoming = Array.isArray(document?.moments) ? document.moments : [];
@@ -51,7 +54,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       }))
       .filter((moment: any) => moment.name && moment.slug);
 
-    const existingResult = await context.env.MKB_DB.prepare(`SELECT id FROM moments`).all();
+    const existingResult = await context.env.MKB_DB.prepare(`SELECT id FROM moments WHERE workspace_id = ?`).bind(workspaceId).all();
     const incomingIds = new Set(cleanMoments.map((moment: any) => moment.id));
     const removedIds = (existingResult.results || [])
       .map((row: any) => String(row.id || ""))
@@ -66,13 +69,13 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       const placeholders = removedIds.map(() => "?").join(",");
       statements.push(
         context.env.MKB_DB.prepare(
-          `DELETE FROM asset_moment_links WHERE moment_id IN (${placeholders})`,
-        ).bind(...removedIds),
+          `DELETE FROM asset_moment_links WHERE workspace_id = ? AND moment_id IN (${placeholders})`,
+        ).bind(workspaceId, ...removedIds),
       );
       statements.push(
         context.env.MKB_DB.prepare(
-          `DELETE FROM moments WHERE id IN (${placeholders})`,
-        ).bind(...removedIds),
+          `DELETE FROM moments WHERE workspace_id = ? AND id IN (${placeholders})`,
+        ).bind(workspaceId, ...removedIds),
       );
     }
 
@@ -83,9 +86,9 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
           INSERT INTO moments (
             id, slug, name, description, available_for_assignment,
             show_on_landing, card_image_id, sort_order, status,
-            document_json, updated_at
+            document_json, updated_at, workspace_id
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(id) DO UPDATE SET
             slug = excluded.slug,
             name = excluded.name,
@@ -97,6 +100,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
             status = excluded.status,
             document_json = excluded.document_json,
             updated_at = excluded.updated_at
+          WHERE moments.workspace_id = excluded.workspace_id
         `).bind(
           moment.id,
           moment.slug,
@@ -109,6 +113,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
           moment.status,
           documentJson,
           updatedAt,
+          workspaceId,
         ),
       );
     }

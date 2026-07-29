@@ -2,6 +2,7 @@ import { getAuthenticatedClientIdentity } from "../../../../../serverless/client
 import { getPublicClientGallery } from "../../../../../serverless/client-gallery-d1";
 import { getPublicPrintStore, mutatePublicPrintStore } from "../../../../../serverless/print-store-d1";
 import { stripeCheckoutConfigured } from "../../../../../serverless/stripe-payments";
+import { resolvePublicWorkspaceId } from "../../../../../serverless/tenant-context";
 
 type Env = { MKB_DB: D1Database; STRIPE_SECRET_KEY?: string; STRIPE_CHECKOUT_ENABLED?: string };
 
@@ -26,6 +27,7 @@ async function authorise(context: any, input: any) {
     String(input?.email || ""),
     String(input?.displayName || ""),
     identity,
+    await resolvePublicWorkspaceId(context.env.MKB_DB, context.request),
   );
   if (access.status !== 200 || access.body?.locked) {
     return { response: Response.json({ error: access.body?.error || "Gallery access is required." }, { status: access.status || 401 }), identity, galleryId: "" };

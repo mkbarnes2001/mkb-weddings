@@ -1,5 +1,6 @@
 import { adminApiRequestAllowed, errorResponse, notFoundResponse } from "../../../../serverless/venue-d1";
 import { getProdigiProduct, prodigiConfigured, prodigiMode, verifyProdigiVariantMapping } from "../../../../serverless/prodigi-lab";
+import { resolveAdminWorkspaceId } from "../../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -25,7 +26,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   if (!adminApiRequestAllowed(context.env as any, context.request)) return notFoundResponse();
   try {
     const body: any = await context.request.json().catch(() => ({}));
-    const mapping = await verifyProdigiVariantMapping(context.env.MKB_DB, context.env, body || {});
+    const mapping = await verifyProdigiVariantMapping(context.env.MKB_DB, context.env, body || {}, await resolveAdminWorkspaceId(context));
     return Response.json({ ok: true, mapping });
   } catch (error) {
     return errorResponse(error);

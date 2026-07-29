@@ -10,6 +10,10 @@ function text(value: unknown) {
   return String(value ?? "").trim();
 }
 
+async function resolvedWorkspaceId(db: D1Db, workspaceId?: string) {
+  return text(workspaceId) || await getDefaultWorkspaceId(db);
+}
+
 function number(value: unknown, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -87,9 +91,10 @@ export async function createPrivateOriginalUpload(
   privateBucket: R2BucketLike,
   galleryId: string,
   input: any,
+  workspaceIdInput?: string,
 ) {
   if (!privateBucket) throw new Error("Private R2 binding MKB_PRIVATE_ASSETS is not configured.");
-  const workspaceId = await getDefaultWorkspaceId(db);
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const gallery = await galleryRow(db, galleryId, workspaceId);
   if (!gallery) throw new Error("Client gallery not found.");
 
@@ -205,9 +210,9 @@ export async function createPrivateOriginalUpload(
     const weddingSlug = text(gallery.wedding_slug);
     if (weddingSlug) {
       await db.prepare(`
-        INSERT OR IGNORE INTO asset_wedding_links (asset_id, wedding_slug, sort_order, is_primary)
-        VALUES (?, ?, ?, 1)
-      `).bind(assetId, weddingSlug, nextOrder).run();
+        INSERT OR IGNORE INTO asset_wedding_links (asset_id, wedding_slug, sort_order, is_primary, workspace_id)
+        VALUES (?, ?, ?, 1, ?)
+      `).bind(assetId, weddingSlug, nextOrder, workspaceId).run();
     }
   } catch (error) {
     await multipart.abort().catch(() => {});
@@ -218,8 +223,8 @@ export async function createPrivateOriginalUpload(
   return { resumed: false, session: mapSession(row) };
 }
 
-export async function getPrivateOriginalUpload(db: D1Db, galleryId: string, sessionId: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function getPrivateOriginalUpload(db: D1Db, galleryId: string, sessionId: string, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const row = await sessionRow(db, galleryId, sessionId, workspaceId);
   if (!row) throw new Error("Upload session not found.");
   return mapSession(row);
@@ -232,12 +237,13 @@ export async function uploadPrivateOriginalPart(
   sessionId: string,
   partNumber: number,
   body: ArrayBuffer,
+  workspaceIdInput?: string,
 ) {
   if (!privateBucket) throw new Error("Private R2 binding MKB_PRIVATE_ASSETS is not configured.");
   if (!Number.isInteger(partNumber) || partNumber < 1 || partNumber > 10000) throw new Error("Invalid multipart part number.");
   if (!body.byteLength || body.byteLength > PART_SIZE) throw new Error("Upload part is empty or exceeds the configured part size.");
 
-  const workspaceId = await getDefaultWorkspaceId(db);
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const row = await sessionRow(db, galleryId, sessionId, workspaceId);
   if (!row) throw new Error("Upload session not found.");
   if (!['created', 'uploading'].includes(text(row.status))) throw new Error("Upload session is no longer accepting parts.");
@@ -263,9 +269,10 @@ export async function completePrivateOriginalUpload(
   galleryId: string,
   sessionId: string,
   input: any,
+  workspaceIdInput?: string,
 ) {
   if (!privateBucket) throw new Error("Private R2 binding MKB_PRIVATE_ASSETS is not configured.");
-  const workspaceId = await getDefaultWorkspaceId(db);
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const row = await sessionRow(db, galleryId, sessionId, workspaceId);
   if (!row) throw new Error("Upload session not found.");
   if (!['created', 'uploading'].includes(text(row.status))) {
@@ -301,9 +308,10 @@ export async function uploadPrivateOriginalDerivatives(
   galleryId: string,
   sessionId: string,
   input: { webFile: File; thumbFile: File; width: number; height: number },
+  workspaceIdInput?: string,
 ) {
   if (!publicBucket) throw new Error("Public R2 binding MKB_IMAGES is not configured.");
-  const workspaceId = await getDefaultWorkspaceId(db);
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const row = await sessionRow(db, galleryId, sessionId, workspaceId);
   if (!row) throw new Error("Upload session not found.");
   if (!['processing', 'complete'].includes(text(row.status))) throw new Error("Original upload must complete before derivatives are stored.");
@@ -374,8 +382,8 @@ export async function uploadPrivateOriginalDerivatives(
   return mapSession(await sessionRow(db, galleryId, sessionId, workspaceId));
 }
 
-export async function failPrivateOriginalUpload(db: D1Db, galleryId: string, sessionId: string, message: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function failPrivateOriginalUpload(db: D1Db, galleryId: string, sessionId: string, message: string, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   await db.prepare(`
     UPDATE asset_upload_sessions
     SET status = 'failed', error_message = ?, updated_at = CURRENT_TIMESTAMP

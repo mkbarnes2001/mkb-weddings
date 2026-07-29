@@ -185,7 +185,7 @@ async function sendMagicLinkEmail(
 export async function requestClientMagicLink(
   db: D1Db,
   env: EmailEnv,
-  input: { galleryToken: string; email: string; visitorKey?: string; origin: string },
+  input: { galleryToken: string; email: string; visitorKey?: string; origin: string; workspaceId?: string },
 ) {
   const email = text(input.email);
   if (!validEmail(email)) return { status: 400, body: { error: "Enter a valid email address." } };
@@ -194,9 +194,9 @@ export async function requestClientMagicLink(
            COALESCE(ws.business_name, 'Photography Gallery') AS business_name
     FROM client_galleries cg
     LEFT JOIN workspace_settings ws ON ws.workspace_id = cg.workspace_id
-    WHERE cg.access_token = ? AND cg.status = 'live'
+    WHERE cg.access_token = ? AND cg.workspace_id = ? AND cg.status = 'live'
     LIMIT 1
-  `).bind(text(input.galleryToken)).first();
+  `).bind(text(input.galleryToken), text(input.workspaceId)).first();
   if (!gallery) return { status: 404, body: { error: "Gallery not found." } };
   const expiresAt = text(gallery.expires_at);
   if (expiresAt && Number.isFinite(Date.parse(expiresAt)) && Date.parse(expiresAt) <= Date.now()) {

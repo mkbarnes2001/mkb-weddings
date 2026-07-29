@@ -5,18 +5,16 @@ type Env = {
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const row = await context.env.MKB_DB.prepare(`
-      SELECT
-        (SELECT COUNT(*) FROM venues) AS venues,
-        (SELECT COUNT(*) FROM weddings) AS weddings,
-        (SELECT COUNT(*) FROM images) AS images,
-        (SELECT COUNT(*) FROM counties) AS counties,
-        (SELECT COUNT(*) FROM moments) AS moments
-    `).first<Record<string, number>>();
+      SELECT value AS schema_version
+      FROM schema_meta
+      WHERE key = 'schema_version'
+      LIMIT 1
+    `).first<Record<string, string>>();
 
     return Response.json({
       ok: true,
       binding: "MKB_DB",
-      counts: row || {},
+      schemaVersion: String(row?.schema_version || ""),
     });
   } catch (error) {
     return Response.json(

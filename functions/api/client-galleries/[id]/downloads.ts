@@ -4,6 +4,7 @@ import {
 } from "../../../../serverless/client-gallery-d1";
 import { createStoredZipStream } from "../../../../serverless/streaming-zip";
 import { adminApiRequestAllowed, errorResponse, notFoundResponse } from "../../../../serverless/venue-d1";
+import { resolveAdminWorkspaceId } from "../../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -39,7 +40,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const source = url.searchParams.get("source") || "favourites";
     const group = url.searchParams.get("group") || "combined";
     const selectionId = url.searchParams.get("selectionId") || "";
-    const result = await resolveAdminClientGalleryBulkDownload(context.env.MKB_DB, galleryId, { source, group, selectionId });
+    const workspaceId = await resolveAdminWorkspaceId(context);
+    const result = await resolveAdminClientGalleryBulkDownload(context.env.MKB_DB, galleryId, { source, group, selectionId }, workspaceId);
     if (!result.assets.length) {
       return Response.json({ error: "No full-resolution originals are available for this download." }, { status: 404 });
     }

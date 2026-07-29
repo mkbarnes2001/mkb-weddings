@@ -1,14 +1,17 @@
+import { resolvePublicWorkspaceId } from "../../../../serverless/tenant-context";
+
 type Env = { MKB_DB: D1Database };
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
+    const workspaceId = await resolvePublicWorkspaceId(context.env.MKB_DB, context.request);
     const slug = String(context.params.slug || "").trim().toLowerCase();
     const collection: any = await context.env.MKB_DB.prepare(`
       SELECT * FROM custom_collections
-      WHERE slug = ? AND status = 'active'
+      WHERE slug = ? AND workspace_id = ? AND status = 'active'
       LIMIT 1
     `)
-      .bind(slug)
+      .bind(slug, workspaceId)
       .first();
 
     if (!collection) {
@@ -27,11 +30,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         i.caption,
         i.wedding_slug
       FROM collection_images ci
-      JOIN images i ON i.asset_key = ci.asset_key
-      WHERE ci.collection_id = ? AND ci.hidden = 0
+      JOIN images i ON i.asset_key = ci.asset_key AND i.workspace_id = ci.workspace_id
+      WHERE ci.collection_id = ? AND ci.workspace_id = ? AND ci.hidden = 0
       ORDER BY ci.sort_order ASC, i.filename COLLATE NOCASE ASC
     `)
-      .bind(String(collection.id || ""))
+      .bind(String(collection.id || ""), workspaceId)
       .all();
 
     const images = (result.results || []).map((row: any) => ({

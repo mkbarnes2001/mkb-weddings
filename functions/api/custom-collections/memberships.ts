@@ -3,6 +3,7 @@ import {
   errorResponse,
   notFoundResponse,
 } from "../../../serverless/venue-d1";
+import { resolveAdminWorkspaceId } from "../../../serverless/tenant-context";
 
 type Env = { MKB_DB: D1Database; ADMIN_API_ENABLED?: string };
 
@@ -25,20 +26,21 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const [collectionResult, membershipResult] = await Promise.all([
       context.env.MKB_DB.prepare(`
         SELECT id, slug, name, status, sort_order
         FROM custom_collections
-        WHERE status <> 'archived'
+        WHERE workspace_id = ? AND status <> 'archived'
         ORDER BY sort_order ASC, name COLLATE NOCASE ASC
-      `).all(),
+      `).bind(workspaceId).all(),
       context.env.MKB_DB.prepare(`
         SELECT ci.asset_key, ci.collection_id
         FROM collection_images ci
-        JOIN custom_collections cc ON cc.id = ci.collection_id
-        WHERE cc.status <> 'archived'
+        JOIN custom_collections cc ON cc.id = ci.collection_id AND cc.workspace_id = ci.workspace_id
+        WHERE cc.workspace_id = ? AND cc.status <> 'archived'
         ORDER BY cc.sort_order ASC, cc.name COLLATE NOCASE ASC
-      `).all(),
+      `).bind(workspaceId).all(),
     ]);
 
     const collections = (collectionResult.results || []).map((row: any) => ({
@@ -70,6 +72,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const body: any = await context.request.json();
     const rawUpdates = Array.isArray(body?.updates) ? body.updates : [];
     const updates: MembershipUpdate[] = rawUpdates
@@ -86,8 +89,8 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     const collectionResult = await context.env.MKB_DB.prepare(`
       SELECT id
       FROM custom_collections
-      WHERE status <> 'archived'
-    `).all();
+      WHERE workspace_id = ? AND status <> 'archived'
+    `).bind(workspaceId).all();
     const assignableIds = new Set(
       (collectionResult.results || []).map((row: any) => text(row.id)).filter(Boolean),
     );
@@ -105,14 +108,14 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         context.env.MKB_DB.prepare(`
           SELECT asset_key
           FROM images
-          WHERE asset_key IN (${placeholders})
-        `).bind(...chunk).all(),
+          WHERE workspace_id = ? AND asset_key IN (${placeholders})
+        `).bind(workspaceId, ...chunk).all(),
         context.env.MKB_DB.prepare(`
           SELECT ci.asset_key, ci.collection_id, ci.sort_order, ci.hidden, cc.status
           FROM collection_images ci
-          JOIN custom_collections cc ON cc.id = ci.collection_id
-          WHERE ci.asset_key IN (${placeholders})
-        `).bind(...chunk).all(),
+          JOIN custom_collections cc ON cc.id = ci.collection_id AND cc.workspace_id = ci.workspace_id
+          WHERE ci.workspace_id = ? AND ci.asset_key IN (${placeholders})
+        `).bind(workspaceId, ...chunk).all(),
       ]);
 
       for (const row of assetResult.results || []) {
@@ -125,8 +128,9 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     const maxOrderResult = await context.env.MKB_DB.prepare(`
       SELECT collection_id, COALESCE(MAX(sort_order), 0) AS max_order
       FROM collection_images
+      WHERE workspace_id = ?
       GROUP BY collection_id
-    `).all();
+    `).bind(workspaceId).all();
     const nextOrder = new Map<string, number>();
     for (const row of maxOrderResult.results || []) {
       nextOrder.set(text((row as any).collection_id), Number((row as any).max_order || 0));
@@ -157,8 +161,8 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         statements.push(
           context.env.MKB_DB.prepare(`
             DELETE FROM collection_images
-            WHERE collection_id = ? AND asset_key = ?
-          `).bind(collectionId, update.assetKey),
+            WHERE collection_id = ? AND asset_key = ? AND workspace_id = ?
+          `).bind(collectionId, update.assetKey, workspaceId),
         );
       }
 
@@ -168,9 +172,9 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         nextOrder.set(collectionId, order);
         statements.push(
           context.env.MKB_DB.prepare(`
-            INSERT OR IGNORE INTO collection_images (collection_id, asset_key, sort_order, hidden)
-            VALUES (?, ?, ?, 0)
-          `).bind(collectionId, update.assetKey, order),
+            INSERT OR IGNORE INTO collection_images (collection_id, asset_key, sort_order, hidden, workspace_id)
+            VALUES (?, ?, ?, 0, ?)
+          `).bind(collectionId, update.assetKey, order, workspaceId),
         );
       }
 

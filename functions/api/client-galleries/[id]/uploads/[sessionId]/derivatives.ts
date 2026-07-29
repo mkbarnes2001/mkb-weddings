@@ -1,4 +1,5 @@
 import { adminApiRequestAllowed, errorResponse, notFoundResponse } from "../../../../../../serverless/venue-d1";
+import { resolveAdminWorkspaceId } from "../../../../../../serverless/tenant-context";
 import { uploadPrivateOriginalDerivatives } from "../../../../../../serverless/private-original-d1";
 
 type Env = {
@@ -33,6 +34,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         width: Number(text(form.get("width")) || 0),
         height: Number(text(form.get("height")) || 0),
       },
+      await resolveAdminWorkspaceId(context),
     );
     return Response.json({ ok: true, session }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {

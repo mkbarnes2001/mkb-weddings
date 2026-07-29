@@ -1,3 +1,5 @@
+import { resolvePublicWorkspaceId, workspaceContentKey } from "../../../serverless/tenant-context";
+
 type Env = { MKB_DB: D1Database };
 
 const SETTINGS_SLUG = "gallery-landing-settings";
@@ -15,12 +17,14 @@ function uniqueStrings(values: unknown) {
   return [...new Set((Array.isArray(values) ? values : []).map((value) => String(value || "").trim()).filter(Boolean))];
 }
 
-export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
+export const onRequestGet: PagesFunction<Env> = async ({ env, request }) => {
   try {
+    const workspaceId = await resolvePublicWorkspaceId(env.MKB_DB, request);
+    const settingsKey = workspaceContentKey(workspaceId, SETTINGS_SLUG);
     const row: any = await env.MKB_DB.prepare(
-      `SELECT document_json FROM content_pages WHERE slug = ? LIMIT 1`,
+      `SELECT document_json FROM content_pages WHERE slug = ? AND workspace_id = ? LIMIT 1`,
     )
-      .bind(SETTINGS_SLUG)
+      .bind(settingsKey, workspaceId)
       .first();
 
     const stored = parse(row?.document_json, {});

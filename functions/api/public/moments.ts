@@ -1,3 +1,5 @@
+import { resolvePublicWorkspaceId } from "../../../serverless/tenant-context";
+
 type Env = { MKB_DB: D1Database };
 
 function parse(value: unknown, fallback: any) {
@@ -29,14 +31,15 @@ function matchesMoment(values: unknown, row: any, doc: any) {
   });
 }
 
-export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
+export const onRequestGet: PagesFunction<Env> = async ({ env, request }) => {
   try {
+    const workspaceId = await resolvePublicWorkspaceId(env.MKB_DB, request);
     const [momentResult, imageResult] = await Promise.all([
       env.MKB_DB.prepare(`
         SELECT * FROM moments
-        WHERE status = 'active' AND show_on_landing = 1
+        WHERE workspace_id = ? AND status = 'active' AND show_on_landing = 1
         ORDER BY sort_order ASC, name COLLATE NOCASE ASC
-      `).all(),
+      `).bind(workspaceId).all(),
       env.MKB_DB.prepare(`
         SELECT
           vi.asset_key,
@@ -49,9 +52,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
           i.full_src,
           i.alt
         FROM venue_images vi
-        JOIN images i ON i.asset_key = vi.asset_key
+        JOIN images i ON i.asset_key = vi.asset_key AND i.workspace_id = vi.workspace_id
+        WHERE vi.workspace_id = ?
         ORDER BY vi.sort_order ASC
-      `).all(),
+      `).bind(workspaceId).all(),
     ]);
 
     const rows = (imageResult.results || []).filter((row: any) => {

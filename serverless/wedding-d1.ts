@@ -205,7 +205,7 @@ function factsFromStoryRows(rows: any[]) {
   return facts;
 }
 
-async function replaceSuppliers(db: D1Db, slug: string, suppliers: any[]) {
+async function replaceSuppliers(db: D1Db, slug: string, suppliers: any[], workspaceId: string) {
   const cleanRows: any[] = [];
 
   for (const supplier of suppliers || []) {
@@ -222,7 +222,7 @@ async function replaceSuppliers(db: D1Db, slug: string, suppliers: any[]) {
       phone: clean.phone,
       location: clean.location,
       county: clean.county,
-    });
+    }, workspaceId);
     cleanRows.push({
       ...clean,
       supplierId: master?.id || clean.supplierId,
@@ -234,26 +234,26 @@ async function replaceSuppliers(db: D1Db, slug: string, suppliers: any[]) {
   }
 
   const statements: any[] = [
-    db.prepare(`DELETE FROM wedding_suppliers WHERE wedding_slug = ?`).bind(slug),
-    db.prepare(`DELETE FROM wedding_supplier_links WHERE wedding_slug = ?`).bind(slug),
+    db.prepare(`DELETE FROM wedding_suppliers WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
+    db.prepare(`DELETE FROM wedding_supplier_links WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
   ];
 
   cleanRows.forEach((clean, index) => {
     statements.push(
       db.prepare(`
         INSERT INTO wedding_suppliers (
-          wedding_slug, sort_order, role, name, website, instagram
-        ) VALUES (?, ?, ?, ?, ?, ?)
+          wedding_slug, workspace_id, sort_order, role, name, website, instagram
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
       `).bind(
-        slug, index + 1, clean.role, clean.name, clean.website, clean.instagram,
+        slug, workspaceId, index + 1, clean.role, clean.name, clean.website, clean.instagram,
       ),
     );
     if (clean.supplierId) {
       statements.push(
         db.prepare(`
-          INSERT INTO wedding_supplier_links (wedding_slug, supplier_id, role, sort_order)
-          VALUES (?, ?, ?, ?)
-        `).bind(slug, clean.supplierId, clean.role, index + 1),
+          INSERT INTO wedding_supplier_links (wedding_slug, workspace_id, supplier_id, role, sort_order)
+          VALUES (?, ?, ?, ?, ?)
+        `).bind(slug, workspaceId, clean.supplierId, clean.role, index + 1),
       );
     }
   });
@@ -262,34 +262,36 @@ async function replaceSuppliers(db: D1Db, slug: string, suppliers: any[]) {
   return cleanRows;
 }
 
-export async function listAdminWeddings(db: D1Db) {
+export async function listAdminWeddings(db: D1Db, workspaceId = "workspace_mkb_weddings") {
   const result = await db.prepare(`
     SELECT *
     FROM weddings
+    WHERE workspace_id = ?
     ORDER BY CASE WHEN story_sort_order > 0 THEN 0 ELSE 1 END, story_sort_order ASC, couple COLLATE NOCASE ASC, title COLLATE NOCASE ASC
-  `).all();
+  `).bind(workspaceId).all();
 
   return (result.results || []).map(hydrateWedding);
 }
 
-export async function getAdminWedding(db: D1Db, slug: string) {
-  const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ?`).bind(slug).first();
+export async function getAdminWedding(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+  const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   return row ? hydrateWedding(row) : null;
 }
 
-export async function createAdminWedding(db: D1Db, incoming: any) {
+export async function createAdminWedding(db: D1Db, incoming: any, workspaceId = "workspace_mkb_weddings") {
   const wedding = cleanWedding(incoming);
-  const exists = await db.prepare(`SELECT slug FROM weddings WHERE slug = ?`).bind(wedding.slug).first();
+  const exists = await db.prepare(`SELECT slug FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(wedding.slug, workspaceId).first();
   if (exists) throw httpError("A wedding with this slug already exists.", 409);
 
   await db.prepare(`
     INSERT INTO weddings (
-      slug, source, title, couple, venue, venue_slug, venue_id, wedding_date,
+      slug, workspace_id, source, title, couple, venue, venue_slug, venue_id, wedding_date,
       excerpt, intro, status, story_enabled, story_status, story_published_at,
       seo_title, seo_description, document_json, published_json, published_at, updated_at
-    ) VALUES (?, 'd1', ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'draft', NULL, ?, ?, ?, '', NULL, CURRENT_TIMESTAMP)
+    ) VALUES (?, ?, 'd1', ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'draft', NULL, ?, ?, ?, '', NULL, CURRENT_TIMESTAMP)
   `).bind(
     wedding.slug,
+    workspaceId,
     wedding.title,
     wedding.couple,
     wedding.venue,
@@ -304,19 +306,19 @@ export async function createAdminWedding(db: D1Db, incoming: any) {
     JSON.stringify(wedding),
   ).run();
 
-  await replaceSuppliers(db, wedding.slug, wedding.suppliers || []);
-  return getAdminWedding(db, wedding.slug);
+  await replaceSuppliers(db, wedding.slug, wedding.suppliers || [], workspaceId);
+  return getAdminWedding(db, wedding.slug, workspaceId);
 }
 
-export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: any) {
-  const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ?`).bind(routeSlug).first();
+export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: any, workspaceId = "workspace_mkb_weddings") {
+  const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(routeSlug, workspaceId).first();
   if (!row) throw httpError("Wedding not found.", 404);
 
   const existing = hydrateWedding(row);
   const wedding = cleanWedding(incoming, existing);
 
   if (wedding.slug !== routeSlug) {
-    const conflict = await db.prepare(`SELECT slug FROM weddings WHERE slug = ?`).bind(wedding.slug).first();
+    const conflict = await db.prepare(`SELECT slug FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(wedding.slug, workspaceId).first();
     if (conflict) throw httpError("A wedding with this slug already exists.", 409);
   }
 
@@ -324,15 +326,15 @@ export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: 
 
   if (wedding.slug !== routeSlug) {
     statements.push(
-      db.prepare(`UPDATE images SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
-      db.prepare(`UPDATE wedding_images SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
-      db.prepare(`UPDATE story_images SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
-      db.prepare(`UPDATE published_story_images SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
-      db.prepare(`UPDATE wedding_suppliers SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
-      db.prepare(`UPDATE wedding_supplier_links SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
-      db.prepare(`UPDATE asset_wedding_links SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
-      db.prepare(`UPDATE client_galleries SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
-      db.prepare(`UPDATE wedding_preview_sets SET wedding_slug = ? WHERE wedding_slug = ?`).bind(wedding.slug, routeSlug),
+      db.prepare(`UPDATE images SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
+      db.prepare(`UPDATE wedding_images SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
+      db.prepare(`UPDATE story_images SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
+      db.prepare(`UPDATE published_story_images SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
+      db.prepare(`UPDATE wedding_suppliers SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
+      db.prepare(`UPDATE wedding_supplier_links SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
+      db.prepare(`UPDATE asset_wedding_links SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
+      db.prepare(`UPDATE client_galleries SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
+      db.prepare(`UPDATE wedding_preview_sets SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
     );
   }
 
@@ -354,7 +356,7 @@ export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: 
         seo_description = ?,
         document_json = ?,
         updated_at = CURRENT_TIMESTAMP
-      WHERE slug = ?
+      WHERE slug = ? AND workspace_id = ?
     `).bind(
       wedding.slug,
       wedding.title,
@@ -370,16 +372,17 @@ export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: 
       wedding.seo.description,
       JSON.stringify(wedding),
       routeSlug,
+      workspaceId,
     ),
   );
 
   await runBatches(db, statements);
-  await replaceSuppliers(db, wedding.slug, wedding.suppliers || []);
-  return getAdminWedding(db, wedding.slug);
+  await replaceSuppliers(db, wedding.slug, wedding.suppliers || [], workspaceId);
+  return getAdminWedding(db, wedding.slug, workspaceId);
 }
 
-export async function archiveAdminWedding(db: D1Db, slug: string) {
-  const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ?`).bind(slug).first();
+export async function archiveAdminWedding(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+  const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!row) throw httpError("Wedding not found.", 404);
 
   const document = json(row.document_json, {} as any);
@@ -396,22 +399,22 @@ export async function archiveAdminWedding(db: D1Db, slug: string) {
       story_status = 'archived',
       document_json = ?,
       updated_at = CURRENT_TIMESTAMP
-    WHERE slug = ?
-  `).bind(JSON.stringify(nextDocument), slug).run();
+    WHERE slug = ? AND workspace_id = ?
+  `).bind(JSON.stringify(nextDocument), slug, workspaceId).run();
 
-  return getAdminWedding(db, slug);
+  return getAdminWedding(db, slug, workspaceId);
 }
 
-export async function deleteAdminWeddingPermanently(db: D1Db, slug: string) {
-  const row = await db.prepare(`SELECT slug, title, couple FROM weddings WHERE slug = ?`).bind(slug).first();
+export async function deleteAdminWeddingPermanently(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+  const row = await db.prepare(`SELECT slug, title, couple FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!row) throw httpError("Wedding not found.", 404);
 
   const liveGalleryResult = await db.prepare(`
     SELECT id, title
     FROM client_galleries
-    WHERE wedding_slug = ? AND status = 'live'
+    WHERE wedding_slug = ? AND workspace_id = ? AND status = 'live'
     ORDER BY updated_at DESC
-  `).bind(slug).all();
+  `).bind(slug, workspaceId).all();
   const liveGalleries = liveGalleryResult?.results || [];
   if (liveGalleries.length) {
     throw httpError(
@@ -424,27 +427,27 @@ export async function deleteAdminWeddingPermanently(db: D1Db, slug: string) {
   const statements = [
     // Preserve Client Galleries and all canonical/private assets, but detach non-live galleries
     // from the wedding being removed.
-    db.prepare(`UPDATE client_galleries SET wedding_slug = NULL, updated_at = CURRENT_TIMESTAMP WHERE wedding_slug = ?`).bind(slug),
+    db.prepare(`UPDATE client_galleries SET wedding_slug = NULL, updated_at = CURRENT_TIMESTAMP WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
 
     // Remove wedding-specific Preview Set membership before deleting the parent sets.
     db.prepare(`
       DELETE FROM wedding_preview_assets
-      WHERE preview_set_id IN (SELECT id FROM wedding_preview_sets WHERE wedding_slug = ?)
-    `).bind(slug),
-    db.prepare(`DELETE FROM wedding_preview_sets WHERE wedding_slug = ?`).bind(slug),
+      WHERE preview_set_id IN (SELECT id FROM wedding_preview_sets WHERE wedding_slug = ? AND workspace_id = ?)
+    `).bind(slug, workspaceId),
+    db.prepare(`DELETE FROM wedding_preview_sets WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
 
     // Remove relationships only. Canonical assets and R2 objects are deliberately retained.
-    db.prepare(`DELETE FROM asset_wedding_links WHERE wedding_slug = ?`).bind(slug),
-    db.prepare(`DELETE FROM wedding_supplier_links WHERE wedding_slug = ?`).bind(slug),
-    db.prepare(`DELETE FROM wedding_suppliers WHERE wedding_slug = ?`).bind(slug),
-    db.prepare(`DELETE FROM published_story_images WHERE wedding_slug = ?`).bind(slug),
-    db.prepare(`DELETE FROM story_images WHERE wedding_slug = ?`).bind(slug),
-    db.prepare(`DELETE FROM wedding_images WHERE wedding_slug = ?`).bind(slug),
+    db.prepare(`DELETE FROM asset_wedding_links WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
+    db.prepare(`DELETE FROM wedding_supplier_links WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
+    db.prepare(`DELETE FROM wedding_suppliers WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
+    db.prepare(`DELETE FROM published_story_images WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
+    db.prepare(`DELETE FROM story_images WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
+    db.prepare(`DELETE FROM wedding_images WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
 
     // Legacy image rows remain available to the Asset Library; only their wedding ownership is cleared.
-    db.prepare(`UPDATE images SET wedding_slug = '', updated_at = CURRENT_TIMESTAMP WHERE wedding_slug = ?`).bind(slug),
+    db.prepare(`UPDATE images SET wedding_slug = '', updated_at = CURRENT_TIMESTAMP WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
 
-    db.prepare(`DELETE FROM weddings WHERE slug = ?`).bind(slug),
+    db.prepare(`DELETE FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
   ];
 
   await runBatches(db, statements);
@@ -458,7 +461,7 @@ export async function deleteAdminWeddingPermanently(db: D1Db, slug: string) {
   };
 }
 
-export async function getWeddingImages(db: D1Db, slug: string) {
+export async function getWeddingImages(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
   const result = await db.prepare(`
     SELECT
       i.asset_key,
@@ -480,13 +483,14 @@ export async function getWeddingImages(db: D1Db, slug: string) {
       CASE WHEN si.asset_key IS NULL THEN 0 ELSE 1 END AS in_story
     FROM images i
     LEFT JOIN wedding_images wi
-      ON wi.wedding_slug = ? AND wi.asset_key = i.asset_key
+      ON wi.wedding_slug = ? AND wi.asset_key = i.asset_key AND wi.workspace_id = i.workspace_id
     LEFT JOIN story_images si
-      ON si.wedding_slug = ? AND si.asset_key = i.asset_key
+      ON si.wedding_slug = ? AND si.asset_key = i.asset_key AND si.workspace_id = i.workspace_id
     WHERE i.wedding_slug = ?
+      AND i.workspace_id = ?
       AND (wi.asset_key IS NOT NULL OR si.asset_key IS NOT NULL)
     ORDER BY sort_order ASC, i.filename COLLATE NOCASE ASC
-  `).bind(slug, slug, slug).all();
+  `).bind(slug, slug, slug, workspaceId).all();
 
   return {
     schemaVersion: 1,
@@ -521,16 +525,16 @@ export async function getWeddingImages(db: D1Db, slug: string) {
   };
 }
 
-export async function saveWeddingImages(db: D1Db, slug: string, document: any) {
-  const wedding = await db.prepare(`SELECT slug FROM weddings WHERE slug = ?`).bind(slug).first();
+export async function saveWeddingImages(db: D1Db, slug: string, document: any, workspaceId = "workspace_mkb_weddings") {
+  const wedding = await db.prepare(`SELECT slug FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!wedding) throw httpError("Wedding not found.", 404);
 
   const incoming = Array.isArray(document?.images) ? document.images : [];
   const existing = await db.prepare(`
     SELECT asset_key, image_id, filename
     FROM images
-    WHERE wedding_slug = ?
-  `).bind(slug).all();
+    WHERE wedding_slug = ? AND workspace_id = ?
+  `).bind(slug, workspaceId).all();
 
   const byId = new Map<string, any>();
   const byFilename = new Map<string, any[]>();
@@ -545,8 +549,8 @@ export async function saveWeddingImages(db: D1Db, slug: string, document: any) {
   }
 
   const statements: any[] = [
-    db.prepare(`DELETE FROM wedding_images WHERE wedding_slug = ?`).bind(slug),
-    db.prepare(`DELETE FROM story_images WHERE wedding_slug = ?`).bind(slug),
+    db.prepare(`DELETE FROM wedding_images WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
+    db.prepare(`DELETE FROM story_images WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
   ];
 
   const resolved = new Map<
@@ -612,10 +616,11 @@ export async function saveWeddingImages(db: D1Db, slug: string, document: any) {
     statements.push(
       db.prepare(`
         INSERT INTO wedding_images (
-          wedding_slug, asset_key, sort_order, is_cover, hidden, rating, collections_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+          wedding_slug, workspace_id, asset_key, sort_order, is_cover, hidden, rating, collections_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         slug,
+        workspaceId,
         match.asset_key,
         order,
         item?.isCover ? 1 : 0,
@@ -629,9 +634,9 @@ export async function saveWeddingImages(db: D1Db, slug: string, document: any) {
       statements.push(
         db.prepare(`
           INSERT INTO story_images (
-            wedding_slug, asset_key, sort_order, is_cover
-          ) VALUES (?, ?, ?, ?)
-        `).bind(slug, match.asset_key, order, item?.isCover ? 1 : 0),
+            wedding_slug, workspace_id, asset_key, sort_order, is_cover
+          ) VALUES (?, ?, ?, ?, ?)
+        `).bind(slug, workspaceId, match.asset_key, order, item?.isCover ? 1 : 0),
       );
     }
 
@@ -647,15 +652,15 @@ export async function saveWeddingImages(db: D1Db, slug: string, document: any) {
   };
 }
 
-export async function getWeddingSuppliers(db: D1Db, slug: string) {
+export async function getWeddingSuppliers(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
   const result = await db.prepare(`
     SELECT l.wedding_slug, l.sort_order, l.role, l.supplier_id,
            s.name, s.website, s.instagram, s.email, s.phone, s.location, s.county, s.category
     FROM wedding_supplier_links l
-    JOIN suppliers s ON s.id = l.supplier_id
-    WHERE l.wedding_slug = ?
+    JOIN suppliers s ON s.id = l.supplier_id AND s.workspace_id = l.workspace_id
+    WHERE l.wedding_slug = ? AND l.workspace_id = ?
     ORDER BY l.sort_order ASC, l.role COLLATE NOCASE ASC, s.name COLLATE NOCASE ASC
-  `).bind(slug).all();
+  `).bind(slug, workspaceId).all();
 
   if ((result.results || []).length) {
     return (result.results || []).map((row: any) => ({
@@ -676,9 +681,9 @@ export async function getWeddingSuppliers(db: D1Db, slug: string) {
   const legacy = await db.prepare(`
     SELECT wedding_slug, sort_order, role, name, website, instagram
     FROM wedding_suppliers
-    WHERE wedding_slug = ?
+    WHERE wedding_slug = ? AND workspace_id = ?
     ORDER BY sort_order ASC, role COLLATE NOCASE ASC, name COLLATE NOCASE ASC
-  `).bind(slug).all();
+  `).bind(slug, workspaceId).all();
 
   return (legacy.results || []).map((row: any) => ({
     blogSlug: text(row.wedding_slug), role: text(row.role), name: text(row.name),
@@ -687,14 +692,15 @@ export async function getWeddingSuppliers(db: D1Db, slug: string) {
   }));
 }
 
-export async function listAdminSuppliers(db: D1Db) {
+export async function listAdminSuppliers(db: D1Db, workspaceId = "workspace_mkb_weddings") {
   const result = await db.prepare(`
     SELECT l.wedding_slug, l.sort_order, l.role, l.supplier_id,
            s.name, s.website, s.instagram, s.email, s.phone, s.location, s.county
     FROM wedding_supplier_links l
-    JOIN suppliers s ON s.id = l.supplier_id
+    JOIN suppliers s ON s.id = l.supplier_id AND s.workspace_id = l.workspace_id
+    WHERE l.workspace_id = ?
     ORDER BY l.wedding_slug COLLATE NOCASE ASC, l.sort_order ASC
-  `).all();
+  `).bind(workspaceId).all();
 
   return (result.results || []).map((row: any) => ({
     supplierId: text(row.supplier_id), blogSlug: text(row.wedding_slug), role: text(row.role),
@@ -704,8 +710,8 @@ export async function listAdminSuppliers(db: D1Db) {
   }));
 }
 
-export async function saveWeddingSuppliers(db: D1Db, slug: string, rows: any[]) {
-  const weddingRow = await db.prepare(`SELECT * FROM weddings WHERE slug = ?`).bind(slug).first();
+export async function saveWeddingSuppliers(db: D1Db, slug: string, rows: any[], workspaceId = "workspace_mkb_weddings") {
+  const weddingRow = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!weddingRow) throw httpError("Wedding not found.", 404);
 
   const suppliers = (Array.isArray(rows) ? rows : [])
@@ -722,7 +728,7 @@ export async function saveWeddingSuppliers(db: D1Db, slug: string, rows: any[]) 
   });
   if (validation.length) throw httpError("Supplier validation failed.", 400, validation);
 
-  const savedSuppliers = await replaceSuppliers(db, slug, suppliers);
+  const savedSuppliers = await replaceSuppliers(db, slug, suppliers, workspaceId);
 
   const document = json(weddingRow.document_json, {} as any);
   const nextDocument = {
@@ -734,8 +740,8 @@ export async function saveWeddingSuppliers(db: D1Db, slug: string, rows: any[]) 
   await db.prepare(`
     UPDATE weddings
     SET document_json = ?, updated_at = CURRENT_TIMESTAMP
-    WHERE slug = ?
-  `).bind(JSON.stringify(nextDocument), slug).run();
+    WHERE slug = ? AND workspace_id = ?
+  `).bind(JSON.stringify(nextDocument), slug, workspaceId).run();
 
   return {
     ok: true,
@@ -746,8 +752,8 @@ export async function saveWeddingSuppliers(db: D1Db, slug: string, rows: any[]) 
   };
 }
 
-export async function getWeddingStory(db: D1Db, slug: string) {
-  const wedding = await getAdminWedding(db, slug);
+export async function getWeddingStory(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+  const wedding = await getAdminWedding(db, slug, workspaceId);
   if (!wedding) return null;
 
   return {
@@ -761,8 +767,8 @@ export async function getWeddingStory(db: D1Db, slug: string) {
   };
 }
 
-export async function saveWeddingStory(db: D1Db, slug: string, story: any) {
-  const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ?`).bind(slug).first();
+export async function saveWeddingStory(db: D1Db, slug: string, story: any, workspaceId = "workspace_mkb_weddings") {
+  const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!row) throw httpError("Wedding not found.", 404);
 
   const title = text(story?.title);
@@ -795,25 +801,26 @@ export async function saveWeddingStory(db: D1Db, slug: string, story: any) {
       intro = ?,
       document_json = ?,
       updated_at = CURRENT_TIMESTAMP
-    WHERE slug = ?
+    WHERE slug = ? AND workspace_id = ?
   `).bind(
     nextDocument.title,
     nextDocument.excerpt,
     nextDocument.intro,
     JSON.stringify(nextDocument),
     slug,
+    workspaceId,
   ).run();
 
   return {
     ok: true,
     slug,
-    story: await getWeddingStory(db, slug),
+    story: await getWeddingStory(db, slug, workspaceId),
     backupPath: null,
     weddingBackupPath: null,
   };
 }
 
-async function publicImages(db: D1Db, slug: string, published = true) {
+async function publicImages(db: D1Db, slug: string, published = true, workspaceId = "workspace_mkb_weddings") {
   const table = published ? "published_story_images" : "story_images";
   const result = await db.prepare(`
     SELECT
@@ -829,10 +836,10 @@ async function publicImages(db: D1Db, slug: string, published = true) {
       i.tags_json,
       i.ai_tags_json
     FROM ${table} si
-    JOIN images i ON i.asset_key = si.asset_key
-    WHERE si.wedding_slug = ?
+    JOIN images i ON i.asset_key = si.asset_key AND i.workspace_id = si.workspace_id
+    WHERE si.wedding_slug = ? AND si.workspace_id = ?
     ORDER BY si.sort_order ASC, i.filename COLLATE NOCASE ASC
-  `).bind(slug).all();
+  `).bind(slug, workspaceId).all();
 
   return (result.results || [])
     .map((row: any, index: number) => ({
@@ -938,11 +945,11 @@ function publishChecks(wedding: any, images: any[]) {
   return { checks, cover };
 }
 
-export async function getWeddingPublishPreview(db: D1Db, slug: string) {
-  const wedding = await getAdminWedding(db, slug);
+export async function getWeddingPublishPreview(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+  const wedding = await getAdminWedding(db, slug, workspaceId);
   if (!wedding) throw httpError("Wedding not found.", 404);
 
-  const images = await publicImages(db, slug, false);
+  const images = await publicImages(db, slug, false, workspaceId);
   const { checks, cover } = publishChecks(wedding, images);
   const required = checks.filter((check) => check.severity === "required");
   const recommended = checks.filter((check) => check.severity === "recommended");
@@ -972,8 +979,8 @@ export async function getWeddingPublishPreview(db: D1Db, slug: string) {
   };
 }
 
-export async function publishAdminWedding(db: D1Db, slug: string, storyEnabled: boolean) {
-  const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ?`).bind(slug).first();
+export async function publishAdminWedding(db: D1Db, slug: string, storyEnabled: boolean, workspaceId = "workspace_mkb_weddings") {
+  const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!row) throw httpError("Wedding not found.", 404);
 
   const wedding = hydrateWedding(row);
@@ -985,8 +992,8 @@ export async function publishAdminWedding(db: D1Db, slug: string, storyEnabled: 
         story_enabled = 0,
         story_status = 'draft',
         updated_at = CURRENT_TIMESTAMP
-      WHERE slug = ?
-    `).bind(slug).run();
+      WHERE slug = ? AND workspace_id = ?
+    `).bind(slug, workspaceId).run();
 
     return {
       weddingSlug: slug,
@@ -1013,7 +1020,7 @@ export async function publishAdminWedding(db: D1Db, slug: string, storyEnabled: 
     };
   }
 
-  const preview = await getWeddingPublishPreview(db, slug);
+  const preview = await getWeddingPublishPreview(db, slug, workspaceId);
   const failed = preview.checks.filter((check: any) => check.severity === "required" && !check.passed);
   if (failed.length) {
     throw httpError(
@@ -1034,15 +1041,15 @@ export async function publishAdminWedding(db: D1Db, slug: string, storyEnabled: 
   };
 
   const statements: any[] = [
-    db.prepare(`DELETE FROM published_story_images WHERE wedding_slug = ?`).bind(slug),
+    db.prepare(`DELETE FROM published_story_images WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
     db.prepare(`
       INSERT INTO published_story_images (
-        wedding_slug, asset_key, sort_order, is_cover
+        wedding_slug, workspace_id, asset_key, sort_order, is_cover
       )
-      SELECT wedding_slug, asset_key, sort_order, is_cover
+      SELECT wedding_slug, workspace_id, asset_key, sort_order, is_cover
       FROM story_images
-      WHERE wedding_slug = ?
-    `).bind(slug),
+      WHERE wedding_slug = ? AND workspace_id = ?
+    `).bind(slug, workspaceId),
     db.prepare(`
       UPDATE weddings SET
         story_enabled = 1,
@@ -1052,8 +1059,8 @@ export async function publishAdminWedding(db: D1Db, slug: string, storyEnabled: 
         published_at = ?,
         status = CASE WHEN status = 'archived' THEN 'draft' ELSE status END,
         updated_at = CURRENT_TIMESTAMP
-      WHERE slug = ?
-    `).bind(now, JSON.stringify(publishedDocument), now, slug),
+      WHERE slug = ? AND workspace_id = ?
+    `).bind(now, JSON.stringify(publishedDocument), now, slug, workspaceId),
   ];
 
   await db.batch(statements);
@@ -1061,8 +1068,8 @@ export async function publishAdminWedding(db: D1Db, slug: string, storyEnabled: 
   const countRow = await db.prepare(`
     SELECT COUNT(*) AS count
     FROM published_story_images
-    WHERE wedding_slug = ?
-  `).bind(slug).first();
+    WHERE wedding_slug = ? AND workspace_id = ?
+  `).bind(slug, workspaceId).first();
 
   return {
     weddingSlug: slug,
@@ -1089,7 +1096,7 @@ export async function publishAdminWedding(db: D1Db, slug: string, storyEnabled: 
   };
 }
 
-export async function saveWeddingListSettings(db: D1Db, items: any[]) {
+export async function saveWeddingListSettings(db: D1Db, items: any[], workspaceId = "workspace_mkb_weddings") {
   const rows = Array.isArray(items) ? items : [];
   const statements: any[] = [];
   for (const item of rows) {
@@ -1097,39 +1104,40 @@ export async function saveWeddingListSettings(db: D1Db, items: any[]) {
     if (!slug) continue;
     const requestedVisible = item?.storyVisible === true;
     if (requestedVisible) {
-      const row = await db.prepare(`SELECT story_enabled, story_status, published_json FROM weddings WHERE slug = ?`).bind(slug).first();
+      const row = await db.prepare(`SELECT story_enabled, story_status, published_json FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
       if (!row) throw httpError(`Wedding not found: ${slug}`, 404);
       if (!Boolean(row.story_enabled) || text(row.story_status) !== "published" || !text(row.published_json)) {
         throw httpError("A wedding story must be published before it can be shown on Stories & Reviews.", 409, [slug]);
       }
     }
     statements.push(
-      db.prepare(`UPDATE weddings SET story_sort_order = ?, story_list_visible = ?, updated_at = CURRENT_TIMESTAMP WHERE slug = ?`)
-        .bind(Number(item?.sortOrder || 0), requestedVisible ? 1 : 0, slug),
+      db.prepare(`UPDATE weddings SET story_sort_order = ?, story_list_visible = ?, updated_at = CURRENT_TIMESTAMP WHERE slug = ? AND workspace_id = ?`)
+        .bind(Number(item?.sortOrder || 0), requestedVisible ? 1 : 0, slug, workspaceId),
     );
   }
   await runBatches(db, statements);
-  return listAdminWeddings(db);
+  return listAdminWeddings(db, workspaceId);
 }
 
-export async function listPublicWeddings(db: D1Db) {
+export async function listPublicWeddings(db: D1Db, workspaceId = "workspace_mkb_weddings") {
   const [allResult, publishedResult] = await Promise.all([
-    db.prepare(`SELECT slug FROM weddings ORDER BY slug ASC`).all(),
+    db.prepare(`SELECT slug FROM weddings WHERE workspace_id = ? ORDER BY slug ASC`).bind(workspaceId).all(),
     db.prepare(`
       SELECT slug, published_json, published_at, story_sort_order
       FROM weddings
-      WHERE story_enabled = 1
+      WHERE workspace_id = ?
+        AND story_enabled = 1
         AND story_status = 'published'
         AND story_list_visible = 1
         AND published_json <> ''
       ORDER BY CASE WHEN story_sort_order > 0 THEN 0 ELSE 1 END, story_sort_order ASC, COALESCE(story_published_at, published_at, updated_at) DESC, slug ASC
-    `).all(),
+    `).bind(workspaceId).all(),
   ]);
 
   const weddings = [] as any[];
   for (const row of publishedResult.results || []) {
     const document = json(row.published_json, {} as any);
-    const images = await publicImages(db, text(row.slug), true);
+    const images = await publicImages(db, text(row.slug), true, workspaceId);
     const cover = images.find((image: any) => image.isCover) || images[0];
 
     weddings.push({
@@ -1168,20 +1176,21 @@ export async function listPublicWeddings(db: D1Db) {
   };
 }
 
-export async function getPublicWedding(db: D1Db, slug: string) {
+export async function getPublicWedding(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
   const row = await db.prepare(`
     SELECT slug, published_json, published_at
     FROM weddings
     WHERE slug = ?
+      AND workspace_id = ?
       AND story_enabled = 1
       AND story_status = 'published'
       AND published_json <> ''
-  `).bind(slug).first();
+  `).bind(slug, workspaceId).first();
 
   if (!row?.published_json) return null;
 
   const document = json(row.published_json, {} as any);
-  const images = await publicImages(db, slug, true);
+  const images = await publicImages(db, slug, true, workspaceId);
 
   return {
     ...document,

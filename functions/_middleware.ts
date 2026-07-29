@@ -1,4 +1,5 @@
 import { getProfessionalContext, professionalAuthEnforced } from "../serverless/platform-auth-d1";
+import { resolvePublicWorkspaceId } from "../serverless/tenant-context";
 
 // functions/middleware.ts
 export async function onRequest(context: any) {
@@ -15,8 +16,8 @@ export async function onRequest(context: any) {
   // every API request in that deployment is session-gated before it reaches a
   // legacy handler. Using the environment gate rather than one hostname also
   // protects the project's pages.dev/preview hostnames. Do not set this flag on
-  // the public Pages project. Legacy data routes are still limited to the MKB
-  // workspace until their workspace migrations are completed.
+  // the public Pages project. Tenant-aware handlers resolve the active business
+  // from the authenticated professional context rather than browser input.
   const authExempt = path.startsWith("/api/platform-auth/") || path === "/api/health" || path === "/api/db-health";
   if (path.startsWith("/api/") && !authExempt && professionalAuthEnforced(context.env as any)) {
     const auth = await getProfessionalContext((context.env as any).MKB_DB, request, context.env as any);
@@ -56,6 +57,8 @@ export async function onRequest(context: any) {
 
   let html = await res.text();
   const origin = "https://www.mkbweddings.co.uk";
+  const db = (context.env as any)?.MKB_DB;
+  const publicWorkspaceId = db ? await resolvePublicWorkspaceId(db, request) : "workspace_mkb_weddings";
 
   // --- Helpers ---
   const escapeHtmlAttr = (s: string) =>
@@ -96,11 +99,10 @@ export async function onRequest(context: any) {
 
   async function getPublishedVenueFromD1(slug: string): Promise<any | null> {
     try {
-      const db = (context.env as any)?.MKB_DB;
       if (!db) return null;
       const row = await db.prepare(
-        "SELECT published_json FROM venues WHERE slug = ? AND status = 'published' AND published_json <> ''",
-      ).bind(slug).first();
+        "SELECT published_json FROM venues WHERE slug = ? AND workspace_id = ? AND status = 'published' AND published_json <> ''",
+      ).bind(slug, publicWorkspaceId).first();
       if (!row?.published_json) return null;
       return JSON.parse(String(row.published_json));
     } catch {
@@ -110,11 +112,10 @@ export async function onRequest(context: any) {
 
   async function getPublishedWeddingFromD1(slug: string): Promise<any | null> {
     try {
-      const db = (context.env as any)?.MKB_DB;
       if (!db) return null;
       const row = await db.prepare(
-        "SELECT published_json FROM weddings WHERE slug = ? AND story_enabled = 1 AND story_status = 'published' AND published_json <> ''",
-      ).bind(slug).first();
+        "SELECT published_json FROM weddings WHERE slug = ? AND workspace_id = ? AND story_enabled = 1 AND story_status = 'published' AND published_json <> ''",
+      ).bind(slug, publicWorkspaceId).first();
       if (!row?.published_json) return null;
       return JSON.parse(String(row.published_json));
     } catch {

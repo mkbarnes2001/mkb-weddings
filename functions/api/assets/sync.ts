@@ -4,6 +4,7 @@ import {
   notFoundResponse,
 } from "../../../serverless/venue-d1";
 import { syncLegacyAssets } from "../../../serverless/asset-library-d1";
+import { resolveAdminWorkspaceId } from "../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -16,7 +17,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   try {
-    const result = await syncLegacyAssets(context.env.MKB_DB);
+    const workspaceId = await resolveAdminWorkspaceId(context as any);
+    const result = await syncLegacyAssets(context.env.MKB_DB, workspaceId);
     return Response.json({ ok: true, ...result });
   } catch (error) {
     return errorResponse(error);

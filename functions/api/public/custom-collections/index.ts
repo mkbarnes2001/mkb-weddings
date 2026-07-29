@@ -1,7 +1,10 @@
+import { resolvePublicWorkspaceId } from "../../../../serverless/tenant-context";
+
 type Env = { MKB_DB: D1Database };
 
-export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
+export const onRequestGet: PagesFunction<Env> = async ({ env, request }) => {
   try {
+    const workspaceId = await resolvePublicWorkspaceId(env.MKB_DB, request);
     const result = await env.MKB_DB.prepare(`
       SELECT
         cc.id,
@@ -17,13 +20,13 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
         hi.alt AS hero_alt
       FROM custom_collections cc
       LEFT JOIN collection_images ci
-        ON ci.collection_id = cc.id AND ci.hidden = 0
+        ON ci.collection_id = cc.id AND ci.workspace_id = cc.workspace_id AND ci.hidden = 0
       LEFT JOIN images hi
-        ON hi.asset_key = cc.hero_asset_key
-      WHERE cc.status = 'active' AND cc.show_on_landing = 1
+        ON hi.asset_key = cc.hero_asset_key AND hi.workspace_id = cc.workspace_id
+      WHERE cc.workspace_id = ? AND cc.status = 'active' AND cc.show_on_landing = 1
       GROUP BY cc.id
       ORDER BY cc.sort_order ASC, cc.name COLLATE NOCASE ASC
-    `).all();
+    `).bind(workspaceId).all();
 
     const collections = (result.results || []).map((row: any) => ({
       id: String(row.id || ""),

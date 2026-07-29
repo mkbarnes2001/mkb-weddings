@@ -59,7 +59,8 @@ export async function syncLegacyAssets(db: D1Db, workspaceId?: string) {
         CURRENT_TIMESTAMP,
         i.updated_at
       FROM images i
-    `).bind(resolvedWorkspaceId),
+      WHERE i.workspace_id = ?
+    `).bind(resolvedWorkspaceId, resolvedWorkspaceId),
     db.prepare(`
       INSERT OR IGNORE INTO asset_files (
         asset_id, variant, storage_key, url, mime_type, width, height,
@@ -78,8 +79,8 @@ export async function syncLegacyAssets(db: D1Db, workspaceId?: string) {
         CURRENT_TIMESTAMP,
         i.updated_at
       FROM images i
-      WHERE TRIM(i.full_src) <> ''
-    `),
+      WHERE i.workspace_id = ? AND TRIM(i.full_src) <> ''
+    `).bind(resolvedWorkspaceId),
     db.prepare(`
       INSERT OR IGNORE INTO asset_files (
         asset_id, variant, storage_key, url, mime_type, width, height,
@@ -98,8 +99,8 @@ export async function syncLegacyAssets(db: D1Db, workspaceId?: string) {
         CURRENT_TIMESTAMP,
         i.updated_at
       FROM images i
-      WHERE TRIM(i.thumb_src) <> ''
-    `),
+      WHERE i.workspace_id = ? AND TRIM(i.thumb_src) <> ''
+    `).bind(resolvedWorkspaceId),
   ];
 
   await db.batch(statements);
@@ -147,7 +148,7 @@ function queryParts(filters: ReturnType<typeof buildFilters>) {
   if (filters.wedding) {
     where.push(`EXISTS (
       SELECT 1 FROM wedding_images wi
-      WHERE wi.asset_key = a.legacy_asset_key AND wi.wedding_slug = ?
+      WHERE wi.asset_key = a.legacy_asset_key AND wi.workspace_id = a.workspace_id AND wi.wedding_slug = ?
     )`);
     bindings.push(filters.wedding);
   }
@@ -155,7 +156,7 @@ function queryParts(filters: ReturnType<typeof buildFilters>) {
   if (filters.venue) {
     where.push(`EXISTS (
       SELECT 1 FROM venue_images vi
-      WHERE vi.asset_key = a.legacy_asset_key AND vi.venue_slug = ?
+      WHERE vi.asset_key = a.legacy_asset_key AND vi.workspace_id = a.workspace_id AND vi.venue_slug = ?
     )`);
     bindings.push(filters.venue);
   }
@@ -165,8 +166,9 @@ function queryParts(filters: ReturnType<typeof buildFilters>) {
       SELECT 1
       FROM venue_images vi
       JOIN json_each(CASE WHEN json_valid(vi.moments_json) THEN vi.moments_json ELSE '[]' END) j
-      LEFT JOIN moments m ON m.slug = ? OR m.id = ?
+      LEFT JOIN moments m ON m.workspace_id = a.workspace_id AND (m.slug = ? OR m.id = ?)
       WHERE vi.asset_key = a.legacy_asset_key
+        AND vi.workspace_id = a.workspace_id
         AND (
           lower(TRIM(CAST(j.value AS TEXT))) = lower(TRIM(?)) OR
           lower(TRIM(CAST(j.value AS TEXT))) = lower(TRIM(COALESCE(m.id, ''))) OR
@@ -201,6 +203,7 @@ function queryParts(filters: ReturnType<typeof buildFilters>) {
         EXISTS (
           SELECT 1 FROM venue_images vi
           WHERE vi.asset_key = a.legacy_asset_key
+            AND vi.workspace_id = a.workspace_id
             AND json_extract(CASE WHEN json_valid(vi.display_json) THEN vi.display_json ELSE '{}' END, '$.creativeFlash') = 1
         )
         OR EXISTS (
@@ -216,8 +219,9 @@ function queryParts(filters: ReturnType<typeof buildFilters>) {
       where.push(`EXISTS (
         SELECT 1
         FROM collection_images ci
-        JOIN custom_collections cc ON cc.id = ci.collection_id
+        JOIN custom_collections cc ON cc.id = ci.collection_id AND cc.workspace_id = ci.workspace_id
         WHERE ci.asset_key = a.legacy_asset_key
+          AND ci.workspace_id = a.workspace_id
           AND (cc.id = ? OR cc.slug = ?)
       )`);
       bindings.push(filters.gallery, filters.gallery);
@@ -226,41 +230,41 @@ function queryParts(filters: ReturnType<typeof buildFilters>) {
 
   if (filters.unassigned) {
     where.push(`
-      NOT EXISTS (SELECT 1 FROM wedding_images wi WHERE wi.asset_key = a.legacy_asset_key)
-      AND NOT EXISTS (SELECT 1 FROM venue_images vi WHERE vi.asset_key = a.legacy_asset_key)
-      AND NOT EXISTS (SELECT 1 FROM collection_images ci WHERE ci.asset_key = a.legacy_asset_key)
+      NOT EXISTS (SELECT 1 FROM wedding_images wi WHERE wi.asset_key = a.legacy_asset_key AND wi.workspace_id = a.workspace_id)
+      AND NOT EXISTS (SELECT 1 FROM venue_images vi WHERE vi.asset_key = a.legacy_asset_key AND vi.workspace_id = a.workspace_id)
+      AND NOT EXISTS (SELECT 1 FROM collection_images ci WHERE ci.asset_key = a.legacy_asset_key AND ci.workspace_id = a.workspace_id)
     `);
   }
 
   return { whereSql: where.join(" AND "), bindings };
 }
 
-async function listFacets(db: D1Db) {
+async function listFacets(db: D1Db, workspaceId: string) {
   const [weddings, venues, moments, galleries] = await Promise.all([
     db.prepare(`
       SELECT slug, title
       FROM weddings
-      WHERE status <> 'archived'
+      WHERE workspace_id = ? AND status <> 'archived'
       ORDER BY title COLLATE NOCASE ASC
-    `).all(),
+    `).bind(workspaceId).all(),
     db.prepare(`
       SELECT slug, name
       FROM venues
-      WHERE status <> 'archived'
+      WHERE workspace_id = ? AND status <> 'archived'
       ORDER BY name COLLATE NOCASE ASC
-    `).all(),
+    `).bind(workspaceId).all(),
     db.prepare(`
       SELECT id, slug, name
       FROM moments
-      WHERE status <> 'archived' AND available_for_assignment = 1
+      WHERE workspace_id = ? AND status <> 'archived' AND available_for_assignment = 1
       ORDER BY sort_order ASC, name COLLATE NOCASE ASC
-    `).all(),
+    `).bind(workspaceId).all(),
     db.prepare(`
       SELECT id, slug, name
       FROM custom_collections
-      WHERE status <> 'archived'
+      WHERE workspace_id = ? AND status <> 'archived'
       ORDER BY sort_order ASC, name COLLATE NOCASE ASC
-    `).all(),
+    `).bind(workspaceId).all(),
   ]);
 
   return {
@@ -279,7 +283,7 @@ async function listFacets(db: D1Db) {
   };
 }
 
-async function relationMaps(db: D1Db, assetKeys: string[]) {
+async function relationMaps(db: D1Db, assetKeys: string[], workspaceId: string) {
   const weddings = new Map<string, any[]>();
   const venues = new Map<string, any[]>();
   const moments = new Map<string, any[]>();
@@ -299,26 +303,26 @@ async function relationMaps(db: D1Db, assetKeys: string[]) {
       db.prepare(`
         SELECT wi.asset_key, wi.wedding_slug, w.title, wi.sort_order
         FROM wedding_images wi
-        LEFT JOIN weddings w ON w.slug = wi.wedding_slug
-        WHERE wi.asset_key IN (${placeholders})
+        LEFT JOIN weddings w ON w.slug = wi.wedding_slug AND w.workspace_id = wi.workspace_id
+        WHERE wi.workspace_id = ? AND wi.asset_key IN (${placeholders})
         ORDER BY wi.sort_order ASC
-      `).bind(...chunk).all(),
+      `).bind(workspaceId, ...chunk).all(),
       db.prepare(`
         SELECT vi.asset_key, vi.venue_slug, v.name, vi.sort_order, vi.moments_json, vi.display_json,
                i.tags_json, i.ai_tags_json
         FROM venue_images vi
-        LEFT JOIN venues v ON v.slug = vi.venue_slug
-        LEFT JOIN images i ON i.asset_key = vi.asset_key
-        WHERE vi.asset_key IN (${placeholders})
+        LEFT JOIN venues v ON v.slug = vi.venue_slug AND v.workspace_id = vi.workspace_id
+        LEFT JOIN images i ON i.asset_key = vi.asset_key AND i.workspace_id = vi.workspace_id
+        WHERE vi.workspace_id = ? AND vi.asset_key IN (${placeholders})
         ORDER BY vi.sort_order ASC
-      `).bind(...chunk).all(),
+      `).bind(workspaceId, ...chunk).all(),
       db.prepare(`
         SELECT ci.asset_key, cc.id, cc.slug, cc.name, ci.sort_order, ci.hidden
         FROM collection_images ci
-        JOIN custom_collections cc ON cc.id = ci.collection_id
-        WHERE ci.asset_key IN (${placeholders}) AND cc.status <> 'archived'
+        JOIN custom_collections cc ON cc.id = ci.collection_id AND cc.workspace_id = ci.workspace_id
+        WHERE ci.workspace_id = ? AND ci.asset_key IN (${placeholders}) AND cc.status <> 'archived'
         ORDER BY cc.sort_order ASC, cc.name COLLATE NOCASE ASC
-      `).bind(...chunk).all(),
+      `).bind(workspaceId, ...chunk).all(),
     ]);
 
     for (const row of weddingRows.results || []) {
@@ -381,9 +385,9 @@ async function relationMaps(db: D1Db, assetKeys: string[]) {
         SELECT vll.venue_slug, la.id, la.slug, la.name, la.area_type, vll.primary_location
         FROM venue_location_links vll
         JOIN location_areas la ON la.id = vll.location_id
-        WHERE vll.venue_slug IN (${venuePlaceholders}) AND la.status = 'active'
+        WHERE la.workspace_id = ? AND vll.venue_slug IN (${venuePlaceholders}) AND la.status = 'active'
         ORDER BY la.area_type ASC, la.sort_order ASC, la.name COLLATE NOCASE ASC
-      `).bind(...allVenueSlugs).all();
+      `).bind(workspaceId, ...allVenueSlugs).all();
 
       const byVenue = new Map<string, any[]>();
       for (const row of locationRows.results || []) {
@@ -416,8 +420,8 @@ async function relationMaps(db: D1Db, assetKeys: string[]) {
     const allMomentRows = await db.prepare(`
       SELECT id, slug, name
       FROM moments
-      WHERE status <> 'archived'
-    `).all();
+      WHERE workspace_id = ? AND status <> 'archived'
+    `).bind(workspaceId).all();
     const lookup = new Map<string, any>();
     for (const row of allMomentRows.results || []) {
       const hydrated = { id: text(row.id), slug: text(row.slug), name: text(row.name) };
@@ -433,17 +437,17 @@ async function relationMaps(db: D1Db, assetKeys: string[]) {
   return { weddings, venues, moments, galleries, locations, creativeFlash };
 }
 
-export async function listAssetLibrary(db: D1Db, requestUrl: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function listAssetLibrary(db: D1Db, requestUrl: string, workspaceId?: string) {
+  const resolvedWorkspaceId = text(workspaceId) || (await getDefaultWorkspaceId(db));
   const filters = buildFilters(new URL(requestUrl));
   const parts = queryParts(filters);
-  const baseBindings = [workspaceId, ...parts.bindings];
+  const baseBindings = [resolvedWorkspaceId, ...parts.bindings];
 
   const [countRow, rowsResult, facets, statsRow] = await Promise.all([
     db.prepare(`
       SELECT COUNT(*) AS total
       FROM assets a
-      LEFT JOIN images i ON i.asset_key = a.legacy_asset_key
+      LEFT JOIN images i ON i.asset_key = a.legacy_asset_key AND i.workspace_id = a.workspace_id
       WHERE ${parts.whereSql}
     `).bind(...baseBindings).first(),
     db.prepare(`
@@ -472,7 +476,7 @@ export async function listAssetLibrary(db: D1Db, requestUrl: string) {
         i.alt,
         i.caption
       FROM assets a
-      LEFT JOIN images i ON i.asset_key = a.legacy_asset_key
+      LEFT JOIN images i ON i.asset_key = a.legacy_asset_key AND i.workspace_id = a.workspace_id
       LEFT JOIN asset_files web ON web.asset_id = a.id AND web.variant = 'web' AND web.status = 'active'
       LEFT JOIN asset_files thumb ON thumb.asset_id = a.id AND thumb.variant = 'thumb' AND thumb.status = 'active'
       LEFT JOIN asset_files original ON original.asset_id = a.id AND original.variant = 'original' AND original.status = 'active'
@@ -480,7 +484,7 @@ export async function listAssetLibrary(db: D1Db, requestUrl: string) {
       ORDER BY a.updated_at DESC, a.filename COLLATE NOCASE ASC
       LIMIT ? OFFSET ?
     `).bind(...baseBindings, filters.limit, filters.offset).all(),
-    listFacets(db),
+    listFacets(db, resolvedWorkspaceId),
     db.prepare(`
       SELECT
         COUNT(*) AS total_assets,
@@ -491,12 +495,12 @@ export async function listAssetLibrary(db: D1Db, requestUrl: string) {
         SUM(CASE WHEN a.legacy_asset_key <> '' THEN 1 ELSE 0 END) AS compatibility_assets
       FROM assets a
       WHERE a.workspace_id = ? AND a.status = 'active'
-    `).bind(workspaceId).first(),
+    `).bind(resolvedWorkspaceId).first(),
   ]);
 
   const rows = rowsResult.results || [];
   const assetKeys = rows.map((row: any) => text(row.legacy_asset_key)).filter(Boolean);
-  const relations = await relationMaps(db, assetKeys);
+  const relations = await relationMaps(db, assetKeys, resolvedWorkspaceId);
 
   const assets = rows.map((row: any) => {
     const assetKey = text(row.legacy_asset_key);
@@ -552,7 +556,7 @@ export async function listAssetLibrary(db: D1Db, requestUrl: string) {
   });
 
   return {
-    workspaceId,
+    workspaceId: resolvedWorkspaceId,
     assets,
     facets,
     pagination: {

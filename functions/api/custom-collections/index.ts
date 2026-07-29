@@ -3,6 +3,7 @@ import {
   errorResponse,
   notFoundResponse,
 } from "../../../serverless/venue-d1";
+import { resolveAdminWorkspaceId } from "../../../serverless/tenant-context";
 
 type Env = { MKB_DB: D1Database; ADMIN_API_ENABLED?: string };
 
@@ -58,9 +59,10 @@ const LIST_SQL = `
     hi.full_src AS hero_full_src,
     hi.alt AS hero_alt
   FROM custom_collections cc
-  LEFT JOIN collection_images ci ON ci.collection_id = cc.id
+  LEFT JOIN collection_images ci ON ci.collection_id = cc.id AND ci.workspace_id = cc.workspace_id
   LEFT JOIN images hi
-    ON hi.asset_key = cc.hero_asset_key
+    ON hi.asset_key = cc.hero_asset_key AND hi.workspace_id = cc.workspace_id
+  WHERE cc.workspace_id = ?
   GROUP BY cc.id
   ORDER BY cc.sort_order ASC, cc.name COLLATE NOCASE ASC
 `;
@@ -71,7 +73,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   try {
-    const result = await context.env.MKB_DB.prepare(LIST_SQL).all();
+    const workspaceId = await resolveAdminWorkspaceId(context);
+    const result = await context.env.MKB_DB.prepare(LIST_SQL).bind(workspaceId).all();
     return Response.json({
       ok: true,
       collections: (result.results || []).map(mapCollection),
@@ -87,6 +90,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const body: any = await context.request.json();
     const input = body?.collection || body || {};
     const name = String(input.name || "").trim();
@@ -100,9 +104,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const existing: any = await context.env.MKB_DB.prepare(
-      `SELECT id FROM custom_collections WHERE slug = ? LIMIT 1`,
+      `SELECT id FROM custom_collections WHERE slug = ? AND workspace_id = ? LIMIT 1`,
     )
-      .bind(slug)
+      .bind(slug, workspaceId)
       .first();
 
     if (existing) {
@@ -113,8 +117,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const maxRow: any = await context.env.MKB_DB.prepare(
-      `SELECT COALESCE(MAX(sort_order), 0) AS max_order FROM custom_collections`,
-    ).first();
+      `SELECT COALESCE(MAX(sort_order), 0) AS max_order FROM custom_collections WHERE workspace_id = ?`,
+    ).bind(workspaceId).first();
     const id = `collection_${crypto.randomUUID()}`;
     const sortOrder = Number(input.sortOrder || Number(maxRow?.max_order || 0) + 1);
 
@@ -122,8 +126,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       INSERT INTO custom_collections (
         id, slug, name, description, status, show_on_landing,
         sort_order, hero_asset_key, seo_title, seo_description,
-        created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        created_at, updated_at, workspace_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
     `)
       .bind(
         id,
@@ -136,14 +140,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         String(input.heroAssetKey || "").trim(),
         String(input.seoTitle || ""),
         String(input.seoDescription || ""),
+        workspaceId,
       )
       .run();
 
     const row: any = await context.env.MKB_DB.prepare(
       `SELECT cc.*, 0 AS image_count, 0 AS visible_image_count
-       FROM custom_collections cc WHERE cc.id = ? LIMIT 1`,
+       FROM custom_collections cc WHERE cc.id = ? AND cc.workspace_id = ? LIMIT 1`,
     )
-      .bind(id)
+      .bind(id, workspaceId)
       .first();
 
     return Response.json({ ok: true, collection: mapCollection(row) }, { status: 201 });

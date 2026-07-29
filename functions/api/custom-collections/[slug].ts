@@ -3,6 +3,7 @@ import {
   errorResponse,
   notFoundResponse,
 } from "../../../serverless/venue-d1";
+import { resolveAdminWorkspaceId } from "../../../serverless/tenant-context";
 
 type Env = { MKB_DB: D1Database; ADMIN_API_ENABLED?: string };
 
@@ -19,7 +20,7 @@ function cleanStatus(value: unknown) {
   return value === "active" || value === "archived" ? value : "draft";
 }
 
-async function findCollection(env: Env, slug: string) {
+async function findCollection(env: Env, slug: string, workspaceId: string) {
   return env.MKB_DB.prepare(`
     SELECT
       cc.*,
@@ -31,14 +32,14 @@ async function findCollection(env: Env, slug: string) {
       hi.full_src AS hero_full_src,
       hi.alt AS hero_alt
     FROM custom_collections cc
-    LEFT JOIN collection_images ci ON ci.collection_id = cc.id
+    LEFT JOIN collection_images ci ON ci.collection_id = cc.id AND ci.workspace_id = cc.workspace_id
     LEFT JOIN images hi
-      ON hi.asset_key = cc.hero_asset_key
-    WHERE cc.slug = ?
+      ON hi.asset_key = cc.hero_asset_key AND hi.workspace_id = cc.workspace_id
+    WHERE cc.slug = ? AND cc.workspace_id = ?
     GROUP BY cc.id
     LIMIT 1
   `)
-    .bind(slug)
+    .bind(slug, workspaceId)
     .first();
 }
 
@@ -74,8 +75,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const slug = cleanSlug(context.params.slug);
-    const row: any = await findCollection(context.env, slug);
+    const row: any = await findCollection(context.env, slug, workspaceId);
     if (!row) return Response.json({ error: "Collection not found." }, { status: 404 });
     return Response.json({ ok: true, collection: mapCollection(row) });
   } catch (error) {
@@ -89,11 +91,12 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const routeSlug = cleanSlug(context.params.slug);
     const current: any = await context.env.MKB_DB.prepare(
-      `SELECT * FROM custom_collections WHERE slug = ? LIMIT 1`,
+      `SELECT * FROM custom_collections WHERE slug = ? AND workspace_id = ? LIMIT 1`,
     )
-      .bind(routeSlug)
+      .bind(routeSlug, workspaceId)
       .first();
     if (!current) return Response.json({ error: "Collection not found." }, { status: 404 });
 
@@ -106,9 +109,9 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     }
 
     const clash: any = await context.env.MKB_DB.prepare(
-      `SELECT id FROM custom_collections WHERE slug = ? AND id <> ? LIMIT 1`,
+      `SELECT id FROM custom_collections WHERE slug = ? AND id <> ? AND workspace_id = ? LIMIT 1`,
     )
-      .bind(nextSlug, String(current.id || ""))
+      .bind(nextSlug, String(current.id || ""), workspaceId)
       .first();
     if (clash) {
       return Response.json(
@@ -122,7 +125,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         slug = ?, name = ?, description = ?, status = ?, show_on_landing = ?,
         sort_order = ?, hero_asset_key = ?, seo_title = ?, seo_description = ?,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
+      WHERE id = ? AND workspace_id = ?
     `)
       .bind(
         nextSlug,
@@ -137,10 +140,11 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         String(input.seoTitle ?? current.seo_title ?? ""),
         String(input.seoDescription ?? current.seo_description ?? ""),
         String(current.id || ""),
+        workspaceId,
       )
       .run();
 
-    const row: any = await findCollection(context.env, nextSlug);
+    const row: any = await findCollection(context.env, nextSlug, workspaceId);
     return Response.json({ ok: true, collection: mapCollection(row) });
   } catch (error) {
     return errorResponse(error);
@@ -153,13 +157,14 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const slug = cleanSlug(context.params.slug);
     const result = await context.env.MKB_DB.prepare(`
       UPDATE custom_collections
       SET status = 'archived', show_on_landing = 0, updated_at = CURRENT_TIMESTAMP
-      WHERE slug = ?
+      WHERE slug = ? AND workspace_id = ?
     `)
-      .bind(slug)
+      .bind(slug, workspaceId)
       .run();
 
     if (!result.meta.changes) {

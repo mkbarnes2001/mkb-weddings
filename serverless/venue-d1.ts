@@ -302,15 +302,16 @@ function hydrateVenue(row: any) {
   };
 }
 
-async function weddingSummaries(db: D1Db) {
+async function weddingSummaries(db: D1Db, workspaceId: string) {
   const result = await db.prepare(`
     SELECT
       w.slug, w.title, w.couple, w.venue, w.venue_slug, w.wedding_date, w.status,
       COUNT(i.asset_key) AS image_count
     FROM weddings w
-    LEFT JOIN images i ON i.wedding_slug = w.slug
+    LEFT JOIN images i ON i.wedding_slug = w.slug AND i.workspace_id = w.workspace_id
+    WHERE w.workspace_id = ?
     GROUP BY w.slug, w.title, w.couple, w.venue, w.venue_slug, w.wedding_date, w.status
-  `).all();
+  `).bind(workspaceId).all();
   return result.results || [];
 }
 
@@ -338,10 +339,10 @@ function enrich(venue: any, weddings: any[]) {
   };
 }
 
-export async function listAdminVenues(db: D1Db) {
+export async function listAdminVenues(db: D1Db, workspaceId = "workspace_mkb_weddings") {
   const [venueResult, weddings] = await Promise.all([
-    db.prepare(`SELECT * FROM venues`).all(),
-    weddingSummaries(db),
+    db.prepare(`SELECT * FROM venues WHERE workspace_id = ?`).bind(workspaceId).all(),
+    weddingSummaries(db, workspaceId),
   ]);
   const venues = (venueResult.results || [])
     .map(hydrateVenue)
@@ -349,27 +350,27 @@ export async function listAdminVenues(db: D1Db) {
   return sortGalleryVenues(venues);
 }
 
-export async function getAdminVenue(db: D1Db, slug: string) {
-  const row = await db.prepare(`SELECT * FROM venues WHERE slug = ?`).bind(slug).first();
+export async function getAdminVenue(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+  const row = await db.prepare(`SELECT * FROM venues WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!row) return null;
-  const weddings = await weddingSummaries(db);
+  const weddings = await weddingSummaries(db, workspaceId);
   return enrich(hydrateVenue(row), weddings);
 }
 
-async function syncVenueImages(db: D1Db, venue: any, oldSlug?: string) {
+async function syncVenueImages(db: D1Db, venue: any, workspaceId: string, oldSlug?: string) {
   const statements: any[] = [];
   if (oldSlug && oldSlug !== venue.slug) {
-    statements.push(db.prepare(`DELETE FROM venue_images WHERE venue_slug = ?`).bind(oldSlug));
+    statements.push(db.prepare(`DELETE FROM venue_images WHERE venue_slug = ? AND workspace_id = ?`).bind(oldSlug, workspaceId));
   }
-  statements.push(db.prepare(`DELETE FROM venue_images WHERE venue_slug = ?`).bind(venue.slug));
+  statements.push(db.prepare(`DELETE FROM venue_images WHERE venue_slug = ? AND workspace_id = ?`).bind(venue.slug, workspaceId));
   for (const item of venue.gallery.images || []) {
     if (!item.assetId) continue;
     statements.push(
       db.prepare(`
         INSERT INTO venue_images (
           venue_slug, asset_key, sort_order, included, hidden, rating, is_hero,
-          moments_json, display_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          moments_json, display_json, workspace_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         venue.slug,
         item.assetId,
@@ -380,33 +381,34 @@ async function syncVenueImages(db: D1Db, venue: any, oldSlug?: string) {
         item.assetId === venue.gallery.heroAssetId ? 1 : 0,
         JSON.stringify(item.moments || []),
         JSON.stringify(item.display || {}),
+        workspaceId,
       ),
     );
   }
   await db.batch(statements);
 }
 
-export async function createAdminVenue(db: D1Db, incoming: any) {
+export async function createAdminVenue(db: D1Db, incoming: any, workspaceId = "workspace_mkb_weddings") {
   const venue = cleanVenue(incoming);
-  const exists = await db.prepare(`SELECT slug FROM venues WHERE slug = ?`).bind(venue.slug).first();
+  const exists = await db.prepare(`SELECT slug FROM venues WHERE slug = ? AND workspace_id = ?`).bind(venue.slug, workspaceId).first();
   if (exists) throw httpError("A venue with this slug already exists.", 409);
 
   await db.prepare(`
     INSERT INTO venues (
       slug, id, name, town, county, country, status, hero_asset_id,
-      seo_title, seo_description, document_json, published_json, published_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', NULL, ?)
+      seo_title, seo_description, document_json, published_json, published_at, updated_at, workspace_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', NULL, ?, ?)
   `).bind(
     venue.slug, venue.id, venue.name, venue.town, venue.county, venue.country,
     venue.status, venue.gallery.heroAssetId || venue.heroImageId,
-    venue.seo.title, venue.seo.description, JSON.stringify(venue), venue.updatedAt,
+    venue.seo.title, venue.seo.description, JSON.stringify(venue), venue.updatedAt, workspaceId,
   ).run();
-  await syncVenueImages(db, venue);
-  return getAdminVenue(db, venue.slug);
+  await syncVenueImages(db, venue, workspaceId);
+  return getAdminVenue(db, venue.slug, workspaceId);
 }
 
-export async function updateAdminVenue(db: D1Db, routeSlug: string, incoming: any) {
-  const row = await db.prepare(`SELECT * FROM venues WHERE slug = ?`).bind(routeSlug).first();
+export async function updateAdminVenue(db: D1Db, routeSlug: string, incoming: any, workspaceId = "workspace_mkb_weddings") {
+  const row = await db.prepare(`SELECT * FROM venues WHERE slug = ? AND workspace_id = ?`).bind(routeSlug, workspaceId).first();
   if (!row) throw httpError("Venue not found.", 404);
   const existing = hydrateVenue(row);
   const venue = cleanVenue(incoming, existing);
@@ -418,7 +420,7 @@ export async function updateAdminVenue(db: D1Db, routeSlug: string, incoming: an
         409,
       );
     }
-    const duplicate = await db.prepare(`SELECT slug FROM venues WHERE slug = ?`).bind(venue.slug).first();
+    const duplicate = await db.prepare(`SELECT slug FROM venues WHERE slug = ? AND workspace_id = ?`).bind(venue.slug, workspaceId).first();
     if (duplicate) throw httpError("A venue with the new slug already exists.", 409);
   }
 
@@ -430,37 +432,37 @@ export async function updateAdminVenue(db: D1Db, routeSlug: string, incoming: an
       UPDATE venues SET
         id = ?, name = ?, town = ?, county = ?, country = ?, status = ?, hero_asset_id = ?,
         seo_title = ?, seo_description = ?, document_json = ?, updated_at = ?
-      WHERE slug = ?
+      WHERE slug = ? AND workspace_id = ?
     `).bind(
       venue.id, venue.name, venue.town, venue.county, venue.country, venue.status,
       venue.gallery.heroAssetId || venue.heroImageId, venue.seo.title, venue.seo.description,
-      JSON.stringify(venue), venue.updatedAt, routeSlug,
+      JSON.stringify(venue), venue.updatedAt, routeSlug, workspaceId,
     ).run();
   } else {
     await db.batch([
       db.prepare(`
         INSERT INTO venues (
           slug, id, name, town, county, country, status, hero_asset_id,
-          seo_title, seo_description, document_json, published_json, published_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          seo_title, seo_description, document_json, published_json, published_at, updated_at, workspace_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         venue.slug, venue.id, venue.name, venue.town, venue.county, venue.country, venue.status,
         venue.gallery.heroAssetId || venue.heroImageId, venue.seo.title, venue.seo.description,
-        JSON.stringify(venue), publishedJson, publishedAt, venue.updatedAt,
+        JSON.stringify(venue), publishedJson, publishedAt, venue.updatedAt, workspaceId,
       ),
-      db.prepare(`DELETE FROM venues WHERE slug = ?`).bind(routeSlug),
-      db.prepare(`UPDATE weddings SET venue_slug = ? WHERE venue_slug = ?`).bind(venue.slug, routeSlug),
+      db.prepare(`DELETE FROM venues WHERE slug = ? AND workspace_id = ?`).bind(routeSlug, workspaceId),
+      db.prepare(`UPDATE weddings SET venue_slug = ? WHERE venue_slug = ? AND workspace_id = ?`).bind(venue.slug, routeSlug, workspaceId),
     ]);
   }
 
-  await syncVenueImages(db, venue, routeSlug);
-  return getAdminVenue(db, venue.slug);
+  await syncVenueImages(db, venue, workspaceId, routeSlug);
+  return getAdminVenue(db, venue.slug, workspaceId);
 }
 
-export async function archiveAdminVenue(db: D1Db, slug: string) {
-  const venue = await getAdminVenue(db, slug);
+export async function archiveAdminVenue(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+  const venue = await getAdminVenue(db, slug, workspaceId);
   if (!venue) throw httpError("Venue not found.", 404);
-  return updateAdminVenue(db, slug, { ...venue, status: "archived" });
+  return updateAdminVenue(db, slug, { ...venue, status: "archived" }, workspaceId);
 }
 
 function publicImagesFromVenue(venue: any) {
@@ -539,8 +541,8 @@ export function toPublicVenue(venue: any) {
   };
 }
 
-export async function publishAdminVenue(db: D1Db, slug: string) {
-  const row = await db.prepare(`SELECT * FROM venues WHERE slug = ?`).bind(slug).first();
+export async function publishAdminVenue(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+  const row = await db.prepare(`SELECT * FROM venues WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!row) throw httpError("Venue not found.", 404);
   const venue = hydrateVenue(row);
   if (venue.status === "archived") throw httpError("Archived venues cannot be published.", 409);
@@ -565,8 +567,8 @@ export async function publishAdminVenue(db: D1Db, slug: string) {
   await db.prepare(`
     UPDATE venues SET
       status = 'published', document_json = ?, published_json = ?, published_at = ?, updated_at = ?
-    WHERE slug = ?
-  `).bind(JSON.stringify(draft), JSON.stringify(draft), publishedAt, publishedAt, slug).run();
+    WHERE slug = ? AND workspace_id = ?
+  `).bind(JSON.stringify(draft), JSON.stringify(draft), publishedAt, publishedAt, slug, workspaceId).run();
 
   return {
     venueSlug: slug,
@@ -577,7 +579,7 @@ export async function publishAdminVenue(db: D1Db, slug: string) {
   };
 }
 
-export async function saveVenueListSettings(db: D1Db, items: any[]) {
+export async function saveVenueListSettings(db: D1Db, items: any[], workspaceId = "workspace_mkb_weddings") {
   const rows = Array.isArray(items) ? items : [];
   const statements = rows
     .map((item) => {
@@ -586,35 +588,35 @@ export async function saveVenueListSettings(db: D1Db, items: any[]) {
       return db.prepare(`
         UPDATE venues
         SET gallery_sort_order = ?, gallery_visible = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE slug = ?
-      `).bind(Number(item?.sortOrder || 0), item?.galleryVisible === false ? 0 : 1, slug);
+        WHERE slug = ? AND workspace_id = ?
+      `).bind(Number(item?.sortOrder || 0), item?.galleryVisible === false ? 0 : 1, slug, workspaceId);
     })
     .filter(Boolean);
   for (let index = 0; index < statements.length; index += 75) {
     const chunk = statements.slice(index, index + 75);
     if (chunk.length) await db.batch(chunk);
   }
-  return listAdminVenues(db);
+  return listAdminVenues(db, workspaceId);
 }
 
-export async function getPublicVenue(db: D1Db, slug: string) {
+export async function getPublicVenue(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
   const row = await db.prepare(`
     SELECT published_json, published_at, updated_at, country
     FROM venues
-    WHERE slug = ? AND status = 'published' AND published_json <> ''
-  `).bind(slug).first();
+    WHERE slug = ? AND workspace_id = ? AND status = 'published' AND published_json <> ''
+  `).bind(slug, workspaceId).first();
   if (!row) return null;
   const doc = json(row.published_json, null);
   if (!doc) return null;
   return toPublicVenue({ ...doc, country: text(doc.country || row.country) });
 }
 
-export async function listPublicVenues(db: D1Db) {
+export async function listPublicVenues(db: D1Db, workspaceId = "workspace_mkb_weddings") {
   const result = await db.prepare(`
     SELECT slug, published_json, published_at, updated_at, country, gallery_sort_order
     FROM venues
-    WHERE status = 'published' AND published_json <> '' AND gallery_visible = 1
-  `).all();
+    WHERE workspace_id = ? AND status = 'published' AND published_json <> '' AND gallery_visible = 1
+  `).bind(workspaceId).all();
   const venues = sortGalleryVenues(
     (result.results || [])
       .map((row: any) => {

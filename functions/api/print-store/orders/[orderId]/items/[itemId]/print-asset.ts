@@ -1,5 +1,6 @@
 import { adminApiRequestAllowed, errorResponse, notFoundResponse } from "../../../../../../../serverless/venue-d1";
 import { savePreparedPrintAsset } from "../../../../../../../serverless/prodigi-lab";
+import { resolveAdminWorkspaceId } from "../../../../../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -23,6 +24,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         sourceWidthPx: context.request.headers.get("x-source-width-px"),
         sourceHeightPx: context.request.headers.get("x-source-height-px"),
       },
+      await resolveAdminWorkspaceId(context),
     );
     return Response.json({ ok: true, printAsset: result });
   } catch (error) {

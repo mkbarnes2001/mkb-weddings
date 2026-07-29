@@ -84,6 +84,7 @@ export async function registerUploadedImage(
     width: number;
     height: number;
   },
+  workspaceId = "workspace_mkb_weddings",
 ) {
   const venueSlug = text(input.venueSlug);
   const weddingSlug = text(input.weddingSlug);
@@ -94,8 +95,8 @@ export async function registerUploadedImage(
   if (!imageId) throw httpError("Image ID is required.", 400);
 
   const [venueRow, weddingRow] = await Promise.all([
-    db.prepare(`SELECT * FROM venues WHERE slug = ?`).bind(venueSlug).first(),
-    db.prepare(`SELECT * FROM weddings WHERE slug = ?`).bind(weddingSlug).first(),
+    db.prepare(`SELECT * FROM venues WHERE slug = ? AND workspace_id = ?`).bind(venueSlug, workspaceId).first(),
+    db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(weddingSlug, workspaceId).first(),
   ]);
 
   if (!venueRow) throw httpError("Venue not found.", 404);
@@ -142,13 +143,13 @@ export async function registerUploadedImage(
     db.prepare(`
       SELECT COALESCE(MAX(sort_order), 0) AS max_order
       FROM wedding_images
-      WHERE wedding_slug = ?
-    `).bind(weddingSlug).first(),
+      WHERE wedding_slug = ? AND workspace_id = ?
+    `).bind(weddingSlug, workspaceId).first(),
     db.prepare(`
       SELECT COALESCE(MAX(sort_order), 0) AS max_order
       FROM venue_images
-      WHERE venue_slug = ?
-    `).bind(venueSlug).first(),
+      WHERE venue_slug = ? AND workspace_id = ?
+    `).bind(venueSlug, workspaceId).first(),
   ]);
 
   const weddingOrder = Number(weddingOrderRow?.max_order || 0) + 1;
@@ -208,8 +209,8 @@ export async function registerUploadedImage(
       INSERT INTO images (
         asset_key, image_id, wedding_slug, filename, full_src, thumb_src,
         alt, caption, tags_json, ai_tags_json, source_type, source_json,
-        width, height, orientation, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, '', '', '[]', '[]', ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        width, height, orientation, updated_at, workspace_id
+      ) VALUES (?, ?, ?, ?, ?, ?, '', '', '[]', '[]', ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
     `).bind(
       assetKey,
       imageId,
@@ -222,6 +223,7 @@ export async function registerUploadedImage(
       Number(input.width || 0) || null,
       Number(input.height || 0) || null,
       source.orientation,
+      workspaceId,
     ),
     db.prepare(`
       INSERT OR IGNORE INTO assets (
@@ -229,12 +231,11 @@ export async function registerUploadedImage(
         mime_type, width, height, checksum, source_type, source_json, status,
         created_at, updated_at
       ) VALUES (
-        ?,
-        COALESCE((SELECT value FROM schema_meta WHERE key = 'default_workspace_id'), 'workspace_mkb_weddings'),
-        ?, ?, ?, ?, ?, ?, ?, '', ?, ?, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, '', ?, ?, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
       )
     `).bind(
       assetId,
+      workspaceId,
       assetKey,
       imageId,
       text(input.originalFilename),
@@ -271,35 +272,36 @@ export async function registerUploadedImage(
     ),
     db.prepare(`
       INSERT INTO wedding_images (
-        wedding_slug, asset_key, sort_order, is_cover, hidden, rating, collections_json
-      ) VALUES (?, ?, ?, 0, 0, 0, '[]')
-    `).bind(weddingSlug, assetKey, weddingOrder),
+        wedding_slug, asset_key, sort_order, is_cover, hidden, rating, collections_json, workspace_id
+      ) VALUES (?, ?, ?, 0, 0, 0, '[]', ?)
+    `).bind(weddingSlug, assetKey, weddingOrder, workspaceId),
     db.prepare(`
       INSERT OR IGNORE INTO asset_wedding_links (
-        asset_id, wedding_slug, sort_order, is_primary
-      ) VALUES (?, ?, ?, 1)
-    `).bind(assetId, weddingSlug, weddingOrder),
+        asset_id, wedding_slug, sort_order, is_primary, workspace_id
+      ) VALUES (?, ?, ?, 1, ?)
+    `).bind(assetId, weddingSlug, weddingOrder, workspaceId),
     db.prepare(`
       INSERT INTO venue_images (
         venue_slug, asset_key, sort_order, included, hidden, rating, is_hero,
-        moments_json, display_json
-      ) VALUES (?, ?, ?, 0, 0, 0, 0, '[]', ?)
+        moments_json, display_json, workspace_id
+      ) VALUES (?, ?, ?, 0, 0, 0, 0, '[]', ?, ?)
     `).bind(
       venueSlug,
       assetKey,
       venueOrder,
       JSON.stringify(venueImage.display),
+      workspaceId,
     ),
     db.prepare(`
       INSERT OR IGNORE INTO asset_venue_links (
-        asset_id, venue_slug, sort_order, is_primary
-      ) VALUES (?, ?, ?, 1)
-    `).bind(assetId, venueSlug, venueOrder),
+        asset_id, venue_slug, sort_order, is_primary, workspace_id
+      ) VALUES (?, ?, ?, 1, ?)
+    `).bind(assetId, venueSlug, venueOrder, workspaceId),
     db.prepare(`
       UPDATE venues
       SET document_json = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE slug = ?
-    `).bind(JSON.stringify(nextVenueDocument), venueSlug),
+      WHERE slug = ? AND workspace_id = ?
+    `).bind(JSON.stringify(nextVenueDocument), venueSlug, workspaceId),
   ]);
 
   return {
@@ -332,6 +334,7 @@ export async function createR2Upload(
     width: number;
     height: number;
   },
+  workspaceId = "workspace_mkb_weddings",
 ) {
   if (!bucket) throw httpError("R2 image binding is not configured.", 500);
 
@@ -363,8 +366,8 @@ export async function createR2Upload(
       ? "png"
       : "jpg";
   const filename = `${weddingSlug}-${baseName}-${suffix}.${extension}`;
-  const fullKey = `full/${weddingSlug}/${filename}`;
-  const thumbKey = `thumb/${weddingSlug}/${filename}`;
+  const fullKey = `workspaces/${workspaceId}/full/${weddingSlug}/${filename}`;
+  const thumbKey = `workspaces/${workspaceId}/thumb/${weddingSlug}/${filename}`;
   const publicBaseUrl = normalisePublicBaseUrl(env.IMAGE_PUBLIC_BASE_URL);
 
   await bucket.put(fullKey, input.fullFile, {
@@ -373,6 +376,7 @@ export async function createR2Upload(
       cacheControl: "public, max-age=31536000, immutable",
     },
     customMetadata: {
+      workspaceId,
       weddingSlug,
       venueSlug,
       imageId,
@@ -387,6 +391,7 @@ export async function createR2Upload(
         cacheControl: "public, max-age=31536000, immutable",
       },
       customMetadata: {
+        workspaceId,
         weddingSlug,
         venueSlug,
         imageId,
@@ -422,6 +427,7 @@ export async function deleteManagedImage(
     imageId: string;
     venueSlug?: string;
   },
+  workspaceId = "workspace_mkb_weddings",
 ) {
   const weddingSlug = text(input.weddingSlug);
   const imageId = text(input.imageId);
@@ -433,9 +439,9 @@ export async function deleteManagedImage(
   const row = await db.prepare(`
     SELECT *
     FROM images
-    WHERE wedding_slug = ? AND image_id = ?
+    WHERE wedding_slug = ? AND image_id = ? AND workspace_id = ?
     LIMIT 1
-  `).bind(weddingSlug, imageId).first();
+  `).bind(weddingSlug, imageId, workspaceId).first();
 
   if (!row) throw httpError("Image not found in the wedding record.", 404);
 
@@ -457,9 +463,9 @@ export async function deleteManagedImage(
   const cover = await db.prepare(`
     SELECT 1 AS found
     FROM wedding_images
-    WHERE wedding_slug = ? AND asset_key = ? AND is_cover = 1
+    WHERE wedding_slug = ? AND asset_key = ? AND workspace_id = ? AND is_cover = 1
     LIMIT 1
-  `).bind(weddingSlug, assetKey).first();
+  `).bind(weddingSlug, assetKey, workspaceId).first();
   if (cover) {
     throw httpError(
       "This image is the wedding cover. Select another wedding cover before deleting it.",
@@ -470,10 +476,10 @@ export async function deleteManagedImage(
   const hero = await db.prepare(`
     SELECT v.name AS venue_name
     FROM venue_images vi
-    JOIN venues v ON v.slug = vi.venue_slug
-    WHERE vi.asset_key = ? AND vi.is_hero = 1
+    JOIN venues v ON v.slug = vi.venue_slug AND v.workspace_id = vi.workspace_id
+    WHERE vi.asset_key = ? AND vi.workspace_id = ? AND vi.is_hero = 1
     LIMIT 1
-  `).bind(assetKey).first();
+  `).bind(assetKey, workspaceId).first();
   if (hero) {
     throw httpError(
       `This image is the venue hero for ${text(hero.venue_name) || "a venue"}. Select another hero before deleting it.`,
@@ -484,12 +490,13 @@ export async function deleteManagedImage(
   const publishedStory = await db.prepare(`
     SELECT w.title
     FROM published_story_images psi
-    JOIN weddings w ON w.slug = psi.wedding_slug
+    JOIN weddings w ON w.slug = psi.wedding_slug AND w.workspace_id = psi.workspace_id
     WHERE psi.asset_key = ?
+      AND psi.workspace_id = ?
       AND w.story_enabled = 1
       AND w.story_status = 'published'
     LIMIT 1
-  `).bind(assetKey).first();
+  `).bind(assetKey, workspaceId).first();
   if (publishedStory) {
     throw httpError(
       "This image is currently used by a published wedding story. Remove it from the Blog collection and publish the story again before permanently deleting it.",
@@ -500,8 +507,9 @@ export async function deleteManagedImage(
   const venueRows = await db.prepare(`
     SELECT slug, name, document_json, published_json
     FROM venues
+    WHERE workspace_id = ?
     ORDER BY slug ASC
-  `).all();
+  `).bind(workspaceId).all();
 
   const draftVenueUpdates: Array<{ slug: string; document: any }> = [];
   const publishedVenueNames: string[] = [];
@@ -552,26 +560,26 @@ export async function deleteManagedImage(
       db.prepare(`
         UPDATE venues
         SET document_json = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE slug = ?
-      `).bind(JSON.stringify(update.document), update.slug),
+        WHERE slug = ? AND workspace_id = ?
+      `).bind(JSON.stringify(update.document), update.slug, workspaceId),
     );
   }
 
   const assetId = `asset:${assetKey}`;
 
   statements.push(
-    db.prepare(`DELETE FROM asset_gallery_links WHERE asset_id = ?`).bind(assetId),
-    db.prepare(`DELETE FROM asset_moment_links WHERE asset_id = ?`).bind(assetId),
-    db.prepare(`DELETE FROM asset_venue_links WHERE asset_id = ?`).bind(assetId),
-    db.prepare(`DELETE FROM asset_wedding_links WHERE asset_id = ?`).bind(assetId),
+    db.prepare(`DELETE FROM asset_gallery_links WHERE asset_id = ? AND workspace_id = ?`).bind(assetId, workspaceId),
+    db.prepare(`DELETE FROM asset_moment_links WHERE asset_id = ? AND workspace_id = ?`).bind(assetId, workspaceId),
+    db.prepare(`DELETE FROM asset_venue_links WHERE asset_id = ? AND workspace_id = ?`).bind(assetId, workspaceId),
+    db.prepare(`DELETE FROM asset_wedding_links WHERE asset_id = ? AND workspace_id = ?`).bind(assetId, workspaceId),
     db.prepare(`DELETE FROM asset_files WHERE asset_id = ?`).bind(assetId),
-    db.prepare(`DELETE FROM collection_images WHERE asset_key = ?`).bind(assetKey),
-    db.prepare(`DELETE FROM venue_images WHERE asset_key = ?`).bind(assetKey),
-    db.prepare(`DELETE FROM story_images WHERE asset_key = ?`).bind(assetKey),
-    db.prepare(`DELETE FROM published_story_images WHERE asset_key = ?`).bind(assetKey),
-    db.prepare(`DELETE FROM wedding_images WHERE asset_key = ?`).bind(assetKey),
-    db.prepare(`DELETE FROM assets WHERE id = ?`).bind(assetId),
-    db.prepare(`DELETE FROM images WHERE asset_key = ?`).bind(assetKey),
+    db.prepare(`DELETE FROM collection_images WHERE asset_key = ? AND workspace_id = ?`).bind(assetKey, workspaceId),
+    db.prepare(`DELETE FROM venue_images WHERE asset_key = ? AND workspace_id = ?`).bind(assetKey, workspaceId),
+    db.prepare(`DELETE FROM story_images WHERE asset_key = ? AND workspace_id = ?`).bind(assetKey, workspaceId),
+    db.prepare(`DELETE FROM published_story_images WHERE asset_key = ? AND workspace_id = ?`).bind(assetKey, workspaceId),
+    db.prepare(`DELETE FROM wedding_images WHERE asset_key = ? AND workspace_id = ?`).bind(assetKey, workspaceId),
+    db.prepare(`DELETE FROM assets WHERE id = ? AND workspace_id = ?`).bind(assetId, workspaceId),
+    db.prepare(`DELETE FROM images WHERE asset_key = ? AND workspace_id = ?`).bind(assetKey, workspaceId),
   );
 
   await db.batch(statements);

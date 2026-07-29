@@ -1,5 +1,6 @@
 import { getAuthenticatedClientIdentity } from "../../../../../serverless/client-auth-d1";
 import { setPublicFavourite } from "../../../../../serverless/client-gallery-d1";
+import { resolvePublicWorkspaceId } from "../../../../../serverless/tenant-context";
 
 type Env = { MKB_DB: D1Database };
 
@@ -12,6 +13,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       String(context.params.token || "").trim(),
       body || {},
       authenticatedIdentity,
+      await resolvePublicWorkspaceId(context.env.MKB_DB, context.request),
     );
     return Response.json(result.body, {
       status: result.status,

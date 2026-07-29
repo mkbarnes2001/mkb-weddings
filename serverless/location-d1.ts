@@ -206,9 +206,9 @@ export async function listLocationConfiguration(
     db.prepare(`
       SELECT slug, name, town, county, country, status
       FROM venues
-      WHERE status <> 'archived'
+      WHERE workspace_id = ? AND status <> 'archived'
       ORDER BY name COLLATE NOCASE ASC
-    `).all(),
+    `).bind(workspaceId).all(),
   ]);
 
   const links = new Map<string, string[]>();
@@ -393,6 +393,7 @@ export async function saveLocationConfiguration(
         gallery_eligible = excluded.gallery_eligible,
         sort_order = excluded.sort_order,
         updated_at = CURRENT_TIMESTAMP
+      WHERE location_types.workspace_id = excluded.workspace_id
     `).bind(
       type.id, workspaceId, type.key, type.label, type.pluralLabel,
       type.enabled ? 1 : 0, type.galleryEligible ? 1 : 0, type.sortOrder, type.system ? 1 : 0,
@@ -418,7 +419,7 @@ export async function saveLocationConfiguration(
             region, status, show_on_landing, sort_order, hero_image_url,
             seo_title, seo_description, intro, document_json, updated_at
           ) VALUES (?, ?, ?, ?, ?, NULLIF(?, ''), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-            COALESCE((SELECT document_json FROM location_areas WHERE id = ?), '{}'), CURRENT_TIMESTAMP)
+            COALESCE((SELECT document_json FROM location_areas WHERE id = ? AND workspace_id = ?), '{}'), CURRENT_TIMESTAMP)
           ON CONFLICT(id) DO UPDATE SET
             slug = excluded.slug,
             name = excluded.name,
@@ -435,6 +436,7 @@ export async function saveLocationConfiguration(
             seo_description = excluded.seo_description,
             intro = excluded.intro,
             updated_at = CURRENT_TIMESTAMP
+          WHERE location_areas.workspace_id = excluded.workspace_id
         `).bind(
           location.id,
           workspaceId,
@@ -453,18 +455,35 @@ export async function saveLocationConfiguration(
           location.seoDescription,
           location.intro,
           location.id,
+          workspaceId,
         ),
       );
       statements.push(
-        db.prepare(`DELETE FROM venue_location_links WHERE location_id = ?`).bind(location.id),
+        db.prepare(`
+          DELETE FROM venue_location_links
+          WHERE location_id = ?
+            AND EXISTS (SELECT 1 FROM location_areas WHERE id = ? AND workspace_id = ?)
+        `).bind(location.id, location.id, workspaceId),
       );
       location.venueSlugs.forEach((venueSlug, venueIndex) => {
         statements.push(
           db.prepare(`
             INSERT OR IGNORE INTO venue_location_links (
               location_id, venue_slug, sort_order, primary_location
-            ) VALUES (?, ?, ?, ?)
-          `).bind(location.id, venueSlug, venueIndex + 1, venueIndex === 0 ? 1 : 0),
+            )
+            SELECT ?, ?, ?, ?
+            WHERE EXISTS (SELECT 1 FROM location_areas WHERE id = ? AND workspace_id = ?)
+              AND EXISTS (SELECT 1 FROM venues WHERE slug = ? AND workspace_id = ?)
+          `).bind(
+            location.id,
+            venueSlug,
+            venueIndex + 1,
+            venueIndex === 0 ? 1 : 0,
+            location.id,
+            workspaceId,
+            venueSlug,
+            workspaceId,
+          ),
         );
       });
     }
@@ -522,9 +541,9 @@ export async function listPublicLocations(
     db.prepare(`
       SELECT slug, name, town, county, country, gallery_sort_order
       FROM venues
-      WHERE status = 'published' AND gallery_visible = 1
+      WHERE workspace_id = ? AND status = 'published' AND gallery_visible = 1
       ORDER BY gallery_sort_order ASC, name COLLATE NOCASE ASC
-    `).all(),
+    `).bind(workspaceId).all(),
     db.prepare(`
       SELECT links.location_id, links.venue_slug
       FROM venue_location_links links
@@ -573,9 +592,9 @@ export async function getPublicLocation(
     db.prepare(`
       SELECT slug, name, town, county, country, gallery_sort_order
       FROM venues
-      WHERE status = 'published' AND gallery_visible = 1
+      WHERE workspace_id = ? AND status = 'published' AND gallery_visible = 1
       ORDER BY gallery_sort_order ASC, name COLLATE NOCASE ASC
-    `).all(),
+    `).bind(workspaceId).all(),
     db.prepare(`SELECT venue_slug FROM venue_location_links WHERE location_id = ?`).bind(area.id).all(),
   ]);
   const explicit = new Set((linkResult.results || []).map((row: any) => text(row.venue_slug)));

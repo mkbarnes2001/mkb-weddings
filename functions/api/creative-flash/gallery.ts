@@ -3,6 +3,7 @@ import {
   errorResponse,
   notFoundResponse,
 } from "../../../serverless/venue-d1";
+import { resolveAdminWorkspaceId, workspaceContentKey } from "../../../serverless/tenant-context";
 
 type Env = { MKB_DB: D1Database; ADMIN_API_ENABLED?: string };
 
@@ -17,9 +18,11 @@ const SETTINGS_SLUG = "creative-flash-gallery-settings";
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   if (!adminApiRequestAllowed(context.env as any, context.request)) return notFoundResponse();
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
+    const settingsKey = workspaceContentKey(workspaceId, SETTINGS_SLUG);
     const settingsRow: any = await context.env.MKB_DB.prepare(
-      `SELECT document_json FROM content_pages WHERE slug = ? LIMIT 1`,
-    ).bind(SETTINGS_SLUG).first();
+      `SELECT document_json FROM content_pages WHERE slug = ? AND workspace_id = ? LIMIT 1`,
+    ).bind(settingsKey, workspaceId).first();
     const settings = {
       heroImageId: "",
       imageOrderIds: [],
@@ -33,10 +36,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
              i.thumb_src, i.full_src, i.alt, i.caption, i.tags_json, i.ai_tags_json,
              v.name AS venue_name
       FROM venue_images vi
-      JOIN images i ON i.asset_key = vi.asset_key
-      LEFT JOIN venues v ON v.slug = vi.venue_slug
+      JOIN images i ON i.asset_key = vi.asset_key AND i.workspace_id = vi.workspace_id
+      LEFT JOIN venues v ON v.slug = vi.venue_slug AND v.workspace_id = vi.workspace_id
+      WHERE vi.workspace_id = ?
       ORDER BY v.name COLLATE NOCASE ASC, vi.sort_order ASC, i.filename COLLATE NOCASE ASC
-    `).all();
+    `).bind(workspaceId).all();
 
     const seen = new Set<string>();
     const images = (result.results || []).filter((row: any) => {
@@ -73,6 +77,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 export const onRequestPut: PagesFunction<Env> = async (context) => {
   if (!adminApiRequestAllowed(context.env as any, context.request)) return notFoundResponse();
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
+    const settingsKey = workspaceContentKey(workspaceId, SETTINGS_SLUG);
     const body: any = await context.request.json();
     const rawSettings = body?.settings || {};
     const settings = {
@@ -82,22 +88,23 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     };
     const updates = Array.isArray(body?.updates) ? body.updates : [];
     const statements: any[] = [context.env.MKB_DB.prepare(`
-      INSERT INTO content_pages (slug, title, status, document_json, updated_at)
-      VALUES (?, 'Creative Flash Gallery Settings', 'active', ?, CURRENT_TIMESTAMP)
+      INSERT INTO content_pages (slug, title, status, document_json, updated_at, workspace_id)
+      VALUES (?, 'Creative Flash Gallery Settings', 'active', ?, CURRENT_TIMESTAMP, ?)
       ON CONFLICT(slug) DO UPDATE SET document_json = excluded.document_json, updated_at = CURRENT_TIMESTAMP
-    `).bind(SETTINGS_SLUG, JSON.stringify(settings))];
+      WHERE content_pages.workspace_id = excluded.workspace_id
+    `).bind(settingsKey, JSON.stringify(settings), workspaceId)];
 
     for (const item of updates) {
       const key = String(item?.assetKey || "").trim();
       if (!key) continue;
-      const rows = await context.env.MKB_DB.prepare(`SELECT venue_slug, included, moments_json, display_json FROM venue_images WHERE asset_key = ?`).bind(key).all();
+      const rows = await context.env.MKB_DB.prepare(`SELECT venue_slug, included, moments_json, display_json FROM venue_images WHERE asset_key = ? AND workspace_id = ?`).bind(key, workspaceId).all();
       for (const row of rows.results || []) {
         const currentDisplay = parse((row as any).display_json, {});
         const nextMoments = Array.isArray(item?.moments) ? [...new Set(item.moments.map((v: any) => String(v || "").trim()).filter(Boolean))] : parse((row as any).moments_json, []);
         const nextIncluded = typeof item?.included === "boolean" ? item.included : Boolean(Number((row as any).included || 0));
         const nextDisplay = { ...currentDisplay, ...(item?.display || {}), venue: nextIncluded, moments: nextMoments.length > 0 };
-        statements.push(context.env.MKB_DB.prepare(`UPDATE venue_images SET included = ?, moments_json = ?, display_json = ? WHERE venue_slug = ? AND asset_key = ?`).bind(
-          nextIncluded ? 1 : 0, JSON.stringify(nextMoments), JSON.stringify(nextDisplay), String((row as any).venue_slug || ""), key,
+        statements.push(context.env.MKB_DB.prepare(`UPDATE venue_images SET included = ?, moments_json = ?, display_json = ? WHERE venue_slug = ? AND asset_key = ? AND workspace_id = ?`).bind(
+          nextIncluded ? 1 : 0, JSON.stringify(nextMoments), JSON.stringify(nextDisplay), String((row as any).venue_slug || ""), key, workspaceId,
         ));
       }
     }

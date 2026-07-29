@@ -1,5 +1,6 @@
 import { setClientGalleryBrandingLogo } from "../../../../serverless/client-gallery-d1";
 import { adminApiRequestAllowed, errorResponse, notFoundResponse } from "../../../../serverless/venue-d1";
+import { resolveAdminWorkspaceId } from "../../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -28,6 +29,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json({ error: "Public image storage is not configured." }, { status: 503 });
     }
     const galleryId = String(context.params.id || "").trim();
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const form = await context.request.formData();
     const file = form.get("logo");
     if (!(file instanceof File)) {
@@ -54,7 +56,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const result = await setClientGalleryBrandingLogo(context.env.MKB_DB, galleryId, {
         storageKey,
         url: `${publicBaseUrl(context.env.IMAGE_PUBLIC_BASE_URL)}/${storageKey}`,
-      });
+      }, workspaceId);
       if (result.previousStorageKey && result.previousStorageKey !== storageKey) {
         context.waitUntil(context.env.MKB_IMAGES.delete(result.previousStorageKey).catch(() => {}));
       }

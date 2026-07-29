@@ -21,6 +21,8 @@ import {
 } from "../../../serverless/wedding-d1";
 import { deleteManagedImage } from "../../../serverless/image-d1";
 
+import { resolveAdminWorkspaceId } from "../../../serverless/tenant-context";
+
 type Env = {
   MKB_DB: D1Database;
   MKB_IMAGES: R2Bucket;
@@ -42,6 +44,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return notFoundResponse();
   }
 
+  const workspaceId = await resolveAdminWorkspaceId(context);
   const parts = segments(context);
 
   // Optional catch-all compatibility: /api/weddings can resolve here.
@@ -50,7 +53,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       if (context.request.method === "GET") {
         return Response.json({
           ok: true,
-          weddings: await listAdminWeddings(context.env.MKB_DB),
+          weddings: await listAdminWeddings(context.env.MKB_DB, workspaceId),
         });
       }
 
@@ -59,6 +62,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         const wedding = await createAdminWedding(
           context.env.MKB_DB,
           payload?.wedding,
+          workspaceId,
         );
         return Response.json(
           {
@@ -97,13 +101,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           context.env.MKB_DB,
           context.env.MKB_IMAGES,
           { weddingSlug: slug, imageId, venueSlug },
+          workspaceId,
         ),
       });
     }
 
     if (!slug || parts.length > 2) return notFoundResponse();
     if (!action && context.request.method === "GET") {
-      const wedding = await getAdminWedding(context.env.MKB_DB, slug);
+      const wedding = await getAdminWedding(context.env.MKB_DB, slug, workspaceId);
       return wedding
         ? Response.json({ ok: true, wedding })
         : Response.json({ error: "Wedding not found." }, { status: 404 });
@@ -115,6 +120,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         context.env.MKB_DB,
         slug,
         payload?.wedding,
+        workspaceId,
       );
       return Response.json({ ok: true, wedding, backupPath: null });
     }
@@ -122,10 +128,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (!action && context.request.method === "DELETE") {
       const mode = new URL(context.request.url).searchParams.get("mode") || "archive";
       if (mode === "permanent") {
-        const deletion = await deleteAdminWeddingPermanently(context.env.MKB_DB, slug);
+        const deletion = await deleteAdminWeddingPermanently(context.env.MKB_DB, slug, workspaceId);
         return Response.json({ ok: true, deletion });
       }
-      const wedding = await archiveAdminWedding(context.env.MKB_DB, slug);
+      const wedding = await archiveAdminWedding(context.env.MKB_DB, slug, workspaceId);
       return Response.json({ ok: true, wedding, backupPath: null });
     }
 
@@ -133,7 +139,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return Response.json({
         ok: true,
         slug,
-        document: await getWeddingImages(context.env.MKB_DB, slug),
+        document: await getWeddingImages(context.env.MKB_DB, slug, workspaceId),
       });
     }
 
@@ -143,14 +149,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     ) {
       const payload = await context.request.json<any>();
       return Response.json(
-        await saveWeddingImages(context.env.MKB_DB, slug, payload?.document),
+        await saveWeddingImages(context.env.MKB_DB, slug, payload?.document, workspaceId),
       );
     }
 
     if (action === "suppliers" && context.request.method === "GET") {
       return Response.json({
         ok: true,
-        rows: await getWeddingSuppliers(context.env.MKB_DB, slug),
+        rows: await getWeddingSuppliers(context.env.MKB_DB, slug, workspaceId),
       });
     }
 
@@ -160,7 +166,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     ) {
       const payload = await context.request.json<any>();
       return Response.json(
-        await saveWeddingSuppliers(context.env.MKB_DB, slug, payload?.rows),
+        await saveWeddingSuppliers(context.env.MKB_DB, slug, payload?.rows, workspaceId),
       );
     }
 
@@ -168,7 +174,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return Response.json({
         ok: true,
         slug,
-        story: await getWeddingStory(context.env.MKB_DB, slug),
+        story: await getWeddingStory(context.env.MKB_DB, slug, workspaceId),
       });
     }
 
@@ -178,14 +184,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     ) {
       const payload = await context.request.json<any>();
       return Response.json(
-        await saveWeddingStory(context.env.MKB_DB, slug, payload?.story),
+        await saveWeddingStory(context.env.MKB_DB, slug, payload?.story, workspaceId),
       );
     }
 
     if (action === "publish" && context.request.method === "GET") {
       return Response.json({
         ok: true,
-        preview: await getWeddingPublishPreview(context.env.MKB_DB, slug),
+        preview: await getWeddingPublishPreview(context.env.MKB_DB, slug, workspaceId),
       });
     }
 
@@ -197,6 +203,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           context.env.MKB_DB,
           slug,
           payload?.storyEnabled === true,
+          workspaceId,
         ),
       });
     }

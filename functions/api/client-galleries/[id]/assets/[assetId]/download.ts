@@ -3,6 +3,7 @@ import {
   resolveAdminClientGalleryOriginalDownload,
 } from "../../../../../../serverless/client-gallery-d1";
 import { adminApiRequestAllowed, errorResponse, notFoundResponse } from "../../../../../../serverless/venue-d1";
+import { resolveAdminWorkspaceId } from "../../../../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -23,7 +24,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
     const galleryId = String(context.params.id || "").trim();
     const assetId = String(context.params.assetId || "").trim();
-    const result = await resolveAdminClientGalleryOriginalDownload(context.env.MKB_DB, galleryId, assetId);
+    const result = await resolveAdminClientGalleryOriginalDownload(
+      context.env.MKB_DB, galleryId, assetId, await resolveAdminWorkspaceId(context),
+    );
     if (!result) return Response.json({ error: "Full-resolution original is not available for this image." }, { status: 404 });
 
     const object = await context.env.MKB_PRIVATE_ASSETS.get(result.storageKey);

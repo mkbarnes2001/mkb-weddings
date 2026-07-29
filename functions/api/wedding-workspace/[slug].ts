@@ -4,6 +4,7 @@ import {
   publishWeddingPreviewAssignments,
   saveWeddingPreviewSet,
 } from "../../../serverless/wedding-workspace-d1";
+import { resolveAdminWorkspaceId } from "../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -18,7 +19,8 @@ function slug(context: any) {
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   if (!adminApiRequestAllowed(context.env as any, context.request)) return notFoundResponse();
   try {
-    const workspace = await getWeddingWorkspace(context.env.MKB_DB, slug(context));
+    const workspaceId = await resolveAdminWorkspaceId(context);
+    const workspace = await getWeddingWorkspace(context.env.MKB_DB, slug(context), workspaceId);
     return Response.json({ ok: true, ...workspace }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     return errorResponse(error);
@@ -28,6 +30,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   if (!adminApiRequestAllowed(context.env as any, context.request)) return notFoundResponse();
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const body = await context.request.json().catch(() => ({} as any)) as any;
     const action = String(body?.action || "").trim();
     const weddingSlug = slug(context);
@@ -37,12 +40,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         context.env.MKB_DB,
         weddingSlug,
         Array.isArray(body.assetIds) ? body.assetIds : [],
+        workspaceId,
       );
       return Response.json({ ok: true, ...workspace }, { headers: { "Cache-Control": "no-store" } });
     }
 
     if (action === "publishAssignments") {
-      const result = await publishWeddingPreviewAssignments(context.env.MKB_DB, weddingSlug, body);
+      const result = await publishWeddingPreviewAssignments(context.env.MKB_DB, weddingSlug, body, workspaceId);
       return Response.json(result, { headers: { "Cache-Control": "no-store" } });
     }
 

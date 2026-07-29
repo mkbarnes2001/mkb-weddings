@@ -1,4 +1,5 @@
 import { adminApiRequestAllowed, errorResponse, notFoundResponse } from "../../../../../serverless/venue-d1";
+import { resolveAdminWorkspaceId } from "../../../../../serverless/tenant-context";
 import { createPrivateOriginalUpload } from "../../../../../serverless/private-original-d1";
 
 type Env = {
@@ -16,6 +17,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       context.env.MKB_PRIVATE_ASSETS,
       String(context.params.id || "").trim(),
       body || {},
+      await resolveAdminWorkspaceId(context),
     );
     return Response.json({ ok: true, ...result }, { status: result.resumed ? 200 : 201 });
   } catch (error) {

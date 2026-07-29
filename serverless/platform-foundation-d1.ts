@@ -216,16 +216,16 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
     { key: "client-galleries", label: "Client Galleries", status: "scoped", detail: "Galleries, visitors, albums and selections are workspace-owned." },
     { key: "locations", label: "Location Intelligence", status: "scoped", detail: "Location types, areas and assignments are workspace-owned." },
     { key: "commerce", label: "Print Store and payments", status: "scoped", detail: "Catalogue, carts, orders, payments and fulfilment are workspace-owned." },
-    { key: "weddings", label: "Weddings and stories", status: "migration", detail: "Legacy records still use global slugs and require controlled business scoping." },
-    { key: "venues", label: "Venues", status: "migration", detail: "Legacy venue records still require business ownership migration." },
-    { key: "suppliers", label: "Supplier records", status: "migration", detail: "Current supplier records are MKB operational data, not marketplace businesses." },
-    { key: "galleries", label: "Moments and public galleries", status: "migration", detail: "Legacy gallery definitions require business ownership migration." },
-    { key: "authentication", label: "Professional identity and sessions", status: "scoped", detail: "Passwordless sign-in, one-time invitations, business membership resolution and server-owned workspace context are available. Legacy modules remain restricted to MKB until their ownership migrations are complete." },
+    { key: "weddings", label: "Weddings and stories", status: "scoped", detail: "Legacy wedding, story and relationship records are workspace-owned and server-scoped." },
+    { key: "venues", label: "Venues", status: "scoped", detail: "Legacy venue records and venue image relationships are workspace-owned and server-scoped." },
+    { key: "suppliers", label: "Supplier records", status: "scoped", detail: "Supplier records and wedding-supplier relationships are workspace-owned and server-scoped." },
+    { key: "galleries", label: "Moments and public galleries", status: "scoped", detail: "Moments, custom collections and public collection definitions are workspace-owned and domain-scoped." },
+    { key: "authentication", label: "Professional identity and sessions", status: "scoped", detail: "Passwordless sign-in, one-time invitations, business membership resolution and server-owned workspace context are enforced across tenant-owned Admin modules." },
     { key: "connect", label: "Stripe Connect", status: "planned", detail: "Connected account onboarding follows business authentication and ownership enforcement." },
   ];
 
   return {
-    schemaVersion: 24,
+    schemaVersion: 25,
     brand: {
       name: "WedPlanned",
       primaryDomain: "wedplanned.com",

@@ -1,9 +1,23 @@
 # Project State
 
 ## Version
-Current release: **v1.8.1 — Professional Identity & Tenant Context**.
-Database schema version: **24**.
+Current release: **v1.8.2 — Legacy Tenant Ownership Migration**.
+Database schema version: **25**.
 
+
+## Legacy Tenant Ownership Migration — v1.8.2
+- Adds workspace ownership to the remaining legacy Weddings, Venues, image relationship, Suppliers, Moments, public collection and compatibility-link tables.
+- Explicitly backfills all existing MKB legacy rows to `workspace_mkb_weddings` while preserving existing published URLs and R2 objects.
+- Resolves Admin business context from the authenticated professional membership established in v1.8.1; browser-supplied workspace IDs are not authoritative.
+- Resolves public legacy content from verified `workspace_domains`; unknown production domains do not fall through to another tenant.
+- Scopes Admin/public reads, writes, publish operations, managed-image/R2 lookup, Asset Library legacy sync and Location Gallery venue reads to the resolved workspace.
+- Re-audits existing tenant-owned surfaces so Workspace Settings, Client Galleries, private-original transfers, Print Store and Admin Prodigi fulfilment follow the authenticated active business rather than the historical default workspace.
+- Scopes dependent Print Store mutations so a guessed price-list ID from another business cannot alter that business's Client Gallery store settings.
+- New managed image uploads use workspace-namespaced R2 keys. Existing MKB keys remain untouched.
+- Non-MKB fixed `content_pages` definitions use internal workspace-prefixed keys to avoid collisions without changing historic MKB keys.
+- Adds `scripts/test-legacy-tenant-isolation.py`, covering cross-tenant read/infer, mutation, publish, R2-key/download lookup and public-domain resolution.
+- Adds migration `025_legacy_tenant_ownership.sql`; schema advances to **25**.
+- v1.8.1 production sign-out validation is complete. External business onboarding remains closed until v1.8.2 is deployed and its production tenant-isolation checklist passes.
 
 ## Professional Identity & Tenant Context — v1.8.1
 - Adds secure passwordless professional sign-in and invitation acceptance.

@@ -1,3 +1,5 @@
+import { resolvePublicWorkspaceId } from "../../../../serverless/tenant-context";
+
 type Env = { MKB_DB: D1Database };
 
 function parse(value: unknown, fallback: any) {
@@ -40,11 +42,12 @@ function hashStringToInt(value: string) {
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
+    const workspaceId = await resolvePublicWorkspaceId(context.env.MKB_DB, context.request);
     const slug = String(context.params.slug || "").trim();
     const row: any = await context.env.MKB_DB.prepare(`
-      SELECT * FROM moments WHERE slug = ? AND status = 'active' LIMIT 1
+      SELECT * FROM moments WHERE slug = ? AND workspace_id = ? AND status = 'active' LIMIT 1
     `)
-      .bind(slug)
+      .bind(slug, workspaceId)
       .first();
 
     if (!row) {
@@ -78,10 +81,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         i.caption,
         v.name AS venue_name
       FROM venue_images vi
-      JOIN images i ON i.asset_key = vi.asset_key
-      LEFT JOIN venues v ON v.slug = vi.venue_slug
+      JOIN images i ON i.asset_key = vi.asset_key AND i.workspace_id = vi.workspace_id
+      LEFT JOIN venues v ON v.slug = vi.venue_slug AND v.workspace_id = vi.workspace_id
+      WHERE vi.workspace_id = ?
       ORDER BY vi.sort_order ASC, i.filename COLLATE NOCASE ASC
-    `).all();
+    `).bind(workspaceId).all();
 
     const hidden = new Set(
       (Array.isArray(moment.hiddenImageIds) ? moment.hiddenImageIds : []).map(String),

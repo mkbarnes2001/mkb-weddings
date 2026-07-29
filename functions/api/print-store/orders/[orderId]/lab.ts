@@ -1,5 +1,6 @@
 import { adminApiRequestAllowed, errorResponse, notFoundResponse } from "../../../../../serverless/venue-d1";
 import { cancelProdigiSubmission, quoteProdigiOrder, refreshProdigiSubmission, submitProdigiOrder } from "../../../../../serverless/prodigi-lab";
+import { resolveAdminWorkspaceId } from "../../../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -19,10 +20,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const body: any = await context.request.json().catch(() => ({}));
     const input = { ...body, orderId: String(context.params.orderId || "") };
     const action = String(body?.action || "").trim();
-    if (action === "quote") return Response.json({ ok: true, ...(await quoteProdigiOrder(context.env.MKB_DB, context.env, input)) });
-    if (action === "submit") return Response.json({ ok: true, ...(await submitProdigiOrder(context.env.MKB_DB, context.env, input)) });
-    if (action === "refresh") return Response.json({ ok: true, ...(await refreshProdigiSubmission(context.env.MKB_DB, context.env, input.orderId)) });
-    if (action === "cancel") return Response.json({ ok: true, ...(await cancelProdigiSubmission(context.env.MKB_DB, context.env, input.orderId)) });
+    const workspaceId = await resolveAdminWorkspaceId(context);
+    if (action === "quote") return Response.json({ ok: true, ...(await quoteProdigiOrder(context.env.MKB_DB, context.env, input, workspaceId)) });
+    if (action === "submit") return Response.json({ ok: true, ...(await submitProdigiOrder(context.env.MKB_DB, context.env, input, workspaceId)) });
+    if (action === "refresh") return Response.json({ ok: true, ...(await refreshProdigiSubmission(context.env.MKB_DB, context.env, input.orderId, workspaceId)) });
+    if (action === "cancel") return Response.json({ ok: true, ...(await cancelProdigiSubmission(context.env.MKB_DB, context.env, input.orderId, workspaceId)) });
     return Response.json({ error: "Unsupported lab action." }, { status: 400 });
   } catch (error) {
     return errorResponse(error);

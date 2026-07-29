@@ -7,6 +7,10 @@ function text(value: unknown) {
   return String(value ?? "").trim();
 }
 
+async function resolvedWorkspaceId(db: D1Db, workspaceId?: string) {
+  return workspaceId !== undefined ? text(workspaceId) : await getDefaultWorkspaceId(db);
+}
+
 function number(value: unknown, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -208,8 +212,8 @@ function mapBranding(row: any) {
   };
 }
 
-export async function getClientGalleryBranding(db: D1Db, galleryId: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function getClientGalleryBranding(db: D1Db, galleryId: string, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const row = await db.prepare(`
     SELECT
       cg.id,
@@ -236,8 +240,8 @@ export async function getClientGalleryBranding(db: D1Db, galleryId: string) {
   return mapBranding(row);
 }
 
-export async function updateClientGalleryBranding(db: D1Db, galleryId: string, input: any) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function updateClientGalleryBranding(db: D1Db, galleryId: string, input: any, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const gallery = await db.prepare(`
     SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1
   `).bind(galleryId, workspaceId).first();
@@ -280,15 +284,16 @@ export async function updateClientGalleryBranding(db: D1Db, galleryId: string, i
     bool(input?.showStudioName, number(existing?.show_studio_name, 1) === 1) ? 1 : 0,
   ).run();
 
-  return getClientGalleryBranding(db, galleryId);
+  return getClientGalleryBranding(db, galleryId, workspaceId);
 }
 
 export async function setClientGalleryBrandingLogo(
   db: D1Db,
   galleryId: string,
   input: { url: string; storageKey: string },
+  workspaceIdInput?: string,
 ) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const gallery = await db.prepare(`
     SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1
   `).bind(galleryId, workspaceId).first();
@@ -308,13 +313,13 @@ export async function setClientGalleryBrandingLogo(
       updated_at = CURRENT_TIMESTAMP
   `).bind(galleryId, text(input.url), text(input.storageKey)).run();
   return {
-    branding: await getClientGalleryBranding(db, galleryId),
+    branding: await getClientGalleryBranding(db, galleryId, workspaceId),
     previousStorageKey: text(previous?.custom_logo_storage_key),
   };
 }
 
-export async function resetClientGalleryBranding(db: D1Db, galleryId: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function resetClientGalleryBranding(db: D1Db, galleryId: string, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const gallery = await db.prepare(`
     SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1
   `).bind(galleryId, workspaceId).first();
@@ -324,7 +329,7 @@ export async function resetClientGalleryBranding(db: D1Db, galleryId: string) {
   `).bind(galleryId).first();
   await db.prepare(`DELETE FROM client_gallery_branding WHERE gallery_id = ?`).bind(galleryId).run();
   return {
-    branding: await getClientGalleryBranding(db, galleryId),
+    branding: await getClientGalleryBranding(db, galleryId, workspaceId),
     previousStorageKey: text(existing?.custom_logo_storage_key),
   };
 }
@@ -354,7 +359,7 @@ async function galleryBaseRow(db: D1Db, id: string, workspaceId: string) {
       COALESCE(cover_thumb.url, '') AS cover_thumb,
       COALESCE(cover_web.url, '') AS cover_web
     FROM client_galleries cg
-    LEFT JOIN weddings w ON w.slug = cg.wedding_slug
+    LEFT JOIN weddings w ON w.slug = cg.wedding_slug AND w.workspace_id = cg.workspace_id
     LEFT JOIN client_gallery_assets cga ON cga.gallery_id = cg.id
     LEFT JOIN client_gallery_favourites cgf ON cgf.gallery_id = cg.id
     LEFT JOIN client_identity_gallery_visitors cigv ON cigv.gallery_id = cgf.gallery_id AND cigv.visitor_key = cgf.visitor_key
@@ -377,13 +382,13 @@ async function galleryBaseRow(db: D1Db, id: string, workspaceId: string) {
   `).bind(id, workspaceId).first();
 }
 
-async function listWeddingOptions(db: D1Db) {
+async function listWeddingOptions(db: D1Db, workspaceId: string) {
   const result = await db.prepare(`
     SELECT slug, title, couple, venue, wedding_date, status
     FROM weddings
-    WHERE status <> 'archived'
+    WHERE workspace_id = ? AND status <> 'archived'
     ORDER BY wedding_date DESC, title COLLATE NOCASE ASC
-  `).all();
+  `).bind(workspaceId).all();
   return (result.results || []).map((row: any) => ({
     slug: text(row.slug),
     title: text(row.title || row.couple || row.slug),
@@ -394,8 +399,8 @@ async function listWeddingOptions(db: D1Db) {
   }));
 }
 
-export async function listClientGalleries(db: D1Db) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function listClientGalleries(db: D1Db, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const [galleryResult, weddings] = await Promise.all([
     db.prepare(`
       SELECT
@@ -414,7 +419,7 @@ export async function listClientGalleries(db: D1Db) {
         COALESCE(cover_thumb.url, '') AS cover_thumb,
         COALESCE(cover_web.url, '') AS cover_web
       FROM client_galleries cg
-      LEFT JOIN weddings w ON w.slug = cg.wedding_slug
+      LEFT JOIN weddings w ON w.slug = cg.wedding_slug AND w.workspace_id = cg.workspace_id
       LEFT JOIN client_gallery_assets cga ON cga.gallery_id = cg.id
       LEFT JOIN client_gallery_favourites cgf ON cgf.gallery_id = cg.id
       LEFT JOIN client_identity_gallery_visitors cigv ON cigv.gallery_id = cgf.gallery_id AND cigv.visitor_key = cgf.visitor_key
@@ -435,7 +440,7 @@ export async function listClientGalleries(db: D1Db) {
       GROUP BY cg.id
       ORDER BY cg.updated_at DESC, cg.title COLLATE NOCASE ASC
     `).bind(workspaceId).all(),
-    listWeddingOptions(db),
+    listWeddingOptions(db, workspaceId),
   ]);
   return {
     workspaceId,
@@ -444,8 +449,8 @@ export async function listClientGalleries(db: D1Db) {
   };
 }
 
-export async function createClientGallery(db: D1Db, input: any) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function createClientGallery(db: D1Db, input: any, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const title = text(input?.title);
   if (!title) throw new Error("Gallery title is required.");
   const id = `client_gallery_${crypto.randomUUID()}`;
@@ -499,7 +504,7 @@ export async function createClientGallery(db: D1Db, input: any) {
       displayName: text(input?.clientName),
       role: "primary_client",
       allowOriginalDownloads: true,
-    });
+    }, workspaceId);
   }
 
   if (weddingSlug && bool(input?.importWeddingAssets, true)) {
@@ -510,8 +515,8 @@ export async function createClientGallery(db: D1Db, input: any) {
   return mapGallery(row);
 }
 
-export async function updateClientGallery(db: D1Db, id: string, input: any) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function updateClientGallery(db: D1Db, id: string, input: any, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const existing = await db.prepare(`
     SELECT * FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1
   `).bind(id, workspaceId).first();
@@ -599,15 +604,15 @@ export async function updateClientGallery(db: D1Db, id: string, input: any) {
       displayName: text(input?.clientName ?? existing.client_name),
       role: "primary_client",
       allowOriginalDownloads: true,
-    });
+    }, workspaceId);
   }
 
   const row = await galleryBaseRow(db, id, workspaceId);
   return mapGallery(row);
 }
 
-export async function archiveClientGallery(db: D1Db, id: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function archiveClientGallery(db: D1Db, id: string, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   await db.prepare(`
     UPDATE client_galleries
     SET status = 'archived', updated_at = CURRENT_TIMESTAMP
@@ -631,7 +636,11 @@ function mapContact(row: any) {
   };
 }
 
-export async function listClientGalleryContacts(db: D1Db, galleryId: string) {
+export async function listClientGalleryContacts(db: D1Db, galleryId: string, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
+  const gallery = await db.prepare(`SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1`)
+    .bind(galleryId, workspaceId).first();
+  if (!gallery) throw new Error("Client gallery not found.");
   const result = await db.prepare(`
     SELECT * FROM client_gallery_contacts
     WHERE gallery_id = ? AND status = 'active'
@@ -640,11 +649,11 @@ export async function listClientGalleryContacts(db: D1Db, galleryId: string) {
   return (result.results || []).map(mapContact);
 }
 
-export async function upsertClientGalleryContact(db: D1Db, galleryId: string, input: any) {
+export async function upsertClientGalleryContact(db: D1Db, galleryId: string, input: any, workspaceIdInput?: string) {
   const email = text(input?.email);
   const emailNormalized = normalizeEmail(email);
   if (!validEmail(email)) throw new Error("Enter a valid email address.");
-  const workspaceId = await getDefaultWorkspaceId(db);
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const gallery = await db.prepare(`SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1`).bind(galleryId, workspaceId).first();
   if (!gallery) throw new Error("Client gallery not found.");
   await db.prepare(`
@@ -666,11 +675,11 @@ export async function upsertClientGalleryContact(db: D1Db, galleryId: string, in
     text(input?.role || "client") || "client",
     bool(input?.allowOriginalDownloads, true) ? 1 : 0,
   ).run();
-  return listClientGalleryContacts(db, galleryId);
+  return listClientGalleryContacts(db, galleryId, workspaceId);
 }
 
-export async function removeClientGalleryContact(db: D1Db, galleryId: string, email: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function removeClientGalleryContact(db: D1Db, galleryId: string, email: string, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const gallery = await db.prepare(`SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1`).bind(galleryId, workspaceId).first();
   if (!gallery) throw new Error("Client gallery not found.");
   await db.prepare(`
@@ -678,10 +687,10 @@ export async function removeClientGalleryContact(db: D1Db, galleryId: string, em
     SET status = 'archived', updated_at = CURRENT_TIMESTAMP
     WHERE gallery_id = ? AND email_normalized = ?
   `).bind(galleryId, normalizeEmail(email)).run();
-  return listClientGalleryContacts(db, galleryId);
+  return listClientGalleryContacts(db, galleryId, workspaceId);
 }
 
-async function listClientGalleryVisitors(db: D1Db, galleryId: string) {
+async function listClientGalleryVisitors(db: D1Db, galleryId: string, workspaceId: string) {
   const result = await db.prepare(`
     SELECT
       cgv.*,
@@ -694,7 +703,7 @@ async function listClientGalleryVisitors(db: D1Db, galleryId: string) {
         ELSE 0
       END AS contact_downloads
     FROM client_gallery_visitors cgv
-    JOIN client_galleries cg ON cg.id = cgv.gallery_id
+    JOIN client_galleries cg ON cg.id = cgv.gallery_id AND cg.workspace_id = ?
     LEFT JOIN client_gallery_access_settings cgas ON cgas.gallery_id = cgv.gallery_id
     LEFT JOIN client_gallery_contacts cgc
       ON cgc.gallery_id = cgv.gallery_id
@@ -703,7 +712,7 @@ async function listClientGalleryVisitors(db: D1Db, galleryId: string) {
     WHERE cgv.gallery_id = ?
     ORDER BY cgv.last_seen_at DESC
     LIMIT 100
-  `).bind(galleryId).all();
+  `).bind(workspaceId, galleryId).all();
   return (result.results || []).map((row: any) => ({
     visitorKey: text(row.visitor_key),
     email: text(row.email),
@@ -733,7 +742,11 @@ function mapSelectionRequest(row: any) {
   };
 }
 
-export async function listClientGallerySelectionRequests(db: D1Db, galleryId: string, includeArchived = true) {
+export async function listClientGallerySelectionRequests(db: D1Db, galleryId: string, includeArchived = true, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
+  const gallery = await db.prepare(`SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1`)
+    .bind(galleryId, workspaceId).first();
+  if (!gallery) throw new Error("Client gallery not found.");
   const result = await db.prepare(`
     SELECT * FROM client_gallery_selection_requests
     WHERE gallery_id = ? ${includeArchived ? "" : "AND status = 'active'"}
@@ -742,7 +755,7 @@ export async function listClientGallerySelectionRequests(db: D1Db, galleryId: st
   return (result.results || []).map(mapSelectionRequest);
 }
 
-async function listClientGallerySelections(db: D1Db, galleryId: string) {
+async function listClientGallerySelections(db: D1Db, galleryId: string, workspaceId: string) {
   const [selectionResult, assetResult] = await Promise.all([
     db.prepare(`
       SELECT
@@ -750,13 +763,14 @@ async function listClientGallerySelections(db: D1Db, galleryId: string) {
         cgsr.name AS request_name,
         COUNT(cgsa.asset_id) AS selected_count
       FROM client_gallery_selections cgs
+      JOIN client_galleries cg ON cg.id = cgs.gallery_id AND cg.workspace_id = ?
       JOIN client_gallery_selection_requests cgsr ON cgsr.id = cgs.request_id
       LEFT JOIN client_gallery_selection_assets cgsa ON cgsa.selection_id = cgs.id
       WHERE cgs.gallery_id = ?
       GROUP BY cgs.id
       ORDER BY CASE cgs.status WHEN 'submitted' THEN 0 ELSE 1 END,
                COALESCE(cgs.submitted_at, cgs.updated_at) DESC
-    `).bind(galleryId).all(),
+    `).bind(workspaceId, galleryId).all(),
     db.prepare(`
       SELECT
         cgsa.selection_id,
@@ -768,12 +782,13 @@ async function listClientGallerySelections(db: D1Db, galleryId: string) {
         COALESCE(wf.url, tf.url, '') AS web_url
       FROM client_gallery_selection_assets cgsa
       JOIN client_gallery_selections cgs ON cgs.id = cgsa.selection_id
-      JOIN assets a ON a.id = cgsa.asset_id
+      JOIN client_galleries cg ON cg.id = cgs.gallery_id AND cg.workspace_id = ?
+      JOIN assets a ON a.id = cgsa.asset_id AND a.workspace_id = cg.workspace_id
       LEFT JOIN asset_files tf ON tf.asset_id = a.id AND tf.variant = 'thumb' AND tf.status = 'active'
       LEFT JOIN asset_files wf ON wf.asset_id = a.id AND wf.variant = 'web' AND wf.status = 'active'
       WHERE cgs.gallery_id = ?
       ORDER BY cgsa.selection_id, cgsa.sort_order ASC, cgsa.selected_at ASC
-    `).bind(galleryId).all(),
+    `).bind(workspaceId, galleryId).all(),
   ]);
   const assetsBySelection = new Map<string, any[]>();
   for (const row of assetResult.results || []) {
@@ -804,8 +819,8 @@ async function listClientGallerySelections(db: D1Db, galleryId: string) {
   }));
 }
 
-export async function mutateClientGallerySelections(db: D1Db, galleryId: string, input: any) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function mutateClientGallerySelections(db: D1Db, galleryId: string, input: any, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const gallery = await db.prepare(`SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1`)
     .bind(galleryId, workspaceId).first();
   if (!gallery) throw new Error('Client gallery not found.');
@@ -859,13 +874,17 @@ export async function mutateClientGallerySelections(db: D1Db, galleryId: string,
   }
 
   return {
-    selectionRequests: await listClientGallerySelectionRequests(db, galleryId, true),
-    selections: await listClientGallerySelections(db, galleryId),
+    selectionRequests: await listClientGallerySelectionRequests(db, galleryId, true, workspaceId),
+    selections: await listClientGallerySelections(db, galleryId, workspaceId),
   };
 }
 
 
-export async function listClientGalleryAlbums(db: D1Db, galleryId: string, includeArchived = true) {
+export async function listClientGalleryAlbums(db: D1Db, galleryId: string, includeArchived = true, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
+  const gallery = await db.prepare(`SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1`)
+    .bind(galleryId, workspaceId).first();
+  if (!gallery) throw new Error("Client gallery not found.");
   const result = await db.prepare(`
     SELECT
       cga.*,
@@ -907,8 +926,8 @@ async function uniqueAlbumSlug(db: D1Db, galleryId: string, wanted: string, excl
   return `${base}-${crypto.randomUUID().slice(0, 8)}`;
 }
 
-export async function mutateClientGalleryAlbums(db: D1Db, galleryId: string, input: any) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function mutateClientGalleryAlbums(db: D1Db, galleryId: string, input: any, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const gallery = await db.prepare(`SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1`)
     .bind(galleryId, workspaceId).first();
   if (!gallery) throw new Error('Client gallery not found.');
@@ -975,10 +994,10 @@ export async function mutateClientGalleryAlbums(db: D1Db, galleryId: string, inp
     throw new Error('Unsupported client gallery album action.');
   }
 
-  return { albums: await listClientGalleryAlbums(db, galleryId, true) };
+  return { albums: await listClientGalleryAlbums(db, galleryId, true, workspaceId) };
 }
 
-async function adminGalleryAssets(db: D1Db, galleryId: string) {
+async function adminGalleryAssets(db: D1Db, galleryId: string, workspaceId: string) {
   const result = await db.prepare(`
     SELECT
       cga.asset_id,
@@ -1006,14 +1025,15 @@ async function adminGalleryAssets(db: D1Db, galleryId: string) {
         WHERE cgaa.asset_id = cga.asset_id AND cgal.gallery_id = cga.gallery_id AND cgal.status = 'active'
       ), '') AS album_sort_orders
     FROM client_gallery_assets cga
-    JOIN assets a ON a.id = cga.asset_id
+    JOIN client_galleries cg ON cg.id = cga.gallery_id AND cg.workspace_id = ?
+    JOIN assets a ON a.id = cga.asset_id AND a.workspace_id = cg.workspace_id
     LEFT JOIN asset_capture_metadata acm ON acm.asset_id = a.id
     LEFT JOIN asset_files tf ON tf.asset_id = a.id AND tf.variant = 'thumb' AND tf.status = 'active'
     LEFT JOIN asset_files wf ON wf.asset_id = a.id AND wf.variant = 'web' AND wf.status = 'active'
     LEFT JOIN asset_files of ON of.asset_id = a.id AND of.variant = 'original' AND of.status = 'active'
     WHERE cga.gallery_id = ? AND a.status = 'active'
     ORDER BY cga.sort_order ASC, a.filename COLLATE NOCASE ASC
-  `).bind(galleryId).all();
+  `).bind(workspaceId, galleryId).all();
   return (result.results || []).map((row: any) => {
     const albumSortOrders = Object.fromEntries(
       text(row.album_sort_orders).split('|').map((part) => part.trim()).filter(Boolean).map((part) => {
@@ -1039,18 +1059,18 @@ async function adminGalleryAssets(db: D1Db, galleryId: string) {
   });
 }
 
-export async function getClientGalleryAdmin(db: D1Db, id: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function getClientGalleryAdmin(db: D1Db, id: string, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const [row, assets, weddings, contacts, visitors, selectionRequests, selections, albums, branding] = await Promise.all([
     galleryBaseRow(db, id, workspaceId),
-    adminGalleryAssets(db, id),
-    listWeddingOptions(db),
-    listClientGalleryContacts(db, id),
-    listClientGalleryVisitors(db, id),
-    listClientGallerySelectionRequests(db, id, true),
-    listClientGallerySelections(db, id),
-    listClientGalleryAlbums(db, id, true),
-    getClientGalleryBranding(db, id),
+    adminGalleryAssets(db, id, workspaceId),
+    listWeddingOptions(db, workspaceId),
+    listClientGalleryContacts(db, id, workspaceId),
+    listClientGalleryVisitors(db, id, workspaceId),
+    listClientGallerySelectionRequests(db, id, true, workspaceId),
+    listClientGallerySelections(db, id, workspaceId),
+    listClientGalleryAlbums(db, id, true, workspaceId),
+    getClientGalleryBranding(db, id, workspaceId),
   ]);
   if (!row) throw new Error("Client gallery not found.");
   return { workspaceId, gallery: mapGallery(row), assets, weddings, contacts, visitors, selectionRequests, selections, albums, branding };
@@ -1078,10 +1098,11 @@ export async function importWeddingAssets(db: D1Db, galleryId: string, workspace
     FROM asset_wedding_links awl
     JOIN assets a ON a.id = awl.asset_id
     WHERE awl.wedding_slug = ?
+      AND awl.workspace_id = ?
       AND a.workspace_id = ?
       AND a.status = 'active'
     ORDER BY awl.sort_order ASC, awl.asset_id ASC
-  `).bind(galleryId, startOrder, resolvedWeddingSlug, resolvedWorkspaceId).run();
+  `).bind(galleryId, startOrder, resolvedWeddingSlug, resolvedWorkspaceId, resolvedWorkspaceId).run();
 
   const firstRow = await db.prepare(`
     SELECT asset_id FROM client_gallery_assets
@@ -1100,8 +1121,8 @@ export async function importWeddingAssets(db: D1Db, galleryId: string, workspace
   return number(countRow?.total);
 }
 
-export async function mutateClientGalleryAssets(db: D1Db, galleryId: string, input: any) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function mutateClientGalleryAssets(db: D1Db, galleryId: string, input: any, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const gallery = await db.prepare(`
     SELECT * FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1
   `).bind(galleryId, workspaceId).first();
@@ -1164,7 +1185,8 @@ export async function mutateClientGalleryAssets(db: D1Db, galleryId: string, inp
   return { total: number(countRow?.total) };
 }
 
-async function publicGalleryRow(db: D1Db, token: string) {
+async function publicGalleryRow(db: D1Db, token: string, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   return db.prepare(`
     SELECT
       cg.*,
@@ -1191,10 +1213,10 @@ async function publicGalleryRow(db: D1Db, token: string) {
     LEFT JOIN client_gallery_display_settings cgds ON cgds.gallery_id = cg.id
     LEFT JOIN workspace_settings ws ON ws.workspace_id = cg.workspace_id
     LEFT JOIN client_gallery_branding cgb ON cgb.gallery_id = cg.id
-    LEFT JOIN weddings w ON w.slug = cg.wedding_slug
-    WHERE cg.access_token = ? AND cg.status = 'live'
+    LEFT JOIN weddings w ON w.slug = cg.wedding_slug AND w.workspace_id = cg.workspace_id
+    WHERE cg.access_token = ? AND cg.workspace_id = ? AND cg.status = 'live'
     LIMIT 1
-  `).bind(token).first();
+  `).bind(token, workspaceId).first();
 }
 
 type PublicVisitorIdentity = {
@@ -1310,7 +1332,7 @@ async function verifyPublicAccess(
   return { ok: true, status: 200, error: '', identity, authenticatedIdentity: verifiedIdentity };
 }
 
-async function publicAssets(db: D1Db, galleryId: string) {
+async function publicAssets(db: D1Db, galleryId: string, workspaceId: string) {
   const settings = await db.prepare(`SELECT sort_mode FROM client_gallery_display_settings WHERE gallery_id = ? LIMIT 1`).bind(galleryId).first();
   const sortMode = cleanSortMode(settings?.sort_mode);
   const orderBy = sortMode === 'filename'
@@ -1341,14 +1363,15 @@ async function publicAssets(db: D1Db, galleryId: string) {
         WHERE cgaa.asset_id = cga.asset_id AND cgal.gallery_id = cga.gallery_id AND cgal.status = 'active'
       ), '') AS album_sort_orders
     FROM client_gallery_assets cga
-    JOIN assets a ON a.id = cga.asset_id
+    JOIN client_galleries cg ON cg.id = cga.gallery_id AND cg.workspace_id = ?
+    JOIN assets a ON a.id = cga.asset_id AND a.workspace_id = cg.workspace_id
     LEFT JOIN asset_capture_metadata acm ON acm.asset_id = a.id
     LEFT JOIN asset_files tf ON tf.asset_id = a.id AND tf.variant = 'thumb' AND tf.status = 'active'
     LEFT JOIN asset_files wf ON wf.asset_id = a.id AND wf.variant = 'web' AND wf.status = 'active'
     LEFT JOIN asset_files of ON of.asset_id = a.id AND of.variant = 'original' AND of.status = 'active'
     WHERE cga.gallery_id = ? AND cga.hidden = 0 AND a.status = 'active'
     ORDER BY ${orderBy}
-  `).bind(galleryId).all();
+  `).bind(workspaceId, galleryId).all();
   return (result.results || []).map((row: any) => ({
     assetId: text(row.asset_id),
     filename: text(row.filename),
@@ -1491,8 +1514,14 @@ async function ensurePublicSelection(
   return row;
 }
 
-export async function mutatePublicClientGallerySelection(db: D1Db, token: string, input: any, authenticatedIdentity: ClientAuthIdentity | null = null) {
-  const row = await publicGalleryRow(db, token);
+export async function mutatePublicClientGallerySelection(
+  db: D1Db,
+  token: string,
+  input: any,
+  authenticatedIdentity: ClientAuthIdentity | null = null,
+  workspaceIdInput?: string,
+) {
+  const row = await publicGalleryRow(db, token, workspaceIdInput);
   const access = await verifyPublicAccess(db, row, {
     pin: text(input?.pin),
     visitorKey: text(input?.visitorKey),
@@ -1596,8 +1625,17 @@ function effectiveDownloadPermission(row: any, identity: PublicVisitorIdentity |
   return number(row?.allow_guest_downloads) === 1;
 }
 
-export async function getPublicClientGallery(db: D1Db, token: string, pin = '', visitorKey = '', email = '', displayName = '', authenticatedIdentity: ClientAuthIdentity | null = null) {
-  const row = await publicGalleryRow(db, token);
+export async function getPublicClientGallery(
+  db: D1Db,
+  token: string,
+  pin = '',
+  visitorKey = '',
+  email = '',
+  displayName = '',
+  authenticatedIdentity: ClientAuthIdentity | null = null,
+  workspaceIdInput?: string,
+) {
+  const row = await publicGalleryRow(db, token, workspaceIdInput);
   if (!row) return { status: 404, body: { error: 'Gallery not found.' } };
   if (galleryIsExpired(row)) return { status: 410, body: { error: 'This gallery has expired.' } };
 
@@ -1657,10 +1695,10 @@ export async function getPublicClientGallery(db: D1Db, token: string, pin = '', 
   }
 
   const [assets, favourites, selectionRequests, albums] = await Promise.all([
-    publicAssets(db, text(row.id)),
+    publicAssets(db, text(row.id), text(row.workspace_id)),
     favouriteIds(db, text(row.id), visitorKey, access.authenticatedIdentity?.id || ''),
     publicSelectionState(db, text(row.id), visitorKey, identity?.emailNormalized || ""),
-    listClientGalleryAlbums(db, text(row.id), false),
+    listClientGalleryAlbums(db, text(row.id), false, text(row.workspace_id)),
   ]);
   const coverAssetId = text(row.cover_asset_id);
   const cover = assets.find((asset) => asset.assetId === coverAssetId) || assets[0] || null;
@@ -1679,8 +1717,14 @@ export async function getPublicClientGallery(db: D1Db, token: string, pin = '', 
   };
 }
 
-export async function setPublicFavourite(db: D1Db, token: string, input: any, authenticatedIdentity: ClientAuthIdentity | null = null) {
-  const row = await publicGalleryRow(db, token);
+export async function setPublicFavourite(
+  db: D1Db,
+  token: string,
+  input: any,
+  authenticatedIdentity: ClientAuthIdentity | null = null,
+  workspaceIdInput?: string,
+) {
+  const row = await publicGalleryRow(db, token, workspaceIdInput);
   const access = await verifyPublicAccess(db, row, {
     pin: text(input?.pin),
     visitorKey: text(input?.visitorKey),
@@ -1730,8 +1774,14 @@ export async function setPublicFavourite(db: D1Db, token: string, input: any, au
   return { status: 200, body: { ok: true, favouriteAssetIds: await favouriteIds(db, galleryId, visitorKey, identityId) } };
 }
 
-export async function authoriseClientGalleryOriginalDownload(db: D1Db, token: string, input: any, authenticatedIdentity: ClientAuthIdentity | null = null) {
-  const row = await publicGalleryRow(db, token);
+export async function authoriseClientGalleryOriginalDownload(
+  db: D1Db,
+  token: string,
+  input: any,
+  authenticatedIdentity: ClientAuthIdentity | null = null,
+  workspaceIdInput?: string,
+) {
+  const row = await publicGalleryRow(db, token, workspaceIdInput);
   const access = await verifyPublicAccess(db, row, {
     pin: text(input?.pin),
     visitorKey: text(input?.visitorKey),
@@ -1756,7 +1806,7 @@ export async function authoriseClientGalleryOriginalDownload(db: D1Db, token: st
       af.mime_type,
       af.file_size
     FROM client_gallery_assets cga
-    JOIN assets a ON a.id = cga.asset_id
+    JOIN assets a ON a.id = cga.asset_id AND a.workspace_id = ?
     JOIN asset_files af
       ON af.asset_id = a.id
       AND af.variant = 'original'
@@ -1767,7 +1817,7 @@ export async function authoriseClientGalleryOriginalDownload(db: D1Db, token: st
       AND cga.hidden = 0
       AND a.status = 'active'
     LIMIT 1
-  `).bind(galleryId, assetId).first();
+  `).bind(workspaceId, galleryId, assetId).first();
 
   if (!asset || !text(asset.storage_key)) {
     return { status: 404, error: 'Full-resolution original is not available for this image.' } as const;
@@ -1845,8 +1895,8 @@ type AdminFavouriteInternalGroup = Omit<AdminClientGalleryFavouriteGroup, 'asset
   assets: AdminFavouriteInternalAsset[];
 };
 
-async function collectAdminClientGalleryFavourites(db: D1Db, galleryId: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+async function collectAdminClientGalleryFavourites(db: D1Db, galleryId: string, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const gallery = await db.prepare(`
     SELECT id, title, client_name, wedding_slug
     FROM client_galleries
@@ -1874,7 +1924,7 @@ async function collectAdminClientGalleryFavourites(db: D1Db, galleryId: string) 
       ofile.mime_type AS original_mime_type,
       ofile.file_size AS original_file_size
     FROM client_gallery_favourites cgf
-    JOIN assets a ON a.id = cgf.asset_id AND a.status = 'active'
+    JOIN assets a ON a.id = cgf.asset_id AND a.workspace_id = ? AND a.status = 'active'
     LEFT JOIN client_identity_gallery_visitors cigv
       ON cigv.gallery_id = cgf.gallery_id AND cigv.visitor_key = cgf.visitor_key
     LEFT JOIN client_identities ci
@@ -1892,7 +1942,7 @@ async function collectAdminClientGalleryFavourites(db: D1Db, galleryId: string) 
       AND ofile.access_level = 'private'
     WHERE cgf.gallery_id = ?
     ORDER BY cgf.created_at ASC, a.filename COLLATE NOCASE ASC
-  `).bind(galleryId).all();
+  `).bind(workspaceId, galleryId).all();
 
   const groups = new Map<string, AdminFavouriteInternalGroup>();
   const combined = new Map<string, AdminFavouriteInternalAsset>();
@@ -1970,8 +2020,8 @@ async function collectAdminClientGalleryFavourites(db: D1Db, galleryId: string) 
   };
 }
 
-export async function listAdminClientGalleryFavourites(db: D1Db, galleryId: string) {
-  const data = await collectAdminClientGalleryFavourites(db, galleryId);
+export async function listAdminClientGalleryFavourites(db: D1Db, galleryId: string, workspaceIdInput?: string) {
+  const data = await collectAdminClientGalleryFavourites(db, galleryId, workspaceIdInput);
   const publicAsset = (asset: AdminFavouriteInternalAsset): AdminClientGalleryFavouriteAsset => ({
     assetId: asset.assetId,
     filename: asset.filename,
@@ -1997,8 +2047,13 @@ export async function listAdminClientGalleryFavourites(db: D1Db, galleryId: stri
   };
 }
 
-export async function resolveAdminClientGalleryOriginalDownload(db: D1Db, galleryId: string, assetId: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function resolveAdminClientGalleryOriginalDownload(
+  db: D1Db,
+  galleryId: string,
+  assetId: string,
+  workspaceIdInput?: string,
+) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const row = await db.prepare(`
     SELECT
       cg.id AS gallery_id,
@@ -2009,7 +2064,7 @@ export async function resolveAdminClientGalleryOriginalDownload(db: D1Db, galler
       af.file_size
     FROM client_galleries cg
     JOIN client_gallery_assets cga ON cga.gallery_id = cg.id
-    JOIN assets a ON a.id = cga.asset_id AND a.status = 'active'
+    JOIN assets a ON a.id = cga.asset_id AND a.workspace_id = cg.workspace_id AND a.status = 'active'
     JOIN asset_files af
       ON af.asset_id = a.id
       AND af.variant = 'original'
@@ -2036,10 +2091,11 @@ export async function resolveAdminClientGalleryBulkDownload(
   db: D1Db,
   galleryId: string,
   input: { source?: string; group?: string; selectionId?: string },
+  workspaceIdInput?: string,
 ) {
   const source = text(input.source || 'favourites');
   if (source === 'selection') {
-    const workspaceId = await getDefaultWorkspaceId(db);
+    const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
     const selectionId = text(input.selectionId);
     const gallery = await db.prepare(`SELECT id, title FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1`)
       .bind(galleryId, workspaceId).first();
@@ -2060,7 +2116,7 @@ export async function resolveAdminClientGalleryBulkDownload(
         af.mime_type,
         af.file_size
       FROM client_gallery_selection_assets cgsa
-      JOIN assets a ON a.id = cgsa.asset_id AND a.status = 'active'
+      JOIN assets a ON a.id = cgsa.asset_id AND a.workspace_id = ? AND a.status = 'active'
       JOIN asset_files af
         ON af.asset_id = a.id
         AND af.variant = 'original'
@@ -2068,7 +2124,7 @@ export async function resolveAdminClientGalleryBulkDownload(
         AND af.access_level = 'private'
       WHERE cgsa.selection_id = ?
       ORDER BY cgsa.sort_order ASC, cgsa.selected_at ASC
-    `).bind(selectionId).all();
+    `).bind(workspaceId, selectionId).all();
     return {
       workspaceId,
       galleryId,
@@ -2083,7 +2139,7 @@ export async function resolveAdminClientGalleryBulkDownload(
     };
   }
 
-  const data = await collectAdminClientGalleryFavourites(db, galleryId);
+  const data = await collectAdminClientGalleryFavourites(db, galleryId, workspaceIdInput);
   const groupKey = text(input.group || 'combined');
   const selected = groupKey === 'combined'
     ? data.combinedAssets

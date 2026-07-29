@@ -92,74 +92,75 @@ function hydrate(row: any, weddings: any[] = []) {
   };
 }
 
-export async function listMasterSuppliers(db: D1Db, includeArchived = true) {
+export async function listMasterSuppliers(db: D1Db, includeArchived = true, workspaceId = "workspace_mkb_weddings") {
   const supplierResult = await db.prepare(`
     SELECT * FROM suppliers
-    ${includeArchived ? "" : "WHERE status <> 'archived'"}
+    WHERE workspace_id = ? ${includeArchived ? "" : "AND status <> 'archived'"}
     ORDER BY status = 'archived' ASC, name COLLATE NOCASE ASC
-  `).all();
+  `).bind(workspaceId).all();
   const linkResult = await db.prepare(`
     SELECT l.supplier_id, l.wedding_slug, l.role, l.sort_order,
            w.title, w.couple, w.wedding_date
     FROM wedding_supplier_links l
-    LEFT JOIN weddings w ON w.slug = l.wedding_slug
+    LEFT JOIN weddings w ON w.slug = l.wedding_slug AND w.workspace_id = l.workspace_id
+    WHERE l.workspace_id = ?
     ORDER BY l.sort_order ASC, w.couple COLLATE NOCASE ASC
-  `).all();
+  `).bind(workspaceId).all();
   const links = linkResult.results || [];
   return (supplierResult.results || []).map((row: any) =>
     hydrate(row, links.filter((link: any) => text(link.supplier_id) === text(row.id))),
   );
 }
 
-export async function getMasterSupplier(db: D1Db, id: string) {
-  const row = await db.prepare(`SELECT * FROM suppliers WHERE id = ?`).bind(id).first();
+export async function getMasterSupplier(db: D1Db, id: string, workspaceId = "workspace_mkb_weddings") {
+  const row = await db.prepare(`SELECT * FROM suppliers WHERE id = ? AND workspace_id = ?`).bind(id, workspaceId).first();
   if (!row) return null;
   const links = await db.prepare(`
     SELECT l.supplier_id, l.wedding_slug, l.role, l.sort_order,
            w.title, w.couple, w.wedding_date
     FROM wedding_supplier_links l
-    LEFT JOIN weddings w ON w.slug = l.wedding_slug
-    WHERE l.supplier_id = ?
+    LEFT JOIN weddings w ON w.slug = l.wedding_slug AND w.workspace_id = l.workspace_id
+    WHERE l.supplier_id = ? AND l.workspace_id = ?
     ORDER BY l.sort_order ASC, w.couple COLLATE NOCASE ASC
-  `).bind(id).all();
+  `).bind(id, workspaceId).all();
   return hydrate(row, links.results || []);
 }
 
-export async function findMasterSupplierByName(db: D1Db, name: string) {
+export async function findMasterSupplierByName(db: D1Db, name: string, workspaceId = "workspace_mkb_weddings") {
   const key = normalise(name);
   if (!key) return null;
-  const result = await db.prepare(`SELECT * FROM suppliers`).all();
+  const result = await db.prepare(`SELECT * FROM suppliers WHERE workspace_id = ?`).bind(workspaceId).all();
   const row = (result.results || []).find((item: any) => normalise(item.name) === key);
   return row ? hydrate(row) : null;
 }
 
-export async function createMasterSupplier(db: D1Db, incoming: MasterSupplierInput) {
+export async function createMasterSupplier(db: D1Db, incoming: MasterSupplierInput, workspaceId = "workspace_mkb_weddings") {
   const supplier = cleanSupplier(incoming);
-  const duplicate = await findMasterSupplierByName(db, supplier.name);
+  const duplicate = await findMasterSupplierByName(db, supplier.name, workspaceId);
   if (duplicate) {
     throw httpError("A supplier with this name already exists.", 409, [duplicate.name]);
   }
   await db.prepare(`
     INSERT INTO suppliers (
-      id, name, display_name, category, website, instagram, email, phone,
+      id, workspace_id, name, display_name, category, website, instagram, email, phone,
       location, county, description, notes, status, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
   `).bind(
-    supplier.id, supplier.name, supplier.displayName, supplier.category,
+    supplier.id, workspaceId, supplier.name, supplier.displayName, supplier.category,
     supplier.website, supplier.instagram, supplier.email, supplier.phone,
     supplier.location, supplier.county, supplier.description, supplier.notes, supplier.status,
   ).run();
-  return getMasterSupplier(db, supplier.id);
+  return getMasterSupplier(db, supplier.id, workspaceId);
 }
 
-export async function updateMasterSupplier(db: D1Db, incoming: MasterSupplierInput) {
+export async function updateMasterSupplier(db: D1Db, incoming: MasterSupplierInput, workspaceId = "workspace_mkb_weddings") {
   const supplier = cleanSupplier(incoming);
   if (!text(incoming?.id)) throw httpError("Supplier ID is required.", 400);
-  const existing = await db.prepare(`SELECT * FROM suppliers WHERE id = ?`).bind(supplier.id).first();
+  const existing = await db.prepare(`SELECT * FROM suppliers WHERE id = ? AND workspace_id = ?`).bind(supplier.id, workspaceId).first();
   if (!existing) throw httpError("Supplier not found.", 404);
   const oldName = text(existing.name);
 
-  const all = await db.prepare(`SELECT id, name FROM suppliers WHERE id <> ?`).bind(supplier.id).all();
+  const all = await db.prepare(`SELECT id, name FROM suppliers WHERE workspace_id = ? AND id <> ?`).bind(workspaceId, supplier.id).all();
   const duplicate = (all.results || []).find((item: any) => normalise(item.name) === normalise(supplier.name));
   if (duplicate) throw httpError("A supplier with this name already exists.", 409);
 
@@ -168,11 +169,11 @@ export async function updateMasterSupplier(db: D1Db, incoming: MasterSupplierInp
       name = ?, display_name = ?, category = ?, website = ?, instagram = ?,
       email = ?, phone = ?, location = ?, county = ?, description = ?, notes = ?,
       status = ?, updated_at = CURRENT_TIMESTAMP
-    WHERE id = ?
+    WHERE id = ? AND workspace_id = ?
   `).bind(
     supplier.name, supplier.displayName, supplier.category, supplier.website,
     supplier.instagram, supplier.email, supplier.phone, supplier.location,
-    supplier.county, supplier.description, supplier.notes, supplier.status, supplier.id,
+    supplier.county, supplier.description, supplier.notes, supplier.status, supplier.id, workspaceId,
   ).run();
 
   // Keep denormalised wedding rows and wedding JSON snapshots current so a master edit is reflected everywhere.
@@ -184,12 +185,14 @@ export async function updateMasterSupplier(db: D1Db, incoming: MasterSupplierInp
       WHERE l.wedding_slug = wedding_suppliers.wedding_slug
         AND l.sort_order = wedding_suppliers.sort_order
         AND l.supplier_id = ?
+        AND l.workspace_id = ?
+        AND wedding_suppliers.workspace_id = ?
     )
-  `).bind(supplier.name, supplier.website, supplier.instagram, supplier.id).run();
+  `).bind(supplier.name, supplier.website, supplier.instagram, supplier.id, workspaceId, workspaceId).run();
 
-  const linked = await db.prepare(`SELECT wedding_slug, role FROM wedding_supplier_links WHERE supplier_id = ?`).bind(supplier.id).all();
+  const linked = await db.prepare(`SELECT wedding_slug, role FROM wedding_supplier_links WHERE supplier_id = ? AND workspace_id = ?`).bind(supplier.id, workspaceId).all();
   for (const link of linked.results || []) {
-    const wedding = await db.prepare(`SELECT document_json, published_json FROM weddings WHERE slug = ?`).bind(link.wedding_slug).first();
+    const wedding = await db.prepare(`SELECT document_json, published_json FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(link.wedding_slug, workspaceId).first();
     if (!wedding) continue;
     const patchDocument = (raw: unknown) => {
       const document = json(raw, null);
@@ -208,27 +211,27 @@ export async function updateMasterSupplier(db: D1Db, incoming: MasterSupplierInp
     };
     const nextDocument = patchDocument(wedding.document_json);
     const nextPublished = text(wedding.published_json) ? patchDocument(wedding.published_json) : wedding.published_json;
-    await db.prepare(`UPDATE weddings SET document_json = ?, published_json = ?, updated_at = CURRENT_TIMESTAMP WHERE slug = ?`)
-      .bind(nextDocument, nextPublished, link.wedding_slug).run();
+    await db.prepare(`UPDATE weddings SET document_json = ?, published_json = ?, updated_at = CURRENT_TIMESTAMP WHERE slug = ? AND workspace_id = ?`)
+      .bind(nextDocument, nextPublished, link.wedding_slug, workspaceId).run();
   }
 
-  return getMasterSupplier(db, supplier.id);
+  return getMasterSupplier(db, supplier.id, workspaceId);
 }
 
-export async function archiveMasterSupplier(db: D1Db, id: string) {
-  const existing = await getMasterSupplier(db, id);
+export async function archiveMasterSupplier(db: D1Db, id: string, workspaceId = "workspace_mkb_weddings") {
+  const existing = await getMasterSupplier(db, id, workspaceId);
   if (!existing) throw httpError("Supplier not found.", 404);
-  await db.prepare(`UPDATE suppliers SET status = 'archived', updated_at = CURRENT_TIMESTAMP WHERE id = ?`).bind(id).run();
-  return getMasterSupplier(db, id);
+  await db.prepare(`UPDATE suppliers SET status = 'archived', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(id, workspaceId).run();
+  return getMasterSupplier(db, id, workspaceId);
 }
 
-export async function ensureMasterSupplier(db: D1Db, incoming: MasterSupplierInput) {
+export async function ensureMasterSupplier(db: D1Db, incoming: MasterSupplierInput, workspaceId = "workspace_mkb_weddings") {
   const requestedId = text(incoming?.id);
   if (requestedId) {
-    const existing = await getMasterSupplier(db, requestedId);
+    const existing = await getMasterSupplier(db, requestedId, workspaceId);
     if (existing) return existing;
   }
-  const byName = await findMasterSupplierByName(db, text(incoming?.name));
+  const byName = await findMasterSupplierByName(db, text(incoming?.name), workspaceId);
   if (byName) return byName;
-  return createMasterSupplier(db, incoming);
+  return createMasterSupplier(db, incoming, workspaceId);
 }

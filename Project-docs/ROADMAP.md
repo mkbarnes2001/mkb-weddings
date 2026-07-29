@@ -101,11 +101,17 @@ Completed and in production:
 - Restricted multi-business switching
 - Rollback-safe Admin authentication enforcement gate
 
-## Next — Legacy Tenant Ownership Migration (v1.8.2)
-- Add and backfill workspace ownership for Weddings, Venues, Suppliers, Moments and public collection definitions
-- Scope Admin/public queries, publishing and R2 access to the resolved business
-- Cross-tenant read/write/publish/download regression tests
-- Support access, data export and deletion foundations
+## Completed in source — Legacy Tenant Ownership Migration (v1.8.2)
+- Workspace ownership and MKB backfill for legacy Weddings, Venues, Suppliers, Moments, images and public collection definitions
+- Authenticated Admin and verified-domain public query scoping
+- Workspace-namespaced new R2 uploads with existing MKB object compatibility
+- Cross-tenant read/write/publish/download-inference regression test
+- Production isolation validation remains the gate before external onboarding
+
+## Next — Support/Data Rights Foundations
+- Explicit support-access controls and support-session audit events
+- Business data export foundation
+- Account/business deletion workflow and retention safeguards
 
 ## Following — Connected Payments & Commercial Billing (v1.8.3)
 - Stripe Connect hosted onboarding and connected-account webhooks

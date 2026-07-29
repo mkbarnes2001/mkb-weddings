@@ -50,6 +50,30 @@ The tenant-readiness audit divides the application into:
 MKB Weddings remains the default and first operating WedPlanned business. Existing single-account Stripe Checkout and Prodigi flows continue unchanged until connected-account ownership is implemented.
 
 
+## Legacy tenant ownership boundary — v1.8.2
+The authenticated business context introduced in v1.8.1 is now enforced across the remaining legacy content model. `workspace_id` is stored on Weddings, Venues, legacy Images and their relationship rows, Suppliers, Moments, public/custom collection definitions, `content_pages` and canonical compatibility links.
+
+Request authority is asymmetric by surface:
+
+```text
+Admin request
+→ professional session
+→ active business_membership
+→ context.data.professionalContext.workspaceId
+→ workspace-scoped legacy query
+
+Public request
+→ request hostname
+→ verified workspace_domains mapping
+→ workspace-scoped public query
+```
+
+Unknown production public domains resolve no tenant. Localhost/Pages preview hosts may fall back to the default MKB workspace for development compatibility. Browser body/query workspace values never decide legacy access.
+
+Managed image operations first prove the image belongs to the resolved workspace before exposing/deleting R2 source keys. New uploads are stored under `workspaces/<workspace_id>/...`; pre-v1.8.2 MKB keys remain unchanged. Asset Library compatibility sync and Location Gallery venue reads use the same workspace boundary because both depend on migrated legacy tables.
+
+Historic MKB fixed `content_pages` primary keys are retained. Equivalent non-MKB definitions use an internal workspace-prefixed storage key. Legacy public slugs otherwise retain their historic physical uniqueness constraints in schema 25; this is a storage compatibility constraint, not an authorisation mechanism.
+
 ## Professional identity and tenant context — v1.8.1
 Professional Admin access uses passwordless, one-time links and an HttpOnly session cookie. `platform_auth_links` and `platform_sessions` store SHA-256 token hashes only. The raw token exists only in the email/link and browser cookie.
 

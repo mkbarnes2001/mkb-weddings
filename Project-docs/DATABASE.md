@@ -3,7 +3,7 @@
 Always inspect the actual migration files before assuming a table/column exists.
 
 ## Schema version
-Current target schema version: **24**. Read migrations in sequence; migrations 020–023 add Print Store commerce, Stripe payments, Prodigi fulfilment and the WedPlanned commercial business foundation.
+Current target schema version: **25**. Read migrations in sequence; migration 024 adds professional identity/session context and migration 025 adds ownership to the remaining legacy content model.
 
 ## Core domains
 - `venues`
@@ -354,3 +354,14 @@ Migration compatibility:
 - a valid existing workspace contact email is seeded as the first owner only when no active owner exists;
 - no existing MKB rows or R2 objects are deleted, renamed or moved;
 - legacy Weddings, Venues, Suppliers, Moments and public collection records remain pending workspace-ownership migration.
+
+## Schema version 25
+Migration: `025_legacy_tenant_ownership.sql`
+
+Adds `workspace_id` ownership to the legacy content and compatibility tables that pre-date the workspace foundation: `venues`, `weddings`, `images`, venue/wedding/story image links, supplier compatibility/link tables, `suppliers`, `moments`, custom/public collection definitions, `content_pages` and canonical asset compatibility links.
+
+All existing rows are backfilled to `workspace_mkb_weddings`. The migration is additive: it does not rename legacy slugs, alter published URLs, copy/delete R2 objects or rewrite existing image source metadata. Workspace-prefixed indexes are added for the new query boundary.
+
+Runtime authority is not taken from a browser-supplied workspace ID. Admin services use the authenticated professional membership context; public legacy services use a verified request-domain mapping. Existing MKB fixed content-page keys remain unchanged, while non-MKB fixed definitions use an internal workspace-prefixed key.
+
+Legacy physical primary keys remain globally unique for compatibility in this release. Authorisation does not depend on those keys being secret or tenant-unique; service queries require the resolved workspace. See `WEDPLANNED-TENANT-OWNERSHIP.md` for deployment and isolation validation.

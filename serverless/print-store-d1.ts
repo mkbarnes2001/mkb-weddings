@@ -7,6 +7,10 @@ function text(value: unknown) {
   return String(value ?? "").trim();
 }
 
+async function resolvedWorkspaceId(db: D1Db, workspaceId?: string) {
+  return text(workspaceId) || await getDefaultWorkspaceId(db);
+}
+
 function number(value: unknown, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -456,8 +460,8 @@ async function listOrders(db: D1Db, workspaceId: string) {
   }));
 }
 
-export async function getPrintStoreAdmin(db: D1Db) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function getPrintStoreAdmin(db: D1Db, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const [currency, products, priceLists, orders] = await Promise.all([
     workspaceCurrency(db, workspaceId),
     listProducts(db, workspaceId, true),
@@ -720,8 +724,8 @@ async function seedStarterCatalogue(db: D1Db, workspaceId: string, currency: str
   return { priceListId };
 }
 
-export async function mutatePrintStoreAdmin(db: D1Db, input: any) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function mutatePrintStoreAdmin(db: D1Db, input: any, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const currency = await workspaceCurrency(db, workspaceId);
   const action = text(input?.action);
   if (action === "saveProduct") {
@@ -736,7 +740,12 @@ export async function mutatePrintStoreAdmin(db: D1Db, input: any) {
     const priceListId = text(input?.priceListId);
     if (!priceListId) throw httpError("Price list is required.");
     await db.prepare(`UPDATE commerce_price_lists SET status = 'archived', is_default = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(priceListId, workspaceId).run();
-    await db.prepare(`UPDATE client_gallery_store_settings SET enabled = 0, updated_at = CURRENT_TIMESTAMP WHERE price_list_id = ?`).bind(priceListId).run();
+    await db.prepare(`
+      UPDATE client_gallery_store_settings
+      SET enabled = 0, updated_at = CURRENT_TIMESTAMP
+      WHERE price_list_id = ?
+        AND gallery_id IN (SELECT id FROM client_galleries WHERE workspace_id = ?)
+    `).bind(priceListId, workspaceId).run();
   } else if (action === "seedStarterCatalogue") {
     await seedStarterCatalogue(db, workspaceId, currency);
   } else if (action === "updateOrder") {
@@ -839,11 +848,11 @@ export async function mutatePrintStoreAdmin(db: D1Db, input: any) {
   } else {
     throw httpError("Unsupported Print Store action.");
   }
-  return getPrintStoreAdmin(db);
+  return getPrintStoreAdmin(db, workspaceId);
 }
 
-export async function getClientGalleryStoreAdmin(db: D1Db, galleryId: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function getClientGalleryStoreAdmin(db: D1Db, galleryId: string, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const gallery = await db.prepare(`SELECT id, title FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1`).bind(galleryId, workspaceId).first();
   if (!gallery) throw httpError("Client gallery not found.", 404);
   const [settings, priceLists] = await Promise.all([
@@ -868,8 +877,8 @@ export async function getClientGalleryStoreAdmin(db: D1Db, galleryId: string) {
   };
 }
 
-export async function updateClientGalleryStoreAdmin(db: D1Db, galleryId: string, input: any) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function updateClientGalleryStoreAdmin(db: D1Db, galleryId: string, input: any, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const gallery = await db.prepare(`SELECT id FROM client_galleries WHERE id = ? AND workspace_id = ? LIMIT 1`).bind(galleryId, workspaceId).first();
   if (!gallery) throw httpError("Client gallery not found.", 404);
   const priceListId = text(input?.priceListId);
@@ -900,7 +909,7 @@ export async function updateClientGalleryStoreAdmin(db: D1Db, galleryId: string,
     integer(input?.minimumOrderMinor),
     text(input?.intro),
   ).run();
-  return getClientGalleryStoreAdmin(db, galleryId);
+  return getClientGalleryStoreAdmin(db, galleryId, workspaceId);
 }
 
 async function publicStoreConfiguration(db: D1Db, galleryId: string) {

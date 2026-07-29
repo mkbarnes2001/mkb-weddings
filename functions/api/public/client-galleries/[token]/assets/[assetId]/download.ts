@@ -3,6 +3,7 @@ import {
   authoriseClientGalleryOriginalDownload,
   recordClientGalleryDownload,
 } from "../../../../../../../serverless/client-gallery-d1";
+import { resolvePublicWorkspaceId } from "../../../../../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -29,6 +30,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         assetId: String(context.params.assetId || "").trim(),
       },
       authenticatedIdentity,
+      await resolvePublicWorkspaceId(context.env.MKB_DB, context.request),
     );
     if (result.status !== 200) {
       return Response.json({ error: result.error }, { status: result.status, headers: { "Cache-Control": "private, no-store" } });

@@ -3,6 +3,7 @@ import {
   errorResponse,
   notFoundResponse,
 } from "../../../../serverless/venue-d1";
+import { resolveAdminWorkspaceId } from "../../../../serverless/tenant-context";
 
 type Env = { MKB_DB: D1Database; ADMIN_API_ENABLED?: string };
 
@@ -39,6 +40,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const slug = cleanSlug(context.params.slug);
     const collectionRow: any = await context.env.MKB_DB.prepare(`
       SELECT
@@ -46,12 +48,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         COUNT(ci.asset_key) AS image_count,
         SUM(CASE WHEN ci.hidden = 0 THEN 1 ELSE 0 END) AS visible_image_count
       FROM custom_collections cc
-      LEFT JOIN collection_images ci ON ci.collection_id = cc.id
-      WHERE cc.slug = ?
+      LEFT JOIN collection_images ci ON ci.collection_id = cc.id AND ci.workspace_id = cc.workspace_id
+      WHERE cc.slug = ? AND cc.workspace_id = ?
       GROUP BY cc.id
       LIMIT 1
     `)
-      .bind(slug)
+      .bind(slug, workspaceId)
       .first();
 
     if (!collectionRow) {
@@ -75,17 +77,18 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           vi.sort_order AS venue_sort_order,
           v.name AS venue_name
         FROM images i
-        LEFT JOIN venue_images vi ON vi.asset_key = i.asset_key
-        LEFT JOIN venues v ON v.slug = vi.venue_slug
+        LEFT JOIN venue_images vi ON vi.asset_key = i.asset_key AND vi.workspace_id = i.workspace_id
+        LEFT JOIN venues v ON v.slug = vi.venue_slug AND v.workspace_id = i.workspace_id
+        WHERE i.workspace_id = ?
         ORDER BY i.updated_at DESC, vi.sort_order ASC, i.filename COLLATE NOCASE ASC
-      `).all(),
+      `).bind(workspaceId).all(),
       context.env.MKB_DB.prepare(`
         SELECT asset_key, sort_order, hidden
         FROM collection_images
-        WHERE collection_id = ?
+        WHERE collection_id = ? AND workspace_id = ?
         ORDER BY sort_order ASC
       `)
-        .bind(String(collectionRow.id || ""))
+        .bind(String(collectionRow.id || ""), workspaceId)
         .all(),
     ]);
 
@@ -150,11 +153,12 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const slug = cleanSlug(context.params.slug);
     const collection: any = await context.env.MKB_DB.prepare(
-      `SELECT id FROM custom_collections WHERE slug = ? LIMIT 1`,
+      `SELECT id FROM custom_collections WHERE slug = ? AND workspace_id = ? LIMIT 1`,
     )
-      .bind(slug)
+      .bind(slug, workspaceId)
       .first();
     if (!collection) {
       return Response.json({ error: "Collection not found." }, { status: 404 });
@@ -179,19 +183,21 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     const collectionId = String(collection.id || "");
     const firstBatch = [
       context.env.MKB_DB.prepare(
-        `UPDATE custom_collections SET hero_asset_key = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-      ).bind(heroAssetKey, collectionId),
+        `UPDATE custom_collections SET hero_asset_key = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`,
+      ).bind(heroAssetKey, collectionId, workspaceId),
       context.env.MKB_DB.prepare(
-        `DELETE FROM collection_images WHERE collection_id = ?`,
-      ).bind(collectionId),
+        `DELETE FROM collection_images WHERE collection_id = ? AND workspace_id = ?`,
+      ).bind(collectionId, workspaceId),
     ];
     await context.env.MKB_DB.batch(firstBatch);
 
     const statements = items.map((item: any) =>
       context.env.MKB_DB.prepare(`
-        INSERT INTO collection_images (collection_id, asset_key, sort_order, hidden)
-        VALUES (?, ?, ?, ?)
-      `).bind(collectionId, item.assetKey, item.sortOrder, item.hidden ? 1 : 0),
+        INSERT INTO collection_images (collection_id, asset_key, sort_order, hidden, workspace_id)
+        SELECT ?, asset_key, ?, ?, ?
+        FROM images
+        WHERE asset_key = ? AND workspace_id = ?
+      `).bind(collectionId, item.sortOrder, item.hidden ? 1 : 0, workspaceId, item.assetKey, workspaceId),
     );
 
     const CHUNK_SIZE = 50;

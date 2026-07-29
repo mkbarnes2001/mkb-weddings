@@ -1,5 +1,3 @@
-import { getDefaultWorkspaceId } from "./workspace-d1";
-
 type D1Db = any;
 
 function text(value: unknown) {
@@ -29,10 +27,10 @@ function httpError(message: string, statusCode = 400) {
   return error;
 }
 
-async function requireWedding(db: D1Db, slug: string) {
+async function requireWedding(db: D1Db, slug: string, workspaceId: string) {
   const row = await db.prepare(`
-    SELECT * FROM weddings WHERE slug = ? LIMIT 1
-  `).bind(slug).first();
+    SELECT * FROM weddings WHERE slug = ? AND workspace_id = ? LIMIT 1
+  `).bind(slug, workspaceId).first();
   if (!row) throw httpError("Wedding not found.", 404);
   return row;
 }
@@ -89,13 +87,13 @@ async function resolveWeddingAssets(db: D1Db, workspaceId: string, weddingSlug: 
       AND wps.slug = 'wedding-day-previews' AND wps.status = 'active'
     LEFT JOIN wedding_preview_assets wpa
       ON wpa.preview_set_id = wps.id AND wpa.asset_id = a.id
-    WHERE awl.wedding_slug = ?
+    WHERE awl.wedding_slug = ? AND awl.workspace_id = ?
     ORDER BY
       CASE WHEN wpa.asset_id IS NULL THEN 1 ELSE 0 END ASC,
       wpa.sort_order ASC,
       awl.sort_order ASC,
       a.created_at ASC
-  `).bind(workspaceId, workspaceId, weddingSlug).all();
+  `).bind(workspaceId, workspaceId, weddingSlug, workspaceId).all();
 
   return (result.results || []).map((row: any) => ({
     id: text(row.id),
@@ -114,9 +112,8 @@ async function resolveWeddingAssets(db: D1Db, workspaceId: string, weddingSlug: 
   }));
 }
 
-export async function getWeddingWorkspace(db: D1Db, weddingSlug: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
-  const wedding = await requireWedding(db, weddingSlug);
+export async function getWeddingWorkspace(db: D1Db, weddingSlug: string, workspaceId = "workspace_mkb_weddings") {
+  const wedding = await requireWedding(db, weddingSlug, workspaceId);
 
   const [assets, previewSet, momentsResult, galleriesResult, clientGalleriesResult, venueRow, workspaceSettings] = await Promise.all([
     resolveWeddingAssets(db, workspaceId, weddingSlug),
@@ -124,15 +121,15 @@ export async function getWeddingWorkspace(db: D1Db, weddingSlug: string) {
     db.prepare(`
       SELECT id, slug, name, sort_order
       FROM moments
-      WHERE status <> 'archived' AND available_for_assignment = 1
+      WHERE workspace_id = ? AND status <> 'archived' AND available_for_assignment = 1
       ORDER BY sort_order ASC, name COLLATE NOCASE ASC
-    `).all(),
+    `).bind(workspaceId).all(),
     db.prepare(`
       SELECT id, slug, name, status, sort_order
       FROM custom_collections
-      WHERE status <> 'archived'
+      WHERE workspace_id = ? AND status <> 'archived'
       ORDER BY sort_order ASC, name COLLATE NOCASE ASC
-    `).all(),
+    `).bind(workspaceId).all(),
     db.prepare(`
       SELECT id, slug, title, client_name, client_email, status, access_token, allow_downloads, updated_at
       FROM client_galleries
@@ -140,7 +137,7 @@ export async function getWeddingWorkspace(db: D1Db, weddingSlug: string) {
       ORDER BY updated_at DESC
     `).bind(workspaceId, weddingSlug).all(),
     text(wedding.venue_slug)
-      ? db.prepare(`SELECT slug, name, document_json FROM venues WHERE slug = ? LIMIT 1`).bind(text(wedding.venue_slug)).first()
+      ? db.prepare(`SELECT slug, name, document_json FROM venues WHERE slug = ? AND workspace_id = ? LIMIT 1`).bind(text(wedding.venue_slug), workspaceId).first()
       : Promise.resolve(null),
     db.prepare(`SELECT business_name, instagram, website_url FROM workspace_settings WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first(),
   ]);
@@ -206,9 +203,8 @@ export async function getWeddingWorkspace(db: D1Db, weddingSlug: string) {
   };
 }
 
-export async function saveWeddingPreviewSet(db: D1Db, weddingSlug: string, assetIds: string[]) {
-  const workspaceId = await getDefaultWorkspaceId(db);
-  await requireWedding(db, weddingSlug);
+export async function saveWeddingPreviewSet(db: D1Db, weddingSlug: string, assetIds: string[], workspaceId = "workspace_mkb_weddings") {
+  await requireWedding(db, weddingSlug, workspaceId);
   const cleanIds = unique((assetIds || []).map(text));
 
   if (cleanIds.length) {
@@ -217,9 +213,9 @@ export async function saveWeddingPreviewSet(db: D1Db, weddingSlug: string, asset
       SELECT awl.asset_id
       FROM asset_wedding_links awl
       JOIN assets a ON a.id = awl.asset_id
-      WHERE awl.wedding_slug = ? AND a.workspace_id = ? AND a.status = 'active'
+      WHERE awl.wedding_slug = ? AND awl.workspace_id = ? AND a.workspace_id = ? AND a.status = 'active'
         AND awl.asset_id IN (${placeholders})
-    `).bind(weddingSlug, workspaceId, ...cleanIds).all();
+    `).bind(weddingSlug, workspaceId, workspaceId, ...cleanIds).all();
     const allowedSet = new Set((allowed.results || []).map((row: any) => text(row.asset_id)));
     const invalid = cleanIds.filter((id) => !allowedSet.has(id));
     if (invalid.length) throw httpError("One or more preview assets do not belong to this wedding.", 400);
@@ -238,18 +234,18 @@ export async function saveWeddingPreviewSet(db: D1Db, weddingSlug: string, asset
   }
 
   await db.prepare(`UPDATE wedding_preview_sets SET updated_at = CURRENT_TIMESTAMP WHERE id = ?`).bind(text(previewSet.id)).run();
-  return getWeddingWorkspace(db, weddingSlug);
+  return getWeddingWorkspace(db, weddingSlug, workspaceId);
 }
 
-async function ensureCompatibilityImage(db: D1Db, weddingSlug: string, assetId: string) {
+async function ensureCompatibilityImage(db: D1Db, weddingSlug: string, assetId: string, workspaceId: string) {
   const asset = await db.prepare(`
     SELECT a.*, COALESCE(web.url, '') AS web_src, COALESCE(thumb.url, web.url, '') AS thumb_src
     FROM assets a
     LEFT JOIN asset_files web ON web.asset_id = a.id AND web.variant = 'web' AND web.status = 'active'
     LEFT JOIN asset_files thumb ON thumb.asset_id = a.id AND thumb.variant = 'thumb' AND thumb.status = 'active'
-    WHERE a.id = ? AND a.status = 'active'
+    WHERE a.id = ? AND a.workspace_id = ? AND a.status = 'active'
     LIMIT 1
-  `).bind(assetId).first();
+  `).bind(assetId, workspaceId).first();
   if (!asset) throw httpError("Asset not found.", 404);
   const webSrc = text(asset.web_src);
   if (!webSrc) throw httpError(`Asset ${text(asset.filename || assetId)} has no web derivative and cannot be published.`, 400);
@@ -262,8 +258,8 @@ async function ensureCompatibilityImage(db: D1Db, weddingSlug: string, assetId: 
     INSERT INTO images (
       asset_key, image_id, wedding_slug, filename, full_src, thumb_src,
       alt, caption, tags_json, ai_tags_json, source_type, source_json,
-      width, height, orientation, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, '', '', '[]', '[]', 'private_client_upload', ?, ?, ?, '', CURRENT_TIMESTAMP)
+      width, height, orientation, updated_at, workspace_id
+    ) VALUES (?, ?, ?, ?, ?, ?, '', '', '[]', '[]', 'private_client_upload', ?, ?, ?, '', CURRENT_TIMESTAMP, ?)
     ON CONFLICT(asset_key) DO UPDATE SET
       image_id = CASE WHEN images.image_id = '' THEN excluded.image_id ELSE images.image_id END,
       wedding_slug = CASE WHEN images.wedding_slug = '' THEN excluded.wedding_slug ELSE images.wedding_slug END,
@@ -273,6 +269,7 @@ async function ensureCompatibilityImage(db: D1Db, weddingSlug: string, assetId: 
       width = COALESCE(excluded.width, images.width),
       height = COALESCE(excluded.height, images.height),
       updated_at = CURRENT_TIMESTAMP
+    WHERE images.workspace_id = excluded.workspace_id
   `).bind(
     assetKey,
     imageId,
@@ -283,18 +280,18 @@ async function ensureCompatibilityImage(db: D1Db, weddingSlug: string, assetId: 
     JSON.stringify({ assetId, managed: true, privateOriginal: true }),
     asset.width || null,
     asset.height || null,
+    workspaceId,
   ).run();
 
   if (!text(asset.legacy_asset_key)) {
-    await db.prepare(`UPDATE assets SET legacy_asset_key = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).bind(assetKey, assetId).run();
+    await db.prepare(`UPDATE assets SET legacy_asset_key = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(assetKey, assetId, workspaceId).run();
   }
 
   return { assetKey, imageId, filename, webSrc, thumbSrc: text(asset.thumb_src || webSrc) };
 }
 
-export async function publishWeddingPreviewAssignments(db: D1Db, weddingSlug: string, input: any) {
-  const workspaceId = await getDefaultWorkspaceId(db);
-  const wedding = await requireWedding(db, weddingSlug);
+export async function publishWeddingPreviewAssignments(db: D1Db, weddingSlug: string, input: any, workspaceId = "workspace_mkb_weddings") {
+  const wedding = await requireWedding(db, weddingSlug, workspaceId);
   const assetIds = unique((input?.assetIds || []).map(text));
   if (!assetIds.length) throw httpError("Select at least one preview image.", 400);
 
@@ -308,15 +305,15 @@ export async function publishWeddingPreviewAssignments(db: D1Db, weddingSlug: st
     SELECT awl.asset_id
     FROM asset_wedding_links awl
     JOIN assets a ON a.id = awl.asset_id
-    WHERE awl.wedding_slug = ? AND a.workspace_id = ? AND a.status = 'active'
+    WHERE awl.wedding_slug = ? AND awl.workspace_id = ? AND a.workspace_id = ? AND a.status = 'active'
       AND awl.asset_id IN (${placeholders})
-  `).bind(weddingSlug, workspaceId, ...assetIds).all();
+  `).bind(weddingSlug, workspaceId, workspaceId, ...assetIds).all();
   const allowedSet = new Set((allowed.results || []).map((row: any) => text(row.asset_id)));
   if (assetIds.some((id) => !allowedSet.has(id))) throw httpError("One or more selected assets do not belong to this wedding.", 400);
 
   let venue = null;
   if (addToVenue) {
-    venue = await db.prepare(`SELECT slug, name FROM venues WHERE slug = ? AND status <> 'archived' LIMIT 1`).bind(venueSlug).first();
+    venue = await db.prepare(`SELECT slug, name FROM venues WHERE slug = ? AND workspace_id = ? AND status <> 'archived' LIMIT 1`).bind(venueSlug, workspaceId).first();
     if (!venue) throw httpError("Linked venue is not available.", 400);
   }
 
@@ -324,9 +321,9 @@ export async function publishWeddingPreviewAssignments(db: D1Db, weddingSlug: st
   for (const requested of requestedMoments) {
     const row = await db.prepare(`
       SELECT id, slug, name FROM moments
-      WHERE (id = ? OR slug = ?) AND status <> 'archived' AND available_for_assignment = 1
+      WHERE workspace_id = ? AND (id = ? OR slug = ?) AND status <> 'archived' AND available_for_assignment = 1
       LIMIT 1
-    `).bind(requested, requested).first();
+    `).bind(workspaceId, requested, requested).first();
     if (row && !moments.some((moment) => moment.id === text(row.id))) {
       moments.push({ id: text(row.id), slug: text(row.slug), name: text(row.name) });
     }
@@ -337,53 +334,53 @@ export async function publishWeddingPreviewAssignments(db: D1Db, weddingSlug: st
   for (const requested of requestedGalleries.filter((value) => value !== "creative-flash")) {
     const row = await db.prepare(`
       SELECT id, slug, name FROM custom_collections
-      WHERE (id = ? OR slug = ?) AND status <> 'archived'
+      WHERE workspace_id = ? AND (id = ? OR slug = ?) AND status <> 'archived'
       LIMIT 1
-    `).bind(requested, requested).first();
+    `).bind(workspaceId, requested, requested).first();
     if (row && !customGalleries.some((gallery) => gallery.id === text(row.id))) {
       customGalleries.push({ id: text(row.id), slug: text(row.slug), name: text(row.name) });
     }
   }
 
-  const weddingMaxRow = await db.prepare(`SELECT COALESCE(MAX(sort_order), 0) AS max_order FROM wedding_images WHERE wedding_slug = ?`).bind(weddingSlug).first();
+  const weddingMaxRow = await db.prepare(`SELECT COALESCE(MAX(sort_order), 0) AS max_order FROM wedding_images WHERE wedding_slug = ? AND workspace_id = ?`).bind(weddingSlug, workspaceId).first();
   let weddingOrder = number(weddingMaxRow?.max_order);
   let venueOrder = 0;
   if (addToVenue) {
-    const venueMaxRow = await db.prepare(`SELECT COALESCE(MAX(sort_order), 0) AS max_order FROM venue_images WHERE venue_slug = ?`).bind(venueSlug).first();
+    const venueMaxRow = await db.prepare(`SELECT COALESCE(MAX(sort_order), 0) AS max_order FROM venue_images WHERE venue_slug = ? AND workspace_id = ?`).bind(venueSlug, workspaceId).first();
     venueOrder = number(venueMaxRow?.max_order);
   }
   const galleryOrders = new Map<string, number>();
   for (const gallery of customGalleries) {
-    const row = await db.prepare(`SELECT COALESCE(MAX(sort_order), 0) AS max_order FROM collection_images WHERE collection_id = ?`).bind(gallery.id).first();
+    const row = await db.prepare(`SELECT COALESCE(MAX(sort_order), 0) AS max_order FROM collection_images WHERE collection_id = ? AND workspace_id = ?`).bind(gallery.id, workspaceId).first();
     galleryOrders.set(gallery.id, number(row?.max_order));
   }
 
   let published = 0;
   for (const assetId of assetIds) {
-    const compatible = await ensureCompatibilityImage(db, weddingSlug, assetId);
+    const compatible = await ensureCompatibilityImage(db, weddingSlug, assetId, workspaceId);
     weddingOrder += 1;
     await db.prepare(`
-      INSERT INTO wedding_images (wedding_slug, asset_key, sort_order, is_cover, hidden, rating, collections_json)
-      VALUES (?, ?, ?, 0, 0, 0, '[]')
+      INSERT INTO wedding_images (wedding_slug, asset_key, sort_order, is_cover, hidden, rating, collections_json, workspace_id)
+      VALUES (?, ?, ?, 0, 0, 0, '[]', ?)
       ON CONFLICT(wedding_slug, asset_key) DO UPDATE SET hidden = 0
-    `).bind(weddingSlug, compatible.assetKey, weddingOrder).run();
+    `).bind(weddingSlug, compatible.assetKey, weddingOrder, workspaceId).run();
 
     await db.prepare(`
-      INSERT OR IGNORE INTO asset_wedding_links (asset_id, wedding_slug, sort_order, is_primary)
-      VALUES (?, ?, ?, 1)
-    `).bind(assetId, weddingSlug, weddingOrder).run();
+      INSERT OR IGNORE INTO asset_wedding_links (asset_id, wedding_slug, sort_order, is_primary, workspace_id)
+      VALUES (?, ?, ?, 1, ?)
+    `).bind(assetId, weddingSlug, weddingOrder, workspaceId).run();
 
     if (creativeFlash) {
-      const imageRow = await db.prepare(`SELECT tags_json FROM images WHERE asset_key = ? LIMIT 1`).bind(compatible.assetKey).first();
+      const imageRow = await db.prepare(`SELECT tags_json FROM images WHERE asset_key = ? AND workspace_id = ? LIMIT 1`).bind(compatible.assetKey, workspaceId).first();
       const tags = unique([...parseJson<string[]>(imageRow?.tags_json, []).map(text), "creative-flash"]);
-      await db.prepare(`UPDATE images SET tags_json = ?, updated_at = CURRENT_TIMESTAMP WHERE asset_key = ?`).bind(JSON.stringify(tags), compatible.assetKey).run();
+      await db.prepare(`UPDATE images SET tags_json = ?, updated_at = CURRENT_TIMESTAMP WHERE asset_key = ? AND workspace_id = ?`).bind(JSON.stringify(tags), compatible.assetKey, workspaceId).run();
     }
 
     if (addToVenue) {
       const existing = await db.prepare(`
         SELECT moments_json, display_json, sort_order
-        FROM venue_images WHERE venue_slug = ? AND asset_key = ? LIMIT 1
-      `).bind(venueSlug, compatible.assetKey).first();
+        FROM venue_images WHERE venue_slug = ? AND asset_key = ? AND workspace_id = ? LIMIT 1
+      `).bind(venueSlug, compatible.assetKey, workspaceId).first();
       const currentMoments = parseJson<string[]>(existing?.moments_json, []).map(text).filter(Boolean);
       const mergedMoments = unique([...currentMoments, ...moments.map((moment) => moment.slug || moment.id)]);
       const display = parseJson<Record<string, any>>(existing?.display_json, {});
@@ -394,8 +391,8 @@ export async function publishWeddingPreviewAssignments(db: D1Db, weddingSlug: st
 
       await db.prepare(`
         INSERT INTO venue_images (
-          venue_slug, asset_key, sort_order, included, hidden, rating, is_hero, moments_json, display_json
-        ) VALUES (?, ?, ?, 1, 0, 0, 0, ?, ?)
+          venue_slug, asset_key, sort_order, included, hidden, rating, is_hero, moments_json, display_json, workspace_id
+        ) VALUES (?, ?, ?, 1, 0, 0, 0, ?, ?, ?)
         ON CONFLICT(venue_slug, asset_key) DO UPDATE SET
           included = 1,
           hidden = 0,
@@ -407,34 +404,35 @@ export async function publishWeddingPreviewAssignments(db: D1Db, weddingSlug: st
         existing ? number(existing.sort_order) : venueOrder,
         JSON.stringify(mergedMoments),
         JSON.stringify(display),
+        workspaceId,
       ).run();
 
       await db.prepare(`
-        INSERT OR IGNORE INTO asset_venue_links (asset_id, venue_slug, sort_order, is_primary)
-        VALUES (?, ?, ?, 1)
-      `).bind(assetId, venueSlug, existing ? number(existing.sort_order) : venueOrder).run();
+        INSERT OR IGNORE INTO asset_venue_links (asset_id, venue_slug, sort_order, is_primary, workspace_id)
+        VALUES (?, ?, ?, 1, ?)
+      `).bind(assetId, venueSlug, existing ? number(existing.sort_order) : venueOrder, workspaceId).run();
     }
 
     for (const moment of moments) {
       await db.prepare(`
-        INSERT OR IGNORE INTO asset_moment_links (asset_id, moment_id, sort_order, source)
-        VALUES (?, ?, ?, 'wedding_workspace')
-      `).bind(assetId, moment.id, weddingOrder).run();
+        INSERT OR IGNORE INTO asset_moment_links (asset_id, moment_id, sort_order, source, workspace_id)
+        VALUES (?, ?, ?, 'wedding_workspace', ?)
+      `).bind(assetId, moment.id, weddingOrder, workspaceId).run();
     }
 
     for (const gallery of customGalleries) {
       const nextOrder = (galleryOrders.get(gallery.id) || 0) + 1;
       galleryOrders.set(gallery.id, nextOrder);
       await db.prepare(`
-        INSERT INTO collection_images (collection_id, asset_key, sort_order, hidden)
-        VALUES (?, ?, ?, 0)
+        INSERT INTO collection_images (collection_id, asset_key, sort_order, hidden, workspace_id)
+        VALUES (?, ?, ?, 0, ?)
         ON CONFLICT(collection_id, asset_key) DO UPDATE SET hidden = 0
-      `).bind(gallery.id, compatible.assetKey, nextOrder).run();
+      `).bind(gallery.id, compatible.assetKey, nextOrder, workspaceId).run();
       await db.prepare(`
-        INSERT INTO asset_gallery_links (asset_id, gallery_id, sort_order, hidden, source)
-        VALUES (?, ?, ?, 0, 'wedding_workspace')
+        INSERT INTO asset_gallery_links (asset_id, gallery_id, sort_order, hidden, source, workspace_id)
+        VALUES (?, ?, ?, 0, 'wedding_workspace', ?)
         ON CONFLICT(asset_id, gallery_id) DO UPDATE SET hidden = 0
-      `).bind(assetId, gallery.id, nextOrder).run();
+      `).bind(assetId, gallery.id, nextOrder, workspaceId).run();
     }
 
     published += 1;

@@ -1,14 +1,18 @@
+import { resolvePublicWorkspaceId, workspaceContentKey } from "../../../serverless/tenant-context";
+
 type Env = { MKB_DB: D1Database };
 function parse(value: unknown, fallback: any) { try { return JSON.parse(String(value || '')); } catch { return fallback; } }
 function norm(value: unknown) { return String(value || '').trim().toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 const SETTINGS_SLUG = 'creative-flash-gallery-settings';
-export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
+export const onRequestGet: PagesFunction<Env> = async ({ env, request }) => {
   try {
-    const settingsRow: any = await env.MKB_DB.prepare(`SELECT document_json FROM content_pages WHERE slug = ? LIMIT 1`).bind(SETTINGS_SLUG).first();
+    const workspaceId = await resolvePublicWorkspaceId(env.MKB_DB, request);
+    const settingsKey = workspaceContentKey(workspaceId, SETTINGS_SLUG);
+    const settingsRow: any = await env.MKB_DB.prepare(`SELECT document_json FROM content_pages WHERE slug = ? AND workspace_id = ? LIMIT 1`).bind(settingsKey, workspaceId).first();
     const settings = { heroImageId: '', imageOrderIds: [], hiddenImageIds: [], ...parse(settingsRow?.document_json, {}) };
     const hidden = new Set((Array.isArray(settings.hiddenImageIds) ? settings.hiddenImageIds : []).map(String));
     const order = Array.isArray(settings.imageOrderIds) ? settings.imageOrderIds.map(String) : [];
-    const result = await env.MKB_DB.prepare(`SELECT vi.asset_key, vi.sort_order, vi.display_json, vi.included, vi.hidden, i.image_id, i.filename, i.thumb_src, i.full_src, i.alt, i.caption, i.tags_json, i.ai_tags_json FROM venue_images vi JOIN images i ON i.asset_key = vi.asset_key ORDER BY vi.sort_order ASC`).all();
+    const result = await env.MKB_DB.prepare(`SELECT vi.asset_key, vi.sort_order, vi.display_json, vi.included, vi.hidden, i.image_id, i.filename, i.thumb_src, i.full_src, i.alt, i.caption, i.tags_json, i.ai_tags_json FROM venue_images vi JOIN images i ON i.asset_key = vi.asset_key AND i.workspace_id = vi.workspace_id WHERE vi.workspace_id = ? ORDER BY vi.sort_order ASC`).bind(workspaceId).all();
     const seen = new Set<string>();
     const raw = (result.results || []).filter((row: any) => {
       if (Number(row.hidden) === 1) return false;

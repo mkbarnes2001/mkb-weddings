@@ -7,6 +7,7 @@ import {
   createR2Upload,
   registerUploadedImage,
 } from "../../../serverless/image-d1";
+import { resolveAdminWorkspaceId } from "../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -26,6 +27,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const url = new URL(context.request.url);
     const venueSlug = url.searchParams.get("venueSlug")?.trim() || "";
     const weddingSlug = url.searchParams.get("weddingSlug")?.trim() || "";
@@ -59,6 +61,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         width,
         height,
       },
+      workspaceId,
     );
 
     try {
@@ -66,7 +69,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         ...uploaded,
         originalFilename,
         originalMimeType,
-      });
+      }, workspaceId);
 
       return Response.json({ ok: true, ...registered }, { status: 201 });
     } catch (error) {

@@ -1,5 +1,6 @@
 import { getAuthenticatedClientIdentity } from "../../../../serverless/client-auth-d1";
 import { getPublicClientGallery } from "../../../../serverless/client-gallery-d1";
+import { resolvePublicWorkspaceId } from "../../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -23,7 +24,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const url = new URL(context.request.url);
     const visitorKey = String(url.searchParams.get("visitor") || "").trim();
     const authenticatedIdentity = await getAuthenticatedClientIdentity(context.env.MKB_DB, context.request);
-    const result = await getPublicClientGallery(context.env.MKB_DB, tokenOf(context), "", visitorKey, "", "", authenticatedIdentity);
+    const workspaceId = await resolvePublicWorkspaceId(context.env.MKB_DB, context.request);
+    const result = await getPublicClientGallery(context.env.MKB_DB, tokenOf(context), "", visitorKey, "", "", authenticatedIdentity, workspaceId);
     return Response.json(withAuthConfig(context.env, result.body), {
       status: result.status,
       headers: { "Cache-Control": "private, no-store" },
@@ -45,6 +47,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       String(body?.email || ""),
       String(body?.displayName || ""),
       authenticatedIdentity,
+      await resolvePublicWorkspaceId(context.env.MKB_DB, context.request),
     );
     return Response.json(withAuthConfig(context.env, result.body), {
       status: result.status,

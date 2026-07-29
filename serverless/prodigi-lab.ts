@@ -17,6 +17,10 @@ function text(value: unknown) {
   return String(value ?? "").trim();
 }
 
+async function resolvedWorkspaceId(db: D1Db, workspaceId?: string) {
+  return text(workspaceId) || await getDefaultWorkspaceId(db);
+}
+
 function integer(value: unknown, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : fallback;
@@ -161,8 +165,9 @@ export async function verifyProdigiVariantMapping(
   db: D1Db,
   env: ProdigiEnv,
   input: { variantId: string; sku: string; attributes?: Record<string, string>; printArea?: string; sizing?: string },
+  workspaceIdInput?: string,
 ) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const variantId = text(input.variantId);
   if (!variantId) throw httpError("Product option is required.");
   const variant = await db.prepare(`
@@ -251,9 +256,10 @@ export async function savePreparedPrintAsset(
   itemIdInput: string,
   body: ArrayBuffer,
   input: { sourceWidthPx?: unknown; sourceHeightPx?: unknown },
+  workspaceIdInput?: string,
 ) {
   if (!bucket) throw httpError("Private print storage is not configured.", 503);
-  const workspaceId = await getDefaultWorkspaceId(db);
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const orderId = text(orderIdInput);
   const itemId = text(itemIdInput);
   const row = await db.prepare(`
@@ -337,8 +343,8 @@ export async function resolvePreparedPrintAsset(db: D1Db, tokenInput: string) {
   `).bind(token).first();
 }
 
-async function orderForLab(db: D1Db, orderIdInput: string, selectedItemIds: string[] = []) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+async function orderForLab(db: D1Db, orderIdInput: string, selectedItemIds: string[] = [], workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const orderId = text(orderIdInput);
   const order = await db.prepare(`SELECT * FROM commerce_orders WHERE id = ? AND workspace_id = ? LIMIT 1`).bind(orderId, workspaceId).first();
   if (!order) throw httpError("Order not found.", 404);
@@ -436,8 +442,8 @@ function quoteMinor(quote: any) {
   return Number.isFinite(amount) ? Math.max(0, Math.round(amount * 100)) : 0;
 }
 
-export async function quoteProdigiOrder(db: D1Db, env: ProdigiEnv, input: any) {
-  const { order, items } = await orderForLab(db, input?.orderId, input?.itemIds);
+export async function quoteProdigiOrder(db: D1Db, env: ProdigiEnv, input: any, workspaceIdInput?: string) {
+  const { order, items } = await orderForLab(db, input?.orderId, input?.itemIds, workspaceIdInput);
   const recipient = shippingAddress(order);
   const shippingMethod = cleanShippingMethod(input?.shippingMethod);
   const quoteItems = validateLabItems(env, order, items, false).map((item) => ({
@@ -472,11 +478,11 @@ function submissionIdempotency(_orderId: string, _itemIds: string[]) {
   return crypto.randomUUID();
 }
 
-export async function submitProdigiOrder(db: D1Db, env: ProdigiEnv, input: any) {
+export async function submitProdigiOrder(db: D1Db, env: ProdigiEnv, input: any, workspaceIdInput?: string) {
   if (prodigiMode(env) === "live" && !truthy(env.PRODIGI_LIVE_SUBMISSION_ENABLED, false)) {
     throw httpError("Live Prodigi submission is locked. Enable PRODIGI_LIVE_SUBMISSION_ENABLED only after sandbox validation and a physical sample order.", 503);
   }
-  const { workspaceId, order, items } = await orderForLab(db, input?.orderId, input?.itemIds);
+  const { workspaceId, order, items } = await orderForLab(db, input?.orderId, input?.itemIds, workspaceIdInput);
   const recipient = shippingAddress(order);
   const shippingMethod = cleanShippingMethod(input?.shippingMethod);
   const providerItems = validateLabItems(env, order, items, true);
@@ -661,8 +667,8 @@ export async function reconcileProdigiOrder(db: D1Db, env: ProdigiEnv, providerO
   return { providerOrderId, stage, status: submissionStatus, orderStatus: text(reconciledOrder?.status), response: payload };
 }
 
-export async function refreshProdigiSubmission(db: D1Db, env: ProdigiEnv, orderIdInput: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function refreshProdigiSubmission(db: D1Db, env: ProdigiEnv, orderIdInput: string, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const submission = await db.prepare(`
     SELECT cls.provider_order_id
     FROM commerce_lab_submissions cls
@@ -674,8 +680,8 @@ export async function refreshProdigiSubmission(db: D1Db, env: ProdigiEnv, orderI
   return reconcileProdigiOrder(db, env, text(submission.provider_order_id));
 }
 
-export async function cancelProdigiSubmission(db: D1Db, env: ProdigiEnv, orderIdInput: string) {
-  const workspaceId = await getDefaultWorkspaceId(db);
+export async function cancelProdigiSubmission(db: D1Db, env: ProdigiEnv, orderIdInput: string, workspaceIdInput?: string) {
+  const workspaceId = await resolvedWorkspaceId(db, workspaceIdInput);
   const submission = await db.prepare(`
     SELECT cls.*
     FROM commerce_lab_submissions cls

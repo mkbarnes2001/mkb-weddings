@@ -1,4 +1,5 @@
 import { requestClientMagicLink } from "../../../../serverless/client-auth-d1";
+import { resolvePublicWorkspaceId } from "../../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -16,6 +17,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       email: String(body?.email || "").trim(),
       visitorKey: String(body?.visitorKey || "").trim(),
       origin: context.request.url,
+      workspaceId: await resolvePublicWorkspaceId(context.env.MKB_DB, context.request),
     });
     return Response.json(result.body, {
       status: result.status,

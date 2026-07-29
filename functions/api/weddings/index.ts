@@ -8,6 +8,8 @@ import {
   listAdminWeddings,
 } from "../../../serverless/wedding-d1";
 
+import { resolveAdminWorkspaceId } from "../../../serverless/tenant-context";
+
 type Env = {
   MKB_DB: D1Database;
   ADMIN_API_ENABLED?: string;
@@ -20,10 +22,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     if (context.request.method === "GET") {
       return Response.json({
         ok: true,
-        weddings: await listAdminWeddings(context.env.MKB_DB),
+        weddings: await listAdminWeddings(context.env.MKB_DB, workspaceId),
       });
     }
 
@@ -32,6 +35,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       const wedding = await createAdminWedding(
         context.env.MKB_DB,
         payload?.wedding,
+        workspaceId,
       );
 
       return Response.json(

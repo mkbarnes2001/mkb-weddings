@@ -4,6 +4,7 @@ import {
   notFoundResponse,
 } from "../../../serverless/venue-d1";
 import { listAssetLibrary } from "../../../serverless/asset-library-d1";
+import { resolveAdminWorkspaceId } from "../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -16,7 +17,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   try {
-    const payload = await listAssetLibrary(context.env.MKB_DB, context.request.url);
+    const workspaceId = await resolveAdminWorkspaceId(context as any);
+    const payload = await listAssetLibrary(context.env.MKB_DB, context.request.url, workspaceId);
     return Response.json({ ok: true, ...payload });
   } catch (error) {
     return errorResponse(error);

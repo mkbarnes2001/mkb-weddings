@@ -4,6 +4,7 @@ import {
   notFoundResponse,
 } from "../../serverless/venue-d1";
 import { getWorkspace, updateWorkspaceSettings } from "../../serverless/workspace-d1";
+import { resolveAdminWorkspaceId } from "../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -17,17 +18,20 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context as any);
+
     if (context.request.method === "GET") {
-      const workspace = await getWorkspace(context.env.MKB_DB);
+      const workspace = await getWorkspace(context.env.MKB_DB, workspaceId);
       if (!workspace) return new Response("Workspace not found", { status: 404 });
       return Response.json({ ok: true, workspace });
     }
 
     if (context.request.method === "PUT") {
       const payload = await context.request.json();
+      const incoming = payload?.workspace || payload;
       const workspace = await updateWorkspaceSettings(
         context.env.MKB_DB,
-        payload?.workspace || payload,
+        { ...incoming, id: workspaceId },
       );
       return Response.json({ ok: true, workspace });
     }

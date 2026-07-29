@@ -3,6 +3,7 @@ import {
   errorResponse,
   notFoundResponse,
 } from "../../../../serverless/venue-d1";
+import { resolveAdminWorkspaceId } from "../../../../serverless/tenant-context";
 
 type Env = { MKB_DB: D1Database; ADMIN_API_ENABLED?: string };
 
@@ -41,11 +42,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
     const slug = String(context.params.slug || "").trim();
     const momentRow: any = await context.env.MKB_DB.prepare(
-      `SELECT * FROM moments WHERE slug = ? LIMIT 1`,
+      `SELECT * FROM moments WHERE slug = ? AND workspace_id = ? LIMIT 1`,
     )
-      .bind(slug)
+      .bind(slug, workspaceId)
       .first();
 
     if (!momentRow) {
@@ -80,10 +82,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         i.caption,
         v.name AS venue_name
       FROM venue_images vi
-      JOIN images i ON i.asset_key = vi.asset_key
-      LEFT JOIN venues v ON v.slug = vi.venue_slug
+      JOIN images i ON i.asset_key = vi.asset_key AND i.workspace_id = vi.workspace_id
+      LEFT JOIN venues v ON v.slug = vi.venue_slug AND v.workspace_id = vi.workspace_id
+      WHERE vi.workspace_id = ?
       ORDER BY v.name COLLATE NOCASE ASC, vi.sort_order ASC, i.filename COLLATE NOCASE ASC
-    `).all();
+    `).bind(workspaceId).all();
 
     const seen = new Set<string>();
     const images = (result.results || [])
@@ -134,6 +137,14 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const workspaceId = await resolveAdminWorkspaceId(context);
+    const slug = String(context.params.slug || "").trim();
+    const momentRow = await context.env.MKB_DB.prepare(
+      `SELECT id FROM moments WHERE slug = ? AND workspace_id = ? LIMIT 1`,
+    ).bind(slug, workspaceId).first();
+    if (!momentRow) {
+      return Response.json({ error: "Moment not found." }, { status: 404 });
+    }
     const body: any = await context.request.json();
     const enabledAssetKeys = new Set(
       (Array.isArray(body?.enabledAssetKeys) ? body.enabledAssetKeys : [])
@@ -168,9 +179,9 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       const result = await context.env.MKB_DB.prepare(`
         SELECT venue_slug, asset_key, included, moments_json, display_json
         FROM venue_images
-        WHERE asset_key IN (${placeholders})
+        WHERE workspace_id = ? AND asset_key IN (${placeholders})
       `)
-        .bind(...chunk)
+        .bind(workspaceId, ...chunk)
         .all();
       rows.push(...(result.results || []));
     }
@@ -208,13 +219,14 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       return context.env.MKB_DB.prepare(`
         UPDATE venue_images
         SET included = ?, moments_json = ?, display_json = ?
-        WHERE venue_slug = ? AND asset_key = ?
+        WHERE venue_slug = ? AND asset_key = ? AND workspace_id = ?
       `).bind(
         nextIncluded ? 1 : 0,
         JSON.stringify(nextMoments),
         JSON.stringify(nextDisplay),
         String(row.venue_slug || ""),
         assetKey,
+        workspaceId,
       );
     });
 

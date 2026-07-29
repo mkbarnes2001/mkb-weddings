@@ -1,5 +1,19 @@
 # MKB Intelligence — Changelog
 
+## v1.8.2 — Legacy Tenant Ownership Migration
+- Added `workspace_id` ownership to the remaining legacy Weddings, Venues, image/gallery relationship, Suppliers, Moments and public collection-definition tables.
+- Backfilled every existing legacy record to `workspace_mkb_weddings` without renaming public slugs, URLs or existing R2 objects.
+- Added server-owned Admin workspace resolution from the authenticated professional membership context and verified-domain resolution for public legacy APIs.
+- Scoped legacy reads, writes, publishing, managed-image deletion, Wedding Workspace compatibility writes, Asset Library relationships and Location Gallery venue reads to the resolved workspace.
+- Re-audited existing workspace-owned paths and made the authenticated active business authoritative for Workspace Settings, Client Galleries, private originals, Print Store and Admin Prodigi fulfilment actions.
+- Closed a Print Store cross-tenant mutation edge case when archiving a price list by scoping the dependent gallery-store update to the active workspace.
+- Namespaced new managed-upload R2 keys by workspace while retaining existing MKB object keys.
+- Namespaced non-MKB fixed `content_pages` storage keys while preserving historic MKB keys.
+- Removed global tenant record counts from the unauthenticated D1 health endpoint.
+- Added dependency-free cross-tenant regression coverage for read/infer, mutate, publish, R2-key/download lookup and public-domain isolation.
+- Added migration 025; schema version advances to 25.
+- Production tenant validation remains required before external professional onboarding is opened.
+
 ## v1.8.1 — Professional Identity & Tenant Context
 - Added passwordless professional sign-in with single-use, SHA-256-hashed links and secure HttpOnly sessions.
 - Added invitation acceptance, resend/manual delivery status and role-aware team access.

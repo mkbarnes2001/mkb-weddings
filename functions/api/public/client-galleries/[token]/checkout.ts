@@ -12,6 +12,7 @@ import {
   sanitizedStripeEventPayload,
   stripeCheckoutConfigured,
 } from "../../../../../serverless/stripe-payments";
+import { resolvePublicWorkspaceId } from "../../../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -47,6 +48,7 @@ async function authorise(context: any, input: any) {
     text(input?.email),
     text(input?.displayName),
     identity,
+    await resolvePublicWorkspaceId(context.env.MKB_DB, context.request),
   );
   const accessBody: any = access.body || {};
   if (access.status !== 200 || accessBody.locked) {
