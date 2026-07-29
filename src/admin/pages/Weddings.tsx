@@ -39,6 +39,7 @@ export function Weddings() {
   const [deleteTarget, setDeleteTarget] = useState<WeddingRecord | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [destructiveBusy, setDestructiveBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   async function reloadWeddings(preferredSlug?: string) {
     const service = await WeddingService.load();
@@ -52,7 +53,10 @@ export function Weddings() {
   }
 
   useEffect(() => {
-    reloadWeddings().catch((err) => setError(err instanceof Error ? err.message : "Unable to load weddings."));
+    setLoading(true);
+    reloadWeddings()
+      .catch((err) => setError(err instanceof Error ? err.message : "Unable to load weddings."))
+      .finally(() => setLoading(false));
   }, []);
 
   const filteredWeddings = useMemo(() => {
@@ -131,7 +135,7 @@ export function Weddings() {
     }
   }
 
-  if (!weddings.length && !error) return <div className="text-neutral-500">Loading weddings…</div>;
+  if (loading) return <div className="text-neutral-500">Loading weddings…</div>;
 
   const draftCount = weddings.filter((wedding) => wedding.publicationStatus === "draft").length;
   const publishedCount = weddings.filter((wedding) => wedding.storyEnabled && wedding.storyStatus === "published" && wedding.storyListVisible).length;
@@ -160,6 +164,11 @@ export function Weddings() {
 
       <section className="admin-master-detail admin-master-detail--360">
         <div className="admin-master-detail__main admin-card-grid admin-card-grid--portrait">
+          {!filteredWeddings.length ? (
+            <div className="rounded-[18px] border border-dashed border-black/10 bg-white/70 p-6 text-[11px] leading-5 text-neutral-500">
+              {weddings.length ? "No weddings match the current filters." : "No weddings in this workspace yet."}
+            </div>
+          ) : null}
           {filteredWeddings.map((wedding) => {
             const cover = coverFor(wedding);
             const selected = wedding.slug === activeSlug;

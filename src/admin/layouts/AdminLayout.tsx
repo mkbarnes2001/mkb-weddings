@@ -79,6 +79,16 @@ export function AdminLayout() {
           align-items: center;
           gap: 6px;
         }
+        .admin-shell select.admin-workspace-switcher {
+          background: #1b1b1b !important;
+          color: #ffffff !important;
+          border-color: rgba(255,255,255,.18) !important;
+          color-scheme: dark;
+        }
+        .admin-shell select.admin-workspace-switcher option {
+          background: #ffffff;
+          color: #111111;
+        }
         .admin-mobile-external-link {
           height: 32px;
           display: inline-flex;
@@ -151,7 +161,7 @@ export function AdminLayout() {
                 <select
                   value={auth.workspaceId}
                   onChange={(event) => void switchWorkspace(event.target.value)}
-                  className="mt-3 h-8 w-full rounded-lg border border-white/10 bg-white/[0.08] px-2 text-[10px] text-white outline-none"
+                  className="admin-workspace-switcher mt-3 h-8 w-full rounded-lg border px-2 text-[10px] outline-none"
                   aria-label="Switch business workspace"
                 >
                   {auth.memberships.map((membership) => <option key={membership.workspaceId} value={membership.workspaceId} className="text-black">{membership.businessName}</option>)}

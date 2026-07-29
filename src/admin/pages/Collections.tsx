@@ -24,6 +24,7 @@ import type { CustomCollection } from "../types/customCollection";
 import type { MomentRepositoryDocument } from "../types/moment";
 import type { VenueSummary } from "../types/venue";
 import { AdminPage, AdminPageHeader } from "../components/ui/AdminUI";
+import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 
 type PublicImage = {
   assetKey?: string;
@@ -49,7 +50,7 @@ type LandingCard = {
 };
 
 const CORE_KEYS = ["county", "venues", "moments", "creative-flash", "stories"];
-const LOCATION_FALLBACK_HERO =
+const MKB_LOCATION_FALLBACK_HERO =
   "https://images.mkbweddings.co.uk/thumb/Slieve%20donard%20hotel/couple%20portraits/mkb-weddings-mkb-photography-northern-ireland-wedding-photography-slieve-donard-hotel-newcastle-wedding-photography-94_500.webp";
 
 const DEFAULT_LOCATION_SETTINGS: LocationGallerySettings = {
@@ -64,8 +65,8 @@ const DEFAULT_LOCATION_SETTINGS: LocationGallerySettings = {
   intro: "",
   seoTitle: "",
   seoDescription: "",
-  heroImageUrl: LOCATION_FALLBACK_HERO,
-  publicOrigin: "https://www.mkbweddings.co.uk",
+  heroImageUrl: "",
+  publicOrigin: "",
 };
 
 
@@ -129,6 +130,8 @@ function imageSource(image: PublicImage | null | undefined) {
 
 export function Collections() {
   const navigate = useNavigate();
+  const { auth } = useProfessionalAuth();
+  const isMkbWorkspace = auth.workspaceId === "workspace_mkb_weddings";
   const [legacyCollections, setLegacyCollections] = useState<ImageCollection[]>([]);
   const [customCollections, setCustomCollections] = useState<CustomCollection[]>([]);
   const [moments, setMoments] = useState<MomentRepositoryDocument | null>(null);
@@ -159,12 +162,13 @@ export function Collections() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [publicOrigin, setPublicOrigin] = useState("");
 
   async function load() {
     setLoading(true);
     setError("");
 
-    const [customResult, momentsResult, venuesResult, locationResult, creativeResult, landingResult, heroResult] =
+    const [customResult, momentsResult, venuesResult, locationResult, creativeResult, landingResult, heroResult, workspaceResult] =
       await Promise.allSettled([
         AdminApiService.listCustomCollections(),
         AdminApiService.getMoments(),
@@ -178,6 +182,7 @@ export function Collections() {
             return response.json();
           },
         ),
+        AdminApiService.getWorkspace(),
       ]);
 
     const loadedCustom = customResult.status === "fulfilled" ? customResult.value : [];
@@ -199,6 +204,19 @@ export function Collections() {
         landing: heroResult.value?.landing || null,
       });
     }
+    if (workspaceResult.status === "fulfilled") {
+      const websiteUrl = String(workspaceResult.value?.settings?.websiteUrl || "").trim().replace(/\/+$/, "");
+      const publicHostname = String(workspaceResult.value?.settings?.publicHostname || "").trim();
+      setPublicOrigin(
+        /^https?:\/\//i.test(websiteUrl)
+          ? websiteUrl
+          : publicHostname
+            ? `https://${publicHostname}`
+            : "",
+      );
+    } else {
+      setPublicOrigin("");
+    }
 
     const landingSettings =
       landingResult.status === "fulfilled"
@@ -208,7 +226,7 @@ export function Collections() {
     setHiddenCoreCards(landingSettings.hiddenCards.filter((key) => CORE_KEYS.includes(key)));
     setLandingDirty(false);
 
-    const failed = [customResult, momentsResult, venuesResult, locationResult, creativeResult, landingResult].filter(
+    const failed = [customResult, momentsResult, venuesResult, locationResult, creativeResult, landingResult, workspaceResult].filter(
       (result) => result.status === "rejected",
     );
     if (failed.length) {
@@ -219,10 +237,14 @@ export function Collections() {
 
   useEffect(() => {
     void load();
-    CollectionService.load()
-      .then((service) => setLegacyCollections(service.getAllCollections()))
-      .catch(() => {});
-  }, []);
+    if (isMkbWorkspace) {
+      CollectionService.load()
+        .then((service) => setLegacyCollections(service.getAllCollections()))
+        .catch(() => {});
+    } else {
+      setLegacyCollections([]);
+    }
+  }, [isMkbWorkspace]);
 
   const creativeHero = useMemo(() => {
     const heroId = creativeSettings.heroImageId;
@@ -269,7 +291,7 @@ export function Collections() {
         key: "county",
         title: locationSettings.landingTitle || "Explore by Location",
         description: locationSettings.cardDescription || "Browse wedding galleries by location",
-        image: locationSettings.heroImageUrl || LOCATION_FALLBACK_HERO,
+        image: locationSettings.heroImageUrl || (isMkbWorkspace ? MKB_LOCATION_FALLBACK_HERO : ""),
         kind: "system",
       },
       {
@@ -298,8 +320,9 @@ export function Collections() {
         key: "stories",
         title: "Stories & Reviews",
         description: "Real wedding love stories",
-        image:
-          "https://images.mkbweddings.co.uk/thumb/Orange%20tree%20house/getting%20ready/mkb-weddings-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-39_500.webp",
+        image: isMkbWorkspace
+          ? "https://images.mkbweddings.co.uk/thumb/Orange%20tree%20house/getting%20ready/mkb-weddings-northern-ireland-wedding-photographer-orange-tree-house-greyabbey-wedding-photography-39_500.webp"
+          : "",
         kind: "system",
       },
     ];
@@ -307,7 +330,7 @@ export function Collections() {
     const map = new Map(cards.map((card) => [card.key, card]));
     const order = normaliseLandingOrder(landingOrder, customCollections);
     return order.map((key) => map.get(key)).filter((card): card is LandingCard => Boolean(card));
-  }, [customCollections, landingOrder, masterHeroes, creativeHero, locationSettings]);
+  }, [customCollections, landingOrder, masterHeroes, creativeHero, locationSettings, isMkbWorkspace]);
 
   function isLandingCardVisible(card: LandingCard) {
     if (card.kind === "custom") {
@@ -441,13 +464,15 @@ export function Collections() {
     });
   }, [legacyCollections, query, storyBySlug]);
 
+  const galleryOrigin = publicOrigin ? `${publicOrigin}/gallery` : "";
+
   return (
     <AdminPage>
       <AdminPageHeader
         eyebrow="Gallery management"
         title="Galleries"
         description="Manage default dynamic galleries, landing-card order and photographer-created galleries from one workspace."
-        actions={<a href="https://www.mkbweddings.co.uk/gallery" target="_blank" rel="noreferrer" className="admin-button admin-button--secondary"><ExternalLink className="admin-button__icon" />View live gallery</a>}
+        actions={galleryOrigin ? <a href={galleryOrigin} target="_blank" rel="noreferrer" className="admin-button admin-button--secondary"><ExternalLink className="admin-button__icon" />View live gallery</a> : null}
       />
 
       {message ? (
@@ -511,15 +536,17 @@ export function Collections() {
                 <div className="mt-5 rounded-2xl bg-neutral-100 p-4 text-sm text-neutral-600">
                   {landingCards.filter(isLandingCardVisible).length} cards currently visible on the Gallery landing.
                 </div>
-                <a
-                  href="https://www.mkbweddings.co.uk/gallery"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Open Gallery landing
-                </a>
+                {galleryOrigin ? (
+                  <a
+                    href={galleryOrigin}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-5 inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Open Gallery landing
+                  </a>
+                ) : null}
               </div>
             </div>
           </section>
@@ -543,7 +570,7 @@ export function Collections() {
                 icon={MapPin}
                 stats={`${publishedVenues.length} published · ${activeVenues.length} managed`}
                 manageTo="/admin/venues"
-                liveHref="https://www.mkbweddings.co.uk/gallery/venues"
+                liveHref={galleryOrigin ? `${galleryOrigin}/venues` : ""}
                 badge="Default gallery"
               />
               <CoreGalleryCard
@@ -553,17 +580,17 @@ export function Collections() {
                 icon={Tags}
                 stats={`${publicMoments.length} public cards · ${activeMoments.length} active moments`}
                 manageTo="/admin/moments"
-                liveHref="https://www.mkbweddings.co.uk/gallery/moments"
+                liveHref={galleryOrigin ? `${galleryOrigin}/moments` : ""}
                 badge="Default gallery"
               />
               <CoreGalleryCard
                 title={locationSettings.landingTitle || "Locations"}
                 description={`A dynamic gallery currently powered by ${locationSettings.pluralLabel || "Locations"}. Change its source type, title and route independently from Location Intelligence.`}
-                image={locationSettings.heroImageUrl || LOCATION_FALLBACK_HERO}
+                image={locationSettings.heroImageUrl || (isMkbWorkspace ? MKB_LOCATION_FALLBACK_HERO : "")}
                 icon={MapPin}
                 stats={`${publicLocations.length} public · ${activeLocations.length} active · ${locationSettings.enabled ? "enabled" : "disabled"}`}
                 manageTo="/admin/gallery/locations"
-                liveHref={`${locationSettings.publicOrigin || "https://www.mkbweddings.co.uk"}${locationSettings.publicBasePath || "/gallery/locations"}`}
+                liveHref={publicOrigin ? `${publicOrigin}${locationSettings.publicBasePath || "/gallery/locations"}` : ""}
                 badge="Optional dynamic"
               />
             </div>
@@ -716,7 +743,7 @@ export function Collections() {
                 icon={Zap}
                 stats={`${visibleCreativeCount} visible · ${creativeImages.length} assigned`}
                 manageTo="/admin/creative-flash"
-                liveHref="https://www.mkbweddings.co.uk/gallery/creative-flash"
+                liveHref={galleryOrigin ? `${galleryOrigin}/creative-flash` : ""}
                 badge="Gallery"
               />
               {[...customCollections]
@@ -793,9 +820,9 @@ export function Collections() {
                           <Settings2 className="h-4 w-4" />
                           Edit settings
                         </Link>
-                        {collection.status === "active" ? (
+                        {collection.status === "active" && galleryOrigin ? (
                           <a
-                            href={`https://www.mkbweddings.co.uk/gallery/collection/${encodeURIComponent(collection.slug)}`}
+                            href={`${galleryOrigin}/collection/${encodeURIComponent(collection.slug)}`}
                             target="_blank"
                             rel="noreferrer"
                             className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
@@ -899,7 +926,7 @@ function CoreGalleryCard({
   icon: typeof Images;
   stats: string;
   manageTo: string;
-  liveHref: string;
+  liveHref?: string;
   badge?: string;
 }) {
   return (
@@ -933,15 +960,17 @@ function CoreGalleryCard({
             <Settings2 className="h-4 w-4" />
             Manage
           </Link>
-          <a
-            href={liveHref}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
-          >
-            <ExternalLink className="h-4 w-4" />
-            View live
-          </a>
+          {liveHref ? (
+            <a
+              href={liveHref}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
+            >
+              <ExternalLink className="h-4 w-4" />
+              View live
+            </a>
+          ) : null}
         </div>
       </div>
     </article>
