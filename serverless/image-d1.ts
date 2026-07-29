@@ -68,6 +68,34 @@ function imageMatches(item: any, assetKey: string, weddingSlug: string, imageId:
   );
 }
 
+function isPublishedVenueImageVisible(item: any) {
+  const display =
+    item?.display && typeof item.display === "object"
+      ? item.display
+      : null;
+
+  const hasDraftVisibilityMetadata =
+    Object.prototype.hasOwnProperty.call(item || {}, "included") ||
+    Object.prototype.hasOwnProperty.call(item || {}, "hidden") ||
+    Boolean(
+      display &&
+      Object.prototype.hasOwnProperty.call(display, "venue"),
+    );
+
+  // Current published venue snapshots retain the full draft gallery and rely
+  // on these visibility flags when they are rendered publicly. Older snapshots
+  // were already filtered before being stored and intentionally omit them.
+  if (!hasDraftVisibilityMetadata) {
+    return true;
+  }
+
+  return Boolean(
+    item?.included &&
+    !item?.hidden &&
+    display?.venue,
+  );
+}
+
 export async function registerUploadedImage(
   db: D1Db,
   input: {
@@ -517,6 +545,7 @@ export async function deleteManagedImage(
   for (const venue of venueRows.results || []) {
     const published = json(venue.published_json, {} as any);
     const publishedMatch = galleryImages(published).some((item: any) =>
+      isPublishedVenueImageVisible(item) &&
       imageMatches(item, assetKey, weddingSlug, imageId),
     );
     if (publishedMatch) {
