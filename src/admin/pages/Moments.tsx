@@ -9,6 +9,7 @@ import {
   Save,
   Trash2,
 } from "lucide-react";
+import { AdminButton } from "../components/ui/AdminUI";
 import { AdminApiService } from "../services/AdminApiService";
 import type {
   MomentRecord,
@@ -255,25 +256,27 @@ export function Moments() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <button
+          <div className="flex flex-wrap items-center gap-2 self-start md:self-center">
+            <AdminButton
               type="button"
+              variant="primary"
+              size="sm"
+              icon={Plus}
               onClick={addMoment}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-black px-3.5 py-2 text-[11px] font-medium text-white ring-1 ring-white/20 transition hover:bg-neutral-800"
             >
-              <Plus className="h-4 w-4" />
               Add moment
-            </button>
+            </AdminButton>
 
-            <button
+            <AdminButton
               type="button"
+              variant="primary"
+              size="sm"
+              icon={Save}
               onClick={save}
               disabled={saving || !dirty}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-black px-3.5 py-2 text-[11px] font-medium text-white ring-1 ring-white/20 transition hover:bg-neutral-800 disabled:opacity-40"
             >
-              <Save className="h-4 w-4" />
               {saving ? "Saving…" : dirty ? "Save moments" : "Saved"}
-            </button>
+            </AdminButton>
           </div>
         </div>
       </section>

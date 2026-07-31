@@ -1173,36 +1173,41 @@ export function VenueGallery() {
                       <GripVertical size={17} />
                     </div>
 
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: "7px",
-                        top: "7px",
-                        display: "flex",
-                        gap: "4px",
-                        flexWrap: "wrap",
-                        maxWidth: "calc(100% - 48px)",
-                      }}
-                    >
+                  </div>
+
+                  {(hero || item?.included || item?.display.moments) ? (
+                    <div className="flex min-h-7 items-center gap-1 border-t border-black/5 px-2 py-1" aria-label="Image gallery assignments">
                       {hero ? (
-                        <span className="rounded-md bg-black/90 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-white">
-                          Hero
+                        <span
+                          className="inline-flex h-4 min-w-4 items-center justify-center rounded bg-black px-1 text-[8px] font-semibold leading-none text-white"
+                          title="Hero image"
+                          aria-label="Hero image"
+                        >
+                          H
                         </span>
                       ) : null}
                       {item?.included ? (
-                        <span className="rounded-md bg-white/90 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-black shadow-sm">
-                          Venue
+                        <span
+                          className="inline-flex h-4 min-w-4 items-center justify-center rounded border border-black/15 bg-white px-1 text-[8px] font-semibold leading-none text-black"
+                          title="Shown in venue gallery"
+                          aria-label="Shown in venue gallery"
+                        >
+                          V
                         </span>
                       ) : null}
                       {item?.display.moments ? (
-                        <span className="rounded-md bg-black/70 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-white">
-                          Moments
+                        <span
+                          className="inline-flex h-4 min-w-4 items-center justify-center rounded border border-black/15 bg-neutral-100 px-1 text-[8px] font-semibold leading-none text-black"
+                          title="Assigned to Moments"
+                          aria-label="Assigned to Moments"
+                        >
+                          M
                         </span>
                       ) : null}
                     </div>
-                  </div>
-
-
+                  ) : (
+                    <div className="min-h-7 border-t border-black/5" aria-hidden="true" />
+                  )}
                 </article>
               );
             })}

@@ -1,5 +1,12 @@
 # MKB Intelligence — Changelog
 
+## v1.8.2f — Gallery UI Follow-up
+- Moved Venue Gallery Hero/Venue/Moments state off the thumbnails into compact H/V/M indicators below each image.
+- Replaced the oversized Moments masthead actions with the shared small Admin button component.
+- Forced the public/private Client Gallery, including Print Store controls and headings, onto the same Montserrat Admin typography.
+- Reworked Shop Prints scrolling so the modal overlay is the scroll container, while the gallery page remains locked behind it; the store header and checkout action remain sticky.
+- No migration; schema remains 25.
+
 ## v1.8.2e — Admin UI & Usability Polish
 - Centred and standardised the professional login screen, renamed it **WedPlanned Pro sign in**, and uses the existing MKB favicon/logo.
 - Replaced the desktop Admin sidebar brand copy with the MKB logo while preserving business/session context and workspace switching.

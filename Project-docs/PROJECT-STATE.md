@@ -1,8 +1,16 @@
 # Project State
 
 ## Version
-Current release: **v1.8.2e — Admin UI & Usability Polish**.
+Current release: **v1.8.2f — Gallery UI Follow-up**.
 Database schema version: **25**.
+
+## Gallery UI Follow-up — v1.8.2f
+- Keeps the v1.8.2 tenant boundary and schema 25 unchanged.
+- Venue Gallery cards now show compact H/V/M assignment indicators below the thumbnail rather than large overlay labels.
+- Moments top actions use the shared small Admin button system so they stay single-row and compact.
+- Public Client Galleries use the Admin Montserrat typography consistently, including headings and the Print Store.
+- Shop Prints now scrolls at the modal-overlay level with body/root scrolling locked, avoiding the previous desktop/mobile nested-scroll failure.
+- No D1, R2, DNS or environment-variable changes are required.
 
 ## Admin UI & Usability Polish — v1.8.2e
 - Keeps the production-complete v1.8.2 tenant boundary and schema 25 unchanged.
