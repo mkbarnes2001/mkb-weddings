@@ -6,7 +6,7 @@ import type { ClientGalleryListPayload } from "../types/clientGallery";
 import { AdminPage, AdminPageHeader, AdminPanel } from "../components/ui/AdminUI";
 
 function publicUrl(slug: string, token: string) {
-  const segment = slug ? `${encodeURIComponent(slug)}/${encodeURIComponent(token)}` : encodeURIComponent(token);
+  const segment = slug ? encodeURIComponent(slug) : encodeURIComponent(token);
   return `${window.location.protocol}//${window.location.host.replace(/^admin\./, "www.")}/client-gallery/${segment}`;
 }
 

@@ -1214,9 +1214,11 @@ async function publicGalleryRow(db: D1Db, token: string, workspaceIdInput?: stri
     LEFT JOIN workspace_settings ws ON ws.workspace_id = cg.workspace_id
     LEFT JOIN client_gallery_branding cgb ON cgb.gallery_id = cg.id
     LEFT JOIN weddings w ON w.slug = cg.wedding_slug AND w.workspace_id = cg.workspace_id
-    WHERE cg.access_token = ? AND cg.workspace_id = ? AND cg.status = 'live'
+    WHERE (cg.access_token = ? OR cg.slug = ?)
+      AND cg.workspace_id = ?
+      AND cg.status = 'live'
     LIMIT 1
-  `).bind(token, workspaceId).first();
+  `).bind(token, token, workspaceId).first();
 }
 
 type PublicVisitorIdentity = {

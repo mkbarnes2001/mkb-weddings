@@ -326,7 +326,9 @@ def main() -> None:
     )
     assert_source_contains(
         "serverless/client-gallery-d1.ts",
-        "WHERE cg.access_token = ? AND cg.workspace_id = ? AND cg.status = 'live'",
+        "WHERE (cg.access_token = ? OR cg.slug = ?)",
+        "AND cg.workspace_id = ?",
+        "AND cg.status = 'live'",
         "a.workspace_id = cg.workspace_id",
     )
     assert_source_contains(
