@@ -141,7 +141,7 @@ export function AdminLayout() {
         <aside className="admin-sidebar flex flex-col border-r border-black" style={{ backgroundColor: "#111111", color: "#ffffff" }}>
           <div className="border-b border-white/10 px-4 py-4">
             <div className="flex items-center justify-center py-1">
-              <img src="/favicon-32x32.png" alt="MKB Weddings" className="h-11 w-11 object-contain" />
+              <img src="/favicon-32x32.png" alt="MKB Weddings" className="h-11 w-11 object-contain opacity-95" style={{ filter: "brightness(0) invert(1)" }} />
             </div>
 
             <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3">

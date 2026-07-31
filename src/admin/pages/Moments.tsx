@@ -322,9 +322,11 @@ export function Moments() {
                 />
               </div>
             ) : (
-              <div className="mb-3 flex items-center justify-center rounded-[14px] bg-neutral-100 text-xs text-neutral-400" style={{ aspectRatio: "16 / 9" }}>
-                Set a hero in Manage gallery
-              </div>
+              <div
+                className="mb-3 rounded-[14px] border border-black/5 bg-neutral-100"
+                style={{ aspectRatio: "16 / 9" }}
+                aria-label={`${moment.name} has no hero image selected`}
+              />
             )}
             <div className="grid grid-cols-1 gap-3">
               <div
@@ -424,24 +426,6 @@ export function Moments() {
               </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-              <label>
-                <span className="mb-1.5 block text-[9px] font-medium uppercase tracking-[0.14em] text-neutral-500">
-                  Card image ID (optional)
-                </span>
-                <input
-                  value={moment.cardImageId}
-                  onChange={(event) =>
-                    updateMoment(moment.id, { cardImageId: event.target.value.trim() })
-                  }
-                  placeholder="Paste an image ID / asset key, or leave blank for automatic"
-                  className="w-full rounded-xl border border-black/10 px-3 py-2 font-mono text-[11px]"
-                />
-                <p className="mt-1.5 text-[10px] leading-relaxed text-neutral-500">
-                  Leave blank to use the first eligible image assigned to this moment.
-                </p>
-              </label>
-            </div>
 
             <label className="mt-3 block">
               <span className="mb-1.5 block text-[9px] font-medium uppercase tracking-[0.14em] text-neutral-500">

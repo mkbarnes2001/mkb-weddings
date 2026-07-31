@@ -137,8 +137,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const origin = publicOrigin(context);
     const galleryPath = `/client-gallery/${encodeURIComponent(tokenOf(context))}`;
-    const successUrl = `${origin}${galleryPath}?checkout=success&order=${encodeURIComponent(order.id)}&session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${origin}${galleryPath}?checkout=cancelled&order=${encodeURIComponent(order.id)}`;
+    const successUrl = `${origin}${galleryPath}?prints=1&checkout=success&order=${encodeURIComponent(order.id)}&session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${origin}${galleryPath}?prints=1&checkout=cancelled&order=${encodeURIComponent(order.id)}`;
     const { session, attempt } = await createStripeCheckoutSession(context.env, order, { successUrl, cancelUrl });
     await attachStripeCheckoutSession(context.env.MKB_DB, order.id, session, attempt);
     order = await getPublicCheckoutOrder(

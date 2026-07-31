@@ -1214,12 +1214,12 @@ export function VenueGallery() {
           </div>
 
           <aside
-            className="admin-summary-panel venue-gallery-summary"
+            className="admin-summary-panel venue-gallery-summary text-[9px] leading-[1.35]"
             style={{
               borderRadius: "14px",
               border: "1px solid rgba(0,0,0,0.12)",
               background: "#fff",
-              padding: "14px",
+              padding: "11px",
             }}
           >
             {!activeAsset || !activeItem ? (
@@ -1227,26 +1227,26 @@ export function VenueGallery() {
                 Select an image to edit its gallery settings.
               </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <img
                   src={activeAsset.fullSrc}
                   alt={activeAsset.aiAlt || activeAsset.filename}
-                  className="max-h-[240px] w-full rounded-xl object-contain"
+                  className="max-h-[185px] w-full rounded-lg object-contain"
                 />
 
                 <div>
                   <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
                     Image
                   </p>
-                  <p className="mt-1 break-all text-[10px] leading-4 text-neutral-700">
+                  <p className="mt-1 break-all text-[9px] leading-[1.35] text-neutral-700">
                     {activeAsset.filename}
                   </p>
                   {activeAsset.weddingCouple && activeAsset.weddingCouple !== "Imported venue gallery" ? (
-                    <p className="mt-1 text-[10px] text-neutral-500">{activeAsset.weddingCouple}</p>
+                    <p className="mt-1 text-[9px] text-neutral-500">{activeAsset.weddingCouple}</p>
                   ) : null}
                 </div>
 
-                <div className="space-y-2 border-t border-black/10 pt-3">
+                <div className="space-y-1.5 border-t border-black/10 pt-2.5">
                   <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
                     Image actions
                   </p>
@@ -1279,7 +1279,7 @@ export function VenueGallery() {
                   ) : null}
                 </div>
 
-                <div className="border-t border-black/10 pt-3">
+                <div className="border-t border-black/10 pt-2.5">
                   <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
                     Gallery destinations
                   </p>
@@ -1305,8 +1305,8 @@ export function VenueGallery() {
                     {moments.filter((moment) => moment.availableForAssignment).map((moment) => {
                       const checked = activeItem.moments.includes(moment.slug);
                       return (
-                        <label key={moment.id} className="flex items-center justify-between gap-3 rounded-lg border border-black/10 px-3 py-2">
-                          <span className="text-[10px] leading-4">{moment.name}</span>
+                        <label key={moment.id} className="flex items-center justify-between gap-2 rounded-md border border-black/10 px-2.5 py-1.5">
+                          <span className="text-[9px] leading-[1.35]">{moment.name}</span>
                           <input
                             type="checkbox"
                             checked={checked}
@@ -1381,7 +1381,7 @@ export function VenueGallery() {
                   ) : null}
                 </div>
 
-                <details className="border-t border-black/10 pt-3">
+                <details className="border-t border-black/10 pt-2.5">
                   <summary className="cursor-pointer text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Other publishing destinations</summary>
                   <div className="mt-4 space-y-2">
                     {activeAsset.weddingSlug ? (
@@ -1411,7 +1411,7 @@ export function VenueGallery() {
                 <button
                   type="button"
                   onClick={() => setHero(activeItem.assetId)}
-                  className="h-8 w-full rounded-lg bg-black px-3 text-[10px] font-medium text-white"
+                  className="h-7 w-full rounded-md bg-black px-2.5 text-[9px] font-medium text-white"
                 >
                   Set as venue hero
                 </button>
@@ -1426,7 +1426,7 @@ export function VenueGallery() {
                       setError(heroError instanceof Error ? heroError.message : "Unable to set Gallery by Venue master hero.");
                     }
                   }}
-                  className="h-8 w-full rounded-lg border border-black/15 bg-white px-3 text-[10px] font-medium text-black"
+                  className="h-7 w-full rounded-md border border-black/15 bg-white px-2.5 text-[9px] font-medium text-black"
                 >
                   Set as Gallery by Venue master hero
                 </button>
@@ -1441,7 +1441,7 @@ export function VenueGallery() {
                       setError(heroError instanceof Error ? heroError.message : "Unable to set main Gallery landing-page hero.");
                     }
                   }}
-                  className="h-8 w-full rounded-lg bg-black px-3 text-[10px] font-medium text-white"
+                  className="h-7 w-full rounded-md bg-black px-2.5 text-[9px] font-medium text-white"
                 >
                   Set as main Gallery landing hero
                 </button>
@@ -1487,8 +1487,8 @@ function Toggle({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="flex items-center justify-between gap-3 rounded-lg border border-black/10 px-3 py-2">
-      <span className="text-[10px] leading-4">{label}</span>
+    <label className="flex items-center justify-between gap-2 rounded-md border border-black/10 px-2.5 py-1.5">
+      <span className="text-[9px] leading-[1.35]">{label}</span>
       <input
         type="checkbox"
         checked={checked}
