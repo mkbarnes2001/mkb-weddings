@@ -1224,7 +1224,7 @@
 
 .admin-client-gallery-create {
   display: grid;
-  grid-template-columns: minmax(190px, 1fr) minmax(220px, 1fr) auto;
+  grid-template-columns: minmax(170px, .9fr) minmax(190px, 1fr) minmax(160px, .8fr) auto;
   gap: 8px;
   align-items: center;
 }

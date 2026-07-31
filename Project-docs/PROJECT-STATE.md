@@ -1,9 +1,27 @@
 # Project State
 
 ## Version
-Current release: **v1.8.2 — Legacy Tenant Ownership Migration**.
+Current release: **v1.8.2e — Admin UI & Usability Polish**.
 Database schema version: **25**.
 
+## Admin UI & Usability Polish — v1.8.2e
+- Keeps the production-complete v1.8.2 tenant boundary and schema 25 unchanged.
+- Standardises the WedPlanned professional sign-in and Client Gallery typography on the Admin sans-serif system.
+- Replaces the legacy Admin sidebar wordmark block with the existing MKB logo while preserving authenticated business/session controls.
+- Condenses Venue Gallery controls, image badges and inspector density; removes star ratings and simplifies multi-select to Show/Hide, Assign to moment and Clear.
+- Makes the WedPlanned Services selector independently scrollable.
+- Adds optional human-readable Client Gallery slugs while retaining the secret access token in every private share URL and preserving the existing token-only route.
+- Rebuilds the Client Gallery Print Store drawer as a fixed-height flex panel with its own scroll region on desktop and mobile.
+- Separates and compacts Moment cards with a clearer drag-to-reorder handle and consistent black actions.
+- No D1 migration, R2 migration or environment-variable change is required.
+
+## v1.8.2 production ownership audit — COMPLETE
+- Production migration 025 completed successfully and schema 25 / foreign keys were verified.
+- All 18 legacy ownership tables were backfilled to `workspace_mkb_weddings` with zero wrong-owner rows.
+- A live second business (`workspace_wedplanned_test`) was used to prove list/detail, known-slug/ID, mutation, publish, Asset Library, Client Gallery, Print Store and private-original/R2 isolation.
+- Verified-domain resolution was tested with a temporary Pages deployment hostname mapped to the test business; it could not retrieve known MKB public content while `www.mkbweddings.co.uk` continued to work.
+- Live MKB venue upload, publish, remove, republish and permanent managed-image deletion passed after the delete-visibility guard fix.
+- The temporary public-domain mapping was removed after validation; the test business remains available for future regression checks.
 
 ## Legacy Tenant Ownership Migration — v1.8.2
 - Adds workspace ownership to the remaining legacy Weddings, Venues, image relationship, Suppliers, Moments, public collection and compatibility-link tables.
@@ -17,7 +35,7 @@ Database schema version: **25**.
 - Non-MKB fixed `content_pages` definitions use internal workspace-prefixed keys to avoid collisions without changing historic MKB keys.
 - Adds `scripts/test-legacy-tenant-isolation.py`, covering cross-tenant read/infer, mutation, publish, R2-key/download lookup and public-domain resolution.
 - Adds migration `025_legacy_tenant_ownership.sql`; schema advances to **25**.
-- v1.8.1 production sign-out validation is complete. External business onboarding remains closed until v1.8.2 is deployed and its production tenant-isolation checklist passes.
+- v1.8.1 production sign-out validation is complete, and the v1.8.2 production tenant-isolation checklist has now passed.
 
 ## Professional Identity & Tenant Context — v1.8.1
 - Adds secure passwordless professional sign-in and invitation acceptance.

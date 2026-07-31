@@ -79,8 +79,9 @@ function displayDate(value: string) {
     : new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" }).format(parsed);
 }
 
-function publicGalleryUrl(token: string) {
-  return `${PUBLIC_ORIGIN}/client-gallery/${token}`;
+function publicGalleryUrl(slug: string, token: string) {
+  const segment = slug ? `${encodeURIComponent(slug)}/${encodeURIComponent(token)}` : encodeURIComponent(token);
+  return `${PUBLIC_ORIGIN}/client-gallery/${segment}`;
 }
 
 export function WeddingWorkspace() {
@@ -812,7 +813,7 @@ export function WeddingWorkspace() {
                 <div className="mt-5 rounded-2xl bg-neutral-50 p-4 flex items-center justify-between gap-4 flex-wrap">
                   <div><strong>{clientGallery.title}</strong><p className="mt-1 text-xs text-neutral-500">{clientGallery.status} · {clientGallery.clientEmail || "Client email not set"}</p></div>
                   <div className="flex gap-2">
-                    {clientGallery.status === "live" ? <a href={publicGalleryUrl(clientGallery.accessToken)} target="_blank" rel="noreferrer" className="rounded-full border border-black/15 px-4 py-2 text-sm inline-flex items-center gap-2"><ExternalLink className="h-4 w-4" />Open private link</a> : null}
+                    {clientGallery.status === "live" ? <a href={publicGalleryUrl(clientGallery.slug, clientGallery.accessToken)} target="_blank" rel="noreferrer" className="rounded-full border border-black/15 px-4 py-2 text-sm inline-flex items-center gap-2"><ExternalLink className="h-4 w-4" />Open private link</a> : null}
                   </div>
                 </div>
                 <div className="mt-5 flex items-center justify-between gap-4 flex-wrap">

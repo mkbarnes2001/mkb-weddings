@@ -5,8 +5,9 @@ import { AdminApiService } from "../services/AdminApiService";
 import type { ClientGalleryListPayload } from "../types/clientGallery";
 import { AdminPage, AdminPageHeader, AdminPanel } from "../components/ui/AdminUI";
 
-function publicUrl(token: string) {
-  return `${window.location.protocol}//${window.location.host.replace(/^admin\./, "www.")}/client-gallery/${token}`;
+function publicUrl(slug: string, token: string) {
+  const segment = slug ? `${encodeURIComponent(slug)}/${encodeURIComponent(token)}` : encodeURIComponent(token);
+  return `${window.location.protocol}//${window.location.host.replace(/^admin\./, "www.")}/client-gallery/${segment}`;
 }
 
 export function ClientGalleries() {
@@ -14,6 +15,7 @@ export function ClientGalleries() {
   const [payload, setPayload] = useState<ClientGalleryListPayload | null>(null);
   const [title, setTitle] = useState("");
   const [weddingSlug, setWeddingSlug] = useState("");
+  const [gallerySlug, setGallerySlug] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -42,6 +44,7 @@ export function ClientGalleries() {
       const gallery = await AdminApiService.createClientGallery({
         title: resolvedTitle,
         weddingSlug,
+        slug: gallerySlug,
         clientName: selectedWedding?.couple || "",
       });
       navigate(`/admin/client-galleries/${gallery.id}`);
@@ -74,6 +77,11 @@ export function ClientGalleries() {
               <option key={wedding.slug} value={wedding.slug}>{wedding.title || wedding.couple || wedding.slug}</option>
             ))}
           </select>
+          <input
+            value={gallerySlug}
+            onChange={(event) => setGallerySlug(event.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""))}
+            placeholder="Custom slug (optional)"
+          />
           <button disabled={busy} onClick={create} className="admin-button admin-button--primary">
             {busy ? "Creating…" : "Create gallery"}
           </button>
@@ -84,7 +92,7 @@ export function ClientGalleries() {
 
       <div className="admin-client-gallery-grid">
         {(payload?.galleries || []).map((gallery) => {
-          const shareUrl = publicUrl(gallery.accessToken);
+          const shareUrl = publicUrl(gallery.slug, gallery.accessToken);
           const accessLabel = gallery.requireEmail ? "Email required" : gallery.pinEnabled ? "PIN" : "Private link";
           const AccessIcon = gallery.requireEmail ? Mail : LockKeyhole;
 

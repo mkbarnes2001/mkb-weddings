@@ -213,10 +213,8 @@ function cropFromControls(
   };
 }
 
-function headingFontFamily(value: string) {
-  if (value === "modern") return '"Montserrat", "Avenir Next", Avenir, Arial, sans-serif';
-  if (value === "classic") return 'Georgia, "Times New Roman", serif';
-  return '"Canela", "Playfair Display", Georgia, serif';
+function headingFontFamily(_value: string) {
+  return '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif';
 }
 
 function contrastText(value: string) {
@@ -809,23 +807,24 @@ export function ClientGallery() {
   const accentTextColor = contrastText(branding.accentColor);
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-[#f7f6f3] text-neutral-600">Loading private gallery…</div>;
+    return <div className="min-h-screen flex items-center justify-center bg-[#f7f6f3] text-neutral-600" style={{ fontFamily: '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif' }}>Loading private gallery…</div>;
   }
 
   if (error && !payload) {
-    return <div className="min-h-screen flex items-center justify-center bg-[#f7f6f3] px-6"><div className="max-w-lg text-center"><h1 style={{ fontFamily: '"Canela", "Playfair Display", Georgia, serif', fontSize: 42, fontWeight: 400 }}>Gallery unavailable</h1><p className="mt-4 text-neutral-600">{error}</p></div></div>;
+    return <div className="min-h-screen flex items-center justify-center bg-[#f7f6f3] px-6" style={{ fontFamily: '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif' }}><div className="max-w-lg text-center"><h1 className="text-4xl font-semibold">Gallery unavailable</h1><p className="mt-4 text-neutral-600">{error}</p></div></div>;
   }
 
   if (payload?.locked) {
     const needsEmail = Boolean(payload.emailRequired);
     const needsPin = Boolean(payload.requiresPin);
     return (
-      <div className="client-gallery-theme min-h-screen flex items-center justify-center px-6" style={{ background: branding.backgroundColor, color: branding.textColor, "--gallery-surface": branding.surfaceColor, "--gallery-muted": `${branding.textColor}99`, "--gallery-border": `${branding.textColor}22` } as any}>
+      <div className="client-gallery-theme min-h-screen flex items-center justify-center px-6" style={{ background: branding.backgroundColor, color: branding.textColor, fontFamily: '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif', "--gallery-surface": branding.surfaceColor, "--gallery-muted": `${branding.textColor}99`, "--gallery-border": `${branding.textColor}22` } as any}>
         <Helmet>
           <title>{payload.title || "Private Gallery"}</title>
           <meta name="robots" content="noindex,nofollow,noarchive" />
           <meta name="referrer" content="no-referrer" />
         </Helmet>
+        <style>{`.client-gallery-theme button, .client-gallery-theme input, .client-gallery-theme select, .client-gallery-theme textarea { font-family: inherit; }`}</style>
         <div className="w-full max-w-md rounded-3xl border border-black/15 p-8 text-center" style={{ background: branding.surfaceColor }}>
           {needsEmail ? <Mail className="h-8 w-8 mx-auto" /> : <LockKeyhole className="h-8 w-8 mx-auto" />}
           <p className="text-xs uppercase tracking-[0.24em] text-neutral-500 mt-5">Private gallery</p>
@@ -847,7 +846,7 @@ export function ClientGallery() {
   if (!payload) return null;
 
   return (
-    <div className="client-gallery-theme min-h-screen" style={{ background: branding.backgroundColor, color: branding.textColor, "--gallery-surface": branding.surfaceColor, "--gallery-muted": `${branding.textColor}99`, "--gallery-border": `${branding.textColor}22` } as any}>
+    <div className="client-gallery-theme min-h-screen" style={{ background: branding.backgroundColor, color: branding.textColor, fontFamily: '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif', "--gallery-surface": branding.surfaceColor, "--gallery-muted": `${branding.textColor}99`, "--gallery-border": `${branding.textColor}22` } as any}>
       <Helmet>
         <title>{payload.title} | Private Gallery</title>
         <meta name="robots" content="noindex,nofollow,noarchive" />
@@ -860,6 +859,7 @@ export function ClientGallery() {
         .client-gallery-theme .text-neutral-700 { color: var(--gallery-muted) !important; }
         .client-gallery-theme .bg-white { background-color: var(--gallery-surface) !important; }
         .client-gallery-theme [class*="border-black/"] { border-color: var(--gallery-border) !important; }
+        .client-gallery-theme button, .client-gallery-theme input, .client-gallery-theme select, .client-gallery-theme textarea { font-family: inherit; }
       `}</style>
 
       <header className="px-5 md:px-8 py-4 border-b border-black/10 backdrop-blur" style={{ position: "sticky", top: 0, zIndex: 20, background: `${branding.surfaceColor}f2` }}>
@@ -1039,21 +1039,20 @@ export function ClientGallery() {
 
       {showStore && store?.enabled ? (
         <div
-          className="fixed inset-0 z-[1250] overflow-y-auto overscroll-contain bg-black/55 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[1250] overflow-hidden bg-black/55 backdrop-blur-[2px]"
           role="presentation"
-          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
           onMouseDown={() => setShowStore(false)}
         >
-          <div className="flex min-h-full items-stretch justify-end sm:p-4">
+          <div className="flex h-full min-h-0 items-stretch justify-end sm:p-4">
             <aside
               role="dialog"
               aria-modal="true"
               aria-labelledby="print-store-title"
-              className="relative min-h-[100dvh] w-full max-w-2xl bg-[#f7f6f3] shadow-2xl sm:min-h-0 sm:rounded-3xl"
+              className="relative flex h-[100dvh] min-h-0 w-full max-w-2xl flex-col overflow-hidden bg-[#f7f6f3] shadow-2xl sm:h-full sm:max-h-[calc(100dvh-2rem)] sm:rounded-3xl"
               style={{ color: "#111" }}
               onMouseDown={(event) => event.stopPropagation()}
             >
-            <div className="sticky top-0 z-20 flex items-start justify-between gap-4 border-b border-black/10 bg-white/95 px-4 py-4 backdrop-blur sm:px-6">
+            <div className="z-20 flex shrink-0 items-start justify-between gap-4 border-b border-black/10 bg-white/95 px-4 py-4 backdrop-blur sm:px-6">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-white"><ShoppingBag size={17} /></span>
@@ -1068,8 +1067,9 @@ export function ClientGallery() {
             </div>
 
             <div
-              className="px-4 py-4 sm:px-6 sm:py-6"
-              style={{ paddingBottom: store.cart.items.length ? "2rem" : "max(2rem, env(safe-area-inset-bottom))" }}
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-6"
+              style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y", paddingBottom: store.cart.items.length ? "2rem" : "max(2rem, env(safe-area-inset-bottom))" }}
+              onWheel={(event) => event.stopPropagation()}
             >
               {checkoutOrder ? (
                 <div className={`mb-4 rounded-2xl border p-4 shadow-sm sm:p-5 ${checkoutOrder.paymentStatus === "paid" ? "border-green-200 bg-green-50" : "border-amber-200 bg-amber-50"}`}>
@@ -1211,7 +1211,7 @@ export function ClientGallery() {
 
             {store.cart.items.length ? (
               <div
-                className="sticky bottom-0 z-20 border-t border-black/10 bg-white/95 px-4 pt-3 shadow-[0_-8px_24px_rgba(0,0,0,0.07)] backdrop-blur sm:px-6"
+                className="z-20 shrink-0 border-t border-black/10 bg-white/95 px-4 pt-3 shadow-[0_-8px_24px_rgba(0,0,0,0.07)] backdrop-blur sm:px-6"
                 style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
               >
                 {storeMessage ? <p aria-live="polite" className="mb-2 line-clamp-2 text-xs leading-relaxed text-neutral-600">{storeMessage}</p> : null}

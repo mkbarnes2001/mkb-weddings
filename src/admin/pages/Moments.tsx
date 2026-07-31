@@ -255,11 +255,11 @@ export function Moments() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={addMoment}
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm text-white"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-black px-3.5 py-2 text-[11px] font-medium text-white ring-1 ring-white/20 transition hover:bg-neutral-800"
             >
               <Plus className="h-4 w-4" />
               Add moment
@@ -269,7 +269,7 @@ export function Moments() {
               type="button"
               onClick={save}
               disabled={saving || !dirty}
-              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-black px-3.5 py-2 text-[11px] font-medium text-white ring-1 ring-white/20 transition hover:bg-neutral-800 disabled:opacity-40"
             >
               <Save className="h-4 w-4" />
               {saving ? "Saving…" : dirty ? "Save moments" : "Saved"}
@@ -300,18 +300,18 @@ export function Moments() {
         Every photography workspace starts with a Moments gallery, but the taxonomy is not fixed. These categories define how this workspace organises and presents wedding-day moments.
       </section>
 
-      <section className="grid grid-cols-1 gap-5 md:grid-cols-2">
+      <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {sortedMoments.map((moment) => (
           <article
             key={moment.id}
             onDragOver={(event) => event.preventDefault()}
             onDrop={() => handleDrop(moment.id)}
-            className={`rounded-[24px] border border-black/10 bg-white/85 p-5 ${
+            className={`rounded-[20px] border border-black/15 bg-white p-4 shadow-[0_10px_30px_rgba(0,0,0,0.04)] ${
               moment.status === "archived" ? "opacity-55" : ""
             }`}
           >
             {heroImages[moment.slug] ? (
-              <div className="mb-5 overflow-hidden rounded-[18px] bg-neutral-100" style={{ aspectRatio: "16 / 9" }}>
+              <div className="mb-3 overflow-hidden rounded-[14px] bg-neutral-100" style={{ aspectRatio: "16 / 9" }}>
                 <img
                   src={heroImages[moment.slug].thumbSrc || heroImages[moment.slug].fullSrc}
                   alt={heroImages[moment.slug].alt || `${moment.name} hero`}
@@ -319,24 +319,25 @@ export function Moments() {
                 />
               </div>
             ) : (
-              <div className="mb-5 flex items-center justify-center rounded-[18px] bg-neutral-100 text-sm text-neutral-400" style={{ aspectRatio: "16 / 9" }}>
+              <div className="mb-3 flex items-center justify-center rounded-[14px] bg-neutral-100 text-xs text-neutral-400" style={{ aspectRatio: "16 / 9" }}>
                 Set a hero in Manage gallery
               </div>
             )}
-            <div className="grid grid-cols-1 gap-5">
+            <div className="grid grid-cols-1 gap-3">
               <div
                 draggable
                 onDragStart={() => setDraggedId(moment.id)}
                 onDragEnd={() => setDraggedId(null)}
-                className="w-fit cursor-grab rounded-full border border-black/10 bg-white p-3"
+                className="flex cursor-grab items-center justify-center gap-1.5 rounded-lg border border-black/10 bg-[#f7f6f3] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500 active:cursor-grabbing"
                 title="Drag to reorder"
               >
-                <GripVertical className="h-5 w-5" />
+                <GripVertical className="h-3.5 w-3.5" />
+                Drag to reorder
               </div>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <label>
-                  <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">
+                  <span className="mb-1.5 block text-[9px] font-medium uppercase tracking-[0.14em] text-neutral-500">
                     Name
                   </span>
                   <input
@@ -348,12 +349,12 @@ export function Moments() {
                         slug: slugify(name),
                       });
                     }}
-                    className="w-full rounded-2xl border border-black/10 px-4 py-3 text-sm"
+                    className="w-full rounded-xl border border-black/10 px-3 py-2 text-xs"
                   />
                 </label>
 
                 <label>
-                  <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">
+                  <span className="mb-1.5 block text-[9px] font-medium uppercase tracking-[0.14em] text-neutral-500">
                     Slug
                   </span>
                   <input
@@ -363,14 +364,14 @@ export function Moments() {
                         slug: slugify(event.target.value),
                       })
                     }
-                    className="w-full rounded-2xl border border-black/10 px-4 py-3 font-mono text-sm"
+                    className="w-full rounded-xl border border-black/10 px-3 py-2 font-mono text-[11px]"
                   />
                 </label>
               </div>
 
-              <div className="space-y-3">
-                <label className="flex items-center justify-between gap-4 rounded-2xl border border-black/10 p-4">
-                  <span className="text-sm">Available for image assignment</span>
+              <div className="space-y-2">
+                <label className="flex items-center justify-between gap-3 rounded-xl border border-black/10 px-3 py-2.5">
+                  <span className="text-xs">Available for image assignment</span>
                   <input
                     type="checkbox"
                     checked={moment.availableForAssignment}
@@ -382,8 +383,8 @@ export function Moments() {
                   />
                 </label>
 
-                <label className="flex items-center justify-between gap-4 rounded-2xl border border-black/10 p-4">
-                  <span className="text-sm">
+                <label className="flex items-center justify-between gap-3 rounded-xl border border-black/10 px-3 py-2.5">
+                  <span className="text-xs">
                     Show card on Moments gallery
                   </span>
                   <input
@@ -398,11 +399,11 @@ export function Moments() {
                 </label>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5 sm:flex-row">
                 {moment.status === "active" ? (
                   <Link
                     to={`/admin/moments/${encodeURIComponent(moment.slug)}/gallery`}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-4 py-2 text-sm text-white"
+                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-black px-3 py-2 text-[10px] font-medium text-white"
                   >
                     <Images className="h-4 w-4" />
                     Manage gallery
@@ -412,7 +413,7 @@ export function Moments() {
                   type="button"
                   onClick={() => archiveMoment(moment.id)}
                   disabled={moment.status === "archived"}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-red-200 px-4 py-2 text-sm text-red-700 disabled:opacity-40"
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-[10px] font-medium text-red-700 disabled:opacity-40"
                 >
                   <Trash2 className="h-4 w-4" />
                   Archive
@@ -420,9 +421,9 @@ export function Moments() {
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
               <label>
-                <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">
+                <span className="mb-1.5 block text-[9px] font-medium uppercase tracking-[0.14em] text-neutral-500">
                   Card image ID (optional)
                 </span>
                 <input
@@ -431,16 +432,16 @@ export function Moments() {
                     updateMoment(moment.id, { cardImageId: event.target.value.trim() })
                   }
                   placeholder="Paste an image ID / asset key, or leave blank for automatic"
-                  className="w-full rounded-2xl border border-black/10 px-4 py-3 font-mono text-sm"
+                  className="w-full rounded-xl border border-black/10 px-3 py-2 font-mono text-[11px]"
                 />
-                <p className="mt-2 text-xs text-neutral-500">
+                <p className="mt-1.5 text-[10px] leading-relaxed text-neutral-500">
                   Leave blank to use the first eligible image assigned to this moment.
                 </p>
               </label>
             </div>
 
-            <label className="mt-4 block">
-              <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">
+            <label className="mt-3 block">
+              <span className="mb-1.5 block text-[9px] font-medium uppercase tracking-[0.14em] text-neutral-500">
                 Description
               </span>
               <textarea
@@ -451,7 +452,7 @@ export function Moments() {
                   })
                 }
                 rows={3}
-                className="w-full rounded-2xl border border-black/10 px-4 py-3 text-sm"
+                className="w-full rounded-xl border border-black/10 px-3 py-2 text-xs"
               />
             </label>
           </article>

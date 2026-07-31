@@ -13,7 +13,6 @@ import {
   MapPinned,
   Settings,
   ShoppingBag,
-  Sparkles,
   Truck,
   Users,
 } from "lucide-react";
@@ -140,20 +139,12 @@ export function AdminLayout() {
       `}</style>
       <div className="admin-layout-grid">
         <aside className="admin-sidebar flex flex-col border-r border-black" style={{ backgroundColor: "#111111", color: "#ffffff" }}>
-          <div className="border-b border-white/10 px-4 py-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-black">
-                <Sparkles className="h-4 w-4" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[9px] uppercase tracking-[0.24em] text-white/45">Photography</p>
-                <h1 className="truncate text-lg leading-tight">Intelligence</h1>
-              </div>
+          <div className="border-b border-white/10 px-4 py-4">
+            <div className="flex items-center justify-center py-1">
+              <img src="/favicon-32x32.png" alt="MKB Weddings" className="h-11 w-11 object-contain" />
             </div>
 
-            <p className="mt-3 text-[10px] text-white/42">Powered by MKB Weddings</p>
-
-            <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3">
+            <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3">
               <p className="text-[9px] uppercase tracking-[0.12em] text-white/40">Business workspace</p>
               <p className="mt-1 truncate text-xs font-medium">{auth.businessName || "MKB Weddings"}</p>
               <p className="mt-1 text-[10px] capitalize text-white/40">{auth.mode === "bootstrap" ? "Setup mode · authentication not enforced" : `${auth.role || "member"} · secure session`}</p>

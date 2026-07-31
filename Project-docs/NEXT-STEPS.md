@@ -1,32 +1,28 @@
 # Next Steps
 
 ## Current baseline
-v1.8.2 implements the **Legacy Tenant Ownership Migration** in source. Schema version is **25**. MKB Weddings remains the first operating WedPlanned business.
+v1.8.2 tenant ownership is **production-complete** on schema **25**. The production audit passed with a real second business, known MKB slugs/IDs, mutation/publish attempts, private-original access and verified-domain resolution. `workspace_wedplanned_test` remains available as a regression tenant.
 
-The v1.8.1 production sign-out test has been completed successfully. Professional identity/session context is therefore the active Admin ownership source. Migration 025 now adds `workspace_id` to the remaining legacy Weddings, Venues, Suppliers, Moments, image relationship and public collection-definition tables and backfills existing records to `workspace_mkb_weddings`.
+v1.8.2e is the next no-migration Admin UI/usability release. It does not change the tenant model, D1 schema, R2 ownership or environment configuration.
 
-External professional onboarding must remain closed until v1.8.2 has been deployed and the production tenant-isolation checks below have passed.
+## v1.8.2e deployment and validation
+1. Run `python3 scripts/test-legacy-tenant-isolation.py` and require a PASS.
+2. Run `npm run build` and `npm run build:admin` in the normal Mac development environment.
+3. Run `git diff --check`.
+4. Confirm the professional login is centred, uses the Admin font, reads **WedPlanned Pro sign in** and shows the MKB logo.
+5. Confirm the desktop sidebar uses the MKB logo and business/session/workspace switching remains visible and functional.
+6. Confirm Venue Gallery top actions have readable black styling, image cards show compact Hero/Venue/Moments tags without star ratings, and multi-select exposes only Show/Hide, Assign to moment and Clear.
+7. Confirm the Venue Gallery inspector is compact and the existing managed-image deletion workflow still behaves correctly.
+8. Confirm Admin → WedPlanned → Services & areas can scroll through the full service selector without scrolling/trapping the page.
+9. Confirm a Client Gallery can save a custom slug and the generated private URL is `/client-gallery/<slug>/<token>`; confirm the existing `/client-gallery/<token>` URL still opens the same gallery.
+10. Confirm the public Client Gallery uses the Admin sans-serif typography and Shop Prints has an independently scrollable panel on desktop and mobile.
+11. Confirm Moment cards are visually separated, can be reordered from the explicit drag handle and save normally.
+12. Switch to `workspace_wedplanned_test` once after deployment and confirm no MKB data appears.
 
-## v1.8.2 deployment and validation
-1. Run `python scripts/test-legacy-tenant-isolation.py` and require a PASS.
-2. Run `npm run build` and `npm run build:admin` in a clean environment with dependencies installed for the deployment OS.
-3. Take the normal D1 backup/export before migration.
-4. Apply `d1/migrations/025_legacy_tenant_ownership.sql` while v1.8.1 is still serving traffic. The migration is additive and backward-compatible with v1.8.1.
-5. Confirm `schema_meta.schema_version` is `25` and the MKB backfill is present.
-6. Deploy the v1.8.2 tenant-aware code.
-7. Run `PRAGMA foreign_key_check;` and confirm no problem rows after the code deploy.
-8. Confirm existing MKB Admin Weddings, Venues, Suppliers, Moments, Locations, Asset Library, Client Galleries, Print Store and Gallery Management still show the expected data.
-9. Confirm existing MKB venue/wedding/moment/location/photographer public gallery URLs still render correctly.
-10. Confirm upload, publish and managed-image deletion still work for MKB without renaming existing R2 objects.
-11. Create/use a second test business membership and switch to it. Confirm known MKB slugs/IDs do not appear through Admin lists, detail endpoints, Workspace Settings, Asset Library facets, Client Galleries, Print Store/Prodigi actions or mutation/publish calls.
-12. Confirm a verified test public domain resolves only its own business content; an unknown/unverified production domain must not fall through to MKB or another tenant.
-13. Confirm the D1 health endpoint reports connectivity/schema only and does not expose global tenant record counts.
-14. Keep external onboarding closed until steps 8–13 pass in production.
-
-Detailed ownership, rollback and R2 notes are in `WEDPLANNED-TENANT-OWNERSHIP.md`.
+Detailed ownership, rollback and R2 notes remain in `WEDPLANNED-TENANT-OWNERSHIP.md`.
 
 ## Next engineering sequence
-1. Complete the v1.8.2 production ownership audit above and record the result in `PROJECT-STATE.md`.
+1. Deploy and smoke-test the v1.8.2e Admin UI/usability release above.
 2. Add support-access controls with explicit, time-bounded support authority and auditable support events.
 3. Add business data-export foundations covering workspace-owned operational records and asset references without leaking another business's data.
 4. Add account/business deletion foundations with explicit retention rules, staged deletion and protected payment/audit records.
@@ -45,5 +41,5 @@ Detailed ownership, rollback and R2 notes are in `WEDPLANNED-TENANT-OWNERSHIP.md
 - Existing MKB published URLs and R2 objects remain stable through migration 025.
 - Public marketplace fields remain separate from private CRM, payment, contract and operational data.
 - Couple/client payments and professional SaaS subscriptions remain separate Stripe relationships.
-- Stripe Connect is not enabled until the v1.8.2 production ownership audit passes.
+- The v1.8.2 production ownership audit has passed; Stripe Connect may proceed only after the planned support/export/deletion foundations are deliberately sequenced.
 - A rollback path must remain available while authentication or ownership migrations are being enabled.

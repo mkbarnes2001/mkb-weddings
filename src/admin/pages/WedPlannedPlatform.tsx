@@ -372,7 +372,11 @@ export function WedPlannedPlatform() {
                     <span>{selectedCategories.length ? `${selectedCategories.length} service${selectedCategories.length === 1 ? "" : "s"} selected` : "Choose services"}</span>
                     <ChevronDown size={15} className="shrink-0 text-neutral-400 transition group-open:rotate-180" />
                   </summary>
-                  <div className="absolute left-0 right-0 z-30 mt-2 max-h-[360px] overflow-y-auto rounded-2xl border border-black/[0.08] bg-white p-3 shadow-xl">
+                  <div
+                    className="mt-2 max-h-[min(360px,55vh)] overflow-y-auto overscroll-contain rounded-2xl border border-black/[0.08] bg-white p-3 shadow-sm"
+                    style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+                    onWheel={(event) => event.stopPropagation()}
+                  >
                     <div className="space-y-4">
                       {categoryGroups.map(([group, categories]) => (
                         <div key={group}>

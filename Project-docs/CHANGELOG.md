@@ -1,5 +1,17 @@
 # MKB Intelligence — Changelog
 
+## v1.8.2e — Admin UI & Usability Polish
+- Centred and standardised the professional login screen, renamed it **WedPlanned Pro sign in**, and uses the existing MKB favicon/logo.
+- Replaced the desktop Admin sidebar brand copy with the MKB logo while preserving business/session context and workspace switching.
+- Simplified Venue Gallery image cards with compact Hero/Venue/Moments tags, no star ratings or repeated source text, smaller inspector typography and denser hero/destination controls.
+- Simplified Venue Gallery bulk selection to contextual Show/Hide, Assign to moment and Clear controls.
+- Fixed the WedPlanned Services selector so its category list has an independent scroll region.
+- Standardised private Client Gallery typography to the Admin sans-serif system and removed the obsolete per-gallery heading-font choice from the branding UI.
+- Rebuilt the Client Gallery Print Store drawer so the panel itself scrolls correctly on desktop and mobile without scrolling the page behind it.
+- Added optional custom Client Gallery slugs; private URLs remain capability-protected by the existing secret token, and legacy token-only links remain valid.
+- Refined Moment cards with clearer separation, a full-width drag handle and smaller fields/actions.
+- No migration; schema remains 25.
+
 ## v1.8.2 — Legacy Tenant Ownership Migration
 - Added `workspace_id` ownership to the remaining legacy Weddings, Venues, image/gallery relationship, Suppliers, Moments and public collection-definition tables.
 - Backfilled every existing legacy record to `workspace_mkb_weddings` without renaming public slugs, URLs or existing R2 objects.
@@ -12,7 +24,7 @@
 - Removed global tenant record counts from the unauthenticated D1 health endpoint.
 - Added dependency-free cross-tenant regression coverage for read/infer, mutate, publish, R2-key/download lookup and public-domain isolation.
 - Added migration 025; schema version advances to 25.
-- Production tenant validation remains required before external professional onboarding is opened.
+- Production tenant validation subsequently passed with the live `workspace_wedplanned_test` regression business, known-ID mutation/publish checks, private-original blocking and verified-domain isolation.
 
 ## v1.8.1 — Professional Identity & Tenant Context
 - Added passwordless professional sign-in with single-use, SHA-256-hashed links and secure HttpOnly sessions.

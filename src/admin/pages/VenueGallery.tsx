@@ -8,7 +8,6 @@ import {
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
-  AlertTriangle,
   Check,
   CloudUpload,
   EyeOff,
@@ -16,7 +15,6 @@ import {
   Image as ImageIcon,
   Save,
   Search,
-  Star,
   Trash2,
   Unlink,
   X,
@@ -46,8 +44,6 @@ export function VenueGallery() {
 
   const [venue, setVenue] = useState<VenueSummary | null>(null);
   const [moments, setMoments] = useState<MomentRecord[]>([]);
-  const [batchMomentMode, setBatchMomentMode] = useState<"add" | "remove" | "replace">("add");
-  const [batchGalleryMode, setBatchGalleryMode] = useState<"add" | "remove" | "replace">("add");
   const [assets, setAssets] = useState<AggregatedAsset[]>([]);
   const [items, setItems] = useState<VenueGalleryItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -438,94 +434,13 @@ export function VenueGallery() {
     );
   }
 
-  function setSelectedMomentDisplay(enabled: boolean) {
-    if (!selectedIds.size) return;
-
-    commit((current) =>
-      current.map((item) =>
-        selectedIds.has(item.assetId)
-          ? {
-              ...item,
-              display: {
-                ...item.display,
-                moments: enabled,
-              },
-            }
-          : item,
-      ),
-    );
-  }
-
-  function applyGalleryToSelection(
-    gallery:
-      | "blog"
-      | "venue"
-      | "moments"
-      | "homepage"
-      | "portfolio"
-      | "creativeFlash",
-  ) {
+  function applyMomentToSelection(momentSlug: string) {
     if (!selectedIds.size) return;
 
     commit((current) =>
       current.map((item) => {
         if (!selectedIds.has(item.assetId)) return item;
-
-        const nextDisplay =
-          batchGalleryMode === "replace"
-            ? {
-                venue: false,
-                moments: false,
-                blog: false,
-                homepage: false,
-                portfolio: false,
-                creativeFlash: false,
-                [gallery]: true,
-              }
-            : {
-                ...item.display,
-                [gallery]: batchGalleryMode === "add",
-              };
-
-        return {
-          ...item,
-          included:
-            gallery === "venue"
-              ? batchGalleryMode === "remove"
-                ? false
-                : true
-              : item.included,
-          display: nextDisplay,
-        };
-      }),
-    );
-  }
-
-  function applyMomentToSelection(
-    momentSlug: string,
-  ) {
-    if (!selectedIds.size) return;
-
-    commit((current) =>
-      current.map((item) => {
-        if (!selectedIds.has(item.assetId)) return item;
-
-        const currentMoments = item.moments || [];
-
-        let nextMoments = currentMoments;
-
-        if (batchMomentMode === "add") {
-          nextMoments = [
-            ...new Set([...currentMoments, momentSlug]),
-          ];
-        } else if (batchMomentMode === "remove") {
-          nextMoments = currentMoments.filter(
-            (value) => value !== momentSlug,
-          );
-        } else {
-          nextMoments = [momentSlug];
-        }
-
+        const nextMoments = [...new Set([...(item.moments || []), momentSlug])];
         return {
           ...item,
           moments: nextMoments,
@@ -535,6 +450,21 @@ export function VenueGallery() {
           },
         };
       }),
+    );
+  }
+
+  function clearSelectedMoments() {
+    if (!selectedIds.size) return;
+    commit((current) =>
+      current.map((item) =>
+        selectedIds.has(item.assetId)
+          ? {
+              ...item,
+              moments: [],
+              display: { ...item.display, moments: false },
+            }
+          : item,
+      ),
     );
   }
 
@@ -970,13 +900,13 @@ export function VenueGallery() {
           <div className="flex flex-wrap gap-3">
             <Link
               to={`/admin/venues/${venue.slug}/upload`}
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm text-white"
+              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-black bg-black px-3.5 text-[10px] font-medium text-white"
             >
               Upload images
             </Link>
             <Link
               to="/admin/moments"
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm text-white"
+              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-black bg-black px-3.5 text-[10px] font-medium text-white"
             >
               Manage moments
             </Link>
@@ -984,7 +914,7 @@ export function VenueGallery() {
             type="button"
             onClick={publishVenue}
             disabled={publishing || saving}
-            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-medium text-black ring-2 ring-white/30 disabled:opacity-40"
+            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-black bg-black px-3.5 text-[10px] font-medium text-white disabled:opacity-40"
           >
             <CloudUpload className="h-4 w-4" />
             {publishing
@@ -996,7 +926,7 @@ export function VenueGallery() {
             type="button"
             onClick={saveGallery}
             disabled={saving || !dirty}
-            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black disabled:opacity-40"
+            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-black bg-black px-3.5 text-[10px] font-medium text-white disabled:opacity-40"
           >
             <Save className="h-4 w-4" />
             {saving ? "Saving…" : dirty ? "Save gallery" : "Saved"}
@@ -1054,95 +984,50 @@ export function VenueGallery() {
       </section>
 
       {selectedIds.size ? (
-        <section className="flex flex-wrap items-center gap-3 rounded-[24px] border border-black/10 bg-white/90 p-4">
-          <strong>{selectedIds.size} selected</strong>
+        <section className="flex flex-wrap items-center gap-2 rounded-xl border border-black/10 bg-white/90 p-3 shadow-sm">
+          <strong className="mr-1 text-[11px]">{selectedIds.size} selected</strong>
 
           <button
             type="button"
-            onClick={() => setSelectedIncluded(true)}
-            className="rounded-full border border-black/10 px-4 py-2 text-sm"
+            onClick={() => {
+              const selectedItems = items.filter((item) => selectedIds.has(item.assetId));
+              const allIncluded = selectedItems.length > 0 && selectedItems.every((item) => item.included);
+              setSelectedIncluded(!allIncluded);
+            }}
+            className="inline-flex h-8 items-center rounded-lg bg-black px-3 text-[10px] font-semibold text-white"
           >
-            Add to venue gallery
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setSelectedIncluded(false)}
-            className="rounded-full border border-black/10 px-4 py-2 text-sm"
-          >
-            Remove from venue gallery
+            {items.filter((item) => selectedIds.has(item.assetId)).every((item) => item.included)
+              ? "Hide from venue gallery"
+              : "Show on venue gallery"}
           </button>
 
           <select
-            value={batchGalleryMode}
-            onChange={(event) =>
-              setBatchGalleryMode(
-                event.target.value as "add" | "remove" | "replace",
-              )
-            }
-            className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
+            value=""
+            onChange={(event) => {
+              const value = event.target.value;
+              if (!value) return;
+              if (value === "__clear__") clearSelectedMoments();
+              else applyMomentToSelection(value);
+              event.currentTarget.value = "";
+            }}
+            className="h-8 min-w-[190px] rounded-lg border border-black/15 bg-white px-3 text-[10px]"
+            aria-label="Assign selected images to a moment"
           >
-            <option value="add">Add to gallery</option>
-            <option value="remove">Remove from gallery</option>
-            <option value="replace">Replace gallery visibility</option>
+            <option value="">Assign to moment…</option>
+            {moments
+              .filter((moment) => moment.availableForAssignment)
+              .map((moment) => (
+                <option key={moment.id} value={moment.slug}>{moment.name}</option>
+              ))}
+            <option value="__clear__">Clear moment assignments</option>
           </select>
-
-          {(
-            [
-              ["blog", "Wedding story"],
-              ["venue", "Venue"],
-              ["homepage", "Homepage"],
-              ["portfolio", "Portfolio"],
-              ["creativeFlash", "Creative Flash"],
-            ] as const
-          ).map(([gallery, label]) => (
-            <button
-              key={gallery}
-              type="button"
-              onClick={() =>
-                applyGalleryToSelection(gallery)
-              }
-              className="rounded-full border border-black/10 px-4 py-2 text-sm"
-            >
-              {label}
-            </button>
-          ))}
-
-          <select
-            value={batchMomentMode}
-            onChange={(event) =>
-              setBatchMomentMode(
-                event.target.value as "add" | "remove" | "replace",
-              )
-            }
-            className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
-          >
-            <option value="add">Add moment</option>
-            <option value="remove">Remove moment</option>
-            <option value="replace">Replace moments</option>
-          </select>
-
-          {moments
-            .filter((moment) => moment.availableForAssignment)
-            .map((moment) => (
-              <button
-                key={moment.id}
-                type="button"
-                onClick={() =>
-                  applyMomentToSelection(moment.slug)
-                }
-                className="rounded-full border border-black/10 px-4 py-2 text-sm"
-              >
-                {moment.name}
-              </button>
-            ))}
 
           <button
             type="button"
             onClick={() => setSelectedIds(new Set())}
-            className="ml-auto inline-flex items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm"
+            className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 text-[10px] font-medium"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
             Clear
           </button>
         </section>
@@ -1274,8 +1159,8 @@ export function VenueGallery() {
                         right: "8px",
                         bottom: "8px",
                         zIndex: 30,
-                        width: "38px",
-                        height: "38px",
+                        width: "30px",
+                        height: "30px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -1285,71 +1170,51 @@ export function VenueGallery() {
                         cursor: "grab",
                       }}
                     >
-                      <GripVertical size={22} />
+                      <GripVertical size={17} />
                     </div>
 
                     <div
                       style={{
                         position: "absolute",
-                        left: "12px",
-                        top: "12px",
+                        left: "7px",
+                        top: "7px",
                         display: "flex",
-                        gap: "6px",
+                        gap: "4px",
                         flexWrap: "wrap",
+                        maxWidth: "calc(100% - 48px)",
                       }}
                     >
                       {hero ? (
-                        <span className="rounded-full bg-black px-3 py-1 text-xs text-white">
+                        <span className="rounded-md bg-black/90 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-white">
                           Hero
                         </span>
                       ) : null}
                       {item?.included ? (
-                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs text-emerald-900">
+                        <span className="rounded-md bg-white/90 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-black shadow-sm">
                           Venue
                         </span>
                       ) : null}
                       {item?.display.moments ? (
-                        <span className="rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-900">
+                        <span className="rounded-md bg-black/70 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-white">
                           Moments
-                        </span>
-                      ) : null}
-                      {item?.display.creativeFlash ? (
-                        <span className="rounded-full bg-violet-100 px-3 py-1 text-xs text-violet-900">
-                          Creative Flash
                         </span>
                       ) : null}
                     </div>
                   </div>
 
-                  <div className="p-2.5">
-                    <p className="truncate text-[11px] font-medium">
-                      {asset.weddingCouple}
-                    </p>
-                    <div className="mt-2 flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map((rating) => (
-                        <Star
-                          key={rating}
-                          className={`h-3 w-3 ${
-                            rating <= (item?.rating || 0)
-                              ? "fill-current text-black"
-                              : "text-neutral-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
+
                 </article>
               );
             })}
           </div>
 
           <aside
-            className="admin-summary-panel"
+            className="admin-summary-panel venue-gallery-summary"
             style={{
-              borderRadius: "28px",
+              borderRadius: "14px",
               border: "1px solid rgba(0,0,0,0.12)",
               background: "#fff",
-              padding: "20px",
+              padding: "14px",
             }}
           >
             {!activeAsset || !activeItem ? (
@@ -1357,32 +1222,27 @@ export function VenueGallery() {
                 Select an image to edit its gallery settings.
               </p>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-3">
                 <img
                   src={activeAsset.fullSrc}
                   alt={activeAsset.aiAlt || activeAsset.filename}
-                  className="max-h-[360px] w-full rounded-2xl object-contain"
+                  className="max-h-[240px] w-full rounded-xl object-contain"
                 />
 
                 <div>
-                  <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
                     Image
                   </p>
-                  <p className="mt-2 break-all text-sm">
+                  <p className="mt-1 break-all text-[10px] leading-4 text-neutral-700">
                     {activeAsset.filename}
                   </p>
-                  <p className="mt-1 text-sm text-neutral-500">
-                    {activeAsset.weddingCouple}
-                  </p>
-                  {activeItem.source?.type === "legacy-gallery-csv" ? (
-                    <p className="mt-2 text-xs text-neutral-400">
-                      Imported from gallery.csv · {activeItem.source.category}
-                    </p>
+                  {activeAsset.weddingCouple && activeAsset.weddingCouple !== "Imported venue gallery" ? (
+                    <p className="mt-1 text-[10px] text-neutral-500">{activeAsset.weddingCouple}</p>
                   ) : null}
                 </div>
 
-                <div className="space-y-3 border-t border-black/10 pt-5">
-                  <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">
+                <div className="space-y-2 border-t border-black/10 pt-3">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
                     Image actions
                   </p>
 
@@ -1395,7 +1255,7 @@ export function VenueGallery() {
                       !activeItem.included ||
                       deleting
                     }
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-black/15 bg-white px-5 py-3 text-sm text-black disabled:opacity-40"
+                    className="inline-flex h-8 w-full items-center justify-center gap-2 rounded-lg border border-black/15 bg-white px-3 text-[10px] font-medium text-black disabled:opacity-40"
                   >
                     <Unlink className="h-4 w-4" />
                     Remove from venue gallery
@@ -1404,40 +1264,24 @@ export function VenueGallery() {
                   {activeAsset.weddingSlug ? (
                     <button
                       type="button"
-                      onClick={
-                        deleteActivePermanently
-                      }
+                      onClick={deleteActivePermanently}
                       disabled={deleting}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-red-300 bg-red-50 px-5 py-3 text-sm text-red-800 disabled:opacity-40"
+                      className="inline-flex h-8 w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 text-[10px] font-medium text-red-800 disabled:opacity-40"
                     >
-                      <Trash2 className="h-4 w-4" />
-                      {deleting
-                        ? "Deleting…"
-                        : "Delete image permanently"}
+                      <Trash2 className="h-3.5 w-3.5" />
+                      {deleting ? "Deleting…" : "Delete image permanently"}
                     </button>
-                  ) : (
-                    <div className="flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                      Imported CSV images can be removed from this venue gallery, but permanent storage deletion is disabled.
-                    </div>
-                  )}
-
-                  <p className="text-xs leading-relaxed text-neutral-500">
-                    Permanent deletion removes the wedding record, venue references, collections, moments and both stored image files.
-                  </p>
+                  ) : null}
                 </div>
 
-                <div className="border-t border-black/10 pt-5">
-                  <p className="mb-1 text-xs uppercase tracking-[0.16em] text-neutral-500">
+                <div className="border-t border-black/10 pt-3">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
                     Gallery destinations
-                  </p>
-                  <p className="text-xs leading-5 text-neutral-500">
-                    Venue, Moments, inherited Locations and photographer-defined Galleries use the same destination model.
                   </p>
                 </div>
 
                 <div>
-                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">Venue</p>
+                  <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-neutral-500">Venue</p>
                   <Toggle
                     label={venue.name}
                     checked={activeItem.included}
@@ -1451,13 +1295,13 @@ export function VenueGallery() {
                 </div>
 
                 <div>
-                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">Moments</p>
-                  <div className="space-y-2">
+                  <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-neutral-500">Moments</p>
+                  <div className="space-y-1.5">
                     {moments.filter((moment) => moment.availableForAssignment).map((moment) => {
                       const checked = activeItem.moments.includes(moment.slug);
                       return (
-                        <label key={moment.id} className="flex items-center justify-between gap-4 rounded-2xl border border-black/10 p-3">
-                          <span className="text-sm">{moment.name}</span>
+                        <label key={moment.id} className="flex items-center justify-between gap-3 rounded-lg border border-black/10 px-3 py-2">
+                          <span className="text-[10px] leading-4">{moment.name}</span>
                           <input
                             type="checkbox"
                             checked={checked}
@@ -1478,7 +1322,7 @@ export function VenueGallery() {
                 </div>
 
                 <div>
-                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">Locations</p>
+                  <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-neutral-500">Locations</p>
                   {inheritedLocationGroups.length ? (
                     <div className="space-y-4">
                       {inheritedLocationGroups.map(([type, locationItems]) => (
@@ -1486,27 +1330,27 @@ export function VenueGallery() {
                           <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-neutral-400">{locationTypeLabel(type)}</p>
                           <div className="space-y-2">
                             {locationItems.map((location) => (
-                              <div key={location.id} className="flex items-center justify-between gap-3 rounded-2xl border border-black/10 bg-neutral-50 p-3">
-                                <span className="text-sm">{location.name}</span>
-                                <span className="inline-flex items-center gap-1 text-xs text-emerald-700"><Check className="h-3.5 w-3.5" />Inherited</span>
+                              <div key={location.id} className="flex items-center justify-between gap-3 rounded-lg border border-black/10 bg-neutral-50 px-3 py-2">
+                                <span className="text-[10px]">{location.name}</span>
+                                <span className="inline-flex items-center gap-1 text-[9px] text-emerald-700"><Check className="h-3.5 w-3.5" />Inherited</span>
                               </div>
                             ))}
                           </div>
                         </div>
                       ))}
-                      <p className="text-xs leading-5 text-neutral-500">
-                        Location membership is inherited from {venue.name}. Change it in Admin → Venues or Admin → Locations rather than tagging every image separately.
+                      <p className="text-[10px] leading-4 text-neutral-500">
+                        Location membership is inherited from {venue.name}. Change it in Admin → Venues or Admin → Locations.
                       </p>
                     </div>
                   ) : (
-                    <p className="rounded-2xl bg-neutral-50 p-4 text-xs leading-5 text-neutral-500">
-                      This venue has no active Location assignments yet. Assign counties, regions or destinations in Admin → Venues.
+                    <p className="rounded-xl bg-neutral-50 p-3 text-[10px] leading-4 text-neutral-500">
+                      No active Location assignments. Assign locations in Admin → Venues.
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">Custom galleries</p>
+                  <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-neutral-500">Custom galleries</p>
                   <div className="space-y-2">
                     <Toggle
                       label="Creative Flash"
@@ -1528,12 +1372,12 @@ export function VenueGallery() {
                     ))}
                   </div>
                   {!customCollections.length ? (
-                    <p className="mt-2 text-xs leading-5 text-neutral-500">Creative Flash is the current MKB photographer gallery. Additional galleries created in Gallery Management appear here automatically.</p>
+                    <p className="mt-2 text-[10px] leading-4 text-neutral-500">Additional galleries created in Gallery Management appear here automatically.</p>
                   ) : null}
                 </div>
 
-                <details className="border-t border-black/10 pt-5">
-                  <summary className="cursor-pointer text-xs uppercase tracking-[0.16em] text-neutral-500">Other publishing destinations</summary>
+                <details className="border-t border-black/10 pt-3">
+                  <summary className="cursor-pointer text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Other publishing destinations</summary>
                   <div className="mt-4 space-y-2">
                     {activeAsset.weddingSlug ? (
                       <Toggle
@@ -1542,8 +1386,8 @@ export function VenueGallery() {
                         onChange={(checked) => patchItem(activeItem.assetId, { display: { ...activeItem.display, blog: checked } })}
                       />
                     ) : (
-                      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                        This imported venue image is not linked to a wedding story.
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-[10px] leading-4 text-amber-900">
+                        This image is not linked to a wedding story.
                       </div>
                     )}
                     <Toggle
@@ -1562,7 +1406,7 @@ export function VenueGallery() {
                 <button
                   type="button"
                   onClick={() => setHero(activeItem.assetId)}
-                  className="w-full rounded-full bg-black px-5 py-3 text-sm text-white"
+                  className="h-8 w-full rounded-lg bg-black px-3 text-[10px] font-medium text-white"
                 >
                   Set as venue hero
                 </button>
@@ -1577,7 +1421,7 @@ export function VenueGallery() {
                       setError(heroError instanceof Error ? heroError.message : "Unable to set Gallery by Venue master hero.");
                     }
                   }}
-                  className="w-full rounded-full border border-black/15 bg-white px-5 py-3 text-sm text-black"
+                  className="h-8 w-full rounded-lg border border-black/15 bg-white px-3 text-[10px] font-medium text-black"
                 >
                   Set as Gallery by Venue master hero
                 </button>
@@ -1592,22 +1436,22 @@ export function VenueGallery() {
                       setError(heroError instanceof Error ? heroError.message : "Unable to set main Gallery landing-page hero.");
                     }
                   }}
-                  className="w-full rounded-full bg-black px-5 py-3 text-sm text-white"
+                  className="h-8 w-full rounded-lg bg-black px-3 text-[10px] font-medium text-white"
                 >
                   Set as main Gallery landing hero
                 </button>
 
                 <div>
-                  <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
                     AI caption
                   </p>
-                  <p className="mt-2 text-sm leading-relaxed text-neutral-700">
+                  <p className="mt-1.5 text-[10px] leading-4 text-neutral-700">
                     {activeAsset.aiCaption || "No caption yet."}
                   </p>
                 </div>
 
                 {activeItem.hidden ? (
-                  <div className="flex items-center gap-2 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900">
+                  <div className="flex items-center gap-2 rounded-xl bg-amber-50 p-3 text-[10px] text-amber-900">
                     <EyeOff className="h-4 w-4" />
                     Hidden in the wedding image record
                   </div>
@@ -1638,8 +1482,8 @@ function Toggle({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="flex items-center justify-between gap-4 rounded-2xl border border-black/10 p-4">
-      <span className="text-sm">{label}</span>
+    <label className="flex items-center justify-between gap-3 rounded-lg border border-black/10 px-3 py-2">
+      <span className="text-[10px] leading-4">{label}</span>
       <input
         type="checkbox"
         checked={checked}

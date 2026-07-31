@@ -10,7 +10,7 @@ Upload the latest complete project ZIP and say:
 The current source, D1 migrations and these documents are authoritative. Chat history is supplementary.
 
 ## Current deployment guide
-For the v1.8.2 ownership release, read `WEDPLANNED-TENANT-OWNERSHIP.md`, `WEDPLANNED-AUTH.md` and `WEDPLANNED-FOUNDATION.md` after `PROJECT-STATE.md` and `NEXT-STEPS.md`. `PRODIGI-SETUP.md` and `STRIPE-SETUP.md` remain authoritative for fulfilment and payment configuration.
+The production tenant baseline is v1.8.2 on schema 25; its production isolation audit is complete. For the v1.8.2e Admin UI/usability release, start with `PROJECT-STATE.md` and `NEXT-STEPS.md`, then read `WEDPLANNED-TENANT-OWNERSHIP.md`, `WEDPLANNED-AUTH.md` and `WEDPLANNED-FOUNDATION.md` for the security model. `PRODIGI-SETUP.md` and `STRIPE-SETUP.md` remain authoritative for fulfilment and payment configuration.
 
 ## End-of-release checklist
 1. Update `PROJECT-STATE.md`.

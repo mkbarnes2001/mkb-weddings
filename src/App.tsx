@@ -67,6 +67,7 @@ export default function App() {
 
       <div className="min-h-screen bg-white">
         <Routes>
+          <Route path="/client-gallery/:slug/:token" element={<ClientGallery />} />
           <Route path="/client-gallery/:token" element={<ClientGallery />} />
 
           {/* -------- Public site routes -------- */}
