@@ -335,6 +335,7 @@ export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: 
       db.prepare(`UPDATE asset_wedding_links SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
       db.prepare(`UPDATE client_galleries SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
       db.prepare(`UPDATE wedding_preview_sets SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
+      db.prepare(`UPDATE crm_jobs SET wedding_slug = ?, updated_at = CURRENT_TIMESTAMP WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
     );
   }
 
@@ -428,6 +429,7 @@ export async function deleteAdminWeddingPermanently(db: D1Db, slug: string, work
     // Preserve Client Galleries and all canonical/private assets, but detach non-live galleries
     // from the wedding being removed.
     db.prepare(`UPDATE client_galleries SET wedding_slug = NULL, updated_at = CURRENT_TIMESTAMP WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
+    db.prepare(`UPDATE crm_jobs SET wedding_slug = '', updated_at = CURRENT_TIMESTAMP WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
 
     // Remove wedding-specific Preview Set membership before deleting the parent sets.
     db.prepare(`

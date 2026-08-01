@@ -5,6 +5,7 @@ import {
   Bot,
   Database,
   FileText,
+  ContactRound,
   Gauge,
   Globe2,
   Images,
@@ -21,6 +22,7 @@ import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: Gauge, end: true },
   { to: "/admin/wedplanned", label: "WedPlanned", icon: Building2 },
+  { to: "/admin/crm", label: "CRM", icon: ContactRound },
   { to: "/admin/weddings", label: "Weddings", icon: FileText },
   { to: "/admin/gallery", label: "Gallery Management", icon: Images },
   { to: "/admin/venues", label: "Venues", icon: Globe2 },

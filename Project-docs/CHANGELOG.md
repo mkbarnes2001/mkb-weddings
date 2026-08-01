@@ -1,5 +1,16 @@
 # MKB Intelligence — Changelog
 
+## v1.9.0 — CRM Foundation
+- Added workspace-owned CRM pipeline stages, contacts, enquiries, enquiry/contact relationships, Jobs, Job/contact relationships and activity history.
+- Added a verified-domain public lead form at `/enquire` and replaced the legacy Contact-page enquiry embed with the same server-owned CRM submission workflow.
+- Added privacy consent capture, honeypot handling, hashed request-fingerprint rate limiting, workspace-currency budget capture, configurable default service and optional Resend lead notifications.
+- Added Admin → CRM with pipeline, Contacts, Jobs, lead-form settings, manual enquiry creation and detailed enquiry editing/activity.
+- Added Accepted/Lost workflows. Accepting a booking transactionally creates one neutral Job and links or creates the workspace Wedding record; repeat acceptance is idempotent.
+- Added CRM permissions to professional roles and support scopes, workspace export coverage and Wedding rename/delete linkage maintenance.
+- Added database relationship triggers and single-primary/single-partner constraints so cross-workspace CRM relationships are rejected at the database boundary as well as the service boundary.
+- Added `scripts/test-crm-foundation.py` and advanced all regression suites to schema 27.
+- Added migration 027; schema version advances to 27.
+
 ## v1.8.3 — Platform Operations Foundation
 - Added workspace-owned, time-bounded WedPlanned support grants with read-only and managed scopes.
 - Added synthetic support workspace access for platform support/admin accounts only while an active grant exists.

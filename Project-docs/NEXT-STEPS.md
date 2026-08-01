@@ -1,79 +1,83 @@
 # Next Steps
 
 ## Current baseline
-The production baseline is commit `e0e3ab6` with v1.8.2 tenant ownership, clean Client Gallery slugs, the standalone Print Store and the latest Admin UI polish. Production D1 is schema **25** and the live second-business isolation audit has passed.
+The stable production baseline before this source release is **v1.8.3 Platform Operations Foundation**, commit `0385e9e`, with production D1 on schema **26**. Authentication, tenant ownership, second-business isolation, support access, workspace export and staged deletion have passed production validation.
 
-## v1.8.3 — Platform Operations Foundation
-This release advances D1 to schema **26** and closes the final operational safeguards before the CRM begins.
+## Current source release — v1.9.0 CRM Foundation
+This release advances D1 to schema **27** and establishes the first complete client workflow:
+
+`Public lead form → Contact + Enquiry → Pipeline → Accepted booking → Job → linked/created Wedding`
 
 Included:
-1. Time-bounded support grants owned by the active business.
-2. Read-only or managed support scope.
-3. Read-only support enforcement at the API boundary.
-4. Support request/session audit events.
-5. Workspace-scoped structured JSON data export, excluding authentication/session secrets and image binaries and redacting gallery/print/upload capability secrets.
-6. Export history.
-7. Staged business deletion requests with a 14-day cooling-off period.
-8. Cancellation and protected-record/asset safeguards; no automatic destructive deletion.
-9. Admin → WedPlanned → Operations UI.
-10. Migration `026_platform_operations_foundation.sql`.
+1. Workspace-owned CRM stages, contacts, enquiries, relationships, Jobs and activity history.
+2. Public `/enquire` form resolved from the verified request domain; browser-supplied workspace IDs are never accepted.
+3. Consent capture, honeypot handling, hashed request-fingerprint rate limiting and optional Resend notification.
+4. Admin CRM pipeline, Contacts, Jobs and lead-form settings.
+5. Manual enquiry creation and detailed enquiry/client editing.
+6. Lost/unavailable workflow with retained history.
+7. Idempotent accepted-booking conversion creating one Job and linking or creating the existing workspace Wedding record.
+8. CRM role permissions, support-mode integration, export coverage and platform audit/activity records.
+9. Database triggers preventing cross-workspace stage/contact/job relationships and unique primary/partner relationship indexes.
+10. Migration `027_crm_foundation.sql`.
 
-## v1.8.3 validation and rollout
-1. Run `python3 scripts/test-legacy-tenant-isolation.py` and require PASS/schema 26.
-2. Run `python3 scripts/test-platform-operations.py` and require PASS.
-3. Run `npm run build` and `npm run build:admin`.
-4. Run `git diff --check`.
-5. Commit locally, but do not push.
-6. Export/backup production D1 and capture a Time Travel bookmark.
-7. Apply migration 026 before deploying code.
-8. Verify schema 26 and `PRAGMA foreign_key_check`.
-9. Push code and confirm both Pages deployments.
-10. Test Operations on MKB and `workspace_wedplanned_test`:
-   - support grant/revoke remains workspace-scoped;
-   - data export contains only the active business;
-   - staged deletion request can be created and cancelled;
-   - read-only support POST/PUT/DELETE requests are blocked.
+## v1.9.0 validation and rollout
+1. Apply the patch through Terminal/`rsync`; never replace the repository folder.
+2. Run:
+   - `python3 scripts/test-legacy-tenant-isolation.py`
+   - `python3 scripts/test-platform-operations.py`
+   - `python3 scripts/test-crm-foundation.py`
+   - `npm run build`
+   - `npm run build:admin`
+   - `git diff --check`
+3. Commit locally, but do not push.
+4. Export production D1 and capture a Time Travel bookmark.
+5. Confirm production schema 26.
+6. Apply migration 027 before deploying code.
+7. Verify schema 27, CRM tables/triggers/indexes and `PRAGMA foreign_key_check`.
+8. Push code and confirm both Pages deployments.
+9. Test first on `workspace_wedplanned_test`:
+   - CRM opens with seven default stages and no MKB records;
+   - manual enquiry/contact creation works;
+   - cross-business known IDs remain unavailable;
+   - accepting a test enquiry creates exactly one Job and one linked Wedding;
+   - accepting it again creates no duplicate;
+   - lost workflow and activity history work;
+   - public lead form is disabled unless explicitly enabled for that business.
+10. Test MKB:
+   - `/enquire` and Contact form resolve MKB from `www.mkbweddings.co.uk`;
+   - one disposable lead appears in CRM and notification delivery behaves as configured;
+   - accepting a disposable test lead creates the Job/Wedding workflow;
+   - remove/archive disposable test records only after validation.
 
-## Next major product phase — v1.9 CRM
-The CRM now comes **before full Stripe Connect**, because quotes, invoices and client payments need a durable Enquiry → Job/Wedding workflow to attach to.
+## Next release — v1.9.1 Client Portal and Questionnaires
+- portal invitations and CRM-contact identity linkage;
+- versioned questionnaire templates and immutable sent instances;
+- structured responses and completion tracking;
+- supplier-team questionnaire;
+- Supplier Master search and unknown-supplier approval/merge queue;
+- approved responses update Job/Wedding relationships without allowing clients to overwrite reusable master data.
 
-### v1.9.0 CRM Foundation
-- contacts;
-- public lead/enquiry form;
-- enquiry pipeline;
-- accepted/lost workflow;
-- accepted enquiry creates a neutral Job and links/creates the workspace Wedding record;
-- activity history and audit.
-
-### v1.9.1 Client Portal and Questionnaires
-- portal invitations;
-- versioned questionnaires and structured responses;
-- client-entered supplier team;
-- Supplier Master search plus review/merge queue for unknown suppliers;
-- approved responses update the Job/Wedding relationships.
-
+## Later releases
 ### v1.9.2 Commercial workflow
-- services and packages;
-- quotes;
-- contracts;
+- services/packages;
+- quotes and acceptance;
+- contracts/signatures;
 - invoices/payment schedules;
 - tasks, workflow templates and reminders.
 
 ### v1.9.3 Connected payments
 - Stripe Connect onboarding and account webhooks;
-- invoice/payment webhooks;
+- invoice/payment webhooks attached to Jobs;
 - business-owned client payments;
-- Stripe Billing for WedPlanned subscriptions remains a separate relationship.
-
-See `WEDPLANNED-CRM.md` for the detailed model and conversion workflow.
+- WedPlanned subscription billing remains a separate Stripe relationship.
 
 ## Guardrails
 - `workspaces.id` remains the durable business ownership key.
-- Browser-supplied workspace IDs are never an access-control decision.
-- Unknown public domains never inherit another tenant.
-- Support access is explicit, time-bounded and auditable.
-- Support sessions cannot download business exports or request deletion.
-- Deletion requests are staged; payment/audit/fulfilment records and private assets require deliberate execution rules.
-- A CRM Job is the commercial source of truth; the existing Wedding remains the content/delivery/publishing record.
-- Client-entered suppliers cannot overwrite the reusable Supplier Master directly.
-- Couple/client payments and WedPlanned SaaS subscriptions remain separate Stripe relationships.
+- Public CRM workspace resolution comes only from a verified request domain.
+- Professional CRM access comes only from the authenticated active membership/support context.
+- Accepted conversion is idempotent and auditable.
+- The neutral Job is the commercial source of truth; Wedding remains the content/delivery/publishing record.
+- Client-entered questionnaire/supplier data will enter reviewable workflow records, not mutate Venue/Supplier masters directly.
+- Couple payments and WedPlanned SaaS subscriptions remain separate provider relationships.
+
+See `WEDPLANNED-CRM.md` for the detailed model.

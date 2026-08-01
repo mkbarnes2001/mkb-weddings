@@ -28,6 +28,7 @@ import { ThankYou } from "./components/ThankYou";
 import { CountyPage } from "./components/CountyPage";
 import { CountiesLanding } from "./components/CountiesLanding";
 import { ClientGallery } from "./components/ClientGallery";
+import { Enquire } from "./components/LeadEnquiryForm";
 
 /* ---------------- Google Analytics Listener ---------------- */
 function GoogleAnalyticsListener() {
@@ -84,6 +85,7 @@ export default function App() {
             <Route path="/blog/:slug" element={<WeddingStoryPage />} />
 
             <Route path="/contact" element={<Contact />} />
+            <Route path="/enquire" element={<Enquire />} />
             <Route path="/packages" element={<WeddingPackages />} />
             <Route path="/thank-you" element={<ThankYou />} />
 

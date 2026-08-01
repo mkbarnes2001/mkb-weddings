@@ -9,6 +9,19 @@ The first MKB workflow is:
 
 The data model must remain useful to venues, planners, florists, bands and other wedding professionals. Therefore the commercial record is a neutral **Job**, while a wedding-specific extension and the existing Wedding record provide wedding content/delivery behaviour.
 
+## v1.9.0 implementation status
+Implemented in the current source release:
+- seven default workspace pipeline stages;
+- reusable CRM contacts and enquiry/contact roles;
+- manual and verified-domain public enquiry capture with workspace currency/default-service settings;
+- consent, honeypot and hashed request-fingerprint rate limiting;
+- Admin pipeline, Contacts, Jobs, form settings and enquiry workspace;
+- accepted/lost actions and activity history;
+- idempotent Job conversion and Wedding create/link;
+- professional permissions, support controls, export coverage and database relationship triggers.
+
+The public route is `/enquire` in v1.9.0. Custom hosted-site paths are deliberately deferred. Existing weddings are not bulk-converted automatically; they can remain content/delivery records until a Job is created or linked through a deliberate import/onboarding workflow.
+
 ## Core hierarchy
 
 `Workspace → Enquiry → Contacts → Job → Wedding details / Deliverables`

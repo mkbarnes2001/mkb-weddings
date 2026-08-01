@@ -3,7 +3,7 @@
 Always inspect the actual migration files before assuming a table/column exists.
 
 ## Schema version
-Current target schema version: **25**. Read migrations in sequence; migration 024 adds professional identity/session context and migration 025 adds ownership to the remaining legacy content model.
+Current target schema version: **27**. Read migrations in sequence; migration 025 adds legacy tenant ownership, migration 026 adds platform operations and migration 027 adds the CRM foundation.
 
 ## Core domains
 - `venues`
@@ -390,3 +390,35 @@ They include workspace-owned structured records plus asset/storage references.
 Stores staged business deletion requests. A partial unique index permits only one open request per workspace. v1.8.3 creates/cancels requests but does not execute destructive deletion. Payment, fulfilment, audit and private-asset retention remain protected execution concerns.
 
 Schema version advances from 25 to **26**.
+
+## Schema 27 — CRM Foundation
+
+Migration: `027_crm_foundation.sql`
+
+### `crm_pipeline_stages`
+Workspace-owned enquiry stages. v1.9.0 seeds New, Contacted, Qualified, Proposal/quote sent, Awaiting decision, Accepted and Lost/unavailable for every existing workspace. Stage type (`open`, `won`, `lost`) is distinct from its display name/order.
+
+### `crm_contacts`
+Reusable workspace contacts with normalised email, phone, source, consent timestamps and notes. Email uniqueness is workspace-scoped and empty emails are permitted for secondary contacts.
+
+### `crm_enquiries` and `crm_enquiry_contacts`
+The pre-booking record and its relationship to primary, partner and other participants. Enquiries store source/campaign, event/date/venue/service/package/budget, consent snapshot, assignment, won/lost state and conversion link. The request fingerprint is a SHA-256 hash used for public form rate limiting; raw IP addresses are not stored.
+
+### `crm_jobs` and `crm_job_contacts`
+The accepted commercial engagement. A unique `(workspace_id, enquiry_id)` constraint makes conversion idempotent. A Job links to the existing Wedding by `wedding_slug`; the Wedding remains editorial/delivery state. Wedding rename and permanent-delete services maintain/clear this link.
+
+### `crm_activities`
+Workspace-scoped activity history for contact, enquiry and Job events. Platform-significant actions also write to `platform_audit_events`.
+
+### `crm_lead_form_settings`
+Per-workspace public lead-form availability, default service, copy, consent and notification email. The form uses the workspace currency for budget capture. v1.9.0 exposes the fixed `/enquire` route; custom paths are deferred to hosted-site routing.
+
+### Relationship enforcement
+Migration 027 adds:
+- triggers requiring enquiry stages, enquiry contacts, Job enquiries and Job contacts to belong to the same workspace;
+- a trigger requiring `accepted_job_id` to reference a Job from the same workspace;
+- partial unique indexes allowing only one primary and one partner relationship per enquiry/Job.
+
+The public endpoint resolves `workspace_id` from `workspace_domains`; Admin operations resolve it from professional auth/support context. The browser cannot nominate a workspace.
+
+Schema version advances from 26 to **27**.

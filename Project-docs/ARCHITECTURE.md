@@ -426,10 +426,19 @@ Workspace export is generated from a fixed server allowlist plus workspace-scope
 
 Business deletion is a staged request, not a direct cascade. The request captures cooling-off and retention metadata. A later platform-admin execution release must explicitly classify payment, fulfilment, audit, legal-retention and private-asset records before deletion.
 
-## CRM source-of-truth decision
+## CRM source-of-truth boundary — v1.9.0
 
 The CRM commercial entity is a neutral `Job`, not the existing editorial Wedding record.
 
-`Enquiry → Job → optional Wedding extension / existing weddings row`
+`Verified-domain lead form → Contact + Enquiry → Pipeline → accepted Job → linked/created Wedding`
 
-This prevents photography-specific content fields from becoming the universal commercial model while preserving MKB's existing Wedding Workspace, suppliers, public story and gallery relationships. Accepted enquiry conversion creates/links both records in one idempotent server transaction. See `WEDPLANNED-CRM.md`.
+Authority rules:
+- public submissions resolve workspace only from a verified request domain;
+- Admin requests resolve workspace only from professional membership/support context;
+- all CRM rows carry `workspace_id` and relationship triggers reject cross-workspace links;
+- public rate limiting stores a SHA-256 request fingerprint, not raw IP;
+- acceptance uses an ordered D1 batch and a unique `(workspace_id, enquiry_id)` Job constraint;
+- Accepted/Lost terminal stages are reached only through their dedicated service actions;
+- the Job owns commercial status/value; Wedding owns photography content, galleries, suppliers and publishing.
+
+The first public route is fixed at `/enquire`; arbitrary hosted-site paths are deferred until routing can resolve them without colliding with existing website routes. The existing Contact page embeds the same CRM form. See `WEDPLANNED-CRM.md`.

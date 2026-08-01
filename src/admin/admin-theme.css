@@ -1720,3 +1720,140 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* v1.9.0 — CRM foundation */
+.admin-input,
+.admin-select,
+.admin-textarea {
+  width: 100%;
+  border: 1px solid var(--admin-border);
+  background: #fff;
+  color: #171717;
+  padding: 0 10px;
+}
+
+.admin-textarea {
+  min-height: 82px;
+  padding-block: 9px;
+  resize: vertical;
+}
+
+.admin-alert {
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.admin-alert--error { border-color: #fecaca; background: #fef2f2; color: #991b1b; }
+.admin-alert--success { border-color: #bbf7d0; background: #f0fdf4; color: #166534; }
+
+.admin-inline-link {
+  color: #111;
+  font-size: 10px;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.admin-table-wrap { overflow-x: auto; }
+.admin-table { min-width: 680px; }
+
+.admin-choice-row {
+  display: flex;
+  min-height: 74px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: #fafafa;
+  padding: 13px 14px;
+}
+.admin-choice-row strong { display: block; font-size: 12px; }
+.admin-choice-row p { margin: 3px 0 0; color: var(--admin-muted); font-size: 10px; line-height: 1.45; }
+
+.crm-pipeline {
+  display: grid;
+  grid-auto-columns: minmax(245px, 1fr);
+  grid-auto-flow: column;
+  gap: 10px;
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x proximity;
+}
+.crm-stage-column {
+  min-height: 360px;
+  overflow: hidden;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: rgba(255,255,255,.68);
+  scroll-snap-align: start;
+}
+.crm-stage-column__header {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--admin-border);
+  padding: 9px 11px;
+  font-size: 10px;
+  font-weight: 650;
+}
+.crm-stage-column__header strong {
+  display: inline-flex;
+  min-width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  font-size: 9px;
+}
+.crm-stage-column__body { display: grid; gap: 8px; padding: 8px; }
+.crm-stage-empty { margin: 18px 4px; color: #a3a3a3; font-size: 10px; text-align: center; }
+.crm-enquiry-card {
+  display: block;
+  border: 1px solid rgba(17,17,17,.10);
+  border-radius: 10px;
+  background: #fff;
+  color: #171717;
+  padding: 11px;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(17,17,17,.035);
+  transition: transform .12s ease, border-color .12s ease;
+}
+.crm-enquiry-card:hover { transform: translateY(-1px); border-color: rgba(17,17,17,.28); }
+.crm-enquiry-card strong { min-width: 0; overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.crm-enquiry-card > div > span { color: #a3a3a3; font-size: 8px; }
+.crm-enquiry-card > p { margin: 3px 0 0; color: #737373; font-size: 9px; }
+.crm-enquiry-card dl { display: grid; gap: 5px; margin: 10px 0 0; }
+.crm-enquiry-card dl div { display: flex; align-items: center; gap: 5px; color: #525252; font-size: 9.5px; }
+.crm-enquiry-card dl svg { width: 11px; height: 11px; color: #a3a3a3; }
+.crm-enquiry-card small { display: block; margin-top: 9px; color: #8a8a8a; font-size: 8.5px; }
+
+.admin-record-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.admin-record-grid > div { border-radius: 8px; background: #f7f7f5; padding: 10px; }
+.admin-record-grid span { display: block; color: #8a8a8a; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+.admin-record-grid strong { display: block; margin-top: 4px; font-size: 11px; }
+
+.crm-activity-list { display: grid; gap: 0; }
+.crm-activity-list > div { display: grid; grid-template-columns: 12px minmax(0,1fr); gap: 8px; padding: 9px 0; border-bottom: 1px solid rgba(17,17,17,.08); }
+.crm-activity-list > div:last-child { border-bottom: 0; }
+.crm-activity-list > div > span { width: 7px; height: 7px; margin-top: 4px; border-radius: 50%; background: #111; }
+.crm-activity-list strong { display: block; font-size: 10px; line-height: 1.4; }
+.crm-activity-list p { margin: 3px 0 0; color: #8a8a8a; font-size: 8.5px; line-height: 1.4; }
+
+@media (max-width: 900px) {
+  .admin-record-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 640px) {
+  .crm-pipeline { grid-auto-columns: minmax(82vw, 1fr); }
+  .admin-record-grid { grid-template-columns: 1fr; }
+}

@@ -1,9 +1,20 @@
 # Project State
 
 ## Version
-Current release in source: **v1.8.3 — Platform Operations Foundation**.
-Database schema version: **26**.
-Production baseline before this release: commit `e0e3ab6`, schema **25**.
+Current release in source: **v1.9.0 — CRM Foundation**.
+Database schema version: **27**.
+Stable production baseline before this release: **v1.8.3**, commit `0385e9e`, schema **26**.
+
+## CRM Foundation — v1.9.0
+- Adds workspace-owned pipeline stages, CRM contacts, enquiries, contact relationships, neutral Jobs, Job relationships and activity history.
+- Adds Admin → CRM with Pipeline, Contacts, Jobs and Lead form tabs plus a detailed enquiry workspace.
+- Adds manual lead creation and a domain-resolved public lead form at `/enquire`; the Contact page uses the same workflow rather than an external CRM iframe.
+- Captures privacy/marketing consent, hashes rate-limit fingerprints, includes a honeypot and can send lead notifications through the existing Resend boundary.
+- Adds Accept booking and Mark lost workflows. Accepted conversion creates exactly one Job and links/creates the existing workspace Wedding record in an ordered D1 batch.
+- Adds database triggers to reject cross-workspace CRM stage/contact/job relationships and indexes limiting an enquiry/job to one primary and one partner contact.
+- Adds CRM permissions, support-mode behaviour, structured export coverage and Wedding rename/delete linkage maintenance.
+- Adds migration `027_crm_foundation.sql`; schema advances to **27**.
+- Adds `scripts/test-crm-foundation.py`; tenant and platform-operations tests also advance to schema 27.
 
 ## Platform Operations Foundation — v1.8.3
 - Adds business-owned support grants with explicit read-only/managed scope and 1/4/24/72-hour expiry.
@@ -17,8 +28,8 @@ Production baseline before this release: commit `e0e3ab6`, schema **25**.
 - Adds migration `026_platform_operations_foundation.sql`; schema advances to **26**.
 - Adds `scripts/test-platform-operations.py` and extends the tenant test to schema 26.
 
-## CRM decision
-The CRM is the next major product phase. The platform sequence is now CRM foundation before full Stripe Connect, because connected payments need Jobs, quotes and invoices to own the commercial relationship.
+## CRM workflow direction
+The CRM foundation is now implemented in source. The platform sequence is now CRM foundation before full Stripe Connect, because connected payments need Jobs, quotes and invoices to own the commercial relationship.
 
 The first MKB workflow will be:
 

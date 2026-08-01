@@ -3342,3 +3342,26 @@ footer .logo-mkb, footer .logo-weddings {
 }
 
 
+
+/* v1.9.0 public CRM lead form */
+.lead-form-control > input,
+.lead-form-control > textarea,
+.lead-form-control > select {
+  width: 100%;
+  border: 1px solid rgba(17,17,17,.18);
+  border-radius: 0;
+  background: #fff;
+  color: #171717;
+  padding: 12px 13px;
+  font: inherit;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.lead-form-control > input { min-height: 48px; }
+.lead-form-control > textarea { resize: vertical; }
+.lead-form-control > input:focus,
+.lead-form-control > textarea:focus,
+.lead-form-control > select:focus {
+  border-color: #171717;
+  box-shadow: 0 0 0 3px rgba(17,17,17,.06);
+}

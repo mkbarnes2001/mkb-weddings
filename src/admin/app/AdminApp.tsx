@@ -1,6 +1,8 @@
 import { Navigate, Routes, Route, useParams } from "react-router-dom";
 import { AdminLayout } from "../layouts/AdminLayout";
 import { Dashboard } from "../pages/Dashboard";
+import { CRM } from "../pages/CRM";
+import { CRMEnquiry } from "../pages/CRMEnquiry";
 import { Weddings } from "../pages/Weddings";
 import { NewWeddingWizard } from "../pages/NewWeddingWizard";
 import { WeddingDetail } from "../pages/WeddingDetail";
@@ -46,6 +48,8 @@ export function AdminApp() {
       <Route element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="wedplanned" element={<WedPlannedPlatform />} />
+        <Route path="crm" element={<CRM />} />
+        <Route path="crm/enquiries/:id" element={<CRMEnquiry />} />
         <Route path="weddings" element={<Weddings />} />
         <Route path="weddings/new" element={<NewWeddingWizard />} />
         <Route path="weddings/:slug" element={<WeddingDetail />} />

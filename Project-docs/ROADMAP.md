@@ -114,11 +114,12 @@ Completed and in production:
 - Workspace-scoped structured business data export
 - Staged account/business deletion request and retention safeguards
 
-## Next — CRM Foundation (v1.9.0)
-- Public lead/enquiry forms
-- Contacts and enquiry pipeline
-- Accepted enquiry creates a neutral Job and links/creates the workspace Wedding record
-- Activity history and audit
+## Current source — CRM Foundation (v1.9.0)
+- Verified-domain public lead/enquiry form and Contact-page integration
+- Workspace contacts, enquiry pipeline and activity history
+- Manual enquiry management and accepted/lost workflow
+- Accepted enquiry creates one neutral Job and links/creates the workspace Wedding record
+- CRM permissions, export coverage and cross-workspace relationship triggers
 
 ## Then — Client Portal and Questionnaires (v1.9.1)
 - Portal invitations and identity linkage
@@ -200,7 +201,7 @@ Required behaviour:
 - Guest view/favourite access with separate download policy
 - Visitor activity tracking without raw IP storage
 
-Client selections and Print Store ordering now use this identified visitor model. Stripe hosted payment and photographer-controlled Prodigi sandbox fulfilment are complete. The next commercial step is the v1.8.3 operations foundation, followed by the CRM source-of-truth workflow. Stripe Connect then attaches to CRM invoices and Jobs rather than existing as an isolated payment layer.
+Client selections and Print Store ordering now use this identified visitor model. Stripe hosted payment and photographer-controlled Prodigi sandbox fulfilment are complete. The operations foundation and CRM source-of-truth workflow are now implemented in source; the next major release is the Client Portal and structured questionnaires. Stripe Connect then attaches to CRM invoices and Jobs rather than existing as an isolated payment layer.
 
 ## v1.5.2 — Favourite Review & Full-Resolution Download
 - Admin favourite thumbnail review.

@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { AnimatePresence, motion } from "motion/react";
+import { LeadEnquiryForm } from "./LeadEnquiryForm";
 
 type HeroSlide = {
   desktop: string;
@@ -142,15 +143,7 @@ export function Contact() {
                 Most couples receive a reply within 24 hours.
               </p>
 
-              <iframe
-                height={759}
-                style={{ minWidth: "100%", maxWidth: "1260px", border: 0 }}
-                id="sn-form-wsgz3"
-                src="https://app.studioninja.co/contactform/parser/0a800fc9-82a4-1a61-8182-f546140b694f/0a800fc8-82a4-122c-8183-0a866445138a"
-                allowFullScreen
-                loading="lazy"
-                title="MKB Weddings contact form"
-              />
+              <LeadEnquiryForm embedded />
             </div>
 
             {/* Contact Info */}

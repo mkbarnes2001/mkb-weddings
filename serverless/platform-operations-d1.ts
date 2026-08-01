@@ -165,7 +165,7 @@ export async function getPlatformOperations(db: D1Db, actor: OperationsActor) {
   const deletionRequests = (deletionRows.results || []).map(hydrateDeletionRequest);
 
   return {
-    schemaVersion: 26,
+    schemaVersion: 27,
     workspace: {
       id: text(workspace.id),
       slug: text(workspace.slug),
@@ -360,6 +360,14 @@ const DIRECT_EXPORT_TABLES = [
   "platform_support_events",
   "workspace_export_events",
   "workspace_deletion_requests",
+  "crm_pipeline_stages",
+  "crm_contacts",
+  "crm_enquiries",
+  "crm_enquiry_contacts",
+  "crm_jobs",
+  "crm_job_contacts",
+  "crm_activities",
+  "crm_lead_form_settings",
   "venues",
   "weddings",
   "images",
@@ -482,7 +490,7 @@ export async function createWorkspaceExport(db: D1Db, actor: OperationsActor) {
     const payload = {
       exportVersion: 1,
       generatedAt: new Date().toISOString(),
-      schemaVersion: Number(schema?.value || 26),
+      schemaVersion: Number(schema?.value || 27),
       workspaceId: actor.workspaceId,
       businessName: text(actor.businessName || workspace.name),
       recordCount,

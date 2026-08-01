@@ -55,13 +55,13 @@ const INVITATION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const SESSION_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
 const ROLE_PERMISSIONS: Record<string, string[]> = {
-  owner: ["platform:read", "business:update", "services:update", "members:read", "members:manage", "workspace:switch", "operations:read", "support:manage", "data:export", "deletion:request"],
-  admin: ["platform:read", "business:update", "services:update", "members:read", "members:manage", "workspace:switch", "operations:read", "data:export"],
-  manager: ["platform:read", "business:update", "services:update", "members:read", "workspace:switch", "operations:read"],
-  content: ["platform:read", "business:update", "services:update", "members:read", "workspace:switch"],
-  finance: ["platform:read", "members:read", "workspace:switch", "operations:read", "data:export"],
-  staff: ["platform:read", "members:read", "workspace:switch"],
-  viewer: ["platform:read", "members:read", "workspace:switch"],
+  owner: ["platform:read", "business:update", "services:update", "members:read", "members:manage", "workspace:switch", "operations:read", "support:manage", "data:export", "deletion:request", "crm:read", "crm:manage"],
+  admin: ["platform:read", "business:update", "services:update", "members:read", "members:manage", "workspace:switch", "operations:read", "data:export", "crm:read", "crm:manage"],
+  manager: ["platform:read", "business:update", "services:update", "members:read", "workspace:switch", "operations:read", "crm:read", "crm:manage"],
+  content: ["platform:read", "business:update", "services:update", "members:read", "workspace:switch", "crm:read"],
+  finance: ["platform:read", "members:read", "workspace:switch", "operations:read", "data:export", "crm:read"],
+  staff: ["platform:read", "members:read", "workspace:switch", "crm:read", "crm:manage"],
+  viewer: ["platform:read", "members:read", "workspace:switch", "crm:read"],
 };
 
 function text(value: unknown) {
@@ -140,7 +140,8 @@ function permissionsFor(role: string, platformRole = "member", accessMode: "memb
       "workspace:switch",
       "operations:read",
       "support:access",
-      ...(supportScope === "manage" ? ["business:update", "services:update"] : []),
+      "crm:read",
+      ...(supportScope === "manage" ? ["business:update", "services:update", "crm:manage"] : []),
     ]);
   }
   if (platformRole === "platform_admin") {

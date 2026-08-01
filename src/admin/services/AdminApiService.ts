@@ -10,6 +10,7 @@ import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, Client
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
 import type { ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
+import type { CrmEnquiryDetail, CrmEnquiryInput, CrmLeadFormSettings, CrmOverview } from "../types/crm";
 import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
@@ -1180,6 +1181,64 @@ export class AdminApiService {
 
   static wedPlannedExportUrl() {
     return `${API_BASE}/api/platform-operations/export`;
+  }
+
+  static async getCrmOverview() {
+    const result = await request<{ ok: true; crm: CrmOverview }>("/api/crm");
+    return result.crm;
+  }
+
+  static async getCrmEnquiry(id: string) {
+    const result = await request<{ ok: true; detail: CrmEnquiryDetail }>(`/api/crm/enquiries/${encodeURIComponent(id)}`);
+    return result.detail;
+  }
+
+  static async createCrmEnquiry(input: CrmEnquiryInput) {
+    const result = await request<{ ok: true; detail: CrmEnquiryDetail }>("/api/crm/enquiries", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return result.detail;
+  }
+
+  static async updateCrmEnquiry(id: string, input: CrmEnquiryInput) {
+    const result = await request<{ ok: true; detail: CrmEnquiryDetail }>(`/api/crm/enquiries/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
+    return result.detail;
+  }
+
+  static async moveCrmEnquiry(id: string, stageId: string) {
+    const result = await request<{ ok: true; detail: CrmEnquiryDetail }>(`/api/crm/enquiries/${encodeURIComponent(id)}/stage`, {
+      method: "POST",
+      body: JSON.stringify({ stageId }),
+    });
+    return result.detail;
+  }
+
+  static async markCrmEnquiryLost(id: string, reason: string) {
+    const result = await request<{ ok: true; detail: CrmEnquiryDetail }>(`/api/crm/enquiries/${encodeURIComponent(id)}/lost`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    });
+    return result.detail;
+  }
+
+  static async acceptCrmEnquiry(id: string, input: { valueAmount?: number | null; weddingSlug?: string } = {}) {
+    const result = await request<{ ok: true; conversion: { enquiry: unknown; job: unknown; idempotent: boolean } }>(`/api/crm/enquiries/${encodeURIComponent(id)}/accept`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return result.conversion;
+  }
+
+  static async saveCrmLeadForm(settings: CrmLeadFormSettings) {
+    const result = await request<{ ok: true; crm: CrmOverview }>("/api/crm/lead-form", {
+      method: "POST",
+      body: JSON.stringify(settings),
+    });
+    return result.crm;
   }
 
   static async getWorkspace() {
