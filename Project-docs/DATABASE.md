@@ -365,3 +365,28 @@ All existing rows are backfilled to `workspace_mkb_weddings`. The migration is a
 Runtime authority is not taken from a browser-supplied workspace ID. Admin services use the authenticated professional membership context; public legacy services use a verified request-domain mapping. Existing MKB fixed content-page keys remain unchanged, while non-MKB fixed definitions use an internal workspace-prefixed key.
 
 Legacy physical primary keys remain globally unique for compatibility in this release. Authorisation does not depend on those keys being secret or tenant-unique; service queries require the resolved workspace. See `WEDPLANNED-TENANT-OWNERSHIP.md` for deployment and isolation validation.
+
+## Schema 26 — Platform Operations Foundation
+
+Migration: `026_platform_operations_foundation.sql`
+
+### `platform_support_grants`
+Workspace-owned support authority. A grant is explicit, time-bounded and either `read` or `manage`. Revocation is recorded rather than deleting the grant. Only platform users with `platform_role` of `support` or `platform_admin` may use an active grant.
+
+### `platform_support_events`
+Append-only support activity records containing the grant, workspace, support identity, request method/path, status and event type. Request bodies and tenant content are not copied into this table.
+
+### `workspace_export_events`
+Records structured JSON export history, file name, table count and record count. Export payloads are generated for the authenticated active workspace and are not persisted in D1 by this release. Authentication/session tables are excluded; gallery PIN/token, print-asset access-token and multipart-upload identifiers are redacted.
+
+Exports deliberately exclude:
+- professional authentication links and sessions;
+- client magic links and client session tokens;
+- binary image files.
+
+They include workspace-owned structured records plus asset/storage references.
+
+### `workspace_deletion_requests`
+Stores staged business deletion requests. A partial unique index permits only one open request per workspace. v1.8.3 creates/cancels requests but does not execute destructive deletion. Payment, fulfilment, audit and private-asset retention remain protected execution concerns.
+
+Schema version advances from 25 to **26**.

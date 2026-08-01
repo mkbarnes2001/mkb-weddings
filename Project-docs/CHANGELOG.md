@@ -1,5 +1,29 @@
 # MKB Intelligence — Changelog
 
+## v1.8.3 — Platform Operations Foundation
+- Added workspace-owned, time-bounded WedPlanned support grants with read-only and managed scopes.
+- Added synthetic support workspace access for platform support/admin accounts only while an active grant exists.
+- Added an API-wide read-only support guard and per-request support audit events.
+- Added workspace-scoped structured JSON export covering business, content, asset-reference, Client Gallery and commerce records while excluding professional/client authentication links and session tokens and redacting gallery PIN/token, print-asset token and multipart-upload secrets.
+- Added workspace export history.
+- Added staged business deletion requests with a 14-day cooling-off period, cancellation and protected-record/private-asset safeguards; no destructive deletion is automated.
+- Added Admin → WedPlanned → Operations for support access, export and deletion controls.
+- Added `scripts/test-platform-operations.py` and extended tenant regression coverage to schema 26.
+- Added migration 026; schema version advances to 26.
+- Reordered the commercial roadmap so the Enquiry → Job/Wedding CRM foundation precedes full Stripe Connect integration.
+
+## v1.8.2h — Standalone Print Store and Admin Compact Polish
+- Replaced the Client Gallery print-store modal with a standalone, normally scrolling page and Back to gallery navigation.
+- Preserved crop, cart, checkout and Stripe return behaviour on the standalone route.
+- Compacted Venue Gallery details, improved sidebar branding visibility and removed Moment card hero-ID/helper copy.
+- No migration; schema remains 25.
+
+## v1.8.2g — Clean Client Gallery Slugs
+- Added clean slug-only Client Gallery URLs while retaining existing token URLs for backwards compatibility.
+- Preserved configured PIN/email access rules independently of the visible URL.
+- Extended tenant regression coverage for workspace-scoped slug resolution.
+- No migration; schema remains 25.
+
 ## v1.8.2f — Gallery UI Follow-up
 - Moved Venue Gallery Hero/Venue/Moments state off the thumbnails into compact H/V/M indicators below each image.
 - Replaced the oversized Moments masthead actions with the shared small Admin button component.

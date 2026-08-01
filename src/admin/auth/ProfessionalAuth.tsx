@@ -27,6 +27,9 @@ const emptyAuth: ProfessionalAuthState = {
   role: "",
   permissions: [],
   memberships: [],
+  accessMode: "none",
+  supportGrantId: "",
+  supportScope: "",
 };
 
 const ProfessionalAuthContext = createContext<ProfessionalAuthContextValue | null>(null);

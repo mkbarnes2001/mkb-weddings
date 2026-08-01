@@ -221,11 +221,12 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
     { key: "suppliers", label: "Supplier records", status: "scoped", detail: "Supplier records and wedding-supplier relationships are workspace-owned and server-scoped." },
     { key: "galleries", label: "Moments and public galleries", status: "scoped", detail: "Moments, custom collections and public collection definitions are workspace-owned and domain-scoped." },
     { key: "authentication", label: "Professional identity and sessions", status: "scoped", detail: "Passwordless sign-in, one-time invitations, business membership resolution and server-owned workspace context are enforced across tenant-owned Admin modules." },
+    { key: "operations", label: "Platform operations", status: "scoped", detail: "Time-bounded support grants, support audit events, business exports and staged deletion requests are workspace-owned." },
     { key: "connect", label: "Stripe Connect", status: "planned", detail: "Connected account onboarding follows business authentication and ownership enforcement." },
   ];
 
   return {
-    schemaVersion: 25,
+    schemaVersion: 26,
     brand: {
       name: "WedPlanned",
       primaryDomain: "wedplanned.com",

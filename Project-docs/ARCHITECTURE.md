@@ -407,3 +407,29 @@ Architecture rules:
 - `PRODIGI_ENABLED` is a kill switch for provider API activity. Sandbox is the default environment and live use requires a physical sample gate.
 
 The provider-neutral tables and route/service boundary allow another lab adapter later without replacing cart, payment, order or canonical asset models.
+
+## Platform operations boundary — v1.8.3
+
+Support access is not a permanent business membership.
+
+`Business owner grant → active/expiring support authority → synthetic support workspace access → audited API requests`
+
+Rules:
+- only `support` and `platform_admin` platform users can see support grants as workspace options;
+- grants are workspace-owned, scoped (`read` or `manage`) and expire automatically by query-time validation;
+- read-only support is blocked from all non-safe API methods by `/functions/api/_middleware.ts`;
+- support sessions cannot export business data or request/cancel deletion;
+- every support API request is logged without copying request bodies;
+- ordinary membership access takes precedence if a platform user also belongs to the business.
+
+Workspace export is generated from a fixed server allowlist plus workspace-scoped relationship joins and batched D1 reads. Browser table names or workspace IDs are never accepted as export authority. Authentication/session tables are excluded and capability-style gallery, print and upload secrets are redacted.
+
+Business deletion is a staged request, not a direct cascade. The request captures cooling-off and retention metadata. A later platform-admin execution release must explicitly classify payment, fulfilment, audit, legal-retention and private-asset records before deletion.
+
+## CRM source-of-truth decision
+
+The CRM commercial entity is a neutral `Job`, not the existing editorial Wedding record.
+
+`Enquiry → Job → optional Wedding extension / existing weddings row`
+
+This prevents photography-specific content fields from becoming the universal commercial model while preserving MKB's existing Wedding Workspace, suppliers, public story and gallery relationships. Accepted enquiry conversion creates/links both records in one idempotent server transaction. See `WEDPLANNED-CRM.md`.

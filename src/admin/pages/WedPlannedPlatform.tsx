@@ -5,8 +5,12 @@ import {
   Building2,
   Check,
   ChevronDown,
+  Clock,
   Copy,
   CircleDashed,
+  Download,
+  FileText,
+  AlertTriangle,
   Globe2,
   MapPinned,
   MailCheck,
@@ -34,15 +38,16 @@ import type {
   ProfessionalInvitationResult,
   WedPlannedBusiness,
   WedPlannedMember,
+  WedPlannedOperationsPayload,
   WedPlannedPlatformPayload,
   WedPlannedServiceArea,
 } from "../types/platform";
 
-type TabKey = "business" | "services" | "team" | "access";
+type TabKey = "business" | "services" | "team" | "operations" | "access";
 
 function initialTab(): TabKey {
   const value = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("tab") : "";
-  return value === "services" || value === "team" || value === "access" ? value : "business";
+  return value === "services" || value === "team" || value === "operations" || value === "access" ? value : "business";
 }
 
 const emptyArea: Partial<WedPlannedServiceArea> = {
@@ -137,9 +142,20 @@ export function WedPlannedPlatform() {
   const [serviceAreaPreset, setServiceAreaPreset] = useState("");
   const [member, setMember] = useState(emptyMember);
   const [lastInvitation, setLastInvitation] = useState<ProfessionalInvitationResult | null>(null);
+  const [operations, setOperations] = useState<WedPlannedOperationsPayload | null>(null);
+  const [operationsLoading, setOperationsLoading] = useState(false);
+  const [supportScope, setSupportScope] = useState<"read" | "manage">("read");
+  const [supportHours, setSupportHours] = useState(4);
+  const [supportReason, setSupportReason] = useState("");
+  const [deletionConfirmation, setDeletionConfirmation] = useState("");
+  const [deletionReason, setDeletionReason] = useState("");
   const canEditBusiness = auth.permissions.includes("business:update");
   const canEditServices = auth.permissions.includes("services:update");
   const canManageMembers = auth.permissions.includes("members:manage");
+  const canReadOperations = auth.permissions.includes("operations:read");
+  const canManageSupport = auth.permissions.includes("support:manage") && auth.accessMode !== "support";
+  const canExportData = auth.permissions.includes("data:export") && auth.accessMode !== "support";
+  const canRequestDeletion = auth.permissions.includes("deletion:request") && auth.accessMode !== "support";
 
   function apply(next: WedPlannedPlatformPayload) {
     setPlatform(next);
@@ -155,6 +171,18 @@ export function WedPlannedPlatform() {
       .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load WedPlanned foundation."))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (!canReadOperations) {
+      setOperations(null);
+      return;
+    }
+    setOperationsLoading(true);
+    AdminApiService.getWedPlannedOperations()
+      .then(setOperations)
+      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load platform operations."))
+      .finally(() => setOperationsLoading(false));
+  }, [auth.workspaceId, canReadOperations]);
 
   const categoryGroups = useMemo(() => {
     const groups = new Map<string, WedPlannedPlatformPayload["categories"]>();
@@ -256,6 +284,42 @@ export function WedPlannedPlatform() {
     }
   }
 
+  async function runOperation(action: () => Promise<WedPlannedOperationsPayload>, success: string) {
+    setSaving(true);
+    setError("");
+    setMessage("");
+    try {
+      const next = await action();
+      setOperations(next);
+      setMessage(success);
+      return true;
+    } catch (actionError) {
+      setError(actionError instanceof Error ? actionError.message : "Unable to complete the platform operation.");
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function grantSupport() {
+    const saved = await runOperation(
+      () => AdminApiService.grantWedPlannedSupport(supportScope, supportHours, supportReason),
+      "Time-bounded support access enabled.",
+    );
+    if (saved) setSupportReason("");
+  }
+
+  async function requestDeletion() {
+    const saved = await runOperation(
+      () => AdminApiService.requestWedPlannedDeletion(deletionConfirmation, deletionReason),
+      "Staged business deletion request created.",
+    );
+    if (saved) {
+      setDeletionConfirmation("");
+      setDeletionReason("");
+    }
+  }
+
   if (loading) return <div className="admin-page text-sm text-neutral-500">Loading WedPlanned foundation…</div>;
   if (!platform || !business) {
     return <div className="admin-page rounded-xl bg-red-50 p-5 text-sm text-red-800">{error || "WedPlanned foundation is unavailable."}</div>;
@@ -301,6 +365,7 @@ export function WedPlannedPlatform() {
         <AdminTab active={tab === "business"} onClick={() => setTab("business")}>Business</AdminTab>
         <AdminTab active={tab === "services"} onClick={() => setTab("services")}>Services & areas</AdminTab>
         <AdminTab active={tab === "team"} onClick={() => setTab("team")}>Team</AdminTab>
+        {canReadOperations ? <AdminTab active={tab === "operations"} onClick={() => setTab("operations")}>Operations</AdminTab> : null}
         <AdminTab active={tab === "access"} onClick={() => setTab("access")}>Platform access</AdminTab>
       </AdminTabs>
 
@@ -519,6 +584,95 @@ export function WedPlannedPlatform() {
             </div>
           </AdminPanel>
         </div>
+      ) : null}
+
+      {tab === "operations" ? (
+        operationsLoading && !operations ? (
+          <div className="rounded-2xl bg-white p-6 text-xs text-neutral-500 shadow-sm ring-1 ring-black/[0.06]">Loading platform operations…</div>
+        ) : operations ? (
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,.85fr)]">
+            <div className="space-y-5">
+              <AdminPanel title="Time-bounded support access" description="Support cannot enter this business unless an owner explicitly opens a limited access window. Every support request is recorded." icon={ShieldCheck}>
+                {operations.support.activeGrant ? (
+                  <div className="rounded-xl bg-emerald-50 p-4 text-xs text-emerald-900">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="font-semibold">Support access is active</p>
+                        <p className="mt-1 text-[10px] leading-4 opacity-75">{operations.support.activeGrant.scope === "manage" ? "Managed access" : "Read-only access"} · expires {new Date(operations.support.activeGrant.expiresAt).toLocaleString("en-GB")}</p>
+                      </div>
+                      {canManageSupport ? <AdminButton variant="secondary" onClick={() => runOperation(() => AdminApiService.revokeWedPlannedSupport(operations.support.activeGrant!.id), "Support access revoked.")} disabled={saving}>Revoke access</AdminButton> : null}
+                    </div>
+                    {operations.support.activeGrant.reason ? <p className="mt-3 rounded-lg bg-white/70 px-3 py-2 text-[10px] leading-4">Reason: {operations.support.activeGrant.reason}</p> : null}
+                  </div>
+                ) : (
+                  <div className="rounded-xl bg-[#f5f3ef] p-4 text-xs text-neutral-600">No WedPlanned support access is currently open for this business.</div>
+                )}
+
+                {canManageSupport ? (
+                  <div className="mt-4 grid gap-3 md:grid-cols-[160px_150px_minmax(0,1fr)_auto] md:items-end">
+                    <AdminField label="Access level">
+                      <FieldSelect value={supportScope} onChange={(value) => setSupportScope(value as "read" | "manage")}><option value="read">Read only</option><option value="manage">Managed support</option></FieldSelect>
+                    </AdminField>
+                    <AdminField label="Duration">
+                      <FieldSelect value={String(supportHours)} onChange={(value) => setSupportHours(Number(value))}><option value="1">1 hour</option><option value="4">4 hours</option><option value="24">24 hours</option><option value="72">72 hours</option></FieldSelect>
+                    </AdminField>
+                    <AdminField label="Reason"><FieldInput value={supportReason} onChange={setSupportReason} placeholder="Optional support case or reason" /></AdminField>
+                    <AdminButton variant="primary" icon={Clock} onClick={grantSupport} disabled={saving}>Enable support</AdminButton>
+                  </div>
+                ) : null}
+              </AdminPanel>
+
+              <AdminPanel title="Business data export" description="Download a structured JSON snapshot of this business. Binary photographs are not duplicated; asset and storage references are included." icon={Download}>
+                <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-[#f5f3ef] p-4">
+                  <div><p className="text-xs font-semibold">Workspace-owned data only</p><p className="mt-1 max-w-2xl text-[10px] leading-4 text-neutral-500">Authentication links and session tokens are excluded. The export includes business, wedding, venue, supplier, asset, gallery and commerce records scoped to {operations.workspace.name}.</p></div>
+                  <AdminButton variant="primary" icon={Download} onClick={() => { window.location.href = AdminApiService.wedPlannedExportUrl(); }} disabled={!canExportData}>Download JSON export</AdminButton>
+                </div>
+                <div className="mt-4 space-y-2">
+                  {operations.exports.length ? operations.exports.slice(0, 5).map((item) => (
+                    <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-black/[0.06] px-3 py-3 text-[10px]">
+                      <div><p className="font-semibold text-neutral-800">{item.fileName || "Workspace export"}</p><p className="mt-1 text-neutral-500">{item.recordCount.toLocaleString()} records · {item.tableCount} tables · {new Date(item.createdAt).toLocaleString("en-GB")}</p></div>
+                      <AdminStatus tone={item.status === "completed" ? "success" : "warning"}>{item.status}</AdminStatus>
+                    </div>
+                  )) : <p className="text-xs text-neutral-500">No business exports have been created yet.</p>}
+                </div>
+              </AdminPanel>
+            </div>
+
+            <div className="space-y-5">
+              <AdminPanel title="Business closure" description="Deletion is deliberately staged. This request does not immediately remove records, galleries or private assets." icon={AlertTriangle}>
+                {operations.deletion.activeRequest ? (
+                  <div className="rounded-xl bg-amber-50 p-4 text-xs text-amber-950">
+                    <p className="font-semibold">Deletion request open</p>
+                    <p className="mt-1 text-[10px] leading-4 opacity-75">Scheduled for review after {new Date(operations.deletion.activeRequest.scheduledFor).toLocaleString("en-GB")}.</p>
+                    {canRequestDeletion ? <AdminButton className="mt-3" variant="secondary" onClick={() => runOperation(() => AdminApiService.cancelWedPlannedDeletion(operations.deletion.activeRequest!.id), "Deletion request cancelled.")} disabled={saving}>Cancel request</AdminButton> : null}
+                  </div>
+                ) : canRequestDeletion ? (
+                  <div className="space-y-3">
+                    <p className="rounded-xl bg-[#f5f3ef] px-3 py-3 text-[10px] leading-4 text-neutral-600">A {operations.deletion.coolingOffDays}-day cooling-off period begins when the request is submitted. No destructive deletion is automated by this screen.</p>
+                    <AdminField label={`Type ${operations.workspace.name} to confirm`}><FieldInput value={deletionConfirmation} onChange={setDeletionConfirmation} /></AdminField>
+                    <AdminField label="Reason"><textarea value={deletionReason} onChange={(event) => setDeletionReason(event.target.value)} rows={3} className="admin-textarea" /></AdminField>
+                    <AdminButton variant="secondary" icon={AlertTriangle} onClick={requestDeletion} disabled={saving || deletionConfirmation !== operations.workspace.name}>Request staged deletion</AdminButton>
+                  </div>
+                ) : <p className="text-xs text-neutral-500">Only a business owner can request account deletion.</p>}
+                <div className="mt-4 space-y-2 border-t border-black/[0.06] pt-4">
+                  {operations.deletion.protectedRecords.map((item) => <div key={item} className="flex gap-2 text-[10px] leading-4 text-neutral-500"><FileText size={12} className="mt-0.5 shrink-0" />{item}</div>)}
+                </div>
+              </AdminPanel>
+
+              <AdminPanel title="Recent support activity" description="Support access and requests are auditable against the active business." compact>
+                <div className="space-y-3">
+                  {operations.support.recentEvents.length ? operations.support.recentEvents.slice(0, 8).map((event) => (
+                    <div key={event.id} className="border-b border-black/[0.06] pb-3 last:border-0 last:pb-0">
+                      <p className="text-xs font-medium">{event.eventType.replace(/\./g, " ")}</p>
+                      <p className="mt-1 text-[10px] text-neutral-500">{event.supportEmail || "WedPlanned support"}{event.path ? ` · ${event.method} ${event.path}` : ""}{event.statusCode ? ` · ${event.statusCode}` : ""}</p>
+                      <p className="mt-1 text-[10px] text-neutral-400">{new Date(event.createdAt).toLocaleString("en-GB")}</p>
+                    </div>
+                  )) : <p className="text-xs text-neutral-500">No support activity has been recorded for this business.</p>}
+                </div>
+              </AdminPanel>
+            </div>
+          </div>
+        ) : <div className="rounded-xl bg-red-50 p-4 text-xs text-red-800">Platform operations are unavailable.</div>
       ) : null}
 
       {tab === "access" ? (

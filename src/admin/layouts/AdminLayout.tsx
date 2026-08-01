@@ -147,7 +147,7 @@ export function AdminLayout() {
             <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3">
               <p className="text-[9px] uppercase tracking-[0.12em] text-white/40">Business workspace</p>
               <p className="mt-1 truncate text-xs font-medium">{auth.businessName || "MKB Weddings"}</p>
-              <p className="mt-1 text-[10px] capitalize text-white/40">{auth.mode === "bootstrap" ? "Setup mode · authentication not enforced" : `${auth.role || "member"} · secure session`}</p>
+              <p className="mt-1 text-[10px] capitalize text-white/40">{auth.mode === "bootstrap" ? "Setup mode · authentication not enforced" : auth.accessMode === "support" ? `${auth.supportScope || "read"} support · time bounded` : `${auth.role || "member"} · secure session`}</p>
               {auth.memberships.length > 1 ? (
                 <select
                   value={auth.workspaceId}

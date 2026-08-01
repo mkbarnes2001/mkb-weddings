@@ -10,7 +10,7 @@ Upload the latest complete project ZIP and say:
 The current source, D1 migrations and these documents are authoritative. Chat history is supplementary.
 
 ## Current deployment guide
-The production tenant baseline is v1.8.2 on schema 25; its production isolation audit is complete. For the v1.8.2e Admin UI/usability release, start with `PROJECT-STATE.md` and `NEXT-STEPS.md`, then read `WEDPLANNED-TENANT-OWNERSHIP.md`, `WEDPLANNED-AUTH.md` and `WEDPLANNED-FOUNDATION.md` for the security model. `PRODIGI-SETUP.md` and `STRIPE-SETUP.md` remain authoritative for fulfilment and payment configuration.
+The stable production baseline before the current source release is commit `e0e3ab6` on schema 25. The current source adds v1.8.3 Platform Operations and migration 026. Start with `PROJECT-STATE.md` and `NEXT-STEPS.md`, then read `WEDPLANNED-TENANT-OWNERSHIP.md`, `WEDPLANNED-AUTH.md`, `WEDPLANNED-FOUNDATION.md` and `WEDPLANNED-CRM.md`. `PRODIGI-SETUP.md` and `STRIPE-SETUP.md` remain authoritative for fulfilment and payment configuration.
 
 ## End-of-release checklist
 1. Update `PROJECT-STATE.md`.

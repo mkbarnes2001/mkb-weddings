@@ -117,6 +117,9 @@ export type ProfessionalMembershipSummary = {
   marketplaceSlug: string;
   role: string;
   status: string;
+  accessMode: "membership" | "support";
+  supportGrantId: string;
+  supportScope: "" | "read" | "manage";
 };
 
 export type ProfessionalAuthState = {
@@ -136,6 +139,9 @@ export type ProfessionalAuthState = {
   role: string;
   permissions: string[];
   memberships: ProfessionalMembershipSummary[];
+  accessMode: "membership" | "support" | "bootstrap" | "none";
+  supportGrantId: string;
+  supportScope: "" | "read" | "manage";
 };
 
 export type ProfessionalInvitationResult = {
@@ -143,4 +149,78 @@ export type ProfessionalInvitationResult = {
   delivery: "sent" | "manual";
   invitationUrl?: string;
   expiresAt: string;
+};
+
+
+export type WedPlannedSupportGrant = {
+  id: string;
+  workspaceId: string;
+  scope: "read" | "manage";
+  status: "active" | "expired" | "revoked";
+  reason: string;
+  grantedByEmail: string;
+  grantedAt: string;
+  expiresAt: string;
+  revokedAt?: string;
+  revokedByEmail: string;
+};
+
+export type WedPlannedSupportEvent = {
+  id: string;
+  grantId: string;
+  supportEmail: string;
+  eventType: string;
+  method: string;
+  path: string;
+  statusCode: number | null;
+  createdAt: string;
+};
+
+export type WedPlannedExportEvent = {
+  id: string;
+  status: "processing" | "completed" | "failed";
+  format: "json";
+  fileName: string;
+  tableCount: number;
+  recordCount: number;
+  requestedByEmail: string;
+  completedAt?: string;
+  createdAt: string;
+};
+
+export type WedPlannedDeletionRequest = {
+  id: string;
+  status: "requested" | "approved" | "executing" | "completed" | "cancelled" | "rejected";
+  reason: string;
+  confirmationName: string;
+  requestedByEmail: string;
+  scheduledFor: string;
+  retention: Record<string, unknown>;
+  cancelledAt?: string;
+  cancelledByEmail: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type WedPlannedOperationsPayload = {
+  schemaVersion: number;
+  workspace: {
+    id: string;
+    slug: string;
+    name: string;
+    status: string;
+    plan: string;
+  };
+  support: {
+    activeGrant: WedPlannedSupportGrant | null;
+    grants: WedPlannedSupportGrant[];
+    recentEvents: WedPlannedSupportEvent[];
+  };
+  exports: WedPlannedExportEvent[];
+  deletion: {
+    activeRequest: WedPlannedDeletionRequest | null;
+    requests: WedPlannedDeletionRequest[];
+    coolingOffDays: number;
+    protectedRecords: string[];
+  };
 };

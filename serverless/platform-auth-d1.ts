@@ -1,4 +1,5 @@
 import { getDefaultWorkspaceId, getWorkspace } from "./workspace-d1";
+import { recordSupportRequest } from "./platform-operations-d1";
 
 type D1Db = any;
 
@@ -21,6 +22,9 @@ export type ProfessionalMembershipSummary = {
   marketplaceSlug: string;
   role: string;
   status: string;
+  accessMode: "membership" | "support";
+  supportGrantId: string;
+  supportScope: "" | "read" | "manage";
 };
 
 export type ProfessionalContext = {
@@ -40,6 +44,9 @@ export type ProfessionalContext = {
   role: string;
   permissions: string[];
   memberships: ProfessionalMembershipSummary[];
+  accessMode: "membership" | "support" | "bootstrap" | "none";
+  supportGrantId: string;
+  supportScope: "" | "read" | "manage";
 };
 
 const SESSION_COOKIE = "wedplanned_admin_session";
@@ -48,11 +55,11 @@ const INVITATION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const SESSION_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
 const ROLE_PERMISSIONS: Record<string, string[]> = {
-  owner: ["platform:read", "business:update", "services:update", "members:read", "members:manage", "workspace:switch"],
-  admin: ["platform:read", "business:update", "services:update", "members:read", "members:manage", "workspace:switch"],
-  manager: ["platform:read", "business:update", "services:update", "members:read", "workspace:switch"],
+  owner: ["platform:read", "business:update", "services:update", "members:read", "members:manage", "workspace:switch", "operations:read", "support:manage", "data:export", "deletion:request"],
+  admin: ["platform:read", "business:update", "services:update", "members:read", "members:manage", "workspace:switch", "operations:read", "data:export"],
+  manager: ["platform:read", "business:update", "services:update", "members:read", "workspace:switch", "operations:read"],
   content: ["platform:read", "business:update", "services:update", "members:read", "workspace:switch"],
-  finance: ["platform:read", "members:read", "workspace:switch"],
+  finance: ["platform:read", "members:read", "workspace:switch", "operations:read", "data:export"],
   staff: ["platform:read", "members:read", "workspace:switch"],
   viewer: ["platform:read", "members:read", "workspace:switch"],
 };
@@ -125,9 +132,22 @@ function unique(values: string[]) {
   return [...new Set(values.filter(Boolean))];
 }
 
-function permissionsFor(role: string, platformRole = "member") {
+function permissionsFor(role: string, platformRole = "member", accessMode: "membership" | "support" = "membership", supportScope: "" | "read" | "manage" = "") {
+  if (accessMode === "support") {
+    return unique([
+      "platform:read",
+      "members:read",
+      "workspace:switch",
+      "operations:read",
+      "support:access",
+      ...(supportScope === "manage" ? ["business:update", "services:update"] : []),
+    ]);
+  }
   if (platformRole === "platform_admin") {
-    return ["platform:read", "business:update", "services:update", "members:read", "members:manage", "workspace:switch", "platform:admin"];
+    return unique([
+      ...ROLE_PERMISSIONS.owner,
+      "platform:admin",
+    ]);
   }
   return unique(ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS.viewer);
 }
@@ -206,7 +226,53 @@ async function loadMemberships(db: D1Db, userId: string): Promise<ProfessionalMe
     marketplaceSlug: text(row.marketplace_slug),
     role: text(row.role),
     status: text(row.status),
+    accessMode: "membership",
+    supportGrantId: "",
+    supportScope: "",
   }));
+}
+
+async function loadSupportMemberships(db: D1Db, userId: string, platformRole: string): Promise<ProfessionalMembershipSummary[]> {
+  if (!["support", "platform_admin"].includes(platformRole)) return [];
+  const result = await db.prepare(`
+    SELECT
+      psg.id,
+      psg.workspace_id,
+      psg.scope,
+      w.slug AS workspace_slug,
+      COALESCE(NULLIF(bp.public_name, ''), w.name) AS business_name,
+      COALESCE(bp.marketplace_slug, '') AS marketplace_slug
+    FROM platform_support_grants psg
+    JOIN workspaces w ON w.id = psg.workspace_id AND w.status = 'active'
+    LEFT JOIN business_profiles bp ON bp.workspace_id = psg.workspace_id
+    WHERE psg.status = 'active'
+      AND datetime(psg.expires_at) > CURRENT_TIMESTAMP
+    ORDER BY datetime(psg.expires_at) ASC, business_name COLLATE NOCASE
+  `).all();
+  return (result.results || []).map((row: any) => ({
+    id: `support:${text(row.id)}`,
+    workspaceId: text(row.workspace_id),
+    workspaceSlug: text(row.workspace_slug),
+    businessName: text(row.business_name),
+    marketplaceSlug: text(row.marketplace_slug),
+    role: "support",
+    status: "active",
+    accessMode: "support",
+    supportGrantId: text(row.id),
+    supportScope: text(row.scope) === "manage" ? "manage" : "read",
+  }));
+}
+
+async function loadAccessOptions(db: D1Db, userId: string, platformRole: string): Promise<ProfessionalMembershipSummary[]> {
+  const memberships = await loadMemberships(db, userId);
+  const support = await loadSupportMemberships(db, userId, platformRole);
+  const seen = new Set<string>();
+  return [...memberships, ...support].filter((item) => {
+    const key = item.workspaceId;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 async function bootstrapContext(db: D1Db, env: PlatformAuthEnv): Promise<ProfessionalContext> {
@@ -222,6 +288,9 @@ async function bootstrapContext(db: D1Db, env: PlatformAuthEnv): Promise<Profess
     marketplaceSlug: text(profile?.marketplace_slug),
     role: "owner",
     status: "active",
+    accessMode: "membership",
+    supportGrantId: "",
+    supportScope: "",
   };
   return {
     accessGranted: true,
@@ -240,6 +309,9 @@ async function bootstrapContext(db: D1Db, env: PlatformAuthEnv): Promise<Profess
     role: "owner",
     permissions: permissionsFor("owner", "platform_admin"),
     memberships: [membership],
+    accessMode: "bootstrap",
+    supportGrantId: "",
+    supportScope: "",
   };
 }
 
@@ -267,7 +339,8 @@ export async function getProfessionalContext(db: D1Db, request: Request, env: Pl
     `).bind(tokenHash).first();
 
     if (row) {
-      const memberships = await loadMemberships(db, text(row.user_id));
+      const platformRole = text(row.platform_role || "member");
+      const memberships = await loadAccessOptions(db, text(row.user_id), platformRole);
       const active = memberships.find((membership) => membership.workspaceId === text(row.active_workspace_id)) || memberships[0];
       if (active) {
         if (active.workspaceId !== text(row.active_workspace_id)) {
@@ -283,15 +356,18 @@ export async function getProfessionalContext(db: D1Db, request: Request, env: Pl
           userId: text(row.user_id),
           email: text(row.email),
           displayName: text(row.display_name),
-          platformRole: text(row.platform_role || "member"),
+          platformRole,
           membershipId: active.id,
           workspaceId: active.workspaceId,
           workspaceSlug: active.workspaceSlug,
           businessName: active.businessName,
           marketplaceSlug: active.marketplaceSlug,
           role: active.role,
-          permissions: permissionsFor(active.role, text(row.platform_role)),
+          permissions: permissionsFor(active.role, platformRole, active.accessMode, active.supportScope),
           memberships,
+          accessMode: active.accessMode,
+          supportGrantId: active.supportGrantId,
+          supportScope: active.supportScope,
         };
       }
     }
@@ -316,6 +392,9 @@ export async function getProfessionalContext(db: D1Db, request: Request, env: Pl
     role: "",
     permissions: [],
     memberships: [],
+    accessMode: "none",
+    supportGrantId: "",
+    supportScope: "",
   };
 }
 
@@ -413,10 +492,20 @@ export async function requestProfessionalLoginLink(db: D1Db, env: PlatformAuthEn
     SELECT pu.id, pu.email, pu.display_name
     FROM platform_users pu
     WHERE pu.email_normalized = ? AND pu.status = 'active'
-      AND EXISTS (
-        SELECT 1 FROM business_memberships bm
-        JOIN workspaces w ON w.id = bm.workspace_id AND w.status = 'active'
-        WHERE bm.user_id = pu.id AND bm.status = 'active'
+      AND (
+        EXISTS (
+          SELECT 1 FROM business_memberships bm
+          JOIN workspaces w ON w.id = bm.workspace_id AND w.status = 'active'
+          WHERE bm.user_id = pu.id AND bm.status = 'active'
+        )
+        OR (
+          pu.platform_role IN ('support', 'platform_admin')
+          AND EXISTS (
+            SELECT 1 FROM platform_support_grants psg
+            JOIN workspaces w ON w.id = psg.workspace_id AND w.status = 'active'
+            WHERE psg.status = 'active' AND datetime(psg.expires_at) > CURRENT_TIMESTAMP
+          )
+        )
       )
     LIMIT 1
   `).bind(email).first();
@@ -591,6 +680,7 @@ export async function verifyProfessionalAuthLink(db: D1Db, rawToken: string) {
       pal.*,
       pu.email,
       pu.display_name,
+      pu.platform_role,
       pu.status AS user_status,
       bm.workspace_id,
       bm.status AS membership_status,
@@ -635,10 +725,10 @@ export async function verifyProfessionalAuthLink(db: D1Db, rawToken: string) {
     WHERE id = ?
   `).bind(text(row.purpose) === "invitation" ? "invitation" : "magic_link", text(row.user_id)).run();
 
-  const memberships = await loadMemberships(db, text(row.user_id));
+  const memberships = await loadAccessOptions(db, text(row.user_id), text(row.platform_role || "member"));
   const preferredWorkspaceId = text(row.workspace_id);
   const active = memberships.find((membership) => membership.workspaceId === preferredWorkspaceId) || memberships[0];
-  if (!active) return { ok: false, status: 403, error: "No active business membership is available for this account." } as const;
+  if (!active) return { ok: false, status: 403, error: "No active business or support access is available for this account." } as const;
 
   const rawSession = randomToken(32);
   const sessionHash = await sha256(rawSession);
@@ -657,8 +747,25 @@ export async function verifyProfessionalAuthLink(db: D1Db, rawToken: string) {
     eventType: text(row.purpose) === "invitation" ? "auth.invitation.accepted" : "auth.login.completed",
     entityType: "session",
     entityId: sessionId,
-    summary: text(row.purpose) === "invitation" ? `Accepted invitation to ${active.businessName}.` : `Signed in to ${active.businessName}.`,
+    summary: text(row.purpose) === "invitation"
+      ? `Accepted invitation to ${active.businessName}.`
+      : active.accessMode === "support"
+        ? `Signed in with support access to ${active.businessName}.`
+        : `Signed in to ${active.businessName}.`,
   });
+  if (active.accessMode === "support") {
+    await recordSupportRequest(db, {
+      grantId: active.supportGrantId,
+      workspaceId: active.workspaceId,
+      supportUserId: text(row.user_id),
+      supportEmail: text(row.email),
+      eventType: "support.session.started",
+      method: "AUTH",
+      path: "/api/platform-auth/verify",
+      statusCode: 200,
+      metadata: { scope: active.supportScope },
+    });
+  }
 
   db.prepare(`DELETE FROM platform_sessions WHERE datetime(expires_at) <= datetime('now', '-1 day') OR revoked_at IS NOT NULL`).run().catch(() => {});
   db.prepare(`DELETE FROM platform_auth_links WHERE datetime(expires_at) <= datetime('now', '-7 days')`).run().catch(() => {});
@@ -692,11 +799,26 @@ export async function switchProfessionalWorkspace(db: D1Db, request: Request, en
     workspaceId,
     actorUserId: context.userId,
     actorEmail: context.email,
-    eventType: "auth.workspace.switched",
+    eventType: membership.accessMode === "support" ? "support.workspace.activated" : "auth.workspace.switched",
     entityType: "workspace",
     entityId: workspaceId,
-    summary: `Switched to ${membership.businessName}.`,
+    summary: membership.accessMode === "support"
+      ? `Activated ${membership.supportScope} support access to ${membership.businessName}.`
+      : `Switched to ${membership.businessName}.`,
   });
+  if (membership.accessMode === "support") {
+    await recordSupportRequest(db, {
+      grantId: membership.supportGrantId,
+      workspaceId,
+      supportUserId: context.userId,
+      supportEmail: context.email,
+      eventType: "support.workspace.activated",
+      method: "POST",
+      path: "/api/platform-auth/switch-workspace",
+      statusCode: 200,
+      metadata: { scope: membership.supportScope },
+    });
+  }
   return getProfessionalContext(db, request, env);
 }
 

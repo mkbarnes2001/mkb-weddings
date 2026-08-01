@@ -1,27 +1,36 @@
 # Project State
 
 ## Version
-Current release: **v1.8.2f — Gallery UI Follow-up**.
-Database schema version: **25**.
+Current release in source: **v1.8.3 — Platform Operations Foundation**.
+Database schema version: **26**.
+Production baseline before this release: commit `e0e3ab6`, schema **25**.
 
-## Gallery UI Follow-up — v1.8.2f
-- Keeps the v1.8.2 tenant boundary and schema 25 unchanged.
-- Venue Gallery cards now show compact H/V/M assignment indicators below the thumbnail rather than large overlay labels.
-- Moments top actions use the shared small Admin button system so they stay single-row and compact.
-- Public Client Galleries use the Admin Montserrat typography consistently, including headings and the Print Store.
-- Shop Prints now scrolls at the modal-overlay level with body/root scrolling locked, avoiding the previous desktop/mobile nested-scroll failure.
-- No D1, R2, DNS or environment-variable changes are required.
+## Platform Operations Foundation — v1.8.3
+- Adds business-owned support grants with explicit read-only/managed scope and 1/4/24/72-hour expiry.
+- Makes support workspace access available only to `support`/`platform_admin` users while a live grant exists.
+- Applies a nested API middleware guard so read-only support cannot perform POST/PUT/PATCH/DELETE actions.
+- Records support activation and request events without storing request bodies or business content in the support log.
+- Adds owner/admin/finance workspace data export permissions; support sessions cannot export.
+- Exports structured workspace records and asset/storage references, not binary photographs; authentication/session secrets are excluded and gallery/print/upload capability secrets are redacted.
+- Adds staged business deletion requests with a 14-day cooling-off period and owner cancellation. No destructive deletion is executed by this release.
+- Adds Admin → WedPlanned → Operations for support, export history, deletion controls and recent support activity.
+- Adds migration `026_platform_operations_foundation.sql`; schema advances to **26**.
+- Adds `scripts/test-platform-operations.py` and extends the tenant test to schema 26.
 
-## Admin UI & Usability Polish — v1.8.2e
-- Keeps the production-complete v1.8.2 tenant boundary and schema 25 unchanged.
-- Standardises the WedPlanned professional sign-in and Client Gallery typography on the Admin sans-serif system.
-- Replaces the legacy Admin sidebar wordmark block with the existing MKB logo while preserving authenticated business/session controls.
-- Condenses Venue Gallery controls, image badges and inspector density; removes star ratings and simplifies multi-select to Show/Hide, Assign to moment and Clear.
-- Makes the WedPlanned Services selector independently scrollable.
-- Adds optional human-readable Client Gallery slugs while retaining the secret access token in every private share URL and preserving the existing token-only route.
-- Rebuilds the Client Gallery Print Store drawer as a fixed-height flex panel with its own scroll region on desktop and mobile.
-- Separates and compacts Moment cards with a clearer drag-to-reorder handle and consistent black actions.
-- No D1 migration, R2 migration or environment-variable change is required.
+## CRM decision
+The CRM is the next major product phase. The platform sequence is now CRM foundation before full Stripe Connect, because connected payments need Jobs, quotes and invoices to own the commercial relationship.
+
+The first MKB workflow will be:
+
+`Lead form → Enquiry pipeline → Accepted Job → Wedding created/linked → Client portal → Questionnaires → Supplier team → Delivery / Client Gallery`
+
+The commercial entity will be a neutral Job so WedPlanned works for every wedding professional. The existing Wedding record remains the wedding content/delivery/publishing record linked to that Job. See `WEDPLANNED-CRM.md`.
+
+## Stable v1.8.2g/h UI baseline
+- Clean Client Gallery slug-only links work while legacy token links remain valid.
+- Client Gallery Shop Prints opens as a standalone page with normal desktop/mobile scrolling.
+- Venue Gallery, Moments and Admin sidebar compact polish are deployed.
+- No schema change was required for these UI releases.
 
 ## v1.8.2 production ownership audit — COMPLETE
 - Production migration 025 completed successfully and schema 25 / foreign keys were verified.

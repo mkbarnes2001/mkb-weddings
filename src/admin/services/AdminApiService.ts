@@ -9,7 +9,7 @@ import type { AssetLibraryFilters, AssetLibraryPayload } from "../types/asset";
 import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, ClientGalleryListPayload, ClientGalleryRecord, PrivateOriginalUploadSession, PrivateOriginalUploadedPart } from "../types/clientGallery";
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
-import type { ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedServiceArea } from "../types/platform";
+import type { ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
 import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
@@ -1148,6 +1148,38 @@ export class AdminApiService {
 
   static async updateWedPlannedMember(member: Partial<WedPlannedMember> & { id: string }) {
     return (await this.mutateWedPlannedPlatform({ action: "updateMember", member })).platform;
+  }
+
+  static async getWedPlannedOperations() {
+    return request<WedPlannedOperationsPayload>("/api/platform-operations");
+  }
+
+  static async mutateWedPlannedOperations(payload: Record<string, unknown>) {
+    const result = await request<{ ok: true; operations: WedPlannedOperationsPayload }>("/api/platform-operations", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return result.operations;
+  }
+
+  static async grantWedPlannedSupport(scope: "read" | "manage", hours: number, reason: string) {
+    return this.mutateWedPlannedOperations({ action: "grant-support", scope, hours, reason });
+  }
+
+  static async revokeWedPlannedSupport(grantId: string) {
+    return this.mutateWedPlannedOperations({ action: "revoke-support", grantId });
+  }
+
+  static async requestWedPlannedDeletion(confirmationName: string, reason: string) {
+    return this.mutateWedPlannedOperations({ action: "request-deletion", confirmationName, reason });
+  }
+
+  static async cancelWedPlannedDeletion(requestId: string) {
+    return this.mutateWedPlannedOperations({ action: "cancel-deletion", requestId });
+  }
+
+  static wedPlannedExportUrl() {
+    return `${API_BASE}/api/platform-operations/export`;
   }
 
   static async getWorkspace() {

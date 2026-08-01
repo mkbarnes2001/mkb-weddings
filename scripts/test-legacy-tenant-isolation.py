@@ -271,7 +271,7 @@ def main() -> None:
         columns = {row[1] for row in con.execute(f"PRAGMA table_info({table})")}
         assert "workspace_id" in columns, f"{table} is missing workspace_id"
 
-    assert execute_one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "25"
+    assert execute_one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "26"
     assert not con.execute("PRAGMA foreign_key_check").fetchall()
 
     assert_source_contains(
@@ -353,15 +353,27 @@ def main() -> None:
         "JOIN client_galleries cg ON cg.id = cga.gallery_id AND cg.workspace_id = ?",
         "AND awl.workspace_id = ?",
     )
+    assert_source_contains(
+        "serverless/platform-operations-d1.ts",
+        "workspace_id = ?",
+        "Support sessions cannot download a business data export.",
+        "platform_support_events",
+        "workspace_deletion_requests",
+    )
+    assert_source_contains(
+        "functions/api/_middleware.ts",
+        "This support session is read-only.",
+        "recordSupportRequest",
+    )
 
-    print("PASS v1.8.2 tenant isolation")
+    print("PASS v1.8.3 tenant isolation")
     print("  read/infer: blocked")
     print("  mutate: blocked")
     print("  publish: blocked")
     print("  R2 key/download lookup: blocked")
     print("  Client Gallery/Print Store active-workspace access: guarded")
     print("  public-domain workspace resolution: verified")
-    print("  schema version: 25")
+    print("  schema version: 26")
 
 
 if __name__ == "__main__":

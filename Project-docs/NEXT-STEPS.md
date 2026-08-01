@@ -1,41 +1,79 @@
 # Next Steps
 
 ## Current baseline
-v1.8.2 tenant ownership is **production-complete** on schema **25**. The production audit passed with a real second business, known MKB slugs/IDs, mutation/publish attempts, private-original access and verified-domain resolution. `workspace_wedplanned_test` remains available as a regression tenant.
+The production baseline is commit `e0e3ab6` with v1.8.2 tenant ownership, clean Client Gallery slugs, the standalone Print Store and the latest Admin UI polish. Production D1 is schema **25** and the live second-business isolation audit has passed.
 
-v1.8.2e is deployed. v1.8.2f is the small no-migration Gallery UI follow-up for the remaining Venue/Moments/Client Gallery issues found in live testing. It does not change the tenant model, D1 schema, R2 ownership or environment configuration.
+## v1.8.3 — Platform Operations Foundation
+This release advances D1 to schema **26** and closes the final operational safeguards before the CRM begins.
 
-## v1.8.2f deployment and validation
-1. Run `python3 scripts/test-legacy-tenant-isolation.py` and require a PASS.
-2. Run `npm run build` and `npm run build:admin` in the normal Mac development environment.
-3. Run `git diff --check`.
-4. Confirm Venue Gallery thumbnails no longer carry large Venue/Moments overlay text and instead show compact H/V/M indicators below the image.
-5. Confirm Moment-page Add moment / Save actions are slim single-row Admin buttons at desktop and mobile widths.
-6. Confirm the public/private Client Gallery uses Montserrat consistently for headings, body copy and Shop Prints.
-7. Open Shop Prints at 100% browser zoom and confirm the drawer scrolls from Step 1 through crop controls, cart and checkout without scrolling the gallery behind it. Repeat on mobile.
-8. Switch once to `workspace_wedplanned_test` and confirm no MKB data appears.
+Included:
+1. Time-bounded support grants owned by the active business.
+2. Read-only or managed support scope.
+3. Read-only support enforcement at the API boundary.
+4. Support request/session audit events.
+5. Workspace-scoped structured JSON data export, excluding authentication/session secrets and image binaries and redacting gallery/print/upload capability secrets.
+6. Export history.
+7. Staged business deletion requests with a 14-day cooling-off period.
+8. Cancellation and protected-record/asset safeguards; no automatic destructive deletion.
+9. Admin → WedPlanned → Operations UI.
+10. Migration `026_platform_operations_foundation.sql`.
 
-Detailed ownership, rollback and R2 notes remain in `WEDPLANNED-TENANT-OWNERSHIP.md`.
+## v1.8.3 validation and rollout
+1. Run `python3 scripts/test-legacy-tenant-isolation.py` and require PASS/schema 26.
+2. Run `python3 scripts/test-platform-operations.py` and require PASS.
+3. Run `npm run build` and `npm run build:admin`.
+4. Run `git diff --check`.
+5. Commit locally, but do not push.
+6. Export/backup production D1 and capture a Time Travel bookmark.
+7. Apply migration 026 before deploying code.
+8. Verify schema 26 and `PRAGMA foreign_key_check`.
+9. Push code and confirm both Pages deployments.
+10. Test Operations on MKB and `workspace_wedplanned_test`:
+   - support grant/revoke remains workspace-scoped;
+   - data export contains only the active business;
+   - staged deletion request can be created and cancelled;
+   - read-only support POST/PUT/DELETE requests are blocked.
 
-## Next engineering sequence
-1. Deploy and smoke-test the v1.8.2f Gallery UI follow-up above.
-2. Add support-access controls with explicit, time-bounded support authority and auditable support events.
-3. Add business data-export foundations covering workspace-owned operational records and asset references without leaking another business's data.
-4. Add account/business deletion foundations with explicit retention rules, staged deletion and protected payment/audit records.
-5. Build **v1.8.3 Stripe Connect & Commercial Billing** only after the v1.8.2 production ownership audit passes.
-6. Add hosted connected-account onboarding and connected-account webhooks so each professional receives their own client payments.
-7. Add Stripe Billing for WedPlanned subscriptions separately from couple-to-professional payments.
-8. Build the universal CRM and client/couple portal: enquiries, contacts, weddings/jobs, tasks, messages, questionnaires, quotes, contracts and invoices.
-9. Add services, packages, availability and online booking after CRM, contracts and connected-payment ownership are established.
-10. Add public supplier profiles, marketplace search, advertising and collaborative content only after private tenant operations are secure.
+## Next major product phase — v1.9 CRM
+The CRM now comes **before full Stripe Connect**, because quotes, invoices and client payments need a durable Enquiry → Job/Wedding workflow to attach to.
+
+### v1.9.0 CRM Foundation
+- contacts;
+- public lead/enquiry form;
+- enquiry pipeline;
+- accepted/lost workflow;
+- accepted enquiry creates a neutral Job and links/creates the workspace Wedding record;
+- activity history and audit.
+
+### v1.9.1 Client Portal and Questionnaires
+- portal invitations;
+- versioned questionnaires and structured responses;
+- client-entered supplier team;
+- Supplier Master search plus review/merge queue for unknown suppliers;
+- approved responses update the Job/Wedding relationships.
+
+### v1.9.2 Commercial workflow
+- services and packages;
+- quotes;
+- contracts;
+- invoices/payment schedules;
+- tasks, workflow templates and reminders.
+
+### v1.9.3 Connected payments
+- Stripe Connect onboarding and account webhooks;
+- invoice/payment webhooks;
+- business-owned client payments;
+- Stripe Billing for WedPlanned subscriptions remains a separate relationship.
+
+See `WEDPLANNED-CRM.md` for the detailed model and conversion workflow.
 
 ## Guardrails
 - `workspaces.id` remains the durable business ownership key.
-- A browser-supplied workspace or business ID is never an access-control decision.
-- Public legacy content is selected from a verified domain mapping; unknown production domains do not inherit the default tenant.
-- One photograph equals one canonical asset. Gallery membership changes never duplicate or delete private originals.
-- Existing MKB published URLs and R2 objects remain stable through migration 025.
-- Public marketplace fields remain separate from private CRM, payment, contract and operational data.
-- Couple/client payments and professional SaaS subscriptions remain separate Stripe relationships.
-- The v1.8.2 production ownership audit has passed; Stripe Connect may proceed only after the planned support/export/deletion foundations are deliberately sequenced.
-- A rollback path must remain available while authentication or ownership migrations are being enabled.
+- Browser-supplied workspace IDs are never an access-control decision.
+- Unknown public domains never inherit another tenant.
+- Support access is explicit, time-bounded and auditable.
+- Support sessions cannot download business exports or request deletion.
+- Deletion requests are staged; payment/audit/fulfilment records and private assets require deliberate execution rules.
+- A CRM Job is the commercial source of truth; the existing Wedding remains the content/delivery/publishing record.
+- Client-entered suppliers cannot overwrite the reusable Supplier Master directly.
+- Couple/client payments and WedPlanned SaaS subscriptions remain separate Stripe relationships.
