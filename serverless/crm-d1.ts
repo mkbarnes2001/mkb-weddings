@@ -1,3 +1,5 @@
+import { applyDefaultWorkflowToJob, ensureWorkflowWorkspaceSetup } from "./crm-workflow-d1";
+
 type D1Db = any;
 
 export type CrmActor = {
@@ -198,6 +200,7 @@ function hydrateEnquiry(row: any) {
       email: text(row.partner_contact_email),
       phone: text(row.partner_contact_phone),
     } : null,
+    lastCommunicationAt: row.last_communication_at || undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -222,6 +225,12 @@ function hydrateJob(row: any) {
     venueSlug: text(row.venue_slug),
     clientPortalStatus: text(row.client_portal_status),
     weddingSlug: text(row.wedding_slug),
+    taskTotal: Number(row.task_total || 0),
+    taskCompleted: Number(row.task_completed || 0),
+    taskPending: Number(row.task_pending || 0),
+    taskOverdue: Number(row.task_overdue || 0),
+    nextTaskTitle: text(row.next_task_title),
+    nextTaskDueAt: text(row.next_task_due_at),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -232,7 +241,9 @@ const ENQUIRY_SELECT = `
     pc.id AS primary_contact_id, pc.display_name AS primary_contact_name,
     pc.email AS primary_contact_email, pc.phone AS primary_contact_phone,
     partner.id AS partner_contact_id, partner.display_name AS partner_contact_name,
-    partner.email AS partner_contact_email, partner.phone AS partner_contact_phone
+    partner.email AS partner_contact_email, partner.phone AS partner_contact_phone,
+    (SELECT MAX(communication.occurred_at) FROM crm_communications communication
+      WHERE communication.workspace_id = e.workspace_id AND communication.enquiry_id = e.id) AS last_communication_at
   FROM crm_enquiries e
   JOIN crm_pipeline_stages s ON s.id = e.stage_id AND s.workspace_id = e.workspace_id
   LEFT JOIN crm_enquiry_contacts epc ON epc.enquiry_id = e.id AND epc.workspace_id = e.workspace_id AND epc.role = 'primary'
@@ -273,6 +284,7 @@ async function ensureCrmWorkspaceSetup(db: D1Db, workspaceId: string) {
     `).bind(workspaceId, workspaceId),
   );
   await db.batch(statements);
+  await ensureWorkflowWorkspaceSetup(db, workspaceId);
 }
 
 async function defaultStage(db: D1Db, workspaceId: string) {
@@ -404,7 +416,17 @@ export async function getCrmOverview(db: D1Db, actor: CrmActor) {
     db.prepare(`SELECT * FROM crm_pipeline_stages WHERE workspace_id = ? AND status = 'active' ORDER BY sort_order, name`).bind(actor.workspaceId).all(),
     db.prepare(`${ENQUIRY_SELECT} WHERE e.workspace_id = ? AND e.status <> 'archived' ORDER BY e.created_at DESC`).bind(actor.workspaceId).all(),
     db.prepare(`SELECT * FROM crm_contacts WHERE workspace_id = ? AND status = 'active' ORDER BY updated_at DESC LIMIT 200`).bind(actor.workspaceId).all(),
-    db.prepare(`SELECT * FROM crm_jobs WHERE workspace_id = ? AND status <> 'archived' ORDER BY created_at DESC LIMIT 200`).bind(actor.workspaceId).all(),
+    db.prepare(`
+      SELECT job.*,
+        (SELECT COUNT(*) FROM crm_tasks task WHERE task.workspace_id = job.workspace_id AND task.job_id = job.id AND task.status <> 'cancelled') AS task_total,
+        (SELECT COUNT(*) FROM crm_tasks task WHERE task.workspace_id = job.workspace_id AND task.job_id = job.id AND task.status = 'completed') AS task_completed,
+        (SELECT COUNT(*) FROM crm_tasks task WHERE task.workspace_id = job.workspace_id AND task.job_id = job.id AND task.status = 'pending') AS task_pending,
+        (SELECT COUNT(*) FROM crm_tasks task WHERE task.workspace_id = job.workspace_id AND task.job_id = job.id AND task.status = 'pending' AND trim(task.due_at) <> '' AND task.due_at < date('now')) AS task_overdue,
+        (SELECT task.title FROM crm_tasks task WHERE task.workspace_id = job.workspace_id AND task.job_id = job.id AND task.status = 'pending' ORDER BY CASE WHEN trim(task.due_at) = '' THEN 1 ELSE 0 END, task.due_at, task.created_at LIMIT 1) AS next_task_title,
+        (SELECT task.due_at FROM crm_tasks task WHERE task.workspace_id = job.workspace_id AND task.job_id = job.id AND task.status = 'pending' ORDER BY CASE WHEN trim(task.due_at) = '' THEN 1 ELSE 0 END, task.due_at, task.created_at LIMIT 1) AS next_task_due_at
+      FROM crm_jobs job WHERE job.workspace_id = ? AND job.status <> 'archived'
+      ORDER BY CASE WHEN trim(job.event_date) = '' THEN 1 ELSE 0 END, job.event_date, job.created_at DESC LIMIT 200
+    `).bind(actor.workspaceId).all(),
     db.prepare(`
       SELECT lead.*, settings.currency AS workspace_currency
       FROM crm_lead_form_settings lead
@@ -414,7 +436,7 @@ export async function getCrmOverview(db: D1Db, actor: CrmActor) {
   ]);
   const enquiries = (enquiryResult.results || []).map(hydrateEnquiry);
   return {
-    schemaVersion: 27,
+    schemaVersion: 30,
     workspace: { id: actor.workspaceId, name: text(actor.businessName), currency: text(settings?.workspace_currency || "GBP") },
     stages: (stageResult.results || []).map(hydrateStage),
     enquiries,
@@ -431,6 +453,9 @@ export async function getCrmOverview(db: D1Db, actor: CrmActor) {
       notificationEmail: text(settings?.notification_email),
       privacyText: text(settings?.privacy_text),
       consentRequired: settings?.consent_required === undefined ? true : Boolean(settings?.consent_required),
+      autoresponderEnabled: Boolean(settings?.autoresponder_enabled),
+      autoresponderSubject: text(settings?.autoresponder_subject || "We have received your enquiry"),
+      autoresponderMessage: text(settings?.autoresponder_message || "Thank you for getting in touch. We have received your enquiry and will reply as soon as possible."),
     },
     stats: {
       open: enquiries.filter((item: any) => item.status === "open").length,
@@ -446,10 +471,11 @@ export async function getCrmEnquiry(db: D1Db, actor: CrmActor, enquiryId: string
   requirePermission(actor, "crm:read");
   const row = await db.prepare(`${ENQUIRY_SELECT} WHERE e.workspace_id = ? AND e.id = ? LIMIT 1`).bind(actor.workspaceId, enquiryId).first();
   if (!row) throw httpError("Enquiry not found.", 404);
-  const [contacts, activityResult, job] = await Promise.all([
+  const [contacts, activityResult, job, communications] = await Promise.all([
     getContactsForEnquiry(db, actor.workspaceId, enquiryId),
     db.prepare(`SELECT * FROM crm_activities WHERE workspace_id = ? AND entity_type = 'enquiry' AND entity_id = ? ORDER BY created_at DESC LIMIT 100`).bind(actor.workspaceId, enquiryId).all(),
     db.prepare(`SELECT * FROM crm_jobs WHERE workspace_id = ? AND enquiry_id = ? LIMIT 1`).bind(actor.workspaceId, enquiryId).first(),
+    db.prepare(`SELECT * FROM crm_communications WHERE workspace_id = ? AND enquiry_id = ? ORDER BY occurred_at DESC, created_at DESC LIMIT 100`).bind(actor.workspaceId, enquiryId).all(),
   ]);
   return {
     enquiry: hydrateEnquiry(row),
@@ -459,6 +485,11 @@ export async function getCrmEnquiry(db: D1Db, actor: CrmActor, enquiryId: string
       actorEmail: text(item.actor_email), metadata: safeJson(item.metadata_json, {}), createdAt: item.created_at,
     })),
     job: job ? hydrateJob(job) : null,
+    communications: (communications.results || []).map((item: any) => ({
+      id: text(item.id), contactId: text(item.contact_id), enquiryId: text(item.enquiry_id), jobId: text(item.job_id),
+      channel: text(item.channel), direction: text(item.direction), subject: text(item.subject), body: text(item.body),
+      status: text(item.status), occurredAt: item.occurred_at, actorEmail: text(item.actor_email), createdAt: item.created_at,
+    })),
   };
 }
 
@@ -680,6 +711,7 @@ export async function acceptEnquiry(db: D1Db, actor: CrmActor, enquiryId: string
   );
   await db.batch(statements);
   await platformAudit(db, actor, { eventType: "crm.enquiry.accepted", entityType: "crm_job", entityId: jobId, summary: `Accepted ${text(enquiryRow.reference)} and created ${jobReference}.`, metadata: { enquiryId, weddingSlug: linkedWeddingSlug } });
+  await applyDefaultWorkflowToJob(db, actor, jobId).catch(() => null);
   const job = await db.prepare(`SELECT * FROM crm_jobs WHERE workspace_id = ? AND id = ? LIMIT 1`).bind(actor.workspaceId, jobId).first();
   return { enquiry: (await getCrmEnquiry(db, actor, enquiryId)).enquiry, job: hydrateJob(job), idempotent: false };
 }
@@ -688,7 +720,7 @@ export async function getCrmContact(db: D1Db, actor: CrmActor, contactId: string
   requirePermission(actor, "crm:read");
   const row = await db.prepare(`SELECT * FROM crm_contacts WHERE id = ? AND workspace_id = ? LIMIT 1`).bind(contactId, actor.workspaceId).first();
   if (!row) throw httpError("Contact not found.", 404);
-  const [enquiries, jobs, activities] = await Promise.all([
+  const [enquiries, jobs, activities, communications] = await Promise.all([
     db.prepare(`
       SELECT enquiry.id, enquiry.reference, enquiry.status, enquiry.event_date, enquiry.venue_text, link.role
       FROM crm_enquiry_contacts link
@@ -708,6 +740,7 @@ export async function getCrmContact(db: D1Db, actor: CrmActor, contactId: string
       WHERE workspace_id = ? AND entity_type = 'contact' AND entity_id = ?
       ORDER BY created_at DESC LIMIT 100
     `).bind(actor.workspaceId, contactId).all(),
+    db.prepare(`SELECT * FROM crm_communications WHERE workspace_id = ? AND contact_id = ? ORDER BY occurred_at DESC, created_at DESC LIMIT 100`).bind(actor.workspaceId, contactId).all(),
   ]);
   return {
     contact: hydrateContact(row),
@@ -719,6 +752,11 @@ export async function getCrmContact(db: D1Db, actor: CrmActor, contactId: string
     activities: (activities.results || []).map((item: any) => ({
       id: text(item.id), eventType: text(item.event_type), summary: text(item.summary),
       actorEmail: text(item.actor_email), metadata: safeJson(item.metadata_json, {}), createdAt: item.created_at,
+    })),
+    communications: (communications.results || []).map((item: any) => ({
+      id: text(item.id), contactId: text(item.contact_id), enquiryId: text(item.enquiry_id), jobId: text(item.job_id),
+      channel: text(item.channel), direction: text(item.direction), subject: text(item.subject), body: text(item.body),
+      status: text(item.status), occurredAt: item.occurred_at, actorEmail: text(item.actor_email), createdAt: item.created_at,
     })),
   };
 }
@@ -798,26 +836,30 @@ export async function saveLeadFormSettings(db: D1Db, actor: CrmActor, input: any
   await db.prepare(`
     INSERT INTO crm_lead_form_settings (
       workspace_id, enabled, public_path, default_service, title, intro, thank_you_title,
-      thank_you_message, notification_email, privacy_text, consent_required, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      thank_you_message, notification_email, privacy_text, consent_required, autoresponder_enabled,
+      autoresponder_subject, autoresponder_message, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     ON CONFLICT(workspace_id) DO UPDATE SET
       enabled = excluded.enabled, public_path = excluded.public_path,
       default_service = excluded.default_service, title = excluded.title,
       intro = excluded.intro, thank_you_title = excluded.thank_you_title,
       thank_you_message = excluded.thank_you_message, notification_email = excluded.notification_email,
       privacy_text = excluded.privacy_text, consent_required = excluded.consent_required,
-      updated_at = CURRENT_TIMESTAMP
+      autoresponder_enabled = excluded.autoresponder_enabled, autoresponder_subject = excluded.autoresponder_subject,
+      autoresponder_message = excluded.autoresponder_message, updated_at = CURRENT_TIMESTAMP
   `).bind(
     actor.workspaceId, input?.enabled ? 1 : 0, publicPath, text(input?.defaultService), text(input?.title), text(input?.intro),
     text(input?.thankYouTitle), text(input?.thankYouMessage), notificationEmail,
-    text(input?.privacyText), input?.consentRequired === false ? 0 : 1,
+    text(input?.privacyText), input?.consentRequired === false ? 0 : 1, input?.autoresponderEnabled ? 1 : 0,
+    text(input?.autoresponderSubject || "We have received your enquiry"),
+    text(input?.autoresponderMessage || "Thank you for getting in touch. We have received your enquiry and will reply as soon as possible."),
   ).run();
   await platformAudit(db, actor, {
     eventType: "crm.lead_form.updated",
     entityType: "crm_lead_form",
     entityId: actor.workspaceId,
     summary: `${input?.enabled ? "Enabled" : "Disabled"} the public CRM lead form.`,
-    metadata: { publicPath, notificationConfigured: Boolean(notificationEmail) },
+    metadata: { publicPath, notificationConfigured: Boolean(notificationEmail), autoresponderEnabled: Boolean(input?.autoresponderEnabled) },
   });
   return getCrmOverview(db, actor);
 }

@@ -1,5 +1,6 @@
 import { resolvePublicWorkspaceId } from "../../../../serverless/tenant-context";
 import { getPublicLeadForm, submitPublicEnquiry } from "../../../../serverless/crm-d1";
+import { sendLeadAutoresponder } from "../../../../serverless/crm-workflow-d1";
 
 type Env = {
   MKB_DB: D1Database;
@@ -62,7 +63,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const workspaceId = await resolvePublicWorkspaceId(context.env.MKB_DB, context.request);
     const body: any = await context.request.json().catch(() => ({}));
     const result = await submitPublicEnquiry(context.env.MKB_DB, workspaceId, context.request, body);
-    if (result.reference) context.waitUntil(sendNotification(context, workspaceId, result, body).catch(() => undefined));
+    if (result.reference) context.waitUntil(Promise.all([
+      sendNotification(context, workspaceId, result, body).catch(() => undefined),
+      sendLeadAutoresponder(context.env.MKB_DB, context.env, workspaceId, result, body).catch(() => ({ sent: false })),
+    ]));
     return Response.json({ ok: true, enquiry: result }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (error: any) {
     return errorResponse(error);

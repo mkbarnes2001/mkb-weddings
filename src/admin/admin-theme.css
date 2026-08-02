@@ -2018,3 +2018,43 @@
   .crm-linked-record { align-items: flex-start; flex-direction: column; }
   .crm-linked-record > div:last-child { justify-content: flex-start; }
 }
+
+/* v1.9.2 CRM workflows, tasks and communication history */
+.crm-progress { width: 120px; max-width: 100%; height: 5px; overflow: hidden; border-radius: 999px; background: #ececec; }
+.crm-progress > span { display: block; height: 100%; border-radius: inherit; background: #171717; }
+.crm-workflow-builder { display: grid; grid-template-columns: minmax(250px, 320px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.crm-workflow-builder > .admin-panel:first-child { position: sticky; top: 14px; }
+.crm-workflow-step-list { display: grid; gap: 12px; }
+.crm-workflow-step-list > article { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; border: 1px solid var(--admin-border); border-radius: 12px; background: #fff; padding: 13px; }
+.crm-workflow-step-list__number { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 8px; background: #111; color: #fff; font-size: 10px; font-weight: 700; }
+.crm-apply-workflow { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px; margin-bottom: 14px; }
+.crm-task-list { display: grid; gap: 8px; }
+.crm-task-list > article { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: start; gap: 10px; border: 1px solid var(--admin-border); border-radius: 10px; background: #fff; padding: 11px; }
+.crm-task-list > article.complete { background: #f6fbf7; opacity: .78; }
+.crm-task-list > article.overdue { border-color: #efb3b3; background: #fff8f8; }
+.crm-task-list > article > button { display: grid; width: 22px; height: 22px; place-items: center; border: 1px solid #bdbdbd; border-radius: 6px; background: #fff; color: #176b3b; }
+.crm-task-list > article.complete > button { border-color: #86d5a2; background: #eaf8ef; }
+.crm-task-list > article > button svg { width: 13px; height: 13px; }
+.crm-task-list strong { display: block; font-size: 10.5px; }
+.crm-task-list p { margin: 3px 0 7px; color: var(--admin-muted); font-size: 9px; line-height: 1.5; }
+.crm-task-create { display: grid; gap: 10px; margin-top: 14px; border-top: 1px solid var(--admin-border); padding-top: 14px; }
+.crm-communication-compose { display: grid; gap: 10px; margin-bottom: 16px; border: 1px solid var(--admin-border); border-radius: 11px; background: #fafafa; padding: 13px; }
+.crm-communication-list { display: grid; gap: 0; }
+.crm-communication-list > article { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; border-top: 1px solid var(--admin-border); padding: 13px 0; }
+.crm-communication-list > article:first-child { border-top: 0; }
+.crm-communication-list__icon { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 8px; background: #f0f0f0; color: #444; }
+.crm-communication-list__icon svg { width: 14px; height: 14px; }
+.crm-communication-list strong { font-size: 10.5px; }
+.crm-communication-list p { margin: 6px 0; color: #333; font-size: 9.5px; line-height: 1.55; white-space: pre-wrap; }
+.crm-communication-list small { color: var(--admin-muted); font-size: 8.5px; }
+
+@media (max-width: 900px) {
+  .crm-workflow-builder { grid-template-columns: 1fr; }
+  .crm-workflow-builder > .admin-panel:first-child { position: static; }
+  .crm-apply-workflow { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .crm-task-list > article { grid-template-columns: 28px minmax(0, 1fr); }
+  .crm-task-list > article > .admin-button { grid-column: 2; justify-self: start; }
+}

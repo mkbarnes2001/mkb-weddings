@@ -10,7 +10,7 @@ import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, Client
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
 import type { ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
-import type { CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate } from "../types/crm";
+import type { CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate } from "../types/crm";
 import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
@@ -1329,6 +1329,80 @@ export class AdminApiService {
     const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/supplier-submissions/${encodeURIComponent(submissionId)}/reject`, {
       method: "POST",
       body: JSON.stringify({ reviewNotes }),
+    });
+    return result.workspace;
+  }
+
+  static async getCrmWorkflowOverview() {
+    const result = await request<{ ok: true; workflows: CrmWorkflowOverview }>("/api/crm/workflows");
+    return result.workflows;
+  }
+
+  static async getCrmWorkflowTemplate(id: string) {
+    const result = await request<{ ok: true; template: CrmWorkflowTemplate }>(`/api/crm/workflows/templates/${encodeURIComponent(id)}`);
+    return result.template;
+  }
+
+  static async createCrmWorkflowTemplate(input: Partial<CrmWorkflowTemplate>) {
+    const result = await request<{ ok: true; template: CrmWorkflowTemplate }>("/api/crm/workflows/templates", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return result.template;
+  }
+
+  static async saveCrmWorkflowTemplate(id: string, input: Partial<CrmWorkflowTemplate>) {
+    const result = await request<{ ok: true; template: CrmWorkflowTemplate }>(`/api/crm/workflows/templates/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
+    return result.template;
+  }
+
+  static async archiveCrmWorkflowTemplate(id: string) {
+    const result = await request<{ ok: true; template: CrmWorkflowTemplate }>(`/api/crm/workflows/templates/${encodeURIComponent(id)}/archive`, {
+      method: "POST",
+      body: JSON.stringify({}),
+    });
+    return result.template;
+  }
+
+  static async applyCrmWorkflow(jobId: string, templateId: string) {
+    const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/workflow`, {
+      method: "POST",
+      body: JSON.stringify({ templateId }),
+    });
+    return result.workspace;
+  }
+
+  static async createCrmJobTask(jobId: string, input: Record<string, unknown>) {
+    const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/tasks`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return result.workspace;
+  }
+
+  static async updateCrmJobTask(jobId: string, taskId: string, input: Record<string, unknown>) {
+    const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/tasks/${encodeURIComponent(taskId)}`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
+    return result.workspace;
+  }
+
+  static async logCrmJobCommunication(jobId: string, input: Record<string, unknown>) {
+    const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/communications`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return result.workspace;
+  }
+
+  static async sendCrmJobEmail(jobId: string, input: Record<string, unknown>) {
+    const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/communications/send`, {
+      method: "POST",
+      body: JSON.stringify(input),
     });
     return result.workspace;
   }

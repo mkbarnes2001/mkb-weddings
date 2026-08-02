@@ -28,7 +28,7 @@ def main() -> None:
     con = sqlite3.connect(":memory:")
     con.row_factory = sqlite3.Row
     con.executescript(schema_text)
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "29"
+    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "30"
     tables = {row[0] for row in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
     assert "crm_supplier_submissions" in tables
     assert one(con, "SELECT COUNT(*) FROM crm_questionnaire_templates WHERE workspace_id=? AND schema_json LIKE '%\"type\":\"supplier\"%'", (A,))[0] >= 1
@@ -100,13 +100,13 @@ def main() -> None:
     assert '"crm_supplier_submissions"' in operations
     assert "duplicate CRM contacts" in contact_page
 
-    print("PASS v1.9.1b supplier questionnaire integration")
+    print("PASS v1.9.2 supplier questionnaire integration")
     print("  structured supplier fields: builder and client portal verified")
     print("  known suppliers: automatic Wedding linking path verified")
     print("  unlisted suppliers: workspace-scoped approval/merge queue verified")
     print("  contact editing and public-domain invitation guard: verified")
     print("  Job workspace and export coverage: verified")
-    print("  schema version: 29")
+    print("  schema version: 30")
 
 
 if __name__ == "__main__":

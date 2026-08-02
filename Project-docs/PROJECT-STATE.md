@@ -1,18 +1,19 @@
 # Project State
-## v1.9.1b source state — Supplier Questionnaire Integration and Job Workspace
-- Base: stable v1.9.1a Client Portal and Questionnaires (`398414f`, schema 28).
-- Source includes migration 029 and targets schema 29.
-- Questionnaire templates now support structured Supplier Master fields with role/category controls, multiple values and an unlisted-supplier option.
-- Known supplier selections link to the accepted Wedding; unknown suppliers enter a Job-scoped approval/merge queue and cannot overwrite Supplier Master data.
-- The CRM Job workspace now consolidates workflow, Job summary, clients, portal access, suppliers, questionnaires, uploaded files, enquiry notes and activity.
-- Contacts are directly editable from CRM with duplicate-email and portal-identity checks.
-- Portal invitations require a verified public domain; Admin hostname fallback has been removed.
-- Mail history, quotes, contracts, invoices and payments are deliberately not simulated in this release and remain later CRM work.
+## v1.9.2 source state — Workflows and Communication
+- Base: stable v1.9.1b Supplier Questionnaire Integration and Job Workspace (`542303e`, schema 29).
+- Source includes migration 030 and targets schema 30.
+- Workspace-owned workflow templates create immutable Job workflow snapshots and dated task lists.
+- New accepted Jobs receive the active default workflow automatically; existing Jobs can apply a workflow manually.
+- CRM adds task progress, overdue/next-task visibility, manual tasks and task completion/reopen controls.
+- Job communication history supports email, phone, SMS, meeting and internal-note records; outbound email uses the existing Resend boundary.
+- Public lead forms can send configurable acknowledgement emails with merge variables and retain sent/failed history.
+- Lead board/list, Job list and cross-Job task views improve operational visibility without changing tenant authority.
+- Quotes, contracts, invoices, payment schedules and connected payments remain v1.9.3 work.
 
 ## Version
-Current release in source: **v1.9.1b — Supplier Questionnaire Integration and Job Workspace**.
-Database schema version: **29**.
-Stable production baseline before this release: **v1.9.1a**, commit `398414f`, schema **28**.
+Current release in source: **v1.9.2 — Workflows and Communication**.
+Database schema version: **30**.
+Stable production baseline before this release: **v1.9.1b**, commit `542303e`, schema **29**.
 
 ## CRM Foundation — v1.9.0
 - Adds workspace-owned pipeline stages, CRM contacts, enquiries, contact relationships, neutral Jobs, Job relationships and activity history.

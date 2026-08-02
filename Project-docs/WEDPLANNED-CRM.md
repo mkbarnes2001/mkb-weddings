@@ -35,6 +35,19 @@ Implemented after the CRM foundation:
 
 Client answers never directly create or overwrite shared supplier records. Only an authorised professional can approve or merge an unlisted suggestion. Quotes, contracts, invoices, payments and communication history remain separate later releases.
 
+## v1.9.2 implementation status
+Implemented after the client portal and supplier integration:
+- workspace-owned reusable workflow templates and ordered task steps;
+- immutable Job workflow snapshots;
+- automatic default workflow application when an enquiry is accepted;
+- manual tasks, due dates, priorities, completion/reopen, progress and overdue/next-task summaries;
+- cross-Job task overview and Lead/Job list views;
+- communication history for email, phone, SMS, meetings and internal notes;
+- outbound client email using Resend;
+- configurable public-lead acknowledgement emails with merge variables and sent/failed history.
+
+This release records operational communication; provider open/click webhooks and inbound mailbox synchronisation are not claimed. Quotes, contracts, invoices and payments remain v1.9.3.
+
 ## Core hierarchy
 
 `Workspace → Enquiry → Contacts → Job → Wedding details / Deliverables`
@@ -173,14 +186,17 @@ The same supplier may hold more than one wedding role. Wedding-specific role/ord
 - wedding-specific role selection;
 - approved responses create Wedding Supplier links and explicit Job/Wedding updates.
 
-### v1.9.2 — Commercial Workflow
-- services/packages;
-- quotes;
-- contracts/signatures;
-- invoices/payment schedules;
-- tasks, workflow templates and reminders.
+### v1.9.2 — Workflows and Communication
+- reusable workflow templates and immutable Job workflow snapshots;
+- automatic and manual Job task creation;
+- due dates, priorities, reminders/progress and overdue visibility;
+- communication history and outbound client email;
+- lead autoresponders and Lead/Job list views.
 
-### v1.9.3 — Connected Payments
+### v1.9.3 — Commercial Booking and Connected Payments
+- services/packages;
+- quotes and contracts/signatures;
+- invoices/payment schedules;
 - Stripe Connect account onboarding;
 - invoice/payment ownership;
 - payment webhooks and balances;

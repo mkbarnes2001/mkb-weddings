@@ -6,6 +6,7 @@ import { CRMEnquiry } from "../pages/CRMEnquiry";
 import { CRMContact } from "../pages/CRMContact";
 import { CRMJob } from "../pages/CRMJob";
 import { CRMQuestionnaireTemplate } from "../pages/CRMQuestionnaireTemplate";
+import { CRMWorkflowTemplate } from "../pages/CRMWorkflowTemplate";
 import { Weddings } from "../pages/Weddings";
 import { NewWeddingWizard } from "../pages/NewWeddingWizard";
 import { WeddingDetail } from "../pages/WeddingDetail";
@@ -56,6 +57,7 @@ export function AdminApp() {
         <Route path="crm/contacts/:id" element={<CRMContact />} />
         <Route path="crm/jobs/:id" element={<CRMJob />} />
         <Route path="crm/questionnaires/:id" element={<CRMQuestionnaireTemplate />} />
+        <Route path="crm/workflows/:id" element={<CRMWorkflowTemplate />} />
         <Route path="weddings" element={<Weddings />} />
         <Route path="weddings/new" element={<NewWeddingWizard />} />
         <Route path="weddings/:slug" element={<WeddingDetail />} />

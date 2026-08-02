@@ -23,7 +23,7 @@ def main() -> None:
     con.row_factory = sqlite3.Row
     con.executescript(SCHEMA.read_text())
 
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "29"
+    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "30"
     required = {
         "platform_support_grants",
         "platform_support_events",
@@ -116,12 +116,12 @@ def main() -> None:
     assert 'commerce_print_assets: ["access_token"]' in operations_source
     assert "Support sessions cannot download a business data export." in operations_source
 
-    print("PASS v1.9.1b platform operations")
+    print("PASS v1.9.2 platform operations")
     print("  support grants: time-bounded and workspace-scoped")
     print("  read-only support: globally guarded")
     print("  export history: workspace-scoped, query allowlist verified, capability secrets redacted")
     print("  deletion requests: staged and single-open-request guarded")
-    print("  schema version: 29")
+    print("  schema version: 30")
 
 
 if __name__ == "__main__":

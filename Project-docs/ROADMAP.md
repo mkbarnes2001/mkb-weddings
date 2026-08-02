@@ -1,16 +1,16 @@
 # MKB Intelligence — Roadmap
 
-## Current CRM release — v1.9.1b
-- Structured Supplier Master questionnaire fields.
-- Automatic Wedding Supplier linking for known suppliers.
-- Approval/merge/reject queue for unlisted client suggestions.
-- Consolidated Job workspace: workflow, Job, clients, suppliers, questionnaires, files, notes and activity.
-- Direct reusable-contact editing and verified-public-domain-only portal invitations.
+## Current CRM release — v1.9.2
+- Reusable workflow templates with ordered task steps.
+- Immutable Job workflow snapshots and automatic default workflow application for newly accepted bookings.
+- Due dates relative to booking/event date, priorities, progress, overdue and next-task visibility.
+- Manual Job tasks and cross-Job task overview.
+- Logged communication history and outbound client email through Resend.
+- Configurable public-lead autoresponders with merge variables.
+- Lead board/list and searchable Job list views.
 
-## Next CRM releases
-- **v1.9.2:** workflow templates, tasks, mail history, lead/job list views and autoresponders.
-- **v1.9.3:** packages, quotes, contracts, invoices, payment schedules and connected payments.
-
+## Next CRM release
+- **v1.9.3:** services/packages, quotes, contracts, invoices, payment schedules and connected payments.
 
 ## Current commercial baseline
 Completed and in production:
@@ -138,9 +138,13 @@ Completed and in production:
 - Versioned questionnaire templates/instances/responses
 - Client-entered supplier team with Supplier Master search and approval/merge queue
 
-## Commercial Workflow and Connected Payments (v1.9.2–v1.9.3)
+## Workflows and Communication — v1.9.2
+- Workflow templates, Job task snapshots, reminders/progress and cross-Job task visibility
+- Communication history, outbound client email and public-lead autoresponders
+- Lead and Job list views
+
+## Commercial Workflow and Connected Payments — v1.9.3
 - Services/packages, quotes, contracts and invoices
-- Tasks, workflow templates and reminders
 - Stripe Connect hosted onboarding and payment webhooks attached to CRM invoices
 - Stripe Billing subscriptions for businesses, separate from couple/client payments
 - Plan limits, trials, billing state and feature enforcement

@@ -28,7 +28,7 @@ def main() -> None:
     con = sqlite3.connect(":memory:")
     con.row_factory = sqlite3.Row
     con.executescript(schema_text)
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "29"
+    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "30"
 
     required = {
         "crm_questionnaire_templates",
@@ -125,12 +125,12 @@ def main() -> None:
     assert 'crm_portal_invitations: ["token_hash"]' in operations
     assert 'crm_questionnaire_files: ["storage_key"]' in operations
 
-    print("PASS v1.9.1b client portal and questionnaires")
+    print("PASS v1.9.2 client portal and questionnaires")
     print("  portal access: workspace-scoped and magic-link authenticated")
     print("  questionnaire snapshots/responses: versioned and guarded")
     print("  private attachments: authorised and R2-backed")
     print("  Admin/public routes and export coverage: verified")
-    print("  schema version: 29")
+    print("  schema version: 30")
 
 
 if __name__ == "__main__":

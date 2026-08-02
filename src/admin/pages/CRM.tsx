@@ -5,8 +5,11 @@ import {
   CalendarDays,
   CheckCircle2,
   ClipboardList,
+  Clock3,
+  Columns3,
   ExternalLink,
   FileQuestion,
+  List,
   Mail,
   Plus,
   Save,
@@ -14,6 +17,7 @@ import {
   Settings2,
   UserRound,
   Users,
+  Workflow,
 } from "lucide-react";
 import {
   AdminButton,
@@ -28,9 +32,9 @@ import {
 } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
-import type { CrmEnquiryInput, CrmLeadFormSettings, CrmOverview, QuestionnaireOverview } from "../types/crm";
+import type { CrmEnquiryInput, CrmLeadFormSettings, CrmOverview, CrmWorkflowOverview, QuestionnaireOverview } from "../types/crm";
 
-type View = "pipeline" | "contacts" | "jobs" | "questionnaires" | "lead-form";
+type View = "pipeline" | "contacts" | "jobs" | "questionnaires" | "workflows" | "lead-form";
 
 const emptyEnquiry: CrmEnquiryInput = {
   source: "manual",
@@ -57,12 +61,16 @@ export function CRM() {
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedView = searchParams.get("view") as View | null;
   const [crm, setCrm] = useState<CrmOverview | null>(null);
-  const [view, setViewState] = useState<View>(requestedView && ["pipeline", "contacts", "jobs", "questionnaires", "lead-form"].includes(requestedView) ? requestedView : "pipeline");
+  const [view, setViewState] = useState<View>(requestedView && ["pipeline", "contacts", "jobs", "questionnaires", "workflows", "lead-form"].includes(requestedView) ? requestedView : "pipeline");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [search, setSearch] = useState("");
+  const [leadSearch, setLeadSearch] = useState("");
+  const [jobSearch, setJobSearch] = useState("");
+  const [jobStatus, setJobStatus] = useState("active");
+  const [pipelineDisplay, setPipelineDisplay] = useState<"board" | "list">("board");
   const [showCreate, setShowCreate] = useState(false);
   const [newEnquiry, setNewEnquiry] = useState<CrmEnquiryInput>({ ...emptyEnquiry, primaryContact: { ...emptyEnquiry.primaryContact }, partnerContact: { ...emptyEnquiry.partnerContact } });
   const canManage = auth.permissions.includes("crm:manage");
@@ -82,7 +90,7 @@ export function CRM() {
   useEffect(() => { void load(); }, [auth.workspaceId]);
   useEffect(() => {
     const next = searchParams.get("view") as View | null;
-    if (next && ["pipeline", "contacts", "jobs", "questionnaires", "lead-form"].includes(next)) setViewState(next);
+    if (next && ["pipeline", "contacts", "jobs", "questionnaires", "workflows", "lead-form"].includes(next)) setViewState(next);
   }, [searchParams]);
 
   function setView(next: View) {
@@ -95,6 +103,21 @@ export function CRM() {
     if (!query) return crm?.contacts || [];
     return (crm?.contacts || []).filter((contact) => [contact.displayName, contact.email, contact.phone].some((value) => value.toLowerCase().includes(query)));
   }, [crm?.contacts, search]);
+
+  const filteredEnquiries = useMemo(() => {
+    const query = leadSearch.trim().toLowerCase();
+    if (!query) return crm?.enquiries || [];
+    return (crm?.enquiries || []).filter((enquiry) => [enquiry.reference, enquiry.primaryContact?.displayName, enquiry.partnerContact?.displayName, enquiry.venueText, enquiry.source, enquiry.stageName].some((value) => String(value || "").toLowerCase().includes(query)));
+  }, [crm?.enquiries, leadSearch]);
+
+  const filteredJobs = useMemo(() => {
+    const query = jobSearch.trim().toLowerCase();
+    return (crm?.jobs || []).filter((job) => {
+      if (jobStatus === "active" && ["completed", "cancelled", "archived"].includes(job.status)) return false;
+      if (jobStatus !== "all" && jobStatus !== "active" && job.status !== jobStatus) return false;
+      return !query || [job.reference, job.title, job.serviceName, job.venueText, job.nextTaskTitle].some((value) => String(value || "").toLowerCase().includes(query));
+    });
+  }, [crm?.jobs, jobSearch, jobStatus]);
 
   async function createEnquiry() {
     setSaving(true);
@@ -164,30 +187,39 @@ export function CRM() {
         <AdminTab active={view === "contacts"} onClick={() => setView("contacts")}>Contacts</AdminTab>
         <AdminTab active={view === "jobs"} onClick={() => setView("jobs")}>Jobs</AdminTab>
         <AdminTab active={view === "questionnaires"} onClick={() => setView("questionnaires")}>Questionnaires</AdminTab>
+        <AdminTab active={view === "workflows"} onClick={() => setView("workflows")}>Workflows</AdminTab>
         <AdminTab active={view === "lead-form"} onClick={() => setView("lead-form")}>Lead form</AdminTab>
       </AdminTabs>
 
       {view === "pipeline" ? (
-        <div className="crm-pipeline" aria-label="Enquiry pipeline">
-          {(crm?.stages || []).map((stage) => {
-            const enquiries = (crm?.enquiries || []).filter((enquiry) => enquiry.stageId === stage.id);
-            return (
-              <section key={stage.id} className="crm-stage-column">
-                <div className="crm-stage-column__header"><span>{stage.name}</span><strong>{enquiries.length}</strong></div>
-                <div className="crm-stage-column__body">
-                  {!enquiries.length ? <p className="crm-stage-empty">No enquiries</p> : null}
-                  {enquiries.map((enquiry) => (
-                    <Link key={enquiry.id} to={`/admin/crm/enquiries/${enquiry.id}`} className="crm-enquiry-card">
-                      <div className="flex items-start justify-between gap-3"><strong>{enquiry.primaryContact?.displayName || enquiry.reference}</strong><span>{enquiry.reference}</span></div>
-                      {enquiry.partnerContact?.displayName ? <p>{enquiry.partnerContact.displayName}</p> : null}
-                      <dl><div><CalendarDays />{dateLabel(enquiry.eventDate)}</div><div><BriefcaseBusiness />{enquiry.venueText || "Venue TBC"}</div></dl>
-                      <small>{enquiry.source}{enquiry.budgetMax ? ` · ${money(enquiry.budgetMax, enquiry.currency)}` : ""}</small>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            );
-          })}
+        <div className="grid gap-4">
+          <div className="admin-toolbar flex flex-wrap items-center justify-between gap-3">
+            <div className="flex gap-2"><AdminButton size="sm" variant={pipelineDisplay === "board" ? "primary" : "secondary"} icon={Columns3} onClick={() => setPipelineDisplay("board")}>Board</AdminButton><AdminButton size="sm" variant={pipelineDisplay === "list" ? "primary" : "secondary"} icon={List} onClick={() => setPipelineDisplay("list")}>List</AdminButton></div>
+            <div className="relative min-w-[240px]"><Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-neutral-400" /><input className="admin-input pl-9" value={leadSearch} onChange={(event) => setLeadSearch(event.target.value)} placeholder="Search leads" /></div>
+          </div>
+          {pipelineDisplay === "board" ? <div className="crm-pipeline" aria-label="Enquiry pipeline">
+            {(crm?.stages || []).map((stage) => {
+              const enquiries = filteredEnquiries.filter((enquiry) => enquiry.stageId === stage.id);
+              return (
+                <section key={stage.id} className="crm-stage-column">
+                  <div className="crm-stage-column__header"><span>{stage.name}</span><strong>{enquiries.length}</strong></div>
+                  <div className="crm-stage-column__body">
+                    {!enquiries.length ? <p className="crm-stage-empty">No enquiries</p> : null}
+                    {enquiries.map((enquiry) => (
+                      <Link key={enquiry.id} to={`/admin/crm/enquiries/${enquiry.id}`} className="crm-enquiry-card">
+                        <div className="flex items-start justify-between gap-3"><strong>{enquiry.primaryContact?.displayName || enquiry.reference}</strong><span>{enquiry.reference}</span></div>
+                        {enquiry.partnerContact?.displayName ? <p>{enquiry.partnerContact.displayName}</p> : null}
+                        <dl><div><CalendarDays />{dateLabel(enquiry.eventDate)}</div><div><BriefcaseBusiness />{enquiry.venueText || "Venue TBC"}</div></dl>
+                        <small>{enquiry.source}{enquiry.budgetMax ? ` · ${money(enquiry.budgetMax, enquiry.currency)}` : ""}</small>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </div> : <AdminPanel title="Lead list" description="A compact operational view of every enquiry, its stage and latest communication." icon={List}>
+            {!filteredEnquiries.length ? <AdminEmptyState icon={ClipboardList} title="No enquiries found" description="Adjust the search or create the first enquiry." /> : <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Created</th><th>Client</th><th>Wedding</th><th>Stage</th><th>Source</th><th>Last communication</th></tr></thead><tbody>{filteredEnquiries.map((enquiry) => <tr key={enquiry.id}><td>{dateLabel(enquiry.createdAt.slice(0, 10))}</td><td><Link className="admin-inline-link" to={`/admin/crm/enquiries/${enquiry.id}`}>{enquiry.primaryContact?.displayName || enquiry.reference}</Link><div className="text-[10px] text-neutral-500">{enquiry.reference}{enquiry.partnerContact?.displayName ? ` · ${enquiry.partnerContact.displayName}` : ""}</div></td><td>{dateLabel(enquiry.eventDate)}<div className="text-[10px] text-neutral-500">{enquiry.venueText || "Venue TBC"}</div></td><td><AdminStatus tone={enquiry.status === "won" ? "success" : enquiry.status === "lost" ? "danger" : "info"}>{enquiry.stageName}</AdminStatus></td><td>{enquiry.source}</td><td>{enquiry.lastCommunicationAt ? dateLabel(enquiry.lastCommunicationAt.slice(0,10)) : "No communication"}</td></tr>)}</tbody></table></div>}
+          </AdminPanel>}
         </div>
       ) : null}
 
@@ -200,14 +232,16 @@ export function CRM() {
       ) : null}
 
       {view === "jobs" ? (
-        <AdminPanel title="Accepted jobs" description="The Job is the commercial source of truth; the Wedding remains the content and delivery record." icon={BriefcaseBusiness}>
-          {!crm?.jobs.length ? <AdminEmptyState icon={ClipboardList} title="No accepted jobs yet" description="Accept an enquiry to create the first Job and linked Wedding." /> : (
-            <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Reference</th><th>Job</th><th>Date</th><th>Status</th><th>Value</th><th>Wedding</th></tr></thead><tbody>{crm.jobs.map((job) => <tr key={job.id}><td>{job.reference}</td><td><Link className="admin-inline-link" to={`/admin/crm/jobs/${job.id}`}>{job.title}</Link><div className="text-[10px] text-neutral-500">{job.serviceName || job.jobType}</div></td><td>{dateLabel(job.eventDate)}</td><td><AdminStatus tone={job.status === "booked" ? "success" : "neutral"}>{job.status}</AdminStatus></td><td>{money(job.valueAmount, job.currency)}</td><td>{job.weddingSlug ? <Link className="admin-inline-link" to={`/admin/weddings/${job.weddingSlug}/workspace`}>Open Wedding</Link> : "—"}</td></tr>)}</tbody></table></div>
+        <AdminPanel title="Accepted jobs" description="Search active work, see workflow progress and identify the next task." icon={BriefcaseBusiness} actions={<div className="flex flex-wrap gap-2"><select className="admin-select min-w-[150px]" value={jobStatus} onChange={(event) => setJobStatus(event.target.value)}><option value="active">Active jobs</option><option value="all">All jobs</option><option value="booked">Booked</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select><div className="relative"><Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-neutral-400" /><input className="admin-input pl-9" value={jobSearch} onChange={(event) => setJobSearch(event.target.value)} placeholder="Search jobs" /></div></div>}>
+          {!filteredJobs.length ? <AdminEmptyState icon={ClipboardList} title="No jobs found" description="Accept an enquiry or adjust the current filters." /> : (
+            <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Wedding date</th><th>Job</th><th>Workflow progress</th><th>Next task</th><th>Status</th><th>Value</th></tr></thead><tbody>{filteredJobs.map((job) => { const progress = job.taskTotal ? Math.round((job.taskCompleted / job.taskTotal) * 100) : 0; return <tr key={job.id}><td>{dateLabel(job.eventDate)}</td><td><Link className="admin-inline-link" to={`/admin/crm/jobs/${job.id}`}>{job.title}</Link><div className="text-[10px] text-neutral-500">{job.reference} · {job.serviceName || job.jobType}</div></td><td><div className="crm-progress"><span style={{ width: `${progress}%` }}></span></div><div className="mt-1 text-[9px] text-neutral-500">{job.taskTotal ? `${job.taskCompleted} of ${job.taskTotal} complete` : "No workflow applied"}{job.taskOverdue ? ` · ${job.taskOverdue} overdue` : ""}</div></td><td>{job.nextTaskTitle || "No pending task"}<div className="text-[10px] text-neutral-500">{job.nextTaskDueAt ? dateLabel(job.nextTaskDueAt) : ""}</div></td><td><AdminStatus tone={job.status === "booked" || job.status === "active" ? "success" : job.status === "cancelled" ? "danger" : "neutral"}>{job.status}</AdminStatus></td><td>{money(job.valueAmount, job.currency)}</td></tr>; })}</tbody></table></div>
           )}
         </AdminPanel>
       ) : null}
 
       {view === "questionnaires" ? <QuestionnaireLibrary workspaceId={auth.workspaceId} canManage={canManage} /> : null}
+
+      {view === "workflows" ? <WorkflowLibrary workspaceId={auth.workspaceId} canManage={canManage} /> : null}
 
       {view === "lead-form" && crm ? <LeadFormSettings settings={crm.leadForm} saving={saving} canManage={canManage} onSave={saveLeadForm} /> : null}
     </AdminPage>
@@ -222,6 +256,9 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
       <div className="grid gap-4 lg:grid-cols-2">
         <label className="admin-choice-row"><div><strong>Accept public enquiries</strong><p>Disable this to make the endpoint unavailable without deleting pipeline data.</p></div><input type="checkbox" checked={draft.enabled} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, enabled: event.target.checked }))} /></label>
         <AdminField label="Notification email"><input className="admin-input" type="email" value={draft.notificationEmail} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, notificationEmail: event.target.value }))} /></AdminField>
+        <label className="admin-choice-row"><div><strong>Send acknowledgement email</strong><p>Automatically confirm receipt to the person who submits the public form.</p></div><input type="checkbox" checked={draft.autoresponderEnabled} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, autoresponderEnabled: event.target.checked }))} /></label>
+        <AdminField label="Acknowledgement subject" help="Variables: {{first_name}}, {{reference}}, {{business_name}}, {{event_date}}, {{venue}}"><input className="admin-input" value={draft.autoresponderSubject} disabled={!canManage || !draft.autoresponderEnabled} onChange={(event) => setDraft((current) => ({ ...current, autoresponderSubject: event.target.value }))} /></AdminField>
+        <AdminField label="Acknowledgement message" help="Sent as plain, accessible email content. Variables shown above are supported."><textarea className="admin-textarea min-h-32" value={draft.autoresponderMessage} disabled={!canManage || !draft.autoresponderEnabled} onChange={(event) => setDraft((current) => ({ ...current, autoresponderMessage: event.target.value }))} /></AdminField>
         <AdminField label="Form title"><input className="admin-input" value={draft.title} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))} /></AdminField>
         <AdminField label="Default service" help="Copied into new website enquiries; leave blank for a neutral form."><input className="admin-input" value={draft.defaultService} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, defaultService: event.target.value }))} placeholder="Wedding photography" /></AdminField>
         <AdminField label="Public URL" help="Custom form paths will be added with the hosted-site routing release."><input className="admin-input" value="/enquire" disabled /></AdminField>
@@ -273,4 +310,43 @@ function QuestionnaireLibrary({ workspaceId, canManage }: { workspaceId: string;
       </AdminPanel>
     </div>
   );
+}
+
+function WorkflowLibrary({ workspaceId, canManage }: { workspaceId: string; canManage: boolean }) {
+  const navigate = useNavigate();
+  const [overview, setOverview] = useState<CrmWorkflowOverview | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function load() {
+    setLoading(true); setError("");
+    try { setOverview(await AdminApiService.getCrmWorkflowOverview()); }
+    catch (loadError) { setError(loadError instanceof Error ? loadError.message : "Unable to load workflows."); }
+    finally { setLoading(false); }
+  }
+  useEffect(() => { void load(); }, [workspaceId]);
+
+  async function createTemplate() {
+    setSaving(true); setError("");
+    try {
+      const template = await AdminApiService.createCrmWorkflowTemplate({ name: "New workflow", description: "", status: "draft", steps: [] });
+      navigate(`/admin/crm/workflows/${template.id}`);
+    } catch (createError) { setError(createError instanceof Error ? createError.message : "Unable to create workflow template."); }
+    finally { setSaving(false); }
+  }
+
+  const pendingTasks = overview?.tasks.filter((task) => task.status === "pending") || [];
+  const overdue = pendingTasks.filter((task) => task.dueAt && task.dueAt < new Date().toISOString().slice(0, 10));
+  const jobById = new Map<string, CrmWorkflowOverview["jobs"][number]>((overview?.jobs || []).map((job) => [job.id, job]));
+
+  return <div className="grid gap-4">
+    {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
+    <AdminPanel title="Workflow templates" description="Build reusable task sequences. The default template is applied automatically when an enquiry becomes a Job." icon={Workflow} actions={canManage ? <AdminButton variant="primary" size="sm" icon={Plus} disabled={saving} onClick={() => void createTemplate()}>New workflow</AdminButton> : undefined}>
+      {loading ? <p className="text-[10px] text-neutral-500">Loading workflows…</p> : !overview?.templates.length ? <AdminEmptyState icon={Workflow} title="No workflow templates" description="Create a workflow to automate the first Job task list." /> : <div className="questionnaire-template-grid">{overview.templates.map((template) => <Link key={template.id} to={`/admin/crm/workflows/${template.id}`} className="questionnaire-template-card"><div><strong>{template.name}</strong><p>{template.description || "No description"}</p></div><div className="flex flex-wrap gap-2"><AdminStatus tone={template.status === "active" ? "success" : "neutral"}>{template.status}</AdminStatus>{template.default ? <AdminStatus tone="success">default</AdminStatus> : null}<AdminStatus tone="info">{template.steps.length} tasks</AdminStatus></div></Link>)}</div>}
+    </AdminPanel>
+    <AdminPanel title="Task overview" description="Pending tasks across all Jobs, ordered by due date." icon={Clock3} actions={<div className="flex gap-2"><AdminStatus tone="warning">{pendingTasks.length} pending</AdminStatus>{overdue.length ? <AdminStatus tone="danger">{overdue.length} overdue</AdminStatus> : null}</div>}>
+      {!pendingTasks.length ? <AdminEmptyState icon={CheckCircle2} title="No pending tasks" description="New Job workflows and manually created tasks will appear here." /> : <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Due</th><th>Task</th><th>Job</th><th>Type</th><th>Priority</th></tr></thead><tbody>{pendingTasks.slice(0, 200).map((task) => { const job = jobById.get(task.jobId); const isOverdue = Boolean(task.dueAt && task.dueAt < new Date().toISOString().slice(0, 10)); return <tr key={task.id}><td><AdminStatus tone={isOverdue ? "danger" : task.dueAt ? "warning" : "neutral"}>{task.dueAt ? dateLabel(task.dueAt) : "No date"}</AdminStatus></td><td><strong>{task.title}</strong><div className="text-[10px] text-neutral-500">{task.description}</div></td><td>{job ? <Link className="admin-inline-link" to={`/admin/crm/jobs/${job.id}`}>{job.title}</Link> : "—"}</td><td>{task.taskType}</td><td>{task.priority}</td></tr>; })}</tbody></table></div>}
+    </AdminPanel>
+  </div>;
 }

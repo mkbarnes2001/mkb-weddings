@@ -1,4 +1,17 @@
 # MKB Intelligence — Changelog
+## v1.9.2 — Workflows and Communication
+- Added migration 030 and workspace-owned workflow templates, versioned Job workflow snapshots, tasks and communication history.
+- Added one editable default client workflow per workspace with booking confirmation, questionnaire, final-details, event-brief and post-event tasks.
+- New accepted Jobs automatically receive the active default workflow; existing Jobs can apply a workflow manually without rewriting historic records.
+- Added task lifecycle controls, due dates relative to booking/event dates, priorities, overdue counts, cross-Job task overview and Job progress indicators.
+- Added Job communication logging for email, phone, SMS, meetings and internal notes, plus outbound client email through the existing Resend boundary.
+- Added configurable public-lead acknowledgement emails with merge variables and sent/failed communication records.
+- Added Lead board/list views, searchable Job list views, last-contact visibility and next-task/progress summaries.
+- Added a reusable workflow builder with ordered steps, task types, relative dates, offsets, priorities, default selection and immutable applied snapshots.
+- Added workspace export coverage and regression tests for workflow/task/communication isolation and autoresponder configuration.
+- Quotes, contracts, invoices, payment schedules and Stripe-connected payments remain planned for v1.9.3.
+- Schema advances to 30.
+
 ## v1.9.1b — Supplier Questionnaire Integration and Job Workspace
 - Added migration 029 and workspace-owned `crm_supplier_submissions` review records.
 - Added structured Supplier selection fields to questionnaire templates, including Supplier Master search, optional category filtering, single/multiple selection and an “unlisted supplier” path.

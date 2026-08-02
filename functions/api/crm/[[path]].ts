@@ -25,6 +25,18 @@ import {
   revokeJobClientAccess,
   saveQuestionnaireTemplate,
 } from "../../../serverless/client-portal-d1";
+import {
+  applyWorkflowToJob,
+  archiveWorkflowTemplate,
+  createJobTask,
+  createWorkflowTemplate,
+  getWorkflowOverview,
+  getWorkflowTemplate,
+  logJobCommunication,
+  saveWorkflowTemplate,
+  sendJobEmail,
+  updateJobTask,
+} from "../../../serverless/crm-workflow-d1";
 
 type Env = {
   MKB_DB: D1Database;
@@ -94,6 +106,16 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         headers: { "Cache-Control": "private, no-store" },
       });
     }
+    if (parts[0] === "workflows" && parts.length === 1) {
+      return Response.json({ ok: true, workflows: await getWorkflowOverview(context.env.MKB_DB, actor) }, {
+        headers: { "Cache-Control": "private, no-store" },
+      });
+    }
+    if (parts[0] === "workflows" && parts[1] === "templates" && parts[2] && parts.length === 3) {
+      return Response.json({ ok: true, template: await getWorkflowTemplate(context.env.MKB_DB, actor, parts[2]) }, {
+        headers: { "Cache-Control": "private, no-store" },
+      });
+    }
     return Response.json({ error: "CRM route not found." }, { status: 404 });
   } catch (error: any) {
     return errorResponse(error);
@@ -141,6 +163,28 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (parts[0] === "jobs" && parts[1] && parts[2] === "supplier-submissions" && parts[3] && parts[4] === "reject") {
       return Response.json({ ok: true, workspace: await rejectSupplierSubmission(context.env.MKB_DB, actor, parts[1], parts[3], body) });
     }
+    if (parts[0] === "workflows" && parts[1] === "templates" && parts.length === 2) {
+      return Response.json({ ok: true, template: await createWorkflowTemplate(context.env.MKB_DB, actor, body) }, { status: 201 });
+    }
+    if (parts[0] === "workflows" && parts[1] === "templates" && parts[2] && parts[3] === "archive") {
+      return Response.json({ ok: true, template: await archiveWorkflowTemplate(context.env.MKB_DB, actor, parts[2]) });
+    }
+    if (parts[0] === "jobs" && parts[1] && parts[2] === "workflow") {
+      await applyWorkflowToJob(context.env.MKB_DB, actor, parts[1], body?.templateId);
+      return Response.json({ ok: true, workspace: await getCrmJobWorkspace(context.env.MKB_DB, actor, parts[1]) }, { status: 201 });
+    }
+    if (parts[0] === "jobs" && parts[1] && parts[2] === "tasks" && parts.length === 3) {
+      await createJobTask(context.env.MKB_DB, actor, parts[1], body);
+      return Response.json({ ok: true, workspace: await getCrmJobWorkspace(context.env.MKB_DB, actor, parts[1]) }, { status: 201 });
+    }
+    if (parts[0] === "jobs" && parts[1] && parts[2] === "communications" && parts[3] === "send") {
+      await sendJobEmail(context.env.MKB_DB, context.env, actor, parts[1], body);
+      return Response.json({ ok: true, workspace: await getCrmJobWorkspace(context.env.MKB_DB, actor, parts[1]) });
+    }
+    if (parts[0] === "jobs" && parts[1] && parts[2] === "communications" && parts.length === 3) {
+      await logJobCommunication(context.env.MKB_DB, actor, parts[1], body);
+      return Response.json({ ok: true, workspace: await getCrmJobWorkspace(context.env.MKB_DB, actor, parts[1]) }, { status: 201 });
+    }
     return Response.json({ error: "CRM route not found." }, { status: 404 });
   } catch (error: any) {
     return errorResponse(error);
@@ -160,6 +204,13 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     }
     if (parts[0] === "questionnaires" && parts[1] === "templates" && parts[2] && parts.length === 3) {
       return Response.json({ ok: true, template: await saveQuestionnaireTemplate(context.env.MKB_DB, actor, parts[2], body) });
+    }
+    if (parts[0] === "workflows" && parts[1] === "templates" && parts[2] && parts.length === 3) {
+      return Response.json({ ok: true, template: await saveWorkflowTemplate(context.env.MKB_DB, actor, parts[2], body) });
+    }
+    if (parts[0] === "jobs" && parts[1] && parts[2] === "tasks" && parts[3] && parts.length === 4) {
+      await updateJobTask(context.env.MKB_DB, actor, parts[1], parts[3], body);
+      return Response.json({ ok: true, workspace: await getCrmJobWorkspace(context.env.MKB_DB, actor, parts[1]) });
     }
     return Response.json({ error: "CRM route not found." }, { status: 404 });
   } catch (error: any) {

@@ -55,6 +55,7 @@ export type CrmEnquiry = {
   lostReason: string;
   acceptedJobId: string;
   convertedAt?: string;
+  lastCommunicationAt?: string;
   primaryContact: { id: string; displayName: string; email: string; phone: string } | null;
   partnerContact: { id: string; displayName: string; email: string; phone: string } | null;
   createdAt: string;
@@ -79,6 +80,12 @@ export type CrmJob = {
   venueSlug: string;
   clientPortalStatus: string;
   weddingSlug: string;
+  taskTotal: number;
+  taskCompleted: number;
+  taskPending: number;
+  taskOverdue: number;
+  nextTaskTitle: string;
+  nextTaskDueAt: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -94,6 +101,9 @@ export type CrmLeadFormSettings = {
   notificationEmail: string;
   privacyText: string;
   consentRequired: boolean;
+  autoresponderEnabled: boolean;
+  autoresponderSubject: string;
+  autoresponderMessage: string;
 };
 
 export type CrmOverview = {
@@ -121,6 +131,7 @@ export type CrmEnquiryDetail = {
   contacts: CrmContact[];
   activities: CrmActivity[];
   job: CrmJob | null;
+  communications: CrmCommunication[];
 };
 
 export type CrmEnquiryInput = {
@@ -264,6 +275,7 @@ export type CrmContactDetail = {
   enquiries: Array<{ id: string; reference: string; status: string; role: string; eventDate: string; venueText: string }>;
   jobs: Array<CrmJob & { role: string }>;
   activities: CrmActivity[];
+  communications: CrmCommunication[];
 };
 
 export type CrmPortalAccess = {
@@ -279,6 +291,88 @@ export type CrmPortalAccess = {
   revokedAt?: string;
 };
 
+
+export type CrmWorkflowStep = {
+  id: string;
+  templateId: string;
+  name: string;
+  description: string;
+  taskType: "task" | "email" | "call" | "meeting" | "milestone" | string;
+  relativeTo: "booking_date" | "event_date";
+  offsetDays: number;
+  priority: "low" | "normal" | "high" | "urgent" | string;
+  sortOrder: number;
+  required: boolean;
+};
+
+export type CrmWorkflowTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  appliesTo: "job";
+  status: "draft" | "active" | "archived";
+  version: number;
+  default: boolean;
+  steps: CrmWorkflowStep[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CrmJobWorkflow = {
+  id: string;
+  templateId: string;
+  templateName: string;
+  templateVersion: number;
+  status: "active" | "completed" | "cancelled" | string;
+  appliedAt: string;
+  completedAt?: string;
+  snapshot: CrmWorkflowStep[];
+};
+
+export type CrmTask = {
+  id: string;
+  jobId: string;
+  enquiryId: string;
+  workflowId: string;
+  templateStepId: string;
+  title: string;
+  description: string;
+  taskType: "task" | "email" | "call" | "meeting" | "milestone" | string;
+  status: "pending" | "completed" | "cancelled" | string;
+  priority: "low" | "normal" | "high" | "urgent" | string;
+  dueAt: string;
+  assignedUserId: string;
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CrmCommunication = {
+  id: string;
+  contactId: string;
+  enquiryId: string;
+  jobId: string;
+  contactName?: string;
+  contactEmail?: string;
+  channel: "email" | "phone" | "sms" | "meeting" | "note" | string;
+  direction: "inbound" | "outbound" | "internal" | string;
+  subject: string;
+  body: string;
+  status: "draft" | "logged" | "sent" | "failed" | string;
+  provider?: string;
+  providerMessageId?: string;
+  occurredAt: string;
+  actorEmail: string;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+};
+
+export type CrmWorkflowOverview = {
+  templates: CrmWorkflowTemplate[];
+  tasks: CrmTask[];
+  jobs: Array<{ id: string; reference: string; title: string; eventDate: string }>;
+};
+
 export type CrmJobWorkspace = {
   job: CrmJob;
   contacts: Array<{ id: string; displayName: string; email: string; phone: string; role: string }>;
@@ -290,4 +384,9 @@ export type CrmJobWorkspace = {
   supplierSubmissions: CrmSupplierSubmission[];
   supplierDirectory: SupplierDirectoryOption[];
   activities: CrmActivity[];
+  workflow: CrmJobWorkflow | null;
+  tasks: CrmTask[];
+  taskStats: { total: number; pending: number; completed: number; overdue: number };
+  communications: CrmCommunication[];
+  workflowTemplates: CrmWorkflowTemplate[];
 };

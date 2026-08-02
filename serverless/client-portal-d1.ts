@@ -1,5 +1,6 @@
 import { getAuthenticatedClientIdentity } from "./client-auth-d1";
 import { createMasterSupplier, getMasterSupplier, listMasterSuppliers } from "./supplier-d1";
+import { getJobWorkflowWorkspace } from "./crm-workflow-d1";
 
 export type PortalActor = {
   userId?: string;
@@ -535,6 +536,7 @@ export async function getCrmJobWorkspace(db: D1Db, actor: PortalActor, jobId: st
     `).bind(jobId, actor.workspaceId).all(),
     listMasterSuppliers(db, false, actor.workspaceId),
   ]);
+  const workflowWorkspace = await getJobWorkflowWorkspace(db, actor, jobId);
   const instances = [];
   for (const row of instanceRows.results || []) {
     instances.push(hydrateInstance(row, await instanceResponses(db, actor.workspaceId, text(row.id)), await instanceFiles(db, actor.workspaceId, text(row.id))));
@@ -583,6 +585,7 @@ export async function getCrmJobWorkspace(db: D1Db, actor: PortalActor, jobId: st
       actorEmail: text(row.actor_email),
       createdAt: row.created_at,
     })),
+    ...workflowWorkspace,
   };
 }
 

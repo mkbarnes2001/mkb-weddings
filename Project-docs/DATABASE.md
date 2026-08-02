@@ -3,7 +3,20 @@
 Always inspect the actual migration files before assuming a table/column exists.
 
 ## Schema version
-Current target schema version: **29**. Read migrations in sequence; migration 027 adds the CRM foundation, migration 028 adds the client portal/questionnaires and migration 029 adds supplier questionnaire review and Wedding linking.
+Current target schema version: **30**. Read migrations in sequence; migration 027 adds the CRM foundation, migration 028 adds the client portal/questionnaires, migration 029 adds supplier questionnaire review and Wedding linking, and migration 030 adds workflow templates, Job tasks, communication history and lead autoresponders.
+
+## Schema version 30
+Migration: `030_workflows_communications.sql`
+
+Adds:
+- `crm_workflow_templates`
+- `crm_workflow_template_steps`
+- `crm_job_workflows`
+- `crm_tasks`
+- `crm_communications`
+- lead-form autoresponder settings
+
+Workflow templates are workspace-owned reusable definitions. Applying a template creates a Job-owned workflow snapshot and task rows, so later template edits cannot rewrite an active or completed Job workflow. Tasks may be relative to booking or event date and carry type, priority, due date and completion audit data. Communication rows record logged or sent email, phone, SMS, meeting and note events against workspace-owned contacts, enquiries and Jobs. D1 triggers reject cross-workspace relationships. The migration seeds one default five-step workflow per workspace.
 
 ## Schema version 29
 Migration: `029_supplier_questionnaire_integration.sql`

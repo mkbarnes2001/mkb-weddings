@@ -1,18 +1,18 @@
 # Next Steps
-## Current release candidate — v1.9.1b Supplier Questionnaire Integration and Job Workspace
-1. Run all five schema-29 regression tests and both Vite builds.
-2. Review the Job workspace, contact editor and supplier questionnaire field in WedPlanned Test Business.
+## Current release candidate — v1.9.2 Workflows and Communication
+1. Run all six schema-30 regression tests and both Vite builds.
+2. Review Lead board/list, Job list, workflow library, workflow builder and expanded Job task/communication panels in WedPlanned Test Business.
 3. Take a production D1 export and Time Travel bookmark.
-4. Apply only `029_supplier_questionnaire_integration.sql` while production code remains on v1.9.1a.
-5. Verify schema 29, `crm_supplier_submissions`, starter-template upgrade and clean foreign keys.
-6. Deploy public/Admin code and use a temporary verified public hostname for the test business.
-7. Submit one known supplier and one unlisted supplier through the client portal; verify automatic Wedding linking, approval/merge/reject and MKB isolation.
-8. Verify contact editing and confirm an invitation cannot be sent without a verified public domain.
-9. Remove the temporary hostname and tag only after the live workflow passes.
+4. Apply only `030_workflows_communications.sql` while production code remains on v1.9.1b.
+5. Verify schema 30, all five workflow/communication tables, seeded default workflows and clean foreign keys.
+6. Deploy public/Admin code and apply the default workflow to the existing test Job.
+7. Verify task due dates, completion/reopen, workflow progress, manual task creation and cross-Job task overview.
+8. Log a phone/note communication and send one disposable client email through Resend.
+9. Enable the test-business lead autoresponder temporarily, submit a disposable public enquiry and verify the communication record without exposing MKB data.
+10. Restore test settings and tag only after tenant isolation and live communication checks pass.
 
-## Following CRM releases
-- v1.9.2: workflow templates, tasks, communication history, lead/job list views and autoresponders.
-- v1.9.3: packages, quotes, contracts, invoices, payment schedules and Stripe-connected payments.
+## Following CRM release
+- v1.9.3: services/packages, quotes, contracts, invoices, payment schedules and Stripe-connected payments.
 
 ## Current baseline
 The stable production baseline before this source release is **v1.8.3 Platform Operations Foundation**, commit `0385e9e`, with production D1 on schema **26**. Authentication, tenant ownership, second-business isolation, support access, workspace export and staged deletion have passed production validation.
