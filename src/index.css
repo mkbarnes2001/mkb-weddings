@@ -3452,3 +3452,209 @@ footer .logo-mkb, footer .logo-weddings {
   .portal-questionnaire-heading, .portal-questionnaire-fields { padding-inline: 18px; }
   .portal-questionnaire-actions { padding-inline: 18px; }
 }
+
+/* v1.9.1a1 — client portal typography and single-column questionnaire hotfix */
+.client-portal-shell,
+.client-portal-shell button,
+.client-portal-shell input,
+.client-portal-shell select,
+.client-portal-shell textarea,
+.client-portal-shell label,
+.client-portal-shell p,
+.client-portal-shell span,
+.client-portal-shell small,
+.client-portal-shell a,
+.client-portal-shell h1,
+.client-portal-shell h2,
+.client-portal-shell h3,
+.client-portal-shell h4,
+.client-portal-shell h5,
+.client-portal-shell h6 {
+  font-family: "Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.client-portal-shell {
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+
+.client-portal-shell h1,
+.client-portal-shell h2,
+.client-portal-shell h3,
+.client-portal-shell h4 {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.client-portal-main > .portal-questionnaire-card {
+  overflow: hidden;
+  max-width: 860px;
+  border: 1px solid rgba(17, 17, 17, 0.10);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 36px rgba(17, 17, 17, 0.045);
+}
+
+.portal-questionnaire-heading h1 {
+  font-size: clamp(28px, 3.6vw, 38px);
+  line-height: 1.12;
+}
+
+.portal-questionnaire-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding: 4px 28px 26px;
+}
+
+.portal-questionnaire-fields > h2 {
+  margin: 22px 0 4px;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.portal-questionnaire-fields > .portal-question-description {
+  margin: 0;
+  padding: 8px 0 18px;
+}
+
+.portal-question-field {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 7px;
+  width: 100%;
+  margin: 0;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+  padding: 20px 0;
+  color: #222;
+}
+
+.portal-question-field:last-child {
+  border-bottom: 0;
+}
+
+.portal-question-field > span {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.portal-question-field > span b {
+  color: #b42318;
+  font-weight: 600;
+}
+
+.portal-question-field > small {
+  display: block;
+  margin-top: -2px;
+  color: #737373;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.portal-question-field > input:not([type="file"]),
+.portal-question-field > textarea,
+.portal-question-field > select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(17, 17, 17, 0.16);
+  border-radius: 9px;
+  background: #fff;
+  color: #171717;
+  padding: 11px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.portal-question-field > input:not([type="file"]),
+.portal-question-field > select {
+  min-height: 44px;
+}
+
+.portal-question-field > textarea {
+  min-height: 116px;
+  resize: vertical;
+}
+
+.portal-question-field > input:not([type="file"]):focus,
+.portal-question-field > textarea:focus,
+.portal-question-field > select:focus {
+  border-color: var(--portal-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--portal-accent) 10%, transparent);
+}
+
+.portal-question-field > input:disabled,
+.portal-question-field > textarea:disabled,
+.portal-question-field > select:disabled {
+  background: #f5f5f4;
+  color: #737373;
+  cursor: not-allowed;
+}
+
+.portal-choice-list {
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+}
+
+.portal-choice-list label {
+  width: 100%;
+  background: #fff;
+  color: #262626;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.portal-choice-list input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  accent-color: var(--portal-accent);
+}
+
+.portal-file-field {
+  width: 100%;
+}
+
+.portal-file-field > input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 48px;
+  color: #525252;
+}
+
+.portal-questionnaire-actions {
+  padding: 15px 28px;
+}
+
+@media (max-width: 760px) {
+  .client-portal-main > .portal-questionnaire-card {
+    border-radius: 12px;
+  }
+
+  .portal-questionnaire-fields {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 4px 18px 22px;
+  }
+
+  .portal-question-field {
+    grid-column: 1 / -1;
+    padding: 17px 0;
+  }
+
+  .portal-questionnaire-actions {
+    flex-direction: column-reverse;
+    padding: 12px 18px;
+  }
+
+  .portal-questionnaire-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
