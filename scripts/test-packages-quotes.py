@@ -136,6 +136,10 @@ def main() -> None:
     assert "hostname.includes(\"admin\")" in quotes_source
     assert "Create and accept a quote to convert this enquiry" in crm_route
     assert "portal-package-grid" in portal_source and "confirmed: true" in portal_source
+    assert "selected_addons_snapshot_json FROM crm_quote_acceptances" in quotes_source
+    assert "acceptance }, identity" in quotes_source
+    assert 'acceptedQuote ? "Selected extras" : "Optional extras"' in portal_source
+    assert "acceptedQuote.totalAmount" in portal_source and "portal-quote-addon-accepted" in portal_source
     assert "else if (quantity > 0) quantity = Math.max(quantity, addon.minimumQuantity)" in quotes_source
     assert "idx_crm_quotes_enquiry_unique" in migration_text
     for table in required:

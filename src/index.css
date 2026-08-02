@@ -3735,6 +3735,7 @@ footer .logo-mkb, footer .logo-weddings {
 .portal-quote-addon strong small { border-radius: 999px; background: #f2eee1; color: #755a18; padding: 3px 6px; font-size: 7.5px; text-transform: uppercase; }
 .portal-quote-addon p { margin: 4px 0 0; color: #777; font-size: 9.5px; }
 .portal-quote-addon > span { font-size: 11px; font-weight: 600; }
+.portal-quote-addon-accepted { justify-self: end; border-radius: 999px; background: #111; color: #fff; padding: 7px 10px; font-size: 10px !important; }
 .portal-quote-addon label { display: grid; gap: 4px; }
 .portal-quote-addon label span { color: #777; font-size: 8px; text-transform: uppercase; }
 .portal-quote-addon input { width: 100%; min-height: 36px; border: 1px solid rgba(17,17,17,.15); border-radius: 8px; padding: 0 8px; }

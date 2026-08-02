@@ -574,7 +574,17 @@ export async function getPublicQuote(db: D1Db, request: Request, workspaceId: st
     version.status = "viewed";
     version.viewedAt = new Date().toISOString();
   }
-  return { quote: hydrateQuote(row, version), identity: { id: identity.id, displayName: identity.displayName, email: identity.email } };
+  let acceptance: any = null;
+  if (version.status === "accepted") {
+    const accepted = await db.prepare(`SELECT option_id, accepted_at, subtotal_amount, discount_amount, tax_amount, total_amount, currency, selected_package_snapshot_json, selected_addons_snapshot_json FROM crm_quote_acceptances WHERE workspace_id = ? AND quote_id = ? AND version_id = ? LIMIT 1`).bind(workspaceId, quoteId, version.id).first();
+    if (accepted) acceptance = {
+      optionId: text(accepted.option_id), acceptedAt: accepted.accepted_at || "", subtotalAmount: Number(accepted.subtotal_amount || 0),
+      discountAmount: Number(accepted.discount_amount || 0), taxAmount: Number(accepted.tax_amount || 0), totalAmount: Number(accepted.total_amount || 0),
+      currency: text(accepted.currency || version.currency), selectedPackage: safeJson(accepted.selected_package_snapshot_json, {}),
+      selectedAddons: safeJson(accepted.selected_addons_snapshot_json, []),
+    };
+  }
+  return { quote: { ...hydrateQuote(row, version), acceptance }, identity: { id: identity.id, displayName: identity.displayName, email: identity.email } };
 }
 
 function selectionFor(option: any, selections: any) {
