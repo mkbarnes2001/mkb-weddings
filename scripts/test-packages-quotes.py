@@ -128,7 +128,8 @@ def main() -> None:
     portal_source = (ROOT / "src/components/ClientPortal.tsx").read_text()
     export_source = (ROOT / "serverless/platform-operations-d1.ts").read_text()
     assert "acceptQuoteCore" in quotes_source and "acceptQuoteAsAdmin" in quotes_source and "acceptQuoteAsClient" in quotes_source
-    assert "purpose = 'public' AND status = 'verified'" in quotes_source
+    assert "purpose = 'public' AND verified = 1" in quotes_source
+    assert "status = 'verified'" not in quotes_source and "is_primary DESC" not in quotes_source
     assert "hostname.includes(\"admin\")" in quotes_source
     assert "Create and accept a quote to convert this enquiry" in crm_route
     assert "portal-package-grid" in portal_source and "confirmed: true" in portal_source

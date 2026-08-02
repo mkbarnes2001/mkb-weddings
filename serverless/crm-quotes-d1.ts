@@ -445,7 +445,7 @@ export async function reviseQuote(db: D1Db, actor: QuoteActor, quoteId: string) 
 }
 
 async function portalOrigin(db: D1Db, workspaceId: string) {
-  const domain = await db.prepare(`SELECT hostname FROM workspace_domains WHERE workspace_id = ? AND purpose = 'public' AND status = 'verified' ORDER BY is_primary DESC, created_at LIMIT 1`).bind(workspaceId).first();
+  const domain = await db.prepare(`SELECT hostname FROM workspace_domains WHERE workspace_id = ? AND purpose = 'public' AND verified = 1 ORDER BY created_at DESC LIMIT 1`).bind(workspaceId).first();
   const hostname = lower(domain?.hostname).replace(/^https?:\/\//, "").replace(/\/$/, "");
   if (!hostname || hostname.includes("admin")) throw httpError("Add and verify a public workspace domain before sending quote invitations.", 409);
   return `https://${hostname}`;
