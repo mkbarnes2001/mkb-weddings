@@ -157,3 +157,86 @@ export type CrmEnquiryInput = {
     phone?: string;
   };
 };
+
+export type QuestionnaireFieldType = "heading" | "description" | "short_text" | "long_text" | "select" | "radio" | "checkbox" | "file";
+
+export type QuestionnaireField = {
+  id: string;
+  type: QuestionnaireFieldType;
+  label: string;
+  help: string;
+  required: boolean;
+  options: string[];
+};
+
+export type QuestionnaireTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  status: "draft" | "active" | "archived";
+  version: number;
+  fields: QuestionnaireField[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type QuestionnaireFile = {
+  id: string;
+  fieldKey: string;
+  filename: string;
+  mimeType: string;
+  fileSize: number;
+  status: string;
+  uploadedAt: string;
+};
+
+export type QuestionnaireInstance = {
+  id: string;
+  jobId: string;
+  templateId: string;
+  assignedContactId: string;
+  assignedContactName: string;
+  title: string;
+  introduction: string;
+  fields: QuestionnaireField[];
+  templateVersion: number;
+  status: "draft" | "sent" | "opened" | "in_progress" | "completed" | "archived";
+  dueAt: string;
+  sentAt?: string;
+  openedAt?: string;
+  completedAt?: string;
+  lastSavedAt?: string;
+  responses: Record<string, unknown>;
+  files: QuestionnaireFile[];
+  jobTitle?: string;
+  jobReference?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type QuestionnaireOverview = {
+  templates: QuestionnaireTemplate[];
+  instances: QuestionnaireInstance[];
+};
+
+export type CrmPortalAccess = {
+  jobId: string;
+  contactId: string;
+  identityId: string;
+  displayName: string;
+  email: string;
+  role: string;
+  status: string;
+  invitedAt?: string;
+  acceptedAt?: string;
+  revokedAt?: string;
+};
+
+export type CrmJobWorkspace = {
+  job: CrmJob;
+  contacts: Array<{ id: string; displayName: string; email: string; phone: string; role: string }>;
+  portalAccess: CrmPortalAccess[];
+  questionnaires: QuestionnaireInstance[];
+  templates: QuestionnaireTemplate[];
+  activities: CrmActivity[];
+};

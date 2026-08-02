@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   BriefcaseBusiness,
   CalendarDays,
   CheckCircle2,
   ClipboardList,
   ExternalLink,
+  FileQuestion,
   Mail,
   Plus,
   Save,
@@ -27,9 +28,9 @@ import {
 } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
-import type { CrmEnquiryInput, CrmLeadFormSettings, CrmOverview } from "../types/crm";
+import type { CrmEnquiryInput, CrmLeadFormSettings, CrmOverview, QuestionnaireOverview } from "../types/crm";
 
-type View = "pipeline" | "contacts" | "jobs" | "lead-form";
+type View = "pipeline" | "contacts" | "jobs" | "questionnaires" | "lead-form";
 
 const emptyEnquiry: CrmEnquiryInput = {
   source: "manual",
@@ -151,6 +152,7 @@ export function CRM() {
         <AdminTab active={view === "pipeline"} onClick={() => setView("pipeline")}>Pipeline</AdminTab>
         <AdminTab active={view === "contacts"} onClick={() => setView("contacts")}>Contacts</AdminTab>
         <AdminTab active={view === "jobs"} onClick={() => setView("jobs")}>Jobs</AdminTab>
+        <AdminTab active={view === "questionnaires"} onClick={() => setView("questionnaires")}>Questionnaires</AdminTab>
         <AdminTab active={view === "lead-form"} onClick={() => setView("lead-form")}>Lead form</AdminTab>
       </AdminTabs>
 
@@ -189,10 +191,12 @@ export function CRM() {
       {view === "jobs" ? (
         <AdminPanel title="Accepted jobs" description="The Job is the commercial source of truth; the Wedding remains the content and delivery record." icon={BriefcaseBusiness}>
           {!crm?.jobs.length ? <AdminEmptyState icon={ClipboardList} title="No accepted jobs yet" description="Accept an enquiry to create the first Job and linked Wedding." /> : (
-            <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Reference</th><th>Job</th><th>Date</th><th>Status</th><th>Value</th><th>Wedding</th></tr></thead><tbody>{crm.jobs.map((job) => <tr key={job.id}><td>{job.reference}</td><td><strong>{job.title}</strong><div className="text-[10px] text-neutral-500">{job.serviceName || job.jobType}</div></td><td>{dateLabel(job.eventDate)}</td><td><AdminStatus tone={job.status === "booked" ? "success" : "neutral"}>{job.status}</AdminStatus></td><td>{money(job.valueAmount, job.currency)}</td><td>{job.weddingSlug ? <Link className="admin-inline-link" to={`/admin/weddings/${job.weddingSlug}/workspace`}>Open Wedding</Link> : "—"}</td></tr>)}</tbody></table></div>
+            <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Reference</th><th>Job</th><th>Date</th><th>Status</th><th>Value</th><th>Wedding</th></tr></thead><tbody>{crm.jobs.map((job) => <tr key={job.id}><td>{job.reference}</td><td><Link className="admin-inline-link" to={`/admin/crm/jobs/${job.id}`}>{job.title}</Link><div className="text-[10px] text-neutral-500">{job.serviceName || job.jobType}</div></td><td>{dateLabel(job.eventDate)}</td><td><AdminStatus tone={job.status === "booked" ? "success" : "neutral"}>{job.status}</AdminStatus></td><td>{money(job.valueAmount, job.currency)}</td><td>{job.weddingSlug ? <Link className="admin-inline-link" to={`/admin/weddings/${job.weddingSlug}/workspace`}>Open Wedding</Link> : "—"}</td></tr>)}</tbody></table></div>
           )}
         </AdminPanel>
       ) : null}
+
+      {view === "questionnaires" ? <QuestionnaireLibrary workspaceId={auth.workspaceId} canManage={canManage} /> : null}
 
       {view === "lead-form" && crm ? <LeadFormSettings settings={crm.leadForm} saving={saving} canManage={canManage} onSave={saveLeadForm} /> : null}
     </AdminPage>
@@ -217,5 +221,45 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
       </div>
       {canManage ? <div className="mt-4"><AdminButton variant="primary" icon={Save} disabled={saving} onClick={() => void onSave(draft)}>Save lead form</AdminButton></div> : null}
     </AdminPanel>
+  );
+}
+
+
+function QuestionnaireLibrary({ workspaceId, canManage }: { workspaceId: string; canManage: boolean }) {
+  const navigate = useNavigate();
+  const [overview, setOverview] = useState<QuestionnaireOverview | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function load() {
+    setLoading(true);
+    setError("");
+    try { setOverview(await AdminApiService.getQuestionnaireOverview()); }
+    catch (loadError) { setError(loadError instanceof Error ? loadError.message : "Unable to load questionnaires."); }
+    finally { setLoading(false); }
+  }
+  useEffect(() => { void load(); }, [workspaceId]);
+
+  async function createTemplate() {
+    setSaving(true);
+    setError("");
+    try {
+      const template = await AdminApiService.createQuestionnaireTemplate({ name: "New questionnaire", description: "", status: "draft", fields: [] });
+      navigate(`/admin/crm/questionnaires/${template.id}`);
+    } catch (createError) { setError(createError instanceof Error ? createError.message : "Unable to create questionnaire template."); }
+    finally { setSaving(false); }
+  }
+
+  return (
+    <div className="grid gap-4">
+      {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
+      <AdminPanel title="Questionnaire templates" description="Build reusable forms, then assign a versioned copy to an accepted Job." icon={FileQuestion} actions={canManage ? <AdminButton variant="primary" size="sm" icon={Plus} disabled={saving} onClick={() => void createTemplate()}>New template</AdminButton> : undefined}>
+        {loading ? <p className="text-[10px] text-neutral-500">Loading questionnaires…</p> : !overview?.templates.length ? <AdminEmptyState icon={FileQuestion} title="No questionnaire templates" description="Create a reusable questionnaire for your client workflow." /> : <div className="questionnaire-template-grid">{overview.templates.map((template) => <Link key={template.id} to={`/admin/crm/questionnaires/${template.id}`} className="questionnaire-template-card"><div><strong>{template.name}</strong><p>{template.description || "No description"}</p></div><div className="flex gap-2"><AdminStatus tone={template.status === "active" ? "success" : "neutral"}>{template.status}</AdminStatus><AdminStatus tone="info">{template.fields.length} fields</AdminStatus></div></Link>)}</div>}
+      </AdminPanel>
+      <AdminPanel title="Assigned questionnaires" description="Questionnaires assigned to Jobs appear here for quick progress review." icon={ClipboardList}>
+        {!overview?.instances.length ? <AdminEmptyState icon={ClipboardList} title="No assigned questionnaires" description="Open an accepted Job to assign a template and invite the client." /> : <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Questionnaire</th><th>Job</th><th>Client</th><th>Status</th><th>Updated</th></tr></thead><tbody>{overview.instances.map((item) => <tr key={item.id}><td><strong>{item.title}</strong></td><td><Link className="admin-inline-link" to={`/admin/crm/jobs/${item.jobId}`}>{item.jobTitle || item.jobReference || "Open Job"}</Link></td><td>{item.assignedContactName || "Any portal client"}</td><td><AdminStatus tone={item.status === "completed" ? "success" : item.status === "in_progress" || item.status === "opened" ? "info" : item.status === "sent" ? "warning" : "neutral"}>{item.status.replace(/_/g, " ")}</AdminStatus></td><td>{dateLabel(item.updatedAt.slice(0,10))}</td></tr>)}</tbody></table></div>}
+      </AdminPanel>
+    </div>
   );
 }

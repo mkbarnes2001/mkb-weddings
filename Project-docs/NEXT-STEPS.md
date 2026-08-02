@@ -1,4 +1,24 @@
 # Next Steps
+## Current release candidate — v1.9.1a Client Portal and Questionnaires
+1. Run all schema-28 regression tests and both Vite builds locally.
+2. Take a production D1 export and Time Travel bookmark.
+3. Apply only `028_client_portal_questionnaires.sql`.
+4. Verify schema 28, foreign keys, seeded questionnaire templates and empty portal operational tables.
+5. Deploy Admin/public code and test against WedPlanned Test Business first.
+6. Invite a test client, verify the magic link, save questionnaire progress, upload/download a private attachment, submit, revoke access and confirm MKB isolation.
+7. Tag the release only after the live workflow passes.
+
+## Next release — v1.9.1b Supplier Questionnaire Integration
+- Supplier-search questionnaire fields backed by the workspace Supplier Master.
+- “Supplier not listed” suggestions and an approval/merge queue.
+- Wedding-specific role selection and multi-role support.
+- Approved responses create/update `wedding_supplier_links`; clients never overwrite reusable master records.
+- Selected structured answers may update the linked Job/Wedding only through explicit server-side mappings.
+
+## Later CRM workflow
+- v1.9.2: workflow templates, tasks, communication history, lead/job list views and autoresponders.
+- v1.9.3: packages, quotes, contracts, invoices, payment schedules and Stripe-connected payments.
+
 
 ## Current baseline
 The stable production baseline before this source release is **v1.8.3 Platform Operations Foundation**, commit `0385e9e`, with production D1 on schema **26**. Authentication, tenant ownership, second-business isolation, support access, workspace export and staged deletion have passed production validation.

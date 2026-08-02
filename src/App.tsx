@@ -29,6 +29,7 @@ import { CountyPage } from "./components/CountyPage";
 import { CountiesLanding } from "./components/CountiesLanding";
 import { ClientGallery } from "./components/ClientGallery";
 import { Enquire } from "./components/LeadEnquiryForm";
+import { ClientPortal } from "./components/ClientPortal";
 
 /* ---------------- Google Analytics Listener ---------------- */
 function GoogleAnalyticsListener() {
@@ -36,7 +37,7 @@ function GoogleAnalyticsListener() {
 
   useEffect(() => {
     // Private client-gallery capability tokens must never be sent to analytics.
-    if (location.pathname.startsWith("/client-gallery/")) return;
+    if (location.pathname.startsWith("/client-gallery/") || location.pathname.startsWith("/client-portal")) return;
     if (window.gtag) {
       window.gtag("config", "G-RQB9V9DTZP", {
         page_path: location.pathname,
@@ -68,6 +69,7 @@ export default function App() {
 
       <div className="min-h-screen bg-white">
         <Routes>
+          <Route path="/client-portal" element={<ClientPortal />} />
           <Route path="/client-gallery/:slug/:token" element={<ClientGallery />} />
           <Route path="/client-gallery/:token" element={<ClientGallery />} />
 

@@ -442,3 +442,18 @@ Authority rules:
 - the Job owns commercial status/value; Wedding owns photography content, galleries, suppliers and publishing.
 
 The first public route is fixed at `/enquire`; arbitrary hosted-site paths are deferred until routing can resolve them without colliding with existing website routes. The existing Contact page embeds the same CRM form. See `WEDPLANNED-CRM.md`.
+
+## Client portal and questionnaire boundary — v1.9.1a
+
+`Accepted Job → linked CRM contact → active Job access → one-time invitation → client identity session → versioned questionnaire`
+
+Authority rules:
+- Admin assignment/invitation resolves workspace from professional auth and requires `crm:manage`.
+- Public portal requests resolve the workspace from the verified request domain; the browser cannot choose a tenant.
+- Magic-link verification creates/reuses a client identity session only when the invitation and Job access are active and workspace/contact/job relationships match.
+- A questionnaire is always assigned to one explicit Job contact; another portal client cannot overwrite that response set.
+- Sent instances retain their own schema snapshot and template version.
+- Required answers are checked server-side, including required file fields.
+- Private attachments are stored only in `MKB_PRIVATE_ASSETS`; storage keys are never returned as public URLs.
+- Revoking Job access immediately removes that Job/questionnaire from the portal even if the browser session cookie remains valid.
+- Questionnaire responses do not directly mutate reusable Venue or Supplier masters. Supplier approval/synchronisation is deferred to v1.9.1b.

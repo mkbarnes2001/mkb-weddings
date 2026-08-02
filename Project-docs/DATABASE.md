@@ -422,3 +422,22 @@ Migration 027 adds:
 The public endpoint resolves `workspace_id` from `workspace_domains`; Admin operations resolve it from professional auth/support context. The browser cannot nominate a workspace.
 
 Schema version advances from 26 to **27**.
+
+## Schema version 28
+Migration: `028_client_portal_questionnaires.sql`
+
+Adds:
+- `crm_questionnaire_templates`
+- `crm_questionnaire_instances`
+- `crm_questionnaire_responses`
+- `crm_questionnaire_files`
+- `crm_job_client_access`
+- `crm_portal_invitations`
+
+Questionnaire templates are reusable workspace records. Each assignment copies the template schema/version into `crm_questionnaire_instances`, so a later template edit cannot alter an already-sent questionnaire. Responses are stored by field ID as structured JSON values.
+
+`crm_job_client_access` grants a CRM contact access to one Job. `crm_portal_invitations` stores only one-time token hashes and delivery/use timestamps. Portal authentication reuses the existing client identity/session system, while every portal query also requires active Job access.
+
+Questionnaire attachments are private R2 objects referenced by `crm_questionnaire_files`. The 10 MB upload route validates active workspace/Job/contact access. Business exports include file metadata but redact `storage_key`; portal invitation token hashes are also redacted.
+
+Migration triggers reject cross-workspace template, Job, contact, response and file relationships. A starter Pre-wedding Questionnaire template is seeded per existing workspace. Schema version advances from 27 to **28**.

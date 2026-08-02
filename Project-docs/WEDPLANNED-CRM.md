@@ -148,11 +148,17 @@ The same supplier may hold more than one wedding role. Wedding-specific role/ord
 - accept/lost actions;
 - accepted enquiry creates Job and Wedding relationship.
 
-### v1.9.1 — Client Portal and Questionnaires
-- portal invitation and contact authentication linkage;
-- questionnaire templates/instances/responses;
-- supplier-team questionnaire and approval queue;
-- structured updates into Job/Wedding.
+### v1.9.1a — Client Portal and Questionnaires
+- Job/contact-scoped portal invitation and magic-link authentication;
+- questionnaire template builder and immutable assigned instances;
+- save-and-return structured responses, required validation and private files;
+- Admin review, completion tracking and access revocation.
+
+### v1.9.1b — Supplier Questionnaire Integration
+- supplier-search field backed by Supplier Master;
+- unknown-supplier suggestion and approval/merge queue;
+- wedding-specific role selection;
+- approved responses create Wedding Supplier links and explicit Job/Wedding updates.
 
 ### v1.9.2 — Commercial Workflow
 - services/packages;
@@ -174,3 +180,13 @@ The same supplier may hold more than one wedding role. Wedding-specific role/ord
 - Client responses cannot directly mutate reusable master Venue or Supplier records.
 - Private CRM data never becomes marketplace/public-profile data implicitly.
 - Payment-provider identifiers attach to invoices/payments, not directly to a public lead.
+
+## v1.9.1a implementation decisions
+- The portal is a standalone `/client-portal` route rather than a modal inside a gallery.
+- A client may access only Jobs explicitly linked through `crm_job_client_access`.
+- Every questionnaire assignment requires one explicit linked contact.
+- Template edits increment the reusable template version; assigned instances keep their original schema snapshot.
+- Supported field types are heading, description, short text, long text, dropdown, radio, checkbox and private file upload.
+- Invitations use the verified workspace public domain and one-time hashed tokens.
+- Portal sessions reuse the established client identity/session cookie, while active Job access is checked on every request.
+- Supplier answers remain ordinary structured fields until v1.9.1b adds controlled Supplier Master resolution.

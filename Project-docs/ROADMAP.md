@@ -170,6 +170,13 @@ Required behaviour:
 - Suggested changes to master data require studio approval
 - Supplier Instagram usernames should feed post-wedding social caption generation automatically
 
+## v1.9.1a — Client Portal and Questionnaires
+- Job-scoped magic-link portal access and revocation.
+- Reusable Build/Preview questionnaire templates.
+- Versioned assignments, save-and-return responses and completion tracking.
+- Private reference-file uploads and Admin review.
+- Next: Supplier Master search, unknown-supplier approval and Wedding Supplier links in v1.9.1b.
+
 ## Delivery expansion
 - Full-gallery ZIP generation with queued / cached delivery
 - Upload session cleanup and storage usage reporting
@@ -201,7 +208,7 @@ Required behaviour:
 - Guest view/favourite access with separate download policy
 - Visitor activity tracking without raw IP storage
 
-Client selections and Print Store ordering now use this identified visitor model. Stripe hosted payment and photographer-controlled Prodigi sandbox fulfilment are complete. The operations foundation and CRM source-of-truth workflow are now implemented in source; the next major release is the Client Portal and structured questionnaires. Stripe Connect then attaches to CRM invoices and Jobs rather than existing as an isolated payment layer.
+Client selections and Print Store ordering now use this identified visitor model. Stripe hosted payment and photographer-controlled Prodigi sandbox fulfilment are complete. The operations foundation, CRM source-of-truth workflow and v1.9.1a Client Portal/questionnaire foundation are implemented in source. Supplier-aware questionnaire fields and approval/synchronisation follow in v1.9.1b. Stripe Connect then attaches to CRM invoices and Jobs rather than existing as an isolated payment layer.
 
 ## v1.5.2 — Favourite Review & Full-Resolution Download
 - Admin favourite thumbnail review.

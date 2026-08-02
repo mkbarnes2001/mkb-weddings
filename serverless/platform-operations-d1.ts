@@ -368,6 +368,12 @@ const DIRECT_EXPORT_TABLES = [
   "crm_job_contacts",
   "crm_activities",
   "crm_lead_form_settings",
+  "crm_questionnaire_templates",
+  "crm_questionnaire_instances",
+  "crm_questionnaire_responses",
+  "crm_questionnaire_files",
+  "crm_job_client_access",
+  "crm_portal_invitations",
   "venues",
   "weddings",
   "images",
@@ -432,6 +438,8 @@ const CHILD_EXPORT_QUERIES: Record<string, string> = {
 
 const EXPORT_REDACTIONS: Record<string, string[]> = {
   client_galleries: ["access_token", "pin_hash"],
+  crm_portal_invitations: ["token_hash"],
+  crm_questionnaire_files: ["storage_key"],
   commerce_print_assets: ["access_token"],
   asset_upload_sessions: ["multipart_upload_id"],
 };

@@ -271,7 +271,7 @@ def main() -> None:
         columns = {row[1] for row in con.execute(f"PRAGMA table_info({table})")}
         assert "workspace_id" in columns, f"{table} is missing workspace_id"
 
-    assert execute_one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "27"
+    assert execute_one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "28"
     assert not con.execute("PRAGMA foreign_key_check").fetchall()
 
     assert_source_contains(
@@ -378,14 +378,14 @@ def main() -> None:
         "submitPublicEnquiry",
     )
 
-    print("PASS v1.9.0 tenant isolation")
+    print("PASS v1.9.1a tenant isolation")
     print("  read/infer: blocked")
     print("  mutate: blocked")
     print("  publish: blocked")
     print("  R2 key/download lookup: blocked")
     print("  Client Gallery/Print Store active-workspace access: guarded")
     print("  public-domain workspace resolution: verified")
-    print("  schema version: 27")
+    print("  schema version: 28")
 
 
 if __name__ == "__main__":

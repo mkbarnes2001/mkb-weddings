@@ -1,4 +1,15 @@
 # MKB Intelligence — Changelog
+## v1.9.1a — Client Portal and Questionnaires
+- Added migration 028 and workspace-owned questionnaire templates, versioned questionnaire instances, structured responses, private file references, Job client access and one-time portal invitation records.
+- Added a standalone `/client-portal` experience with email magic-link entry, 30-day client sessions, Job-scoped access, save-and-return questionnaires, required-field validation and submission history.
+- Added Admin CRM Job workspaces for portal invitations/revocation, questionnaire assignment, response review and secure attachment download.
+- Added a Studio-Ninja-guided questionnaire builder with Build/Preview modes, drag/reorder controls, headings, descriptions, short/long text, dropdown, radio, checkbox and private file-upload fields.
+- Questionnaire assignments retain an immutable schema/version snapshot when templates are edited later.
+- Added private R2 questionnaire attachments with a 10 MB limit; storage keys are redacted from business exports.
+- Added workspace-scoped export coverage and regression tests for portal authentication, questionnaire isolation, file access and cross-tenant relationship rejection.
+- Supplier Master search, unknown-supplier approval and Wedding Supplier synchronisation remain deliberately deferred to v1.9.1b.
+- Schema advances to 28.
+
 
 ## v1.9.0 — CRM Foundation
 - Added workspace-owned CRM pipeline stages, contacts, enquiries, enquiry/contact relationships, Jobs, Job/contact relationships and activity history.

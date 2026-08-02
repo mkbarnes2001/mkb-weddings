@@ -3,6 +3,8 @@ import { AdminLayout } from "../layouts/AdminLayout";
 import { Dashboard } from "../pages/Dashboard";
 import { CRM } from "../pages/CRM";
 import { CRMEnquiry } from "../pages/CRMEnquiry";
+import { CRMJob } from "../pages/CRMJob";
+import { CRMQuestionnaireTemplate } from "../pages/CRMQuestionnaireTemplate";
 import { Weddings } from "../pages/Weddings";
 import { NewWeddingWizard } from "../pages/NewWeddingWizard";
 import { WeddingDetail } from "../pages/WeddingDetail";
@@ -50,6 +52,8 @@ export function AdminApp() {
         <Route path="wedplanned" element={<WedPlannedPlatform />} />
         <Route path="crm" element={<CRM />} />
         <Route path="crm/enquiries/:id" element={<CRMEnquiry />} />
+        <Route path="crm/jobs/:id" element={<CRMJob />} />
+        <Route path="crm/questionnaires/:id" element={<CRMQuestionnaireTemplate />} />
         <Route path="weddings" element={<Weddings />} />
         <Route path="weddings/new" element={<NewWeddingWizard />} />
         <Route path="weddings/:slug" element={<WeddingDetail />} />

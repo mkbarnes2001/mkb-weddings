@@ -3365,3 +3365,90 @@ footer .logo-mkb, footer .logo-weddings {
   border-color: #171717;
   box-shadow: 0 0 0 3px rgba(17,17,17,.06);
 }
+
+/* v1.9.1a — secure client portal */
+.client-portal-shell {
+  --portal-accent: #111111;
+  min-height: 100vh;
+  background: #f5f3ef;
+  color: #171717;
+  font-family: "Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif;
+}
+.client-portal-loading { display: grid; min-height: 100vh; place-items: center; color: #737373; font-size: 13px; }
+.client-portal-signin { width: min(520px, calc(100% - 32px)); margin: 0 auto; padding: 11vh 0 40px; text-align: center; }
+.client-portal-brand { display: grid; width: 58px; height: 58px; margin: 0 auto 18px; place-items: center; border-radius: 17px; background: var(--portal-accent); color: #fff; font-size: 18px; font-weight: 700; }
+.client-portal-brand img { width: 42px; height: 42px; object-fit: contain; }
+.client-portal-eyebrow { margin: 0; color: #8a8a8a; font-size: 10px; font-weight: 650; letter-spacing: .16em; text-transform: uppercase; }
+.client-portal-signin h1 { margin: 10px 0 0; font-size: clamp(28px, 5vw, 42px); line-height: 1.08; }
+.client-portal-signin > p:not(.client-portal-eyebrow) { max-width: 470px; margin: 14px auto 0; color: #666; font-size: 13px; line-height: 1.7; }
+.client-portal-signin label { display: grid; gap: 7px; margin-top: 28px; text-align: left; }
+.client-portal-signin label span { font-size: 10px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+.client-portal-signin input { min-height: 48px; border: 1px solid rgba(17,17,17,.16); border-radius: 10px; background: #fff; padding: 0 14px; font: inherit; }
+.client-portal-signin > button { display: inline-flex; width: 100%; min-height: 48px; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; border: 0; border-radius: 10px; background: var(--portal-accent); color: #fff; font: inherit; font-size: 12px; font-weight: 650; }
+.client-portal-signin > button svg { width: 15px; }
+.client-portal-signin > button:disabled { opacity: .45; }
+.client-portal-alert { margin: 16px 0; border: 1px solid rgba(17,17,17,.12); border-radius: 10px; padding: 11px 13px; font-size: 11px; line-height: 1.55; }
+.client-portal-alert--error { border-color: #fecaca; background: #fef2f2; color: #991b1b; }
+.client-portal-alert--success { border-color: #bbf7d0; background: #f0fdf4; color: #166534; }
+.client-portal-header { position: sticky; top: 0; z-index: 20; display: flex; min-height: 70px; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid rgba(17,17,17,.1); background: rgba(255,255,255,.94); padding: 12px clamp(18px, 4vw, 52px); backdrop-filter: blur(16px); }
+.client-portal-header p { margin: 0; color: #777; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+.client-portal-header strong { display: block; margin-top: 4px; font-size: 16px; }
+.client-portal-user { display: flex; align-items: center; gap: 12px; color: #666; font-size: 10px; }
+.client-portal-user button { display: inline-flex; min-height: 34px; align-items: center; gap: 6px; border: 1px solid rgba(17,17,17,.13); border-radius: 8px; background: #fff; padding: 0 10px; font: inherit; font-weight: 600; }
+.client-portal-user button svg { width: 13px; }
+.client-portal-layout { display: grid; grid-template-columns: minmax(250px, 320px) minmax(0, 1fr); min-height: calc(100vh - 70px); }
+.client-portal-sidebar { border-right: 1px solid rgba(17,17,17,.09); background: #eeece7; padding: 28px 20px; }
+.client-portal-job { margin-top: 18px; border: 1px solid rgba(17,17,17,.09); border-radius: 14px; background: rgba(255,255,255,.72); padding: 14px; }
+.client-portal-job h2 { margin: 0; font-size: 14px; }
+.client-portal-job > p { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; color: #737373; font-size: 9.5px; }
+.client-portal-job > p svg { width: 12px; }
+.client-portal-job > div { display: grid; gap: 6px; margin-top: 14px; }
+.client-portal-job button { display: grid; grid-template-columns: 16px minmax(0,1fr) 15px; align-items: center; gap: 8px; border: 1px solid transparent; border-radius: 9px; background: transparent; padding: 9px; color: #333; text-align: left; font: inherit; }
+.client-portal-job button.active { border-color: rgba(17,17,17,.12); background: #fff; }
+.client-portal-job button svg { width: 14px; }
+.client-portal-job button span { min-width: 0; font-size: 10px; font-weight: 600; }
+.client-portal-job button small { display: block; margin-top: 2px; color: #8a8a8a; font-size: 8px; font-weight: 500; text-transform: capitalize; }
+.client-portal-main { min-width: 0; padding: clamp(18px, 4vw, 48px); }
+.client-portal-main > .portal-questionnaire-card { max-width: 900px; margin: 0 auto; }
+.portal-questionnaire-heading { border-bottom: 1px solid rgba(17,17,17,.08); padding: 26px 28px 22px; }
+.portal-questionnaire-heading > span { color: #8a8a8a; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+.portal-questionnaire-heading h1 { margin: 8px 0 0; font-size: clamp(24px, 4vw, 36px); }
+.portal-questionnaire-heading > p { max-width: 680px; margin: 10px 0 0; color: #666; font-size: 12px; line-height: 1.7; }
+.portal-questionnaire-meta { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+.portal-questionnaire-meta span { border-radius: 999px; background: #f2f1ee; padding: 5px 8px; color: #666; font-size: 8px; text-transform: capitalize; }
+.client-portal-back { display: none; align-items: center; gap: 5px; margin-bottom: 14px; border: 0; background: transparent; padding: 0; color: #666; font: inherit; font-size: 10px; }
+.client-portal-back svg { width: 13px; }
+.portal-question-description { margin: 0; color: #666; font-size: 12px; line-height: 1.7; }
+.portal-choice-list { display: grid; gap: 8px; }
+.portal-choice-list label { display: flex; align-items: center; gap: 8px; border: 1px solid rgba(17,17,17,.1); border-radius: 8px; padding: 9px 11px; font-size: 11px; }
+.portal-file-field { display: grid; gap: 10px; }
+.portal-file-field > input { border: 1px dashed rgba(17,17,17,.22); border-radius: 9px; background: #fafafa; padding: 12px; font-size: 10px; }
+.portal-file-list { display: grid; gap: 7px; }
+.portal-file-list > div { display: grid; grid-template-columns: 16px minmax(0,1fr) 28px; align-items: center; gap: 8px; border: 1px solid rgba(17,17,17,.09); border-radius: 8px; background: #fafafa; padding: 8px 9px; }
+.portal-file-list svg { width: 14px; color: #777; }
+.portal-file-list a { min-width: 0; color: #222; text-decoration: none; }
+.portal-file-list a span { display: block; overflow: hidden; font-size: 10px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.portal-file-list a small { display: block; margin-top: 2px; color: #888; font-size: 8px; }
+.portal-file-list button { display: grid; width: 27px; height: 27px; place-items: center; border: 0; border-radius: 7px; background: #fff; color: #991b1b; }
+.portal-questionnaire-actions { position: sticky; bottom: 0; display: flex; justify-content: flex-end; gap: 9px; border-top: 1px solid rgba(17,17,17,.09); background: rgba(255,255,255,.96); padding: 14px 26px; backdrop-filter: blur(14px); }
+.portal-questionnaire-actions button { display: inline-flex; min-height: 40px; align-items: center; gap: 7px; border: 1px solid var(--portal-accent); border-radius: 8px; background: var(--portal-accent); color: #fff; padding: 0 14px; font: inherit; font-size: 10px; font-weight: 650; }
+.portal-questionnaire-actions button.secondary { background: #fff; color: #222; }
+.portal-questionnaire-actions button svg { width: 14px; }
+.client-portal-complete { display: flex; align-items: center; gap: 8px; color: #166534; font-size: 11px; font-weight: 650; }
+.client-portal-complete svg { width: 17px; }
+.client-portal-empty { display: grid; min-height: 420px; place-items: center; align-content: center; color: #777; text-align: center; }
+.client-portal-empty svg { width: 34px; height: 34px; opacity: .4; }
+.client-portal-empty h2 { margin: 14px 0 0; color: #222; font-size: 18px; }
+.client-portal-empty p, .client-portal-muted { color: #777; font-size: 10px; }
+
+@media (max-width: 760px) {
+  .client-portal-header { min-height: 60px; }
+  .client-portal-user > span { display: none; }
+  .client-portal-layout { grid-template-columns: 1fr; }
+  .client-portal-sidebar { border-right: 0; border-bottom: 1px solid rgba(17,17,17,.09); padding: 18px; }
+  .client-portal-job { margin-top: 10px; }
+  .client-portal-main { padding: 14px; }
+  .client-portal-back { display: inline-flex; }
+  .portal-questionnaire-heading, .portal-questionnaire-fields { padding-inline: 18px; }
+  .portal-questionnaire-actions { padding-inline: 18px; }
+}

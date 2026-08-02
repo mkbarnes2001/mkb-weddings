@@ -1,4 +1,15 @@
 # Project State
+## v1.9.1a source state — Client Portal and Questionnaires
+- Base: stable v1.9.0 CRM Foundation (`96d4c91`, schema 27).
+- Source now includes migration 028 and targets schema 28; production migration/deployment must follow the controlled backup-first process.
+- Accepted Jobs can invite an explicitly selected linked client to a standalone magic-link portal.
+- Questionnaire templates support Build/Preview, ordering, required fields, option fields and private reference-file uploads.
+- Assigned questionnaires are immutable versioned snapshots with draft/sent/opened/in-progress/completed states.
+- Client sessions reuse the existing secure client identity/session boundary and remain scoped to active Job access.
+- Private questionnaire files use `MKB_PRIVATE_ASSETS`; Admin/client downloads are authorised through workspace, Job, contact and access checks.
+- Business export includes questionnaire/portal metadata but redacts invitation hashes and private storage keys.
+- Supplier questionnaire integration is not included in v1.9.1a; it is the next isolated release.
+
 
 ## Version
 Current release in source: **v1.9.0 — CRM Foundation**.

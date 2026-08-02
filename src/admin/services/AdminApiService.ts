@@ -10,7 +10,7 @@ import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, Client
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
 import type { ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
-import type { CrmEnquiryDetail, CrmEnquiryInput, CrmLeadFormSettings, CrmOverview } from "../types/crm";
+import type { CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate } from "../types/crm";
 import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
@@ -1239,6 +1239,73 @@ export class AdminApiService {
       body: JSON.stringify(settings),
     });
     return result.crm;
+  }
+
+  static async getCrmJobWorkspace(id: string) {
+    const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(id)}`);
+    return result.workspace;
+  }
+
+  static async getQuestionnaireOverview() {
+    const result = await request<{ ok: true; questionnaires: QuestionnaireOverview }>("/api/crm/questionnaires");
+    return result.questionnaires;
+  }
+
+  static async getQuestionnaireTemplate(id: string) {
+    const result = await request<{ ok: true; template: QuestionnaireTemplate }>(`/api/crm/questionnaires/templates/${encodeURIComponent(id)}`);
+    return result.template;
+  }
+
+  static async createQuestionnaireTemplate(input: Partial<QuestionnaireTemplate>) {
+    const result = await request<{ ok: true; template: QuestionnaireTemplate }>("/api/crm/questionnaires/templates", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return result.template;
+  }
+
+  static async saveQuestionnaireTemplate(id: string, input: Partial<QuestionnaireTemplate>) {
+    const result = await request<{ ok: true; template: QuestionnaireTemplate }>(`/api/crm/questionnaires/templates/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
+    return result.template;
+  }
+
+  static async archiveQuestionnaireTemplate(id: string) {
+    const result = await request<{ ok: true; template: QuestionnaireTemplate }>(`/api/crm/questionnaires/templates/${encodeURIComponent(id)}/archive`, {
+      method: "POST",
+      body: JSON.stringify({}),
+    });
+    return result.template;
+  }
+
+  static async assignQuestionnaire(jobId: string, input: { templateId: string; contactId?: string; title?: string; introduction?: string; dueAt?: string }) {
+    const result = await request<{ ok: true; questionnaire: QuestionnaireInstance }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/questionnaires`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return result.questionnaire;
+  }
+
+  static async inviteCrmClient(jobId: string, contactId: string) {
+    const result = await request<{ ok: true; invitation: { ok: true; message: string; expiresAt: string } }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/invite`, {
+      method: "POST",
+      body: JSON.stringify({ contactId }),
+    });
+    return result.invitation;
+  }
+
+  static async revokeCrmClientAccess(jobId: string, identityId: string) {
+    const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/revoke`, {
+      method: "POST",
+      body: JSON.stringify({ identityId }),
+    });
+    return result.workspace;
+  }
+
+  static questionnaireFileUrl(instanceId: string, fileId: string) {
+    return `${API_BASE}/api/crm/questionnaire-files/${encodeURIComponent(fileId)}?instanceId=${encodeURIComponent(instanceId)}`;
   }
 
   static async getWorkspace() {
