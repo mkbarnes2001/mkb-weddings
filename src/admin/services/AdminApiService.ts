@@ -10,7 +10,7 @@ import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, Client
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
 import type { ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
-import type { CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate } from "../types/crm";
+import type { CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate } from "../types/crm";
 import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
@@ -1193,6 +1193,19 @@ export class AdminApiService {
     return result.detail;
   }
 
+  static async getCrmContact(id: string) {
+    const result = await request<{ ok: true; detail: CrmContactDetail }>(`/api/crm/contacts/${encodeURIComponent(id)}`);
+    return result.detail;
+  }
+
+  static async updateCrmContact(id: string, input: Record<string, unknown>) {
+    const result = await request<{ ok: true; detail: CrmContactDetail }>(`/api/crm/contacts/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
+    return result.detail;
+  }
+
   static async createCrmEnquiry(input: CrmEnquiryInput) {
     const result = await request<{ ok: true; detail: CrmEnquiryDetail }>("/api/crm/enquiries", {
       method: "POST",
@@ -1300,6 +1313,22 @@ export class AdminApiService {
     const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/revoke`, {
       method: "POST",
       body: JSON.stringify({ identityId }),
+    });
+    return result.workspace;
+  }
+
+  static async approveCrmSupplierSubmission(jobId: string, submissionId: string, input: Record<string, unknown>) {
+    const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/supplier-submissions/${encodeURIComponent(submissionId)}/approve`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return result.workspace;
+  }
+
+  static async rejectCrmSupplierSubmission(jobId: string, submissionId: string, reviewNotes = "") {
+    const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/supplier-submissions/${encodeURIComponent(submissionId)}/reject`, {
+      method: "POST",
+      body: JSON.stringify({ reviewNotes }),
     });
     return result.workspace;
   }

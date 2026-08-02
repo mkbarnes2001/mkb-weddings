@@ -158,7 +158,7 @@ export type CrmEnquiryInput = {
   };
 };
 
-export type QuestionnaireFieldType = "heading" | "description" | "short_text" | "long_text" | "select" | "radio" | "checkbox" | "file";
+export type QuestionnaireFieldType = "heading" | "description" | "short_text" | "long_text" | "select" | "radio" | "checkbox" | "file" | "supplier";
 
 export type QuestionnaireField = {
   id: string;
@@ -167,6 +167,10 @@ export type QuestionnaireField = {
   help: string;
   required: boolean;
   options: string[];
+  supplierRole: string;
+  supplierCategory: string;
+  allowUnlisted: boolean;
+  multiple: boolean;
 };
 
 export type QuestionnaireTemplate = {
@@ -219,6 +223,49 @@ export type QuestionnaireOverview = {
   instances: QuestionnaireInstance[];
 };
 
+
+export type SupplierDirectoryOption = {
+  id: string;
+  name: string;
+  category: string;
+  website?: string;
+  instagram?: string;
+  email?: string;
+  phone?: string;
+  location: string;
+  county: string;
+};
+
+export type CrmSupplierSubmission = {
+  id: string;
+  jobId: string;
+  instanceId: string;
+  fieldKey: string;
+  responseIndex: number;
+  role: string;
+  supplierId: string;
+  resolvedSupplierId: string;
+  name: string;
+  website: string;
+  instagram: string;
+  email: string;
+  phone: string;
+  location: string;
+  county: string;
+  status: "pending" | "linked" | "approved" | "rejected" | string;
+  reviewNotes: string;
+  reviewedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CrmContactDetail = {
+  contact: CrmContact;
+  enquiries: Array<{ id: string; reference: string; status: string; role: string; eventDate: string; venueText: string }>;
+  jobs: Array<CrmJob & { role: string }>;
+  activities: CrmActivity[];
+};
+
 export type CrmPortalAccess = {
   jobId: string;
   contactId: string;
@@ -238,5 +285,9 @@ export type CrmJobWorkspace = {
   portalAccess: CrmPortalAccess[];
   questionnaires: QuestionnaireInstance[];
   templates: QuestionnaireTemplate[];
+  enquiry: { reference: string; source: string; campaign: string; notes: string; createdAt: string } | null;
+  linkedSuppliers: Array<SupplierDirectoryOption & { role: string; sortOrder: number }>;
+  supplierSubmissions: CrmSupplierSubmission[];
+  supplierDirectory: SupplierDirectoryOption[];
   activities: CrmActivity[];
 };

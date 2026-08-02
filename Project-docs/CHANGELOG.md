@@ -1,4 +1,16 @@
 # MKB Intelligence — Changelog
+## v1.9.1b — Supplier Questionnaire Integration and Job Workspace
+- Added migration 029 and workspace-owned `crm_supplier_submissions` review records.
+- Added structured Supplier selection fields to questionnaire templates, including Supplier Master search, optional category filtering, single/multiple selection and an “unlisted supplier” path.
+- Existing Supplier Master selections link automatically to the accepted Job's Wedding using the questionnaire role; clients never edit reusable Supplier Master records.
+- Unlisted suppliers appear on the Job workspace for create-new, merge-with-existing or reject review, with activity history and database-enforced workspace relationships.
+- Rebuilt the CRM Job page around Workflow, Job, Clients, Supplier team, Questionnaires, Files, Notes and Recent activity, following the supplied Studio Ninja workflow references without adding non-functional quote/invoice/contract controls.
+- Added a full contact edit page with duplicate-email and client-portal identity safeguards; Contacts table rows now open the reusable contact record.
+- Client portal invitation generation now requires a verified public workspace domain and never falls back to the Cloudflare-protected Admin hostname.
+- Added workspace export coverage and dependency-free regression tests for supplier fields, approval/merge, contact editing, public-domain guards and Job workspace structure.
+- Quotes, contracts, invoices, payments and communication history remain planned for v1.9.2/v1.9.3.
+- Schema advances to 29.
+
 ## v1.9.1a — Client Portal and Questionnaires
 - Added migration 028 and workspace-owned questionnaire templates, versioned questionnaire instances, structured responses, private file references, Job client access and one-time portal invitation records.
 - Added a standalone `/client-portal` experience with email magic-link entry, 30-day client sessions, Job-scoped access, save-and-return questionnaires, required-field validation and submission history.

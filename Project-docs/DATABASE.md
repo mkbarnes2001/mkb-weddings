@@ -3,7 +3,13 @@
 Always inspect the actual migration files before assuming a table/column exists.
 
 ## Schema version
-Current target schema version: **27**. Read migrations in sequence; migration 025 adds legacy tenant ownership, migration 026 adds platform operations and migration 027 adds the CRM foundation.
+Current target schema version: **29**. Read migrations in sequence; migration 027 adds the CRM foundation, migration 028 adds the client portal/questionnaires and migration 029 adds supplier questionnaire review and Wedding linking.
+
+## Schema version 29
+Migration: `029_supplier_questionnaire_integration.sql`
+
+Adds `crm_supplier_submissions`, a workspace-owned review boundary between client questionnaire answers and reusable Supplier Master data. Existing supplier IDs may be linked automatically to the Job's Wedding. Unlisted names remain pending until an authorised professional creates a new Supplier Master record, merges the suggestion into an existing record or rejects it. Cross-workspace Job, questionnaire, contact and supplier references are rejected by D1 triggers.
+
 
 ## Core domains
 - `venues`

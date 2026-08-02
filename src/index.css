@@ -3658,3 +3658,40 @@ footer .logo-mkb, footer .logo-weddings {
     justify-content: center;
   }
 }
+
+/* v1.9.1b — Supplier Master fields inside the client questionnaire */
+.portal-supplier-field { display: grid; gap: 12px; width: 100%; }
+.portal-supplier-empty { display: grid; gap: 10px; border: 1px dashed rgba(17,17,17,.18); border-radius: 10px; background: #fafaf9; padding: 14px; }
+.portal-supplier-empty p { margin: 0; color: #666; font-size: 12px; }
+.portal-supplier-empty > div,
+.portal-supplier-add { display: flex; flex-wrap: wrap; gap: 8px; }
+.portal-supplier-empty button,
+.portal-supplier-add button,
+.portal-supplier-preview button { display: inline-flex; min-height: 38px; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--portal-accent); border-radius: 8px; background: var(--portal-accent); color: #fff; padding: 8px 11px; font-size: 11px; font-weight: 600; }
+.portal-supplier-empty button.secondary,
+.portal-supplier-add button.secondary { border-color: rgba(17,17,17,.16); background: #fff; color: #222; }
+.portal-supplier-empty button svg,
+.portal-supplier-add button svg { width: 14px; height: 14px; }
+.portal-supplier-entry { display: grid; gap: 12px; border: 1px solid rgba(17,17,17,.12); border-radius: 11px; background: #fafaf9; padding: 14px; }
+.portal-supplier-entry__header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.portal-supplier-entry__header strong { font-size: 12px; }
+.portal-supplier-entry__header button { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid #f1c7c7; border-radius: 8px; background: #fff; color: #b42318; }
+.portal-supplier-entry__header svg { width: 14px; height: 14px; }
+.portal-supplier-mode { display: flex; flex-wrap: wrap; gap: 12px; }
+.portal-supplier-mode label { display: inline-flex; align-items: center; gap: 6px; color: #444; font-size: 11px; }
+.portal-supplier-mode input { width: 15px; height: 15px; accent-color: var(--portal-accent); }
+.portal-supplier-entry > label,
+.portal-supplier-details > label { display: grid; gap: 5px; }
+.portal-supplier-entry > label > span,
+.portal-supplier-details > label > span { color: #555; font-size: 10.5px; font-weight: 600; }
+.portal-supplier-entry input:not([type="radio"]),
+.portal-supplier-entry select { box-sizing: border-box; width: 100%; min-height: 42px; border: 1px solid rgba(17,17,17,.15); border-radius: 8px; background: #fff; color: #171717; padding: 9px 11px; font-size: 12px; }
+.portal-supplier-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.portal-supplier-review-note { margin: 0; border-radius: 8px; background: #fff7df; color: #72530f; padding: 9px 10px; font-size: 10.5px; line-height: 1.5; }
+@media (max-width: 680px) {
+  .portal-supplier-details { grid-template-columns: 1fr; }
+  .portal-supplier-empty > div,
+  .portal-supplier-add { flex-direction: column; }
+  .portal-supplier-empty button,
+  .portal-supplier-add button { width: 100%; }
+}

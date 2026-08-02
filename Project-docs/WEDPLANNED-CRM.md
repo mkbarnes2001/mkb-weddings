@@ -22,6 +22,19 @@ Implemented in the current source release:
 
 The public route is `/enquire` in v1.9.0. Custom hosted-site paths are deliberately deferred. Existing weddings are not bulk-converted automatically; they can remain content/delivery records until a Job is created or linked through a deliberate import/onboarding workflow.
 
+## v1.9.1a/b implementation status
+Implemented after the CRM foundation:
+- secure client portal invitations and 30-day sessions;
+- versioned questionnaire templates/instances, save-and-return, completion tracking and private files;
+- structured supplier fields that search active workspace Supplier Master records;
+- automatic Wedding Supplier linking for known suppliers;
+- an approval/merge/reject queue for unlisted suppliers;
+- a consolidated Job workspace for workflow, Job details, clients, suppliers, questionnaires, files, notes and activity;
+- direct reusable-contact editing;
+- a strict verified-public-domain requirement for portal email links.
+
+Client answers never directly create or overwrite shared supplier records. Only an authorised professional can approve or merge an unlisted suggestion. Quotes, contracts, invoices, payments and communication history remain separate later releases.
+
 ## Core hierarchy
 
 `Workspace → Enquiry → Contacts → Job → Wedding details / Deliverables`

@@ -1,5 +1,17 @@
 # MKB Intelligence — Roadmap
 
+## Current CRM release — v1.9.1b
+- Structured Supplier Master questionnaire fields.
+- Automatic Wedding Supplier linking for known suppliers.
+- Approval/merge/reject queue for unlisted client suggestions.
+- Consolidated Job workspace: workflow, Job, clients, suppliers, questionnaires, files, notes and activity.
+- Direct reusable-contact editing and verified-public-domain-only portal invitations.
+
+## Next CRM releases
+- **v1.9.2:** workflow templates, tasks, mail history, lead/job list views and autoresponders.
+- **v1.9.3:** packages, quotes, contracts, invoices, payment schedules and connected payments.
+
+
 ## Current commercial baseline
 Completed and in production:
 - Workspace / studio ownership foundation

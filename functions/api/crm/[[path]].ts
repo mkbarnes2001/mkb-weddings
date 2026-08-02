@@ -2,14 +2,17 @@ import { requireProfessionalContext } from "../../../serverless/platform-auth-d1
 import {
   acceptEnquiry,
   createAdminEnquiry,
+  getCrmContact,
   getCrmEnquiry,
   getCrmOverview,
   markEnquiryLost,
   moveEnquiryStage,
   saveLeadFormSettings,
   updateAdminEnquiry,
+  updateCrmContact,
 } from "../../../serverless/crm-d1";
 import {
+  approveSupplierSubmission,
   archiveQuestionnaireTemplate,
   assignQuestionnaire,
   createQuestionnaireTemplate,
@@ -18,6 +21,7 @@ import {
   getQuestionnaireOverview,
   getQuestionnaireTemplate,
   inviteJobClient,
+  rejectSupplierSubmission,
   revokeJobClientAccess,
   saveQuestionnaireTemplate,
 } from "../../../serverless/client-portal-d1";
@@ -62,6 +66,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
     if (parts[0] === "enquiries" && parts[1] && parts.length === 2) {
       return Response.json({ ok: true, detail: await getCrmEnquiry(context.env.MKB_DB, actor, parts[1]) }, {
+        headers: { "Cache-Control": "private, no-store" },
+      });
+    }
+    if (parts[0] === "contacts" && parts[1] && parts.length === 2) {
+      return Response.json({ ok: true, detail: await getCrmContact(context.env.MKB_DB, actor, parts[1]) }, {
         headers: { "Cache-Control": "private, no-store" },
       });
     }
@@ -126,6 +135,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (parts[0] === "jobs" && parts[1] && parts[2] === "revoke") {
       return Response.json({ ok: true, workspace: await revokeJobClientAccess(context.env.MKB_DB, actor, parts[1], String(body?.identityId || "")) });
     }
+    if (parts[0] === "jobs" && parts[1] && parts[2] === "supplier-submissions" && parts[3] && parts[4] === "approve") {
+      return Response.json({ ok: true, workspace: await approveSupplierSubmission(context.env.MKB_DB, actor, parts[1], parts[3], body) });
+    }
+    if (parts[0] === "jobs" && parts[1] && parts[2] === "supplier-submissions" && parts[3] && parts[4] === "reject") {
+      return Response.json({ ok: true, workspace: await rejectSupplierSubmission(context.env.MKB_DB, actor, parts[1], parts[3], body) });
+    }
     return Response.json({ error: "CRM route not found." }, { status: 404 });
   } catch (error: any) {
     return errorResponse(error);
@@ -139,6 +154,9 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     const body: any = await context.request.json().catch(() => ({}));
     if (parts[0] === "enquiries" && parts[1] && parts.length === 2) {
       return Response.json({ ok: true, detail: await updateAdminEnquiry(context.env.MKB_DB, actor, parts[1], body) });
+    }
+    if (parts[0] === "contacts" && parts[1] && parts.length === 2) {
+      return Response.json({ ok: true, detail: await updateCrmContact(context.env.MKB_DB, actor, parts[1], body) });
     }
     if (parts[0] === "questionnaires" && parts[1] === "templates" && parts[2] && parts.length === 3) {
       return Response.json({ ok: true, template: await saveQuestionnaireTemplate(context.env.MKB_DB, actor, parts[2], body) });

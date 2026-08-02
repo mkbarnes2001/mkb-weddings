@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   BriefcaseBusiness,
   CalendarDays,
@@ -54,8 +54,10 @@ function dateLabel(value: string) {
 
 export function CRM() {
   const { auth } = useProfessionalAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedView = searchParams.get("view") as View | null;
   const [crm, setCrm] = useState<CrmOverview | null>(null);
-  const [view, setView] = useState<View>("pipeline");
+  const [view, setViewState] = useState<View>(requestedView && ["pipeline", "contacts", "jobs", "questionnaires", "lead-form"].includes(requestedView) ? requestedView : "pipeline");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -78,6 +80,15 @@ export function CRM() {
   }
 
   useEffect(() => { void load(); }, [auth.workspaceId]);
+  useEffect(() => {
+    const next = searchParams.get("view") as View | null;
+    if (next && ["pipeline", "contacts", "jobs", "questionnaires", "lead-form"].includes(next)) setViewState(next);
+  }, [searchParams]);
+
+  function setView(next: View) {
+    setViewState(next);
+    setSearchParams(next === "pipeline" ? {} : { view: next }, { replace: true });
+  }
 
   const filteredContacts = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -183,7 +194,7 @@ export function CRM() {
       {view === "contacts" ? (
         <AdminPanel title="Contacts" description="Contacts are reusable across enquiries and future Jobs." icon={Users} actions={<div className="relative"><Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-neutral-400" /><input className="admin-input pl-9" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search contacts" /></div>}>
           {!filteredContacts.length ? <AdminEmptyState icon={UserRound} title="No contacts yet" description="Contacts will appear when a lead form or manual enquiry is created." /> : (
-            <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Source</th><th>Updated</th></tr></thead><tbody>{filteredContacts.map((contact) => <tr key={contact.id}><td><strong>{contact.displayName}</strong></td><td>{contact.email || "—"}</td><td>{contact.phone || "—"}</td><td>{contact.source}</td><td>{dateLabel(contact.updatedAt.slice(0, 10))}</td></tr>)}</tbody></table></div>
+            <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Source</th><th>Updated</th></tr></thead><tbody>{filteredContacts.map((contact) => <tr key={contact.id}><td><Link className="admin-inline-link" to={`/admin/crm/contacts/${contact.id}`}>{contact.displayName}</Link></td><td>{contact.email || "—"}</td><td>{contact.phone || "—"}</td><td>{contact.source}</td><td>{dateLabel(contact.updatedAt.slice(0, 10))}</td></tr>)}</tbody></table></div>
           )}
         </AdminPanel>
       ) : null}

@@ -374,6 +374,7 @@ const DIRECT_EXPORT_TABLES = [
   "crm_questionnaire_files",
   "crm_job_client_access",
   "crm_portal_invitations",
+  "crm_supplier_submissions",
   "venues",
   "weddings",
   "images",

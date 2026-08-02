@@ -1,20 +1,18 @@
 # Project State
-## v1.9.1a source state — Client Portal and Questionnaires
-- Base: stable v1.9.0 CRM Foundation (`96d4c91`, schema 27).
-- Source now includes migration 028 and targets schema 28; production migration/deployment must follow the controlled backup-first process.
-- Accepted Jobs can invite an explicitly selected linked client to a standalone magic-link portal.
-- Questionnaire templates support Build/Preview, ordering, required fields, option fields and private reference-file uploads.
-- Assigned questionnaires are immutable versioned snapshots with draft/sent/opened/in-progress/completed states.
-- Client sessions reuse the existing secure client identity/session boundary and remain scoped to active Job access.
-- Private questionnaire files use `MKB_PRIVATE_ASSETS`; Admin/client downloads are authorised through workspace, Job, contact and access checks.
-- Business export includes questionnaire/portal metadata but redacts invitation hashes and private storage keys.
-- Supplier questionnaire integration is not included in v1.9.1a; it is the next isolated release.
-
+## v1.9.1b source state — Supplier Questionnaire Integration and Job Workspace
+- Base: stable v1.9.1a Client Portal and Questionnaires (`398414f`, schema 28).
+- Source includes migration 029 and targets schema 29.
+- Questionnaire templates now support structured Supplier Master fields with role/category controls, multiple values and an unlisted-supplier option.
+- Known supplier selections link to the accepted Wedding; unknown suppliers enter a Job-scoped approval/merge queue and cannot overwrite Supplier Master data.
+- The CRM Job workspace now consolidates workflow, Job summary, clients, portal access, suppliers, questionnaires, uploaded files, enquiry notes and activity.
+- Contacts are directly editable from CRM with duplicate-email and portal-identity checks.
+- Portal invitations require a verified public domain; Admin hostname fallback has been removed.
+- Mail history, quotes, contracts, invoices and payments are deliberately not simulated in this release and remain later CRM work.
 
 ## Version
-Current release in source: **v1.9.0 — CRM Foundation**.
-Database schema version: **27**.
-Stable production baseline before this release: **v1.8.3**, commit `0385e9e`, schema **26**.
+Current release in source: **v1.9.1b — Supplier Questionnaire Integration and Job Workspace**.
+Database schema version: **29**.
+Stable production baseline before this release: **v1.9.1a**, commit `398414f`, schema **28**.
 
 ## CRM Foundation — v1.9.0
 - Adds workspace-owned pipeline stages, CRM contacts, enquiries, contact relationships, neutral Jobs, Job relationships and activity history.

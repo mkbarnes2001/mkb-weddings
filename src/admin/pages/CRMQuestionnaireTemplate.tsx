@@ -24,17 +24,39 @@ const fieldLabels: Record<QuestionnaireFieldType, string> = {
   radio: "Radio button select",
   checkbox: "Checkbox select",
   file: "File upload",
+  supplier: "Supplier selection",
 };
 
+function baseField(type: QuestionnaireFieldType): Pick<QuestionnaireField, "options" | "supplierRole" | "supplierCategory" | "allowUnlisted" | "multiple"> {
+  return {
+    options: ["select", "radio", "checkbox"].includes(type) ? ["Option 1", "Option 2"] : [],
+    supplierRole: type === "supplier" ? "Supplier" : "",
+    supplierCategory: "",
+    allowUnlisted: type === "supplier",
+    multiple: type === "supplier",
+  };
+}
+
 function blankField(type: QuestionnaireFieldType, index: number): QuestionnaireField {
-  const content = type === "heading" ? "New section" : type === "description" ? "Add guidance for your client." : "New question";
+  const content = type === "heading" ? "New section" : type === "description" ? "Add guidance for your client." : type === "supplier" ? "Supplier team" : "New question";
   return {
     id: `field_${Date.now()}_${index}`,
     type,
     label: content,
-    help: "",
+    help: type === "supplier" ? "Choose an existing supplier or add one for approval." : "",
     required: false,
-    options: ["select", "radio", "checkbox"].includes(type) ? ["Option 1", "Option 2"] : [],
+    ...baseField(type),
+  };
+}
+
+function normaliseField(field: QuestionnaireField): QuestionnaireField {
+  return {
+    ...field,
+    options: Array.isArray(field.options) ? field.options : [],
+    supplierRole: field.supplierRole || "",
+    supplierCategory: field.supplierCategory || "",
+    allowUnlisted: field.allowUnlisted !== false,
+    multiple: field.multiple !== false,
   };
 }
 
@@ -51,6 +73,7 @@ function FieldPreview({ field }: { field: QuestionnaireField }) {
       {field.type === "radio" ? <div className="grid gap-2">{field.options.map((option) => <span key={option}><input type="radio" disabled /> {option}</span>)}</div> : null}
       {field.type === "checkbox" ? <div className="grid gap-2">{field.options.map((option) => <span key={option}><input type="checkbox" disabled /> {option}</span>)}</div> : null}
       {field.type === "file" ? <input type="file" disabled /> : null}
+      {field.type === "supplier" ? <div className="portal-supplier-preview"><select disabled><option>Search Supplier Master</option></select>{field.allowUnlisted ? <button type="button" disabled>+ Add supplier not listed</button> : null}<small>{field.multiple ? "Clients may add more than one supplier." : "One supplier can be selected."}</small></div> : null}
     </label>
   );
 }
@@ -72,7 +95,7 @@ export function CRMQuestionnaireTemplate() {
     let active = true;
     setLoading(true);
     AdminApiService.getQuestionnaireTemplate(id)
-      .then((result) => { if (active) setTemplate(result); })
+      .then((result) => { if (active) setTemplate({ ...result, fields: result.fields.map(normaliseField) }); })
       .catch((loadError) => { if (active) setError(loadError instanceof Error ? loadError.message : "Unable to load questionnaire template."); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
@@ -82,7 +105,19 @@ export function CRMQuestionnaireTemplate() {
   const requiredCount = useMemo(() => template?.fields.filter((field) => field.required).length || 0, [template?.fields]);
 
   function updateField(index: number, patch: Partial<QuestionnaireField>) {
-    setTemplate((current) => current ? { ...current, fields: current.fields.map((field, fieldIndex) => fieldIndex === index ? { ...field, ...patch } : field) } : current);
+    setTemplate((current) => current ? { ...current, fields: current.fields.map((field, fieldIndex) => fieldIndex === index ? normaliseField({ ...field, ...patch }) : field) } : current);
+  }
+
+  function changeFieldType(index: number, type: QuestionnaireFieldType) {
+    setTemplate((current) => current ? {
+      ...current,
+      fields: current.fields.map((field, fieldIndex) => fieldIndex === index ? normaliseField({
+        ...field,
+        type,
+        ...baseField(type),
+        required: ["heading", "description"].includes(type) ? false : field.required,
+      }) : field),
+    } : current);
   }
 
   function addField(type: QuestionnaireFieldType) {
@@ -106,7 +141,7 @@ export function CRMQuestionnaireTemplate() {
     setMessage("");
     try {
       const saved = await AdminApiService.saveQuestionnaireTemplate(template.id, template);
-      setTemplate(saved);
+      setTemplate({ ...saved, fields: saved.fields.map(normaliseField) });
       setMessage("Questionnaire template saved.");
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Unable to save questionnaire template.");
@@ -120,7 +155,7 @@ export function CRMQuestionnaireTemplate() {
     setSaving(true);
     try {
       await AdminApiService.archiveQuestionnaireTemplate(template.id);
-      navigate("/admin/crm");
+      navigate("/admin/crm?view=questionnaires");
     } catch (archiveError) {
       setError(archiveError instanceof Error ? archiveError.message : "Unable to archive questionnaire template.");
     } finally {
@@ -134,7 +169,7 @@ export function CRMQuestionnaireTemplate() {
   return (
     <AdminPage>
       <AdminPageHeader
-        eyebrow={<Link to="/admin/crm" className="admin-inline-link inline-flex items-center gap-1"><ArrowLeft size={13} />CRM questionnaires</Link>}
+        eyebrow={<Link to="/admin/crm?view=questionnaires" className="admin-inline-link inline-flex items-center gap-1"><ArrowLeft size={13} />CRM questionnaires</Link>}
         title={template.name}
         description="Build a reusable questionnaire. Assigned questionnaires keep a versioned snapshot, so later template changes do not alter what a client received."
         actions={canManage ? <div className="flex gap-2"><AdminButton variant="danger" size="sm" icon={Trash2} onClick={() => void archive()} disabled={saving}>Archive</AdminButton><AdminButton variant="primary" icon={Save} onClick={() => void save()} disabled={saving}>Save template</AdminButton></div> : undefined}
@@ -161,7 +196,7 @@ export function CRMQuestionnaireTemplate() {
             </div>
           </AdminPanel>
 
-          <AdminPanel title="Questionnaire fields" description="Fields are saved as structured data and rendered in the secure client portal." icon={GripVertical}>
+          <AdminPanel title="Questionnaire fields" description="Supplier selection fields search this business's Supplier Master and keep unlisted names in a review queue." icon={GripVertical}>
             <div className="questionnaire-builder-fields">
               {!template.fields.length ? <div className="admin-empty-state"><h3>No fields yet</h3><p>Add a heading or question from the field palette.</p></div> : null}
               {template.fields.map((field, index) => (
@@ -176,11 +211,12 @@ export function CRMQuestionnaireTemplate() {
                   <div className="questionnaire-builder-field__handle" title="Drag to reorder"><GripVertical /></div>
                   <div className="questionnaire-builder-field__body">
                     <div className="grid gap-3 md:grid-cols-[170px_minmax(0,1fr)]">
-                      <AdminField label="Field type"><select className="admin-select" value={field.type} disabled={!canManage} onChange={(event) => updateField(index, { type: event.target.value as QuestionnaireFieldType, options: ["select", "radio", "checkbox"].includes(event.target.value) ? (field.options.length ? field.options : ["Option 1", "Option 2"]) : [] })}>{(Object.keys(fieldLabels) as QuestionnaireFieldType[]).map((type) => <option key={type} value={type}>{fieldLabels[type]}</option>)}</select></AdminField>
+                      <AdminField label="Field type"><select className="admin-select" value={field.type} disabled={!canManage} onChange={(event) => changeFieldType(index, event.target.value as QuestionnaireFieldType)}>{(Object.keys(fieldLabels) as QuestionnaireFieldType[]).map((type) => <option key={type} value={type}>{fieldLabels[type]}</option>)}</select></AdminField>
                       <AdminField label={field.type === "description" ? "Text" : field.type === "heading" ? "Heading" : "Question label"}><input className="admin-input" value={field.label} disabled={!canManage} onChange={(event) => updateField(index, { label: event.target.value })} /></AdminField>
                     </div>
                     {!['heading','description'].includes(field.type) ? <AdminField label="Help text"><input className="admin-input" value={field.help} disabled={!canManage} onChange={(event) => updateField(index, { help: event.target.value })} /></AdminField> : null}
                     {["select", "radio", "checkbox"].includes(field.type) ? <AdminField label="Options" help="One option per line."><textarea className="admin-textarea min-h-24" value={field.options.join("\n")} disabled={!canManage} onChange={(event) => updateField(index, { options: event.target.value.split("\n").map((item) => item.trim()).filter(Boolean) })} /></AdminField> : null}
+                    {field.type === "supplier" ? <div className="questionnaire-supplier-config"><AdminField label="Wedding supplier role" help="The role used when linking the selected supplier to the Wedding."><input className="admin-input" value={field.supplierRole} disabled={!canManage} onChange={(event) => updateField(index, { supplierRole: event.target.value })} placeholder="Florist, videographer, band…" /></AdminField><AdminField label="Supplier category filter" help="Optional. Leave blank to search all active suppliers."><input className="admin-input" value={field.supplierCategory} disabled={!canManage} onChange={(event) => updateField(index, { supplierCategory: event.target.value })} placeholder="Florist" /></AdminField><label className="admin-choice-row"><div><strong>Allow supplier not listed</strong><p>Unlisted suppliers appear on the Job page for approval or merging.</p></div><input type="checkbox" checked={field.allowUnlisted} disabled={!canManage} onChange={(event) => updateField(index, { allowUnlisted: event.target.checked })} /></label><label className="admin-choice-row"><div><strong>Allow multiple suppliers</strong><p>Useful for a full supplier-team question. Disable for a single role such as florist.</p></div><input type="checkbox" checked={field.multiple} disabled={!canManage} onChange={(event) => updateField(index, { multiple: event.target.checked })} /></label></div> : null}
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       {!['heading','description'].includes(field.type) ? <label className="inline-flex items-center gap-2 text-[10px]"><input type="checkbox" checked={field.required} disabled={!canManage} onChange={(event) => updateField(index, { required: event.target.checked })} />Required</label> : <span />}
                       <div className="flex gap-2"><AdminButton size="sm" disabled={!canManage || index === 0} onClick={() => moveField(index, index - 1)}>Move up</AdminButton><AdminButton size="sm" disabled={!canManage || index === template.fields.length - 1} onClick={() => moveField(index, index + 1)}>Move down</AdminButton><AdminButton variant="danger" size="sm" icon={Trash2} disabled={!canManage} onClick={() => setTemplate((current) => current ? { ...current, fields: current.fields.filter((_, fieldIndex) => fieldIndex !== index) } : current)}>Remove</AdminButton></div>

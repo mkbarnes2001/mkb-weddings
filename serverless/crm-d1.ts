@@ -684,6 +684,110 @@ export async function acceptEnquiry(db: D1Db, actor: CrmActor, enquiryId: string
   return { enquiry: (await getCrmEnquiry(db, actor, enquiryId)).enquiry, job: hydrateJob(job), idempotent: false };
 }
 
+export async function getCrmContact(db: D1Db, actor: CrmActor, contactId: string) {
+  requirePermission(actor, "crm:read");
+  const row = await db.prepare(`SELECT * FROM crm_contacts WHERE id = ? AND workspace_id = ? LIMIT 1`).bind(contactId, actor.workspaceId).first();
+  if (!row) throw httpError("Contact not found.", 404);
+  const [enquiries, jobs, activities] = await Promise.all([
+    db.prepare(`
+      SELECT enquiry.id, enquiry.reference, enquiry.status, enquiry.event_date, enquiry.venue_text, link.role
+      FROM crm_enquiry_contacts link
+      JOIN crm_enquiries enquiry ON enquiry.id = link.enquiry_id AND enquiry.workspace_id = link.workspace_id
+      WHERE link.contact_id = ? AND link.workspace_id = ?
+      ORDER BY enquiry.created_at DESC
+    `).bind(contactId, actor.workspaceId).all(),
+    db.prepare(`
+      SELECT job.*, link.role
+      FROM crm_job_contacts link
+      JOIN crm_jobs job ON job.id = link.job_id AND job.workspace_id = link.workspace_id
+      WHERE link.contact_id = ? AND link.workspace_id = ?
+      ORDER BY job.event_date, job.created_at DESC
+    `).bind(contactId, actor.workspaceId).all(),
+    db.prepare(`
+      SELECT * FROM crm_activities
+      WHERE workspace_id = ? AND entity_type = 'contact' AND entity_id = ?
+      ORDER BY created_at DESC LIMIT 100
+    `).bind(actor.workspaceId, contactId).all(),
+  ]);
+  return {
+    contact: hydrateContact(row),
+    enquiries: (enquiries.results || []).map((item: any) => ({
+      id: text(item.id), reference: text(item.reference), status: text(item.status), role: text(item.role),
+      eventDate: text(item.event_date), venueText: text(item.venue_text),
+    })),
+    jobs: (jobs.results || []).map((item: any) => ({ ...hydrateJob(item), role: text(item.role) })),
+    activities: (activities.results || []).map((item: any) => ({
+      id: text(item.id), eventType: text(item.event_type), summary: text(item.summary),
+      actorEmail: text(item.actor_email), metadata: safeJson(item.metadata_json, {}), createdAt: item.created_at,
+    })),
+  };
+}
+
+export async function updateCrmContact(db: D1Db, actor: CrmActor, contactId: string, input: any) {
+  requirePermission(actor, "crm:manage");
+  const current = await db.prepare(`SELECT * FROM crm_contacts WHERE id = ? AND workspace_id = ? LIMIT 1`).bind(contactId, actor.workspaceId).first();
+  if (!current) throw httpError("Contact not found.", 404);
+  const firstName = text(input?.firstName ?? current.first_name);
+  const lastName = text(input?.lastName ?? current.last_name);
+  const nextDisplayName = displayName(firstName, lastName, input?.displayName ?? current.display_name);
+  const email = lower(input?.email ?? current.email);
+  if (email && !validEmail(email)) throw httpError("Enter a valid email address.");
+  if (email) {
+    const duplicate = await db.prepare(`
+      SELECT id FROM crm_contacts WHERE workspace_id = ? AND email_normalized = ? AND id <> ? LIMIT 1
+    `).bind(actor.workspaceId, email, contactId).first();
+    if (duplicate) throw httpError("Another contact in this business already uses that email address.", 409);
+    const identityConflict = await db.prepare(`
+      SELECT identity.id
+      FROM client_identities identity
+      WHERE identity.workspace_id = ? AND identity.email_normalized = ?
+        AND identity.id NOT IN (
+          SELECT access.identity_id FROM crm_job_client_access access
+          WHERE access.workspace_id = ? AND access.contact_id = ?
+        )
+      LIMIT 1
+    `).bind(actor.workspaceId, email, actor.workspaceId, contactId).first();
+    if (identityConflict) throw httpError("That email address is already linked to another client portal identity.", 409);
+  }
+  if (!email) {
+    const portalAccess = await db.prepare(`
+      SELECT 1 FROM crm_job_client_access
+      WHERE workspace_id = ? AND contact_id = ? AND status = 'active' LIMIT 1
+    `).bind(actor.workspaceId, contactId).first();
+    if (portalAccess) throw httpError("Revoke active client portal access before removing this contact's email address.", 409);
+  }
+  const status = text(input?.status) === "archived" ? "archived" : "active";
+  await db.batch([
+    db.prepare(`
+      UPDATE crm_contacts SET first_name = ?, last_name = ?, display_name = ?, email_normalized = ?, email = ?,
+        phone = ?, notes = ?, status = ?, marketing_consent = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ? AND workspace_id = ?
+    `).bind(
+      firstName, lastName, nextDisplayName, email, email, text(input?.phone ?? current.phone),
+      text(input?.notes ?? current.notes), status, input?.marketingConsent ? 1 : 0, contactId, actor.workspaceId,
+    ),
+    db.prepare(`
+      UPDATE client_identities SET email_normalized = ?, email = ?, display_name = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE workspace_id = ? AND id IN (
+        SELECT identity_id FROM crm_job_client_access WHERE workspace_id = ? AND contact_id = ?
+      )
+    `).bind(email, email, nextDisplayName, actor.workspaceId, actor.workspaceId, contactId),
+  ]);
+  await activity(db, actor, {
+    workspaceId: actor.workspaceId,
+    entityType: "contact",
+    entityId: contactId,
+    eventType: "contact.updated",
+    summary: `Updated ${nextDisplayName || "contact"}.`,
+    metadata: { emailChanged: lower(current.email) !== email, status },
+  });
+  await platformAudit(db, actor, {
+    eventType: "crm.contact.updated", entityType: "crm_contact", entityId: contactId,
+    summary: `Updated CRM contact ${nextDisplayName || contactId}.`, metadata: { status },
+  });
+  return getCrmContact(db, actor, contactId);
+}
+
 export async function saveLeadFormSettings(db: D1Db, actor: CrmActor, input: any) {
   requirePermission(actor, "crm:manage");
   const notificationEmail = lower(input?.notificationEmail);
