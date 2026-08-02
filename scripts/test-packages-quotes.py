@@ -130,6 +130,9 @@ def main() -> None:
     assert "acceptQuoteCore" in quotes_source and "acceptQuoteAsAdmin" in quotes_source and "acceptQuoteAsClient" in quotes_source
     assert "purpose = 'public' AND verified = 1" in quotes_source
     assert "status = 'verified'" not in quotes_source and "is_primary DESC" not in quotes_source
+    assert "UPDATE crm_quote_invitations SET consumed_at = COALESCE(consumed_at, CURRENT_TIMESTAMP)" in quotes_source
+    assert "identity_id <> ? AND status = 'active'" in quotes_source
+    assert "invitation.invitationId" in quotes_source
     assert "hostname.includes(\"admin\")" in quotes_source
     assert "Create and accept a quote to convert this enquiry" in crm_route
     assert "portal-package-grid" in portal_source and "confirmed: true" in portal_source

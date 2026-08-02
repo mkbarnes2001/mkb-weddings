@@ -469,10 +469,12 @@ async function createInvitation(db: D1Db, workspaceId: string, quote: any, versi
   const returnPath = `/client-portal?quote=${encodeURIComponent(text(quote.id))}`;
   const invitationId = `crm_quote_invitation_${crypto.randomUUID()}`;
   await db.batch([
+    db.prepare(`UPDATE crm_quote_invitations SET consumed_at = COALESCE(consumed_at, CURRENT_TIMESTAMP) WHERE workspace_id = ? AND quote_id = ? AND consumed_at IS NULL`).bind(workspaceId, quote.id),
+    db.prepare(`UPDATE crm_quote_client_access SET status = 'revoked', revoked_at = COALESCE(revoked_at, CURRENT_TIMESTAMP), updated_at = CURRENT_TIMESTAMP WHERE workspace_id = ? AND quote_id = ? AND identity_id <> ? AND status = 'active'`).bind(workspaceId, quote.id, identity.id),
     db.prepare(`INSERT INTO crm_quote_client_access (quote_id, workspace_id, contact_id, identity_id, status, invited_at, created_at, updated_at) VALUES (?, ?, ?, ?, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(quote_id, identity_id) DO UPDATE SET contact_id = excluded.contact_id, status = 'active', invited_at = CURRENT_TIMESTAMP, revoked_at = NULL, updated_at = CURRENT_TIMESTAMP`).bind(quote.id, workspaceId, contact.id, identity.id),
     db.prepare(`INSERT INTO crm_quote_invitations (id, workspace_id, quote_id, version_id, contact_id, identity_id, token_hash, return_path, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(invitationId, workspaceId, quote.id, version.id, contact.id, identity.id, tokenHash, returnPath, expiresAt),
   ]);
-  return { rawToken, expiresAt, returnPath };
+  return { invitationId, rawToken, expiresAt, returnPath };
 }
 async function sendQuoteEmail(env: QuoteEmailEnv, input: { to: string; businessName: string; clientName: string; reference: string; loginUrl: string; eventDate: string; expiresAt: string }) {
   const apiKey = text(env.RESEND_API_KEY);
@@ -512,9 +514,12 @@ export async function sendQuote(db: D1Db, env: QuoteEmailEnv, actor: QuoteActor,
   try {
     delivery = await sendQuoteEmail(env, { to: lower(contact.email), businessName: business, clientName: text(contact.display_name), reference: text(quote.reference), loginUrl, eventDate: text(quote.event_date), expiresAt: invitation.expiresAt });
   } catch (error: any) {
-    await db.prepare(`INSERT INTO crm_communications (id, workspace_id, contact_id, enquiry_id, quote_id, quote_version_id, channel, direction, subject, body, status, provider, provider_message_id, failure_reason, occurred_at, actor_user_id, actor_email, metadata_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'email', 'outbound', ?, ?, 'failed', 'resend', '', ?, CURRENT_TIMESTAMP, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
-      `crm_communication_${crypto.randomUUID()}`, actor.workspaceId, contact.id, quote.enquiry_id, quote.id, version.id, `Quote ${text(quote.reference)}`, `Quote invitation to ${lower(contact.email)}.`, text(error?.message), text(actor.userId) || null, lower(actor.email), JSON.stringify({ quoteId, versionId: version.id }),
-    ).run();
+    await db.batch([
+      db.prepare(`UPDATE crm_quote_invitations SET consumed_at = COALESCE(consumed_at, CURRENT_TIMESTAMP) WHERE id = ? AND workspace_id = ?`).bind(invitation.invitationId, actor.workspaceId),
+      db.prepare(`INSERT INTO crm_communications (id, workspace_id, contact_id, enquiry_id, quote_id, quote_version_id, channel, direction, subject, body, status, provider, provider_message_id, failure_reason, occurred_at, actor_user_id, actor_email, metadata_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'email', 'outbound', ?, ?, 'failed', 'resend', '', ?, CURRENT_TIMESTAMP, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+        `crm_communication_${crypto.randomUUID()}`, actor.workspaceId, contact.id, quote.enquiry_id, quote.id, version.id, `Quote ${text(quote.reference)}`, `Quote invitation to ${lower(contact.email)}.`, text(error?.message), text(actor.userId) || null, lower(actor.email), JSON.stringify({ quoteId, versionId: version.id }),
+      ),
+    ]);
     throw error;
   }
   await db.batch([
