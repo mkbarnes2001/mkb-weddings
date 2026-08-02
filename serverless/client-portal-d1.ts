@@ -1,6 +1,7 @@
 import { getAuthenticatedClientIdentity } from "./client-auth-d1";
 import { createMasterSupplier, getMasterSupplier, listMasterSuppliers } from "./supplier-d1";
 import { getJobWorkflowWorkspace } from "./crm-workflow-d1";
+import { getPublicQuotesForIdentity, requestQuotePortalMagicLink, verifyQuotePortalMagicLink } from "./crm-quotes-d1";
 
 export type PortalActor = {
   userId?: string;
@@ -320,6 +321,17 @@ function hydrateJob(row: any) {
     venueSlug: text(row.venue_slug),
     clientPortalStatus: text(row.client_portal_status),
     weddingSlug: text(row.wedding_slug),
+    quoteId: text(row.quote_id),
+    quoteVersionId: text(row.quote_version_id),
+    quoteReference: text(row.quote_reference),
+    quoteVersionNumber: row.quote_version_number == null ? null : Number(row.quote_version_number),
+    acceptedQuoteAt: row.accepted_quote_at || undefined,
+    bookingSubtotal: row.booking_subtotal == null ? null : Number(row.booking_subtotal),
+    bookingDiscount: row.booking_discount == null ? null : Number(row.booking_discount),
+    bookingTax: row.booking_tax == null ? null : Number(row.booking_tax),
+    packageSnapshot: json(row.package_snapshot_json, {}),
+    addonsSnapshot: json(row.addons_snapshot_json, []),
+    quoteSnapshot: json(row.quote_snapshot_json, {}),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -861,7 +873,10 @@ export async function requestPortalMagicLink(db: D1Db, env: EmailEnv, workspaceI
   if (!identity) return generic;
   const accessRows = await portalAccessForIdentity(db, workspaceId, text(identity.id));
   const access = accessRows.results?.[0];
-  if (!access) return generic;
+  if (!access) {
+    await requestQuotePortalMagicLink(db, env, workspaceId, email).catch(() => false);
+    return generic;
+  }
   const recent = await db.prepare(`
     SELECT COUNT(*) AS total FROM crm_portal_invitations
     WHERE workspace_id = ? AND identity_id = ? AND created_at >= datetime('now', '-10 minutes')
@@ -888,7 +903,12 @@ export async function verifyPortalMagicLink(db: D1Db, rawToken: string) {
     JOIN crm_job_client_access access ON access.job_id = invitation.job_id AND access.workspace_id = invitation.workspace_id AND access.identity_id = invitation.identity_id AND access.status = 'active'
     WHERE invitation.token_hash = ? LIMIT 1
   `).bind(tokenHash).first();
-  if (!row || text(row.identity_status) !== "active") return { ok: false, status: 400, error: "This sign-in link is invalid or has expired." } as const;
+  if (!row) {
+    const quoteResult = await verifyQuotePortalMagicLink(db, rawToken);
+    if (quoteResult) return quoteResult;
+    return { ok: false, status: 400, error: "This sign-in link is invalid or has expired." } as const;
+  }
+  if (text(row.identity_status) !== "active") return { ok: false, status: 400, error: "This sign-in link is invalid or has expired." } as const;
   if (text(row.consumed_at)) return { ok: false, status: 400, error: "This sign-in link has already been used." } as const;
   if (!text(row.expires_at) || Date.parse(text(row.expires_at)) <= Date.now()) return { ok: false, status: 400, error: "This sign-in link has expired." } as const;
   const consumed = await db.prepare(`UPDATE crm_portal_invitations SET consumed_at = CURRENT_TIMESTAMP WHERE id = ? AND consumed_at IS NULL AND datetime(expires_at) > CURRENT_TIMESTAMP`).bind(row.id).run();
@@ -917,7 +937,7 @@ export async function getPublicPortal(db: D1Db, request: Request, workspaceId: s
     contactEmail: text(workspace?.contact_email),
   };
   const identity = await publicIdentity(db, request, workspaceId);
-  if (!identity) return { authenticated: false, identity: null, business, jobs: [] };
+  if (!identity) return { authenticated: false, identity: null, business, jobs: [], quotes: [] };
   const accessRows = await portalAccessForIdentity(db, workspaceId, identity.id);
   const jobs = [];
   for (const access of accessRows.results || []) {
@@ -941,6 +961,7 @@ export async function getPublicPortal(db: D1Db, request: Request, workspaceId: s
     identity: { id: identity.id, email: identity.email, displayName: identity.displayName },
     business,
     jobs,
+    quotes: await getPublicQuotesForIdentity(db, workspaceId, identity.id),
   };
 }
 

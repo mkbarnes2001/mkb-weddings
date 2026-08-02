@@ -17,6 +17,7 @@ import {
   MessageCircle,
   MessageSquareText,
   Pencil,
+  PackageCheck,
   Phone,
   Plus,
   Send,
@@ -243,6 +244,10 @@ export function CRMJob() {
 
       <div className="crm-job-workspace">
         <div className="crm-job-workspace__main">
+          {job.quoteId ? <AdminPanel title="Quote summary" description="The accepted quote version and commercial snapshots are immutable." icon={PackageCheck} actions={<Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/crm/quotes/${job.quoteId}`}><ExternalLink className="admin-button__icon" />Open quote</Link>}>
+            {(() => { const pkg = (job.packageSnapshot || {}) as any; const addons = Array.isArray(job.addonsSnapshot) ? job.addonsSnapshot as any[] : []; return <div className="crm-quote-job-summary"><dl className="admin-compact-details"><div><dt>Quote</dt><dd>{job.quoteReference || "—"} · v{job.quoteVersionNumber || 1}</dd></div><div><dt>Accepted</dt><dd>{dateLabel(job.acceptedQuoteAt || job.bookingDate)}</dd></div><div><dt>Package</dt><dd>{pkg.name || job.packageName || "—"}</dd></div><div><dt>Coverage</dt><dd>{pkg.coverageMinutes ? `${Math.round(pkg.coverageMinutes / 60)} hours` : "—"}</dd></div><div><dt>Subtotal</dt><dd>{money(job.bookingSubtotal, job.currency)}</dd></div><div><dt>Discount</dt><dd>{money(job.bookingDiscount, job.currency)}</dd></div><div><dt>Tax</dt><dd>{money(job.bookingTax, job.currency)}</dd></div><div><dt>Total booking value</dt><dd><strong>{money(job.valueAmount, job.currency)}</strong></dd></div></dl><div className="crm-quote-job-details"><section><h4>Included</h4>{Array.isArray(pkg.includedItems) && pkg.includedItems.length ? <ul>{pkg.includedItems.map((item: string) => <li key={item}>{item}</li>)}</ul> : <p>No included-item list stored.</p>}</section><section><h4>Selected add-ons</h4>{addons.length ? <ul>{addons.map((addon: any) => <li key={addon.id || addon.addonId || addon.name}><span>{addon.name}</span><strong>{addon.quantity || 1} × {money(addon.unitPriceAmount || 0, addon.currency || job.currency)}</strong></li>)}</ul> : <p>No optional add-ons selected.</p>}</section></div></div>; })()}
+          </AdminPanel> : null}
+
           <AdminPanel title="Workflow" description="A live view of the booking milestones already supported by WedPlanned." icon={ClipboardList}>
             <div className="crm-job-workflow">{workflow.map((step, index) => <div key={step.label} className={step.complete ? "complete" : ""}><span>{step.complete ? <Check /> : index + 1}</span><section><strong>{step.label}</strong><p>{step.detail}</p></section></div>)}</div>
           </AdminPanel>

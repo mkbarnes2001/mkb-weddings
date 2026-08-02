@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft, CalendarDays, CheckCircle2, Download, FileText, LogOut, Mail, Paperclip, Plus, Save, Search, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, CalendarDays, CheckCircle2, Download, FileText, LogOut, Mail, PackageCheck, Paperclip, Plus, Save, Search, Send, Trash2, XCircle } from "lucide-react";
 
 type SupplierDirectoryOption = {
   id: string;
@@ -64,17 +64,38 @@ type PortalJob = {
   questionnaires: PortalQuestionnaire[];
 };
 
+
+type PortalQuoteAddon = { id: string; addonId: string; name: string; description: string; unitPriceAmount: number; currency: string; minimumQuantity: number; maximumQuantity: number; defaultQuantity: number; requirement: "optional" | "recommended" | "mandatory"; displayOrder: number };
+type PortalQuoteOption = { id: string; name: string; description: string; serviceType: string; basePriceAmount: number; currency: string; coverageMinutes: number | null; deliverables: string[]; includedItems: string[]; clientNotes: string; recommended: boolean; items: Array<{ id: string; name: string; quantity: number; unitPriceAmount: number }>; addons: PortalQuoteAddon[] };
+type PortalQuote = { id: string; reference: string; status: string; clientName: string; partnerName: string; eventDate: string; venueText: string; acceptedJobId: string; currentVersion: { id: string; versionNumber: number; status: string; expiresAt: string; clientNotes: string; discountType: "none" | "fixed" | "percentage"; discountValue: number; taxTreatment: "none" | "inclusive" | "exclusive"; taxRateBasisPoints: number; currency: string; options: PortalQuoteOption[] } };
+type PortalQuoteSummary = { id: string; reference: string; status: string; eventDate: string; venueText: string; acceptedJobId: string; updatedAt: string };
+
 type PortalPayload = {
   authenticated: boolean;
   identity: { id: string; email: string; displayName: string } | null;
   business?: { name: string; logoUrl: string; accentColor: string; contactEmail: string };
   jobs: PortalJob[];
+  quotes: PortalQuoteSummary[];
 };
 
 function formatDate(value: string) {
   if (!value) return "Date TBC";
   const parsed = new Date(`${value.slice(0, 10)}T12:00:00`);
   return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function money(value: number, currency = "GBP") { return new Intl.NumberFormat("en-GB", { style: "currency", currency }).format((value || 0) / 100); }
+
+function quoteTotals(option: PortalQuoteOption | undefined, quote: PortalQuote | null, quantities: Record<string, number>) {
+  if (!option || !quote) return { subtotal: 0, discount: 0, tax: 0, total: 0 };
+  const items = option.items.reduce((sum, item) => sum + item.quantity * item.unitPriceAmount, 0);
+  const addons = option.addons.reduce((sum, addon) => { let quantity = quantities[addon.id] ?? addon.defaultQuantity; if (addon.requirement === "mandatory") quantity = Math.max(quantity, 1, addon.minimumQuantity); else if (quantity > 0) quantity = Math.max(quantity, addon.minimumQuantity); quantity = Math.min(addon.maximumQuantity, Math.max(0, quantity)); return sum + quantity * addon.unitPriceAmount; }, 0);
+  const subtotal = option.basePriceAmount + items + addons;
+  const version = quote.currentVersion;
+  const discount = version.discountType === "fixed" ? Math.min(subtotal, version.discountValue) : version.discountType === "percentage" ? Math.round(subtotal * version.discountValue / 10000) : 0;
+  const discounted = Math.max(0, subtotal - discount);
+  const tax = version.taxTreatment === "exclusive" ? Math.round(discounted * version.taxRateBasisPoints / 10000) : version.taxTreatment === "inclusive" && version.taxRateBasisPoints ? Math.round(discounted - discounted / (1 + version.taxRateBasisPoints / 10000)) : 0;
+  return { subtotal, discount, tax, total: version.taxTreatment === "exclusive" ? discounted + tax : discounted };
 }
 
 function formatBytes(value: number) {
@@ -168,6 +189,10 @@ function SupplierQuestion({
 export function ClientPortal() {
   const [portal, setPortal] = useState<PortalPayload | null>(null);
   const [selectedId, setSelectedId] = useState(() => new URLSearchParams(window.location.search).get("questionnaire") || "");
+  const [selectedQuoteId, setSelectedQuoteId] = useState(() => new URLSearchParams(window.location.search).get("quote") || "");
+  const [quote, setQuote] = useState<PortalQuote | null>(null);
+  const [selectedOptionId, setSelectedOptionId] = useState("");
+  const [addonQuantities, setAddonQuantities] = useState<Record<string, number>>({});
   const [questionnaire, setQuestionnaire] = useState<PortalQuestionnaire | null>(null);
   const [supplierDirectory, setSupplierDirectory] = useState<SupplierDirectoryOption[]>([]);
   const [responses, setResponses] = useState<Record<string, unknown>>({});
@@ -183,9 +208,10 @@ export function ClientPortal() {
     try {
       const result = await jsonRequest<{ ok: true; portal: PortalPayload }>("/api/public/client-portal");
       setPortal(result.portal);
-      if (!selectedId && result.portal.authenticated) {
-        const firstOpen = result.portal.jobs.flatMap((job) => job.questionnaires).find((item) => item.status !== "completed");
-        if (firstOpen) setSelectedId(firstOpen.id);
+      if (!selectedId && !selectedQuoteId && result.portal.authenticated) {
+        const firstQuote = result.portal.quotes.find((item) => ["sent", "viewed"].includes(item.status));
+        if (firstQuote) setSelectedQuoteId(firstQuote.id);
+        else { const firstOpen = result.portal.jobs.flatMap((job) => job.questionnaires).find((item) => item.status !== "completed"); if (firstOpen) setSelectedId(firstOpen.id); }
       }
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Unable to load client portal.");
@@ -205,6 +231,22 @@ export function ClientPortal() {
       .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load questionnaire."))
       .finally(() => setSaving(false));
   }, [selectedId, portal?.authenticated]);
+
+  useEffect(() => {
+    if (!selectedQuoteId || !portal?.authenticated) { setQuote(null); return; }
+    setSaving(true); setError("");
+    jsonRequest<{ ok: true; quote: PortalQuote }>(`/api/public/client-portal/quotes/${encodeURIComponent(selectedQuoteId)}`)
+      .then((result) => {
+        setQuote(result.quote);
+        const option = result.quote.currentVersion.options.find((item) => item.recommended) || result.quote.currentVersion.options[0];
+        setSelectedOptionId(option?.id || "");
+        const quantities: Record<string, number> = {};
+        for (const addon of option?.addons || []) quantities[addon.id] = addon.requirement === "mandatory" ? Math.max(1, addon.minimumQuantity, addon.defaultQuantity) : addon.defaultQuantity;
+        setAddonQuantities(quantities);
+      })
+      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load quote."))
+      .finally(() => setSaving(false));
+  }, [selectedQuoteId, portal?.authenticated]);
 
   const selectedJob = useMemo(() => portal?.jobs.find((job) => job.questionnaires.some((item) => item.id === selectedId)) || null, [portal?.jobs, selectedId]);
 
@@ -269,14 +311,47 @@ export function ClientPortal() {
     } finally { setSaving(false); }
   }
 
+  function chooseQuoteOption(option: PortalQuoteOption) {
+    setSelectedOptionId(option.id);
+    const quantities: Record<string, number> = {};
+    for (const addon of option.addons) quantities[addon.id] = addon.requirement === "mandatory" ? Math.max(1, addon.minimumQuantity, addon.defaultQuantity) : addon.defaultQuantity;
+    setAddonQuantities(quantities);
+  }
+
+  async function acceptQuote() {
+    if (!quote || !selectedOptionId || !window.confirm("Accept this quote and confirm your selected package and extras?")) return;
+    setSaving(true); setError(""); setMessage("");
+    try {
+      const addons = Object.entries(addonQuantities).map(([id, quantity]) => ({ id, quantity }));
+      const result = await jsonRequest<{ ok: true; conversion: { jobReference: string } }>(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}/accept`, { method: "POST", body: JSON.stringify({ optionId: selectedOptionId, addons, confirmed: true }) });
+      setMessage(`Quote accepted. Your booking ${result.conversion.jobReference} is now active.`);
+      setSelectedQuoteId(quote.id);
+      await loadPortal();
+      const refreshed = await jsonRequest<{ ok: true; quote: PortalQuote }>(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}`);
+      setQuote(refreshed.quote);
+    } catch (acceptError) { setError(acceptError instanceof Error ? acceptError.message : "Unable to accept quote."); }
+    finally { setSaving(false); }
+  }
+
+  async function declineQuote() {
+    if (!quote || !window.confirm("Decline this quote? The business will be notified.")) return;
+    const reason = window.prompt("Optional reason for declining:", "") || "";
+    setSaving(true); setError(""); setMessage("");
+    try { await jsonRequest(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}/decline`, { method: "POST", body: JSON.stringify({ reason }) }); setMessage("Quote declined. The business has been notified."); await loadPortal(); setQuote({ ...quote, status: "declined", currentVersion: { ...quote.currentVersion, status: "declined" } }); }
+    catch (declineError) { setError(declineError instanceof Error ? declineError.message : "Unable to decline quote."); }
+    finally { setSaving(false); }
+  }
+
   async function signOut() {
     await fetch("/api/public/client-auth/sign-out", { method: "POST", credentials: "include" }).catch(() => {});
-    setPortal({ authenticated: false, identity: null, jobs: [] });
-    setSelectedId("");
-    setQuestionnaire(null);
+    setPortal({ authenticated: false, identity: null, jobs: [], quotes: [] });
+    setSelectedId(""); setSelectedQuoteId("");
+    setQuestionnaire(null); setQuote(null);
   }
 
   const accent = portal?.business?.accentColor || "#111111";
+  const selectedQuoteOption = quote?.currentVersion.options.find((option) => option.id === selectedOptionId);
+  const selectedQuoteTotals = quoteTotals(selectedQuoteOption, quote, addonQuantities);
 
   if (loading && !portal) return <div className="client-portal-shell"><div className="client-portal-loading">Loading client portal…</div></div>;
 
@@ -288,7 +363,7 @@ export function ClientPortal() {
           <div className="client-portal-brand">{portal?.business?.logoUrl ? <img src={portal.business.logoUrl} alt="" /> : <span>WP</span>}</div>
           <p className="client-portal-eyebrow">Secure client portal</p>
           <h1>Open your wedding workspace</h1>
-          <p>Enter the email address linked to your booking. We will send a one-time sign-in link.</p>
+          <p>Enter the email address linked to your quote or booking. We will send a one-time sign-in link.</p>
           {error ? <div className="client-portal-alert client-portal-alert--error">{error}</div> : null}
           {message ? <div className="client-portal-alert client-portal-alert--success">{message}</div> : null}
           <label><span>Email address</span><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></label>
@@ -307,14 +382,21 @@ export function ClientPortal() {
       </header>
       <div className="client-portal-layout">
         <aside className="client-portal-sidebar">
+          {portal.quotes.length ? <><p className="client-portal-eyebrow">Your quotes</p><div className="client-portal-quote-links">{portal.quotes.map((item) => <button key={item.id} className={selectedQuoteId === item.id ? "active" : ""} onClick={() => { setSelectedQuoteId(item.id); setSelectedId(""); }}><PackageCheck /><span><strong>{item.reference}</strong><small>{item.status.replace(/_/g, " ")} · {formatDate(item.eventDate)}</small></span>{item.status === "accepted" ? <CheckCircle2 /> : null}</button>)}</div></> : null}
           <p className="client-portal-eyebrow">Your bookings</p>
-          {portal.jobs.map((job) => <section key={job.id} className="client-portal-job"><h2>{job.title}</h2><p><CalendarDays />{formatDate(job.eventDate)}</p><p>{job.venueText || "Venue TBC"}</p><div>{job.questionnaires.map((item) => <button key={item.id} className={selectedId === item.id ? "active" : ""} onClick={() => setSelectedId(item.id)}><FileText /><span>{item.title}<small>{item.status.replace(/_/g, " ")}</small></span>{item.status === "completed" ? <CheckCircle2 /> : null}</button>)}</div></section>)}
-          {!portal.jobs.length ? <p className="client-portal-muted">No active bookings are linked to this email.</p> : null}
+          {portal.jobs.map((job) => <section key={job.id} className="client-portal-job"><h2>{job.title}</h2><p><CalendarDays />{formatDate(job.eventDate)}</p><p>{job.venueText || "Venue TBC"}</p><div>{job.questionnaires.map((item) => <button key={item.id} className={selectedId === item.id ? "active" : ""} onClick={() => { setSelectedId(item.id); setSelectedQuoteId(""); }}><FileText /><span>{item.title}<small>{item.status.replace(/_/g, " ")}</small></span>{item.status === "completed" ? <CheckCircle2 /> : null}</button>)}</div></section>)}
+          {!portal.jobs.length && !portal.quotes.length ? <p className="client-portal-muted">No active quotes or bookings are linked to this email.</p> : null}
         </aside>
         <main className="client-portal-main">
           {error ? <div className="client-portal-alert client-portal-alert--error">{error}</div> : null}
           {message ? <div className="client-portal-alert client-portal-alert--success">{message}</div> : null}
-          {!questionnaire ? <div className="client-portal-empty"><FileText /><h2>Select a questionnaire</h2><p>Choose a questionnaire from your booking to continue.</p></div> : (
+          {quote ? <article className="portal-quote-card">
+            <div className="portal-quote-heading"><button className="client-portal-back" onClick={() => setSelectedQuoteId("")}><ArrowLeft />Back</button><span>{portal.business?.name || "WedPlanned"}</span><h1>Your quote</h1><p className="portal-quote-client">Prepared for {quote.clientName}{quote.partnerName ? ` and ${quote.partnerName}` : ""}</p><div className="portal-quote-meta"><strong>{quote.reference}</strong><span>Version {quote.currentVersion.versionNumber}</span><span>{formatDate(quote.eventDate)}</span><span>{quote.venueText || "Venue TBC"}</span>{quote.currentVersion.expiresAt ? <span>Expires {formatDate(quote.currentVersion.expiresAt)}</span> : null}</div>{quote.currentVersion.clientNotes ? <p>{quote.currentVersion.clientNotes}</p> : null}</div>
+            <div className="portal-package-grid">{quote.currentVersion.options.map((option) => <button type="button" key={option.id} className={`portal-package-card ${selectedOptionId === option.id ? "selected" : ""}`} disabled={["accepted", "declined", "expired"].includes(quote.currentVersion.status)} onClick={() => chooseQuoteOption(option)}>{option.recommended ? <em>Recommended</em> : null}<span className="portal-package-check">{selectedOptionId === option.id ? <CheckCircle2 /> : null}</span><h2>{option.name}</h2>{option.description ? <p>{option.description}</p> : null}<strong>{money(option.basePriceAmount, option.currency)}</strong>{option.coverageMinutes ? <small>{Math.round(option.coverageMinutes / 60)} hours coverage</small> : null}<ul>{option.includedItems.map((item) => <li key={item}>{item}</li>)}</ul>{option.deliverables.length ? <div className="portal-package-deliverables"><b>Deliverables</b>{option.deliverables.map((item) => <span key={item}>{item}</span>)}</div> : null}</button>)}</div>
+            {selectedQuoteOption?.addons.length ? <section className="portal-quote-addons"><h2>Optional extras</h2><p>Select permitted extras for your chosen package.</p>{selectedQuoteOption.addons.map((addon) => { const quantity = addonQuantities[addon.id] ?? addon.defaultQuantity; const mandatory = addon.requirement === "mandatory"; return <div key={addon.id} className="portal-quote-addon"><div><strong>{addon.name}{mandatory ? <small>Required</small> : addon.requirement === "recommended" ? <small>Recommended</small> : null}</strong><p>{addon.description}</p></div><span>{money(addon.unitPriceAmount, addon.currency)}</span><label><span>Quantity</span><input type="number" min={mandatory ? Math.max(1, addon.minimumQuantity) : 0} max={addon.maximumQuantity} value={quantity} disabled={["accepted", "declined", "expired"].includes(quote.currentVersion.status)} onChange={(event) => { const raw = Math.max(0, Math.min(addon.maximumQuantity, Number(event.target.value) || 0)); const next = mandatory ? Math.max(1, addon.minimumQuantity, raw) : raw > 0 ? Math.max(addon.minimumQuantity, raw) : 0; setAddonQuantities((current) => ({ ...current, [addon.id]: next })); }} /></label></div>; })}</section> : null}
+            <section className="portal-quote-summary"><h2>Price summary</h2><dl><div><dt>Subtotal</dt><dd>{money(selectedQuoteTotals.subtotal, quote.currentVersion.currency)}</dd></div>{selectedQuoteTotals.discount ? <div><dt>Discount</dt><dd>−{money(selectedQuoteTotals.discount, quote.currentVersion.currency)}</dd></div> : null}{quote.currentVersion.taxTreatment !== "none" ? <div><dt>Tax {quote.currentVersion.taxTreatment === "inclusive" ? "included" : ""}</dt><dd>{money(selectedQuoteTotals.tax, quote.currentVersion.currency)}</dd></div> : null}<div className="total"><dt>Total</dt><dd>{money(selectedQuoteTotals.total, quote.currentVersion.currency)}</dd></div></dl></section>
+            <footer className="portal-quote-actions">{quote.currentVersion.status === "accepted" ? <div className="client-portal-complete"><CheckCircle2 /><span>Quote accepted. Your booking is active.</span></div> : quote.currentVersion.status === "declined" ? <div className="client-portal-complete muted"><XCircle /><span>This quote was declined.</span></div> : quote.currentVersion.status === "expired" ? <div className="client-portal-complete muted"><XCircle /><span>This quote has expired.</span></div> : <><button className="secondary" disabled={saving} onClick={() => void declineQuote()}><XCircle />Decline quote</button><button disabled={saving || !selectedOptionId} onClick={() => void acceptQuote()}><CheckCircle2 />Accept quote</button></>}</footer>
+          </article> : !questionnaire ? <div className="client-portal-empty"><FileText /><h2>Select a quote or questionnaire</h2><p>Choose an item from the sidebar to continue.</p></div> : (
             <article className="portal-questionnaire-card">
               <div className="portal-questionnaire-heading"><button className="client-portal-back" onClick={() => setSelectedId("")}><ArrowLeft />Back</button><span>{selectedJob?.title}</span><h1>{questionnaire.title}</h1>{questionnaire.introduction ? <p>{questionnaire.introduction}</p> : null}<div className="portal-questionnaire-meta"><span>{questionnaire.status.replace(/_/g, " ")}</span>{questionnaire.dueAt ? <span>Due {formatDate(questionnaire.dueAt)}</span> : null}{questionnaire.lastSavedAt ? <span>Saved {new Date(questionnaire.lastSavedAt).toLocaleString("en-GB")}</span> : null}</div></div>
               <div className="portal-questionnaire-fields">

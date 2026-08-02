@@ -1,6 +1,5 @@
 import { requireProfessionalContext } from "../../../serverless/platform-auth-d1";
 import {
-  acceptEnquiry,
   createAdminEnquiry,
   getCrmContact,
   getCrmEnquiry,
@@ -25,6 +24,18 @@ import {
   revokeJobClientAccess,
   saveQuestionnaireTemplate,
 } from "../../../serverless/client-portal-d1";
+import {
+  acceptQuoteAsAdmin,
+  createQuote,
+  getQuote,
+  getQuoteCatalogue,
+  getQuoteOverview,
+  reviseQuote,
+  saveAddon,
+  savePackage,
+  saveQuoteDraft,
+  sendQuote,
+} from "../../../serverless/crm-quotes-d1";
 import {
   applyWorkflowToJob,
   archiveWorkflowTemplate,
@@ -116,6 +127,21 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         headers: { "Cache-Control": "private, no-store" },
       });
     }
+    if (parts[0] === "catalogue" && parts.length === 1) {
+      return Response.json({ ok: true, catalogue: await getQuoteCatalogue(context.env.MKB_DB, actor) }, {
+        headers: { "Cache-Control": "private, no-store" },
+      });
+    }
+    if (parts[0] === "quotes" && parts.length === 1) {
+      return Response.json({ ok: true, quotes: await getQuoteOverview(context.env.MKB_DB, actor) }, {
+        headers: { "Cache-Control": "private, no-store" },
+      });
+    }
+    if (parts[0] === "quotes" && parts[1] && parts.length === 2) {
+      return Response.json({ ok: true, quote: await getQuote(context.env.MKB_DB, actor, parts[1]) }, {
+        headers: { "Cache-Control": "private, no-store" },
+      });
+    }
     return Response.json({ error: "CRM route not found." }, { status: 404 });
   } catch (error: any) {
     return errorResponse(error);
@@ -140,7 +166,25 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json({ ok: true, detail: await markEnquiryLost(context.env.MKB_DB, actor, parts[1], body?.reason) });
     }
     if (parts[0] === "enquiries" && parts[1] && parts[2] === "accept") {
-      return Response.json({ ok: true, conversion: await acceptEnquiry(context.env.MKB_DB, actor, parts[1], body) });
+      return Response.json({ error: "Create and accept a quote to convert this enquiry into a booked Job." }, { status: 409 });
+    }
+    if (parts[0] === "catalogue" && parts[1] === "packages" && parts.length === 2) {
+      return Response.json({ ok: true, package: await savePackage(context.env.MKB_DB, actor, "", body) }, { status: 201 });
+    }
+    if (parts[0] === "catalogue" && parts[1] === "addons" && parts.length === 2) {
+      return Response.json({ ok: true, addon: await saveAddon(context.env.MKB_DB, actor, "", body) }, { status: 201 });
+    }
+    if (parts[0] === "quotes" && parts.length === 1) {
+      return Response.json({ ok: true, quote: await createQuote(context.env.MKB_DB, actor, body) }, { status: 201 });
+    }
+    if (parts[0] === "quotes" && parts[1] && parts[2] === "revise") {
+      return Response.json({ ok: true, quote: await reviseQuote(context.env.MKB_DB, actor, parts[1]) }, { status: 201 });
+    }
+    if (parts[0] === "quotes" && parts[1] && parts[2] === "send") {
+      return Response.json({ ok: true, quote: await sendQuote(context.env.MKB_DB, context.env, actor, parts[1]) });
+    }
+    if (parts[0] === "quotes" && parts[1] && parts[2] === "accept") {
+      return Response.json({ ok: true, conversion: await acceptQuoteAsAdmin(context.env.MKB_DB, actor, parts[1], body) });
     }
     if (parts[0] === "questionnaires" && parts[1] === "templates" && parts.length === 2) {
       return Response.json({ ok: true, template: await createQuestionnaireTemplate(context.env.MKB_DB, actor, body) }, { status: 201 });
@@ -201,6 +245,15 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     }
     if (parts[0] === "contacts" && parts[1] && parts.length === 2) {
       return Response.json({ ok: true, detail: await updateCrmContact(context.env.MKB_DB, actor, parts[1], body) });
+    }
+    if (parts[0] === "catalogue" && parts[1] === "packages" && parts[2] && parts.length === 3) {
+      return Response.json({ ok: true, package: await savePackage(context.env.MKB_DB, actor, parts[2], body) });
+    }
+    if (parts[0] === "catalogue" && parts[1] === "addons" && parts[2] && parts.length === 3) {
+      return Response.json({ ok: true, addon: await saveAddon(context.env.MKB_DB, actor, parts[2], body) });
+    }
+    if (parts[0] === "quotes" && parts[1] && parts.length === 2) {
+      return Response.json({ ok: true, quote: await saveQuoteDraft(context.env.MKB_DB, actor, parts[1], body) });
     }
     if (parts[0] === "questionnaires" && parts[1] === "templates" && parts[2] && parts.length === 3) {
       return Response.json({ ok: true, template: await saveQuestionnaireTemplate(context.env.MKB_DB, actor, parts[2], body) });

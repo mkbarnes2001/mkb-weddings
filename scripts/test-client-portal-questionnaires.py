@@ -28,7 +28,7 @@ def main() -> None:
     con = sqlite3.connect(":memory:")
     con.row_factory = sqlite3.Row
     con.executescript(schema_text)
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "30"
+    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "31"
 
     required = {
         "crm_questionnaire_templates",
@@ -130,7 +130,7 @@ def main() -> None:
     print("  questionnaire snapshots/responses: versioned and guarded")
     print("  private attachments: authorised and R2-backed")
     print("  Admin/public routes and export coverage: verified")
-    print("  schema version: 30")
+    print("  schema version: 31")
 
 
 if __name__ == "__main__":

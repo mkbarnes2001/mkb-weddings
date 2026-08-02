@@ -5,6 +5,9 @@ import { CRM } from "../pages/CRM";
 import { CRMEnquiry } from "../pages/CRMEnquiry";
 import { CRMContact } from "../pages/CRMContact";
 import { CRMJob } from "../pages/CRMJob";
+import { CRMCatalogue } from "../pages/CRMCatalogue";
+import { CRMQuotes } from "../pages/CRMQuotes";
+import { CRMQuote } from "../pages/CRMQuote";
 import { CRMQuestionnaireTemplate } from "../pages/CRMQuestionnaireTemplate";
 import { CRMWorkflowTemplate } from "../pages/CRMWorkflowTemplate";
 import { Weddings } from "../pages/Weddings";
@@ -56,6 +59,9 @@ export function AdminApp() {
         <Route path="crm/enquiries/:id" element={<CRMEnquiry />} />
         <Route path="crm/contacts/:id" element={<CRMContact />} />
         <Route path="crm/jobs/:id" element={<CRMJob />} />
+        <Route path="crm/catalogue" element={<CRMCatalogue />} />
+        <Route path="crm/quotes" element={<CRMQuotes />} />
+        <Route path="crm/quotes/:id" element={<CRMQuote />} />
         <Route path="crm/questionnaires/:id" element={<CRMQuestionnaireTemplate />} />
         <Route path="crm/workflows/:id" element={<CRMWorkflowTemplate />} />
         <Route path="weddings" element={<Weddings />} />

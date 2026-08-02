@@ -80,6 +80,17 @@ export type CrmJob = {
   venueSlug: string;
   clientPortalStatus: string;
   weddingSlug: string;
+  quoteId: string;
+  quoteVersionId: string;
+  quoteReference: string;
+  quoteVersionNumber: number | null;
+  acceptedQuoteAt?: string;
+  bookingSubtotal: number | null;
+  bookingDiscount: number | null;
+  bookingTax: number | null;
+  packageSnapshot: Record<string, unknown>;
+  addonsSnapshot: Array<Record<string, unknown>>;
+  quoteSnapshot: Record<string, unknown>;
   taskTotal: number;
   taskCompleted: number;
   taskPending: number;
@@ -132,6 +143,7 @@ export type CrmEnquiryDetail = {
   activities: CrmActivity[];
   job: CrmJob | null;
   communications: CrmCommunication[];
+  quotes?: CrmQuote[];
 };
 
 export type CrmEnquiryInput = {
@@ -389,4 +401,145 @@ export type CrmJobWorkspace = {
   taskStats: { total: number; pending: number; completed: number; overdue: number };
   communications: CrmCommunication[];
   workflowTemplates: CrmWorkflowTemplate[];
+};
+
+export type CrmPackage = {
+  id: string;
+  name: string;
+  serviceType: string;
+  internalCode: string;
+  description: string;
+  priceAmount: number;
+  currency: string;
+  coverageMinutes: number | null;
+  deliverables: string[];
+  includedItems: string[];
+  clientNotes: string;
+  displayOrder: number;
+  recommended: boolean;
+  status: "active" | "hidden" | "archived";
+  imageUrl: string;
+  addonIds: string[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CrmAddon = {
+  id: string;
+  name: string;
+  description: string;
+  priceAmount: number;
+  currency: string;
+  serviceType: string;
+  status: "active" | "hidden" | "archived";
+  displayOrder: number;
+  availabilityScope: "all" | "selected";
+  minimumQuantity: number;
+  maximumQuantity: number;
+  requirement: "optional" | "recommended" | "mandatory";
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CrmQuoteItem = {
+  id?: string;
+  itemType?: "included" | "custom";
+  name: string;
+  description: string;
+  quantity: number;
+  unitPriceAmount: number;
+  displayOrder: number;
+};
+
+export type CrmQuoteAddonOption = {
+  id: string;
+  addonId: string;
+  name: string;
+  description: string;
+  unitPriceAmount: number;
+  currency: string;
+  minimumQuantity: number;
+  maximumQuantity: number;
+  defaultQuantity: number;
+  requirement: "optional" | "recommended" | "mandatory";
+  displayOrder: number;
+};
+
+export type CrmQuoteOption = {
+  id: string;
+  packageId: string;
+  optionType: "catalogue" | "bespoke";
+  name: string;
+  description: string;
+  serviceType: string;
+  internalCode: string;
+  basePriceAmount: number;
+  currency: string;
+  coverageMinutes: number | null;
+  deliverables: string[];
+  includedItems: string[];
+  clientNotes: string;
+  recommended: boolean;
+  displayOrder: number;
+  items: CrmQuoteItem[];
+  addons: CrmQuoteAddonOption[];
+};
+
+export type CrmQuoteVersion = {
+  id: string;
+  quoteId: string;
+  versionNumber: number;
+  previousVersionId: string;
+  status: "draft" | "sent" | "viewed" | "accepted" | "declined" | "expired" | "superseded";
+  clientNotes: string;
+  internalNotes: string;
+  expiresAt: string;
+  discountType: "none" | "fixed" | "percentage";
+  discountValue: number;
+  taxTreatment: "none" | "inclusive" | "exclusive";
+  taxRateBasisPoints: number;
+  subtotalAmount: number;
+  discountAmount: number;
+  taxAmount: number;
+  totalAmount: number;
+  currency: string;
+  sentAt?: string;
+  viewedAt?: string;
+  acceptedAt?: string;
+  declinedAt?: string;
+  provider: string;
+  providerMessageId: string;
+  failureReason: string;
+  options: CrmQuoteOption[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CrmQuote = {
+  id: string;
+  enquiryId: string;
+  primaryContactId: string;
+  reference: string;
+  status: CrmQuoteVersion["status"];
+  currentVersionId: string;
+  acceptedVersionId: string;
+  acceptedJobId: string;
+  currency: string;
+  clientName: string;
+  partnerName: string;
+  clientEmail: string;
+  eventDate: string;
+  venueText: string;
+  enquiryReference: string;
+  serviceInterest: string;
+  currentVersion: CrmQuoteVersion | null;
+  versions: CrmQuoteVersion[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CrmQuoteOverview = {
+  quotes: CrmQuote[];
+  packages: CrmPackage[];
+  addons: CrmAddon[];
 };

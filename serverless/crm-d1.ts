@@ -225,6 +225,17 @@ function hydrateJob(row: any) {
     venueSlug: text(row.venue_slug),
     clientPortalStatus: text(row.client_portal_status),
     weddingSlug: text(row.wedding_slug),
+    quoteId: text(row.quote_id),
+    quoteVersionId: text(row.quote_version_id),
+    quoteReference: text(row.quote_reference),
+    quoteVersionNumber: row.quote_version_number == null ? null : Number(row.quote_version_number),
+    acceptedQuoteAt: row.accepted_quote_at || undefined,
+    bookingSubtotal: row.booking_subtotal == null ? null : Number(row.booking_subtotal),
+    bookingDiscount: row.booking_discount == null ? null : Number(row.booking_discount),
+    bookingTax: row.booking_tax == null ? null : Number(row.booking_tax),
+    packageSnapshot: safeJson(row.package_snapshot_json, {}),
+    addonsSnapshot: safeJson(row.addons_snapshot_json, []),
+    quoteSnapshot: safeJson(row.quote_snapshot_json, {}),
     taskTotal: Number(row.task_total || 0),
     taskCompleted: Number(row.task_completed || 0),
     taskPending: Number(row.task_pending || 0),
@@ -684,13 +695,18 @@ export async function acceptEnquiry(db: D1Db, actor: CrmActor, enquiryId: string
         id, workspace_id, reference, enquiry_id, job_type, status, title,
         booking_date, event_date, service_name, package_name, value_amount, currency,
         assigned_user_id, venue_text, venue_id, venue_slug, wedding_slug,
-        created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, 'booked', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        quote_id, quote_version_id, quote_reference, quote_version_number, accepted_quote_at,
+        booking_subtotal, booking_discount, booking_tax, package_snapshot_json,
+        addons_snapshot_json, quote_snapshot_json, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, 'booked', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).bind(
       jobId, actor.workspaceId, jobReference, enquiryId, text(enquiryRow.event_type || "wedding"), title,
-      new Date().toISOString().slice(0, 10), text(enquiryRow.event_date), text(enquiryRow.service_interest), text(enquiryRow.package_interest),
+      new Date().toISOString().slice(0, 10), text(enquiryRow.event_date), text(input?.serviceName || enquiryRow.service_interest), text(input?.packageName || enquiryRow.package_interest),
       integer(input?.valueAmount ?? enquiryRow.budget_max), text(enquiryRow.currency || "GBP"), text(enquiryRow.assigned_user_id) || text(actor.userId) || null,
       text(enquiryRow.venue_text), text(enquiryRow.venue_id), text(enquiryRow.venue_slug), linkedWeddingSlug,
+      text(input?.quoteId) || null, text(input?.quoteVersionId) || null, text(input?.quoteReference), input?.quoteVersionNumber == null ? null : integer(input?.quoteVersionNumber),
+      text(input?.acceptedQuoteAt) || null, integer(input?.bookingSubtotal), integer(input?.bookingDiscount), integer(input?.bookingTax),
+      JSON.stringify(input?.packageSnapshot || {}), JSON.stringify(input?.addonsSnapshot || []), JSON.stringify(input?.quoteSnapshot || {}),
     ),
     db.prepare(`
       UPDATE crm_enquiries SET stage_id = ?, status = 'won', won_at = CURRENT_TIMESTAMP,

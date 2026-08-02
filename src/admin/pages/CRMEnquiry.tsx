@@ -5,6 +5,8 @@ import {
   BriefcaseBusiness,
   CalendarDays,
   CheckCircle2,
+  PackageCheck,
+  Plus,
   Clock3,
   FileText,
   Mail,
@@ -23,7 +25,7 @@ import {
 } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
-import type { CrmEnquiryDetail, CrmEnquiryInput, CrmOverview } from "../types/crm";
+import type { CrmEnquiryDetail, CrmEnquiryInput, CrmOverview, CrmQuote } from "../types/crm";
 
 function dateTime(value?: string) {
   if (!value) return "";
@@ -48,19 +50,21 @@ export function CRMEnquiry() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [lostReason, setLostReason] = useState("");
-  const [bookingValue, setBookingValue] = useState("");
+  const [quotes, setQuotes] = useState<CrmQuote[]>([]);
   const canManage = auth.permissions.includes("crm:manage");
 
   async function load() {
     setLoading(true);
     setError("");
     try {
-      const [nextDetail, nextOverview] = await Promise.all([
+      const [nextDetail, nextOverview, quoteOverview] = await Promise.all([
         AdminApiService.getCrmEnquiry(id),
         AdminApiService.getCrmOverview(),
+        AdminApiService.getCrmQuoteOverview(),
       ]);
       setDetail(nextDetail);
       setOverview(nextOverview);
+      setQuotes(quoteOverview.quotes.filter((quote) => quote.enquiryId === id));
       const primary = nextDetail.contacts.find((contact) => contact.role === "primary");
       const partner = nextDetail.contacts.find((contact) => contact.role === "partner");
       const primaryName = splitName(primary?.displayName || nextDetail.enquiry.primaryContact?.displayName || "");
@@ -94,7 +98,6 @@ export function CRMEnquiry() {
           phone: partner?.phone || nextDetail.enquiry.partnerContact?.phone || "",
         },
       });
-      setBookingValue(nextDetail.enquiry.budgetMax ? String(nextDetail.enquiry.budgetMax / 100) : "");
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Unable to load enquiry.");
     } finally {
@@ -136,19 +139,15 @@ export function CRMEnquiry() {
     }
   }
 
-  async function acceptBooking() {
-    if (!detail) return;
-    if (!window.confirm("Accept this booking and create its Job and linked Wedding record?")) return;
+  async function createQuote() {
     setSaving(true);
     setError("");
     setMessage("");
     try {
-      const valueAmount = bookingValue.trim() ? Math.round(Number(bookingValue) * 100) : null;
-      const result: any = await AdminApiService.acceptCrmEnquiry(id, { valueAmount });
-      setMessage(result.idempotent ? "This enquiry was already converted." : "Booking accepted. Job and Wedding created.");
-      await load();
+      const quote = await AdminApiService.createCrmQuote(id);
+      navigate(`/admin/crm/quotes/${quote.id}`);
     } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : "Unable to accept the booking.");
+      setError(actionError instanceof Error ? actionError.message : "Unable to create the quote.");
     } finally {
       setSaving(false);
     }
@@ -164,7 +163,7 @@ export function CRMEnquiry() {
         eyebrow={<Link to="/admin/crm" className="admin-inline-link inline-flex items-center gap-1"><ArrowLeft size={13} />CRM pipeline</Link>}
         title={enquiry.primaryContact?.displayName || enquiry.reference}
         description={`${enquiry.reference} · ${enquiry.source} enquiry`}
-        actions={<div className="flex flex-wrap gap-2">{detail.job?.weddingSlug ? <Link to={`/admin/weddings/${detail.job.weddingSlug}/workspace`} className="admin-button admin-button--primary"><FileText className="admin-button__icon" />Open Wedding</Link> : null}{canManage && !detail.job ? <AdminButton variant="primary" icon={CheckCircle2} disabled={saving} onClick={() => void acceptBooking()}>Accept booking</AdminButton> : null}</div>}
+        actions={<div className="flex flex-wrap gap-2">{quotes[0] ? <Link to={`/admin/crm/quotes/${quotes[0].id}`} className="admin-button admin-button--secondary"><PackageCheck className="admin-button__icon" />Open quote</Link> : null}{detail.job ? <Link to={`/admin/crm/jobs/${detail.job.id}`} className="admin-button admin-button--primary"><FileText className="admin-button__icon" />Open Job</Link> : null}{canManage && !detail.job && !quotes.length ? <AdminButton variant="primary" icon={Plus} disabled={saving} onClick={() => void createQuote()}>Create quote</AdminButton> : null}</div>}
         meta={<div className="flex flex-wrap gap-2"><AdminStatus tone={enquiry.status === "won" ? "success" : enquiry.status === "lost" ? "danger" : "info"}>{enquiry.stageName}</AdminStatus>{detail.job ? <AdminStatus tone="success">Job {detail.job.reference}</AdminStatus> : null}</div>}
       />
 
@@ -173,7 +172,7 @@ export function CRMEnquiry() {
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-5">
-          <AdminPanel title="Enquiry details" description="These values flow into the Job and Wedding when the booking is accepted." icon={BriefcaseBusiness} actions={canManage ? <AdminButton size="sm" variant="primary" icon={Save} disabled={saving} onClick={() => void save()}>Save</AdminButton> : undefined}>
+          <AdminPanel title="Enquiry details" description="These values flow into the quote and are copied into the Job and Wedding when a quote is accepted." icon={BriefcaseBusiness} actions={canManage ? <AdminButton size="sm" variant="primary" icon={Save} disabled={saving} onClick={() => void save()}>Save</AdminButton> : undefined}>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               <AdminField label="Pipeline stage"><select className="admin-select" value={form.stageId || ""} disabled={!canManage || enquiry.status === "won"} onChange={(event) => setForm((current) => ({ ...current, stageId: event.target.value }))}>{(overview?.stages || []).filter((item) => item.type === "open" || item.id === form.stageId).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></AdminField>
               <AdminField label="Wedding date"><input className="admin-input" type="date" disabled={!canManage || enquiry.status === "won"} value={form.eventDate || ""} onChange={(event) => setForm((current) => ({ ...current, eventDate: event.target.value }))} /></AdminField>
@@ -183,7 +182,6 @@ export function CRMEnquiry() {
               <AdminField label="Package interest"><input className="admin-input" disabled={!canManage} value={form.packageInterest || ""} onChange={(event) => setForm((current) => ({ ...current, packageInterest: event.target.value }))} /></AdminField>
               <AdminField label="Budget minimum (£)"><input className="admin-input" type="number" disabled={!canManage} value={form.budgetMin == null ? "" : form.budgetMin / 100} onChange={(event) => setForm((current) => ({ ...current, budgetMin: event.target.value ? Math.round(Number(event.target.value) * 100) : null }))} /></AdminField>
               <AdminField label="Budget maximum (£)"><input className="admin-input" type="number" disabled={!canManage} value={form.budgetMax == null ? "" : form.budgetMax / 100} onChange={(event) => setForm((current) => ({ ...current, budgetMax: event.target.value ? Math.round(Number(event.target.value) * 100) : null }))} /></AdminField>
-              <AdminField label="Booking value (£)" help="Used when accepting the booking."><input className="admin-input" type="number" disabled={!canManage || Boolean(detail.job)} value={bookingValue} onChange={(event) => setBookingValue(event.target.value)} /></AdminField>
             </div>
             <div className="mt-4"><AdminField label="Notes"><textarea className="admin-textarea min-h-32" disabled={!canManage} value={form.notes || ""} onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))} /></AdminField></div>
           </AdminPanel>
@@ -213,6 +211,10 @@ export function CRMEnquiry() {
               <div className="mt-3"><AdminButton variant="danger" size="sm" disabled={saving} onClick={() => void markLost()}>Mark lost</AdminButton></div>
             </AdminPanel>
           ) : null}
+
+          <AdminPanel title="Quotes" description="Package choices and quote revisions linked to this enquiry." icon={PackageCheck}>
+            {!quotes.length ? <div className="admin-empty-state"><PackageCheck /><div><strong>No quote created</strong><p>Create a quote to present package choices and optional extras to the client.</p></div>{canManage && !detail.job ? <AdminButton variant="primary" size="sm" icon={Plus} disabled={saving} onClick={() => void createQuote()}>Create quote</AdminButton> : null}</div> : <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Reference</th><th>Version</th><th>Status</th><th>Total</th></tr></thead><tbody>{quotes.map((quote) => <tr key={quote.id}><td><Link className="admin-inline-link" to={`/admin/crm/quotes/${quote.id}`}>{quote.reference}</Link></td><td>v{quote.currentVersion?.versionNumber || 1}</td><td><AdminStatus tone={quote.status === "accepted" ? "success" : quote.status === "declined" || quote.status === "expired" ? "danger" : quote.status === "sent" || quote.status === "viewed" ? "info" : "warning"}>{quote.status}</AdminStatus></td><td>{new Intl.NumberFormat("en-GB", { style: "currency", currency: quote.currency || "GBP" }).format((quote.currentVersion?.totalAmount || 0) / 100)}</td></tr>)}</tbody></table></div>}
+          </AdminPanel>
 
           <AdminPanel title="Activity" description="CRM actions are recorded against this enquiry." icon={Clock3} compact>
             <div className="crm-activity-list">{detail.activities.map((item) => <div key={item.id}><span></span><section><strong>{item.summary}</strong><p>{dateTime(item.createdAt)}{item.actorEmail ? ` · ${item.actorEmail}` : ""}</p></section></div>)}</div>

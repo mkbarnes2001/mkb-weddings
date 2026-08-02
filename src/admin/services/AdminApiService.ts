@@ -10,7 +10,7 @@ import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, Client
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
 import type { ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
-import type { CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate } from "../types/crm";
+import type { CrmAddon, CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmPackage, CrmQuote, CrmQuoteOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate } from "../types/crm";
 import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
@@ -1257,6 +1257,58 @@ export class AdminApiService {
   static async getCrmJobWorkspace(id: string) {
     const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(id)}`);
     return result.workspace;
+  }
+
+  static async getCrmQuoteOverview() {
+    const result = await request<{ ok: true; quotes: CrmQuoteOverview }>("/api/crm/quotes");
+    return result.quotes;
+  }
+
+  static async getCrmQuoteCatalogue() {
+    const result = await request<{ ok: true; catalogue: { packages: CrmPackage[]; addons: CrmAddon[] } }>("/api/crm/catalogue");
+    return result.catalogue;
+  }
+
+  static async saveCrmPackage(id: string | undefined, input: Partial<CrmPackage>) {
+    const path = id ? `/api/crm/catalogue/packages/${encodeURIComponent(id)}` : "/api/crm/catalogue/packages";
+    const result = await request<{ ok: true; package: CrmPackage }>(path, { method: id ? "PUT" : "POST", body: JSON.stringify(input) });
+    return result.package;
+  }
+
+  static async saveCrmAddon(id: string | undefined, input: Partial<CrmAddon>) {
+    const path = id ? `/api/crm/catalogue/addons/${encodeURIComponent(id)}` : "/api/crm/catalogue/addons";
+    const result = await request<{ ok: true; addon: CrmAddon }>(path, { method: id ? "PUT" : "POST", body: JSON.stringify(input) });
+    return result.addon;
+  }
+
+  static async createCrmQuote(enquiryId: string) {
+    const result = await request<{ ok: true; quote: CrmQuote }>("/api/crm/quotes", { method: "POST", body: JSON.stringify({ enquiryId }) });
+    return result.quote;
+  }
+
+  static async getCrmQuote(id: string) {
+    const result = await request<{ ok: true; quote: CrmQuote }>(`/api/crm/quotes/${encodeURIComponent(id)}`);
+    return result.quote;
+  }
+
+  static async saveCrmQuote(id: string, input: Record<string, unknown>) {
+    const result = await request<{ ok: true; quote: CrmQuote }>(`/api/crm/quotes/${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify(input) });
+    return result.quote;
+  }
+
+  static async reviseCrmQuote(id: string) {
+    const result = await request<{ ok: true; quote: CrmQuote }>(`/api/crm/quotes/${encodeURIComponent(id)}/revise`, { method: "POST", body: "{}" });
+    return result.quote;
+  }
+
+  static async sendCrmQuote(id: string) {
+    const result = await request<{ ok: true; quote: CrmQuote }>(`/api/crm/quotes/${encodeURIComponent(id)}/send`, { method: "POST", body: "{}" });
+    return result.quote;
+  }
+
+  static async acceptCrmQuote(id: string, input: { optionId: string; addons?: Array<{ id: string; quantity: number }>; confirmed: true }) {
+    const result = await request<{ ok: true; conversion: { jobId: string; jobReference: string; idempotent: boolean } }>(`/api/crm/quotes/${encodeURIComponent(id)}/accept`, { method: "POST", body: JSON.stringify(input) });
+    return result.conversion;
   }
 
   static async getQuestionnaireOverview() {
