@@ -84,6 +84,9 @@ def main() -> None:
         ".admin-module-destination-grid", ".admin-mobile-module-switcher",
     ]:
         assert selector in css, f"missing CSS selector {selector}"
+    assert ".admin-module-switcher-wrap { padding: 14px 16px 18px !important; }" in css
+    assert ".admin-module-switcher { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }" in css
+    assert "min-height: 44px" in css and "padding: 9px 10px" in css
     migrations = list((ROOT / "d1" / "migrations").glob("032*")) if (ROOT / "d1" / "migrations").exists() else []
     assert not migrations, "v1.9.5a navigation release must not add schema 32"
 
