@@ -225,3 +225,34 @@ export function AdminEmptyState({
     </div>
   );
 }
+
+export function AdminAccordion({
+  title,
+  description,
+  icon: Icon,
+  summary,
+  children,
+  defaultOpen = false,
+  className = "",
+}: {
+  title: ReactNode;
+  description?: ReactNode;
+  icon?: LucideIcon;
+  summary?: ReactNode;
+  children: ReactNode;
+  defaultOpen?: boolean;
+  className?: string;
+}) {
+  return (
+    <details className={cx("admin-accordion", className)} open={defaultOpen || undefined}>
+      <summary className="admin-accordion__summary">
+        <span className="admin-accordion__heading">
+          {Icon ? <span className="admin-accordion__icon" aria-hidden="true"><Icon /></span> : null}
+          <span><strong>{title}</strong>{description ? <small>{description}</small> : null}</span>
+        </span>
+        <span className="admin-accordion__meta">{summary}<span className="admin-accordion__chevron" aria-hidden="true"></span></span>
+      </summary>
+      <div className="admin-accordion__body">{children}</div>
+    </details>
+  );
+}

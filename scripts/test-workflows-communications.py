@@ -104,8 +104,8 @@ def main() -> None:
     assert 'parts[0] === "workflows"' in route
     assert 'parts[2] === "communications"' in route
     assert "sendLeadAutoresponder" in public_route
-    assert "Acknowledgement subject" in overview and "Lead list" in overview and "Task overview" in overview
-    assert "Tasks and workflow" in job_page and "Communication" in job_page and "Send email" in job_page
+    assert "Acknowledgement subject" in overview and "Leads overview" in overview and "Task overview" in overview
+    assert "Workflow and tasks" in job_page and "Communication" in job_page and "Send email" in job_page
     assert "Default workflow" in builder and "Day offset" in builder
     assert 'path="crm/workflows/:id"' in app
     for table in required:

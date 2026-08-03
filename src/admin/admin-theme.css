@@ -2129,3 +2129,206 @@
   font-size: 0.62rem;
   font-weight: 400;
 }
+
+/* v1.9.3a.1 — desktop and mobile CRM operations UI */
+.admin-external-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.admin-external-link { min-width: 0; height: 34px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid rgba(255,255,255,.14); border-radius: 8px; background: rgba(255,255,255,.06); color: #fff; padding: 0 8px; font-size: 9px; font-weight: 600; line-height: 1; text-decoration: none; }
+.admin-external-link:hover { border-color: rgba(255,255,255,.28); background: rgba(255,255,255,.12); }
+.admin-external-link svg { width: 13px; height: 13px; }
+.admin-shell select.admin-workspace-switcher { background: #1b1b1b !important; color: #fff !important; border-color: rgba(255,255,255,.18) !important; color-scheme: dark; }
+.admin-shell select.admin-workspace-switcher option { background: #fff; color: #111; }
+.admin-mobile-header,
+.admin-mobile-bottom-nav,
+.admin-mobile-more { display: none; }
+
+.crm-operations-page .admin-page-header { align-items: center; }
+.crm-operations-tabs { position: sticky; top: 0; z-index: 20; overflow-x: auto; background: rgba(244,242,238,.94); backdrop-filter: blur(12px); }
+.crm-operations-toolbar { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(160px, 210px) auto; align-items: center; gap: 10px; border: 1px solid var(--admin-border); border-radius: 12px; background: rgba(255,255,255,.88); padding: 10px; box-shadow: var(--admin-shadow); }
+.crm-search-control { position: relative; min-width: 0; }
+.crm-search-control > svg { position: absolute; top: 50%; left: 12px; width: 15px; height: 15px; color: #8a8a8a; transform: translateY(-50%); pointer-events: none; }
+.crm-search-control > input { width: 100%; height: 38px; border: 1px solid var(--admin-border); border-radius: 9px; background: #fff; padding: 0 12px 0 38px; font-size: 11px; outline: none; }
+.crm-search-control > input:focus { border-color: #111; box-shadow: 0 0 0 2px rgba(17,17,17,.06); }
+.crm-view-toggle { display: flex; gap: 6px; justify-self: end; }
+.crm-operations-list { display: grid; gap: 9px; }
+.crm-operation-record { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 40px; border: 1px solid var(--admin-border); border-radius: 12px; background: rgba(255,255,255,.9); box-shadow: 0 5px 18px rgba(17,17,17,.035); transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease; }
+.crm-operation-record:hover { border-color: rgba(17,17,17,.28); box-shadow: 0 9px 24px rgba(17,17,17,.06); transform: translateY(-1px); }
+.crm-operation-record__main { display: grid; grid-template-columns: minmax(190px, .95fr) minmax(350px, 1.45fr) minmax(160px, .65fr); align-items: center; gap: 22px; min-width: 0; color: #171717; padding: 15px 8px 15px 16px; text-decoration: none; }
+.crm-operation-record--job .crm-operation-record__main { grid-template-columns: minmax(190px, .9fr) minmax(330px, 1.3fr) minmax(130px, .55fr) minmax(150px, .55fr); }
+.crm-operation-record__identity { min-width: 0; }
+.crm-operation-record__title-row { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.crm-operation-record__title-row h3 { min-width: 0; margin: 0; overflow: hidden; font-size: 12px; font-weight: 650; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.crm-operation-record__identity > p { margin: 5px 0 0 19px; overflow: hidden; color: var(--admin-muted); font-size: 8.8px; text-overflow: ellipsis; white-space: nowrap; }
+.crm-record-dot { width: 10px; height: 10px; flex: 0 0 10px; border: 2px solid #9b2642; border-radius: 50%; background: #ef94a9; box-shadow: 0 0 0 2px rgba(155,38,66,.08); }
+.crm-operation-record--job .crm-record-dot { border-color: #2f6e47; background: #8ed0a5; }
+.crm-operation-record__details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; min-width: 0; margin: 0; }
+.crm-operation-record__details div { min-width: 0; }
+.crm-operation-record__details dt { margin-bottom: 5px; color: #999; font-size: 7.5px; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; }
+.crm-operation-record__details dd { display: flex; align-items: center; gap: 5px; min-width: 0; margin: 0; overflow: hidden; color: #454545; font-size: 9px; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+.crm-operation-record__details svg { width: 12px; height: 12px; flex: 0 0 12px; color: #8a8a8a; }
+.crm-operation-record__status { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: 5px; }
+.crm-operation-record__status strong { font-size: 11px; }
+.crm-operation-record__status small { color: var(--admin-muted); font-size: 8px; line-height: 1.35; }
+.crm-operation-record__workflow > div { width: 100%; height: 5px; overflow: hidden; border-radius: 999px; background: #ecebea; }
+.crm-operation-record__workflow > div span { display: block; height: 100%; border-radius: inherit; background: #171717; }
+.crm-operation-record__workflow small { display: block; margin-top: 6px; color: var(--admin-muted); font-size: 8px; line-height: 1.35; }
+.crm-record-menu { position: relative; display: grid; place-items: center; border-left: 1px solid rgba(17,17,17,.07); }
+.crm-record-menu > summary { display: grid; width: 32px; height: 32px; place-items: center; cursor: pointer; border-radius: 8px; color: #555; list-style: none; }
+.crm-record-menu > summary::-webkit-details-marker { display: none; }
+.crm-record-menu > summary:hover { background: #f2f1ee; color: #111; }
+.crm-record-menu > summary svg { width: 17px; height: 17px; }
+.crm-record-menu > div { position: absolute; top: calc(50% + 18px); right: 7px; z-index: 30; display: grid; min-width: 150px; overflow: hidden; border: 1px solid var(--admin-border); border-radius: 9px; background: #fff; box-shadow: 0 16px 36px rgba(17,17,17,.14); }
+.crm-record-menu > div a { padding: 9px 11px; border-bottom: 1px solid rgba(17,17,17,.07); color: #222; font-size: 9px; text-decoration: none; }
+.crm-record-menu > div a:last-child { border-bottom: 0; }
+.crm-record-menu > div a:hover { background: #f5f4f1; }
+.crm-client-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 9px; }
+.crm-client-list > a { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: center; gap: 11px; border: 1px solid var(--admin-border); border-radius: 11px; background: #fff; color: #222; padding: 12px; text-decoration: none; }
+.crm-client-list > a:hover { border-color: rgba(17,17,17,.28); }
+.crm-client-avatar { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 10px; background: #efede8; font-size: 12px; font-weight: 700; }
+.crm-client-list strong { display: block; font-size: 10.5px; }
+.crm-client-list p { margin: 4px 0 0; overflow: hidden; color: var(--admin-muted); font-size: 8.5px; text-overflow: ellipsis; white-space: nowrap; }
+.crm-schedule-list { display: grid; gap: 8px; }
+.crm-schedule-record { display: grid; grid-template-columns: 68px minmax(0, 1fr) 20px; align-items: center; gap: 14px; border: 1px solid var(--admin-border); border-radius: 11px; background: #fff; color: #222; padding: 11px 13px; text-decoration: none; }
+.crm-schedule-record:hover { border-color: rgba(17,17,17,.3); }
+.crm-schedule-record time { display: grid; place-items: center; align-self: stretch; border-right: 1px solid var(--admin-border); padding-right: 13px; text-align: center; }
+.crm-schedule-record time strong { font-size: 18px; line-height: 1; }
+.crm-schedule-record time span { margin-top: 4px; color: var(--admin-muted); font-size: 8px; text-transform: uppercase; }
+.crm-schedule-record h3 { margin: 6px 0 0; font-size: 11px; }
+.crm-schedule-record p { margin: 3px 0 0; color: var(--admin-muted); font-size: 9px; }
+.crm-schedule-record > svg { width: 14px; height: 14px; color: #999; }
+
+.admin-accordion { min-width: 0; overflow: hidden; border: 1px solid var(--admin-border); border-radius: 12px; background: rgba(255,255,255,.9); box-shadow: var(--admin-shadow); }
+.admin-accordion__summary { display: flex; min-height: 58px; align-items: center; justify-content: space-between; gap: 14px; cursor: pointer; padding: 11px 14px; list-style: none; }
+.admin-accordion__summary::-webkit-details-marker { display: none; }
+.admin-accordion__summary:hover { background: rgba(248,247,244,.8); }
+.admin-accordion__heading { display: flex; min-width: 0; align-items: center; gap: 10px; }
+.admin-accordion__icon { display: grid; width: 30px; height: 30px; flex: 0 0 30px; place-items: center; border-radius: 8px; background: #111; color: #fff; }
+.admin-accordion__icon svg { width: 14px; height: 14px; }
+.admin-accordion__heading strong { display: block; font-size: 11px; }
+.admin-accordion__heading small { display: block; margin-top: 3px; color: var(--admin-muted); font-size: 8.5px; line-height: 1.4; }
+.admin-accordion__meta { display: flex; align-items: center; gap: 10px; }
+.admin-accordion__chevron { width: 8px; height: 8px; border-right: 1.5px solid #555; border-bottom: 1.5px solid #555; transform: rotate(45deg); transition: transform .15s ease; }
+.admin-accordion[open] .admin-accordion__chevron { transform: rotate(225deg); }
+.admin-accordion__body { border-top: 1px solid var(--admin-border); padding: 14px; }
+.crm-job-operations-grid { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(360px, .82fr); gap: 14px; align-items: start; }
+.crm-job-operations-column { display: grid; gap: 11px; min-width: 0; }
+.crm-job-overview-panel .admin-panel__body { padding: 0; }
+.crm-job-overview { display: grid; grid-template-columns: minmax(210px, .72fr) minmax(0, 1.45fr); gap: 18px 28px; padding: 17px; }
+.crm-job-overview__identity { display: flex; align-items: flex-start; gap: 11px; min-width: 0; }
+.crm-job-overview__identity .crm-record-dot { margin-top: 5px; }
+.crm-job-overview__identity p { margin: 0 0 3px; color: #888; font-size: 8px; font-weight: 650; letter-spacing: .12em; text-transform: uppercase; }
+.crm-job-overview__identity h2 { margin: 0; font-size: 15px; line-height: 1.2; }
+.crm-job-overview__identity small { display: block; margin-top: 5px; color: var(--admin-muted); font-size: 8.5px; }
+.crm-job-overview__facts { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px 18px; margin: 0; }
+.crm-job-overview__facts dt { margin-bottom: 4px; color: #999; font-size: 7px; font-weight: 650; letter-spacing: .11em; text-transform: uppercase; }
+.crm-job-overview__facts dd { display: flex; align-items: center; gap: 5px; min-width: 0; margin: 0; overflow: hidden; font-size: 9px; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+.crm-job-overview__facts svg { width: 12px; height: 12px; flex: 0 0 12px; color: #888; }
+.crm-job-overview__progress { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 0; border-top: 1px solid var(--admin-border); padding-top: 14px; }
+.crm-job-overview__progress > div { position: relative; display: grid; grid-template-columns: 24px minmax(0,1fr); align-items: center; gap: 7px; min-width: 0; }
+.crm-job-overview__progress > div:not(:last-child)::after { position: absolute; top: 12px; right: 4px; left: 28px; height: 1px; background: #ddd; content: ""; }
+.crm-job-overview__progress > div.complete:not(:last-child)::after { background: #7fc99a; }
+.crm-job-overview__progress > div > span { position: relative; z-index: 1; display: grid; width: 24px; height: 24px; place-items: center; border: 1px solid #bbb; border-radius: 50%; background: #fff; color: #777; font-size: 8px; }
+.crm-job-overview__progress > div.complete > span { border-color: #76c792; background: #edf8f1; color: #166534; }
+.crm-job-overview__progress svg { width: 12px; height: 12px; }
+.crm-job-overview__progress strong { display: block; overflow: hidden; font-size: 8.5px; text-overflow: ellipsis; white-space: nowrap; }
+.crm-job-overview__progress small { display: block; margin-top: 2px; overflow: hidden; color: var(--admin-muted); font-size: 7.5px; text-overflow: ellipsis; white-space: nowrap; }
+.crm-questionnaire-assign { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) 140px auto; align-items: end; gap: 8px; margin-bottom: 14px; border-bottom: 1px solid var(--admin-border); padding-bottom: 14px; }
+.crm-inline-action { margin-top: 12px; }
+.crm-activity-list--spaced { margin-top: 12px; border-top: 1px solid var(--admin-border); }
+
+@media (max-width: 1180px) {
+  .crm-operation-record__main { grid-template-columns: minmax(180px,.8fr) minmax(300px,1.35fr) minmax(145px,.6fr); gap: 15px; }
+  .crm-operation-record--job .crm-operation-record__main { grid-template-columns: minmax(180px,.75fr) minmax(300px,1.25fr) minmax(110px,.45fr) minmax(140px,.55fr); }
+  .crm-job-operations-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  .crm-operation-record__main,
+  .crm-operation-record--job .crm-operation-record__main { grid-template-columns: minmax(0,1fr) minmax(0,1.35fr); }
+  .crm-operation-record__status { grid-column: 1; }
+  .crm-operation-record__workflow { grid-column: 2; grid-row: 2; }
+  .crm-job-overview { grid-template-columns: 1fr; }
+  .crm-job-overview__facts { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .crm-job-overview__progress { grid-column: 1; overflow-x: auto; grid-template-columns: repeat(5,minmax(145px,1fr)); }
+  .crm-questionnaire-assign { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+
+@media (max-width: 760px) {
+  .admin-layout-grid { display: block; }
+  .admin-sidebar { display: none !important; }
+  .admin-mobile-header { display: block; position: sticky; top: 0; z-index: 45; min-height: 58px; border-bottom: 1px solid var(--admin-border); background: rgba(255,255,255,.96); backdrop-filter: blur(14px); }
+  .admin-mobile-header__inner { display: grid; grid-template-columns: 34px minmax(0,1fr) 36px; align-items: center; gap: 10px; min-height: 58px; padding: 7px 12px; }
+  .admin-mobile-header__inner > img { width: 30px; height: 30px; object-fit: contain; }
+  .admin-mobile-header__inner > button { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid var(--admin-border); border-radius: 9px; background: #fff; }
+  .admin-mobile-header__inner > button svg { width: 17px; height: 17px; }
+  .admin-mobile-header__workspace { display: grid; min-width: 0; }
+  .admin-mobile-header__workspace strong { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+  .admin-mobile-header__workspace span { margin-top: 2px; color: var(--admin-muted); font-size: 8px; text-transform: capitalize; }
+  .admin-mobile-header__workspace select { width: 100%; border: 0; background: transparent; color: var(--admin-muted); padding: 2px 18px 0 0; font-size: 8px; outline: none; }
+  .admin-main-content { padding: 10px 10px calc(82px + env(safe-area-inset-bottom)); }
+  .admin-mobile-bottom-nav { position: fixed; right: 0; bottom: 0; left: 0; z-index: 50; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); border-top: 1px solid rgba(17,17,17,.12); background: rgba(255,255,255,.97); padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -8px 28px rgba(17,17,17,.07); backdrop-filter: blur(16px); }
+  .admin-mobile-bottom-nav a,
+  .admin-mobile-bottom-nav button { position: relative; display: grid; min-height: 58px; place-items: center; align-content: center; gap: 3px; border: 0; background: transparent; color: #555; text-decoration: none; }
+  .admin-mobile-bottom-nav a::before,
+  .admin-mobile-bottom-nav button::before { position: absolute; top: 0; right: 22%; left: 22%; height: 2px; border-radius: 0 0 2px 2px; background: transparent; content: ""; }
+  .admin-mobile-bottom-nav .active { color: #111; background: #f1f8f3; }
+  .admin-mobile-bottom-nav .active::before { background: #2f7a49; }
+  .admin-mobile-bottom-nav svg { width: 20px; height: 20px; }
+  .admin-mobile-bottom-nav span { font-size: 8px; font-weight: 600; }
+  .admin-mobile-more { position: fixed; inset: 0; z-index: 70; display: block; }
+  .admin-mobile-more__backdrop { position: absolute; inset: 0; border: 0; background: rgba(17,17,17,.38); backdrop-filter: blur(2px); }
+  .admin-mobile-more > section { position: absolute; right: 0; bottom: 0; left: 0; max-height: 82dvh; overflow-y: auto; border-radius: 18px 18px 0 0; background: #fff; padding: 14px 14px calc(16px + env(safe-area-inset-bottom)); box-shadow: 0 -20px 50px rgba(17,17,17,.16); }
+  .admin-mobile-more header { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--admin-border); padding: 2px 2px 12px; }
+  .admin-mobile-more header strong { display: block; font-size: 13px; }
+  .admin-mobile-more header span { display: block; margin-top: 2px; color: var(--admin-muted); font-size: 8px; }
+  .admin-mobile-more header button { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid var(--admin-border); border-radius: 9px; background: #fff; }
+  .admin-mobile-more header svg { width: 16px; height: 16px; }
+  .admin-mobile-more nav { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; padding: 12px 0; }
+  .admin-mobile-more nav a { display: grid; min-height: 72px; place-items: center; align-content: center; gap: 6px; border: 1px solid var(--admin-border); border-radius: 11px; background: #faf9f7; color: #222; font-size: 8px; text-align: center; text-decoration: none; }
+  .admin-mobile-more nav svg { width: 19px; height: 19px; }
+  .admin-mobile-more footer { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; border-top: 1px solid var(--admin-border); padding-top: 12px; }
+  .admin-mobile-more footer a,
+  .admin-mobile-more footer button { display: inline-flex; min-height: 38px; align-items: center; justify-content: center; gap: 5px; border: 1px solid var(--admin-border); border-radius: 9px; background: #fff; color: #222; font-size: 8px; text-decoration: none; }
+  .admin-mobile-more footer svg { width: 13px; height: 13px; }
+  .crm-operations-page .admin-page-header { padding: 13px; }
+  .crm-operations-page .admin-page-description { display: none; }
+  .crm-operations-page .admin-page-actions { display: flex; flex-wrap: wrap; }
+  .crm-operations-page .admin-page-actions .admin-button { width: auto; flex: 1 1 auto; }
+  .crm-operations-tabs { top: 58px; margin-inline: -10px; border-radius: 0; padding-inline: 10px; }
+  .crm-operations-toolbar { grid-template-columns: 1fr minmax(130px,.45fr); gap: 7px; padding: 8px; }
+  .crm-view-toggle { grid-column: 1 / -1; justify-self: stretch; }
+  .crm-view-toggle .admin-button { flex: 1; }
+  .crm-operation-record { grid-template-columns: minmax(0,1fr) 36px; }
+  .crm-operation-record__main,
+  .crm-operation-record--job .crm-operation-record__main { grid-template-columns: 1fr; gap: 12px; padding: 14px 7px 14px 13px; }
+  .crm-operation-record__identity > p { margin-left: 19px; }
+  .crm-operation-record__details { grid-template-columns: 1fr; gap: 7px; padding: 10px 0; border-top: 1px solid rgba(17,17,17,.07); border-bottom: 1px solid rgba(17,17,17,.07); }
+  .crm-operation-record__details div { display: grid; grid-template-columns: 82px minmax(0,1fr); align-items: center; gap: 8px; }
+  .crm-operation-record__details dt { margin: 0; }
+  .crm-operation-record__status,
+  .crm-operation-record__workflow { grid-column: 1; grid-row: auto; }
+  .crm-operation-record__status { flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .crm-operation-record__status small { flex-basis: 100%; }
+  .crm-record-menu { align-items: start; padding-top: 12px; }
+  .crm-record-menu > div { position: fixed; right: 12px; bottom: calc(66px + env(safe-area-inset-bottom)); left: 12px; top: auto; }
+  .crm-record-menu > div a { min-height: 42px; display: flex; align-items: center; padding: 0 14px; font-size: 10px; }
+  .crm-client-list { grid-template-columns: 1fr; }
+  .crm-job-operations-grid { grid-template-columns: 1fr; gap: 10px; }
+  .crm-job-overview { grid-template-columns: 1fr; gap: 15px; padding: 14px; }
+  .crm-job-overview__facts { grid-template-columns: 1fr 1fr; gap: 11px; }
+  .crm-job-overview__progress { display: flex; overflow-x: auto; gap: 14px; padding-bottom: 4px; scroll-snap-type: x proximity; }
+  .crm-job-overview__progress > div { flex: 0 0 150px; scroll-snap-align: start; }
+  .crm-job-overview__progress > div:not(:last-child)::after { right: -10px; }
+  .admin-accordion__summary { min-height: 56px; padding: 10px 11px; }
+  .admin-accordion__heading small { display: none; }
+  .admin-accordion__body { padding: 11px; }
+  .crm-questionnaire-assign { grid-template-columns: 1fr; }
+  .crm-schedule-record { grid-template-columns: 58px minmax(0,1fr) 16px; gap: 10px; padding: 10px; }
+  .crm-schedule-record time { padding-right: 10px; }
+}
+
+@media (max-width: 420px) {
+  .crm-operations-toolbar { grid-template-columns: 1fr; }
+  .crm-operations-toolbar .admin-select { width: 100%; }
+  .crm-job-overview__facts { grid-template-columns: 1fr; }
+  .admin-mobile-more nav { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
