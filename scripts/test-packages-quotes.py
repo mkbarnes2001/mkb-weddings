@@ -128,6 +128,10 @@ def main() -> None:
     portal_source = (ROOT / "src/components/ClientPortal.tsx").read_text()
     export_source = (ROOT / "serverless/platform-operations-d1.ts").read_text()
     assert "acceptQuoteCore" in quotes_source and "acceptQuoteAsAdmin" in quotes_source and "acceptQuoteAsClient" in quotes_source
+    assert '"crm:manage", "crm:read"' in quotes_source
+    assert "The enquiry is already linked to a Job created from another quote." in quotes_source
+    assert "UPDATE crm_jobs SET status = 'booked', service_name = ?, package_name = ?, value_amount = ?" in quotes_source
+    assert "addons_snapshot_json = ?, quote_snapshot_json = ?" in quotes_source
     assert "purpose = 'public' AND verified = 1" in quotes_source
     assert "status = 'verified'" not in quotes_source and "is_primary DESC" not in quotes_source
     assert "UPDATE crm_quote_invitations SET consumed_at = COALESCE(consumed_at, CURRENT_TIMESTAMP)" in quotes_source

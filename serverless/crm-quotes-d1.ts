@@ -630,17 +630,27 @@ async function acceptQuoteCore(db: D1Db, actor: QuoteActor, quoteId: string, inp
   const ipHash = clientIp ? await sha256(`${actor.workspaceId}|${clientIp}`) : "";
   const contact = await db.prepare(`SELECT * FROM crm_contacts WHERE id = ? AND workspace_id = ? LIMIT 1`).bind(row.primary_contact_id, actor.workspaceId).first();
   if (!contact) throw httpError("Primary client not found.", 409);
-  const conversion = await acceptEnquiry(db, { ...actor, permissions: ["crm:manage"] }, text(row.enquiry_id), {
+  const acceptedAt = new Date().toISOString();
+  const conversionActor = { ...actor, permissions: [...new Set([...(actor.permissions || []), "crm:manage", "crm:read"])] };
+  const quoteSnapshot = { quoteId, reference: text(row.reference), versionId: version.id, versionNumber: version.versionNumber, clientNotes: version.clientNotes, discountType: version.discountType, discountValue: version.discountValue, taxTreatment: version.taxTreatment, taxRateBasisPoints: version.taxRateBasisPoints };
+  const conversion = await acceptEnquiry(db, conversionActor, text(row.enquiry_id), {
     valueAmount: calculated.total, packageName: option.name, serviceName: option.serviceType || text(row.service_interest),
     quoteId, quoteVersionId: version.id, quoteReference: text(row.reference), quoteVersionNumber: version.versionNumber,
-    acceptedQuoteAt: new Date().toISOString(), bookingSubtotal: calculated.subtotal, bookingDiscount: calculated.discount,
-    bookingTax: calculated.tax, packageSnapshot, addonsSnapshot: selectedAddons,
-    quoteSnapshot: { quoteId, reference: text(row.reference), versionId: version.id, versionNumber: version.versionNumber, clientNotes: version.clientNotes, discountType: version.discountType, discountValue: version.discountValue, taxTreatment: version.taxTreatment, taxRateBasisPoints: version.taxRateBasisPoints },
+    acceptedQuoteAt: acceptedAt, bookingSubtotal: calculated.subtotal, bookingDiscount: calculated.discount,
+    bookingTax: calculated.tax, packageSnapshot, addonsSnapshot: selectedAddons, quoteSnapshot,
   });
   const jobId = text(conversion.job?.id);
+  if (!jobId) throw httpError("Unable to create or reuse the booked Job.", 409);
+  const conversionQuoteId = text(conversion.job?.quoteId);
+  if (conversionQuoteId && conversionQuoteId !== quoteId) throw httpError("The enquiry is already linked to a Job created from another quote.", 409);
   const recordedAcceptance = await db.prepare(`SELECT id, total_amount, currency FROM crm_quote_acceptances WHERE workspace_id = ? AND quote_id = ? LIMIT 1`).bind(actor.workspaceId, quoteId).first();
   if (recordedAcceptance) return { quoteId, jobId, jobReference: text(conversion.job?.reference), idempotent: true, totalAmount: Number(recordedAcceptance.total_amount || 0), currency: text(recordedAcceptance.currency || version.currency) };
   const statements: any[] = [
+    db.prepare(`UPDATE crm_jobs SET status = 'booked', service_name = ?, package_name = ?, value_amount = ?, currency = ?, quote_id = ?, quote_version_id = ?, quote_reference = ?, quote_version_number = ?, accepted_quote_at = ?, booking_subtotal = ?, booking_discount = ?, booking_tax = ?, package_snapshot_json = ?, addons_snapshot_json = ?, quote_snapshot_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ? AND enquiry_id = ? AND (quote_id IS NULL OR quote_id = ?)` ).bind(
+      option.serviceType || text(row.service_interest), option.name, calculated.total, version.currency, quoteId, version.id, text(row.reference), version.versionNumber, acceptedAt,
+      calculated.subtotal, calculated.discount, calculated.tax, JSON.stringify(packageSnapshot), JSON.stringify(selectedAddons), JSON.stringify(quoteSnapshot),
+      jobId, actor.workspaceId, text(row.enquiry_id), quoteId,
+    ),
     db.prepare(`INSERT OR IGNORE INTO crm_quote_acceptances (id, workspace_id, quote_id, version_id, option_id, contact_id, identity_id, actor_type, actor_user_id, actor_email, accepted_at, client_ip_hash, user_agent, subtotal_amount, discount_amount, tax_amount, total_amount, currency, selected_package_snapshot_json, selected_addons_snapshot_json, audit_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(
       acceptanceId, actor.workspaceId, quoteId, version.id, option.id, contact.id, identity?.id || null, identity ? "client" : "admin", text(actor.userId) || null, lower(actor.email || identity?.email), ipHash, request ? text(request.headers.get("user-agent")).slice(0, 500) : "", calculated.subtotal, calculated.discount, calculated.tax, calculated.total, version.currency, JSON.stringify(packageSnapshot), JSON.stringify(selectedAddons), JSON.stringify({ quoteReference: text(row.reference), versionNumber: version.versionNumber, actorType: identity ? "client" : "admin", confirmation: Boolean(input?.confirmed) }),
     ),
