@@ -942,11 +942,19 @@ export async function verifyPortalMagicLink(db: D1Db, rawToken: string) {
 }
 
 export async function getPublicPortal(db: D1Db, request: Request, workspaceId: string) {
-  const workspace = await db.prepare(`SELECT business_name, logo_url, accent_color, contact_email FROM workspace_settings WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first();
+  const workspace = await db.prepare(`SELECT business_name, logo_url, accent_color, contact_email, document_json FROM workspace_settings WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first();
+  const workspaceDocument = json<any>(workspace?.document_json, {});
+  const portalBranding = workspaceDocument?.portal && typeof workspaceDocument.portal === "object" ? workspaceDocument.portal : {};
   const business = {
     name: text(workspace?.business_name || "WedPlanned"),
     logoUrl: text(workspace?.logo_url),
     accentColor: text(workspace?.accent_color || "#111111"),
+    secondaryColor: text(portalBranding.secondaryColor || "#f1efe9"),
+    backgroundColor: text(portalBranding.backgroundColor || "#f7f6f3"),
+    bannerUrl: text(portalBranding.bannerUrl),
+    welcomeHeading: text(portalBranding.welcomeHeading || "Welcome to your client portal"),
+    welcomeMessage: text(portalBranding.welcomeMessage || "Everything for your booking is organised here in one secure place."),
+    footerText: text(portalBranding.footerText),
     contactEmail: text(workspace?.contact_email),
   };
   const identity = await publicIdentity(db, request, workspaceId);

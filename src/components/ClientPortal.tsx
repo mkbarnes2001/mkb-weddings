@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft, CalendarDays, CheckCircle2, Download, FileText, LogOut, Mail, PackageCheck, Paperclip, Plus, Save, Search, Send, Trash2, XCircle } from "lucide-react";
+import { ArrowLeft, CalendarDays, CheckCircle2, Download, FileText, Home, LogOut, Mail, PackageCheck, Paperclip, Plus, Save, Search, Send, Trash2, XCircle } from "lucide-react";
 
 type SupplierDirectoryOption = {
   id: string;
@@ -74,7 +74,18 @@ type PortalQuoteSummary = { id: string; reference: string; status: string; event
 type PortalPayload = {
   authenticated: boolean;
   identity: { id: string; email: string; displayName: string } | null;
-  business?: { name: string; logoUrl: string; accentColor: string; contactEmail: string };
+  business?: {
+    name: string;
+    logoUrl: string;
+    accentColor: string;
+    secondaryColor: string;
+    backgroundColor: string;
+    bannerUrl: string;
+    welcomeHeading: string;
+    welcomeMessage: string;
+    footerText: string;
+    contactEmail: string;
+  };
   jobs: PortalJob[];
   quotes: PortalQuoteSummary[];
 };
@@ -187,10 +198,23 @@ function SupplierQuestion({
   );
 }
 
+type PortalView = "home" | "quotes" | "questionnaires";
+
+function contrastColour(hex: string) {
+  const value = /^#[0-9a-f]{6}$/i.test(hex) ? hex.slice(1) : "111111";
+  const r = Number.parseInt(value.slice(0, 2), 16);
+  const g = Number.parseInt(value.slice(2, 4), 16);
+  const b = Number.parseInt(value.slice(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? "#171717" : "#ffffff";
+}
+
 export function ClientPortal() {
+  const initialQuestionnaire = new URLSearchParams(window.location.search).get("questionnaire") || "";
+  const initialQuote = new URLSearchParams(window.location.search).get("quote") || "";
   const [portal, setPortal] = useState<PortalPayload | null>(null);
-  const [selectedId, setSelectedId] = useState(() => new URLSearchParams(window.location.search).get("questionnaire") || "");
-  const [selectedQuoteId, setSelectedQuoteId] = useState(() => new URLSearchParams(window.location.search).get("quote") || "");
+  const [view, setView] = useState<PortalView>(initialQuote ? "quotes" : initialQuestionnaire ? "questionnaires" : "home");
+  const [selectedId, setSelectedId] = useState(initialQuestionnaire);
+  const [selectedQuoteId, setSelectedQuoteId] = useState(initialQuote);
   const [quote, setQuote] = useState<PortalQuote | null>(null);
   const [selectedOptionId, setSelectedOptionId] = useState("");
   const [addonQuantities, setAddonQuantities] = useState<Record<string, number>>({});
@@ -209,11 +233,6 @@ export function ClientPortal() {
     try {
       const result = await jsonRequest<{ ok: true; portal: PortalPayload }>("/api/public/client-portal");
       setPortal(result.portal);
-      if (!selectedId && !selectedQuoteId && result.portal.authenticated) {
-        const firstQuote = result.portal.quotes.find((item) => ["sent", "viewed"].includes(item.status));
-        if (firstQuote) setSelectedQuoteId(firstQuote.id);
-        else { const firstOpen = result.portal.jobs.flatMap((job) => job.questionnaires).find((item) => item.status !== "completed"); if (firstOpen) setSelectedId(firstOpen.id); }
-      }
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Unable to load client portal.");
     } finally {
@@ -352,11 +371,25 @@ export function ClientPortal() {
   async function signOut() {
     await fetch("/api/public/client-auth/sign-out", { method: "POST", credentials: "include" }).catch(() => {});
     setPortal({ authenticated: false, identity: null, jobs: [], quotes: [] });
-    setSelectedId(""); setSelectedQuoteId("");
+    setView("home"); setSelectedId(""); setSelectedQuoteId("");
     setQuestionnaire(null); setQuote(null);
   }
 
   const accent = portal?.business?.accentColor || "#111111";
+  const secondary = portal?.business?.secondaryColor || "#f1efe9";
+  const background = portal?.business?.backgroundColor || "#f7f6f3";
+  const portalStyle = {
+    "--portal-accent": accent,
+    "--portal-secondary": secondary,
+    "--portal-background": background,
+    "--portal-on-accent": contrastColour(accent),
+  } as CSSProperties;
+  const allQuestionnaires = portal?.jobs.flatMap((job) => job.questionnaires.map((item) => ({ ...item, job }))) || [];
+  const completedQuestionnaires = allQuestionnaires.filter((item) => item.status === "completed").length;
+  const pendingQuestionnaires = allQuestionnaires.length - completedQuestionnaires;
+  const primaryJob = portal?.jobs[0] || null;
+  const acceptedQuotes = portal?.quotes.filter((item) => item.status === "accepted").length || 0;
+  const clientFirstName = (portal?.identity?.displayName || portal?.identity?.email || "there").split(/[ @]/)[0];
   const selectedQuoteOption = quote?.currentVersion.options.find((option) => option.id === selectedOptionId);
   const selectedQuoteTotals = quoteTotals(selectedQuoteOption, quote, addonQuantities);
   const acceptedQuote = quote?.currentVersion.status === "accepted" ? quote.acceptance : null;
@@ -372,7 +405,7 @@ export function ClientPortal() {
 
   if (!portal?.authenticated) {
     return (
-      <div className="client-portal-shell" style={{ "--portal-accent": accent } as CSSProperties}>
+      <div className="client-portal-shell" style={portalStyle}>
         <Helmet><title>Client portal</title><meta name="robots" content="noindex,nofollow" /></Helmet>
         <main className="client-portal-signin">
           <div className="client-portal-brand">{portal?.business?.logoUrl ? <img src={portal.business.logoUrl} alt="" /> : <span>WP</span>}</div>
@@ -389,18 +422,44 @@ export function ClientPortal() {
   }
 
   return (
-    <div className="client-portal-shell" style={{ "--portal-accent": accent } as CSSProperties}>
+    <div className="client-portal-shell" style={portalStyle}>
       <Helmet><title>{portal.business?.name || "WedPlanned"} client portal</title><meta name="robots" content="noindex,nofollow" /></Helmet>
-      <header className="client-portal-header">
-        <div><p>{portal.business?.name || "WedPlanned"}</p><strong>Client portal</strong></div>
+      <header
+        className="client-portal-hero"
+        style={portal.business?.bannerUrl ? { backgroundImage: `linear-gradient(90deg, rgba(0,0,0,.36), rgba(0,0,0,.08)), url(${portal.business.bannerUrl})` } : undefined}
+      >
+        <div className="client-portal-hero__identity">
+          <div className="client-portal-hero__logo">{portal.business?.logoUrl ? <img src={portal.business.logoUrl} alt={`${portal.business?.name || "Business"} logo`} /> : <span>{(portal.business?.name || "WP").slice(0, 2).toUpperCase()}</span>}</div>
+          <div><strong>{portal.business?.name || "WedPlanned"}</strong><small>Client portal</small></div>
+        </div>
         <div className="client-portal-user"><span>{portal.identity?.displayName || portal.identity?.email}</span><button onClick={() => void signOut()}><LogOut />Sign out</button></div>
       </header>
-      <div className="client-portal-layout">
+      <nav className="client-portal-nav" aria-label="Client portal sections">
+        <button className={view === "home" ? "active" : ""} onClick={() => { setView("home"); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><Home />Home</button>
+        {portal.quotes.length ? <button className={view === "quotes" ? "active" : ""} onClick={() => { setView("quotes"); setSelectedId(""); setQuestionnaire(null); }}><PackageCheck />Quotes</button> : null}
+        {allQuestionnaires.length ? <button className={view === "questionnaires" ? "active" : ""} onClick={() => { setView("questionnaires"); setSelectedQuoteId(""); setQuote(null); }}><FileText />Questionnaires</button> : null}
+      </nav>
+      {view === "home" ? <main className="client-portal-home">
+        {error ? <div className="client-portal-alert client-portal-alert--error">{error}</div> : null}
+        {message ? <div className="client-portal-alert client-portal-alert--success">{message}</div> : null}
+        <section className="client-portal-welcome">
+          <p className="client-portal-eyebrow">Welcome, {clientFirstName}</p>
+          <h1>{portal.business?.welcomeHeading || "Welcome to your client portal"}</h1>
+          <p>{portal.business?.welcomeMessage || "Everything for your booking is organised here in one secure place."}</p>
+        </section>
+        {primaryJob ? <section className="client-portal-event-card">
+          <div><small>Your booking</small><h2>{primaryJob.title}</h2><p><CalendarDays />{formatDate(primaryJob.eventDate)}{primaryJob.venueText ? ` · ${primaryJob.venueText}` : ""}</p></div>
+          <span>{primaryJob.status.replace(/_/g, " ")}</span>
+        </section> : null}
+        <section className="client-portal-home-grid">
+          {portal.quotes.length ? <button onClick={() => setView("quotes")}><PackageCheck /><span><small>Quotes</small><strong>{acceptedQuotes ? `${acceptedQuotes} accepted` : `${portal.quotes.length} available`}</strong><em>Review package options and booking details</em></span></button> : null}
+          {allQuestionnaires.length ? <button onClick={() => setView("questionnaires")}><FileText /><span><small>Questionnaires</small><strong>{pendingQuestionnaires ? `${pendingQuestionnaires} to complete` : "Complete"}</strong><em>{completedQuestionnaires} of {allQuestionnaires.length} completed</em></span></button> : null}
+        </section>
+        {!portal.jobs.length && !portal.quotes.length ? <div className="client-portal-empty"><FileText /><h2>Nothing is waiting for you</h2><p>No active quotes or bookings are linked to this email.</p></div> : null}
+      </main> : <div className="client-portal-layout">
         <aside className="client-portal-sidebar">
-          {portal.quotes.length ? <><p className="client-portal-eyebrow">Your quotes</p><div className="client-portal-quote-links">{portal.quotes.map((item) => <button key={item.id} className={selectedQuoteId === item.id ? "active" : ""} onClick={() => { setSelectedQuoteId(item.id); setSelectedId(""); }}><PackageCheck /><span><strong>{item.reference}</strong><small>{item.status.replace(/_/g, " ")} · {formatDate(item.eventDate)}</small></span>{item.status === "accepted" ? <CheckCircle2 /> : null}</button>)}</div></> : null}
-          <p className="client-portal-eyebrow">Your bookings</p>
-          {portal.jobs.map((job) => <section key={job.id} className="client-portal-job"><h2>{job.title}</h2><p><CalendarDays />{formatDate(job.eventDate)}</p><p>{job.venueText || "Venue TBC"}</p><div>{job.questionnaires.map((item) => <button key={item.id} className={selectedId === item.id ? "active" : ""} onClick={() => { setSelectedId(item.id); setSelectedQuoteId(""); }}><FileText /><span>{item.title}<small>{item.status.replace(/_/g, " ")}</small></span>{item.status === "completed" ? <CheckCircle2 /> : null}</button>)}</div></section>)}
-          {!portal.jobs.length && !portal.quotes.length ? <p className="client-portal-muted">No active quotes or bookings are linked to this email.</p> : null}
+          {view === "quotes" ? <><p className="client-portal-eyebrow">Your quotes</p><div className="client-portal-quote-links">{portal.quotes.map((item) => <button key={item.id} className={selectedQuoteId === item.id ? "active" : ""} onClick={() => { setSelectedQuoteId(item.id); setSelectedId(""); setQuestionnaire(null); }}><PackageCheck /><span><strong>{item.reference}</strong><small>{item.status.replace(/_/g, " ")} · {formatDate(item.eventDate)}</small></span>{item.status === "accepted" ? <CheckCircle2 /> : null}</button>)}</div></> : null}
+          {view === "questionnaires" ? <><p className="client-portal-eyebrow">Your questionnaires</p>{portal.jobs.map((job) => <section key={job.id} className="client-portal-job"><h2>{job.title}</h2><p><CalendarDays />{formatDate(job.eventDate)}</p><p>{job.venueText || "Venue TBC"}</p><div>{job.questionnaires.map((item) => <button key={item.id} className={selectedId === item.id ? "active" : ""} onClick={() => { setSelectedId(item.id); setSelectedQuoteId(""); setQuote(null); }}><FileText /><span>{item.title}<small>{item.status.replace(/_/g, " ")}</small></span>{item.status === "completed" ? <CheckCircle2 /> : null}</button>)}</div></section>)}</> : null}
         </aside>
         <main className="client-portal-main">
           {error ? <div className="client-portal-alert client-portal-alert--error">{error}</div> : null}
@@ -428,7 +487,8 @@ export function ClientPortal() {
             </article>
           )}
         </main>
-      </div>
+      </div>}
+      {portal.business?.footerText || portal.business?.contactEmail ? <footer className="client-portal-footer"><span>{portal.business?.footerText || `Need help? Contact ${portal.business?.name || "the business"}.`}</span>{portal.business?.contactEmail ? <a href={`mailto:${portal.business.contactEmail}`}>{portal.business.contactEmail}</a> : null}</footer> : null}
     </div>
   );
 }

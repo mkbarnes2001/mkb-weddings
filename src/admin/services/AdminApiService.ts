@@ -141,6 +141,12 @@ export type WorkspaceSettings = {
   instagram: string;
   logoUrl: string;
   accentColor: string;
+  portalBannerUrl: string;
+  portalSecondaryColor: string;
+  portalBackgroundColor: string;
+  portalWelcomeHeading: string;
+  portalWelcomeMessage: string;
+  portalFooterText: string;
   defaultCountry: string;
   timezone: string;
   currency: string;
@@ -1474,6 +1480,20 @@ export class AdminApiService {
       body: JSON.stringify({ workspace }),
     });
     return result.workspace;
+  }
+
+  static async uploadPortalAsset(kind: "logo" | "banner", file: File) {
+    const form = new FormData();
+    form.set("kind", kind);
+    form.set("file", file);
+    const response = await fetch(`${API_BASE}/api/workspace/portal-assets`, {
+      method: "POST",
+      credentials: "include",
+      body: form,
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result?.error || `Upload failed (${response.status}).`);
+    return result.asset as { kind: "logo" | "banner"; storageKey: string; url: string; filename: string };
   }
 
   static async health() {

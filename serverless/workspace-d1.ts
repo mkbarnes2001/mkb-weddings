@@ -6,6 +6,20 @@ function text(value: unknown) {
   return String(value ?? "").trim();
 }
 
+function json<T = Record<string, unknown>>(value: unknown, fallback: T): T {
+  try {
+    if (typeof value === "string") return JSON.parse(value) as T;
+    return (value ?? fallback) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function colour(value: unknown, fallback: string) {
+  const candidate = text(value);
+  return /^#[0-9a-f]{6}$/i.test(candidate) ? candidate : fallback;
+}
+
 function httpError(message: string, statusCode = 400, details: string[] = []) {
   const error = new Error(message) as Error & { statusCode?: number; details?: string[] };
   error.statusCode = statusCode;
@@ -14,6 +28,8 @@ function httpError(message: string, statusCode = 400, details: string[] = []) {
 }
 
 function hydrate(workspace: any, settings: any, domains: any[]) {
+  const document = json<any>(settings?.document_json, {});
+  const portal = document?.portal && typeof document.portal === "object" ? document.portal : {};
   return {
     id: text(workspace?.id),
     slug: text(workspace?.slug),
@@ -29,7 +45,13 @@ function hydrate(workspace: any, settings: any, domains: any[]) {
       phone: text(settings?.phone),
       instagram: text(settings?.instagram),
       logoUrl: text(settings?.logo_url),
-      accentColor: text(settings?.accent_color),
+      accentColor: colour(settings?.accent_color, "#111111"),
+      portalBannerUrl: text(portal.bannerUrl),
+      portalSecondaryColor: colour(portal.secondaryColor, "#f1efe9"),
+      portalBackgroundColor: colour(portal.backgroundColor, "#f7f6f3"),
+      portalWelcomeHeading: text(portal.welcomeHeading || "Welcome to your client portal"),
+      portalWelcomeMessage: text(portal.welcomeMessage || "Everything for your booking is organised here in one secure place."),
+      portalFooterText: text(portal.footerText),
       defaultCountry: text(settings?.default_country || "GB"),
       timezone: text(settings?.timezone || "Europe/London"),
       currency: text(settings?.currency || "GBP"),
@@ -66,6 +88,20 @@ export async function updateWorkspaceSettings(db: D1Db, incoming: any) {
 
   const settings = incoming?.settings || incoming || {};
   const name = text(incoming?.name) || existing.name;
+  const existingSettingsRow = await db.prepare(`SELECT document_json FROM workspace_settings WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first();
+  const document = json<any>(existingSettingsRow?.document_json, {});
+  const existingPortal = document?.portal && typeof document.portal === "object" ? document.portal : {};
+  const supplied = (key: string) => Object.prototype.hasOwnProperty.call(settings, key);
+  const portalDocument = {
+    ...existingPortal,
+    bannerUrl: supplied("portalBannerUrl") ? text(settings.portalBannerUrl) : text(existingPortal.bannerUrl),
+    secondaryColor: supplied("portalSecondaryColor") ? colour(settings.portalSecondaryColor, "#f1efe9") : colour(existingPortal.secondaryColor, "#f1efe9"),
+    backgroundColor: supplied("portalBackgroundColor") ? colour(settings.portalBackgroundColor, "#f7f6f3") : colour(existingPortal.backgroundColor, "#f7f6f3"),
+    welcomeHeading: supplied("portalWelcomeHeading") ? text(settings.portalWelcomeHeading || "Welcome to your client portal") : text(existingPortal.welcomeHeading || "Welcome to your client portal"),
+    welcomeMessage: supplied("portalWelcomeMessage") ? text(settings.portalWelcomeMessage || "Everything for your booking is organised here in one secure place.") : text(existingPortal.welcomeMessage || "Everything for your booking is organised here in one secure place."),
+    footerText: supplied("portalFooterText") ? text(settings.portalFooterText) : text(existingPortal.footerText),
+  };
+  const nextDocument = { ...document, portal: portalDocument };
   const websiteUrl = text(settings.websiteUrl);
   if (websiteUrl && !/^https?:\/\//i.test(websiteUrl)) {
     throw httpError("Workspace validation failed.", 400, ["Website URL must begin with http:// or https://."]);
@@ -82,7 +118,7 @@ export async function updateWorkspaceSettings(db: D1Db, incoming: any) {
       workspace_id, business_name, website_url, admin_hostname, public_hostname,
       contact_email, phone, instagram, logo_url, accent_color,
       default_country, timezone, currency, document_json, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '{}', CURRENT_TIMESTAMP)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     ON CONFLICT(workspace_id) DO UPDATE SET
       business_name = excluded.business_name,
       website_url = excluded.website_url,
@@ -96,6 +132,7 @@ export async function updateWorkspaceSettings(db: D1Db, incoming: any) {
       default_country = excluded.default_country,
       timezone = excluded.timezone,
       currency = excluded.currency,
+      document_json = excluded.document_json,
       updated_at = CURRENT_TIMESTAMP
   `).bind(
     workspaceId,
@@ -107,10 +144,11 @@ export async function updateWorkspaceSettings(db: D1Db, incoming: any) {
     text(settings.phone),
     text(settings.instagram).replace(/^@/, ""),
     text(settings.logoUrl),
-    text(settings.accentColor),
+    colour(settings.accentColor, existing.settings.accentColor || "#111111"),
     text(settings.defaultCountry) || "GB",
     text(settings.timezone) || "Europe/London",
     text(settings.currency) || "GBP",
+    JSON.stringify(nextDocument),
   ).run();
 
   return getWorkspace(db, workspaceId);

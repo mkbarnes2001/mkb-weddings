@@ -27,6 +27,7 @@ import { Collections } from "../pages/Collections";
 import { SEOCentre } from "../pages/SEOCentre";
 import { PlaceholderPage } from "../pages/PlaceholderPage";
 import { Settings } from "../pages/Settings";
+import { ClientPortalSettings } from "../pages/ClientPortalSettings";
 import { WedPlannedPlatform } from "../pages/WedPlannedPlatform";
 import { AssetLibrary } from "../pages/AssetLibrary";
 import { ClientGalleries } from "../pages/ClientGalleries";
@@ -128,6 +129,7 @@ export function AdminApp() {
             />
           }
         />
+        <Route path="settings/client-portal" element={<ClientPortalSettings />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>

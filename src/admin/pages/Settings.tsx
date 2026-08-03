@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AdminApiService, type WorkspaceRecord } from "../services/AdminApiService";
-import { AdminPage, AdminPageHeader } from "../components/ui/AdminUI";
+import { ExternalLink, Palette } from "lucide-react";
+import { AdminLinkButton, AdminPage, AdminPageHeader, AdminPanel } from "../components/ui/AdminUI";
 
 function Field({ label, value, onChange, placeholder = "" }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string }) {
   return (
@@ -60,6 +61,7 @@ export function Settings() {
         eyebrow="Commercial foundation"
         title="Workspace settings"
         description="Configure the operational workspace used by MKB. WedPlanned business identity, categories, team and commercial access are managed in the dedicated platform area."
+        actions={<AdminLinkButton href="/admin/settings/client-portal" variant="primary" icon={Palette}>Client portal branding</AdminLinkButton>}
       />
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1.3fr_0.7fr]">
@@ -116,6 +118,15 @@ export function Settings() {
           </div>
         </div>
       </section>
+
+      <AdminPanel
+        title="Client portal branding"
+        description="Upload your logo and banner, choose workspace colours and preview the secure experience your clients receive."
+        icon={Palette}
+        actions={<AdminLinkButton href="/admin/settings/client-portal" variant="secondary" icon={ExternalLink}>Configure portal</AdminLinkButton>}
+      >
+        <p className="text-sm leading-6 text-neutral-600">Branding belongs to this workspace, so every WedPlanned business can provide its own client-facing identity without exposing another business&apos;s assets or settings.</p>
+      </AdminPanel>
 
       <section className="rounded-[28px] border border-black/10 bg-white/75 p-7">
         <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Migration strategy</p>
