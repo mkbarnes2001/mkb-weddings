@@ -2,6 +2,8 @@ import { getDefaultWorkspaceId } from "./workspace-d1";
 
 type D1Db = any;
 
+export const DEFAULT_CLIENT_PORTAL_ORIGIN = "https://mkb-weddings.pages.dev";
+
 function text(value: unknown) {
   return String(value ?? "").trim();
 }
@@ -61,6 +63,30 @@ export async function resolvePublicWorkspaceId(db: D1Db, request: Request) {
   }
 
   return getDefaultWorkspaceId(db);
+}
+
+
+/**
+ * Resolve a client portal workspace from the explicit public workspace slug.
+ * This allows every tenant to use the shared platform portal before adding an
+ * optional custom public domain. The selected workspace still has to be active,
+ * and all client data access remains protected by the authenticated identity's
+ * workspace ID.
+ */
+export async function resolveClientPortalWorkspaceId(db: D1Db, request: Request) {
+  const url = new URL(request.url);
+  const workspaceKey = text(url.searchParams.get("workspace"));
+  if (workspaceKey) {
+    const row = await db.prepare(`
+      SELECT id
+      FROM workspaces
+      WHERE status = 'active'
+        AND (lower(slug) = lower(?) OR id = ?)
+      LIMIT 1
+    `).bind(workspaceKey, workspaceKey).first();
+    return text(row?.id);
+  }
+  return resolvePublicWorkspaceId(db, request);
 }
 
 /**

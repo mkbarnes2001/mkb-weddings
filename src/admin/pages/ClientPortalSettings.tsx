@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties, ChangeEvent } from "react";
 import { ExternalLink, Image, Monitor, Save, Smartphone, Upload } from "lucide-react";
 import { AdminApiService, type WorkspaceRecord } from "../services/AdminApiService";
-import { AdminButton, AdminField, AdminPage, AdminPageHeader, AdminPanel, AdminStatus, AdminTabs, AdminTab } from "../components/ui/AdminUI";
+import { AdminButton, AdminField, AdminLinkButton, AdminPage, AdminPageHeader, AdminPanel, AdminStatus, AdminTabs, AdminTab } from "../components/ui/AdminUI";
 
 type PreviewMode = "desktop" | "mobile";
 
@@ -21,9 +21,14 @@ function contrastColour(hex: string) {
   return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? "#171717" : "#ffffff";
 }
 
+const PLATFORM_PORTAL_ORIGIN = "https://mkb-weddings.pages.dev";
+
 function portalUrl(workspace: WorkspaceRecord) {
   const hostname = workspace.settings.publicHostname || workspace.domains.find((item) => item.purpose === "public" && item.verified)?.hostname;
-  return hostname ? `https://${hostname}/client-portal` : "/client-portal";
+  const origin = hostname ? `https://${hostname.replace(/^https?:\/\//, "").replace(/\/$/, "")}` : PLATFORM_PORTAL_ORIGIN;
+  const url = new URL("/client-portal", origin);
+  url.searchParams.set("workspace", workspace.slug || workspace.id);
+  return url.toString();
 }
 
 function TextField({ label, value, onChange, help, multiline = false }: { label: string; value: string; onChange: (value: string) => void; help?: string; multiline?: boolean }) {
@@ -120,7 +125,7 @@ export function ClientPortalSettings() {
         eyebrow="Client experience"
         title="Client portal"
         description="Brand the secure workspace your clients use for quotes, questionnaires and booking activity. These settings are isolated to the active business workspace."
-        actions={<><AdminButton variant="secondary" icon={ExternalLink} onClick={() => window.open(openUrl, "_blank", "noopener,noreferrer")}>Open portal</AdminButton><AdminButton variant="primary" icon={Save} onClick={() => void save()} disabled={saving || Boolean(uploading)}>{saving ? "Saving…" : "Save branding"}</AdminButton></>}
+        actions={<><AdminLinkButton href={openUrl} target="_blank" rel="noreferrer" variant="secondary" icon={ExternalLink}>Open portal</AdminLinkButton><AdminButton variant="primary" icon={Save} onClick={() => void save()} disabled={saving || Boolean(uploading)}>{saving ? "Saving…" : "Save branding"}</AdminButton></>}
         meta={<AdminStatus tone="success">Workspace branded</AdminStatus>}
       />
 

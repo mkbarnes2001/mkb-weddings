@@ -1,11 +1,11 @@
 import { deleteQuestionnaireFile, getQuestionnaireFileForClient } from "../../../../../../../serverless/client-portal-d1";
-import { resolvePublicWorkspaceId } from "../../../../../../../serverless/tenant-context";
+import { resolveClientPortalWorkspaceId } from "../../../../../../../serverless/tenant-context";
 
 type Env = { MKB_DB: D1Database; MKB_PRIVATE_ASSETS: R2Bucket };
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
-    const workspaceId = await resolvePublicWorkspaceId(context.env.MKB_DB, context.request);
+    const workspaceId = await resolveClientPortalWorkspaceId(context.env.MKB_DB, context.request);
     const { object, row } = await getQuestionnaireFileForClient(context.env.MKB_DB, context.env.MKB_PRIVATE_ASSETS, context.request, workspaceId, String(context.params.id || ""), String(context.params.fileId || ""));
     const headers = new Headers();
     object.writeHttpMetadata(headers);
@@ -20,7 +20,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
   try {
-    const workspaceId = await resolvePublicWorkspaceId(context.env.MKB_DB, context.request);
+    const workspaceId = await resolveClientPortalWorkspaceId(context.env.MKB_DB, context.request);
     const result = await deleteQuestionnaireFile(context.env.MKB_DB, context.env.MKB_PRIVATE_ASSETS, context.request, workspaceId, String(context.params.id || ""), String(context.params.fileId || ""));
     return Response.json(result, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error: any) {

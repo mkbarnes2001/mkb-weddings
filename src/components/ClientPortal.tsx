@@ -116,6 +116,13 @@ function formatBytes(value: number) {
   return `${(value / 1024 / 1024).toFixed(1)} MB`;
 }
 
+function portalApiPath(path: string) {
+  const url = new URL(path, window.location.origin);
+  const workspace = new URLSearchParams(window.location.search).get("workspace");
+  if (workspace) url.searchParams.set("workspace", workspace);
+  return `${url.pathname}${url.search}`;
+}
+
 async function jsonRequest<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(path, { credentials: "include", ...options, headers: { "Content-Type": "application/json", ...(options?.headers || {}) } });
   const body = await response.json().catch(() => ({}));
@@ -231,7 +238,7 @@ export function ClientPortal() {
     setLoading(true);
     setError("");
     try {
-      const result = await jsonRequest<{ ok: true; portal: PortalPayload }>("/api/public/client-portal");
+      const result = await jsonRequest<{ ok: true; portal: PortalPayload }>(portalApiPath("/api/public/client-portal"));
       setPortal(result.portal);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Unable to load client portal.");
@@ -246,7 +253,7 @@ export function ClientPortal() {
     if (!selectedId || !portal?.authenticated) { setQuestionnaire(null); setSupplierDirectory([]); return; }
     setSaving(true);
     setError("");
-    jsonRequest<{ ok: true; questionnaire: PortalQuestionnaire; suppliers?: SupplierDirectoryOption[] }>(`/api/public/client-portal/questionnaires/${encodeURIComponent(selectedId)}`)
+    jsonRequest<{ ok: true; questionnaire: PortalQuestionnaire; suppliers?: SupplierDirectoryOption[] }>(portalApiPath(`/api/public/client-portal/questionnaires/${encodeURIComponent(selectedId)}`))
       .then((result) => { setQuestionnaire(result.questionnaire); setResponses(result.questionnaire.responses || {}); setSupplierDirectory(result.suppliers || []); })
       .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load questionnaire."))
       .finally(() => setSaving(false));
@@ -255,7 +262,7 @@ export function ClientPortal() {
   useEffect(() => {
     if (!selectedQuoteId || !portal?.authenticated) { setQuote(null); return; }
     setSaving(true); setError("");
-    jsonRequest<{ ok: true; quote: PortalQuote }>(`/api/public/client-portal/quotes/${encodeURIComponent(selectedQuoteId)}`)
+    jsonRequest<{ ok: true; quote: PortalQuote }>(portalApiPath(`/api/public/client-portal/quotes/${encodeURIComponent(selectedQuoteId)}`))
       .then((result) => {
         setQuote(result.quote);
         const accepted = result.quote.acceptance;
@@ -278,7 +285,7 @@ export function ClientPortal() {
 
   async function refreshQuestionnaire() {
     if (!questionnaire) return;
-    const refreshed = await jsonRequest<{ ok: true; questionnaire: PortalQuestionnaire; suppliers?: SupplierDirectoryOption[] }>(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}`);
+    const refreshed = await jsonRequest<{ ok: true; questionnaire: PortalQuestionnaire; suppliers?: SupplierDirectoryOption[] }>(portalApiPath(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}`));
     setQuestionnaire(refreshed.questionnaire);
     setResponses(refreshed.questionnaire.responses || {});
     setSupplierDirectory(refreshed.suppliers || supplierDirectory);
@@ -287,7 +294,7 @@ export function ClientPortal() {
   async function requestLink() {
     setSaving(true); setError(""); setMessage("");
     try {
-      const result = await jsonRequest<{ ok: true; message: string }>("/api/public/client-portal/request-link", { method: "POST", body: JSON.stringify({ email }) });
+      const result = await jsonRequest<{ ok: true; message: string }>(portalApiPath("/api/public/client-portal/request-link"), { method: "POST", body: JSON.stringify({ email }) });
       setMessage(result.message);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Unable to send sign-in link.");
@@ -298,7 +305,7 @@ export function ClientPortal() {
     if (!questionnaire) return;
     setSaving(true); setError(""); setMessage("");
     try {
-      const result = await jsonRequest<{ ok: true; questionnaire: PortalQuestionnaire }>(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}`, { method: "PUT", body: JSON.stringify({ responses, submit }) });
+      const result = await jsonRequest<{ ok: true; questionnaire: PortalQuestionnaire }>(portalApiPath(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}`), { method: "PUT", body: JSON.stringify({ responses, submit }) });
       setQuestionnaire(result.questionnaire);
       setResponses(result.questionnaire.responses || {});
       setMessage(submit ? "Questionnaire submitted. Thank you." : "Progress saved. You can safely return later.");
@@ -315,7 +322,7 @@ export function ClientPortal() {
       const form = new FormData();
       form.set("fieldKey", fieldKey);
       form.set("file", file);
-      const response = await fetch(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}/files`, { method: "POST", credentials: "include", body: form });
+      const response = await fetch(portalApiPath(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}/files`), { method: "POST", credentials: "include", body: form });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body?.error || "Unable to upload file.");
       await refreshQuestionnaire();
@@ -329,7 +336,7 @@ export function ClientPortal() {
     if (!questionnaire || !window.confirm("Remove this file?")) return;
     setSaving(true); setError("");
     try {
-      await jsonRequest(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}/files/${encodeURIComponent(fileId)}`, { method: "DELETE" });
+      await jsonRequest(portalApiPath(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}/files/${encodeURIComponent(fileId)}`), { method: "DELETE" });
       await refreshQuestionnaire();
       setMessage("File removed.");
     } catch (removeError) {
@@ -349,11 +356,11 @@ export function ClientPortal() {
     setSaving(true); setError(""); setMessage("");
     try {
       const addons = Object.entries(addonQuantities).map(([id, quantity]) => ({ id, quantity }));
-      const result = await jsonRequest<{ ok: true; conversion: { jobReference: string } }>(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}/accept`, { method: "POST", body: JSON.stringify({ optionId: selectedOptionId, addons, confirmed: true }) });
+      const result = await jsonRequest<{ ok: true; conversion: { jobReference: string } }>(portalApiPath(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}/accept`), { method: "POST", body: JSON.stringify({ optionId: selectedOptionId, addons, confirmed: true }) });
       setMessage(`Quote accepted. Your booking ${result.conversion.jobReference} is now active.`);
       setSelectedQuoteId(quote.id);
       await loadPortal();
-      const refreshed = await jsonRequest<{ ok: true; quote: PortalQuote }>(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}`);
+      const refreshed = await jsonRequest<{ ok: true; quote: PortalQuote }>(portalApiPath(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}`));
       setQuote(refreshed.quote);
     } catch (acceptError) { setError(acceptError instanceof Error ? acceptError.message : "Unable to accept quote."); }
     finally { setSaving(false); }
@@ -363,7 +370,7 @@ export function ClientPortal() {
     if (!quote || !window.confirm("Decline this quote? The business will be notified.")) return;
     const reason = window.prompt("Optional reason for declining:", "") || "";
     setSaving(true); setError(""); setMessage("");
-    try { await jsonRequest(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}/decline`, { method: "POST", body: JSON.stringify({ reason }) }); setMessage("Quote declined. The business has been notified."); await loadPortal(); setQuote({ ...quote, status: "declined", currentVersion: { ...quote.currentVersion, status: "declined" } }); }
+    try { await jsonRequest(portalApiPath(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}/decline`), { method: "POST", body: JSON.stringify({ reason }) }); setMessage("Quote declined. The business has been notified."); await loadPortal(); setQuote({ ...quote, status: "declined", currentVersion: { ...quote.currentVersion, status: "declined" } }); }
     catch (declineError) { setError(declineError instanceof Error ? declineError.message : "Unable to decline quote."); }
     finally { setSaving(false); }
   }
@@ -480,7 +487,7 @@ export function ClientPortal() {
                   const value = responses[field.id];
                   const files = questionnaire.files.filter((file) => file.fieldKey === field.id);
                   if (field.type === "supplier") return <div key={field.id} className="portal-question-field"><span>{field.label}{field.required ? <b> *</b> : null}</span>{field.help ? <small>{field.help}</small> : null}<SupplierQuestion field={field} value={value} suppliers={supplierDirectory} disabled={questionnaire.status === "completed"} onChange={(next) => setResponses((current) => ({ ...current, [field.id]: next }))} /></div>;
-                  return <label key={field.id} className="portal-question-field"><span>{field.label}{field.required ? <b> *</b> : null}</span>{field.help ? <small>{field.help}</small> : null}{field.type === "short_text" ? <input value={String(value ?? "")} disabled={questionnaire.status === "completed"} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))} /> : null}{field.type === "long_text" ? <textarea value={String(value ?? "")} disabled={questionnaire.status === "completed"} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))} /> : null}{field.type === "select" ? <select value={String(value ?? "")} disabled={questionnaire.status === "completed"} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))}><option value="">Choose an option</option>{field.options.map((option) => <option key={option}>{option}</option>)}</select> : null}{field.type === "radio" ? <div className="portal-choice-list">{field.options.map((option) => <label key={option}><input type="radio" name={field.id} checked={value === option} disabled={questionnaire.status === "completed"} onChange={() => setResponses((current) => ({ ...current, [field.id]: option }))} />{option}</label>)}</div> : null}{field.type === "checkbox" ? <div className="portal-choice-list">{field.options.map((option) => { const selected = Array.isArray(value) ? value as string[] : []; return <label key={option}><input type="checkbox" checked={selected.includes(option)} disabled={questionnaire.status === "completed"} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.checked ? [...selected, option] : selected.filter((item) => item !== option) }))} />{option}</label>; })}</div> : null}{field.type === "file" ? <div className="portal-file-field"><input type="file" disabled={saving || questionnaire.status === "completed"} onChange={(event) => { const file = event.target.files?.[0]; void upload(field.id, file); event.currentTarget.value = ""; }} /><div className="portal-file-list">{files.map((file) => <div key={file.id}><Paperclip /><a href={`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}/files/${encodeURIComponent(file.id)}`} target="_blank" rel="noreferrer"><span>{file.filename}</span><small>{formatBytes(file.fileSize)}</small></a>{questionnaire.status !== "completed" ? <button type="button" onClick={() => void removeFile(file.id)}><Trash2 /></button> : <Download />}</div>)}</div></div> : null}</label>;
+                  return <label key={field.id} className="portal-question-field"><span>{field.label}{field.required ? <b> *</b> : null}</span>{field.help ? <small>{field.help}</small> : null}{field.type === "short_text" ? <input value={String(value ?? "")} disabled={questionnaire.status === "completed"} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))} /> : null}{field.type === "long_text" ? <textarea value={String(value ?? "")} disabled={questionnaire.status === "completed"} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))} /> : null}{field.type === "select" ? <select value={String(value ?? "")} disabled={questionnaire.status === "completed"} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))}><option value="">Choose an option</option>{field.options.map((option) => <option key={option}>{option}</option>)}</select> : null}{field.type === "radio" ? <div className="portal-choice-list">{field.options.map((option) => <label key={option}><input type="radio" name={field.id} checked={value === option} disabled={questionnaire.status === "completed"} onChange={() => setResponses((current) => ({ ...current, [field.id]: option }))} />{option}</label>)}</div> : null}{field.type === "checkbox" ? <div className="portal-choice-list">{field.options.map((option) => { const selected = Array.isArray(value) ? value as string[] : []; return <label key={option}><input type="checkbox" checked={selected.includes(option)} disabled={questionnaire.status === "completed"} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.checked ? [...selected, option] : selected.filter((item) => item !== option) }))} />{option}</label>; })}</div> : null}{field.type === "file" ? <div className="portal-file-field"><input type="file" disabled={saving || questionnaire.status === "completed"} onChange={(event) => { const file = event.target.files?.[0]; void upload(field.id, file); event.currentTarget.value = ""; }} /><div className="portal-file-list">{files.map((file) => <div key={file.id}><Paperclip /><a href={portalApiPath(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}/files/${encodeURIComponent(file.id)}`)} target="_blank" rel="noreferrer"><span>{file.filename}</span><small>{formatBytes(file.fileSize)}</small></a>{questionnaire.status !== "completed" ? <button type="button" onClick={() => void removeFile(file.id)}><Trash2 /></button> : <Download />}</div>)}</div></div> : null}</label>;
                 })}
               </div>
               <footer className="portal-questionnaire-actions">{questionnaire.status === "completed" ? <div className="client-portal-complete"><CheckCircle2 /><span>Submitted {questionnaire.completedAt ? new Date(questionnaire.completedAt).toLocaleString("en-GB") : ""}</span></div> : <><button className="secondary" disabled={saving} onClick={() => void save(false)}><Save />Save progress</button><button disabled={saving} onClick={() => void save(true)}><Send />Submit questionnaire</button></>}</footer>

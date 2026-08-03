@@ -112,9 +112,9 @@ def main() -> None:
         "AND contact_id = ?",
     ]:
         assert needle in portal_source or needle in public_files, f"missing portal guard: {needle}"
-    assert "resolvePublicWorkspaceId" in public_index
-    assert "resolvePublicWorkspaceId" in public_request
-    assert "resolvePublicWorkspaceId" in public_questionnaire
+    assert "resolveClientPortalWorkspaceId" in public_index
+    assert "resolveClientPortalWorkspaceId" in public_request
+    assert "resolveClientPortalWorkspaceId" in public_questionnaire
     assert "requireProfessionalContext" in admin_route
     assert 'path="crm/jobs/:id"' in admin_app
     assert 'path="crm/questionnaires/:id"' in admin_app

@@ -1,5 +1,6 @@
 import { getAuthenticatedClientIdentity } from "./client-auth-d1";
 import { acceptEnquiry } from "./crm-d1";
+import { DEFAULT_CLIENT_PORTAL_ORIGIN } from "./tenant-context";
 
 type D1Db = any;
 
@@ -447,8 +448,8 @@ export async function reviseQuote(db: D1Db, actor: QuoteActor, quoteId: string) 
 async function portalOrigin(db: D1Db, workspaceId: string) {
   const domain = await db.prepare(`SELECT hostname FROM workspace_domains WHERE workspace_id = ? AND purpose = 'public' AND verified = 1 ORDER BY created_at DESC LIMIT 1`).bind(workspaceId).first();
   const hostname = lower(domain?.hostname).replace(/^https?:\/\//, "").replace(/\/$/, "");
-  if (!hostname || hostname.includes("admin")) throw httpError("Add and verify a public workspace domain before sending quote invitations.", 409);
-  return `https://${hostname}`;
+  if (hostname && !hostname.includes("admin")) return `https://${hostname}`;
+  return DEFAULT_CLIENT_PORTAL_ORIGIN;
 }
 async function ensureIdentity(db: D1Db, workspaceId: string, contact: any) {
   const email = lower(contact.email);
@@ -466,7 +467,9 @@ async function createInvitation(db: D1Db, workspaceId: string, quote: any, versi
   const rawToken = randomToken(32);
   const tokenHash = await sha256(rawToken);
   const expiresAt = new Date(Date.now() + INVITATION_TTL_MS).toISOString();
-  const returnPath = `/client-portal?quote=${encodeURIComponent(text(quote.id))}`;
+  const workspace = await db.prepare(`SELECT slug FROM workspaces WHERE id = ? LIMIT 1`).bind(workspaceId).first();
+  const query = new URLSearchParams({ workspace: text(workspace?.slug) || workspaceId, quote: text(quote.id) });
+  const returnPath = `/client-portal?${query.toString()}`;
   const invitationId = `crm_quote_invitation_${crypto.randomUUID()}`;
   await db.batch([
     db.prepare(`UPDATE crm_quote_invitations SET consumed_at = COALESCE(consumed_at, CURRENT_TIMESTAMP) WHERE workspace_id = ? AND quote_id = ? AND consumed_at IS NULL`).bind(workspaceId, quote.id),

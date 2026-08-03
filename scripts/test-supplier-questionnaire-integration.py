@@ -85,7 +85,7 @@ def main() -> None:
         "linkSupplierToWedding",
         "approveSupplierSubmission",
         "rejectSupplierSubmission",
-        "Add and verify a public workspace domain before sending client portal invitations.",
+        "DEFAULT_CLIENT_PORTAL_ORIGIN",
         "purpose = 'public' AND verified = 1",
     ]:
         assert needle in portal, f"missing supplier/portal guard: {needle}"

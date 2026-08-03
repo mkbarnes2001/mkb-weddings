@@ -1,4 +1,5 @@
 import { getAuthenticatedClientIdentity } from "./client-auth-d1";
+import { DEFAULT_CLIENT_PORTAL_ORIGIN } from "./tenant-context";
 import { createMasterSupplier, getMasterSupplier, listMasterSuppliers } from "./supplier-d1";
 import { getJobWorkflowWorkspace } from "./crm-workflow-d1";
 import { getPublicQuotesForIdentity, requestQuotePortalMagicLink, verifyQuotePortalMagicLink } from "./crm-quotes-d1";
@@ -699,7 +700,7 @@ async function portalOrigin(db: D1Db, workspaceId: string, _fallback: string) {
     ORDER BY created_at DESC LIMIT 1
   `).bind(workspaceId).first();
   if (text(domain?.hostname)) return `https://${text(domain.hostname)}`;
-  throw httpError("Add and verify a public workspace domain before sending client portal invitations.", 409);
+  return DEFAULT_CLIENT_PORTAL_ORIGIN;
 }
 
 async function createPortalInvitation(db: D1Db, workspaceId: string, job: any, contact: any, identity: any, createdByUserId: string, origin: string) {
@@ -708,7 +709,9 @@ async function createPortalInvitation(db: D1Db, workspaceId: string, job: any, c
   const invitationId = `crm_portal_invitation_${crypto.randomUUID()}`;
   const expiresAt = new Date(Date.now() + PORTAL_LINK_TTL_MS).toISOString();
   const jobId = text(job.id || job.job_id);
-  const returnPath = `/client-portal?job=${encodeURIComponent(jobId)}`;
+  const workspace = await db.prepare(`SELECT slug FROM workspaces WHERE id = ? LIMIT 1`).bind(workspaceId).first();
+  const query = new URLSearchParams({ workspace: text(workspace?.slug) || workspaceId, job: jobId });
+  const returnPath = `/client-portal?${query.toString()}`;
   await db.prepare(`
     INSERT INTO crm_portal_invitations (
       id, workspace_id, job_id, contact_id, identity_id, email,

@@ -1,5 +1,5 @@
 import { requestPortalMagicLink } from "../../../../serverless/client-portal-d1";
-import { resolvePublicWorkspaceId } from "../../../../serverless/tenant-context";
+import { resolveClientPortalWorkspaceId } from "../../../../serverless/tenant-context";
 
 type Env = {
   MKB_DB: D1Database;
@@ -14,7 +14,7 @@ type Env = {
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const body: any = await context.request.json().catch(() => ({}));
-    const workspaceId = await resolvePublicWorkspaceId(context.env.MKB_DB, context.request);
+    const workspaceId = await resolveClientPortalWorkspaceId(context.env.MKB_DB, context.request);
     const result = await requestPortalMagicLink(context.env.MKB_DB, context.env, workspaceId, context.request.url, body?.email);
     return Response.json(result, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error: any) {

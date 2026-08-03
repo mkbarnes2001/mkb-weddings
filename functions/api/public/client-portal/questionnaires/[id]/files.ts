@@ -1,11 +1,11 @@
 import { uploadQuestionnaireFile } from "../../../../../../serverless/client-portal-d1";
-import { resolvePublicWorkspaceId } from "../../../../../../serverless/tenant-context";
+import { resolveClientPortalWorkspaceId } from "../../../../../../serverless/tenant-context";
 
 type Env = { MKB_DB: D1Database; MKB_PRIVATE_ASSETS: R2Bucket };
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
-    const workspaceId = await resolvePublicWorkspaceId(context.env.MKB_DB, context.request);
+    const workspaceId = await resolveClientPortalWorkspaceId(context.env.MKB_DB, context.request);
     const form = await context.request.formData();
     const file = form.get("file");
     const fieldKey = String(form.get("fieldKey") || "").trim();
