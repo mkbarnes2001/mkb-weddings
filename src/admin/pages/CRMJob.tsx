@@ -63,15 +63,22 @@ function answerLabel(value: unknown, field?: QuestionnaireField) {
   return String(value ?? "Not answered");
 }
 
+function portalState(workspace: CrmJobWorkspace) {
+  const activeAccess = workspace.portalAccess.filter((item) => item.status === "active");
+  if (activeAccess.some((item) => Boolean(item.acceptedAt))) return { status: "active", label: "active" };
+  if (activeAccess.length) return { status: "invited", label: "invited" };
+  return { status: "not_invited", label: "not invited" };
+}
+
 function workflowState(workspace: CrmJobWorkspace) {
-  const portalActive = workspace.portalAccess.some((item) => item.status === "active");
+  const portal = portalState(workspace);
   const completed = workspace.questionnaires.filter((item) => item.status === "completed").length;
   const total = workspace.questionnaires.length;
   const weddingPassed = workspace.job.eventDate ? new Date(`${workspace.job.eventDate}T23:59:59`).getTime() < Date.now() : false;
   return [
     { label: "Lead created", detail: workspace.enquiry?.reference || workspace.job.enquiryId || "Manual Job", complete: true },
     { label: "Job accepted", detail: dateLabel(workspace.job.bookingDate || workspace.job.createdAt), complete: true },
-    { label: "Client portal", detail: portalActive ? "Access active" : "Not invited", complete: portalActive },
+    { label: "Client portal", detail: portal.status === "active" ? "Access active" : portal.status === "invited" ? "Invitation sent" : "Not invited", complete: portal.status === "active" },
     { label: "Questionnaires", detail: total ? `${completed} of ${total} completed` : "None assigned", complete: total > 0 && completed === total },
     { label: "Wedding day", detail: dateLabel(workspace.job.eventDate), complete: weddingPassed },
   ];
@@ -233,6 +240,7 @@ export function CRMJob() {
   const packageSnapshot = (job.packageSnapshot || {}) as any;
   const selectedAddons = Array.isArray(job.addonsSnapshot) ? job.addonsSnapshot as any[] : [];
   const nextTask = workspace.tasks.find((task) => task.status === "pending");
+  const portal = portalState(workspace);
 
   return (
     <AdminPage className="crm-job-operations-page">
@@ -240,7 +248,7 @@ export function CRMJob() {
         eyebrow={<Link to="/admin/crm?view=jobs" className="admin-inline-link inline-flex items-center gap-1"><ArrowLeft size={13} />Jobs overview</Link>}
         title={job.title}
         description={`${job.reference} · ${job.serviceName || job.jobType || "Wedding service"}`}
-        meta={<div className="flex flex-wrap gap-2"><AdminStatus tone={statusTone(job.status)}>{job.status}</AdminStatus><AdminStatus tone={job.clientPortalStatus === "active" ? "success" : job.clientPortalStatus === "invited" ? "warning" : "neutral"}>portal {job.clientPortalStatus.replace(/_/g, " ")}</AdminStatus><AdminStatus tone="info">{dateLabel(job.eventDate)}</AdminStatus></div>}
+        meta={<div className="flex flex-wrap gap-2"><AdminStatus tone={statusTone(job.status)}>{job.status}</AdminStatus><AdminStatus tone={portal.status === "active" ? "success" : portal.status === "invited" ? "warning" : "neutral"}>portal {portal.label}</AdminStatus><AdminStatus tone="info">{dateLabel(job.eventDate)}</AdminStatus></div>}
         actions={<div className="flex flex-wrap gap-2">{job.quoteId ? <Link className="admin-button admin-button--secondary admin-button--md" to={`/admin/crm/quotes/${job.quoteId}`}><PackageCheck className="admin-button__icon" />Open quote</Link> : null}{job.weddingSlug ? <Link className="admin-button admin-button--primary admin-button--md" to={`/admin/weddings/${job.weddingSlug}/workspace`}><ExternalLink className="admin-button__icon" />Open Wedding</Link> : null}</div>}
       />
       {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
@@ -258,7 +266,7 @@ export function CRMJob() {
             <div><dt>Package</dt><dd><PackageCheck />{job.packageName || "Not set"}</dd></div>
             <div><dt>Booking value</dt><dd><BriefcaseBusiness />{money(job.valueAmount, job.currency)}</dd></div>
             <div><dt>Next task</dt><dd><Clock3 />{nextTask?.title || job.nextTaskTitle || "No pending task"}</dd></div>
-            <div><dt>Portal</dt><dd><LockKeyhole />{job.clientPortalStatus.replace(/_/g, " ")}</dd></div>
+            <div><dt>Portal</dt><dd><LockKeyhole />{portal.label}</dd></div>
           </dl>
           <div className="crm-job-overview__progress">
             {workflow.map((step, index) => <div key={step.label} className={step.complete ? "complete" : ""}><span>{step.complete ? <Check /> : index + 1}</span><div><strong>{step.label}</strong><small>{step.detail}</small></div></div>)}

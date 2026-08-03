@@ -11,6 +11,7 @@ def main() -> None:
     layout = (ROOT / "src/admin/layouts/AdminLayout.tsx").read_text()
     ui = (ROOT / "src/admin/components/ui/AdminUI.tsx").read_text()
     css = (ROOT / "src/admin/admin-theme.css").read_text()
+    portal_service = (ROOT / "serverless/client-portal-d1.ts").read_text()
     schema = (ROOT / "d1/schema.sql").read_text()
 
     # CRM overview: list-first leads/jobs, visible filtering and real schedule data.
@@ -39,6 +40,9 @@ def main() -> None:
         assert section in job, section
     assert 'crm-job-overview__facts' in job
     assert 'job.nextTaskTitle' in job
+    assert 'function portalState(workspace: CrmJobWorkspace)' in job
+    assert 'portal.status === "active"' in job
+    assert 'job.clientPortalStatus.replace' not in job
     assert 'title="Invoices"' not in job
     assert 'title="Contracts"' not in job
     assert 'title="Payments"' not in job
@@ -51,6 +55,11 @@ def main() -> None:
     assert 'label: "Schedule"' in layout
     assert 'className="admin-mobile-more"' in layout
     assert 'navItems.map' in layout
+
+    # Portal status is derived from actual access and recalculated after revocation.
+    assert 'accepted_count' in portal_service
+    assert 'nextPortalStatus' in portal_service
+    assert 'client_portal_status = ?' in portal_service
 
     # Responsive CSS supports both desktop operational rows and mobile fixed navigation.
     for selector in [

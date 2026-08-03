@@ -841,6 +841,19 @@ export async function revokeJobClientAccess(db: D1Db, actor: PortalActor, jobId:
     WHERE job_id = ? AND workspace_id = ? AND identity_id = ? AND status = 'active'
   `).bind(jobId, actor.workspaceId, identityId).run();
   if (!result.meta?.changes) throw httpError("Active client portal access not found.", 404);
+  const remainingAccess = await db.prepare(`
+    SELECT COUNT(*) AS active_count,
+           SUM(CASE WHEN accepted_at IS NOT NULL THEN 1 ELSE 0 END) AS accepted_count
+    FROM crm_job_client_access
+    WHERE job_id = ? AND workspace_id = ? AND status = 'active'
+  `).bind(jobId, actor.workspaceId).first();
+  const nextPortalStatus = Number(remainingAccess?.accepted_count || 0) > 0
+    ? "active"
+    : Number(remainingAccess?.active_count || 0) > 0
+      ? "invited"
+      : "not_invited";
+  await db.prepare(`UPDATE crm_jobs SET client_portal_status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`)
+    .bind(nextPortalStatus, jobId, actor.workspaceId).run();
   await recordJobActivity(db, actor, actor.workspaceId, jobId, "portal.revoked", "Revoked client portal access.", { identityId });
   return getCrmJobWorkspace(db, actor, jobId);
 }
