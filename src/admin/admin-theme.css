@@ -2399,3 +2399,67 @@
   .portal-branding-upload__preview { min-height: 120px; }
   .portal-branding-device { padding: 8px; }
 }
+
+/* v1.9.5a — platform modules and navigation */
+.admin-sidebar-brand { display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 10px; }
+.admin-sidebar-brand:hover { background: rgba(255,255,255,.05); }
+.admin-sidebar-brand img { width: 44px; height: 44px; object-fit: contain; opacity: .95; filter: brightness(0) invert(1); }
+.admin-sidebar-section-label { margin: 0 0 7px; color: rgba(255,255,255,.38); font-size: 8px; font-weight: 650; letter-spacing: .14em; text-transform: uppercase; }
+.admin-module-switcher { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+.admin-module-link { display: flex; min-width: 0; min-height: 42px; align-items: center; gap: 7px; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; background: rgba(255,255,255,.035); color: rgba(255,255,255,.62); padding: 8px; font-size: 8.5px; line-height: 1.15; text-decoration: none; }
+.admin-module-link:hover { border-color: rgba(255,255,255,.17); background: rgba(255,255,255,.08); color: #fff; }
+.admin-module-link--active { border-color: rgba(255,255,255,.24); background: #fff; color: #111; box-shadow: 0 6px 16px rgba(0,0,0,.18); }
+.admin-module-link svg { width: 14px; height: 14px; flex: 0 0 14px; }
+.admin-module-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-module-navigation__header { display: grid; grid-template-columns: 28px minmax(0,1fr); align-items: center; gap: 9px; border-bottom: 1px solid rgba(255,255,255,.08); padding: 2px 4px 11px; }
+.admin-module-navigation__header > svg { width: 16px; height: 16px; color: rgba(255,255,255,.72); }
+.admin-module-navigation__header strong { display: block; color: #fff; font-size: 10.5px; }
+.admin-module-navigation__header span { display: block; margin-top: 2px; color: rgba(255,255,255,.36); font-size: 7.7px; line-height: 1.35; }
+.admin-context-bar { display: flex; min-width: 0; align-items: center; gap: 7px; margin: 0 0 10px; color: var(--admin-muted); font-size: 9px; }
+.admin-context-bar a { display: inline-flex; min-width: 0; align-items: center; gap: 6px; color: #333; font-weight: 650; text-decoration: none; }
+.admin-context-bar a:hover { color: #000; }
+.admin-context-bar a svg { width: 12px; height: 12px; }
+.admin-context-bar > svg { width: 11px; height: 11px; color: #aaa; }
+.admin-context-bar > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-module-metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 9px; }
+.admin-module-metric { min-width: 0; border: 1px solid var(--admin-border); border-radius: 12px; background: rgba(255,255,255,.88); padding: 14px 15px; box-shadow: var(--admin-shadow); }
+.admin-module-metric strong { display: block; overflow: hidden; color: var(--admin-text); font-size: 22px; font-weight: 650; letter-spacing: -.04em; text-overflow: ellipsis; white-space: nowrap; }
+.admin-module-metric span { display: block; margin-top: 5px; color: #3f3f3f; font-size: 9.5px; font-weight: 650; }
+.admin-module-metric small { display: block; margin-top: 3px; overflow: hidden; color: var(--admin-muted); font-size: 8.5px; text-overflow: ellipsis; white-space: nowrap; }
+.admin-module-destination-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; }
+.admin-module-destination { display: grid; grid-template-columns: 34px minmax(0,1fr) 16px; align-items: start; gap: 11px; min-width: 0; border: 1px solid var(--admin-border); border-radius: 12px; background: rgba(255,255,255,.88); color: var(--admin-text); padding: 14px; text-decoration: none; box-shadow: var(--admin-shadow); transition: border-color 120ms ease, transform 120ms ease; }
+.admin-module-destination:hover { border-color: var(--admin-border-strong); transform: translateY(-1px); }
+.admin-module-destination__icon { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid var(--admin-border); border-radius: 9px; background: var(--admin-surface-muted); color: #333; }
+.admin-module-destination__icon svg { width: 15px; height: 15px; }
+.admin-module-destination strong { display: block; font-size: 10.5px; }
+.admin-module-destination p { margin: 5px 0 0; color: var(--admin-muted); font-size: 9px; line-height: 1.5; }
+.admin-module-destination__meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.admin-module-destination__arrow { width: 13px; height: 13px; margin-top: 3px; color: #999; }
+.admin-module-guidance { display: grid; gap: 10px; }
+.admin-module-guidance > div { display: grid; grid-template-columns: 28px minmax(0,1fr); align-items: start; gap: 10px; border-top: 1px solid var(--admin-border); padding-top: 10px; }
+.admin-module-guidance > div:first-child { border-top: 0; padding-top: 0; }
+.admin-module-guidance > div > svg { width: 15px; height: 15px; margin: 2px 0 0 5px; color: #555; }
+.admin-module-guidance strong { display: block; font-size: 9.5px; }
+.admin-module-guidance small { display: block; margin-top: 3px; color: var(--admin-muted); font-size: 8.7px; line-height: 1.5; }
+
+@media (max-width: 1180px) {
+  .admin-module-destination-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+
+@media (max-width: 900px) {
+  .admin-module-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+
+@media (max-width: 760px) {
+  .admin-context-bar { margin: 0 2px 8px; }
+  .admin-module-metrics { gap: 7px; }
+  .admin-module-metric { padding: 11px 12px; }
+  .admin-module-metric strong { font-size: 18px; }
+  .admin-module-destination-grid { grid-template-columns: 1fr; gap: 7px; }
+  .admin-module-destination { padding: 12px; }
+  .admin-mobile-module-switcher { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; border-bottom: 1px solid var(--admin-border); padding: 12px 0; }
+  .admin-mobile-module-switcher a { display: grid; min-height: 58px; place-items: center; align-content: center; gap: 5px; border: 1px solid var(--admin-border); border-radius: 10px; background: #faf9f7; color: #555; font-size: 7.5px; text-align: center; text-decoration: none; }
+  .admin-mobile-module-switcher a.active { border-color: #222; background: #111; color: #fff; }
+  .admin-mobile-module-switcher svg { width: 17px; height: 17px; }
+  .admin-mobile-more nav a.active { border-color: #222; background: #111; color: #fff; }
+}

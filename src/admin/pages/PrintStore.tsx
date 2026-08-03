@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Archive,
   Ban,
@@ -45,6 +46,7 @@ import type {
 } from "../types/printStore";
 
 type Tab = "catalogue" | "pricing" | "orders";
+const validTabs: Tab[] = ["catalogue", "pricing", "orders"];
 
 const blankVariant = (): PrintStoreProductVariant => ({
   id: "",
@@ -247,7 +249,9 @@ async function renderPreparedJpeg(source: Blob, item: PrintStoreOrderItem) {
 }
 
 export function PrintStore() {
-  const [tab, setTab] = useState<Tab>("catalogue");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab") as Tab | null;
+  const [tab, setTabState] = useState<Tab>(requestedTab && validTabs.includes(requestedTab) ? requestedTab : "catalogue");
   const [data, setData] = useState<PrintStoreAdminPayload | null>(null);
   const [productDraft, setProductDraft] = useState<PrintStoreProduct>(blankProduct());
   const [priceListDraft, setPriceListDraft] = useState<PrintStorePriceList>(blankPriceList());
@@ -279,6 +283,15 @@ export function PrintStore() {
   };
 
   useEffect(() => { load(); }, []);
+  useEffect(() => {
+    const next = searchParams.get("tab") as Tab | null;
+    setTabState(next && validTabs.includes(next) ? next : "catalogue");
+  }, [searchParams]);
+
+  function setTab(next: Tab) {
+    setTabState(next);
+    setSearchParams(next === "catalogue" ? {} : { tab: next }, { replace: true });
+  }
 
   const activeProducts = useMemo(() => (data?.products || []).filter((product) => product.status !== "archived"), [data]);
   const allVariants = useMemo(() => activeProducts.flatMap((product) => product.variants.filter((variant) => variant.status !== "archived").map((variant) => ({ product, variant }))), [activeProducts]);

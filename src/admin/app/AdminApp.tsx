@@ -1,6 +1,7 @@
 import { Navigate, Routes, Route, useParams } from "react-router-dom";
 import { AdminLayout } from "../layouts/AdminLayout";
 import { Dashboard } from "../pages/Dashboard";
+import { BusinessOverview, ClientGalleriesOverview } from "../pages/ModuleOverviews";
 import { CRM } from "../pages/CRM";
 import { CRMEnquiry } from "../pages/CRMEnquiry";
 import { CRMContact } from "../pages/CRMContact";
@@ -55,6 +56,8 @@ export function AdminApp() {
     <Routes>
       <Route element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
+        <Route path="website" element={<Navigate to="/admin" replace />} />
+        <Route path="business" element={<BusinessOverview />} />
         <Route path="wedplanned" element={<WedPlannedPlatform />} />
         <Route path="crm" element={<CRM />} />
         <Route path="crm/enquiries/:id" element={<CRMEnquiry />} />
@@ -114,6 +117,7 @@ export function AdminApp() {
         <Route path="venues/:slug/upload" element={<VenueUpload />} />
         <Route path="suppliers" element={<Suppliers />} />
         <Route path="assets" element={<AssetLibrary />} />
+        <Route path="client-galleries/overview" element={<ClientGalleriesOverview />} />
         <Route path="client-galleries" element={<ClientGalleries />} />
         <Route path="client-galleries/:id" element={<ClientGalleryEditor />} />
         <Route path="client-galleries/:id/review" element={<ClientGalleryReview />} />

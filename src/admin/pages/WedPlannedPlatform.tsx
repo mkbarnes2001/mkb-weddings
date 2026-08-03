@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   BadgeCheck,
   BriefcaseBusiness,
@@ -129,9 +130,10 @@ function labelForScope(status: string) {
 
 export function WedPlannedPlatform() {
   const { auth } = useProfessionalAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [platform, setPlatform] = useState<WedPlannedPlatformPayload | null>(null);
   const [business, setBusiness] = useState<WedPlannedBusiness | null>(null);
-  const [tab, setTab] = useState<TabKey>(initialTab);
+  const [tab, setTabState] = useState<TabKey>(initialTab);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -156,6 +158,18 @@ export function WedPlannedPlatform() {
   const canManageSupport = auth.permissions.includes("support:manage") && auth.accessMode !== "support";
   const canExportData = auth.permissions.includes("data:export") && auth.accessMode !== "support";
   const canRequestDeletion = auth.permissions.includes("deletion:request") && auth.accessMode !== "support";
+
+  useEffect(() => {
+    const requested = searchParams.get("tab");
+    const next: TabKey = requested === "services" || requested === "team" || requested === "access" || (requested === "operations" && canReadOperations) ? requested : "business";
+    setTabState(next);
+  }, [canReadOperations, searchParams]);
+
+  function setTab(next: TabKey) {
+    const resolved = next === "operations" && !canReadOperations ? "business" : next;
+    setTabState(resolved);
+    setSearchParams(resolved === "business" ? {} : { tab: resolved }, { replace: true });
+  }
 
   function apply(next: WedPlannedPlatformPayload) {
     setPlatform(next);

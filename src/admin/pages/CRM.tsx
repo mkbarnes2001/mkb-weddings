@@ -9,6 +9,7 @@ import {
   Columns3,
   ExternalLink,
   FileQuestion,
+  Gauge,
   List,
   Mail,
   MapPin,
@@ -17,6 +18,7 @@ import {
   Save,
   Search,
   Settings2,
+  Target,
   UserRound,
   Users,
   Workflow,
@@ -36,9 +38,9 @@ import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
 import type { CrmEnquiry, CrmEnquiryInput, CrmJob, CrmLeadFormSettings, CrmOverview, CrmWorkflowOverview, QuestionnaireOverview } from "../types/crm";
 
-type View = "pipeline" | "contacts" | "jobs" | "schedule" | "questionnaires" | "workflows" | "lead-form";
+type View = "pipeline" | "contacts" | "jobs" | "schedule" | "questionnaires" | "workflows" | "lead-form" | "overview";
 
-const validViews: View[] = ["pipeline", "contacts", "jobs", "schedule", "questionnaires", "workflows", "lead-form"];
+const validViews: View[] = ["overview", "pipeline", "contacts", "jobs", "schedule", "questionnaires", "workflows", "lead-form"];
 
 const emptyEnquiry: CrmEnquiryInput = {
   source: "manual",
@@ -167,7 +169,7 @@ export function CRM() {
   useEffect(() => { void load(); }, [auth.workspaceId]);
   useEffect(() => {
     const next = searchParams.get("view") as View | null;
-    if (next && validViews.includes(next)) setViewState(next);
+    setViewState(next && validViews.includes(next) ? next : "pipeline");
   }, [searchParams]);
 
   function setView(next: View) {
@@ -235,6 +237,7 @@ export function CRM() {
   if (loading && !crm) return <AdminPage><p className="text-sm text-neutral-500">Loading CRM…</p></AdminPage>;
 
   const pageTitle: Record<View, string> = {
+    overview: "CRM overview",
     pipeline: "Leads overview",
     contacts: "Clients",
     jobs: "Jobs overview",
@@ -275,6 +278,7 @@ export function CRM() {
       ) : null}
 
       <AdminTabs className="crm-operations-tabs">
+        <AdminTab active={view === "overview"} onClick={() => setView("overview")}><Gauge />Overview</AdminTab>
         <AdminTab active={view === "pipeline"} onClick={() => setView("pipeline")}>Leads</AdminTab>
         <AdminTab active={view === "jobs"} onClick={() => setView("jobs")}>Jobs</AdminTab>
         <AdminTab active={view === "schedule"} onClick={() => setView("schedule")}>Schedule</AdminTab>
@@ -283,6 +287,29 @@ export function CRM() {
         <AdminTab active={view === "workflows"} onClick={() => setView("workflows")}>Workflows</AdminTab>
         <AdminTab active={view === "lead-form"} onClick={() => setView("lead-form")}>Lead form</AdminTab>
       </AdminTabs>
+
+      {view === "overview" ? <div className="grid gap-4">
+        <section className="admin-module-metrics">
+          <div className="admin-module-metric"><strong>{crm?.stats.open || 0}</strong><span>Open leads</span><small>{crm?.stats.new || 0} new</small></div>
+          <div className="admin-module-metric"><strong>{crm?.stats.jobs || 0}</strong><span>Jobs</span><small>{(crm?.jobs || []).filter((job) => job.status === "booked").length} booked</small></div>
+          <div className="admin-module-metric"><strong>{crm?.contacts.length || 0}</strong><span>Clients</span><small>Workspace contacts</small></div>
+          <div className="admin-module-metric"><strong>{scheduleItems.length}</strong><span>Upcoming schedule</span><small>Weddings and deadlines</small></div>
+        </section>
+        <section className="admin-module-destination-grid">
+          <Link to="/admin/crm" className="admin-module-destination"><span className="admin-module-destination__icon"><Target /></span><div><strong>Leads</strong><p>Review new enquiries, pipeline status and next actions.</p><div className="admin-module-destination__meta"><AdminStatus tone="info">{crm?.stats.open || 0} open</AdminStatus></div></div><ExternalLink className="admin-module-destination__arrow" /></Link>
+          <Link to="/admin/crm?view=jobs" className="admin-module-destination"><span className="admin-module-destination__icon"><BriefcaseBusiness /></span><div><strong>Jobs</strong><p>Open booked workspaces, workflows, communications and client portal access.</p><div className="admin-module-destination__meta"><AdminStatus tone="success">{crm?.stats.jobs || 0} jobs</AdminStatus></div></div><ExternalLink className="admin-module-destination__arrow" /></Link>
+          <Link to="/admin/crm/quotes" className="admin-module-destination"><span className="admin-module-destination__icon"><FileQuestion /></span><div><strong>Packages & quotes</strong><p>Manage catalogue packages and send immutable quote versions.</p></div><ExternalLink className="admin-module-destination__arrow" /></Link>
+          <Link to="/admin/crm?view=questionnaires" className="admin-module-destination"><span className="admin-module-destination__icon"><ClipboardList /></span><div><strong>Questionnaires</strong><p>Build templates and track assigned client questionnaires.</p></div><ExternalLink className="admin-module-destination__arrow" /></Link>
+        </section>
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(280px,.75fr)]">
+          <AdminPanel title="Upcoming schedule" description="The next weddings and Job deadlines across this workspace." icon={CalendarDays}>
+            {!scheduleItems.length ? <AdminEmptyState icon={CalendarDays} title="Nothing scheduled" description="Wedding dates and Job deadlines will appear here." /> : <div className="crm-schedule-list">{scheduleItems.slice(0, 6).map((item) => <Link key={item.id} to={`/admin/crm/jobs/${item.job.id}`} className={`crm-schedule-record crm-schedule-record--${item.type}`}><time dateTime={item.date}><strong>{new Date(`${item.date}T12:00:00`).toLocaleDateString("en-GB", { day: "2-digit" })}</strong><span>{new Date(`${item.date}T12:00:00`).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}</span></time><div><AdminStatus tone={item.type === "wedding" ? "success" : "warning"}>{item.type}</AdminStatus><h3>{item.title}</h3><p>{item.detail}</p></div><ExternalLink /></Link>)}</div>}
+          </AdminPanel>
+          <AdminPanel title="Client operations" description="Communications remain attached to the relevant lead, client or Job record." icon={Mail}>
+            <div className="admin-module-guidance"><div><Mail /><span><strong>Communications</strong><small>Send email or record calls, meetings, messages and notes from each Job workspace.</small></span></div><div><Workflow /><span><strong>Workflows</strong><small>Reusable task sequences control operational delivery after booking.</small></span></div><div><UserRound /><span><strong>Client records</strong><small>Contacts retain linked enquiries, Jobs, activity and communication history.</small></span></div></div>
+          </AdminPanel>
+        </div>
+      </div> : null}
 
       {view === "pipeline" ? <div className="grid gap-4">
         <div className="crm-operations-toolbar">
