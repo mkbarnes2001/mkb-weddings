@@ -28,18 +28,20 @@ import type { WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import { COUNTRY_OPTIONS } from "../data/countries";
 import { AdminSearchSelect, type AdminSearchSelectOption } from "../components/ui/AdminSearchSelect";
 import {
+  DEFAULT_SUPPLIER_ROLE_DEFINITIONS,
   SUPPLIER_CATEGORY_OPTIONS,
-  canonicalSupplierCategory,
-  canonicalWeddingRole,
+  configuredSupplierCategory,
+  configuredWeddingRole,
   defaultWeddingRoleForCategory,
+  normaliseSupplierTaxonomy,
   weddingRoleOptionsForCategory,
+  type SupplierRoleDefinition,
 } from "../data/supplierTaxonomy";
 
 const PUBLIC_ORIGIN = "https://www.mkbweddings.co.uk";
-const SUPPLIER_CATEGORY_SEARCH_OPTIONS: AdminSearchSelectOption[] = SUPPLIER_CATEGORY_OPTIONS.map((category) => ({ value: category, label: category }));
 
-function roleSearchOptions(category: string): AdminSearchSelectOption[] {
-  return weddingRoleOptionsForCategory(category).map((role) => ({ value: role, label: role }));
+function roleSearchOptions(category: string, categories: readonly string[], roles: readonly SupplierRoleDefinition[]): AdminSearchSelectOption[] {
+  return weddingRoleOptionsForCategory(category, categories, roles).map((role) => ({ value: role, label: role }));
 }
 
 type UploadItem = {
@@ -171,6 +173,17 @@ export function WeddingWorkspace() {
   }, [location.hash, workspace]);
 
   const clientGallery = workspace?.clientGalleries[0] || null;
+  const supplierTaxonomy = useMemo(
+    () => normaliseSupplierTaxonomy(
+      workspaceRecord?.settings.supplierCategories || SUPPLIER_CATEGORY_OPTIONS,
+      workspaceRecord?.settings.supplierRoles || DEFAULT_SUPPLIER_ROLE_DEFINITIONS,
+    ),
+    [workspaceRecord?.settings.supplierCategories, workspaceRecord?.settings.supplierRoles],
+  );
+  const supplierCategorySearchOptions = useMemo<AdminSearchSelectOption[]>(
+    () => supplierTaxonomy.categories.map((category) => ({ value: category, label: category })),
+    [supplierTaxonomy.categories],
+  );
   const selectedVenue = useMemo(
     () => venues.find((venue) => venue.slug === wedding?.venueSlug) || null,
     [venues, wedding?.venueSlug],
@@ -183,18 +196,18 @@ export function WeddingWorkspace() {
     () => masterSuppliers.map((supplier) => ({
       value: supplier.id,
       label: supplier.displayName || supplier.name,
-      description: [canonicalSupplierCategory(supplier.category) || supplier.category, supplier.county || supplier.location].filter(Boolean).join(" · "),
+      description: [configuredSupplierCategory(supplier.category, supplierTaxonomy.categories) || supplier.category, supplier.county || supplier.location].filter(Boolean).join(" · "),
       keywords: [supplier.name, supplier.displayName, supplier.category, supplier.instagram, supplier.email],
     })),
-    [masterSuppliers],
+    [masterSuppliers, supplierTaxonomy.categories],
   );
   const supplierRoleSearchOptions = useMemo(
-    () => roleSearchOptions(selectedSupplier?.category || ""),
-    [selectedSupplier?.category],
+    () => roleSearchOptions(selectedSupplier?.category || "", supplierTaxonomy.categories, supplierTaxonomy.roles),
+    [selectedSupplier?.category, supplierTaxonomy.categories, supplierTaxonomy.roles],
   );
   const newSupplierRoleSearchOptions = useMemo(
-    () => roleSearchOptions(newSupplier.category),
-    [newSupplier.category],
+    () => roleSearchOptions(newSupplier.category, supplierTaxonomy.categories, supplierTaxonomy.roles),
+    [newSupplier.category, supplierTaxonomy.categories, supplierTaxonomy.roles],
   );
   const possibleVenueMatches = useMemo(
     () => newVenue.name.trim() ? venues.filter((venue) => looksSimilar(newVenue.name, venue.name)).slice(0, 4) : [],
@@ -428,12 +441,12 @@ export function WeddingWorkspace() {
       setError("Supplier name is required.");
       return;
     }
-    const category = canonicalSupplierCategory(newSupplier.category);
+    const category = configuredSupplierCategory(newSupplier.category, supplierTaxonomy.categories);
     if (!category) {
       setError("Choose a canonical supplier category from the searchable list.");
       return;
     }
-    const role = canonicalWeddingRole(newSupplier.role) || defaultWeddingRoleForCategory(category);
+    const role = configuredWeddingRole(newSupplier.role, supplierTaxonomy.roles) || defaultWeddingRoleForCategory(category, supplierTaxonomy.categories, supplierTaxonomy.roles);
     if (!role) {
       setError("Choose a canonical Wedding role from the searchable list.");
       return;
@@ -504,7 +517,7 @@ export function WeddingWorkspace() {
 
   const addSupplier = async () => {
     if (!selectedSupplier) return;
-    const role = canonicalWeddingRole(supplierRole) || defaultWeddingRoleForCategory(selectedSupplier.category);
+    const role = configuredWeddingRole(supplierRole, supplierTaxonomy.roles) || defaultWeddingRoleForCategory(selectedSupplier.category, supplierTaxonomy.categories, supplierTaxonomy.roles);
     if (!role) {
       setError("Choose a canonical Wedding role from the searchable list.");
       return;
@@ -701,7 +714,7 @@ export function WeddingWorkspace() {
             <Link to={`/admin/weddings/${slug}/publish`} className="wedding-workspace-hero__action">Publishing</Link>
           </div>
         </div>
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="wedding-workspace-steps">
           {setupSteps.map((step) => (
             <span key={step.label} className={`wedding-workspace-step ${step.done ? "is-done" : ""}`}>
               {step.done ? <Check className="h-3.5 w-3.5" /> : null}{step.label}
@@ -713,8 +726,8 @@ export function WeddingWorkspace() {
       {message ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{message}</div> : null}
       {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{error}</div> : null}
 
-      <div className="admin-master-detail admin-master-detail--420">
-        <main className="admin-master-detail__main space-y-4">
+      <div className="admin-master-detail admin-master-detail--420 wedding-workspace-layout">
+        <main className="admin-master-detail__main wedding-workspace-main">
           <section className="wedding-workspace-card">
             <div className="wedding-workspace-section-header">
               <div>
@@ -726,7 +739,7 @@ export function WeddingWorkspace() {
             </div>
 
             <div className="mt-5 space-y-4">
-              <section className="wedding-workspace-subpanel">
+              <section className="wedding-workspace-subpanel wedding-workspace-venue-panel">
                 <div className="wedding-workspace-subpanel__header">
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="wedding-workspace-subpanel__icon"><MapPin className="h-4 w-4" /></span>
@@ -740,7 +753,7 @@ export function WeddingWorkspace() {
                       ) : <p className="mt-1 text-xs text-neutral-500">No venue linked yet.</p>}
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="wedding-workspace-venue-actions">
                     {selectedVenue ? <button type="button" onClick={() => setShowVenuePicker((value) => !value)} className="admin-button admin-button--secondary admin-button--sm">{showVenuePicker ? "Close" : "Change venue"}</button> : null}
                     <button type="button" onClick={() => { setShowNewVenue((value) => !value); setShowVenuePicker(true); }} className="admin-button admin-button--secondary admin-button--sm">{showNewVenue ? "Cancel new venue" : "New venue"}</button>
                   </div>
@@ -832,9 +845,9 @@ export function WeddingWorkspace() {
                       <div key={`${row.supplierId}-${row.role}-${index}`} className="wedding-workspace-supplier-row">
                         <div className="min-w-0">
                           <strong className="block truncate text-sm font-semibold text-neutral-900">{row.name}</strong>
-                          <span className="mt-0.5 block truncate text-xs text-neutral-500">{row.instagram ? cleanInstagram(row.instagram) : row.email || "No contact summary"}</span>
+                          <span className="mt-0.5 block truncate text-xs text-neutral-500">{configuredSupplierCategory(row.category || "", supplierTaxonomy.categories) || row.category || "Uncategorised"}</span>
                         </div>
-                        <span className="wedding-workspace-role-tag">{canonicalWeddingRole(row.role) || row.role || "Other Supplier"}</span>
+                        <span className="wedding-workspace-role-tag">{configuredWeddingRole(row.role || "", supplierTaxonomy.roles) || row.role || "Other Supplier"}</span>
                         <button type="button" title={`Remove ${row.name}`} aria-label={`Remove ${row.name}`} disabled={busy} onClick={() => removeSupplier(index)} className="admin-icon-button"><X className="h-4 w-4" /></button>
                       </div>
                     ))}
@@ -850,7 +863,7 @@ export function WeddingWorkspace() {
                       onChange={(supplierId) => {
                         const supplier = masterSuppliers.find((item) => item.id === supplierId);
                         setSelectedSupplierId(supplierId);
-                        setSupplierRole(supplierId ? defaultWeddingRoleForCategory(supplier?.category || "") : "");
+                        setSupplierRole(supplierId ? defaultWeddingRoleForCategory(supplier?.category || "", supplierTaxonomy.categories, supplierTaxonomy.roles) : "");
                       }}
                       placeholder="Search supplier name, category or location…"
                       help="Select a reusable Supplier Master record."
@@ -858,7 +871,7 @@ export function WeddingWorkspace() {
                     {selectedSupplier ? (
                       <AdminSearchSelect
                         label="Wedding role"
-                        value={canonicalWeddingRole(supplierRole) || supplierRole}
+                        value={configuredWeddingRole(supplierRole, supplierTaxonomy.roles) || supplierRole}
                         options={supplierRoleSearchOptions}
                         onChange={setSupplierRole}
                         placeholder="Search Wedding roles…"
@@ -879,16 +892,16 @@ export function WeddingWorkspace() {
                       <label className="wedding-workspace-field sm:col-span-2"><span>Business name</span><input value={newSupplier.name} onChange={(event) => setNewSupplier((current) => ({ ...current, name: event.target.value }))} placeholder="Supplier business name" className="admin-input" /></label>
                       <AdminSearchSelect
                         label="Category"
-                        value={canonicalSupplierCategory(newSupplier.category) || newSupplier.category}
-                        options={SUPPLIER_CATEGORY_SEARCH_OPTIONS}
-                        onChange={(category) => setNewSupplier((current) => ({ ...current, category, role: defaultWeddingRoleForCategory(category) }))}
+                        value={configuredSupplierCategory(newSupplier.category, supplierTaxonomy.categories) || newSupplier.category}
+                        options={supplierCategorySearchOptions}
+                        onChange={(category) => setNewSupplier((current) => ({ ...current, category, role: defaultWeddingRoleForCategory(category, supplierTaxonomy.categories, supplierTaxonomy.roles) }))}
                         placeholder="Search supplier categories…"
                         help="A broad, canonical business category."
                         allowClear={false}
                       />
                       <AdminSearchSelect
                         label="Wedding role"
-                        value={canonicalWeddingRole(newSupplier.role) || newSupplier.role}
+                        value={configuredWeddingRole(newSupplier.role, supplierTaxonomy.roles) || newSupplier.role}
                         options={newSupplierRoleSearchOptions}
                         onChange={(role) => setNewSupplier((current) => ({ ...current, role }))}
                         placeholder="Search Wedding roles…"
@@ -899,7 +912,7 @@ export function WeddingWorkspace() {
                       <label className="wedding-workspace-field"><span>Email</span><input value={newSupplier.email} onChange={(event) => setNewSupplier((current) => ({ ...current, email: event.target.value }))} placeholder="supplier@example.com" className="admin-input" /></label>
                       <label className="wedding-workspace-field sm:col-span-2"><span>Website</span><input value={newSupplier.website} onChange={(event) => setNewSupplier((current) => ({ ...current, website: event.target.value }))} placeholder="https://…" className="admin-input" /></label>
                     </div>
-                    {possibleSupplierMatches.length ? <div className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-950"><strong>Possible existing supplier:</strong><div className="mt-2 flex flex-wrap gap-2">{possibleSupplierMatches.map((supplier) => <button key={supplier.id} type="button" onClick={() => { setSelectedSupplierId(supplier.id); setSupplierRole(canonicalWeddingRole(newSupplier.role) || defaultWeddingRoleForCategory(supplier.category)); setShowNewSupplier(false); }} className="admin-button admin-button--secondary admin-button--sm">Use {supplier.displayName || supplier.name}</button>)}</div></div> : null}
+                    {possibleSupplierMatches.length ? <div className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-950"><strong>Possible existing supplier:</strong><div className="mt-2 flex flex-wrap gap-2">{possibleSupplierMatches.map((supplier) => <button key={supplier.id} type="button" onClick={() => { setSelectedSupplierId(supplier.id); setSupplierRole(configuredWeddingRole(newSupplier.role, supplierTaxonomy.roles) || defaultWeddingRoleForCategory(supplier.category, supplierTaxonomy.categories, supplierTaxonomy.roles)); setShowNewSupplier(false); }} className="admin-button admin-button--secondary admin-button--sm">Use {supplier.displayName || supplier.name}</button>)}</div></div> : null}
                     <button type="button" disabled={busy || !newSupplier.name.trim()} onClick={createAndLinkSupplier} className="admin-button admin-button--primary admin-button--sm mt-4"><Plus className="admin-button__icon" />Create & link supplier</button>
                   </div>
                 ) : null}
@@ -956,17 +969,16 @@ export function WeddingWorkspace() {
           </section>
         </main>
 
-        <aside className="admin-summary-panel space-y-4">
-          <section className="wedding-workspace-aside-card">
+        <aside className="admin-summary-panel wedding-workspace-aside">
+          <section className="wedding-workspace-aside-card wedding-workspace-social-card">
             <div className="flex items-center gap-3"><Instagram className="h-5 w-5" /><div><p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Social</p><h2 className="text-base" style={{ fontWeight: 600 }}>Instagram preview post</h2></div></div>
-            <p className="mt-3 text-sm text-neutral-600">Generated from the wedding, venue and reusable supplier records. Edit freely before copying.</p>
-            <textarea value={caption} onChange={(event) => setCaption(event.target.value)} rows={14} className="mt-4 w-full rounded-2xl border border-black/15 p-4 text-sm leading-relaxed" />
+            <p className="mt-3 text-[11px] leading-relaxed text-neutral-600">Generated from the wedding, venue and reusable supplier records. Edit freely before copying.</p>
+            <textarea value={caption} onChange={(event) => setCaption(event.target.value)} rows={14} className="wedding-workspace-caption" />
             <div className="mt-3 flex gap-2"><button onClick={regenerateCaption} className="admin-button admin-button--secondary admin-button--sm">Regenerate</button><button onClick={async () => { await navigator.clipboard?.writeText(caption); setMessage("Instagram caption copied."); }} className="admin-button admin-button--primary admin-button--sm"><Clipboard className="h-4 w-4" />Copy caption</button></div>
           </section>
 
-          <section className="wedding-workspace-aside-card">
-            <div className="flex items-center gap-3"><Users className="h-5 w-5" /><h2 className="text-base" style={{ fontWeight: 600 }}>At a glance</h2></div>
-            <div className="mt-4 space-y-3 text-sm"><Row label="Venue" value={workspace.wedding.venue || "Not linked"} /><Row label="Suppliers" value={String(suppliers.length)} /><Row label="Client gallery" value={clientGallery?.status || "Not created"} /><Row label="Wedding assets" value={String(workspace.assets.length)} /><Row label="Preview Set" value={String(previewAssets.length)} /><Row label="Full-res previews" value={String(previewAssets.filter((asset) => asset.hasOriginal).length)} /></div>
+          <section className="wedding-workspace-aside-card wedding-workspace-summary-card">
+            <div className="space-y-3 text-sm"><Row label="Venue" value={workspace.wedding.venue || "Not linked"} /><Row label="Suppliers" value={String(suppliers.length)} /><Row label="Client gallery" value={clientGallery?.status || "Not created"} /><Row label="Wedding assets" value={String(workspace.assets.length)} /><Row label="Preview Set" value={String(previewAssets.length)} /><Row label="Full-res previews" value={String(previewAssets.filter((asset) => asset.hasOriginal).length)} /></div>
             {clientGallery ? <Link to={`/admin/client-galleries/${clientGallery.id}`} className="admin-button admin-button--secondary admin-button--sm mt-4 w-full">Manage client gallery</Link> : null}
           </section>
         </aside>

@@ -2904,3 +2904,338 @@
     max-height: 190px;
   }
 }
+
+/* v1.9.7a refinement — configurable supplier master lists and final Workspace spacing */
+.admin-supplier-table--compact {
+  max-height: calc(100dvh - 270px);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.admin-supplier-table--compact .admin-supplier-table__header {
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  padding: 6px 10px;
+}
+
+.admin-supplier-table--compact .admin-supplier-table__header > button {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 22px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  text-transform: inherit;
+}
+
+.admin-supplier-table--compact .admin-supplier-table__header > button:hover,
+.admin-supplier-table--compact .admin-supplier-table__header > button[aria-pressed="true"] {
+  color: #262626;
+}
+
+.admin-supplier-table--compact .admin-supplier-table__header svg {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 11px;
+}
+
+.admin-supplier-table--compact .admin-supplier-row {
+  min-height: 34px;
+  padding: 6px 10px;
+}
+
+.admin-supplier-table--compact .admin-supplier-row__name {
+  font-size: 9.5px;
+}
+
+.admin-supplier-table--compact .admin-supplier-row__category {
+  font-size: 8.5px;
+}
+
+.admin-supplier-table--compact .admin-supplier-row__status {
+  padding: 2px 5px;
+  font-size: 7.5px;
+}
+
+.admin-supplier-table--compact .admin-supplier-row__count {
+  font-size: 9px;
+}
+
+.supplier-taxonomy-manager {
+  border: 1px solid var(--admin-border);
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px;
+}
+
+.supplier-taxonomy-manager__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--admin-border);
+  padding-bottom: 14px;
+}
+
+.supplier-taxonomy-manager__header h2 {
+  margin: 4px 0 0;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.supplier-taxonomy-manager__header p:last-child {
+  margin: 5px 0 0;
+  max-width: 700px;
+  color: var(--admin-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.supplier-taxonomy-manager__grid {
+  display: grid;
+  grid-template-columns: minmax(260px, .8fr) minmax(420px, 1.35fr);
+  gap: 14px;
+  margin-top: 14px;
+  align-items: start;
+}
+
+.supplier-taxonomy-list-card {
+  min-width: 0;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: #fafafa;
+  padding: 12px;
+}
+
+.supplier-taxonomy-list-card__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.supplier-taxonomy-list-card__heading strong {
+  display: block;
+  font-size: 11px;
+}
+
+.supplier-taxonomy-list-card__heading span {
+  display: block;
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size: 8.5px;
+}
+
+.supplier-taxonomy-list {
+  display: grid;
+  gap: 5px;
+  max-height: calc(100dvh - 360px);
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-gutter: stable;
+}
+
+.supplier-taxonomy-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  border: 1px solid rgba(17,17,17,.08);
+  border-radius: 8px;
+  background: #fff;
+  padding: 5px;
+}
+
+.supplier-taxonomy-row--role {
+  grid-template-columns: minmax(150px, 1fr) minmax(145px, .9fr) auto;
+}
+
+.supplier-taxonomy-row input,
+.supplier-taxonomy-row select {
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  border: 1px solid rgba(17,17,17,.1);
+  border-radius: 7px;
+  background: #fff;
+  padding: 0 8px;
+  color: #262626;
+  font-size: 9.5px;
+}
+
+.supplier-taxonomy-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.supplier-taxonomy-row__actions button {
+  display: inline-grid;
+  width: 25px;
+  min-width: 25px;
+  height: 25px;
+  min-height: 25px !important;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #737373;
+}
+
+.supplier-taxonomy-row__actions button:hover {
+  background: #f2f1ee;
+  color: #111;
+}
+
+.supplier-taxonomy-row__actions button:disabled {
+  opacity: .25;
+}
+
+.supplier-taxonomy-row__actions svg {
+  width: 12px;
+  height: 12px;
+}
+
+.wedding-workspace-layout {
+  gap: 16px !important;
+  margin-top: 16px !important;
+}
+
+.wedding-workspace-main,
+.wedding-workspace-aside {
+  display: grid;
+  gap: 16px;
+}
+
+.wedding-workspace-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 15px;
+}
+
+.wedding-workspace-step {
+  min-height: 22px;
+  gap: 4px;
+  padding: 3px 7px;
+  font-size: 8px;
+}
+
+.wedding-workspace-step svg {
+  width: 11px;
+  height: 11px;
+}
+
+.wedding-workspace-venue-panel {
+  padding: 10px 11px;
+}
+
+.wedding-workspace-venue-panel .wedding-workspace-subpanel__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.wedding-workspace-venue-panel .wedding-workspace-subpanel__icon {
+  width: 28px;
+  height: 28px;
+  flex-basis: 28px;
+}
+
+.wedding-workspace-venue-actions {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 5px;
+  align-self: center;
+}
+
+.wedding-workspace-supplier-row {
+  min-height: 44px;
+  padding-block: 6px;
+}
+
+.wedding-workspace-role-tag,
+.wedding-workspace-status {
+  padding: 3px 7px;
+  font-size: 8px;
+}
+
+.wedding-workspace-caption {
+  width: 100%;
+  margin-top: 12px;
+  border: 1px solid rgba(17,17,17,.15);
+  border-radius: 12px;
+  padding: 16px 12px 12px;
+  font-size: 11px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.wedding-workspace-summary-card {
+  padding-top: 15px;
+}
+
+@media (max-width: 980px) {
+  .supplier-taxonomy-manager__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .supplier-taxonomy-list {
+    max-height: 360px;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-supplier-table--compact {
+    max-height: none;
+  }
+
+  .supplier-taxonomy-manager {
+    padding: 12px;
+  }
+
+  .supplier-taxonomy-manager__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .supplier-taxonomy-row--role {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .supplier-taxonomy-row--role select {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .supplier-taxonomy-row--role .supplier-taxonomy-row__actions {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .wedding-workspace-venue-panel .wedding-workspace-subpanel__header {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wedding-workspace-venue-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wedding-workspace-venue-actions .admin-button {
+    width: 100%;
+  }
+}
+
+.wedding-workspace-social-card {
+  padding-top: 20px;
+}

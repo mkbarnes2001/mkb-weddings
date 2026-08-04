@@ -150,6 +150,8 @@ export type WorkspaceSettings = {
   defaultCountry: string;
   timezone: string;
   currency: string;
+  supplierCategories: string[];
+  supplierRoles: Array<{ name: string; category: string }>;
 };
 
 export type WorkspaceRecord = {

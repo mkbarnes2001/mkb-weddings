@@ -535,6 +535,14 @@ export function ClientGalleryEditor() {
           min-width: 0;
           overflow: hidden;
         }
+        .client-gallery-sidebar-overview > :last-child {
+          min-width: 0;
+          overflow: hidden;
+        }
+        .client-gallery-sidebar-overview h1,
+        .client-gallery-sidebar-overview p {
+          overflow-wrap: anywhere;
+        }
         .client-gallery-primary-tabs {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -949,34 +957,59 @@ export function ClientGalleryEditor() {
           .client-gallery-editor-sidebar { position: static; }
           .client-gallery-sidebar-overview {
             display: grid;
-            grid-template-columns: minmax(260px, .82fr) minmax(0, 1.18fr);
+            grid-template-columns: minmax(220px, 290px) minmax(0, 1fr);
+            align-items: start;
           }
-          .client-gallery-sidebar-cover { min-height: 100%; }
-          .client-gallery-sidebar-cover img { min-height: 100%; }
+          .client-gallery-sidebar-cover {
+            width: 100%;
+            min-height: 0;
+            aspect-ratio: 4 / 3 !important;
+          }
+          .client-gallery-sidebar-cover img { min-height: 0; }
           .client-gallery-context-menu { max-height: none; }
           .client-gallery-activity-stats { grid-template-columns: repeat(3, minmax(0,1fr)); }
           .client-gallery-branding-grid { grid-template-columns: minmax(0,1fr); }
           .client-gallery-branding-grid aside { position: static !important; }
           .client-gallery-activity-split { grid-template-columns: minmax(0,1fr); }
-          .client-gallery-photo-toolbar { grid-template-columns: repeat(3, minmax(0,1fr)); }
+          .client-gallery-photo-toolbar { grid-template-columns: repeat(4, minmax(0,1fr)); }
+          .client-gallery-photo-toolbar__import { grid-column: 1; }
+          .client-gallery-photo-toolbar__library { grid-column: 2; }
+          .client-gallery-photo-toolbar__sort { grid-column: 3; }
+          .client-gallery-photo-toolbar__upload { grid-column: 4; }
+          .client-gallery-photo-toolbar__search { grid-column: 1 / span 2; }
+          .client-gallery-photo-toolbar__select { grid-column: 3 / span 2; }
         }
-        @media (max-width: 1020px) {
+        @media (max-width: 900px) {
+          .client-gallery-editor-header {
+            align-items: stretch;
+            flex-direction: column;
+          }
+          .client-gallery-editor-subtitle { white-space: normal; }
+          .client-gallery-editor-actions {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0,1fr));
+          }
+          .client-gallery-editor-action {
+            width: 100%;
+            min-width: 0;
+          }
+          .client-gallery-activity-split { grid-template-columns: minmax(0,1fr); }
+        }
+        @media (max-width: 760px) {
           .client-gallery-sidebar-overview {
             grid-template-columns: minmax(0, 1fr);
           }
           .client-gallery-sidebar-cover {
-            min-height: 0;
             aspect-ratio: 16 / 9 !important;
           }
-          .client-gallery-sidebar-cover img {
-            min-height: 0;
-          }
-        }
-        @media (max-width: 820px) {
-          .client-gallery-sidebar-overview {
-            grid-template-columns: minmax(0, 1fr);
-          }
-          .client-gallery-activity-split { grid-template-columns: minmax(0,1fr); }
+          .client-gallery-photo-toolbar { grid-template-columns: repeat(2, minmax(0,1fr)); }
+          .client-gallery-photo-toolbar__import,
+          .client-gallery-photo-toolbar__library,
+          .client-gallery-photo-toolbar__sort,
+          .client-gallery-photo-toolbar__select,
+          .client-gallery-photo-toolbar__upload { grid-column: auto; }
+          .client-gallery-photo-toolbar__search { grid-column: 1 / -1; }
         }
         @media (max-width: 640px) {
           .client-gallery-editor-page { padding: 10px 12px 18px !important; }
@@ -1137,12 +1170,12 @@ export function ClientGalleryEditor() {
                   disabled={busy || !draft.weddingSlug}
                   title="Import images already linked to this wedding"
                   onClick={() => mutateAssets({ action: "importWedding" }, "Wedding assets imported.")}
-                  className="disabled:opacity-40"
+                  className="client-gallery-photo-toolbar__import disabled:opacity-40"
                   style={{ height: 32, border: "1px solid rgba(0,0,0,.15)", borderRadius: 8, background: "#fff", padding: "0 9px", fontSize: 10, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5, whiteSpace: "nowrap" }}
                 >
                   <ImagePlus style={{ width: 13, height: 13 }} /> Import
                 </button>
-                <details style={{ position: "relative" }}>
+                <details className="client-gallery-photo-toolbar__library" style={{ position: "relative" }}>
                   <summary
                     title="Add from Asset Library"
                     className="list-none cursor-pointer"
@@ -1155,24 +1188,26 @@ export function ClientGalleryEditor() {
                     {assetResults.length ? <div className="mt-3" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))", gap: 8 }}>{assetResults.map((asset) => <button key={asset.id} onClick={() => mutateAssets({ action: "add", assetIds: [asset.id] }, "Image added.")} className="text-left rounded-lg border border-black/10 overflow-hidden"><img src={asset.files.thumb || asset.files.web} alt="" style={{ width: "100%", height: 80, objectFit: "cover" }} /><span className="block p-2 text-[10px] truncate">+ {asset.filename}</span></button>)}</div> : null}
                   </div>
                 </details>
-                <label title="Choose gallery photo order" style={{ height: 32, minWidth: 0, border: "1px solid rgba(0,0,0,.15)", borderRadius: 8, background: "#fff", padding: "0 8px", display: "flex", alignItems: "center", gap: 4 }}>
+                <label className="client-gallery-photo-toolbar__sort" title="Choose gallery photo order" style={{ height: 32, minWidth: 0, border: "1px solid rgba(0,0,0,.15)", borderRadius: 8, background: "#fff", padding: "0 8px", display: "flex", alignItems: "center", gap: 4 }}>
                   <ArrowUpDown style={{ width: 13, height: 13, color: "#a3a3a3", flex: "0 0 auto" }} />
                   <select value={gallery.sortMode} onChange={(event) => setPhotoSortMode(event.target.value as "custom" | "capture_time" | "filename")} disabled={busy} style={{ minWidth: 0, width: "100%", border: 0, background: "transparent", outline: "none", fontSize: 10 }}>
                     <option value="custom">Custom order</option><option value="capture_time">Capture time</option><option value="filename">Filename</option>
                   </select>
                 </label>
-                <div style={{ height: 32, minWidth: 0, border: "1px solid rgba(0,0,0,.15)", borderRadius: 8, background: "#fff", padding: "0 9px", display: "flex", alignItems: "center", gap: 5 }}>
+                <div className="client-gallery-photo-toolbar__search" style={{ height: 32, minWidth: 0, border: "1px solid rgba(0,0,0,.15)", borderRadius: 8, background: "#fff", padding: "0 9px", display: "flex", alignItems: "center", gap: 5 }}>
                   <Search style={{ width: 13, height: 13, color: "#a3a3a3", flex: "0 0 auto" }} />
                   <input value={photoSearch} onChange={(e) => setPhotoSearch(e.target.value)} placeholder="Search photos" style={{ minWidth: 0, width: "100%", border: 0, outline: "none", fontSize: 10, background: "transparent" }} />
                 </div>
                 <button
                   onClick={selectAllVisible}
+                  className="client-gallery-photo-toolbar__select"
                   style={{ height: 32, border: "1px solid rgba(0,0,0,.15)", borderRadius: 8, background: "#fff", padding: "0 9px", fontSize: 10, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5, whiteSpace: "nowrap" }}
                 >
                   <Check style={{ width: 13, height: 13 }} /> {selectedAssets.size === visiblePhotos.length && visiblePhotos.length ? "Clear" : "Select all"}
                 </button>
                 <label
                   title="Upload full-resolution JPEGs"
+                  className="client-gallery-photo-toolbar__upload"
                   style={{ height: 32, borderRadius: 8, background: "#111", color: "#fff", padding: "0 10px", fontSize: 10, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 5, whiteSpace: "nowrap", cursor: "pointer" }}
                 >
                   <UploadCloud style={{ width: 13, height: 13 }} /> Upload

@@ -5,6 +5,7 @@ export type SupplierRecord = {
   supplierId?: string;
   blogSlug?: string;
   role?: string;
+  category?: string;
   name?: string;
   website?: string;
   instagram?: string;

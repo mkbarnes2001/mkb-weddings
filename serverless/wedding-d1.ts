@@ -669,6 +669,7 @@ export async function getWeddingSuppliers(db: D1Db, slug: string, workspaceId = 
       supplierId: text(row.supplier_id),
       blogSlug: text(row.wedding_slug),
       role: text(row.role || row.category),
+      category: text(row.category),
       name: text(row.name),
       website: text(row.website),
       instagram: text(row.instagram),
@@ -697,7 +698,7 @@ export async function getWeddingSuppliers(db: D1Db, slug: string, workspaceId = 
 export async function listAdminSuppliers(db: D1Db, workspaceId = "workspace_mkb_weddings") {
   const result = await db.prepare(`
     SELECT l.wedding_slug, l.sort_order, l.role, l.supplier_id,
-           s.name, s.website, s.instagram, s.email, s.phone, s.location, s.county
+           s.name, s.website, s.instagram, s.email, s.phone, s.location, s.county, s.category
     FROM wedding_supplier_links l
     JOIN suppliers s ON s.id = l.supplier_id AND s.workspace_id = l.workspace_id
     WHERE l.workspace_id = ?
@@ -705,7 +706,7 @@ export async function listAdminSuppliers(db: D1Db, workspaceId = "workspace_mkb_
   `).bind(workspaceId).all();
 
   return (result.results || []).map((row: any) => ({
-    supplierId: text(row.supplier_id), blogSlug: text(row.wedding_slug), role: text(row.role),
+    supplierId: text(row.supplier_id), blogSlug: text(row.wedding_slug), role: text(row.role), category: text(row.category),
     name: text(row.name), website: text(row.website), instagram: text(row.instagram),
     email: text(row.email), phone: text(row.phone), location: text(row.location), county: text(row.county),
     sortOrder: String(Number(row.sort_order || 0)),

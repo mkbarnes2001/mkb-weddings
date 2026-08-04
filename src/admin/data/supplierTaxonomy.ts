@@ -3,6 +3,16 @@ export type SupplierCategoryDefinition = {
   roles: readonly string[];
 };
 
+export type SupplierRoleDefinition = {
+  name: string;
+  category: string;
+};
+
+export type SupplierTaxonomySettings = {
+  categories: string[];
+  roles: SupplierRoleDefinition[];
+};
+
 export const SUPPLIER_TAXONOMY: readonly SupplierCategoryDefinition[] = [
   { category: "Photography", roles: ["Photographer", "Second Photographer", "Photo Booth"] },
   { category: "Videography & Content", roles: ["Videographer", "Content Creator"] },
@@ -25,6 +35,9 @@ export const SUPPLIER_TAXONOMY: readonly SupplierCategoryDefinition[] = [
 
 export const SUPPLIER_CATEGORY_OPTIONS = SUPPLIER_TAXONOMY.map((item) => item.category);
 export const WEDDING_ROLE_OPTIONS = Array.from(new Set(SUPPLIER_TAXONOMY.flatMap((item) => item.roles)));
+export const DEFAULT_SUPPLIER_ROLE_DEFINITIONS: SupplierRoleDefinition[] = SUPPLIER_TAXONOMY.flatMap((item) =>
+  item.roles.map((name) => ({ name, category: item.category })),
+);
 
 const CATEGORY_ALIASES: Record<string, string> = {
   photographer: "Photography",
@@ -104,7 +117,7 @@ const ROLE_ALIASES: Record<string, string> = {
   supplier: "Other Supplier",
 };
 
-function key(value: string) {
+export function supplierTaxonomyKey(value: string) {
   return String(value || "")
     .trim()
     .toLowerCase()
@@ -117,25 +130,87 @@ function key(value: string) {
 }
 
 function exactOption(value: string, options: readonly string[]) {
-  const target = key(value);
-  return options.find((option) => key(option) === target) || "";
+  const target = supplierTaxonomyKey(value);
+  return options.find((option) => supplierTaxonomyKey(option) === target) || "";
+}
+
+function uniqueNames(values: readonly string[]) {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const value of values) {
+    const name = String(value || "").trim();
+    const key = supplierTaxonomyKey(name);
+    if (!name || !key || seen.has(key)) continue;
+    seen.add(key);
+    result.push(name);
+  }
+  return result;
+}
+
+export function normaliseSupplierTaxonomy(
+  categories: readonly string[] | undefined,
+  roles: readonly SupplierRoleDefinition[] | undefined,
+): SupplierTaxonomySettings {
+  const nextCategories = uniqueNames(categories?.length ? categories : SUPPLIER_CATEGORY_OPTIONS);
+  const fallbackCategory = nextCategories[0] || "Other";
+  const categoryByKey = new Map(nextCategories.map((category) => [supplierTaxonomyKey(category), category]));
+  const roleSource = roles?.length ? roles : DEFAULT_SUPPLIER_ROLE_DEFINITIONS;
+  const seenRoles = new Set<string>();
+  const nextRoles: SupplierRoleDefinition[] = [];
+
+  for (const item of roleSource) {
+    const name = String(item?.name || "").trim();
+    const roleKey = supplierTaxonomyKey(name);
+    if (!name || !roleKey || seenRoles.has(roleKey)) continue;
+    const exactCategory = categoryByKey.get(supplierTaxonomyKey(item?.category || ""));
+    nextRoles.push({ name, category: exactCategory || fallbackCategory });
+    seenRoles.add(roleKey);
+  }
+
+  if (!nextRoles.length) nextRoles.push({ name: "Other Supplier", category: fallbackCategory });
+  return { categories: nextCategories, roles: nextRoles };
+}
+
+export function configuredSupplierCategory(value: string, categories: readonly string[] = SUPPLIER_CATEGORY_OPTIONS) {
+  const exact = exactOption(value, categories);
+  if (exact) return exact;
+  const alias = CATEGORY_ALIASES[supplierTaxonomyKey(value)] || "";
+  return alias ? exactOption(alias, categories) : "";
+}
+
+export function configuredWeddingRole(value: string, roles: readonly SupplierRoleDefinition[] = DEFAULT_SUPPLIER_ROLE_DEFINITIONS) {
+  const roleNames = roles.map((item) => item.name);
+  const exact = exactOption(value, roleNames);
+  if (exact) return exact;
+  const alias = ROLE_ALIASES[supplierTaxonomyKey(value)] || "";
+  return alias ? exactOption(alias, roleNames) : "";
 }
 
 export function canonicalSupplierCategory(value: string) {
-  return exactOption(value, SUPPLIER_CATEGORY_OPTIONS) || CATEGORY_ALIASES[key(value)] || "";
+  return configuredSupplierCategory(value, SUPPLIER_CATEGORY_OPTIONS);
 }
 
 export function canonicalWeddingRole(value: string) {
-  return exactOption(value, WEDDING_ROLE_OPTIONS) || ROLE_ALIASES[key(value)] || "";
+  return configuredWeddingRole(value, DEFAULT_SUPPLIER_ROLE_DEFINITIONS);
 }
 
-export function defaultWeddingRoleForCategory(value: string) {
-  const category = canonicalSupplierCategory(value);
-  return SUPPLIER_TAXONOMY.find((item) => item.category === category)?.roles[0] || "Other Supplier";
+export function defaultWeddingRoleForCategory(
+  value: string,
+  categories: readonly string[] = SUPPLIER_CATEGORY_OPTIONS,
+  roles: readonly SupplierRoleDefinition[] = DEFAULT_SUPPLIER_ROLE_DEFINITIONS,
+) {
+  const category = configuredSupplierCategory(value, categories);
+  return roles.find((item) => configuredSupplierCategory(item.category, categories) === category)?.name
+    || roles[0]?.name
+    || "Other Supplier";
 }
 
-export function weddingRoleOptionsForCategory(value: string) {
-  const category = canonicalSupplierCategory(value);
-  const preferred: readonly string[] = SUPPLIER_TAXONOMY.find((item) => item.category === category)?.roles || [];
-  return [...preferred, ...WEDDING_ROLE_OPTIONS.filter((role) => !preferred.includes(role))];
+export function weddingRoleOptionsForCategory(
+  value: string,
+  categories: readonly string[] = SUPPLIER_CATEGORY_OPTIONS,
+  roles: readonly SupplierRoleDefinition[] = DEFAULT_SUPPLIER_ROLE_DEFINITIONS,
+) {
+  const category = configuredSupplierCategory(value, categories);
+  const preferred = roles.filter((item) => configuredSupplierCategory(item.category, categories) === category).map((item) => item.name);
+  return [...preferred, ...roles.map((item) => item.name).filter((role) => !preferred.includes(role))];
 }
