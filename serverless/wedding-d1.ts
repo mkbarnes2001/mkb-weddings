@@ -1122,6 +1122,32 @@ export async function saveWeddingListSettings(db: D1Db, items: any[], workspaceI
   return listAdminWeddings(db, workspaceId);
 }
 
+function weddingDateHasArrived(value: unknown) {
+  const raw = String(value || "").trim();
+  if (!raw) return false;
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw <= today;
+
+  const season = raw.match(/^(spring|summer|autumn|fall|winter)\s+(\d{4})$/i);
+  if (season) {
+    const month = {
+      spring: "03",
+      summer: "06",
+      autumn: "09",
+      fall: "09",
+      winter: "12",
+    }[season[1].toLowerCase() as "spring" | "summer" | "autumn" | "fall" | "winter"];
+
+    return `${season[2]}-${month}-01` <= today;
+  }
+
+  const parsed = Date.parse(`1 ${raw}`);
+  return Number.isFinite(parsed)
+    && new Date(parsed).toISOString().slice(0, 10) <= today;
+}
+
 export async function listPublicWeddings(db: D1Db, workspaceId = "workspace_mkb_weddings") {
   const [allResult, publishedResult] = await Promise.all([
     db.prepare(`SELECT slug FROM weddings WHERE workspace_id = ? ORDER BY slug ASC`).bind(workspaceId).all(),
@@ -1133,7 +1159,6 @@ export async function listPublicWeddings(db: D1Db, workspaceId = "workspace_mkb_
         AND story_status = 'published'
         AND story_list_visible = 1
         AND published_json <> ''
-        AND date(wedding_date) <= date('now')
       ORDER BY CASE WHEN story_sort_order > 0 THEN 0 ELSE 1 END, story_sort_order ASC, COALESCE(story_published_at, published_at, updated_at) DESC, slug ASC
     `).bind(workspaceId).all(),
   ]);
@@ -1141,6 +1166,7 @@ export async function listPublicWeddings(db: D1Db, workspaceId = "workspace_mkb_
   const weddings = [] as any[];
   for (const row of publishedResult.results || []) {
     const document = json(row.published_json, {} as any);
+    if (!weddingDateHasArrived(text(document.weddingDate || row.wedding_date))) continue;
     const images = await publicImages(db, text(row.slug), true, workspaceId);
     const cover = images.find((image: any) => image.isCover) || images[0];
 
@@ -1189,12 +1215,12 @@ export async function getPublicWedding(db: D1Db, slug: string, workspaceId = "wo
       AND story_enabled = 1
       AND story_status = 'published'
       AND published_json <> ''
-      AND date(wedding_date) <= date('now')
   `).bind(slug, workspaceId).first();
 
   if (!row?.published_json) return null;
 
   const document = json(row.published_json, {} as any);
+  if (!weddingDateHasArrived(text(document.weddingDate || row.wedding_date))) return null;
   const images = await publicImages(db, slug, true, workspaceId);
 
   return {

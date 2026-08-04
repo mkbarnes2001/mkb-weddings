@@ -225,7 +225,7 @@ export function AdminLayout() {
 
           <nav className="admin-module-navigation min-h-0 flex-1 overflow-y-auto p-3" aria-label={`${currentContextLabel} navigation`}>
             <div className="admin-module-navigation__header"><ContextIcon /><div><strong>{currentContextLabel}</strong><span>{isPlatformRoute ? "Global businesses, taxonomy, modules, assets, operations and access" : currentModule.description}</span></div></div>
-            <div className="admin-module-navigation__items mt-3" data-layout={!isPlatformRoute && (currentModule.key === "website" || currentModule.key === "crm") ? "grid" : "list"}>
+            <div className="admin-module-navigation__items mt-3" data-layout="list">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = isAdminNavigationItemActive(item, location.pathname, location.search);

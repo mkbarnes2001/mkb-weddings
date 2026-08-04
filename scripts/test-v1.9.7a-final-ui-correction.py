@@ -20,9 +20,10 @@ checks = {
         and "min-width: 244px;" in theme
         and "overflow-y: auto !important;" in theme
     ),
-    "CRM and Website navigation use a compact two-column layout": (
-        'data-layout={!isPlatformRoute && (currentModule.key === "website" || currentModule.key === "crm") ? "grid" : "list"}' in layout
-        and '.admin-module-navigation__items[data-layout="grid"]' in theme
+    "all module navigation uses the standard single-list layout": (
+        'data-layout="list"' in layout
+        and 'data-layout={!isPlatformRoute && (currentModule.key === "website" || currentModule.key === "crm") ? "grid" : "list"}' not in layout
+        and '.admin-module-navigation__items[data-layout="grid"]' not in theme
     ),
     "platform administrator authority is visible in the session UI": (
         'const isPlatformAdmin = auth.platformRole === "platform_admin";' in layout

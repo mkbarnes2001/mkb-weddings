@@ -28,10 +28,29 @@ function coverFor(wedding: WeddingRecord) {
 
 function weddingDateHasArrived(value: string) {
   const raw = String(value || "").trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return false;
+  if (!raw) return false;
+
   const today = new Date();
   const localToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  return raw <= localToday;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw <= localToday;
+
+  const season = raw.match(/^(spring|summer|autumn|fall|winter)\s+(\d{4})$/i);
+  if (season) {
+    const month = {
+      spring: "03",
+      summer: "06",
+      autumn: "09",
+      fall: "09",
+      winter: "12",
+    }[season[1].toLowerCase() as "spring" | "summer" | "autumn" | "fall" | "winter"];
+
+    return `${season[2]}-${month}-01` <= localToday;
+  }
+
+  const parsed = Date.parse(`1 ${raw}`);
+  return Number.isFinite(parsed)
+    && new Date(parsed).toISOString().slice(0, 10) <= localToday;
 }
 
 export function Weddings() {

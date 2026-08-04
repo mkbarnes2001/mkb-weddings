@@ -97,6 +97,32 @@ export async function onRequest(context: any) {
 
   const canonicalFromPath = (p: string) => `${origin}${p.replace(/\/+$/, "") || "/"}`;
 
+  function weddingDateHasArrived(value: unknown) {
+    const raw = String(value || "").trim();
+    if (!raw) return false;
+
+    const today = new Date().toISOString().slice(0, 10);
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw <= today;
+
+    const season = raw.match(/^(spring|summer|autumn|fall|winter)\s+(\d{4})$/i);
+    if (season) {
+      const month = {
+        spring: "03",
+        summer: "06",
+        autumn: "09",
+        fall: "09",
+        winter: "12",
+      }[season[1].toLowerCase() as "spring" | "summer" | "autumn" | "fall" | "winter"];
+
+      return `${season[2]}-${month}-01` <= today;
+    }
+
+    const parsed = Date.parse(`1 ${raw}`);
+    return Number.isFinite(parsed)
+      && new Date(parsed).toISOString().slice(0, 10) <= today;
+  }
+
   async function getPublishedVenueFromD1(slug: string): Promise<any | null> {
     try {
       if (!db) return null;
@@ -113,11 +139,17 @@ export async function onRequest(context: any) {
   async function getPublishedWeddingFromD1(slug: string): Promise<any | null> {
     try {
       if (!db) return null;
+
       const row = await db.prepare(
-        "SELECT published_json FROM weddings WHERE slug = ? AND workspace_id = ? AND story_enabled = 1 AND story_status = 'published' AND published_json <> '' AND date(wedding_date) <= date('now')",
+        "SELECT published_json FROM weddings WHERE slug = ? AND workspace_id = ? AND story_enabled = 1 AND story_status = 'published' AND published_json <> ''",
       ).bind(slug, publicWorkspaceId).first();
+
       if (!row?.published_json) return null;
-      return JSON.parse(String(row.published_json));
+
+      const document = JSON.parse(String(row.published_json));
+      if (!weddingDateHasArrived(document?.weddingDate)) return null;
+
+      return document;
     } catch {
       return null;
     }

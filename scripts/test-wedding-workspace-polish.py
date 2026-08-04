@@ -110,15 +110,19 @@ def main() -> None:
     ]:
         assert token in gallery, token
 
-    # Future weddings remain in CRM but do not appear in Website Wedding Stories or public fallbacks.
+    # Future weddings remain excluded while ISO, month/year and season/year dates are handled consistently.
     for token in [
         "function weddingDateHasArrived",
+        "const season = raw.match",
+        "Date.parse(`1 ${raw}`)",
         "Website story records appear here only after the wedding date",
         "weddings.filter((wedding) => weddingDateHasArrived(wedding.weddingDate))",
     ]:
         assert token in weddings_page, token
-    assert "AND date(wedding_date) <= date('now')" in wedding_d1
-    assert "date(wedding_date) <= date('now')" in middleware
+    assert "AND date(wedding_date) <= date('now')" not in wedding_d1
+    assert "date(wedding_date) <= date('now')" not in middleware
+    assert "weddingDateHasArrived(text(document.weddingDate || row.wedding_date))" in wedding_d1
+    assert "weddingDateHasArrived(document?.weddingDate)" in middleware
     assert "weddingDateHasArrived(wedding.weddingDate)" in public_repository
     assert "extractEligibleWeddingStorySlugs" in sitemap
     assert 'status: wedding.status !== "published" ? wedding.status || "draft" : "future"' in published_index
@@ -138,7 +142,7 @@ def main() -> None:
     print("  container-responsive Client Gallery toolbar: verified")
     print("  clickable Supplier category filtering and A-Z sorting: verified")
     print("  platform-admin-only global supplier taxonomy: verified")
-    print("  future Wedding Stories excluded from Admin, public API and static fallbacks: verified")
+    print("  future Wedding Stories excluded with format-aware Admin and public date checks: verified")
     print("  existing platform tables reused; schema remains 31: verified")
 
 
