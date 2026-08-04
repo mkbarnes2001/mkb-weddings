@@ -1265,6 +1265,13 @@ export class AdminApiService {
     return result.workspace;
   }
 
+  static async createCrmJobClientGallery(id: string) {
+    return request<{ ok: true; gallery: ClientGalleryRecord; idempotent: boolean; workspace: CrmJobWorkspace }>(
+      `/api/crm/jobs/${encodeURIComponent(id)}/client-gallery`,
+      { method: "POST", body: JSON.stringify({}) },
+    );
+  }
+
   static async getCrmQuoteOverview() {
     const result = await request<{ ok: true; quotes: CrmQuoteOverview }>("/api/crm/quotes");
     return result.quotes;

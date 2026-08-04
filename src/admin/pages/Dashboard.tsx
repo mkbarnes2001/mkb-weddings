@@ -38,7 +38,7 @@ export function Dashboard() {
       <div className="admin-module-metric"><strong>{stats.warningWeddingCount}</strong><span>Stories needing checks</span><small>Content or image readiness</small></div>
     </section>
     <section className="admin-module-destination-grid">
-      <Destination to="/admin/weddings" icon={FileText} title="Weddings & stories" description="Manage wedding records, content, suppliers, images and publishing readiness." status={`${stats.weddingCount} stories`} />
+      <Destination to="/admin/weddings" icon={FileText} title="Wedding stories" description="Create and publish Website stories from operational Wedding Workspaces created through CRM Jobs." status={`${stats.weddingCount} stories`} />
       <Destination to="/admin/gallery" icon={Images} title="Website galleries" description="Control public venue, moment, location, creative-flash and collection landing content." status={`${stats.galleryImageCount} images`} />
       <Destination to="/admin/venues" icon={MapPinned} title="Venues" description="Maintain venue pages, public galleries, locations and editorial content." />
       <Destination to="/admin/seo" icon={BarChart3} title="SEO" description="Review public search metadata and content visibility." />

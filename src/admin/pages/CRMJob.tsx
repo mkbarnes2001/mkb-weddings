@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
+  BookOpen,
   BriefcaseBusiness,
   CalendarDays,
   Check,
@@ -11,6 +12,9 @@ import {
   ExternalLink,
   FileText,
   FolderOpen,
+  Globe2,
+  Images,
+  LayoutDashboard,
   LockKeyhole,
   Mail,
   MapPin,
@@ -46,7 +50,7 @@ function money(value: number | null, currency = "GBP") {
 }
 
 function statusTone(status: string): "neutral" | "success" | "warning" | "danger" | "info" {
-  if (["completed", "active", "linked", "approved", "booked"].includes(status)) return "success";
+  if (["completed", "active", "linked", "approved", "booked", "published", "live", "ready"].includes(status)) return "success";
   if (["in_progress", "opened"].includes(status)) return "info";
   if (["sent", "invited", "pending", "draft"].includes(status)) return "warning";
   if (["revoked", "rejected"].includes(status)) return "danger";
@@ -232,6 +236,17 @@ export function CRMJob() {
     finally { setSaving(false); }
   }
 
+  async function createClientGalleryFromJob() {
+    setSaving(true); setError(""); setMessage("");
+    try {
+      const result = await AdminApiService.createCrmJobClientGallery(id);
+      setWorkspace(result.workspace);
+      setMessage(result.idempotent ? "The existing linked client gallery is ready to open." : "Client gallery created from this Job and linked Wedding Workspace.");
+    } catch (galleryError) {
+      setError(galleryError instanceof Error ? galleryError.message : "Unable to create the client gallery.");
+    } finally { setSaving(false); }
+  }
+
   if (loading && !workspace) return <AdminPage><p className="text-sm text-neutral-500">Loading Job workspace…</p></AdminPage>;
   if (!workspace) return <AdminPage><div className="admin-alert admin-alert--error">{error || "Job not found."}</div></AdminPage>;
   const { job } = workspace;
@@ -241,6 +256,10 @@ export function CRMJob() {
   const selectedAddons = Array.isArray(job.addonsSnapshot) ? job.addonsSnapshot as any[] : [];
   const nextTask = workspace.tasks.find((task) => task.status === "pending");
   const portal = portalState(workspace);
+  const lifecycle = workspace.lifecycle;
+  const primaryGallery = lifecycle.primaryClientGallery;
+  const completedQuestionnaires = workspace.questionnaires.filter((item) => item.status === "completed").length;
+  const storyLabel = lifecycle.story.state === "not_started" ? "not started" : lifecycle.story.state;
 
   return (
     <AdminPage className="crm-job-operations-page">
@@ -249,7 +268,7 @@ export function CRMJob() {
         title={job.title}
         description={`${job.reference} · ${job.serviceName || job.jobType || "Wedding service"}`}
         meta={<div className="flex flex-wrap gap-2"><AdminStatus tone={statusTone(job.status)}>{job.status}</AdminStatus><AdminStatus tone={portal.status === "active" ? "success" : portal.status === "invited" ? "warning" : "neutral"}>portal {portal.label}</AdminStatus><AdminStatus tone="info">{dateLabel(job.eventDate)}</AdminStatus></div>}
-        actions={<div className="flex flex-wrap gap-2">{job.quoteId ? <Link className="admin-button admin-button--secondary admin-button--md" to={`/admin/crm/quotes/${job.quoteId}`}><PackageCheck className="admin-button__icon" />Open quote</Link> : null}{job.weddingSlug ? <Link className="admin-button admin-button--primary admin-button--md" to={`/admin/weddings/${job.weddingSlug}/workspace`}><ExternalLink className="admin-button__icon" />Open Wedding</Link> : null}</div>}
+        actions={<div className="flex flex-wrap gap-2">{job.quoteId ? <Link className="admin-button admin-button--secondary admin-button--md" to={`/admin/crm/quotes/${job.quoteId}`}><PackageCheck className="admin-button__icon" />Open quote</Link> : null}{job.weddingSlug ? <Link className="admin-button admin-button--primary admin-button--md" to={`/admin/weddings/${job.weddingSlug}/workspace`}><ExternalLink className="admin-button__icon" />Open Wedding Workspace</Link> : null}</div>}
       />
       {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
       {message ? <div className="admin-alert admin-alert--success">{message}</div> : null}
@@ -274,6 +293,57 @@ export function CRMJob() {
         </div>
       </AdminPanel>
 
+      <AdminPanel
+        title="Wedding delivery and content"
+        description="The CRM Job is the booking source. Its linked Wedding Workspace feeds private delivery and Website content without duplicate uploads."
+        icon={LayoutDashboard}
+        className="crm-wedding-lifecycle-panel"
+      >
+        <div className="crm-wedding-lifecycle-grid">
+          <article className="crm-wedding-lifecycle-card">
+            <span className="crm-wedding-lifecycle-card__icon"><LayoutDashboard /></span>
+            <div><p>Wedding Workspace</p><strong>{lifecycle.wedding.exists ? "Ready" : "Not linked"}</strong><small>{lifecycle.wedding.exists ? `${lifecycle.wedding.couple || lifecycle.wedding.title} · ${lifecycle.wedding.venue || "Venue TBC"}` : "A booked wedding should have one shared operational workspace."}</small></div>
+            {lifecycle.wedding.exists ? <Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/weddings/${lifecycle.wedding.slug}/workspace`}>Open</Link> : <AdminStatus tone="danger">review</AdminStatus>}
+          </article>
+
+          <article className="crm-wedding-lifecycle-card">
+            <span className="crm-wedding-lifecycle-card__icon"><Images /></span>
+            <div><p>Wedding assets</p><strong>{lifecycle.wedding.assetCount} photographs</strong><small>{lifecycle.wedding.previewCount} selected for the Wedding Day Preview Set.</small></div>
+            {lifecycle.wedding.exists ? <Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/weddings/${lifecycle.wedding.slug}/workspace#preview-upload`}>Manage</Link> : null}
+          </article>
+
+          <article className="crm-wedding-lifecycle-card">
+            <span className="crm-wedding-lifecycle-card__icon"><Images /></span>
+            <div><p>Client Gallery</p><strong>{primaryGallery ? primaryGallery.title : "Not created"}</strong><small>{primaryGallery ? `${primaryGallery.status} · ${lifecycle.clientGalleries.length} linked gallery${lifecycle.clientGalleries.length === 1 ? "" : "s"}` : "Create a private gallery prefilled from this Job."}</small></div>
+            {primaryGallery ? <Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/client-galleries/${primaryGallery.id}`}>Open</Link> : <AdminButton variant="primary" size="sm" icon={Plus} disabled={saving || !canManage || !lifecycle.wedding.exists} onClick={() => void createClientGalleryFromJob()}>Create</AdminButton>}
+          </article>
+
+          <article className="crm-wedding-lifecycle-card">
+            <span className="crm-wedding-lifecycle-card__icon"><LockKeyhole /></span>
+            <div><p>Client portal</p><strong>{portal.label}</strong><small>{workspace.portalAccess.filter((item) => item.status === "active").length} active access record{workspace.portalAccess.filter((item) => item.status === "active").length === 1 ? "" : "s"}.</small></div>
+            <a className="admin-button admin-button--secondary admin-button--sm" href="#job-clients">Manage</a>
+          </article>
+
+          <article className="crm-wedding-lifecycle-card">
+            <span className="crm-wedding-lifecycle-card__icon"><ClipboardList /></span>
+            <div><p>Questionnaires</p><strong>{workspace.questionnaires.length ? `${completedQuestionnaires} of ${workspace.questionnaires.length} complete` : "None assigned"}</strong><small>Responses and uploads stay attached to this Job.</small></div>
+            <a className="admin-button admin-button--secondary admin-button--sm" href="#job-questionnaires">Manage</a>
+          </article>
+
+          <article className="crm-wedding-lifecycle-card">
+            <span className="crm-wedding-lifecycle-card__icon"><BookOpen /></span>
+            <div><p>Wedding Story</p><strong>{storyLabel}</strong><small>{lifecycle.story.state === "published" ? `${lifecycle.story.publishedImageCount} published story images.` : `${lifecycle.story.draftImageCount} draft story images.`}</small></div>
+            {lifecycle.wedding.exists ? <Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/weddings/${lifecycle.wedding.slug}/content`}>{lifecycle.story.state === "not_started" ? "Start" : "Edit"}</Link> : null}
+          </article>
+
+          <article className="crm-wedding-lifecycle-card">
+            <span className="crm-wedding-lifecycle-card__icon"><Globe2 /></span>
+            <div><p>Website galleries</p><strong>{lifecycle.publicAssignments.total} assignments</strong><small>{lifecycle.publicAssignments.venue} venue · {lifecycle.publicAssignments.moments} moments · {lifecycle.publicAssignments.galleries} collections.</small></div>
+            {lifecycle.wedding.exists ? <Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/weddings/${lifecycle.wedding.slug}/workspace#publishing-destinations`}>Manage</Link> : null}
+          </article>
+        </div>
+      </AdminPanel>
+
       <div className="crm-job-operations-grid">
         <div className="crm-job-operations-column">
           {job.quoteId ? <AdminAccordion title="Quote and package" description="Accepted commercial details are locked to this booking." icon={PackageCheck} defaultOpen summary={<AdminStatus tone="success">{money(job.valueAmount, job.currency)}</AdminStatus>}>
@@ -293,14 +363,14 @@ export function CRMJob() {
         </div>
 
         <div className="crm-job-operations-column">
-          <AdminAccordion title="Clients" description="Contact details and client portal access." icon={Users} defaultOpen summary={<AdminStatus tone="neutral">{workspace.contacts.length}</AdminStatus>}>
+          <div id="job-clients" className="scroll-mt-5"><AdminAccordion title="Clients" description="Contact details and client portal access." icon={Users} defaultOpen summary={<AdminStatus tone="neutral">{workspace.contacts.length}</AdminStatus>}>
             <div className="crm-job-clients">{workspace.contacts.map((contact) => { const access = activeAccessByContact.get(contact.id); return <article key={contact.id}><div><strong>{contact.displayName}</strong><p>{contact.role}</p><a href={contact.email ? `mailto:${contact.email}` : undefined}>{contact.email || "Email required"}</a>{contact.phone ? <span>{contact.phone}</span> : null}</div><div className="crm-job-client-actions"><Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/crm/contacts/${contact.id}`}><Pencil className="admin-button__icon" />Edit client</Link>{access ? <AdminStatus tone={access.acceptedAt ? "success" : "warning"}>{access.acceptedAt ? "portal active" : "invited"}</AdminStatus> : null}<AdminButton variant="primary" size="sm" icon={Mail} disabled={saving || !canManage || !contact.email} onClick={() => void invite(contact.id)}>{access ? "Send new link" : "Invite client"}</AdminButton>{access ? <AdminButton variant="danger" size="sm" icon={ShieldX} disabled={saving || !canManage} onClick={() => void revoke(access.identityId)}>Revoke</AdminButton> : null}</div></article>; })}</div>
-          </AdminAccordion>
+          </AdminAccordion></div>
 
-          <AdminAccordion title="Questionnaires" description="Assign forms and review responses." icon={ClipboardList} summary={<AdminStatus tone="neutral">{workspace.questionnaires.length}</AdminStatus>}>
+          <div id="job-questionnaires" className="scroll-mt-5"><AdminAccordion title="Questionnaires" description="Assign forms and review responses." icon={ClipboardList} summary={<AdminStatus tone="neutral">{workspace.questionnaires.length}</AdminStatus>}>
             {canManage ? <div className="crm-questionnaire-assign"><AdminField label="Template"><select className="admin-select" value={templateId} disabled={!canManage} onChange={(event) => setTemplateId(event.target.value)}>{workspace.templates.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}</select></AdminField><AdminField label="Client"><select className="admin-select" value={contactId} disabled={!canManage} onChange={(event) => setContactId(event.target.value)}>{workspace.contacts.map((contact) => <option key={contact.id} value={contact.id}>{contact.displayName} ({contact.role})</option>)}</select></AdminField><AdminField label="Due date"><input className="admin-input" type="date" value={dueAt} disabled={!canManage} onChange={(event) => setDueAt(event.target.value)} /></AdminField><AdminButton variant="primary" icon={Plus} disabled={saving || !canManage || !templateId || !contactId} onClick={() => void assign()}>Assign questionnaire</AdminButton></div> : null}
             {!workspace.questionnaires.length ? <AdminEmptyState icon={FileText} title="No questionnaires assigned" description="Assign a template above when client information is needed." /> : <div className="grid gap-3">{workspace.questionnaires.map((item) => <article key={item.id} className="questionnaire-instance-card"><div className="flex flex-wrap items-start justify-between gap-3"><div><h3>{item.title}</h3><p>{item.assignedContactName || "Client not assigned"}{item.dueAt ? ` · due ${dateLabel(item.dueAt)}` : ""}</p></div><AdminStatus tone={statusTone(item.status)}>{item.status.replace(/_/g, " ")}</AdminStatus></div>{item.introduction ? <p className="mt-3 text-[10px] leading-5 text-neutral-500">{item.introduction}</p> : null}<div className="mt-3 grid gap-2">{item.fields.filter((field) => !["heading", "description", "file"].includes(field.type)).map((field) => <div key={field.id} className="questionnaire-response-row"><span>{field.label}</span><strong>{answerLabel(item.responses[field.id], field)}</strong></div>)}</div></article>)}</div>}
-          </AdminAccordion>
+          </AdminAccordion></div>
 
           <AdminAccordion title="Supplier team" description="Approved Wedding suppliers and client suggestions." icon={Store} summary={pendingSubmissions.length ? <AdminStatus tone="warning">{pendingSubmissions.length} review</AdminStatus> : <AdminStatus tone="neutral">{workspace.linkedSuppliers.length} linked</AdminStatus>}>
             {pendingSubmissions.length ? <div className="crm-supplier-review"><div className="crm-supplier-review__heading"><AdminStatus tone="warning">{pendingSubmissions.length} needs review</AdminStatus></div>{pendingSubmissions.map((submission) => { const review = supplierReview[submission.id] || { supplierId: "", role: submission.role, notes: "" }; return <article key={submission.id}><div className="flex items-start justify-between gap-2"><div><strong>{submission.name || "Unnamed supplier"}</strong><p>{submission.website || submission.instagram || submission.email || submission.location || "No contact details supplied"}</p></div><AdminStatus tone="warning">pending</AdminStatus></div><AdminField label="Wedding role"><input className="admin-input" value={review.role} disabled={!canManage} onChange={(event) => setSupplierReview((current) => ({ ...current, [submission.id]: { ...review, role: event.target.value } }))} /></AdminField><AdminField label="Approval action"><select className="admin-select" value={review.supplierId} disabled={!canManage} onChange={(event) => setSupplierReview((current) => ({ ...current, [submission.id]: { ...review, supplierId: event.target.value } }))}><option value="">Create new Supplier Master record</option>{workspace.supplierDirectory.map((supplier) => <option key={supplier.id} value={supplier.id}>Merge into {supplier.name}{supplier.category ? ` · ${supplier.category}` : ""}</option>)}</select></AdminField><AdminField label="Review note"><input className="admin-input" value={review.notes} disabled={!canManage} onChange={(event) => setSupplierReview((current) => ({ ...current, [submission.id]: { ...review, notes: event.target.value } }))} /></AdminField><div className="flex flex-wrap gap-2"><AdminButton variant="primary" size="sm" icon={CheckCircle2} disabled={saving || !canManage} onClick={() => void approveSupplier(submission)}>Approve</AdminButton><AdminButton variant="danger" size="sm" icon={X} disabled={saving || !canManage} onClick={() => void rejectSupplier(submission)}>Reject</AdminButton></div></article>; })}</div> : null}

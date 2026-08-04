@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Check,
@@ -86,6 +86,7 @@ function publicGalleryUrl(slug: string, token: string) {
 
 export function WeddingWorkspace() {
   const { slug = "" } = useParams<{ slug: string }>();
+  const location = useLocation();
   const [workspace, setWorkspace] = useState<WeddingWorkspacePayload | null>(null);
   const [wedding, setWedding] = useState<WeddingDocument | null>(null);
   const [venues, setVenues] = useState<VenueSummary[]>([]);
@@ -148,6 +149,11 @@ export function WeddingWorkspace() {
   useEffect(() => {
     if (slug) reload();
   }, [slug]);
+
+  useEffect(() => {
+    if (!workspace || !location.hash) return;
+    window.setTimeout(() => document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  }, [location.hash, workspace]);
 
   const clientGallery = workspace?.clientGalleries[0] || null;
   const selectedVenue = useMemo(
@@ -495,9 +501,9 @@ export function WeddingWorkspace() {
         status: "draft",
         allowFavourites: true,
         allowDownloads: false,
-        importWeddingAssets: false,
+        importWeddingAssets: true,
       });
-      setMessage("Client gallery created. You can upload previews here immediately.");
+      setMessage("Client gallery created and existing Wedding assets imported. You can upload more photographs here immediately.");
       await reload();
       window.setTimeout(() => {
         const element = document.getElementById("preview-upload");
@@ -631,18 +637,19 @@ export function WeddingWorkspace() {
 
   return (
     <div className="space-y-7" style={{ maxWidth: 1680 }}>
-      <Link to="/admin/weddings" className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black">
-        <ArrowLeft className="h-4 w-4" /> Weddings
+      <Link to={workspace.job ? `/admin/crm/jobs/${workspace.job.id}` : "/admin/weddings"} className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black">
+        <ArrowLeft className="h-4 w-4" /> {workspace.job ? `CRM Job ${workspace.job.reference}` : "Wedding Stories"}
       </Link>
 
       <section className="rounded-[30px] bg-black p-8 text-white md:p-10">
-        <p className="text-xs uppercase tracking-[0.22em] text-white/45">Post-wedding workspace</p>
+        <p className="text-xs uppercase tracking-[0.22em] text-white/45">Wedding Workspace</p>
         <div className="mt-4 flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <h1 className="text-4xl md:text-5xl" style={{ fontWeight: 600, letterSpacing: "-.03em" }}>{workspace.wedding.couple || workspace.wedding.title}</h1>
             <p className="mt-3 text-white/60">{workspace.wedding.venue || "Venue not linked"}{workspace.wedding.weddingDate ? ` · ${displayDate(workspace.wedding.weddingDate)}` : ""}</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            {workspace.job ? <Link to={`/admin/crm/jobs/${workspace.job.id}`} className="rounded-full border border-white/20 px-5 py-3 text-sm">Open CRM Job</Link> : null}
             <Link to={`/admin/weddings/${slug}/content`} className="rounded-full border border-white/20 px-5 py-3 text-sm">Master content</Link>
             <Link to={`/admin/weddings/${slug}/publish`} className="rounded-full border border-white/20 px-5 py-3 text-sm">Publishing</Link>
           </div>
@@ -834,7 +841,7 @@ export function WeddingWorkspace() {
             {!workspace.assets.length ? <p className="mt-5 text-sm text-neutral-500">No canonical assets linked to this wedding yet.</p> : null}
           </section>
 
-          <section className="rounded-[26px] border border-black/10 bg-white p-6">
+          <section id="publishing-destinations" className="scroll-mt-5 rounded-[26px] border border-black/10 bg-white p-6">
             <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">4 · Publishing destinations</p><h2 className="mt-2 text-2xl" style={{ fontWeight: 600 }}>Use previews across the Intelligence platform</h2><p className="mt-2 text-sm text-neutral-600">This only adds safe web derivatives to public destinations. Private full-resolution originals remain protected.</p>
             <div className="mt-6 grid gap-6 md:grid-cols-3">
               <div><p className="text-xs uppercase tracking-[0.12em] text-neutral-500">Venue</p><label className="mt-3 flex items-center gap-3"><input type="checkbox" checked={addToVenue} disabled={!workspace.wedding.venueSlug} onChange={(event) => setAddToVenue(event.target.checked)} /><span>{workspace.wedding.venue || "No venue linked"}</span></label></div>

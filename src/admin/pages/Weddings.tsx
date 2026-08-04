@@ -143,11 +143,11 @@ export function Weddings() {
   return (
     <AdminPage>
       <AdminPageHeader
-        eyebrow="Wedding repository"
-        title="Weddings"
-        description="Manage wedding records, public story visibility and display order without affecting linked suppliers, galleries or assets."
+        eyebrow="Website content"
+        title="Wedding Stories"
+        description="Create and publish Website stories from Wedding Workspaces. New booked weddings originate in CRM Jobs; standalone records remain available for legacy or editorial use."
         actions={<>
-          <Link to="/admin/weddings/new" className="admin-button admin-button--secondary"><Plus className="admin-button__icon" />New wedding</Link>
+          <Link to="/admin/weddings/new" className="admin-button admin-button--secondary"><Plus className="admin-button__icon" />Add standalone story</Link>
           <button type="button" onClick={saveLayout} disabled={!dirty || saving} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : dirty ? "Save order" : "Saved"}</button>
         </>}
       />
@@ -155,10 +155,10 @@ export function Weddings() {
       {message ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{message}</div> : null}
       {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{error}</div> : null}
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3"><MiniStat label="Total" value={weddings.length} /><MiniStat label="Draft / hidden" value={draftCount} /><MiniStat label="Visible stories" value={publishedCount} /></section>
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3"><MiniStat label="Story records" value={weddings.length} /><MiniStat label="Not started / draft" value={draftCount} /><MiniStat label="Published stories" value={publishedCount} /></section>
 
       <AdminToolbar>
-        <div className="relative min-w-[220px] flex-1"><Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search couples, venues or weddings..." className="h-[34px] w-full border border-black/10 bg-white pl-9 pr-3 text-[11px]" /></div>
+        <div className="relative min-w-[220px] flex-1"><Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search couples, venues or stories..." className="h-[34px] w-full border border-black/10 bg-white pl-9 pr-3 text-[11px]" /></div>
         <div className="flex flex-wrap gap-1.5">{(["all", "draft", "published", "archived"] as StatusFilter[]).map((status) => <button key={status} type="button" onClick={() => setStatusFilter(status)} className={`admin-button admin-button--sm ${statusFilter === status ? "admin-button--primary" : "admin-button--secondary"}`}>{status}</button>)}</div>
       </AdminToolbar>
 
@@ -166,7 +166,7 @@ export function Weddings() {
         <div className="admin-master-detail__main admin-card-grid admin-card-grid--portrait">
           {!filteredWeddings.length ? (
             <div className="rounded-[18px] border border-dashed border-black/10 bg-white/70 p-6 text-[11px] leading-5 text-neutral-500">
-              {weddings.length ? "No weddings match the current filters." : "No weddings in this workspace yet."}
+              {weddings.length ? "No wedding stories match the current filters." : "No Wedding Workspaces or standalone stories exist in this workspace yet."}
             </div>
           ) : null}
           {filteredWeddings.map((wedding) => {
@@ -196,7 +196,7 @@ export function Weddings() {
             {coverFor(active) ? <img src={coverFor(active)?.thumbSrc || coverFor(active)?.fullSrc} alt={active.couple} className="max-h-[230px] w-full rounded-xl object-cover" /> : null}
 
             <div className="admin-wedding-summary-heading min-w-0">
-              <p>Wedding</p>
+              <p>Wedding story</p>
               <h2>{active.couple}</h2>
               <span>{active.venue} · {active.weddingDate}</span>
             </div>

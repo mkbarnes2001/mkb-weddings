@@ -2,6 +2,7 @@ import { getAuthenticatedClientIdentity } from "./client-auth-d1";
 import { DEFAULT_CLIENT_PORTAL_ORIGIN } from "./tenant-context";
 import { createMasterSupplier, getMasterSupplier, listMasterSuppliers } from "./supplier-d1";
 import { getJobWorkflowWorkspace } from "./crm-workflow-d1";
+import { createClientGallery, listClientGalleries } from "./client-gallery-d1";
 import { getPublicQuotesForIdentity, requestQuotePortalMagicLink, verifyQuotePortalMagicLink } from "./crm-quotes-d1";
 
 export type PortalActor = {
@@ -500,6 +501,158 @@ export async function archiveQuestionnaireTemplate(db: D1Db, actor: PortalActor,
   return saveQuestionnaireTemplate(db, actor, templateId, { status: "archived" });
 }
 
+async function getJobWeddingLifecycle(db: D1Db, workspaceId: string, job: any) {
+  const weddingSlug = text(job?.wedding_slug);
+  const empty = {
+    wedding: {
+      exists: false,
+      slug: weddingSlug,
+      title: "",
+      couple: "",
+      venue: text(job?.venue_text),
+      weddingDate: text(job?.event_date),
+      status: "missing",
+      assetCount: 0,
+      previewCount: 0,
+    },
+    clientGalleries: [],
+    primaryClientGallery: null,
+    story: {
+      state: "not_started",
+      enabled: false,
+      status: "draft",
+      listVisible: false,
+      draftImageCount: 0,
+      publishedImageCount: 0,
+      publishedAt: "",
+    },
+    publicAssignments: { venue: 0, moments: 0, galleries: 0, total: 0 },
+  };
+  if (!weddingSlug) return empty;
+
+  const [wedding, galleryRows, assetCounts, storyCounts, publicCounts] = await Promise.all([
+    db.prepare(`
+      SELECT slug, title, couple, venue, wedding_date, status, excerpt, intro,
+             story_enabled, story_status, story_published_at, story_list_visible,
+             document_json, published_at
+      FROM weddings
+      WHERE slug = ? AND workspace_id = ?
+      LIMIT 1
+    `).bind(weddingSlug, workspaceId).first(),
+    db.prepare(`
+      SELECT id, slug, title, client_name, client_email, status, updated_at
+      FROM client_galleries
+      WHERE workspace_id = ? AND wedding_slug = ? AND status <> 'archived'
+      ORDER BY updated_at DESC, created_at DESC
+    `).bind(workspaceId, weddingSlug).all(),
+    db.prepare(`
+      SELECT
+        COUNT(DISTINCT awl.asset_id) AS asset_count,
+        COUNT(DISTINCT wpa.asset_id) AS preview_count
+      FROM asset_wedding_links awl
+      JOIN assets asset
+        ON asset.id = awl.asset_id
+       AND asset.workspace_id = awl.workspace_id
+       AND asset.status = 'active'
+      LEFT JOIN wedding_preview_sets preview
+        ON preview.workspace_id = awl.workspace_id
+       AND preview.wedding_slug = awl.wedding_slug
+       AND preview.status = 'active'
+      LEFT JOIN wedding_preview_assets wpa
+        ON wpa.preview_set_id = preview.id
+       AND wpa.asset_id = awl.asset_id
+      WHERE awl.workspace_id = ? AND awl.wedding_slug = ?
+    `).bind(workspaceId, weddingSlug).first(),
+    db.prepare(`
+      SELECT
+        (SELECT COUNT(*) FROM story_images WHERE workspace_id = ? AND wedding_slug = ?) AS draft_image_count,
+        (SELECT COUNT(*) FROM published_story_images WHERE workspace_id = ? AND wedding_slug = ?) AS published_image_count
+    `).bind(workspaceId, weddingSlug, workspaceId, weddingSlug).first(),
+    db.prepare(`
+      SELECT
+        (SELECT COUNT(DISTINCT venue_link.asset_id)
+           FROM asset_venue_links venue_link
+           JOIN asset_wedding_links wedding_link
+             ON wedding_link.asset_id = venue_link.asset_id
+            AND wedding_link.workspace_id = venue_link.workspace_id
+          WHERE wedding_link.workspace_id = ? AND wedding_link.wedding_slug = ?) AS venue_count,
+        (SELECT COUNT(DISTINCT moment_link.asset_id)
+           FROM asset_moment_links moment_link
+           JOIN asset_wedding_links wedding_link
+             ON wedding_link.asset_id = moment_link.asset_id
+            AND wedding_link.workspace_id = moment_link.workspace_id
+          WHERE wedding_link.workspace_id = ? AND wedding_link.wedding_slug = ?) AS moment_count,
+        (SELECT COUNT(DISTINCT gallery_link.asset_id)
+           FROM asset_gallery_links gallery_link
+           JOIN asset_wedding_links wedding_link
+             ON wedding_link.asset_id = gallery_link.asset_id
+            AND wedding_link.workspace_id = gallery_link.workspace_id
+          WHERE wedding_link.workspace_id = ? AND wedding_link.wedding_slug = ? AND gallery_link.hidden = 0) AS gallery_count
+    `).bind(workspaceId, weddingSlug, workspaceId, weddingSlug, workspaceId, weddingSlug).first(),
+  ]);
+
+  if (!wedding) return empty;
+  const storyDocument = json<any>(wedding.document_json, {});
+  const draftImageCount = Number(storyCounts?.draft_image_count || 0);
+  const publishedImageCount = Number(storyCounts?.published_image_count || 0);
+  const storyStarted = Boolean(Number(wedding.story_enabled || 0))
+    || Boolean(text(wedding.excerpt))
+    || Boolean(text(wedding.intro))
+    || draftImageCount > 0
+    || (Array.isArray(storyDocument?.story) && storyDocument.story.length > 0);
+  const storedStoryStatus = text(wedding.story_status || "draft");
+  const storyState = storedStoryStatus === "archived"
+    ? "archived"
+    : storedStoryStatus === "published" && Boolean(Number(wedding.story_enabled || 0))
+      ? "published"
+      : storyStarted
+        ? "draft"
+        : "not_started";
+  const clientGalleries = (galleryRows.results || []).map((row: any) => ({
+    id: text(row.id),
+    slug: text(row.slug),
+    title: text(row.title),
+    clientName: text(row.client_name),
+    clientEmail: text(row.client_email),
+    status: text(row.status),
+    updatedAt: row.updated_at,
+  }));
+  const venueAssignments = Number(publicCounts?.venue_count || 0);
+  const momentAssignments = Number(publicCounts?.moment_count || 0);
+  const galleryAssignments = Number(publicCounts?.gallery_count || 0);
+
+  return {
+    wedding: {
+      exists: true,
+      slug: text(wedding.slug),
+      title: text(wedding.title),
+      couple: text(wedding.couple),
+      venue: text(wedding.venue),
+      weddingDate: text(wedding.wedding_date),
+      status: text(wedding.status),
+      assetCount: Number(assetCounts?.asset_count || 0),
+      previewCount: Number(assetCounts?.preview_count || 0),
+    },
+    clientGalleries,
+    primaryClientGallery: clientGalleries[0] || null,
+    story: {
+      state: storyState,
+      enabled: Boolean(Number(wedding.story_enabled || 0)),
+      status: storedStoryStatus,
+      listVisible: Boolean(Number(wedding.story_list_visible || 0)),
+      draftImageCount,
+      publishedImageCount,
+      publishedAt: text(wedding.story_published_at || wedding.published_at),
+    },
+    publicAssignments: {
+      venue: venueAssignments,
+      moments: momentAssignments,
+      galleries: galleryAssignments,
+      total: venueAssignments + momentAssignments + galleryAssignments,
+    },
+  };
+}
+
 export async function getCrmJobWorkspace(db: D1Db, actor: PortalActor, jobId: string) {
   requirePermission(actor, "crm:read");
   await ensureStarterTemplate(db, actor.workspaceId);
@@ -549,7 +702,10 @@ export async function getCrmJobWorkspace(db: D1Db, actor: PortalActor, jobId: st
     `).bind(jobId, actor.workspaceId).all(),
     listMasterSuppliers(db, false, actor.workspaceId),
   ]);
-  const workflowWorkspace = await getJobWorkflowWorkspace(db, actor, jobId);
+  const [workflowWorkspace, lifecycle] = await Promise.all([
+    getJobWorkflowWorkspace(db, actor, jobId),
+    getJobWeddingLifecycle(db, actor.workspaceId, job),
+  ]);
   const instances = [];
   for (const row of instanceRows.results || []) {
     instances.push(hydrateInstance(row, await instanceResponses(db, actor.workspaceId, text(row.id)), await instanceFiles(db, actor.workspaceId, text(row.id))));
@@ -598,8 +754,55 @@ export async function getCrmJobWorkspace(db: D1Db, actor: PortalActor, jobId: st
       actorEmail: text(row.actor_email),
       createdAt: row.created_at,
     })),
+    lifecycle,
     ...workflowWorkspace,
   };
+}
+
+export async function createJobClientGallery(db: D1Db, actor: PortalActor, jobId: string) {
+  requirePermission(actor, "crm:manage");
+  const job = await jobRow(db, actor.workspaceId, jobId);
+  if (!job) throw httpError("Job not found.", 404);
+  const weddingSlug = text(job.wedding_slug);
+  if (!weddingSlug) throw httpError("This Job does not have a linked Wedding Workspace.", 409);
+
+  const wedding = await db.prepare(`
+    SELECT slug, title, couple, venue, wedding_date
+    FROM weddings
+    WHERE slug = ? AND workspace_id = ? AND status <> 'archived'
+    LIMIT 1
+  `).bind(weddingSlug, actor.workspaceId).first();
+  if (!wedding) throw httpError("The linked Wedding Workspace is not available in this business.", 409);
+
+  const listed = await listClientGalleries(db, actor.workspaceId);
+  const existing = listed.galleries.find((gallery: any) => text(gallery.weddingSlug) === weddingSlug && text(gallery.status) !== "archived");
+  if (existing) {
+    return { gallery: existing, idempotent: true, workspace: await getCrmJobWorkspace(db, actor, jobId) };
+  }
+
+  const primaryContact = await db.prepare(`
+    SELECT contact.display_name, contact.email
+    FROM crm_job_contacts link
+    JOIN crm_contacts contact
+      ON contact.id = link.contact_id
+     AND contact.workspace_id = link.workspace_id
+    WHERE link.job_id = ? AND link.workspace_id = ?
+    ORDER BY CASE link.role WHEN 'primary' THEN 0 WHEN 'partner' THEN 1 ELSE 2 END, contact.created_at
+    LIMIT 1
+  `).bind(jobId, actor.workspaceId).first();
+  const clientName = text(wedding.couple || job.title || wedding.title);
+  const gallery = await createClientGallery(db, {
+    title: clientName || text(wedding.title) || text(job.title) || "Client Gallery",
+    weddingSlug,
+    clientName,
+    clientEmail: text(primaryContact?.email),
+    status: "draft",
+    allowFavourites: true,
+    allowDownloads: false,
+    importWeddingAssets: true,
+  }, actor.workspaceId);
+  await recordJobActivity(db, actor, actor.workspaceId, jobId, "client_gallery.created", `Created client gallery ${gallery.title}.`, { galleryId: gallery.id, weddingSlug });
+  return { gallery, idempotent: false, workspace: await getCrmJobWorkspace(db, actor, jobId) };
 }
 
 export async function assignQuestionnaire(db: D1Db, actor: PortalActor, jobId: string, input: any) {

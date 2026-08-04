@@ -15,6 +15,7 @@ import {
   archiveQuestionnaireTemplate,
   assignQuestionnaire,
   createQuestionnaireTemplate,
+  createJobClientGallery,
   getCrmJobWorkspace,
   getQuestionnaireInstanceAdmin,
   getQuestionnaireOverview,
@@ -191,6 +192,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
     if (parts[0] === "questionnaires" && parts[1] === "templates" && parts[2] && parts[3] === "archive") {
       return Response.json({ ok: true, template: await archiveQuestionnaireTemplate(context.env.MKB_DB, actor, parts[2]) });
+    }
+    if (parts[0] === "jobs" && parts[1] && parts[2] === "client-gallery" && parts.length === 3) {
+      const result = await createJobClientGallery(context.env.MKB_DB, actor, parts[1]);
+      return Response.json({ ok: true, ...result }, { status: result.idempotent ? 200 : 201 });
     }
     if (parts[0] === "jobs" && parts[1] && parts[2] === "questionnaires") {
       return Response.json({ ok: true, questionnaire: await assignQuestionnaire(context.env.MKB_DB, actor, parts[1], body) }, { status: 201 });

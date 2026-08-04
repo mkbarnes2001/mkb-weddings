@@ -52,6 +52,7 @@ export type AdminModuleDefinition = {
   items: AdminNavigationItem[];
 };
 
+export const isWeddingWorkspacePath = (pathname: string) => /^\/admin\/weddings\/[^/]+\/workspace$/.test(pathname);
 const exactPath = (path: string) => (pathname: string) => pathname === path;
 const pathPrefix = (path: string) => (pathname: string) => pathname === path || pathname.startsWith(`${path}/`);
 const exactWithQuery = (path: string, key: string, value: string) => (pathname: string, params: URLSearchParams) => pathname === path && params.get(key) === value;
@@ -65,7 +66,7 @@ const crmItems: AdminNavigationItem[] = [
   { key: "overview", label: "Overview", to: "/admin/crm?view=overview", icon: Gauge, mobilePrimary: true, match: exactWithQuery("/admin/crm", "view", "overview") },
   { key: "leads", label: "Leads", to: "/admin/crm", icon: Target, mobilePrimary: true, match: (pathname, params) => pathname.startsWith("/admin/crm/enquiries/") || exactWithoutQuery("/admin/crm", "view", ["pipeline"])(pathname, params) },
   { key: "clients", label: "Clients", to: "/admin/crm?view=contacts", icon: UserRound, mobilePrimary: true, match: (pathname, params) => pathname.startsWith("/admin/crm/contacts/") || exactWithQuery("/admin/crm", "view", "contacts")(pathname, params) },
-  { key: "jobs", label: "Jobs", to: "/admin/crm?view=jobs", icon: BriefcaseBusiness, mobilePrimary: true, match: (pathname, params) => pathname.startsWith("/admin/crm/jobs/") || exactWithQuery("/admin/crm", "view", "jobs")(pathname, params) },
+  { key: "jobs", label: "Jobs", to: "/admin/crm?view=jobs", icon: BriefcaseBusiness, mobilePrimary: true, match: (pathname, params) => pathname.startsWith("/admin/crm/jobs/") || isWeddingWorkspacePath(pathname) || exactWithQuery("/admin/crm", "view", "jobs")(pathname, params) },
   { key: "schedule", label: "Schedule", to: "/admin/crm?view=schedule", icon: CalendarDays, match: exactWithQuery("/admin/crm", "view", "schedule") },
   { key: "packages", label: "Packages", to: "/admin/crm/catalogue", icon: Package, match: pathPrefix("/admin/crm/catalogue") },
   { key: "quotes", label: "Quotes", to: "/admin/crm/quotes", icon: FileQuestion, match: pathPrefix("/admin/crm/quotes") },
@@ -83,7 +84,7 @@ const clientGalleryItems: AdminNavigationItem[] = [
 
 const websiteItems: AdminNavigationItem[] = [
   { key: "overview", label: "Overview", to: "/admin", icon: Gauge, mobilePrimary: true, match: exactPath("/admin") },
-  { key: "weddings", label: "Weddings & stories", to: "/admin/weddings", icon: FileText, mobilePrimary: true, match: pathPrefix("/admin/weddings") },
+  { key: "weddings", label: "Wedding stories", to: "/admin/weddings", icon: FileText, mobilePrimary: true, match: pathPrefix("/admin/weddings") },
   { key: "galleries", label: "Website galleries", to: "/admin/gallery", icon: Images, mobilePrimary: true, match: (pathname) => pathname === "/admin/gallery" || pathname.startsWith("/admin/gallery/") || pathname === "/admin/collections" },
   { key: "venues", label: "Venues", to: "/admin/venues", icon: Globe2, mobilePrimary: true, match: pathPrefix("/admin/venues") },
   { key: "locations", label: "Locations", to: "/admin/locations", icon: MapPinned, match: pathPrefix("/admin/locations") },
@@ -115,7 +116,7 @@ export const adminModules: AdminModuleDefinition[] = [
     to: "/admin/crm?view=overview",
     icon: ContactRound,
     entitlementKey: "crm",
-    match: (pathname) => pathname.startsWith("/admin/crm"),
+    match: (pathname) => pathname.startsWith("/admin/crm") || isWeddingWorkspacePath(pathname),
     items: crmItems,
   },
   {

@@ -115,7 +115,7 @@ async function resolveWeddingAssets(db: D1Db, workspaceId: string, weddingSlug: 
 export async function getWeddingWorkspace(db: D1Db, weddingSlug: string, workspaceId = "workspace_mkb_weddings") {
   const wedding = await requireWedding(db, weddingSlug, workspaceId);
 
-  const [assets, previewSet, momentsResult, galleriesResult, clientGalleriesResult, venueRow, workspaceSettings] = await Promise.all([
+  const [assets, previewSet, momentsResult, galleriesResult, clientGalleriesResult, venueRow, workspaceSettings, linkedJobRow] = await Promise.all([
     resolveWeddingAssets(db, workspaceId, weddingSlug),
     previewSetRow(db, workspaceId, weddingSlug),
     db.prepare(`
@@ -140,6 +140,13 @@ export async function getWeddingWorkspace(db: D1Db, weddingSlug: string, workspa
       ? db.prepare(`SELECT slug, name, document_json FROM venues WHERE slug = ? AND workspace_id = ? LIMIT 1`).bind(text(wedding.venue_slug), workspaceId).first()
       : Promise.resolve(null),
     db.prepare(`SELECT business_name, instagram, website_url FROM workspace_settings WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first(),
+    db.prepare(`
+      SELECT id, reference, title, status
+      FROM crm_jobs
+      WHERE workspace_id = ? AND wedding_slug = ? AND status <> 'archived'
+      ORDER BY created_at DESC
+      LIMIT 1
+    `).bind(workspaceId, weddingSlug).first(),
   ]);
 
   const venueDocument = parseJson<any>(venueRow?.document_json, {});
@@ -168,6 +175,12 @@ export async function getWeddingWorkspace(db: D1Db, weddingSlug: string, workspa
       instagram: text(workspaceSettings?.instagram),
       websiteUrl: text(workspaceSettings?.website_url),
     },
+    job: linkedJobRow ? {
+      id: text(linkedJobRow.id),
+      reference: text(linkedJobRow.reference),
+      title: text(linkedJobRow.title),
+      status: text(linkedJobRow.status),
+    } : null,
     previewSet: {
       id: text(previewSet?.id),
       name: text(previewSet?.name || "Wedding Day Previews"),

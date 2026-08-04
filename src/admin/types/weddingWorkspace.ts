@@ -61,6 +61,12 @@ export type WeddingWorkspacePayload = {
     instagram: string;
     websiteUrl: string;
   };
+  job: {
+    id: string;
+    reference: string;
+    title: string;
+    status: string;
+  } | null;
   previewSet: {
     id: string;
     name: string;

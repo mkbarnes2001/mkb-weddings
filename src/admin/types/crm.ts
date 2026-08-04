@@ -385,6 +385,42 @@ export type CrmWorkflowOverview = {
   jobs: Array<{ id: string; reference: string; title: string; eventDate: string }>;
 };
 
+export type CrmWeddingLifecycleGallery = {
+  id: string;
+  slug: string;
+  title: string;
+  clientName: string;
+  clientEmail: string;
+  status: string;
+  updatedAt: string;
+};
+
+export type CrmWeddingLifecycle = {
+  wedding: {
+    exists: boolean;
+    slug: string;
+    title: string;
+    couple: string;
+    venue: string;
+    weddingDate: string;
+    status: string;
+    assetCount: number;
+    previewCount: number;
+  };
+  clientGalleries: CrmWeddingLifecycleGallery[];
+  primaryClientGallery: CrmWeddingLifecycleGallery | null;
+  story: {
+    state: "not_started" | "draft" | "published" | "archived";
+    enabled: boolean;
+    status: string;
+    listVisible: boolean;
+    draftImageCount: number;
+    publishedImageCount: number;
+    publishedAt: string;
+  };
+  publicAssignments: { venue: number; moments: number; galleries: number; total: number };
+};
+
 export type CrmJobWorkspace = {
   job: CrmJob;
   contacts: Array<{ id: string; displayName: string; email: string; phone: string; role: string }>;
@@ -396,6 +432,7 @@ export type CrmJobWorkspace = {
   supplierSubmissions: CrmSupplierSubmission[];
   supplierDirectory: SupplierDirectoryOption[];
   activities: CrmActivity[];
+  lifecycle: CrmWeddingLifecycle;
   workflow: CrmJobWorkflow | null;
   tasks: CrmTask[];
   taskStats: { total: number; pending: number; completed: number; overdue: number };

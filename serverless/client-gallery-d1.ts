@@ -7,6 +7,25 @@ function text(value: unknown) {
   return String(value ?? "").trim();
 }
 
+function httpError(message: string, statusCode = 400) {
+  const error = new Error(message) as Error & { statusCode?: number };
+  error.statusCode = statusCode;
+  return error;
+}
+
+async function requireWeddingInWorkspace(db: D1Db, workspaceId: string, weddingSlug: string, allowArchived = false) {
+  if (!weddingSlug) return null;
+  const wedding = await db.prepare(`
+    SELECT slug, title, couple, status
+    FROM weddings
+    WHERE slug = ? AND workspace_id = ?
+    LIMIT 1
+  `).bind(weddingSlug, workspaceId).first();
+  if (!wedding) throw httpError("The selected Wedding record is not available in this workspace.", 404);
+  if (!allowArchived && text(wedding.status) === "archived") throw httpError("Choose an active Wedding record.", 409);
+  return wedding;
+}
+
 async function resolvedWorkspaceId(db: D1Db, workspaceId?: string) {
   return workspaceId !== undefined ? text(workspaceId) : await getDefaultWorkspaceId(db);
 }
@@ -456,6 +475,7 @@ export async function createClientGallery(db: D1Db, input: any, workspaceIdInput
   const id = `client_gallery_${crypto.randomUUID()}`;
   const slug = await uniqueSlug(db, workspaceId, input?.slug || title);
   const weddingSlug = text(input?.weddingSlug);
+  await requireWeddingInWorkspace(db, workspaceId, weddingSlug);
   const token = accessToken();
   const pin = text(input?.pin);
   const pinHash = pin ? await hashPin(pin) : "";
@@ -524,6 +544,8 @@ export async function updateClientGallery(db: D1Db, id: string, input: any, work
 
   const title = text(input?.title ?? existing.title) || text(existing.title);
   const slug = await uniqueSlug(db, workspaceId, input?.slug ?? existing.slug ?? title, id);
+  const weddingSlug = text(input?.weddingSlug ?? existing.wedding_slug);
+  await requireWeddingInWorkspace(db, workspaceId, weddingSlug, weddingSlug === text(existing.wedding_slug));
   let pinHash = text(existing.pin_hash);
   if (Object.prototype.hasOwnProperty.call(input || {}, "pin")) {
     const pin = text(input?.pin);
@@ -556,7 +578,7 @@ export async function updateClientGallery(db: D1Db, id: string, input: any, work
       updated_at = CURRENT_TIMESTAMP
     WHERE id = ? AND workspace_id = ?
   `).bind(
-    text(input?.weddingSlug ?? existing.wedding_slug),
+    weddingSlug,
     slug,
     title,
     text(input?.clientName ?? existing.client_name),

@@ -5,6 +5,7 @@ import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import {
   adminModules,
   isAdminNavigationItemActive,
+  isWeddingWorkspacePath,
   resolveAdminModule,
   resolveAdminNavigationItem,
   visibleModuleItems,
@@ -18,6 +19,7 @@ export function AdminLayout() {
   const moduleItems = visibleModuleItems(currentModule, auth.permissions);
   const navItems = moduleItems;
   const currentItem = resolveAdminNavigationItem(currentModule, location.pathname, location.search, auth.permissions);
+  const currentSectionLabel = isWeddingWorkspacePath(location.pathname) ? "Wedding Workspace" : currentItem?.label || "Detail";
   const crmMobilePrimary = [
     { key: "clients", label: "Clients" },
     { key: "leads", label: "Leads" },
@@ -30,10 +32,9 @@ export function AdminLayout() {
   const ModuleIcon = currentModule.icon;
 
   useEffect(() => {
-    const section = currentItem?.label || "Detail";
-    document.title = `${section} · ${currentModule.label} · ${auth.businessName || "WedPlanned"}`;
+    document.title = `${currentSectionLabel} · ${currentModule.label} · ${auth.businessName || "WedPlanned"}`;
     setMobileMoreOpen(false);
-  }, [auth.businessName, currentItem?.label, currentModule.label, location.pathname, location.search]);
+  }, [auth.businessName, currentModule.label, currentSectionLabel, location.pathname, location.search]);
 
   return (
     <div className="admin-shell min-h-screen bg-[#f5f3ef] text-neutral-950">
@@ -83,7 +84,7 @@ export function AdminLayout() {
           <header className="admin-topbar admin-mobile-header">
             <div className="admin-mobile-header__inner">
               <img src="/favicon-32x32.png" alt="" aria-hidden="true" />
-              <div className="admin-mobile-header__workspace"><strong>{auth.businessName || "MKB Weddings"}</strong><span>{currentModule.label} · {currentItem?.label || "Detail"}</span></div>
+              <div className="admin-mobile-header__workspace"><strong>{auth.businessName || "MKB Weddings"}</strong><span>{currentModule.label} · {currentSectionLabel}</span></div>
               <button type="button" onClick={() => setMobileMoreOpen(true)} aria-label="Open Admin menu"><Menu /></button>
             </div>
           </header>
@@ -92,7 +93,7 @@ export function AdminLayout() {
             <div className="admin-context-bar" aria-label="Breadcrumb">
               <Link to={currentModule.to}><ModuleIcon />{currentModule.label}</Link>
               <ChevronRight aria-hidden="true" />
-              <span>{currentItem?.label || "Detail"}</span>
+              <span>{currentSectionLabel}</span>
             </div>
             <Outlet />
           </main>

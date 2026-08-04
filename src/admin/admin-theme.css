@@ -2464,3 +2464,27 @@
   .admin-mobile-module-switcher svg { width: 17px; height: 17px; }
   .admin-mobile-more nav a.active { border-color: #222; background: #111; color: #fff; }
 }
+
+/* v1.9.6a — unified Wedding lifecycle */
+.crm-wedding-lifecycle-panel .admin-panel__body { padding: 14px; }
+.crm-wedding-lifecycle-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+.crm-wedding-lifecycle-card { display: grid; grid-template-columns: 32px minmax(0,1fr) auto; align-items: center; gap: 10px; min-width: 0; border: 1px solid var(--admin-border); border-radius: 11px; background: var(--admin-surface-soft); padding: 11px; }
+.crm-wedding-lifecycle-card__icon { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid var(--admin-border); border-radius: 8px; background: #fff; color: #333; }
+.crm-wedding-lifecycle-card__icon svg { width: 14px; height: 14px; }
+.crm-wedding-lifecycle-card > div { min-width: 0; }
+.crm-wedding-lifecycle-card p { margin: 0 0 2px; color: #8b8b8b; font-size: 7.5px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; }
+.crm-wedding-lifecycle-card strong { display: block; overflow: hidden; font-size: 10px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+.crm-wedding-lifecycle-card small { display: block; margin-top: 3px; overflow: hidden; color: var(--admin-muted); font-size: 8px; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.crm-wedding-lifecycle-card .admin-button { align-self: center; }
+
+@media (max-width: 900px) {
+  .crm-wedding-lifecycle-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
+  .crm-wedding-lifecycle-panel .admin-panel__body { padding: 10px; }
+  .crm-wedding-lifecycle-card { grid-template-columns: 30px minmax(0,1fr); }
+  .crm-wedding-lifecycle-card > .admin-button,
+  .crm-wedding-lifecycle-card > .admin-status { grid-column: 2; justify-self: start; }
+  .crm-wedding-lifecycle-card small { white-space: normal; }
+}
