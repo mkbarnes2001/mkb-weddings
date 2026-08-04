@@ -74,7 +74,7 @@ export function AdminLayout() {
 
           <nav className="admin-module-navigation min-h-0 flex-1 overflow-y-auto p-3" aria-label={`${currentModule.label} navigation`}>
             <div className="admin-module-navigation__header"><ModuleIcon /><div><strong>{currentModule.label}</strong><span>{currentModule.description}</span></div></div>
-            <div className="admin-module-navigation__items mt-3" data-layout={currentModule.key === "website" ? "grid" : "list"}>
+            <div className="admin-module-navigation__items mt-3" data-layout={currentModule.key === "website" || currentModule.key === "crm" ? "grid" : "list"}>
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = isAdminNavigationItemActive(item, location.pathname, location.search);

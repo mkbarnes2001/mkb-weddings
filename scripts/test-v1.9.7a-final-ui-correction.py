@@ -16,9 +16,11 @@ checks = {
     "desktop sidebar navigation can shrink and scroll": (
         'className="admin-module-navigation min-h-0 flex-1 overflow-y-auto p-3"' in layout
         and ".admin-module-navigation { min-height: 0;" in theme
+        and "grid-template-rows: auto auto minmax(0,1fr) auto" in theme
+        and "overflow-y: scroll !important" in theme
     ),
-    "Website navigation uses a compact two-column layout": (
-        'data-layout={currentModule.key === "website" ? "grid" : "list"}' in layout
+    "CRM and Website navigation use a compact two-column layout": (
+        'data-layout={currentModule.key === "website" || currentModule.key === "crm" ? "grid" : "list"}' in layout
         and '.admin-module-navigation__items[data-layout="grid"]' in theme
     ),
     "platform administrator authority is visible in the session UI": (
