@@ -87,7 +87,7 @@ def main() -> None:
     assert ".admin-module-switcher-wrap { padding: 14px 16px 18px !important; }" in css
     assert ".admin-module-switcher { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }" in css
     assert "min-height: 44px" in css and "padding: 9px 10px" in css
-    assert not (ROOT / "d1/migrations/032_platform_modules_navigation.sql").exists(), "v1.9.5a navigation did not own schema 32"
+    assert not (ROOT / "d1/migrations/032_platform_modules_navigation.sql").exists(), "v1.9.5a navigation did not own schema 33"
 
     print("PASS v1.9.5a platform modules and navigation")
     print("  four-module switcher and module-specific navigation: verified")

@@ -1,5 +1,6 @@
 import { getPlatformFoundation, savePlatformSupplierTaxonomy } from "./platform-foundation-d1";
 import { getPlatformModuleConfigurations, savePlatformModuleConfiguration } from "./platform-module-config-d1";
+import { listPlatformBrandAssets } from "./platform-brand-assets-d1";
 
 type D1Db = any;
 
@@ -27,7 +28,7 @@ async function schemaVersion(db: D1Db) {
 
 export async function getPlatformAdministration(db: D1Db, actor: any) {
   requirePlatformAdmin(actor);
-  const [version, workspaces, users, recentAudit, modules, foundation] = await Promise.all([
+  const [version, workspaces, users, recentAudit, modules, brandAssets, foundation] = await Promise.all([
     schemaVersion(db),
     db.prepare(`
       SELECT w.id, w.slug, w.name, w.status, w.plan, w.created_at, w.updated_at,
@@ -70,6 +71,7 @@ export async function getPlatformAdministration(db: D1Db, actor: any) {
       LIMIT 20
     `).all(),
     getPlatformModuleConfigurations(db),
+    listPlatformBrandAssets(db, actor),
     getPlatformFoundation(db, actor.workspaceId),
   ]);
 
@@ -83,6 +85,7 @@ export async function getPlatformAdministration(db: D1Db, actor: any) {
       activeWorkspaces: workspaceRows.filter((row: any) => text(row.status) === "active").length,
       users: userRows.length,
       platformAdmins: userRows.filter((row: any) => text(row.platform_role) === "platform_admin").length,
+      brandAssets: brandAssets.length,
     },
     workspaces: workspaceRows.map((row: any) => ({
       id: text(row.id),
@@ -109,6 +112,7 @@ export async function getPlatformAdministration(db: D1Db, actor: any) {
       createdAt: row.created_at,
     })),
     modules,
+    brandAssets,
     supplierTaxonomy: foundation.supplierTaxonomy,
     recentAudit: (recentAudit.results || []).map((row: any) => ({
       id: text(row.id),

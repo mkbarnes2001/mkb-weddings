@@ -13,25 +13,30 @@ suppliers = read("src/admin/pages/Suppliers.tsx")
 theme = read("src/admin/admin-theme.css")
 
 checks = {
-    "desktop sidebar navigation can shrink and scroll": (
+    "desktop sidebar keeps a stable width and navigation scrolls": (
         'className="admin-module-navigation min-h-0 flex-1 overflow-y-auto p-3"' in layout
-        and ".admin-module-navigation { min-height: 0;" in theme
-        and "grid-template-rows: auto auto minmax(0,1fr) auto" in theme
-        and "overflow-y: scroll !important" in theme
+        and ".admin-module-navigation {" in theme
+        and "width: 244px;" in theme
+        and "min-width: 244px;" in theme
+        and "overflow-y: auto !important;" in theme
     ),
     "CRM and Website navigation use a compact two-column layout": (
         'data-layout={!isPlatformRoute && (currentModule.key === "website" || currentModule.key === "crm") ? "grid" : "list"}' in layout
         and '.admin-module-navigation__items[data-layout="grid"]' in theme
     ),
     "platform administrator authority is visible in the session UI": (
-        'auth.platformRole === "platform_admin"' in layout
-        and layout.count("Platform administrator") >= 2
+        'const isPlatformAdmin = auth.platformRole === "platform_admin";' in layout
+        and '? "Platform administrator"' in layout
+        and "admin-sidebar-control-card__user" in layout
     ),
-    "account and sign-out controls are visually distinct": (
-        "admin-sidebar-account" in layout
+    "unified workspace control and icon sign-out are visually distinct": (
+        "admin-sidebar-control-card" in layout
+        and "admin-sidebar-control-card__user" in layout
         and "admin-sidebar-signout" in layout
-        and ".admin-sidebar-account" in theme
-        and ".admin-sidebar-signout" in theme
+        and 'title="Sign out" aria-label="Sign out"><LogOut /></button>' in layout
+        and ".admin-sidebar-control-card {" in theme
+        and ".admin-sidebar-signout {" in theme
+        and "admin-sidebar-account" not in layout
     ),
     "Supplier categories use a single selection list": (
         'aria-label="Filter suppliers by category"' in suppliers

@@ -102,6 +102,8 @@ export type PlatformModuleKey = "crm" | "client-galleries" | "website" | "busine
 export type PlatformModuleConfiguration = {
   moduleKey: PlatformModuleKey;
   accentColor: string;
+  pageBackgroundColor: string;
+  sectionBackgroundColor: string;
   iconKey: string;
   markUrl: string;
   activeButtonStyle: "solid" | "soft" | "outline";
@@ -109,6 +111,20 @@ export type PlatformModuleConfiguration = {
   status: "active" | "archived";
   sortOrder: number;
   updatedAt?: string;
+};
+
+export type PlatformBrandAsset = {
+  id: string;
+  name: string;
+  assetType: "logo" | "icon";
+  storageKey: string;
+  url: string;
+  mimeType: string;
+  sizeBytes: number;
+  status: "active" | "archived";
+  uploadedByEmail: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type PlatformAdministrationWorkspace = {
@@ -140,10 +156,11 @@ export type PlatformAdministrationUser = {
 export type PlatformAdministrationPayload = {
   schemaVersion: number;
   brand: { name: string; primaryDomain: string; ukDomain: string };
-  summary: { workspaces: number; activeWorkspaces: number; users: number; platformAdmins: number };
+  summary: { workspaces: number; activeWorkspaces: number; users: number; platformAdmins: number; brandAssets: number };
   workspaces: PlatformAdministrationWorkspace[];
   users: PlatformAdministrationUser[];
   modules: PlatformModuleConfiguration[];
+  brandAssets: PlatformBrandAsset[];
   supplierTaxonomy: PlatformSupplierTaxonomy;
   recentAudit: Array<WedPlannedAuditEvent & { actorEmail: string }>;
 };

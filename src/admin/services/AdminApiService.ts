@@ -9,7 +9,7 @@ import type { AssetLibraryFilters, AssetLibraryPayload } from "../types/asset";
 import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, ClientGalleryListPayload, ClientGalleryRecord, PrivateOriginalUploadSession, PrivateOriginalUploadedPart } from "../types/clientGallery";
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
-import type { PlatformAdministrationPayload, PlatformModuleConfiguration, PlatformSupplierTaxonomy, ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
+import type { PlatformAdministrationPayload, PlatformBrandAsset, PlatformModuleConfiguration, PlatformSupplierTaxonomy, ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
 import type { CrmAddon, CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmPackage, CrmQuote, CrmQuoteOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate } from "../types/crm";
 import { prepareImageUpload } from "./ImageUploadService";
 
@@ -1160,6 +1160,29 @@ export class AdminApiService {
 
   static async savePlatformModuleConfiguration(module: PlatformModuleConfiguration) {
     return this.mutatePlatformAdministration({ action: "saveModuleConfiguration", module });
+  }
+
+  static async uploadPlatformBrandAsset(name: string, assetType: PlatformBrandAsset["assetType"], file: File) {
+    const form = new FormData();
+    form.set("name", name);
+    form.set("assetType", assetType);
+    form.set("file", file);
+    const response = await fetch(`${API_BASE}/api/platform-assets`, {
+      method: "POST",
+      credentials: "include",
+      body: form,
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error((result as ApiErrorPayload).error || `Platform asset upload failed (${response.status}).`);
+    return (result as { ok: true; platformAdmin: PlatformAdministrationPayload }).platformAdmin;
+  }
+
+  static async deletePlatformBrandAsset(assetId: string) {
+    const result = await request<{ ok: true; platformAdmin: PlatformAdministrationPayload }>(
+      `/api/platform-assets?id=${encodeURIComponent(assetId)}`,
+      { method: "DELETE" },
+    );
+    return result.platformAdmin;
   }
 
   static async saveWedPlannedServiceArea(serviceArea: Partial<WedPlannedServiceArea>) {

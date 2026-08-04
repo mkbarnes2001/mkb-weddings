@@ -113,6 +113,7 @@ export const platformAdminItems: AdminNavigationItem[] = [
   { key: "businesses", label: "Businesses & workspaces", to: "/admin/platform?section=businesses", icon: Building2, mobilePrimary: true, match: exactWithQuery("/admin/platform", "section", "businesses") },
   { key: "taxonomy", label: "Supplier taxonomy", to: "/admin/platform?section=taxonomy", icon: Users, match: exactWithQuery("/admin/platform", "section", "taxonomy") },
   { key: "modules", label: "Module configuration", to: "/admin/platform?section=modules", icon: Palette, mobilePrimary: true, match: exactWithQuery("/admin/platform", "section", "modules") },
+  { key: "assets", label: "Brand assets", to: "/admin/platform?section=assets", icon: Images, match: exactWithQuery("/admin/platform", "section", "assets") },
   { key: "operations", label: "Platform operations", to: "/admin/platform?section=operations", icon: ShieldCheck, match: exactWithQuery("/admin/platform", "section", "operations") },
   { key: "access", label: "Platform access", to: "/admin/platform?section=access", icon: ContactRound, mobilePrimary: true, match: exactWithQuery("/admin/platform", "section", "access") },
 ];
@@ -139,10 +140,10 @@ export const adminModuleIconOptions = [
 const iconByKey = new Map<string, LucideIcon>(adminModuleIconOptions.map((option) => [option.key, option.icon]));
 
 export const defaultAdminModuleConfigurations: PlatformModuleConfiguration[] = [
-  { moduleKey: "crm", accentColor: "#2563EB", iconKey: "contact-round", markUrl: "", activeButtonStyle: "solid", panelAccentStyle: "edge", status: "active", sortOrder: 10 },
-  { moduleKey: "client-galleries", accentColor: "#7C3AED", iconKey: "images", markUrl: "", activeButtonStyle: "soft", panelAccentStyle: "wash", status: "active", sortOrder: 20 },
-  { moduleKey: "website", accentColor: "#0F766E", iconKey: "globe-2", markUrl: "", activeButtonStyle: "solid", panelAccentStyle: "edge", status: "active", sortOrder: 30 },
-  { moduleKey: "business", accentColor: "#B45309", iconKey: "briefcase-business", markUrl: "", activeButtonStyle: "outline", panelAccentStyle: "header", status: "active", sortOrder: 40 },
+  { moduleKey: "crm", accentColor: "#2563EB", pageBackgroundColor: "#F5F3EF", sectionBackgroundColor: "#FFFFFF", iconKey: "contact-round", markUrl: "", activeButtonStyle: "solid", panelAccentStyle: "edge", status: "active", sortOrder: 10 },
+  { moduleKey: "client-galleries", accentColor: "#7C3AED", pageBackgroundColor: "#F5F3EF", sectionBackgroundColor: "#FFFFFF", iconKey: "images", markUrl: "", activeButtonStyle: "soft", panelAccentStyle: "wash", status: "active", sortOrder: 20 },
+  { moduleKey: "website", accentColor: "#0F766E", pageBackgroundColor: "#F5F3EF", sectionBackgroundColor: "#FFFFFF", iconKey: "globe-2", markUrl: "", activeButtonStyle: "solid", panelAccentStyle: "edge", status: "active", sortOrder: 30 },
+  { moduleKey: "business", accentColor: "#B45309", pageBackgroundColor: "#F5F3EF", sectionBackgroundColor: "#FFFFFF", iconKey: "briefcase-business", markUrl: "", activeButtonStyle: "outline", panelAccentStyle: "header", status: "active", sortOrder: 40 },
 ];
 
 export function resolveAdminModule(pathname: string) {

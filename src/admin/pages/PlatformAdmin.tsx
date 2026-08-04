@@ -11,6 +11,7 @@ import {
   ContactRound,
   Download,
   Gauge,
+  ImagePlus,
   Globe2,
   Images,
   Palette,
@@ -19,6 +20,7 @@ import {
   Save,
   ShieldCheck,
   Trash2,
+  Upload,
   Users,
 } from "lucide-react";
 import {
@@ -49,11 +51,11 @@ import type {
   WedPlannedOperationsPayload,
 } from "../types/platform";
 
-type SectionKey = "overview" | "businesses" | "taxonomy" | "modules" | "operations" | "access";
+type SectionKey = "overview" | "businesses" | "taxonomy" | "modules" | "assets" | "operations" | "access";
 
 function sectionFromSearch(params: URLSearchParams): SectionKey {
   const value = params.get("section");
-  return value === "businesses" || value === "taxonomy" || value === "modules" || value === "operations" || value === "access" ? value : "overview";
+  return value === "businesses" || value === "taxonomy" || value === "modules" || value === "assets" || value === "operations" || value === "access" ? value : "overview";
 }
 
 function FieldInput({ value, onChange, placeholder = "", type = "text" }: {
@@ -110,6 +112,11 @@ export function PlatformAdmin() {
   const [supportReason, setSupportReason] = useState("");
   const [deletionConfirmation, setDeletionConfirmation] = useState("");
   const [deletionReason, setDeletionReason] = useState("");
+  const [assetName, setAssetName] = useState("");
+  const [assetType, setAssetType] = useState<"logo" | "icon">("logo");
+  const [assetFile, setAssetFile] = useState<File | null>(null);
+  const [assetInputKey, setAssetInputKey] = useState(0);
+  const [assetUploading, setAssetUploading] = useState(false);
 
   function apply(next: PlatformAdministrationPayload) {
     setPlatformAdmin(next);
@@ -222,6 +229,40 @@ export function PlatformAdmin() {
     await runAdmin(() => AdminApiService.savePlatformModuleConfiguration(module), `${moduleLabels.get(module.moduleKey) || module.moduleKey} module appearance saved.`);
   }
 
+  async function uploadBrandAsset() {
+    if (!assetFile) return setError("Choose a PNG, JPEG or WebP logo or icon.");
+    setAssetUploading(true);
+    setMessage("");
+    setError("");
+    try {
+      const next = await AdminApiService.uploadPlatformBrandAsset(assetName.trim() || assetFile.name.replace(/\.[^.]+$/, ""), assetType, assetFile);
+      apply(next);
+      setAssetName("");
+      setAssetFile(null);
+      setAssetInputKey((current) => current + 1);
+      setMessage("Platform brand asset uploaded.");
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Unable to upload the platform brand asset.");
+    } finally {
+      setAssetUploading(false);
+    }
+  }
+
+  async function deleteBrandAsset(assetId: string, assetLabel: string) {
+    if (!window.confirm(`Delete ${assetLabel} from the platform asset library?`)) return;
+    setSaving(true);
+    setMessage("");
+    setError("");
+    try {
+      apply(await AdminApiService.deletePlatformBrandAsset(assetId));
+      setMessage("Platform brand asset deleted.");
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : "Unable to delete the platform brand asset.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   const selectedWorkspace = useMemo(() => platformAdmin?.workspaces.find((workspace) => workspace.id === selectedWorkspaceId) || null, [platformAdmin?.workspaces, selectedWorkspaceId]);
 
   if (loading) return <div className="admin-page text-sm text-neutral-500">Loading Platform administration…</div>;
@@ -243,12 +284,13 @@ export function PlatformAdmin() {
         <Metric value={platformAdmin.summary.workspaces} label="Business workspaces" detail={`${platformAdmin.summary.activeWorkspaces} active`} />
         <Metric value={platformAdmin.summary.users} label="Platform users" detail={`${platformAdmin.summary.platformAdmins} platform administrators`} />
         <Metric value={platformAdmin.modules.length} label="Configured modules" detail="Global appearance definitions" />
-        <Metric value={platformAdmin.supplierTaxonomy.categories.length} label="Supplier categories" detail={`${platformAdmin.supplierTaxonomy.roles.length} Wedding roles`} />
+        <Metric value={platformAdmin.summary.brandAssets} label="Brand assets" detail="Reusable platform logos and icons" />
       </section>
       <section className="admin-module-destination-grid">
         <Destination to="/admin/platform?section=businesses" icon={Building2} title="Businesses & workspaces" description="Review every tenant boundary, business status, membership count and verified-domain footprint." meta={`${platformAdmin.summary.activeWorkspaces} active`} />
         <Destination to="/admin/platform?section=taxonomy" icon={Users} title="Supplier taxonomy" description="Manage the canonical supplier categories and Wedding roles shared by every workspace." meta={`${platformAdmin.supplierTaxonomy.roles.length} roles`} />
-        <Destination to="/admin/platform?section=modules" icon={Palette} title="Module configuration" description="Control module accents, icons, marks, active buttons and main-panel treatments." meta={`${platformAdmin.modules.length} modules`} />
+        <Destination to="/admin/platform?section=modules" icon={Palette} title="Module configuration" description="Control module accents, page and section colours, icons, marks and navigation treatments." meta={`${platformAdmin.modules.length} modules`} />
+        <Destination to="/admin/platform?section=assets" icon={Images} title="Brand assets" description="Upload reusable platform-owned logos and icons, then assign them to modules." meta={`${platformAdmin.brandAssets.length} assets`} />
         <Destination to="/admin/platform?section=operations" icon={ShieldCheck} title="Platform operations" description="Select a business workspace before managing support access, exports or staged deletion." meta="Workspace scoped" />
         <Destination to="/admin/platform?section=access" icon={ContactRound} title="Platform access" description="Review platform identities, roles and the enforced administrator boundary." meta={`${platformAdmin.summary.users} users`} />
       </section>
@@ -273,18 +315,35 @@ export function PlatformAdmin() {
       const definition = adminModules.find((item) => item.key === module.moduleKey)!;
       const selectedIcon = adminModuleIconOptions.find((option) => option.key === module.iconKey)?.icon || definition.icon;
       const PreviewIcon = selectedIcon;
+      const markInLibrary = platformAdmin.brandAssets.some((asset) => asset.url === module.markUrl);
       return <AdminPanel key={module.moduleKey} title={definition.label} description={definition.description} icon={PreviewIcon} actions={<AdminStatus tone="info">Global</AdminStatus>}>
-        <div className="platform-module-preview" style={{ "--preview-accent": module.accentColor } as CSSProperties} data-button-style={module.activeButtonStyle} data-panel-style={module.panelAccentStyle}><span className="platform-module-preview__button"><PreviewIcon />{definition.shortLabel}</span><span className="platform-module-preview__nav">Active navigation</span><span className="platform-module-preview__panel">Main-panel accent</span></div>
+        <div className="platform-module-preview" style={{ "--preview-accent": module.accentColor, "--preview-page": module.pageBackgroundColor, "--preview-surface": module.sectionBackgroundColor } as CSSProperties} data-button-style={module.activeButtonStyle} data-panel-style={module.panelAccentStyle}><span className="platform-module-preview__button"><PreviewIcon />{definition.shortLabel}</span><span className="platform-module-preview__nav">Active navigation</span><span className="platform-module-preview__panel">Section surface</span></div>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           <AdminField label="Accent colour"><div className="platform-colour-control"><input type="color" value={module.accentColor} onChange={(event) => updateModule(module.moduleKey, { accentColor: event.target.value.toUpperCase() })} /><FieldInput value={module.accentColor} onChange={(value) => updateModule(module.moduleKey, { accentColor: value.toUpperCase() })} /></div></AdminField>
           <AdminField label="Module icon"><FieldSelect value={module.iconKey} onChange={(value) => updateModule(module.moduleKey, { iconKey: value })}>{adminModuleIconOptions.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}</FieldSelect></AdminField>
+          <AdminField label="Page background"><div className="platform-colour-control"><input type="color" value={module.pageBackgroundColor} onChange={(event) => updateModule(module.moduleKey, { pageBackgroundColor: event.target.value.toUpperCase() })} /><FieldInput value={module.pageBackgroundColor} onChange={(value) => updateModule(module.moduleKey, { pageBackgroundColor: value.toUpperCase() })} /></div></AdminField>
+          <AdminField label="Section / card background"><div className="platform-colour-control"><input type="color" value={module.sectionBackgroundColor} onChange={(event) => updateModule(module.moduleKey, { sectionBackgroundColor: event.target.value.toUpperCase() })} /><FieldInput value={module.sectionBackgroundColor} onChange={(value) => updateModule(module.moduleKey, { sectionBackgroundColor: value.toUpperCase() })} /></div></AdminField>
           <AdminField label="Active-button appearance"><FieldSelect value={module.activeButtonStyle} onChange={(value) => updateModule(module.moduleKey, { activeButtonStyle: value as PlatformModuleConfiguration["activeButtonStyle"] })}><option value="solid">Solid accent</option><option value="soft">Soft accent</option><option value="outline">Accent outline</option></FieldSelect></AdminField>
           <AdminField label="Main-panel accent"><FieldSelect value={module.panelAccentStyle} onChange={(value) => updateModule(module.moduleKey, { panelAccentStyle: value as PlatformModuleConfiguration["panelAccentStyle"] })}><option value="edge">Accent edge</option><option value="wash">Accent wash</option><option value="header">Header accent</option></FieldSelect></AdminField>
-          <AdminField label="Logo or mark URL" help="Use an https:// URL or same-origin path. Leave empty to use the selected icon." className="md:col-span-2"><FieldInput value={module.markUrl} onChange={(value) => updateModule(module.moduleKey, { markUrl: value })} placeholder="https://… or /assets/mark.svg" /></AdminField>
+          <AdminField label="Logo or mark" help="Choose a reusable asset from the platform Brand assets library. Leave empty to use the selected Lucide icon." className="md:col-span-2"><FieldSelect value={module.markUrl} onChange={(value) => updateModule(module.moduleKey, { markUrl: value })}><option value="">Use selected module icon</option>{module.markUrl && !markInLibrary ? <option value={module.markUrl}>Current external mark</option> : null}{platformAdmin.brandAssets.map((asset) => <option key={asset.id} value={asset.url}>{asset.name} · {asset.assetType}</option>)}</FieldSelect></AdminField>
         </div>
-        <div className="mt-4 flex justify-end"><AdminButton variant="primary" icon={Save} disabled={saving} onClick={() => saveModule(module)}>{saving ? "Saving…" : `Save ${definition.shortLabel}`}</AdminButton></div>
+        <div className="mt-4 flex items-center justify-between gap-3"><Link to="/admin/platform?section=assets" className="admin-inline-link">Manage Brand assets</Link><AdminButton variant="primary" icon={Save} disabled={saving} onClick={() => saveModule(module)}>{saving ? "Saving…" : `Save ${definition.shortLabel}`}</AdminButton></div>
       </AdminPanel>;
     })}</div> : null}
+
+    {section === "assets" ? <div className="space-y-5">
+      <AdminPanel title="Add platform brand asset" description="Upload reusable platform-owned logos and icons. PNG, JPEG and WebP files up to 3 MB are supported." icon={ImagePlus}>
+        <div className="platform-asset-upload-grid">
+          <AdminField label="Asset name"><FieldInput value={assetName} onChange={setAssetName} placeholder="For example: WedPlanned monogram" /></AdminField>
+          <AdminField label="Asset type"><FieldSelect value={assetType} onChange={(value) => setAssetType(value as "logo" | "icon")}><option value="logo">Logo / mark</option><option value="icon">Icon</option></FieldSelect></AdminField>
+          <AdminField label="Image file"><input key={assetInputKey} type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setAssetFile(event.target.files?.[0] || null)} /></AdminField>
+          <AdminButton variant="primary" icon={Upload} disabled={assetUploading || !assetFile} onClick={uploadBrandAsset}>{assetUploading ? "Uploading…" : "Upload asset"}</AdminButton>
+        </div>
+      </AdminPanel>
+      <AdminPanel title="Brand asset library" description="Select these assets from Module configuration. Assets assigned to a module cannot be deleted." icon={Images} actions={<AdminStatus tone="info">{platformAdmin.brandAssets.length} assets</AdminStatus>}>
+        {platformAdmin.brandAssets.length ? <div className="platform-brand-asset-grid">{platformAdmin.brandAssets.map((asset) => <article key={asset.id} className="platform-brand-asset-card"><div className="platform-brand-asset-card__preview"><img src={asset.url} alt="" /></div><div className="platform-brand-asset-card__body"><div><strong>{asset.name}</strong><span>{asset.assetType} · {(asset.sizeBytes / 1024).toFixed(0)} KB</span></div><button type="button" className="admin-icon-control admin-icon-control--danger" onClick={() => deleteBrandAsset(asset.id, asset.name)} disabled={saving} title="Delete asset" aria-label={`Delete ${asset.name}`}><Trash2 /></button></div></article>)}</div> : <div className="admin-empty-state"><span className="admin-empty-state__icon"><Images /></span><h3>No platform brand assets</h3><p>Upload a logo or icon above, then assign it to a module from Module configuration.</p></div>}
+      </AdminPanel>
+    </div> : null}
 
     {section === "operations" ? <div className="space-y-5">
       <AdminPanel title="Workspace operation boundary" description="Every operation below is explicitly scoped to the selected business workspace." icon={ShieldCheck}>
