@@ -3,13 +3,10 @@ import { Archive, ExternalLink, Plus, Save, Search, Users } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import { SupplierService, type MasterSupplier } from "../services/SupplierService";
 import { AdminPage, AdminPageHeader, AdminToolbar } from "../components/ui/AdminUI";
+import { AdminSearchSelect, type AdminSearchSelectOption } from "../components/ui/AdminSearchSelect";
+import { SUPPLIER_CATEGORY_OPTIONS, canonicalSupplierCategory } from "../data/supplierTaxonomy";
 
-const CATEGORIES = [
-  "Photography", "Venue", "Videographer", "Florist", "Flowers", "Hair", "Makeup", "Make-up",
-  "Wedding Dress", "Dress", "Seamstress", "Suits", "Menswear", "Cake", "Band", "DJ",
-  "Ceremony Music", "Stationery", "Transport", "Decor", "Celebrant", "Celebrant / Officiant",
-  "Content Creator", "Entertainment", "Ice Cream", "Other",
-];
+const CATEGORY_OPTIONS: AdminSearchSelectOption[] = SUPPLIER_CATEGORY_OPTIONS.map((category) => ({ value: category, label: category }));
 
 const EMPTY: MasterSupplier = {
   id: "", name: "", displayName: "", category: "", website: "", instagram: "",
@@ -41,7 +38,7 @@ export function Suppliers() {
     const q = query.trim().toLowerCase();
     if (!q) return suppliers;
     return suppliers.filter((supplier) => [
-      supplier.name, supplier.displayName, supplier.category, supplier.website,
+      supplier.name, supplier.displayName, supplier.category, canonicalSupplierCategory(supplier.category), supplier.website,
       supplier.instagram, supplier.email, supplier.location, supplier.county,
     ].some((value) => String(value || "").toLowerCase().includes(q)));
   }, [suppliers, query]);
@@ -65,11 +62,14 @@ export function Suppliers() {
 
   async function save() {
     if (!draft?.name.trim()) { setError("Supplier name is required."); return; }
+    const category = canonicalSupplierCategory(draft.category);
+    if (!category) { setError("Choose a canonical supplier category from the searchable list."); return; }
     setSaving(true); setError(""); setMessage("");
     try {
+      const payload = { ...draft, category };
       const saved = draft.id
-        ? await AdminApiService.updateMasterSupplier(draft as MasterSupplier & { id: string })
-        : await AdminApiService.createMasterSupplier(draft);
+        ? await AdminApiService.updateMasterSupplier(payload as MasterSupplier & { id: string })
+        : await AdminApiService.createMasterSupplier(payload);
       await load(saved.id);
       setMessage(draft.id ? "Supplier updated." : "Supplier created.");
     } catch (err) {
@@ -127,7 +127,7 @@ export function Suppliers() {
             {filtered.length ? filtered.map((supplier) => (
               <button key={supplier.id} type="button" onClick={() => selectSupplier(supplier)} className={`admin-supplier-row ${activeId === supplier.id ? "admin-supplier-row--active" : ""}`}>
                 <span className="admin-supplier-row__name">{supplier.displayName || supplier.name}</span>
-                <span className="admin-supplier-row__category">{supplier.category || "Uncategorised"}{supplier.county ? ` · ${supplier.county}` : supplier.location ? ` · ${supplier.location}` : ""}</span>
+                <span className="admin-supplier-row__category">{canonicalSupplierCategory(supplier.category) || supplier.category || "Uncategorised"}{supplier.county ? ` · ${supplier.county}` : supplier.location ? ` · ${supplier.location}` : ""}</span>
                 <span className={`admin-supplier-row__status ${supplier.status === "archived" ? "is-archived" : ""}`}>{supplier.status}</span>
                 <span className="admin-supplier-row__count">{supplier.linkedWeddingCount}</span>
               </button>
@@ -146,7 +146,15 @@ export function Suppliers() {
               <div className="admin-quiet-form">
                 <Field label="Business name" value={draft.name} onChange={(value) => patch({ name: value, displayName: draft.displayName || value })} />
                 <Field label="Display name" value={draft.displayName} onChange={(value) => patch({ displayName: value })} />
-                <label className="admin-quiet-field"><span>Category</span><select value={draft.category} onChange={(event) => patch({ category: event.target.value })}><option value="">Select category…</option>{draft.category && !CATEGORIES.includes(draft.category) ? <option value={draft.category}>{draft.category}</option> : null}{CATEGORIES.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
+                <AdminSearchSelect
+                  label="Category"
+                  value={canonicalSupplierCategory(draft.category) || draft.category}
+                  options={CATEGORY_OPTIONS}
+                  onChange={(category) => patch({ category })}
+                  placeholder="Search supplier categories…"
+                  help="Type to filter, then choose one canonical category. Legacy labels are normalised when saved."
+                  allowClear={false}
+                />
                 <Field label="Website" value={draft.website} onChange={(value) => patch({ website: value })} placeholder="https://..." />
                 <Field label="Instagram" value={draft.instagram} onChange={(value) => patch({ instagram: value.replace(/^@/, "") })} placeholder="supplierhandle" />
                 <Field label="Email" value={draft.email} onChange={(value) => patch({ email: value })} />

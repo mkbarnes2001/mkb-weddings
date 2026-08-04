@@ -26,8 +26,21 @@ import { uploadPrivateOriginal } from "../lib/privateOriginalUpload";
 import type { VenueSummary } from "../types/venue";
 import type { WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import { COUNTRY_OPTIONS } from "../data/countries";
+import { AdminSearchSelect, type AdminSearchSelectOption } from "../components/ui/AdminSearchSelect";
+import {
+  SUPPLIER_CATEGORY_OPTIONS,
+  canonicalSupplierCategory,
+  canonicalWeddingRole,
+  defaultWeddingRoleForCategory,
+  weddingRoleOptionsForCategory,
+} from "../data/supplierTaxonomy";
 
 const PUBLIC_ORIGIN = "https://www.mkbweddings.co.uk";
+const SUPPLIER_CATEGORY_SEARCH_OPTIONS: AdminSearchSelectOption[] = SUPPLIER_CATEGORY_OPTIONS.map((category) => ({ value: category, label: category }));
+
+function roleSearchOptions(category: string): AdminSearchSelectOption[] {
+  return weddingRoleOptionsForCategory(category).map((role) => ({ value: role, label: role }));
+}
 
 type UploadItem = {
   id: string;
@@ -102,6 +115,7 @@ export function WeddingWorkspace() {
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
   const [supplierRole, setSupplierRole] = useState("");
   const [showNewVenue, setShowNewVenue] = useState(false);
+  const [showVenuePicker, setShowVenuePicker] = useState(false);
   const [newVenue, setNewVenue] = useState({ name: "", town: "", county: "", country: "Northern Ireland", additionalLocationId: "", website: "", instagram: "" });
   const [showNewSupplier, setShowNewSupplier] = useState(false);
   const [newSupplier, setNewSupplier] = useState({ name: "", category: "", role: "", website: "", instagram: "", email: "" });
@@ -133,6 +147,7 @@ export function WeddingWorkspace() {
       setLocationConfig(nextLocations);
       setWorkspaceRecord(nextWorkspaceRecord);
       setVenuePicker(nextWedding.venue || nextWorkspace.wedding.venue || "");
+      setShowVenuePicker(!nextWedding.venueSlug);
       setNewVenue((current) => ({
         ...current,
         country: current.country || nextWorkspaceRecord.settings.defaultCountry || "Northern Ireland",
@@ -163,6 +178,23 @@ export function WeddingWorkspace() {
   const selectedSupplier = useMemo(
     () => masterSuppliers.find((supplier) => supplier.id === selectedSupplierId) || null,
     [masterSuppliers, selectedSupplierId],
+  );
+  const supplierSearchOptions = useMemo<AdminSearchSelectOption[]>(
+    () => masterSuppliers.map((supplier) => ({
+      value: supplier.id,
+      label: supplier.displayName || supplier.name,
+      description: [canonicalSupplierCategory(supplier.category) || supplier.category, supplier.county || supplier.location].filter(Boolean).join(" · "),
+      keywords: [supplier.name, supplier.displayName, supplier.category, supplier.instagram, supplier.email],
+    })),
+    [masterSuppliers],
+  );
+  const supplierRoleSearchOptions = useMemo(
+    () => roleSearchOptions(selectedSupplier?.category || ""),
+    [selectedSupplier?.category],
+  );
+  const newSupplierRoleSearchOptions = useMemo(
+    () => roleSearchOptions(newSupplier.category),
+    [newSupplier.category],
   );
   const possibleVenueMatches = useMemo(
     () => newVenue.name.trim() ? venues.filter((venue) => looksSimilar(newVenue.name, venue.name)).slice(0, 4) : [],
@@ -212,7 +244,7 @@ export function WeddingWorkspace() {
       const key = `${role.toLowerCase()}|${name.toLowerCase()}|${handle.toLowerCase()}`;
       if (!name || seen.has(key)) return;
       if (role.toLowerCase() === "venue" && venueName && name.toLowerCase() === venueName.toLowerCase()) return;
-      if (role.toLowerCase() === "photography" && studioHandle) return;
+      if (["photography", "photographer"].includes(role.toLowerCase()) && studioHandle) return;
       seen.add(key);
       lines.push(`${role}: ${handle || name}`);
     });
@@ -243,6 +275,7 @@ export function WeddingWorkspace() {
       setWedding(result.wedding);
       setVenuePicker(venue?.name || "");
       setMessage(venue ? `${venue.name} linked to this wedding.` : "Venue link cleared.");
+      setShowVenuePicker(false);
       await reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to update venue.");
@@ -263,6 +296,7 @@ export function WeddingWorkspace() {
       return;
     }
     setShowNewVenue(true);
+    setShowVenuePicker(true);
     setNewVenue((current) => ({ ...current, name: value }));
     setMessage(`No existing venue matched “${value}”. Complete the quick-create details below.`);
   };
@@ -394,6 +428,16 @@ export function WeddingWorkspace() {
       setError("Supplier name is required.");
       return;
     }
+    const category = canonicalSupplierCategory(newSupplier.category);
+    if (!category) {
+      setError("Choose a canonical supplier category from the searchable list.");
+      return;
+    }
+    const role = canonicalWeddingRole(newSupplier.role) || defaultWeddingRoleForCategory(category);
+    if (!role) {
+      setError("Choose a canonical Wedding role from the searchable list.");
+      return;
+    }
     const exact = masterSuppliers.find((supplier) => matchKey(supplier.displayName || supplier.name) === matchKey(name));
     if (exact) {
       setError(`${exact.displayName || exact.name} already exists. Use the existing supplier instead.`);
@@ -407,13 +451,12 @@ export function WeddingWorkspace() {
       const created = await AdminApiService.createMasterSupplier({
         name,
         displayName: name,
-        category: newSupplier.category.trim(),
+        category,
         website: normaliseWebsite(newSupplier.website),
         instagram: cleanInstagram(newSupplier.instagram).replace(/^@/, ""),
         email: newSupplier.email.trim(),
         status: "active",
       });
-      const role = newSupplier.role.trim() || created.category || "Supplier";
       const nextRows: SupplierRecord[] = [
         ...suppliers,
         {
@@ -461,7 +504,11 @@ export function WeddingWorkspace() {
 
   const addSupplier = async () => {
     if (!selectedSupplier) return;
-    const role = supplierRole.trim() || selectedSupplier.category || "Supplier";
+    const role = canonicalWeddingRole(supplierRole) || defaultWeddingRoleForCategory(selectedSupplier.category);
+    if (!role) {
+      setError("Choose a canonical Wedding role from the searchable list.");
+      return;
+    }
     if (suppliers.some((row) => row.supplierId === selectedSupplier.id && String(row.role || "").toLowerCase() === role.toLowerCase())) {
       setError(`${selectedSupplier.name} is already assigned as ${role}.`);
       return;
@@ -636,27 +683,27 @@ export function WeddingWorkspace() {
   ];
 
   return (
-    <div className="space-y-7" style={{ maxWidth: 1680 }}>
+    <div className="wedding-workspace space-y-5" style={{ maxWidth: 1580 }}>
       <Link to={workspace.job ? `/admin/crm/jobs/${workspace.job.id}` : "/admin/weddings"} className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black">
         <ArrowLeft className="h-4 w-4" /> {workspace.job ? `CRM Job ${workspace.job.reference}` : "Wedding Stories"}
       </Link>
 
-      <section className="rounded-[30px] bg-black p-8 text-white md:p-10">
+      <section className="wedding-workspace-hero bg-black text-white">
         <p className="text-xs uppercase tracking-[0.22em] text-white/45">Wedding Workspace</p>
-        <div className="mt-4 flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+        <div className="mt-3 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <h1 className="text-4xl md:text-5xl" style={{ fontWeight: 600, letterSpacing: "-.03em" }}>{workspace.wedding.couple || workspace.wedding.title}</h1>
-            <p className="mt-3 text-white/60">{workspace.wedding.venue || "Venue not linked"}{workspace.wedding.weddingDate ? ` · ${displayDate(workspace.wedding.weddingDate)}` : ""}</p>
+            <h1 className="wedding-workspace-hero__title" style={{ fontWeight: 600, letterSpacing: "-.025em" }}>{workspace.wedding.couple || workspace.wedding.title}</h1>
+            <p className="mt-2 text-sm text-white/60">{workspace.wedding.venue || "Venue not linked"}{workspace.wedding.weddingDate ? ` · ${displayDate(workspace.wedding.weddingDate)}` : ""}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {workspace.job ? <Link to={`/admin/crm/jobs/${workspace.job.id}`} className="rounded-full border border-white/20 px-5 py-3 text-sm">Open CRM Job</Link> : null}
-            <Link to={`/admin/weddings/${slug}/content`} className="rounded-full border border-white/20 px-5 py-3 text-sm">Master content</Link>
-            <Link to={`/admin/weddings/${slug}/publish`} className="rounded-full border border-white/20 px-5 py-3 text-sm">Publishing</Link>
+            {workspace.job ? <Link to={`/admin/crm/jobs/${workspace.job.id}`} className="wedding-workspace-hero__action">Open CRM Job</Link> : null}
+            <Link to={`/admin/weddings/${slug}/content`} className="wedding-workspace-hero__action">Master content</Link>
+            <Link to={`/admin/weddings/${slug}/publish`} className="wedding-workspace-hero__action">Publishing</Link>
           </div>
         </div>
-        <div className="mt-7 flex flex-wrap gap-2">
+        <div className="mt-5 flex flex-wrap gap-2">
           {setupSteps.map((step) => (
-            <span key={step.label} className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs ${step.done ? "bg-white text-black" : "border border-white/20 text-white/60"}`}>
+            <span key={step.label} className={`wedding-workspace-step ${step.done ? "is-done" : ""}`}>
               {step.done ? <Check className="h-3.5 w-3.5" /> : null}{step.label}
             </span>
           ))}
@@ -667,46 +714,61 @@ export function WeddingWorkspace() {
       {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{error}</div> : null}
 
       <div className="admin-master-detail admin-master-detail--420">
-        <main className="admin-master-detail__main space-y-7">
-          <section className="rounded-[26px] border border-black/10 bg-white p-6">
-            <div className="flex items-start justify-between gap-5 flex-wrap">
+        <main className="admin-master-detail__main space-y-4">
+          <section className="wedding-workspace-card">
+            <div className="wedding-workspace-section-header">
               <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">1 · Wedding setup</p>
-                <h2 className="mt-2 text-2xl" style={{ fontWeight: 600 }}>Wedding setup</h2>
-                <p className="mt-2 max-w-2xl text-sm text-neutral-600">Link the venue first, then build the supplier team. Each section is managed independently without leaving this wedding.</p>
+                <p className="wedding-workspace-kicker">1 · Wedding setup</p>
+                <h2 className="wedding-workspace-section-title">Wedding setup</h2>
+                <p className="wedding-workspace-section-copy max-w-2xl">Link the venue first, then build the supplier team. Each section is managed independently without leaving this wedding.</p>
               </div>
               <Link to={`/admin/weddings/${slug}/content`} className="text-sm underline underline-offset-4">Edit full wedding record</Link>
             </div>
 
-            <div className="mt-7 space-y-7">
-              <section className="rounded-[22px] p-5" style={{ border: "1px solid rgba(120,102,75,.28)", background: "#fbfaf7", boxShadow: "0 8px 28px rgba(44,36,24,.04)" }}>
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div className="flex items-start gap-3">
-                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white" style={{ border: "1px solid rgba(120,102,75,.22)" }}><MapPin className="h-4 w-4" /></span>
-                    <div>
-                    <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Venue</p>
-                    {selectedVenue ? <p className="mt-2 text-sm text-neutral-600">Currently linked: <strong className="text-black">{selectedVenue.name}</strong>{selectedVenue.town ? ` · ${selectedVenue.town}` : ""}{selectedVenue.county ? ` · ${selectedVenue.county}` : ""}</p> : <p className="mt-2 text-sm text-neutral-500">Search your venue database or create a new venue inline.</p>}
+            <div className="mt-5 space-y-4">
+              <section className="wedding-workspace-subpanel">
+                <div className="wedding-workspace-subpanel__header">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="wedding-workspace-subpanel__icon"><MapPin className="h-4 w-4" /></span>
+                    <div className="min-w-0">
+                      <p className="wedding-workspace-kicker">Venue</p>
+                      {selectedVenue ? (
+                        <div className="mt-1 min-w-0">
+                          <strong className="block truncate text-sm font-semibold text-neutral-900">{selectedVenue.name}</strong>
+                          <span className="block truncate text-xs text-neutral-500">{[selectedVenue.town, selectedVenue.county].filter(Boolean).join(" · ") || "Linked to this Wedding Workspace"}</span>
+                        </div>
+                      ) : <p className="mt-1 text-xs text-neutral-500">No venue linked yet.</p>}
                     </div>
                   </div>
-                  <button type="button" onClick={() => setShowNewVenue((value) => !value)} className="admin-action-secondary">{showNewVenue ? "Cancel new venue" : "Add new venue"}</button>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedVenue ? <button type="button" onClick={() => setShowVenuePicker((value) => !value)} className="admin-button admin-button--secondary admin-button--sm">{showVenuePicker ? "Close" : "Change venue"}</button> : null}
+                    <button type="button" onClick={() => { setShowNewVenue((value) => !value); setShowVenuePicker(true); }} className="admin-button admin-button--secondary admin-button--sm">{showNewVenue ? "Cancel new venue" : "New venue"}</button>
+                  </div>
                 </div>
 
-                <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-                  <div>
-                    <input
-                      list="wedding-workspace-venues"
-                      value={venuePicker}
-                      onChange={(event) => setVenuePicker(event.target.value)}
-                      onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void linkVenueFromPicker(); } }}
-                      placeholder="Search or select venue…"
-                      className="w-full rounded-xl border border-black/15 bg-white px-4 py-3"
-                    />
-                    <datalist id="wedding-workspace-venues">
-                      {venues.map((venue) => <option key={venue.slug} value={venue.name}>{[venue.town, venue.county].filter(Boolean).join(" · ")}</option>)}
-                    </datalist>
+                {showVenuePicker || !selectedVenue ? (
+                  <div className="wedding-workspace-inline-form">
+                    <div className="min-w-0 flex-1">
+                      <label className="wedding-workspace-field-label" htmlFor="wedding-workspace-venue-picker">Search venue database</label>
+                      <input
+                        id="wedding-workspace-venue-picker"
+                        list="wedding-workspace-venues"
+                        value={venuePicker}
+                        onChange={(event) => setVenuePicker(event.target.value)}
+                        onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void linkVenueFromPicker(); } }}
+                        placeholder="Type a venue name…"
+                        className="admin-input"
+                      />
+                      <datalist id="wedding-workspace-venues">
+                        {venues.map((venue) => <option key={venue.slug} value={venue.name}>{[venue.town, venue.county].filter(Boolean).join(" · ")}</option>)}
+                      </datalist>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap gap-2 self-end">
+                      {selectedVenue ? <button type="button" disabled={busy} onClick={() => saveVenue("")} className="admin-button admin-button--ghost admin-button--sm">Clear link</button> : null}
+                      <button type="button" disabled={busy} onClick={linkVenueFromPicker} className="admin-button admin-button--primary admin-button--sm">Link venue</button>
+                    </div>
                   </div>
-                  <button type="button" disabled={busy} onClick={linkVenueFromPicker} className="admin-action-primary">Link venue</button>
-                </div>
+                ) : null}
 
                 {showNewVenue ? (
                   <div className="mt-5 rounded-2xl border border-black/10 bg-white p-5">
@@ -752,118 +814,160 @@ export function WeddingWorkspace() {
                 ) : null}
               </section>
 
-              <section className="rounded-[22px] p-5" style={{ border: "1px solid rgba(71,88,105,.22)", background: "#f8fafb", boxShadow: "0 8px 28px rgba(34,48,58,.04)" }}>
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div className="flex items-start gap-3">
-                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white" style={{ border: "1px solid rgba(71,88,105,.18)" }}><Users className="h-4 w-4" /></span>
+              <section className="wedding-workspace-subpanel">
+                <div className="wedding-workspace-subpanel__header">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="wedding-workspace-subpanel__icon"><Users className="h-4 w-4" /></span>
                     <div>
-                      <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Suppliers</p>
-                      <p className="mt-2 text-sm text-neutral-500">Current wedding team, with quick-add controls kept separate below.</p>
+                      <p className="wedding-workspace-kicker">Supplier team</p>
+                      <p className="mt-1 text-xs text-neutral-500">Use controlled categories and Wedding roles to keep reporting consistent.</p>
                     </div>
                   </div>
-                  <button type="button" onClick={() => setShowNewSupplier((value) => !value)} className="admin-action-secondary">{showNewSupplier ? "Cancel new supplier" : "Create new supplier"}</button>
+                  <button type="button" onClick={() => setShowNewSupplier((value) => !value)} className="admin-button admin-button--secondary admin-button--sm">{showNewSupplier ? "Cancel" : "New supplier"}</button>
                 </div>
 
                 {suppliers.length ? (
-                  <div className="mt-4 overflow-x-auto rounded-xl border border-black/10 bg-white">
-                    <div style={{ minWidth: "620px" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "150px minmax(0,1fr) minmax(150px,0.8fr) 44px", gap: "12px", alignItems: "center" }} className="border-b border-black/10 bg-neutral-50 px-3 py-2 text-[11px] uppercase tracking-[0.1em] text-neutral-400">
-                        <span>Role</span><span>Supplier</span><span>Instagram</span><span />
-                      </div>
-                      {suppliers.map((row, index) => (
-                        <div key={`${row.supplierId}-${row.role}-${index}`} style={{ display: "grid", gridTemplateColumns: "150px minmax(0,1fr) minmax(150px,0.8fr) 44px", gap: "12px", alignItems: "center" }} className="border-b border-black/5 px-3 py-2 last:border-b-0">
-                          <span className="truncate text-xs font-medium text-neutral-500">{row.role || "Supplier"}</span>
-                          <strong className="truncate text-sm font-medium text-neutral-900">{row.name}</strong>
-                          <span className="truncate text-xs text-neutral-400">{row.instagram ? cleanInstagram(row.instagram) : "—"}</span>
-                          <button type="button" title={`Remove ${row.name}`} aria-label={`Remove ${row.name}`} disabled={busy} onClick={() => removeSupplier(index)} className="admin-icon-button"><X className="h-4 w-4" /></button>
+                  <div className="wedding-workspace-supplier-list">
+                    {suppliers.map((row, index) => (
+                      <div key={`${row.supplierId}-${row.role}-${index}`} className="wedding-workspace-supplier-row">
+                        <div className="min-w-0">
+                          <strong className="block truncate text-sm font-semibold text-neutral-900">{row.name}</strong>
+                          <span className="mt-0.5 block truncate text-xs text-neutral-500">{row.instagram ? cleanInstagram(row.instagram) : row.email || "No contact summary"}</span>
                         </div>
-                      ))}
-                    </div>
+                        <span className="wedding-workspace-role-tag">{canonicalWeddingRole(row.role) || row.role || "Other Supplier"}</span>
+                        <button type="button" title={`Remove ${row.name}`} aria-label={`Remove ${row.name}`} disabled={busy} onClick={() => removeSupplier(index)} className="admin-icon-button"><X className="h-4 w-4" /></button>
+                      </div>
+                    ))}
                   </div>
-                ) : <p className="mt-4 text-sm text-neutral-500">No suppliers linked yet.</p>}
+                ) : <div className="wedding-workspace-empty-row">No suppliers linked yet.</div>}
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-                  <select value={selectedSupplierId} onChange={(event) => { setSelectedSupplierId(event.target.value); if (!event.target.value) setSupplierRole(""); }} className="min-w-0 rounded-xl border border-black/15 bg-white px-3 py-3">
-                    <option value="">Search or select supplier…</option>
-                    {masterSuppliers.map((supplier) => <option key={supplier.id} value={supplier.id}>{supplier.displayName || supplier.name}</option>)}
-                  </select>
-                  {selectedSupplier ? <button disabled={busy} onClick={addSupplier} className="admin-action-primary"><Plus className="h-4 w-4" />Add supplier</button> : null}
+                <div className="wedding-workspace-add-supplier">
+                  <div className="wedding-workspace-add-supplier__fields">
+                    <AdminSearchSelect
+                      label="Add existing supplier"
+                      value={selectedSupplierId}
+                      options={supplierSearchOptions}
+                      onChange={(supplierId) => {
+                        const supplier = masterSuppliers.find((item) => item.id === supplierId);
+                        setSelectedSupplierId(supplierId);
+                        setSupplierRole(supplierId ? defaultWeddingRoleForCategory(supplier?.category || "") : "");
+                      }}
+                      placeholder="Search supplier name, category or location…"
+                      help="Select a reusable Supplier Master record."
+                    />
+                    {selectedSupplier ? (
+                      <AdminSearchSelect
+                        label="Wedding role"
+                        value={canonicalWeddingRole(supplierRole) || supplierRole}
+                        options={supplierRoleSearchOptions}
+                        onChange={setSupplierRole}
+                        placeholder="Search Wedding roles…"
+                        help="Type to filter, then choose one controlled role."
+                        allowClear={false}
+                      />
+                    ) : null}
+                  </div>
+                  {selectedSupplier ? <button disabled={busy} onClick={addSupplier} className="admin-button admin-button--primary admin-button--sm"><Plus className="admin-button__icon" />Add supplier</button> : null}
                 </div>
-                {selectedSupplier ? <div className="mt-3 max-w-md"><label className="text-xs uppercase tracking-[0.12em] text-neutral-500">Role for this wedding</label><input value={supplierRole} onChange={(event) => setSupplierRole(event.target.value)} placeholder={selectedSupplier.category || "Supplier role"} className="mt-2 w-full rounded-xl border border-black/15 bg-white px-3 py-3" /></div> : null}
 
                 {showNewSupplier ? (
-                  <div className="mt-5 rounded-2xl border border-black/10 bg-white p-5">
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <input value={newSupplier.name} onChange={(event) => setNewSupplier((current) => ({ ...current, name: event.target.value }))} placeholder="Business name" className="rounded-xl border border-black/15 bg-white px-3 py-3 sm:col-span-2" />
-                      <input value={newSupplier.category} onChange={(event) => setNewSupplier((current) => ({ ...current, category: event.target.value }))} placeholder="Category (e.g. Florist)" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
-                      <input value={newSupplier.role} onChange={(event) => setNewSupplier((current) => ({ ...current, role: event.target.value }))} placeholder="Wedding role" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
-                      <input value={newSupplier.instagram} onChange={(event) => setNewSupplier((current) => ({ ...current, instagram: event.target.value }))} placeholder="Instagram" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
-                      <input value={newSupplier.email} onChange={(event) => setNewSupplier((current) => ({ ...current, email: event.target.value }))} placeholder="Email" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
-                      <input value={newSupplier.website} onChange={(event) => setNewSupplier((current) => ({ ...current, website: event.target.value }))} placeholder="Website" className="rounded-xl border border-black/15 bg-white px-3 py-3 sm:col-span-2" />
+                  <div className="wedding-workspace-create-supplier">
+                    <div className="wedding-workspace-create-supplier__heading">
+                      <div><strong>Create supplier</strong><p>Create the master record once, then link it to this wedding.</p></div>
                     </div>
-                    {possibleSupplierMatches.length ? <div className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-950"><strong>Possible existing supplier:</strong><div className="mt-2 flex flex-wrap gap-2">{possibleSupplierMatches.map((supplier) => <button key={supplier.id} type="button" onClick={() => { setSelectedSupplierId(supplier.id); setSupplierRole(newSupplier.role || supplier.category || ""); setShowNewSupplier(false); }} className="admin-action-secondary">Use {supplier.displayName || supplier.name}</button>)}</div></div> : null}
-                    <button type="button" disabled={busy || !newSupplier.name.trim()} onClick={createAndLinkSupplier} className="admin-action-primary mt-4"><Plus className="h-4 w-4" />Create & link supplier</button>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <label className="wedding-workspace-field sm:col-span-2"><span>Business name</span><input value={newSupplier.name} onChange={(event) => setNewSupplier((current) => ({ ...current, name: event.target.value }))} placeholder="Supplier business name" className="admin-input" /></label>
+                      <AdminSearchSelect
+                        label="Category"
+                        value={canonicalSupplierCategory(newSupplier.category) || newSupplier.category}
+                        options={SUPPLIER_CATEGORY_SEARCH_OPTIONS}
+                        onChange={(category) => setNewSupplier((current) => ({ ...current, category, role: defaultWeddingRoleForCategory(category) }))}
+                        placeholder="Search supplier categories…"
+                        help="A broad, canonical business category."
+                        allowClear={false}
+                      />
+                      <AdminSearchSelect
+                        label="Wedding role"
+                        value={canonicalWeddingRole(newSupplier.role) || newSupplier.role}
+                        options={newSupplierRoleSearchOptions}
+                        onChange={(role) => setNewSupplier((current) => ({ ...current, role }))}
+                        placeholder="Search Wedding roles…"
+                        help="The specific role performed at this wedding."
+                        allowClear={false}
+                      />
+                      <label className="wedding-workspace-field"><span>Instagram</span><input value={newSupplier.instagram} onChange={(event) => setNewSupplier((current) => ({ ...current, instagram: event.target.value }))} placeholder="@supplier" className="admin-input" /></label>
+                      <label className="wedding-workspace-field"><span>Email</span><input value={newSupplier.email} onChange={(event) => setNewSupplier((current) => ({ ...current, email: event.target.value }))} placeholder="supplier@example.com" className="admin-input" /></label>
+                      <label className="wedding-workspace-field sm:col-span-2"><span>Website</span><input value={newSupplier.website} onChange={(event) => setNewSupplier((current) => ({ ...current, website: event.target.value }))} placeholder="https://…" className="admin-input" /></label>
+                    </div>
+                    {possibleSupplierMatches.length ? <div className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-950"><strong>Possible existing supplier:</strong><div className="mt-2 flex flex-wrap gap-2">{possibleSupplierMatches.map((supplier) => <button key={supplier.id} type="button" onClick={() => { setSelectedSupplierId(supplier.id); setSupplierRole(canonicalWeddingRole(newSupplier.role) || defaultWeddingRoleForCategory(supplier.category)); setShowNewSupplier(false); }} className="admin-button admin-button--secondary admin-button--sm">Use {supplier.displayName || supplier.name}</button>)}</div></div> : null}
+                    <button type="button" disabled={busy || !newSupplier.name.trim()} onClick={createAndLinkSupplier} className="admin-button admin-button--primary admin-button--sm mt-4"><Plus className="admin-button__icon" />Create & link supplier</button>
                   </div>
                 ) : null}
               </section>
             </div>
           </section>
 
-          <section id="preview-upload" className="rounded-[26px] border border-black/10 bg-white p-6">
-            <div className="flex items-start justify-between gap-5 flex-wrap">
-              <div><p className="text-xs uppercase tracking-[0.18em] text-neutral-500">2 · Client delivery</p><h2 className="mt-2 text-2xl" style={{ fontWeight: 600 }}>Client gallery & previews</h2><p className="mt-2 text-sm text-neutral-600">Upload full-resolution preview JPEGs once. They become private client originals plus safe web derivatives for publishing.</p></div>
-              {clientGallery ? <Link to={`/admin/client-galleries/${clientGallery.id}`} className="rounded-full border border-black/15 px-5 py-3 text-sm">Open full gallery manager</Link> : <button disabled={busy} onClick={createGallery} className="rounded-full bg-black px-5 py-3 text-sm text-white"><Plus className="mr-2 inline h-4 w-4" />Create client gallery</button>}
+          <section id="preview-upload" className="wedding-workspace-card scroll-mt-5">
+            <div className="wedding-workspace-section-header">
+              <div><p className="wedding-workspace-kicker">2 · Client delivery</p><h2 className="wedding-workspace-section-title">Client gallery & previews</h2><p className="wedding-workspace-section-copy">Upload preview JPEGs once. Private originals and safe web derivatives are created together.</p></div>
             </div>
 
             {clientGallery ? (
               <>
-                <div className="mt-5 rounded-2xl bg-neutral-50 p-4 flex items-center justify-between gap-4 flex-wrap">
-                  <div><strong>{clientGallery.title}</strong><p className="mt-1 text-xs text-neutral-500">{clientGallery.status} · {clientGallery.clientEmail || "Client email not set"}</p></div>
-                  <div className="flex gap-2">
-                    {clientGallery.status === "live" ? <a href={publicGalleryUrl(clientGallery.slug, clientGallery.accessToken)} target="_blank" rel="noreferrer" className="rounded-full border border-black/15 px-4 py-2 text-sm inline-flex items-center gap-2"><ExternalLink className="h-4 w-4" />Open gallery</a> : null}
+                <div className="wedding-workspace-gallery-summary">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2"><strong className="truncate text-sm font-semibold">{clientGallery.title}</strong><span className="wedding-workspace-status">{clientGallery.status}</span></div>
+                    <p className="mt-1 truncate text-xs text-neutral-500">{clientGallery.clientEmail || "Client email not set"} · {workspace.assets.length} Wedding asset{workspace.assets.length === 1 ? "" : "s"}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Link to={`/admin/client-galleries/${clientGallery.id}`} className="admin-button admin-button--secondary admin-button--sm">Manage gallery</Link>
+                    {clientGallery.status === "live" ? <a href={publicGalleryUrl(clientGallery.slug, clientGallery.accessToken)} target="_blank" rel="noreferrer" className="admin-button admin-button--secondary admin-button--sm"><ExternalLink className="admin-button__icon" />Open gallery</a> : null}
+                    <label className="admin-button admin-button--primary admin-button--sm cursor-pointer"><UploadCloud className="admin-button__icon" />Add preview JPEGs<input type="file" multiple accept="image/jpeg,.jpg,.jpeg" onChange={(event) => { addOriginalFiles(event.target.files); event.currentTarget.value = ""; }} style={{ display: "none" }} /></label>
                   </div>
                 </div>
-                <div className="mt-5 flex items-center justify-between gap-4 flex-wrap">
-                  <label className="rounded-full bg-black text-white px-5 py-3 inline-flex items-center gap-2 cursor-pointer"><UploadCloud className="h-4 w-4" />Choose full-res JPEGs<input type="file" multiple accept="image/jpeg,.jpg,.jpeg" onChange={(event) => { addOriginalFiles(event.target.files); event.currentTarget.value = ""; }} style={{ display: "none" }} /></label>
-                  <p className="text-xs text-neutral-500">Uploads are added automatically to the Wedding Day Preview Set.</p>
-                </div>
-                {uploads.length ? <div className="mt-4 space-y-2">{uploads.map((item) => <div key={item.id} className="rounded-2xl border border-black/10 bg-neutral-50 p-3 grid grid-cols-[minmax(0,1fr)_70px_36px] gap-3 items-center"><div className="min-w-0"><div className="flex items-center gap-2">{item.status === "done" ? <CheckCircle2 className="h-4 w-4 text-green-700" /> : item.status === "error" ? <X className="h-4 w-4 text-red-700" /> : item.status === "uploading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4 text-neutral-400" />}<span className="truncate text-sm">{item.file.name}</span></div><div className="mt-2 h-1.5 rounded-full bg-neutral-200 overflow-hidden"><div className="h-full bg-black" style={{ width: `${item.progress}%` }} /></div><p className="mt-1 text-xs text-neutral-500">{item.error || item.stage}</p></div><span className="text-xs text-right">{item.progress}%</span>{item.status === "error" ? <button onClick={() => updateUpload(item.id, { status: "queued", progress: 0, stage: "Ready", error: "" })}><RefreshCw className="h-4 w-4" /></button> : <button disabled={uploading || item.status === "uploading"} onClick={() => setUploads((current) => current.filter((upload) => upload.id !== item.id))}><Trash2 className="h-4 w-4" /></button>}</div>)}</div> : null}
-                {uploads.length ? <div className="mt-4 flex justify-end"><button disabled={uploading || !queuedCount} onClick={uploadQueued} className="rounded-full bg-black text-white px-6 py-3 disabled:opacity-40">{uploading ? "Uploading…" : `Upload ${queuedCount || ""} preview${queuedCount === 1 ? "" : "s"}`}</button></div> : null}
+                <p className="mt-2 text-[11px] text-neutral-500">Selected files are added automatically to the Wedding Day Preview Set.</p>
+                {uploads.length ? <div className="mt-4 space-y-2">{uploads.map((item) => <div key={item.id} className="rounded-xl border border-black/10 bg-neutral-50 p-3 grid grid-cols-[minmax(0,1fr)_54px_32px] gap-3 items-center"><div className="min-w-0"><div className="flex items-center gap-2">{item.status === "done" ? <CheckCircle2 className="h-4 w-4 text-green-700" /> : item.status === "error" ? <X className="h-4 w-4 text-red-700" /> : item.status === "uploading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4 text-neutral-400" />}<span className="truncate text-xs">{item.file.name}</span></div><div className="mt-2 h-1 rounded-full bg-neutral-200 overflow-hidden"><div className="h-full bg-black" style={{ width: `${item.progress}%` }} /></div><p className="mt-1 text-[10px] text-neutral-500">{item.error || item.stage}</p></div><span className="text-[10px] text-right">{item.progress}%</span>{item.status === "error" ? <button onClick={() => updateUpload(item.id, { status: "queued", progress: 0, stage: "Ready", error: "" })}><RefreshCw className="h-4 w-4" /></button> : <button disabled={uploading || item.status === "uploading"} onClick={() => setUploads((current) => current.filter((upload) => upload.id !== item.id))}><Trash2 className="h-4 w-4" /></button>}</div>)}</div> : null}
+                {uploads.length ? <div className="mt-3 flex justify-end"><button disabled={uploading || !queuedCount} onClick={uploadQueued} className="admin-button admin-button--primary admin-button--sm disabled:opacity-40">{uploading ? "Uploading…" : `Upload ${queuedCount || ""} preview${queuedCount === 1 ? "" : "s"}`}</button></div> : null}
               </>
-            ) : <p className="mt-5 text-sm text-neutral-500">Create the linked client gallery first, then upload previews directly from this page.</p>}
+            ) : (
+              <div className="wedding-workspace-gallery-summary">
+                <div><strong className="text-sm">No client gallery yet</strong><p className="mt-1 text-xs text-neutral-500">Create the linked private gallery before uploading previews.</p></div>
+                <button disabled={busy} onClick={createGallery} className="admin-button admin-button--primary admin-button--sm"><Plus className="admin-button__icon" />Create client gallery</button>
+              </div>
+            )}
           </section>
 
-          <section className="rounded-[26px] border border-black/10 bg-white p-6">
-            <div className="flex items-start justify-between gap-5 flex-wrap"><div><p className="text-xs uppercase tracking-[0.18em] text-neutral-500">3 · Preview Set</p><h2 className="mt-2 text-2xl" style={{ fontWeight: 600 }}>Wedding Day Previews</h2><p className="mt-2 text-sm text-neutral-600">Choose the images you want to use across venue galleries, moments, custom galleries and social posts.</p></div><div className="flex gap-2"><button onClick={() => setPreviewIds(workspace.assets.map((asset) => asset.id))} className="rounded-full border border-black/15 px-4 py-2 text-sm">Select all</button><button disabled={busy} onClick={savePreviewSet} className="rounded-full bg-black text-white px-4 py-2 text-sm inline-flex items-center gap-2"><Save className="h-4 w-4" />Save Preview Set</button></div></div>
+          <section className="wedding-workspace-card">
+            <div className="wedding-workspace-section-header"><div><p className="wedding-workspace-kicker">3 · Preview Set</p><h2 className="wedding-workspace-section-title">Wedding Day Previews</h2><p className="wedding-workspace-section-copy">Choose the images you want to use across venue galleries, moments, custom galleries and social posts.</p></div><div className="flex gap-2"><button onClick={() => setPreviewIds(workspace.assets.map((asset) => asset.id))} className="admin-button admin-button--secondary admin-button--sm">Select all</button><button disabled={busy} onClick={savePreviewSet} className="admin-button admin-button--primary admin-button--sm"><Save className="admin-button__icon" />Save Preview Set</button></div></div>
             <div className="mt-5" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px,1fr))", gap: 10 }}>
               {workspace.assets.map((asset) => { const selected = previewIds.includes(asset.id); return <button key={asset.id} onClick={() => setPreviewIds((current) => selected ? current.filter((id) => id !== asset.id) : [...current, asset.id])} className={`relative overflow-hidden rounded-2xl border text-left ${selected ? "border-black ring-2 ring-black/10" : "border-black/10"}`}><img src={asset.thumbSrc || asset.webSrc} alt="" style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", display: "block" }} /><span className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow">{selected ? <Check className="h-4 w-4" /> : null}</span>{asset.hasOriginal ? <span className="absolute left-2 top-2 rounded-full bg-black/80 px-2 py-1 text-[9px] uppercase text-white">Original</span> : null}<span className="block truncate p-2 text-[11px]">{asset.filename}</span></button>; })}
             </div>
             {!workspace.assets.length ? <p className="mt-5 text-sm text-neutral-500">No canonical assets linked to this wedding yet.</p> : null}
           </section>
 
-          <section id="publishing-destinations" className="scroll-mt-5 rounded-[26px] border border-black/10 bg-white p-6">
-            <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">4 · Publishing destinations</p><h2 className="mt-2 text-2xl" style={{ fontWeight: 600 }}>Use previews across the Intelligence platform</h2><p className="mt-2 text-sm text-neutral-600">This only adds safe web derivatives to public destinations. Private full-resolution originals remain protected.</p>
+          <section id="publishing-destinations" className="wedding-workspace-card scroll-mt-5">
+            <p className="wedding-workspace-kicker">4 · Publishing destinations</p><h2 className="wedding-workspace-section-title">Use previews across the Intelligence platform</h2><p className="wedding-workspace-section-copy">This only adds safe web derivatives to public destinations. Private full-resolution originals remain protected.</p>
             <div className="mt-6 grid gap-6 md:grid-cols-3">
               <div><p className="text-xs uppercase tracking-[0.12em] text-neutral-500">Venue</p><label className="mt-3 flex items-center gap-3"><input type="checkbox" checked={addToVenue} disabled={!workspace.wedding.venueSlug} onChange={(event) => setAddToVenue(event.target.checked)} /><span>{workspace.wedding.venue || "No venue linked"}</span></label></div>
               <div><p className="text-xs uppercase tracking-[0.12em] text-neutral-500">Moments</p><div className="mt-3 space-y-2 max-h-44 overflow-auto">{workspace.moments.map((moment) => <label key={moment.id} className="flex items-center gap-3 text-sm"><input type="checkbox" checked={selectedMomentIds.includes(moment.id)} onChange={(event) => setSelectedMomentIds((current) => event.target.checked ? [...current, moment.id] : current.filter((id) => id !== moment.id))} />{moment.name}</label>)}</div></div>
               <div><p className="text-xs uppercase tracking-[0.12em] text-neutral-500">Galleries</p><div className="mt-3 space-y-2 max-h-44 overflow-auto">{workspace.galleries.map((gallery) => <label key={gallery.id} className="flex items-center gap-3 text-sm"><input type="checkbox" checked={selectedGalleryIds.includes(gallery.id)} onChange={(event) => setSelectedGalleryIds((current) => event.target.checked ? [...current, gallery.id] : current.filter((id) => id !== gallery.id))} />{gallery.name}</label>)}</div></div>
             </div>
-            <button disabled={busy || !previewIds.length} onClick={publishAssignments} className="mt-6 rounded-full bg-black text-white px-6 py-3 inline-flex items-center gap-2 disabled:opacity-40"><Send className="h-4 w-4" />Add {previewIds.length || ""} previews to selected destinations</button>
+            <button disabled={busy || !previewIds.length} onClick={publishAssignments} className="admin-button admin-button--primary admin-button--sm mt-5 disabled:opacity-40"><Send className="h-4 w-4" />Add {previewIds.length || ""} previews to selected destinations</button>
           </section>
         </main>
 
-        <aside className="admin-summary-panel space-y-7">
-          <section className="rounded-[26px] border border-black/10 bg-white p-6">
-            <div className="flex items-center gap-3"><Instagram className="h-5 w-5" /><div><p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Social</p><h2 className="text-xl" style={{ fontWeight: 600 }}>Instagram preview post</h2></div></div>
+        <aside className="admin-summary-panel space-y-4">
+          <section className="wedding-workspace-aside-card">
+            <div className="flex items-center gap-3"><Instagram className="h-5 w-5" /><div><p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Social</p><h2 className="text-base" style={{ fontWeight: 600 }}>Instagram preview post</h2></div></div>
             <p className="mt-3 text-sm text-neutral-600">Generated from the wedding, venue and reusable supplier records. Edit freely before copying.</p>
-            <textarea value={caption} onChange={(event) => setCaption(event.target.value)} rows={18} className="mt-4 w-full rounded-2xl border border-black/15 p-4 text-sm leading-relaxed" />
-            <div className="mt-3 flex gap-2"><button onClick={regenerateCaption} className="rounded-full border border-black/15 px-4 py-2 text-sm">Regenerate</button><button onClick={async () => { await navigator.clipboard?.writeText(caption); setMessage("Instagram caption copied."); }} className="rounded-full bg-black text-white px-4 py-2 text-sm inline-flex items-center gap-2"><Clipboard className="h-4 w-4" />Copy caption</button></div>
+            <textarea value={caption} onChange={(event) => setCaption(event.target.value)} rows={14} className="mt-4 w-full rounded-2xl border border-black/15 p-4 text-sm leading-relaxed" />
+            <div className="mt-3 flex gap-2"><button onClick={regenerateCaption} className="admin-button admin-button--secondary admin-button--sm">Regenerate</button><button onClick={async () => { await navigator.clipboard?.writeText(caption); setMessage("Instagram caption copied."); }} className="admin-button admin-button--primary admin-button--sm"><Clipboard className="h-4 w-4" />Copy caption</button></div>
           </section>
 
-          <section className="rounded-[26px] border border-black/10 bg-white p-6">
-            <div className="flex items-center gap-3"><Users className="h-5 w-5" /><h2 className="text-xl" style={{ fontWeight: 600 }}>At a glance</h2></div>
+          <section className="wedding-workspace-aside-card">
+            <div className="flex items-center gap-3"><Users className="h-5 w-5" /><h2 className="text-base" style={{ fontWeight: 600 }}>At a glance</h2></div>
             <div className="mt-4 space-y-3 text-sm"><Row label="Venue" value={workspace.wedding.venue || "Not linked"} /><Row label="Suppliers" value={String(suppliers.length)} /><Row label="Client gallery" value={clientGallery?.status || "Not created"} /><Row label="Wedding assets" value={String(workspace.assets.length)} /><Row label="Preview Set" value={String(previewAssets.length)} /><Row label="Full-res previews" value={String(previewAssets.filter((asset) => asset.hasOriginal).length)} /></div>
-            {clientGallery ? <Link to={`/admin/client-galleries/${clientGallery.id}`} className="mt-5 block rounded-full border border-black/15 px-4 py-3 text-center text-sm">Manage client gallery</Link> : null}
+            {clientGallery ? <Link to={`/admin/client-galleries/${clientGallery.id}`} className="admin-button admin-button--secondary admin-button--sm mt-4 w-full">Manage client gallery</Link> : null}
           </section>
         </aside>
       </div>

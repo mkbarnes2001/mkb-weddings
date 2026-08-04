@@ -2488,3 +2488,419 @@
   .crm-wedding-lifecycle-card > .admin-status { grid-column: 2; justify-self: start; }
   .crm-wedding-lifecycle-card small { white-space: normal; }
 }
+
+/* v1.9.7a — Wedding Workspace polish and controlled supplier taxonomy */
+.admin-search-select {
+  position: relative;
+  min-width: 0;
+}
+
+.admin-search-select__label,
+.wedding-workspace-field > span,
+.wedding-workspace-field-label {
+  display: block;
+  margin-bottom: 5px;
+  color: #666;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.admin-search-select__input-wrap {
+  position: relative;
+}
+
+.admin-search-select__control {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.admin-search-select__control input {
+  width: 100%;
+  height: var(--admin-control-height);
+  min-width: 0;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-sm);
+  background: #fff;
+  padding: 0 34px 0 31px;
+  color: var(--admin-text);
+  font-size: 11px;
+}
+
+.admin-search-select__search-icon {
+  position: absolute;
+  left: 10px;
+  z-index: 1;
+  width: 13px;
+  height: 13px;
+  color: #9a9a9a;
+  pointer-events: none;
+}
+
+.admin-search-select__chevron,
+.admin-search-select__clear {
+  position: absolute;
+  right: 7px;
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  min-height: 22px !important;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: #777;
+}
+
+.admin-search-select__chevron {
+  width: 13px;
+  height: 13px;
+  right: 11px;
+  pointer-events: none;
+}
+
+.admin-search-select__clear svg {
+  width: 12px;
+  height: 12px;
+}
+
+.admin-search-select__menu {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 230px;
+  overflow-y: auto;
+  border: 1px solid rgba(17, 17, 17, 0.14);
+  border-radius: 10px;
+  background: #fff;
+  padding: 5px;
+  box-shadow: 0 18px 45px rgba(17, 17, 17, 0.16);
+}
+
+.admin-search-select__option {
+  display: flex;
+  width: 100%;
+  min-height: 36px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  padding: 7px 9px;
+  text-align: left;
+}
+
+.admin-search-select__option:hover,
+.admin-search-select__option.is-active {
+  background: #f2f1ee;
+}
+
+.admin-search-select__option strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.admin-search-select__option small {
+  display: block;
+  margin-top: 2px;
+  color: #777;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.admin-search-select__option > svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+}
+
+.admin-search-select__empty {
+  padding: 12px;
+  color: #777;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.admin-search-select__help {
+  margin-top: 5px;
+  color: #888;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.wedding-workspace-hero {
+  border-radius: 20px;
+  padding: 24px 26px;
+}
+
+.wedding-workspace-hero__title {
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  line-height: 1.02;
+}
+
+.wedding-workspace-hero__action {
+  display: inline-flex;
+  min-height: 32px !important;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px !important;
+  padding: 0 10px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.wedding-workspace-step {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 4px 9px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 9px;
+  line-height: 1;
+}
+
+.wedding-workspace-step.is-done {
+  border-color: #fff;
+  background: #fff;
+  color: #111;
+}
+
+.wedding-workspace-card,
+.wedding-workspace-aside-card {
+  border: 1px solid var(--admin-border);
+  border-radius: 18px;
+  background: #fff;
+  padding: 20px;
+}
+
+.wedding-workspace-aside-card {
+  padding: 17px;
+}
+
+.wedding-workspace-section-header,
+.wedding-workspace-subpanel__header,
+.wedding-workspace-gallery-summary {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.wedding-workspace-kicker {
+  color: #777;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.wedding-workspace-section-title {
+  margin-top: 5px;
+  color: #171717;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.wedding-workspace-section-copy {
+  margin-top: 6px;
+  color: #666;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.wedding-workspace-subpanel {
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  border-radius: 14px;
+  background: #fafafa;
+  padding: 14px;
+}
+
+.wedding-workspace-subpanel__header {
+  align-items: center;
+}
+
+.wedding-workspace-subpanel__icon {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  border-radius: 9px;
+  background: #fff;
+}
+
+.wedding-workspace-inline-form,
+.wedding-workspace-add-supplier {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 13px;
+  border-top: 1px solid rgba(17, 17, 17, 0.08);
+  padding-top: 13px;
+}
+
+.wedding-workspace-add-supplier {
+  justify-content: space-between;
+}
+
+.wedding-workspace-add-supplier__fields {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.wedding-workspace-supplier-list {
+  margin-top: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(17, 17, 17, 0.09);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.wedding-workspace-supplier-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 34px;
+  gap: 12px;
+  align-items: center;
+  min-height: 52px;
+  padding: 8px 9px 8px 12px;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.06);
+}
+
+.wedding-workspace-supplier-row:last-child {
+  border-bottom: 0;
+}
+
+.wedding-workspace-role-tag,
+.wedding-workspace-status {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(17, 17, 17, 0.09);
+  border-radius: 999px;
+  background: #f3f2ef;
+  padding: 4px 8px;
+  color: #555;
+  font-size: 9px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.wedding-workspace-empty-row {
+  margin-top: 12px;
+  border: 1px dashed rgba(17, 17, 17, 0.14);
+  border-radius: 10px;
+  padding: 13px;
+  color: #777;
+  font-size: 10px;
+  text-align: center;
+}
+
+.wedding-workspace-create-supplier {
+  margin-top: 13px;
+  border-top: 1px solid rgba(17, 17, 17, 0.08);
+  padding-top: 13px;
+}
+
+.wedding-workspace-create-supplier__heading {
+  margin-bottom: 12px;
+}
+
+.wedding-workspace-create-supplier__heading strong {
+  font-size: 12px;
+}
+
+.wedding-workspace-create-supplier__heading p {
+  margin-top: 2px;
+  color: #777;
+  font-size: 10px;
+}
+
+.wedding-workspace-field {
+  display: block;
+  min-width: 0;
+}
+
+.wedding-workspace-field .admin-input,
+.wedding-workspace-inline-form .admin-input {
+  height: var(--admin-control-height);
+  border-radius: var(--admin-radius-sm);
+  font-size: 11px;
+}
+
+.wedding-workspace-gallery-summary {
+  margin-top: 13px;
+  align-items: center;
+  border: 1px solid rgba(17, 17, 17, 0.09);
+  border-radius: 11px;
+  background: #f8f7f4;
+  padding: 11px 12px;
+}
+
+@media (max-width: 760px) {
+  .wedding-workspace-hero {
+    border-radius: 16px;
+    padding: 19px;
+  }
+
+  .wedding-workspace-card,
+  .wedding-workspace-aside-card {
+    border-radius: 14px;
+    padding: 15px;
+  }
+
+  .wedding-workspace-section-title {
+    font-size: 16px;
+  }
+
+  .wedding-workspace-inline-form,
+  .wedding-workspace-add-supplier,
+  .wedding-workspace-gallery-summary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .wedding-workspace-add-supplier__fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wedding-workspace-supplier-row {
+    grid-template-columns: minmax(0, 1fr) 34px;
+  }
+
+  .wedding-workspace-role-tag {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .wedding-workspace-supplier-row .admin-icon-button {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .admin-search-select__menu {
+    max-height: 190px;
+  }
+}
