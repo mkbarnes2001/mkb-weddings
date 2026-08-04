@@ -1133,7 +1133,7 @@ export async function importWeddingAssets(db: D1Db, galleryId: string, workspace
   `).bind(galleryId).first();
   await db.prepare(`
     UPDATE client_galleries
-    SET cover_asset_id = COALESCE(NULLIF(cover_asset_id, ''), ?), updated_at = CURRENT_TIMESTAMP
+    SET cover_asset_id = COALESCE(NULLIF(cover_asset_id, ''), NULLIF(?, '')), updated_at = CURRENT_TIMESTAMP
     WHERE id = ? AND workspace_id = ?
   `).bind(text(firstRow?.asset_id), galleryId, resolvedWorkspaceId).run();
 

@@ -51,6 +51,7 @@ def main() -> None:
     assert "idempotent: true" in portal
     assert "clientEmail: text(primaryContact?.email)" in portal
     assert "importWeddingAssets: true" in portal
+    assert "COALESCE(NULLIF(cover_asset_id, ''), NULLIF(?, ''))" in galleries
     assert '"client_gallery.created"' in portal
 
     # Generic Client Gallery links cannot cross workspace boundaries.
