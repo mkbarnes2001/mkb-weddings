@@ -88,6 +88,9 @@ def main() -> None:
     assert 'event.key === "Escape"' in layout and 'document.addEventListener("mousedown"' in layout
     assert "admin-workspace-menu__identity" in layout
     assert "admin-workspace-menu__signout" in layout
+    assert "position: sticky;\n  top: 0;\n  z-index: 80;" in css
+    assert "grid-template-rows: auto auto minmax(0,1fr) auto; overflow: visible;" in css
+    assert ".admin-main-region {\n  position: relative;\n  z-index: 1;" in css
     assert "admin-sidebar-control-card" not in layout
     assert "admin-sidebar-external" not in layout
     assert "www.mkbweddings.co.uk/blog" not in layout

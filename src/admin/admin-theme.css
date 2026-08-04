@@ -151,12 +151,15 @@
 .admin-sidebar {
   position: sticky;
   top: 0;
+  z-index: 80;
   height: 100vh;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .admin-main-region {
+  position: relative;
+  z-index: 1;
   min-width: 0;
   background: var(--admin-bg);
 }
@@ -2429,7 +2432,7 @@
 .admin-module-navigation__items[data-layout="grid"] .admin-nav-link > span:last-child { display: -webkit-box; overflow: hidden; font-size: 8px; line-height: 1.18; white-space: normal !important; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 
 @media (min-width: 761px) {
-  .admin-sidebar { display: grid !important; grid-template-rows: auto auto minmax(0,1fr) auto; overflow: hidden; }
+  .admin-sidebar { display: grid !important; grid-template-rows: auto auto minmax(0,1fr) auto; overflow: visible; }
   .admin-module-navigation { min-height: 0; overflow-y: scroll !important; }
 }
 
