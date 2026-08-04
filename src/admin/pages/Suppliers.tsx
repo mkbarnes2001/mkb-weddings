@@ -7,7 +7,6 @@ import {
   Plus,
   Search,
   Users,
-  X,
 } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import { SupplierService, type MasterSupplier } from "../services/SupplierService";
@@ -209,13 +208,15 @@ export function Suppliers() {
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
               <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, category, county or Instagram..." className="h-[34px] w-full border border-black/10 bg-white pl-9 pr-3 text-[11px]" />
             </div>
-            <div className="admin-supplier-category-filter" aria-label="Supplier category filter">
-              <button type="button" data-active={categoryFilter === "all" ? "true" : "false"} onClick={() => setCategoryFilter("all")}>All categories <span>{suppliers.length}</span></button>
+            <label className="admin-supplier-category-select">
+              <span>Category</span>
+              <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} aria-label="Filter suppliers by category">
+                <option value="all">All categories ({suppliers.length})</option>
               {categoryCounts.map(([category, count]) => (
-                <button key={category} type="button" data-active={categoryFilter === category ? "true" : "false"} onClick={() => setCategoryFilter(category)}>{category} <span>{count}</span></button>
+                  <option key={category} value={category}>{category} ({count})</option>
               ))}
-            </div>
-            {categoryFilter !== "all" ? <button type="button" className="admin-button admin-button--secondary admin-button--sm" onClick={() => setCategoryFilter("all")}><X className="admin-button__icon" />Clear category</button> : null}
+              </select>
+            </label>
           </AdminToolbar>
 
           <div className="admin-supplier-table admin-supplier-table--compact">

@@ -77,7 +77,7 @@ def main() -> None:
     for token in [
         'const [categoryFilter, setCategoryFilter] = useState("all")',
         "All categories",
-        "admin-supplier-category-filter",
+        "admin-supplier-category-select",
         "setCategoryFilter(category)",
         'changeSort("supplier")',
         'changeSort("category")',
@@ -128,7 +128,7 @@ def main() -> None:
 
     for selector in [
         ".admin-supplier-table--compact",
-        ".admin-supplier-category-filter",
+        ".admin-supplier-category-select",
         ".supplier-taxonomy-manager",
         ".wedding-workspace-layout",
     ]:

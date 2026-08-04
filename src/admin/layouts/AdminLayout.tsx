@@ -30,6 +30,12 @@ export function AdminLayout() {
     ? crmMobilePrimary.map(({ key }) => moduleItems.find((item) => item.key === key)).filter((item): item is NonNullable<typeof item> => Boolean(item))
     : moduleItems.filter((item) => item.mobilePrimary).slice(0, 4);
   const ModuleIcon = currentModule.icon;
+  const isPlatformAdmin = auth.platformRole === "platform_admin";
+  const sessionLabel = auth.mode === "bootstrap"
+    ? "Setup mode · authentication not enforced"
+    : auth.accessMode === "support"
+      ? `${auth.supportScope || "read"} support · time bounded`
+      : `${auth.role || "member"} · secure session`;
 
   useEffect(() => {
     document.title = `${currentSectionLabel} · ${currentModule.label} · ${auth.businessName || "WedPlanned"}`;
@@ -47,7 +53,10 @@ export function AdminLayout() {
             <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3">
               <p className="text-[9px] uppercase tracking-[0.12em] text-white/40">Business workspace</p>
               <p className="mt-1 truncate text-xs font-medium">{auth.businessName || "MKB Weddings"}</p>
-              <p className="mt-1 text-[10px] capitalize text-white/40">{auth.mode === "bootstrap" ? "Setup mode · authentication not enforced" : auth.accessMode === "support" ? `${auth.supportScope || "read"} support · time bounded` : `${auth.role || "member"} · secure session`}</p>
+              <div className="admin-sidebar-session">
+                <p>{sessionLabel}</p>
+                {isPlatformAdmin ? <span>Platform administrator</span> : null}
+              </div>
               {auth.memberships.length > 1 ? <select value={auth.workspaceId} onChange={(event) => void switchWorkspace(event.target.value)} className="admin-workspace-switcher mt-3 h-8 w-full rounded-lg border px-2 text-[10px] outline-none" aria-label="Switch business workspace">{auth.memberships.map((membership) => <option key={membership.workspaceId} value={membership.workspaceId} className="text-black">{membership.businessName}</option>)}</select> : null}
             </div>
           </div>
@@ -63,9 +72,9 @@ export function AdminLayout() {
             </div>
           </div>
 
-          <nav className="admin-module-navigation flex-1 overflow-y-auto p-3" aria-label={`${currentModule.label} navigation`}>
+          <nav className="admin-module-navigation min-h-0 flex-1 overflow-y-auto p-3" aria-label={`${currentModule.label} navigation`}>
             <div className="admin-module-navigation__header"><ModuleIcon /><div><strong>{currentModule.label}</strong><span>{currentModule.description}</span></div></div>
-            <div className="mt-3 space-y-1">
+            <div className="admin-module-navigation__items mt-3" data-layout={currentModule.key === "website" ? "grid" : "list"}>
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = isAdminNavigationItemActive(item, location.pathname, location.search);
@@ -75,7 +84,16 @@ export function AdminLayout() {
           </nav>
 
           <div className="admin-sidebar-external border-t border-white/10 p-3">
-            {auth.authenticated ? <div className="mb-3 flex items-center justify-between gap-3 rounded-lg bg-white/[0.04] px-2.5 py-2"><div className="min-w-0"><p className="truncate text-[10px] font-medium text-white/80">{auth.displayName || auth.email}</p><p className="truncate text-[9px] text-white/38">{auth.email}</p></div><button onClick={() => void signOut()} className="rounded-md p-1.5 text-white/45 hover:bg-white/10 hover:text-white" title="Sign out" aria-label="Sign out"><LogOut size={13} /></button></div> : null}
+            {auth.authenticated ? <div className="admin-sidebar-account">
+              <div className="min-w-0">
+                <p>{auth.displayName || auth.email}</p>
+                <small>{auth.email}</small>
+                {isPlatformAdmin ? <span>Platform administrator</span> : null}
+              </div>
+              <button type="button" onClick={() => void signOut()} className="admin-sidebar-signout" title="Sign out" aria-label="Sign out">
+                <LogOut /><span>Sign out</span>
+              </button>
+            </div> : null}
             <div className="admin-external-links"><a href="https://www.mkbweddings.co.uk/blog" className="admin-external-link" target="_blank" rel="noreferrer"><FileText /> <span>Blog</span></a><a href="https://www.mkbweddings.co.uk/" className="admin-external-link" target="_blank" rel="noreferrer"><Globe2 /> <span>Website</span></a></div>
           </div>
         </aside>
