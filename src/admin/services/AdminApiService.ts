@@ -9,7 +9,7 @@ import type { AssetLibraryFilters, AssetLibraryPayload } from "../types/asset";
 import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, ClientGalleryListPayload, ClientGalleryRecord, PrivateOriginalUploadSession, PrivateOriginalUploadedPart } from "../types/clientGallery";
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
-import type { PlatformSupplierTaxonomy, ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
+import type { PlatformAdministrationPayload, PlatformModuleConfiguration, PlatformSupplierTaxonomy, ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
 import type { CrmAddon, CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmPackage, CrmQuote, CrmQuoteOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate } from "../types/crm";
 import { prepareImageUpload } from "./ImageUploadService";
 
@@ -1141,8 +1141,25 @@ export class AdminApiService {
     return (await this.mutateWedPlannedPlatform({ action: "saveCategories", categoryKeys, primaryCategoryKey })).platform;
   }
 
+  static async getPlatformAdministration() {
+    const result = await request<{ ok: true; platformAdmin: PlatformAdministrationPayload }>("/api/platform-admin");
+    return result.platformAdmin;
+  }
+
+  static async mutatePlatformAdministration(payload: Record<string, unknown>) {
+    const result = await request<{ ok: true; platformAdmin: PlatformAdministrationPayload }>("/api/platform-admin", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return result.platformAdmin;
+  }
+
   static async savePlatformSupplierTaxonomy(taxonomy: PlatformSupplierTaxonomy) {
-    return (await this.mutateWedPlannedPlatform({ action: "saveSupplierTaxonomy", ...taxonomy })).platform;
+    return this.mutatePlatformAdministration({ action: "saveSupplierTaxonomy", ...taxonomy });
+  }
+
+  static async savePlatformModuleConfiguration(module: PlatformModuleConfiguration) {
+    return this.mutatePlatformAdministration({ action: "saveModuleConfiguration", module });
   }
 
   static async saveWedPlannedServiceArea(serviceArea: Partial<WedPlannedServiceArea>) {
@@ -1161,36 +1178,38 @@ export class AdminApiService {
     return (await this.mutateWedPlannedPlatform({ action: "updateMember", member })).platform;
   }
 
-  static async getWedPlannedOperations() {
-    return request<WedPlannedOperationsPayload>("/api/platform-operations");
+  static async getWedPlannedOperations(workspaceId = "") {
+    const query = workspaceId ? `?workspaceId=${encodeURIComponent(workspaceId)}` : "";
+    return request<WedPlannedOperationsPayload>(`/api/platform-operations${query}`);
   }
 
-  static async mutateWedPlannedOperations(payload: Record<string, unknown>) {
+  static async mutateWedPlannedOperations(payload: Record<string, unknown>, workspaceId = "") {
     const result = await request<{ ok: true; operations: WedPlannedOperationsPayload }>("/api/platform-operations", {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ ...payload, ...(workspaceId ? { workspaceId } : {}) }),
     });
     return result.operations;
   }
 
-  static async grantWedPlannedSupport(scope: "read" | "manage", hours: number, reason: string) {
-    return this.mutateWedPlannedOperations({ action: "grant-support", scope, hours, reason });
+  static async grantWedPlannedSupport(scope: "read" | "manage", hours: number, reason: string, workspaceId = "") {
+    return this.mutateWedPlannedOperations({ action: "grant-support", scope, hours, reason }, workspaceId);
   }
 
-  static async revokeWedPlannedSupport(grantId: string) {
-    return this.mutateWedPlannedOperations({ action: "revoke-support", grantId });
+  static async revokeWedPlannedSupport(grantId: string, workspaceId = "") {
+    return this.mutateWedPlannedOperations({ action: "revoke-support", grantId }, workspaceId);
   }
 
-  static async requestWedPlannedDeletion(confirmationName: string, reason: string) {
-    return this.mutateWedPlannedOperations({ action: "request-deletion", confirmationName, reason });
+  static async requestWedPlannedDeletion(confirmationName: string, reason: string, workspaceId = "") {
+    return this.mutateWedPlannedOperations({ action: "request-deletion", confirmationName, reason }, workspaceId);
   }
 
-  static async cancelWedPlannedDeletion(requestId: string) {
-    return this.mutateWedPlannedOperations({ action: "cancel-deletion", requestId });
+  static async cancelWedPlannedDeletion(requestId: string, workspaceId = "") {
+    return this.mutateWedPlannedOperations({ action: "cancel-deletion", requestId }, workspaceId);
   }
 
-  static wedPlannedExportUrl() {
-    return `${API_BASE}/api/platform-operations/export`;
+  static wedPlannedExportUrl(workspaceId = "") {
+    const query = workspaceId ? `?workspaceId=${encodeURIComponent(workspaceId)}` : "";
+    return `${API_BASE}/api/platform-operations/export${query}`;
   }
 
   static async getCrmOverview() {

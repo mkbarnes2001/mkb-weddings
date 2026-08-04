@@ -5,6 +5,7 @@ import {
   BriefcaseBusiness,
   Building2,
   CalendarDays,
+  Camera,
   ClipboardList,
   ContactRound,
   Database,
@@ -21,14 +22,16 @@ import {
   Settings,
   ShieldCheck,
   ShoppingBag,
+  Sparkles,
   Store,
   Target,
   UserRound,
   Users,
   Workflow,
 } from "lucide-react";
+import type { PlatformModuleConfiguration, PlatformModuleKey } from "../types/platform";
 
-export type AdminModuleKey = "crm" | "client-galleries" | "website" | "business";
+export type AdminModuleKey = PlatformModuleKey;
 
 export type AdminNavigationItem = {
   key: string;
@@ -103,59 +106,57 @@ const businessItems: AdminNavigationItem[] = [
   { key: "team", label: "Team members", to: "/admin/wedplanned?tab=team", icon: Users, mobilePrimary: true, match: exactWithQuery("/admin/wedplanned", "tab", "team") },
   { key: "client-portal", label: "Client portal", to: "/admin/settings/client-portal", icon: Palette, mobilePrimary: true, match: pathPrefix("/admin/settings/client-portal") },
   { key: "workspace", label: "Domains & workspace", to: "/admin/settings", icon: Settings, match: (pathname) => pathname === "/admin/settings" },
-  { key: "operations", label: "Operations", to: "/admin/wedplanned?tab=operations", icon: ShieldCheck, requiredPermission: "operations:read", match: exactWithQuery("/admin/wedplanned", "tab", "operations") },
-  { key: "access", label: "Platform access", to: "/admin/wedplanned?tab=access", icon: ContactRound, match: exactWithQuery("/admin/wedplanned", "tab", "access") },
+];
+
+export const platformAdminItems: AdminNavigationItem[] = [
+  { key: "overview", label: "Platform overview", to: "/admin/platform", icon: Gauge, mobilePrimary: true, match: (pathname, params) => pathname === "/admin/platform" && !(params.get("section") || "") },
+  { key: "businesses", label: "Businesses & workspaces", to: "/admin/platform?section=businesses", icon: Building2, mobilePrimary: true, match: exactWithQuery("/admin/platform", "section", "businesses") },
+  { key: "taxonomy", label: "Supplier taxonomy", to: "/admin/platform?section=taxonomy", icon: Users, match: exactWithQuery("/admin/platform", "section", "taxonomy") },
+  { key: "modules", label: "Module configuration", to: "/admin/platform?section=modules", icon: Palette, mobilePrimary: true, match: exactWithQuery("/admin/platform", "section", "modules") },
+  { key: "operations", label: "Platform operations", to: "/admin/platform?section=operations", icon: ShieldCheck, match: exactWithQuery("/admin/platform", "section", "operations") },
+  { key: "access", label: "Platform access", to: "/admin/platform?section=access", icon: ContactRound, mobilePrimary: true, match: exactWithQuery("/admin/platform", "section", "access") },
 ];
 
 export const adminModules: AdminModuleDefinition[] = [
-  {
-    key: "crm",
-    label: "CRM",
-    shortLabel: "CRM",
-    description: "Leads, clients, jobs and communications",
-    to: "/admin/crm?view=overview",
-    icon: ContactRound,
-    entitlementKey: "crm",
-    match: (pathname) => pathname.startsWith("/admin/crm") || isWeddingWorkspacePath(pathname),
-    items: crmItems,
-  },
-  {
-    key: "client-galleries",
-    label: "Client Galleries",
-    shortLabel: "Galleries",
-    description: "Private delivery, selections and sales",
-    to: "/admin/client-galleries/overview",
-    icon: Images,
-    entitlementKey: "client_galleries",
-    match: (pathname) => pathname.startsWith("/admin/client-galleries") || pathname.startsWith("/admin/print-store"),
-    items: clientGalleryItems,
-  },
-  {
-    key: "website",
-    label: "Website",
-    shortLabel: "Website",
-    description: "Public galleries, stories and content",
-    to: "/admin",
-    icon: Globe2,
-    entitlementKey: "website_content",
-    match: (pathname) => pathname === "/admin" || ["/admin/website", "/admin/weddings", "/admin/gallery", "/admin/collections", "/admin/locations", "/admin/moments", "/admin/creative-flash", "/admin/custom-collections", "/admin/venues", "/admin/suppliers", "/admin/assets", "/admin/ai", "/admin/seo", "/admin/publishing"].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)),
-    items: websiteItems,
-  },
-  {
-    key: "business",
-    label: "Business",
-    shortLabel: "Business",
-    description: "Workspace, team, portal and access",
-    to: "/admin/business",
-    icon: BriefcaseBusiness,
-    entitlementKey: "business_settings",
-    match: (pathname) => pathname.startsWith("/admin/business") || pathname.startsWith("/admin/wedplanned") || pathname.startsWith("/admin/settings"),
-    items: businessItems,
-  },
+  { key: "crm", label: "CRM", shortLabel: "CRM", description: "Leads, clients, jobs and communications", to: "/admin/crm?view=overview", icon: ContactRound, entitlementKey: "crm", match: (pathname) => pathname.startsWith("/admin/crm") || isWeddingWorkspacePath(pathname), items: crmItems },
+  { key: "client-galleries", label: "Client Galleries", shortLabel: "Galleries", description: "Private delivery, selections and sales", to: "/admin/client-galleries/overview", icon: Images, entitlementKey: "client_galleries", match: (pathname) => pathname.startsWith("/admin/client-galleries") || pathname.startsWith("/admin/print-store"), items: clientGalleryItems },
+  { key: "website", label: "Website", shortLabel: "Website", description: "Public galleries, stories and content", to: "/admin", icon: Globe2, entitlementKey: "website_content", match: (pathname) => pathname === "/admin" || ["/admin/website", "/admin/weddings", "/admin/gallery", "/admin/collections", "/admin/locations", "/admin/moments", "/admin/creative-flash", "/admin/custom-collections", "/admin/venues", "/admin/suppliers", "/admin/assets", "/admin/ai", "/admin/seo", "/admin/publishing"].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)), items: websiteItems },
+  { key: "business", label: "Business", shortLabel: "Business", description: "Workspace profile, team, portal and domains", to: "/admin/business", icon: BriefcaseBusiness, entitlementKey: "business_settings", match: (pathname) => pathname.startsWith("/admin/business") || pathname.startsWith("/admin/wedplanned") || pathname.startsWith("/admin/settings"), items: businessItems },
+];
+
+export const adminModuleIconOptions = [
+  { key: "contact-round", label: "Contact", icon: ContactRound },
+  { key: "images", label: "Images", icon: Images },
+  { key: "globe-2", label: "Globe", icon: Globe2 },
+  { key: "briefcase-business", label: "Briefcase", icon: BriefcaseBusiness },
+  { key: "calendar-days", label: "Calendar", icon: CalendarDays },
+  { key: "camera", label: "Camera", icon: Camera },
+  { key: "layers-3", label: "Layers", icon: Layers3 },
+  { key: "palette", label: "Palette", icon: Palette },
+  { key: "sparkles", label: "Sparkles", icon: Sparkles },
+] as const;
+
+const iconByKey = new Map<string, LucideIcon>(adminModuleIconOptions.map((option) => [option.key, option.icon]));
+
+export const defaultAdminModuleConfigurations: PlatformModuleConfiguration[] = [
+  { moduleKey: "crm", accentColor: "#2563EB", iconKey: "contact-round", markUrl: "", activeButtonStyle: "solid", panelAccentStyle: "edge", status: "active", sortOrder: 10 },
+  { moduleKey: "client-galleries", accentColor: "#7C3AED", iconKey: "images", markUrl: "", activeButtonStyle: "soft", panelAccentStyle: "wash", status: "active", sortOrder: 20 },
+  { moduleKey: "website", accentColor: "#0F766E", iconKey: "globe-2", markUrl: "", activeButtonStyle: "solid", panelAccentStyle: "edge", status: "active", sortOrder: 30 },
+  { moduleKey: "business", accentColor: "#B45309", iconKey: "briefcase-business", markUrl: "", activeButtonStyle: "outline", panelAccentStyle: "header", status: "active", sortOrder: 40 },
 ];
 
 export function resolveAdminModule(pathname: string) {
   return adminModules.find((module) => module.match(pathname)) || adminModules.find((module) => module.key === "website")!;
+}
+
+export function resolveAdminModuleAppearance(moduleKey: AdminModuleKey, configurations: PlatformModuleConfiguration[] = []) {
+  const fallback = defaultAdminModuleConfigurations.find((item) => item.moduleKey === moduleKey)!;
+  const configured = configurations.find((item) => item.moduleKey === moduleKey && item.status === "active");
+  return { ...fallback, ...(configured || {}), moduleKey };
+}
+
+export function resolveAdminModuleIcon(module: AdminModuleDefinition, configuration?: PlatformModuleConfiguration) {
+  return iconByKey.get(configuration?.iconKey || "") || module.icon;
 }
 
 export function visibleModuleItems(module: AdminModuleDefinition, permissions: string[]) {
@@ -165,6 +166,11 @@ export function visibleModuleItems(module: AdminModuleDefinition, permissions: s
 export function resolveAdminNavigationItem(module: AdminModuleDefinition, pathname: string, search: string, permissions: string[]) {
   const params = new URLSearchParams(search);
   return visibleModuleItems(module, permissions).find((item) => item.match(pathname, params));
+}
+
+export function resolvePlatformAdminNavigationItem(pathname: string, search: string) {
+  const params = new URLSearchParams(search);
+  return platformAdminItems.find((item) => item.match(pathname, params)) || platformAdminItems[0];
 }
 
 export function isAdminNavigationItemActive(item: AdminNavigationItem, pathname: string, search: string) {

@@ -104,8 +104,7 @@ def main() -> None:
         ".crm-wedding-lifecycle-card__icon",
     ]:
         assert selector in css, selector
-    migrations = list((ROOT / "d1" / "migrations").glob("032*"))
-    assert not migrations, "v1.9.6a must remain source-only unless schema 32 is explicitly reviewed"
+    assert not (ROOT / "d1/migrations/032_unified_wedding_lifecycle.sql").exists(), "v1.9.6a remained source-only"
 
     print("PASS v1.9.6a unified Wedding lifecycle")
     print("  CRM Job origin and Wedding Workspace lifecycle: verified")

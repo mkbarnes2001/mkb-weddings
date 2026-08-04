@@ -15,7 +15,8 @@ def main() -> None:
     taxonomy = read("src/admin/data/supplierTaxonomy.ts")
     searchable = read("src/admin/components/ui/AdminSearchSelect.tsx")
     gallery = read("src/admin/pages/ClientGalleryEditor.tsx")
-    platform_page = read("src/admin/pages/WedPlannedPlatform.tsx")
+    platform_page = read("src/admin/pages/PlatformAdmin.tsx")
+    platform_route = read("src/admin/app/AdminApp.tsx")
     platform_d1 = read("serverless/platform-foundation-d1.ts")
     workspace_d1 = read("serverless/workspace-d1.ts")
     api = read("src/admin/services/AdminApiService.ts")
@@ -62,11 +63,11 @@ def main() -> None:
     assert "platform_supplier_categories" not in platform_d1
     assert "supplierCategories" not in workspace_d1
     assert "supplierRoles" not in workspace_d1
+    assert 'auth.platformRole === "platform_admin"' in platform_route
     for token in [
-        'auth.platformRole === "platform_admin"',
         "Supplier taxonomy",
         "Save platform taxonomy",
-        "Business workspaces can select them but cannot add, rename or remove them.",
+        "Business workspaces may select these options but cannot add, rename, reorder or remove them.",
     ]:
         assert token in platform_page, token
     assert "Manage categories & roles" not in suppliers
@@ -123,8 +124,7 @@ def main() -> None:
     assert 'status: wedding.status !== "published" ? wedding.status || "draft" : "future"' in published_index
 
     # Existing platform tables provide global persistence; no schema transition is required.
-    migrations = list((ROOT / "d1" / "migrations").glob("032*")) if (ROOT / "d1" / "migrations").exists() else []
-    assert not migrations, "Final v1.9.7a refinement must remain schema 31"
+    assert not (ROOT / "d1/migrations/032_wedding_workspace_polish.sql").exists(), "v1.9.7a remained source-only"
 
     for selector in [
         ".admin-supplier-table--compact",

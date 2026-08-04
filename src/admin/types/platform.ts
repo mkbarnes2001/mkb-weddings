@@ -97,6 +97,57 @@ export type PlatformSupplierTaxonomy = {
   roles: Array<{ key?: string; name: string; category: string; sortOrder?: number }>;
 };
 
+export type PlatformModuleKey = "crm" | "client-galleries" | "website" | "business";
+
+export type PlatformModuleConfiguration = {
+  moduleKey: PlatformModuleKey;
+  accentColor: string;
+  iconKey: string;
+  markUrl: string;
+  activeButtonStyle: "solid" | "soft" | "outline";
+  panelAccentStyle: "edge" | "wash" | "header";
+  status: "active" | "archived";
+  sortOrder: number;
+  updatedAt?: string;
+};
+
+export type PlatformAdministrationWorkspace = {
+  id: string;
+  slug: string;
+  name: string;
+  status: string;
+  plan: string;
+  marketplaceSlug: string;
+  memberCount: number;
+  activeMemberCount: number;
+  domainCount: number;
+  verifiedDomainCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PlatformAdministrationUser = {
+  id: string;
+  email: string;
+  displayName: string;
+  platformRole: string;
+  status: string;
+  membershipCount: number;
+  lastSignedInAt?: string;
+  createdAt: string;
+};
+
+export type PlatformAdministrationPayload = {
+  schemaVersion: number;
+  brand: { name: string; primaryDomain: string; ukDomain: string };
+  summary: { workspaces: number; activeWorkspaces: number; users: number; platformAdmins: number };
+  workspaces: PlatformAdministrationWorkspace[];
+  users: PlatformAdministrationUser[];
+  modules: PlatformModuleConfiguration[];
+  supplierTaxonomy: PlatformSupplierTaxonomy;
+  recentAudit: Array<WedPlannedAuditEvent & { actorEmail: string }>;
+};
+
 export type WedPlannedPlatformPayload = {
   schemaVersion: number;
   brand: {
@@ -110,6 +161,7 @@ export type WedPlannedPlatformPayload = {
   members: WedPlannedMember[];
   entitlements: WedPlannedEntitlement[];
   supplierTaxonomy: PlatformSupplierTaxonomy;
+  moduleConfigurations: PlatformModuleConfiguration[];
   scopeReadiness: WedPlannedScopeReadiness[];
   recentAudit: WedPlannedAuditEvent[];
 };

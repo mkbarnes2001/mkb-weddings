@@ -20,7 +20,7 @@ checks = {
         and "overflow-y: scroll !important" in theme
     ),
     "CRM and Website navigation use a compact two-column layout": (
-        'data-layout={currentModule.key === "website" || currentModule.key === "crm" ? "grid" : "list"}' in layout
+        'data-layout={!isPlatformRoute && (currentModule.key === "website" || currentModule.key === "crm") ? "grid" : "list"}' in layout
         and '.admin-module-navigation__items[data-layout="grid"]' in theme
     ),
     "platform administrator authority is visible in the session UI": (

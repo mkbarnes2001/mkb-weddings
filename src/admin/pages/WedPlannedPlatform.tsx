@@ -1,25 +1,15 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  BadgeCheck,
   BriefcaseBusiness,
   Building2,
-  Check,
   ChevronDown,
-  ChevronUp,
-  Clock,
   Copy,
-  CircleDashed,
-  Download,
-  FileText,
-  AlertTriangle,
   Globe2,
   MapPinned,
   MailCheck,
   Plus,
-  RotateCcw,
   Save,
-  ShieldCheck,
   Sparkles,
   Trash2,
   Users,
@@ -32,8 +22,6 @@ import {
   AdminPageHeader,
   AdminPanel,
   AdminStatus,
-  AdminTab,
-  AdminTabs,
 } from "../components/ui/AdminUI";
 import { AdminApiService } from "../services/AdminApiService";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
@@ -41,23 +29,15 @@ import type {
   ProfessionalInvitationResult,
   WedPlannedBusiness,
   WedPlannedMember,
-  WedPlannedOperationsPayload,
   WedPlannedPlatformPayload,
   WedPlannedServiceArea,
 } from "../types/platform";
-import {
-  DEFAULT_SUPPLIER_ROLE_DEFINITIONS,
-  SUPPLIER_CATEGORY_OPTIONS,
-  normaliseSupplierTaxonomy,
-  supplierTaxonomyKey,
-  type SupplierRoleDefinition,
-} from "../data/supplierTaxonomy";
 
-type TabKey = "business" | "services" | "team" | "taxonomy" | "operations" | "access";
+type TabKey = "business" | "services" | "team";
 
 function initialTab(): TabKey {
   const value = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("tab") : "";
-  return value === "services" || value === "team" || value === "taxonomy" || value === "operations" || value === "access" ? value : "business";
+  return value === "services" || value === "team" ? value : "business";
 }
 
 const emptyArea: Partial<WedPlannedServiceArea> = {
@@ -125,32 +105,10 @@ function FieldSelect({ value, onChange, children }: {
   );
 }
 
-function toneForScope(status: string): "success" | "warning" | "info" {
-  if (status === "scoped") return "success";
-  if (status === "migration") return "warning";
-  return "info";
-}
-
-function labelForScope(status: string) {
-  if (status === "scoped") return "Tenant scoped";
-  if (status === "migration") return "Migration required";
-  return "Planned";
-}
-
-function duplicateTaxonomyName(values: string[]) {
-  const seen = new Set<string>();
-  for (const value of values) {
-    const key = supplierTaxonomyKey(value);
-    if (!key) return "Every option needs a name.";
-    if (seen.has(key)) return `Duplicate option: ${value.trim()}.`;
-    seen.add(key);
-  }
-  return "";
-}
 
 export function WedPlannedPlatform() {
   const { auth } = useProfessionalAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [platform, setPlatform] = useState<WedPlannedPlatformPayload | null>(null);
   const [business, setBusiness] = useState<WedPlannedBusiness | null>(null);
   const [tab, setTabState] = useState<TabKey>(initialTab);
@@ -160,41 +118,19 @@ export function WedPlannedPlatform() {
   const [error, setError] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [primaryCategory, setPrimaryCategory] = useState("");
-  const [supplierCategories, setSupplierCategories] = useState<string[]>([...SUPPLIER_CATEGORY_OPTIONS]);
-  const [supplierRoles, setSupplierRoles] = useState<SupplierRoleDefinition[]>([...DEFAULT_SUPPLIER_ROLE_DEFINITIONS]);
   const [serviceArea, setServiceArea] = useState(emptyArea);
   const [serviceAreaPreset, setServiceAreaPreset] = useState("");
   const [member, setMember] = useState(emptyMember);
   const [lastInvitation, setLastInvitation] = useState<ProfessionalInvitationResult | null>(null);
-  const [operations, setOperations] = useState<WedPlannedOperationsPayload | null>(null);
-  const [operationsLoading, setOperationsLoading] = useState(false);
-  const [supportScope, setSupportScope] = useState<"read" | "manage">("read");
-  const [supportHours, setSupportHours] = useState(4);
-  const [supportReason, setSupportReason] = useState("");
-  const [deletionConfirmation, setDeletionConfirmation] = useState("");
-  const [deletionReason, setDeletionReason] = useState("");
   const canEditBusiness = auth.permissions.includes("business:update");
   const canEditServices = auth.permissions.includes("services:update");
   const canManageMembers = auth.permissions.includes("members:manage");
-  const canReadOperations = auth.permissions.includes("operations:read");
-  const canManageSupport = auth.permissions.includes("support:manage") && auth.accessMode !== "support";
-  const canExportData = auth.permissions.includes("data:export") && auth.accessMode !== "support";
-  const canRequestDeletion = auth.permissions.includes("deletion:request") && auth.accessMode !== "support";
-  const canManageSupplierTaxonomy = auth.platformRole === "platform_admin";
 
   useEffect(() => {
     const requested = searchParams.get("tab");
-    const next: TabKey = requested === "services" || requested === "team" || requested === "access"
-      || (requested === "taxonomy" && canManageSupplierTaxonomy)
-      || (requested === "operations" && canReadOperations) ? requested : "business";
+    const next: TabKey = requested === "services" || requested === "team" ? requested : "business";
     setTabState(next);
-  }, [canManageSupplierTaxonomy, canReadOperations, searchParams]);
-
-  function setTab(next: TabKey) {
-    const resolved = (next === "operations" && !canReadOperations) || (next === "taxonomy" && !canManageSupplierTaxonomy) ? "business" : next;
-    setTabState(resolved);
-    setSearchParams(resolved === "business" ? {} : { tab: resolved }, { replace: true });
-  }
+  }, [searchParams]);
 
   function apply(next: WedPlannedPlatformPayload) {
     setPlatform(next);
@@ -202,9 +138,6 @@ export function WedPlannedPlatform() {
     const keys = next.categories.filter((category) => category.selected).map((category) => category.key);
     setSelectedCategories(keys);
     setPrimaryCategory(next.categories.find((category) => category.primary)?.key || keys[0] || "");
-    const taxonomy = normaliseSupplierTaxonomy(next.supplierTaxonomy?.categories, next.supplierTaxonomy?.roles);
-    setSupplierCategories(taxonomy.categories);
-    setSupplierRoles(taxonomy.roles);
   }
 
   useEffect(() => {
@@ -213,18 +146,6 @@ export function WedPlannedPlatform() {
       .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load WedPlanned foundation."))
       .finally(() => setLoading(false));
   }, []);
-
-  useEffect(() => {
-    if (!canReadOperations) {
-      setOperations(null);
-      return;
-    }
-    setOperationsLoading(true);
-    AdminApiService.getWedPlannedOperations()
-      .then(setOperations)
-      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load platform operations."))
-      .finally(() => setOperationsLoading(false));
-  }, [auth.workspaceId, canReadOperations]);
 
   const categoryGroups = useMemo(() => {
     const groups = new Map<string, WedPlannedPlatformPayload["categories"]>();
@@ -256,67 +177,6 @@ export function WedPlannedPlatform() {
     } finally {
       setSaving(false);
     }
-  }
-
-  function updateSupplierCategory(index: number, value: string) {
-    const previous = supplierCategories[index];
-    setSupplierCategories((current) => current.map((item, itemIndex) => itemIndex === index ? value : item));
-    setSupplierRoles((current) => current.map((role) => supplierTaxonomyKey(role.category) === supplierTaxonomyKey(previous) ? { ...role, category: value } : role));
-    setMessage("");
-    setError("");
-  }
-
-  function removeSupplierCategory(index: number) {
-    if (supplierCategories.length <= 1) {
-      setError("Keep at least one supplier category.");
-      return;
-    }
-    const removed = supplierCategories[index];
-    const next = supplierCategories.filter((_, itemIndex) => itemIndex !== index);
-    const replacement = next[Math.min(index, next.length - 1)] || next[0];
-    setSupplierCategories(next);
-    setSupplierRoles((current) => current.map((role) => supplierTaxonomyKey(role.category) === supplierTaxonomyKey(removed) ? { ...role, category: replacement } : role));
-    setMessage("");
-    setError("");
-  }
-
-  function moveSupplierCategory(index: number, direction: -1 | 1) {
-    const target = index + direction;
-    if (target < 0 || target >= supplierCategories.length) return;
-    setSupplierCategories((current) => {
-      const next = [...current];
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
-  }
-
-  function moveSupplierRole(index: number, direction: -1 | 1) {
-    const target = index + direction;
-    if (target < 0 || target >= supplierRoles.length) return;
-    setSupplierRoles((current) => {
-      const next = [...current];
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
-  }
-
-  async function saveSupplierTaxonomy() {
-    const categoryError = duplicateTaxonomyName(supplierCategories);
-    const roleError = duplicateTaxonomyName(supplierRoles.map((role) => role.name));
-    if (categoryError || roleError) {
-      setError(categoryError || roleError);
-      return;
-    }
-    const categoryKeys = new Set(supplierCategories.map(supplierTaxonomyKey));
-    if (supplierRoles.some((role) => !categoryKeys.has(supplierTaxonomyKey(role.category)))) {
-      setError("Each Wedding role must use one of the platform supplier categories.");
-      return;
-    }
-    const taxonomy = normaliseSupplierTaxonomy(supplierCategories, supplierRoles);
-    await run(
-      () => AdminApiService.savePlatformSupplierTaxonomy(taxonomy),
-      "Global supplier categories and Wedding roles saved for every WedPlanned workspace.",
-    );
   }
 
   async function saveBusiness() {
@@ -387,42 +247,6 @@ export function WedPlannedPlatform() {
     }
   }
 
-  async function runOperation(action: () => Promise<WedPlannedOperationsPayload>, success: string) {
-    setSaving(true);
-    setError("");
-    setMessage("");
-    try {
-      const next = await action();
-      setOperations(next);
-      setMessage(success);
-      return true;
-    } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : "Unable to complete the platform operation.");
-      return false;
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function grantSupport() {
-    const saved = await runOperation(
-      () => AdminApiService.grantWedPlannedSupport(supportScope, supportHours, supportReason),
-      "Time-bounded support access enabled.",
-    );
-    if (saved) setSupportReason("");
-  }
-
-  async function requestDeletion() {
-    const saved = await runOperation(
-      () => AdminApiService.requestWedPlannedDeletion(deletionConfirmation, deletionReason),
-      "Staged business deletion request created.",
-    );
-    if (saved) {
-      setDeletionConfirmation("");
-      setDeletionReason("");
-    }
-  }
-
   if (loading) return <div className="admin-page text-sm text-neutral-500">Loading WedPlanned foundation…</div>;
   if (!platform || !business) {
     return <div className="admin-page rounded-xl bg-red-50 p-5 text-sm text-red-800">{error || "WedPlanned foundation is unavailable."}</div>;
@@ -431,9 +255,9 @@ export function WedPlannedPlatform() {
   return (
     <AdminPage>
       <AdminPageHeader
-        eyebrow="Commercial platform"
-        title="WedPlanned"
-        description="The neutral business foundation for wedding professionals, CRM, bookings, connected payments and the future marketplace."
+        eyebrow="Business · Workspace configuration"
+        title="Business settings"
+        description="Manage this workspace’s business identity, services and team. Global WedPlanned controls are available only in Platform administration."
         meta={
           <div className="flex flex-wrap items-center gap-2">
             <AdminStatus tone="info">Schema {platform.schemaVersion}</AdminStatus>
@@ -447,7 +271,7 @@ export function WedPlannedPlatform() {
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
           <div className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2eee7]"><Building2 size={17} /></span>
-            <div><p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">First business</p><p className="text-sm font-semibold">{business.publicName}</p></div>
+            <div><p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">Business profile</p><p className="text-sm font-semibold">{business.publicName}</p></div>
           </div>
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
@@ -458,20 +282,11 @@ export function WedPlannedPlatform() {
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2eee7]"><ShieldCheck size={17} /></span>
-            <div><p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">Tenant readiness</p><p className="text-sm font-semibold">{platform.scopeReadiness.filter((item) => item.status === "scoped").length} modules scoped</p></div>
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2eee7]"><Users size={17} /></span>
+            <div><p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">Team members</p><p className="text-sm font-semibold">{platform.members.filter((item) => item.status === "active").length} active</p></div>
           </div>
         </div>
       </div>
-
-      <AdminTabs className="mt-1">
-        <AdminTab active={tab === "business"} onClick={() => setTab("business")}>Business</AdminTab>
-        <AdminTab active={tab === "services"} onClick={() => setTab("services")}>Services & areas</AdminTab>
-        <AdminTab active={tab === "team"} onClick={() => setTab("team")}>Team</AdminTab>
-        {canManageSupplierTaxonomy ? <AdminTab active={tab === "taxonomy"} onClick={() => setTab("taxonomy")}>Supplier taxonomy</AdminTab> : null}
-        {canReadOperations ? <AdminTab active={tab === "operations"} onClick={() => setTab("operations")}>Operations</AdminTab> : null}
-        <AdminTab active={tab === "access"} onClick={() => setTab("access")}>Platform access</AdminTab>
-      </AdminTabs>
 
       {message ? <div className="rounded-xl bg-emerald-50 px-4 py-3 text-xs text-emerald-800">{message}</div> : null}
       {error ? <div className="rounded-xl bg-red-50 px-4 py-3 text-xs text-red-800">{error}</div> : null}
@@ -690,168 +505,6 @@ export function WedPlannedPlatform() {
         </div>
       ) : null}
 
-      {tab === "taxonomy" && canManageSupplierTaxonomy ? (
-        <section className="supplier-taxonomy-manager">
-          <header className="supplier-taxonomy-manager__header">
-            <div>
-              <p className="admin-eyebrow">Platform-controlled dropdowns</p>
-              <h2>Supplier categories & Wedding roles</h2>
-              <p>These canonical options are shared by every WedPlanned professional. Business workspaces can select them but cannot add, rename or remove them.</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => { setSupplierCategories([...SUPPLIER_CATEGORY_OPTIONS]); setSupplierRoles([...DEFAULT_SUPPLIER_ROLE_DEFINITIONS]); setMessage(""); setError(""); }} className="admin-button admin-button--secondary admin-button--sm"><RotateCcw className="admin-button__icon" />Restore defaults</button>
-              <button type="button" disabled={saving} onClick={saveSupplierTaxonomy} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : "Save platform taxonomy"}</button>
-            </div>
-          </header>
-          <div className="supplier-taxonomy-manager__grid">
-            <section className="supplier-taxonomy-list-card">
-              <div className="supplier-taxonomy-list-card__heading"><div><strong>Supplier categories</strong><span>{supplierCategories.length} platform options</span></div><button type="button" onClick={() => setSupplierCategories((current) => [...current, `New category ${current.length + 1}`])} className="admin-button admin-button--secondary admin-button--sm"><Plus className="admin-button__icon" />Add category</button></div>
-              <div className="supplier-taxonomy-list">
-                {supplierCategories.map((category, index) => <div key={`${index}-${category}`} className="supplier-taxonomy-row"><input value={category} onChange={(event) => updateSupplierCategory(index, event.target.value)} aria-label={`Platform supplier category ${index + 1}`} /><div className="supplier-taxonomy-row__actions"><button type="button" disabled={index === 0} onClick={() => moveSupplierCategory(index, -1)} title="Move up"><ChevronUp /></button><button type="button" disabled={index === supplierCategories.length - 1} onClick={() => moveSupplierCategory(index, 1)} title="Move down"><ChevronDown /></button><button type="button" disabled={supplierCategories.length <= 1} onClick={() => removeSupplierCategory(index)} title="Remove category"><Trash2 /></button></div></div>)}
-              </div>
-            </section>
-            <section className="supplier-taxonomy-list-card">
-              <div className="supplier-taxonomy-list-card__heading"><div><strong>Wedding roles</strong><span>{supplierRoles.length} platform options</span></div><button type="button" onClick={() => setSupplierRoles((current) => [...current, { name: `New role ${current.length + 1}`, category: supplierCategories[0] || "Other" }])} className="admin-button admin-button--secondary admin-button--sm"><Plus className="admin-button__icon" />Add role</button></div>
-              <div className="supplier-taxonomy-list">
-                {supplierRoles.map((role, index) => <div key={`${index}-${role.name}`} className="supplier-taxonomy-row supplier-taxonomy-row--role"><input value={role.name} onChange={(event) => setSupplierRoles((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item))} aria-label={`Platform Wedding role ${index + 1}`} /><select value={role.category} onChange={(event) => setSupplierRoles((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, category: event.target.value } : item))}>{supplierCategories.map((category) => <option key={category} value={category}>{category}</option>)}</select><div className="supplier-taxonomy-row__actions"><button type="button" disabled={index === 0} onClick={() => moveSupplierRole(index, -1)} title="Move up"><ChevronUp /></button><button type="button" disabled={index === supplierRoles.length - 1} onClick={() => moveSupplierRole(index, 1)} title="Move down"><ChevronDown /></button><button type="button" disabled={supplierRoles.length <= 1} onClick={() => setSupplierRoles((current) => current.filter((_, itemIndex) => itemIndex !== index))} title="Remove role"><Trash2 /></button></div></div>)}
-              </div>
-            </section>
-          </div>
-        </section>
-      ) : null}
-
-      {tab === "operations" ? (
-        operationsLoading && !operations ? (
-          <div className="rounded-2xl bg-white p-6 text-xs text-neutral-500 shadow-sm ring-1 ring-black/[0.06]">Loading platform operations…</div>
-        ) : operations ? (
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,.85fr)]">
-            <div className="space-y-5">
-              <AdminPanel title="Time-bounded support access" description="Support cannot enter this business unless an owner explicitly opens a limited access window. Every support request is recorded." icon={ShieldCheck}>
-                {operations.support.activeGrant ? (
-                  <div className="rounded-xl bg-emerald-50 p-4 text-xs text-emerald-900">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold">Support access is active</p>
-                        <p className="mt-1 text-[10px] leading-4 opacity-75">{operations.support.activeGrant.scope === "manage" ? "Managed access" : "Read-only access"} · expires {new Date(operations.support.activeGrant.expiresAt).toLocaleString("en-GB")}</p>
-                      </div>
-                      {canManageSupport ? <AdminButton variant="secondary" onClick={() => runOperation(() => AdminApiService.revokeWedPlannedSupport(operations.support.activeGrant!.id), "Support access revoked.")} disabled={saving}>Revoke access</AdminButton> : null}
-                    </div>
-                    {operations.support.activeGrant.reason ? <p className="mt-3 rounded-lg bg-white/70 px-3 py-2 text-[10px] leading-4">Reason: {operations.support.activeGrant.reason}</p> : null}
-                  </div>
-                ) : (
-                  <div className="rounded-xl bg-[#f5f3ef] p-4 text-xs text-neutral-600">No WedPlanned support access is currently open for this business.</div>
-                )}
-
-                {canManageSupport ? (
-                  <div className="mt-4 grid gap-3 md:grid-cols-[160px_150px_minmax(0,1fr)_auto] md:items-end">
-                    <AdminField label="Access level">
-                      <FieldSelect value={supportScope} onChange={(value) => setSupportScope(value as "read" | "manage")}><option value="read">Read only</option><option value="manage">Managed support</option></FieldSelect>
-                    </AdminField>
-                    <AdminField label="Duration">
-                      <FieldSelect value={String(supportHours)} onChange={(value) => setSupportHours(Number(value))}><option value="1">1 hour</option><option value="4">4 hours</option><option value="24">24 hours</option><option value="72">72 hours</option></FieldSelect>
-                    </AdminField>
-                    <AdminField label="Reason"><FieldInput value={supportReason} onChange={setSupportReason} placeholder="Optional support case or reason" /></AdminField>
-                    <AdminButton variant="primary" icon={Clock} onClick={grantSupport} disabled={saving}>Enable support</AdminButton>
-                  </div>
-                ) : null}
-              </AdminPanel>
-
-              <AdminPanel title="Business data export" description="Download a structured JSON snapshot of this business. Binary photographs are not duplicated; asset and storage references are included." icon={Download}>
-                <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-[#f5f3ef] p-4">
-                  <div><p className="text-xs font-semibold">Workspace-owned data only</p><p className="mt-1 max-w-2xl text-[10px] leading-4 text-neutral-500">Authentication links and session tokens are excluded. The export includes business, wedding, venue, supplier, asset, gallery and commerce records scoped to {operations.workspace.name}.</p></div>
-                  <AdminButton variant="primary" icon={Download} onClick={() => { window.location.href = AdminApiService.wedPlannedExportUrl(); }} disabled={!canExportData}>Download JSON export</AdminButton>
-                </div>
-                <div className="mt-4 space-y-2">
-                  {operations.exports.length ? operations.exports.slice(0, 5).map((item) => (
-                    <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-black/[0.06] px-3 py-3 text-[10px]">
-                      <div><p className="font-semibold text-neutral-800">{item.fileName || "Workspace export"}</p><p className="mt-1 text-neutral-500">{item.recordCount.toLocaleString()} records · {item.tableCount} tables · {new Date(item.createdAt).toLocaleString("en-GB")}</p></div>
-                      <AdminStatus tone={item.status === "completed" ? "success" : "warning"}>{item.status}</AdminStatus>
-                    </div>
-                  )) : <p className="text-xs text-neutral-500">No business exports have been created yet.</p>}
-                </div>
-              </AdminPanel>
-            </div>
-
-            <div className="space-y-5">
-              <AdminPanel title="Business closure" description="Deletion is deliberately staged. This request does not immediately remove records, galleries or private assets." icon={AlertTriangle}>
-                {operations.deletion.activeRequest ? (
-                  <div className="rounded-xl bg-amber-50 p-4 text-xs text-amber-950">
-                    <p className="font-semibold">Deletion request open</p>
-                    <p className="mt-1 text-[10px] leading-4 opacity-75">Scheduled for review after {new Date(operations.deletion.activeRequest.scheduledFor).toLocaleString("en-GB")}.</p>
-                    {canRequestDeletion ? <AdminButton className="mt-3" variant="secondary" onClick={() => runOperation(() => AdminApiService.cancelWedPlannedDeletion(operations.deletion.activeRequest!.id), "Deletion request cancelled.")} disabled={saving}>Cancel request</AdminButton> : null}
-                  </div>
-                ) : canRequestDeletion ? (
-                  <div className="space-y-3">
-                    <p className="rounded-xl bg-[#f5f3ef] px-3 py-3 text-[10px] leading-4 text-neutral-600">A {operations.deletion.coolingOffDays}-day cooling-off period begins when the request is submitted. No destructive deletion is automated by this screen.</p>
-                    <AdminField label={`Type ${operations.workspace.name} to confirm`}><FieldInput value={deletionConfirmation} onChange={setDeletionConfirmation} /></AdminField>
-                    <AdminField label="Reason"><textarea value={deletionReason} onChange={(event) => setDeletionReason(event.target.value)} rows={3} className="admin-textarea" /></AdminField>
-                    <AdminButton variant="secondary" icon={AlertTriangle} onClick={requestDeletion} disabled={saving || deletionConfirmation !== operations.workspace.name}>Request staged deletion</AdminButton>
-                  </div>
-                ) : <p className="text-xs text-neutral-500">Only a business owner can request account deletion.</p>}
-                <div className="mt-4 space-y-2 border-t border-black/[0.06] pt-4">
-                  {operations.deletion.protectedRecords.map((item) => <div key={item} className="flex gap-2 text-[10px] leading-4 text-neutral-500"><FileText size={12} className="mt-0.5 shrink-0" />{item}</div>)}
-                </div>
-              </AdminPanel>
-
-              <AdminPanel title="Recent support activity" description="Support access and requests are auditable against the active business." compact>
-                <div className="space-y-3">
-                  {operations.support.recentEvents.length ? operations.support.recentEvents.slice(0, 8).map((event) => (
-                    <div key={event.id} className="border-b border-black/[0.06] pb-3 last:border-0 last:pb-0">
-                      <p className="text-xs font-medium">{event.eventType.replace(/\./g, " ")}</p>
-                      <p className="mt-1 text-[10px] text-neutral-500">{event.supportEmail || "WedPlanned support"}{event.path ? ` · ${event.method} ${event.path}` : ""}{event.statusCode ? ` · ${event.statusCode}` : ""}</p>
-                      <p className="mt-1 text-[10px] text-neutral-400">{new Date(event.createdAt).toLocaleString("en-GB")}</p>
-                    </div>
-                  )) : <p className="text-xs text-neutral-500">No support activity has been recorded for this business.</p>}
-                </div>
-              </AdminPanel>
-            </div>
-          </div>
-        ) : <div className="rounded-xl bg-red-50 p-4 text-xs text-red-800">Platform operations are unavailable.</div>
-      ) : null}
-
-      {tab === "access" ? (
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,.8fr)]">
-          <AdminPanel title="Tenant-isolation readiness" description="This is the live audit boundary for external WedPlanned businesses." icon={ShieldCheck}>
-            <div className="space-y-2">
-              {platform.scopeReadiness.map((item) => (
-                <div key={item.key} className="grid gap-2 rounded-xl bg-[#f5f3ef] p-3 md:grid-cols-[minmax(0,1fr)_150px] md:items-center">
-                  <div><p className="text-xs font-semibold">{item.label}</p><p className="mt-1 text-[10px] leading-4 text-neutral-500">{item.detail}</p></div>
-                  <AdminStatus tone={toneForScope(item.status)}>{labelForScope(item.status)}</AdminStatus>
-                </div>
-              ))}
-            </div>
-          </AdminPanel>
-
-          <div className="space-y-5">
-            <AdminPanel title="Professional access" description="Session and business context are resolved on the server." icon={ShieldCheck} compact>
-              <div className="space-y-3 text-xs">
-                <div className="flex items-center justify-between gap-4"><span className="text-neutral-500">Mode</span><AdminStatus tone={auth.authenticated ? "success" : "warning"}>{auth.mode === "bootstrap" ? "Setup mode" : auth.authenticated ? "Secure session" : "Sign-in required"}</AdminStatus></div>
-                <div className="flex items-center justify-between gap-4"><span className="text-neutral-500">Enforcement</span><span className="font-medium">{auth.enforced ? "Enabled" : "Not enabled"}</span></div>
-                <div className="flex items-center justify-between gap-4"><span className="text-neutral-500">Business context</span><span className="truncate text-right font-medium">{auth.businessName}</span></div>
-                <div className="flex items-center justify-between gap-4"><span className="text-neutral-500">Role</span><span className="capitalize font-medium">{auth.role}</span></div>
-              </div>
-              {!auth.enforced ? <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-[10px] leading-4 text-amber-900">Keep external onboarding disabled until authentication is enforced and legacy Weddings, Venues, Suppliers and public-gallery routes are tenant-scoped.</p> : null}
-            </AdminPanel>
-            <AdminPanel title="Feature entitlements" description="MKB is an internal founder business, so all foundation features are enabled while commercial plans are designed." icon={BadgeCheck}>
-              <div className="space-y-2">
-                {platform.entitlements.map((feature) => (
-                  <div key={feature.key} className="flex items-start gap-3 rounded-xl bg-[#f5f3ef] p-3">
-                    <span className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full ${feature.enabled ? "bg-emerald-100 text-emerald-700" : "bg-neutral-200 text-neutral-500"}`}>{feature.enabled ? <Check size={12} /> : <CircleDashed size={12} />}</span>
-                    <div><p className="text-xs font-semibold">{feature.name}</p><p className="mt-1 text-[10px] leading-4 text-neutral-500">{feature.description}</p></div>
-                  </div>
-                ))}
-              </div>
-            </AdminPanel>
-            <AdminPanel title="Recent foundation activity" compact>
-              <div className="space-y-3">
-                {platform.recentAudit.length ? platform.recentAudit.map((event) => (
-                  <div key={event.id} className="border-b border-black/[0.06] pb-3 last:border-0 last:pb-0"><p className="text-xs font-medium">{event.summary}</p><p className="mt-1 text-[10px] text-neutral-500">{event.createdAt}</p></div>
-                )) : <p className="text-xs text-neutral-500">No platform changes recorded yet.</p>}
-              </div>
-            </AdminPanel>
-          </div>
-        </div>
-      ) : null}
     </AdminPage>
   );
 }

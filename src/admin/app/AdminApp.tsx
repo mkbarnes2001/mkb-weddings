@@ -30,6 +30,8 @@ import { PlaceholderPage } from "../pages/PlaceholderPage";
 import { Settings } from "../pages/Settings";
 import { ClientPortalSettings } from "../pages/ClientPortalSettings";
 import { WedPlannedPlatform } from "../pages/WedPlannedPlatform";
+import { PlatformAdmin } from "../pages/PlatformAdmin";
+import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AssetLibrary } from "../pages/AssetLibrary";
 import { ClientGalleries } from "../pages/ClientGalleries";
 import { ClientGalleryEditor } from "../pages/ClientGalleryEditor";
@@ -59,6 +61,7 @@ export function AdminApp() {
         <Route path="website" element={<Navigate to="/admin" replace />} />
         <Route path="business" element={<BusinessOverview />} />
         <Route path="wedplanned" element={<WedPlannedPlatform />} />
+        <Route path="platform" element={<PlatformAdminRoute />} />
         <Route path="crm" element={<CRM />} />
         <Route path="crm/enquiries/:id" element={<CRMEnquiry />} />
         <Route path="crm/contacts/:id" element={<CRMContact />} />
@@ -140,6 +143,13 @@ export function AdminApp() {
   );
 }
 
+
+function PlatformAdminRoute() {
+  const { auth } = useProfessionalAuth();
+  return auth.platformRole === "platform_admin" && auth.permissions.includes("platform:admin")
+    ? <PlatformAdmin />
+    : <Navigate to="/admin/business" replace />;
+}
 
 function LegacyWeddingStoryEditorRedirect() {
   const { slug } = useParams();

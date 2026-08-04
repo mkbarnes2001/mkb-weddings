@@ -165,7 +165,7 @@ export async function getPlatformOperations(db: D1Db, actor: OperationsActor) {
   const deletionRequests = (deletionRows.results || []).map(hydrateDeletionRequest);
 
   return {
-    schemaVersion: 27,
+    schemaVersion: 32,
     workspace: {
       id: text(workspace.id),
       slug: text(workspace.slug),

@@ -155,7 +155,7 @@ export function ProfessionalAuthProvider({ children }: { children: ReactNode }) 
     try {
       const next = await AdminApiService.switchProfessionalWorkspace(workspaceId);
       setAuth(next);
-      window.location.assign("/admin/wedplanned");
+      window.location.assign("/admin/business");
     } finally {
       setLoading(false);
     }

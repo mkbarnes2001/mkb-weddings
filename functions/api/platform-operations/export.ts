@@ -1,4 +1,4 @@
-import { requireProfessionalContext } from "../../../serverless/platform-auth-d1";
+import { requireProfessionalContext, type ProfessionalContext } from "../../../serverless/platform-auth-d1";
 import { createWorkspaceExport } from "../../../serverless/platform-operations-d1";
 
 type Env = {
@@ -7,11 +7,23 @@ type Env = {
   WEDPLANNED_BOOTSTRAP_EMAIL?: string;
 };
 
+function actorForWorkspace(actor: ProfessionalContext, workspaceIdInput: unknown) {
+  const workspaceId = String(workspaceIdInput || "").trim();
+  if (!workspaceId || workspaceId === actor.workspaceId) return actor;
+  if (actor.platformRole !== "platform_admin" || !actor.permissions.includes("platform:admin") || actor.accessMode === "support") {
+    const error = new Error("Only a WedPlanned platform administrator can export another business workspace.") as Error & { statusCode?: number };
+    error.statusCode = 403;
+    throw error;
+  }
+  return { ...actor, workspaceId, businessName: "" };
+}
+
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const actor = context.data?.professionalContext
       || await requireProfessionalContext(context.env.MKB_DB, context.request, context.env);
-    const result = await createWorkspaceExport(context.env.MKB_DB, actor);
+    const requestedWorkspaceId = new URL(context.request.url).searchParams.get("workspaceId");
+    const result = await createWorkspaceExport(context.env.MKB_DB, actorForWorkspace(actor, requestedWorkspaceId));
     return new Response(JSON.stringify(result.payload, null, 2), {
       status: 200,
       headers: {

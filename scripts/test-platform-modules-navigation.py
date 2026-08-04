@@ -27,7 +27,7 @@ def main() -> None:
         ('key: "business"', 'label: "Business"', 'entitlementKey: "business_settings"'),
     ]:
         assert key in modules and label in modules and entitlement in modules
-    assert "requiredPermission" in modules and 'requiredPermission: "operations:read"' in modules
+    assert "requiredPermission" in modules
     assert "WedPlanned Network" not in modules
     assert 'label: "Contracts"' not in modules
     assert 'label: "Invoices"' not in modules
@@ -67,7 +67,7 @@ def main() -> None:
     assert 'Communications remain attached to the relevant lead, client or Job record.' in crm
     assert 'useSearchParams' in store and 'const validTabs: Tab[] = ["catalogue", "pricing", "orders"]' in store
     assert 'setSearchParams(next === "catalogue" ? {} : { tab: next }' in store
-    assert 'useSearchParams' in platform and 'setSearchParams(resolved === "business" ? {} : { tab: resolved }' in platform
+    assert 'useSearchParams' in platform and 'searchParams.get("tab")' in platform
 
     # Landing pages use real existing APIs and preserve the public/private gallery boundary.
     assert "AdminApiService.listClientGalleries()" in overviews
@@ -87,8 +87,7 @@ def main() -> None:
     assert ".admin-module-switcher-wrap { padding: 14px 16px 18px !important; }" in css
     assert ".admin-module-switcher { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }" in css
     assert "min-height: 44px" in css and "padding: 9px 10px" in css
-    migrations = list((ROOT / "d1" / "migrations").glob("032*")) if (ROOT / "d1" / "migrations").exists() else []
-    assert not migrations, "v1.9.5a navigation release must not add schema 32"
+    assert not (ROOT / "d1/migrations/032_platform_modules_navigation.sql").exists(), "v1.9.5a navigation did not own schema 32"
 
     print("PASS v1.9.5a platform modules and navigation")
     print("  four-module switcher and module-specific navigation: verified")

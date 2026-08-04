@@ -1,4 +1,5 @@
 import { getDefaultWorkspaceId, getWorkspace, updateWorkspaceSettings } from "./workspace-d1";
+import { getPlatformModuleConfigurations } from "./platform-module-config-d1";
 
 type D1Db = any;
 
@@ -235,7 +236,7 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
   const workspace = await getWorkspace(db, workspaceId);
   if (!workspace) throw httpError("Business workspace not found.", 404);
 
-  const [profile, categories, serviceAreas, members, entitlements, auditRows, supplierTaxonomy] = await Promise.all([
+  const [profile, categories, serviceAreas, members, entitlements, auditRows, supplierTaxonomy, moduleConfigurations, schemaRow] = await Promise.all([
     db.prepare(`SELECT * FROM business_profiles WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first(),
     db.prepare(`
       SELECT pc.*,
@@ -280,6 +281,8 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
       LIMIT 12
     `).bind(workspaceId).all(),
     getPlatformSupplierTaxonomy(db),
+    getPlatformModuleConfigurations(db),
+    db.prepare(`SELECT value FROM schema_meta WHERE key = 'schema_version' LIMIT 1`).first(),
   ]);
 
   const scopeReadiness = [
@@ -298,7 +301,7 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
   ];
 
   return {
-    schemaVersion: 26,
+    schemaVersion: Number(schemaRow?.value || 0),
     brand: {
       name: "WedPlanned",
       primaryDomain: "wedplanned.com",
@@ -310,6 +313,7 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
     members: (members.results || []).map(hydrateMember),
     entitlements: (entitlements.results || []).map(hydrateEntitlement),
     supplierTaxonomy,
+    moduleConfigurations,
     scopeReadiness,
     recentAudit: (auditRows.results || []).map((row: any) => ({
       id: text(row.id),
