@@ -54,6 +54,76 @@ function parseJson(value: unknown, fallback: Record<string, unknown> = {}) {
   }
 }
 
+
+function taxonomyKey(value: unknown) {
+  return lower(value)
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+const DEFAULT_SUPPLIER_TAXONOMY = {
+  categories: [
+    "Photography", "Videography & Content", "Planning & Coordination", "Venue & Catering",
+    "Floristry", "Hair & Beauty", "Attire", "Jewellery & Accessories", "Cake & Confectionery",
+    "Music & Entertainment", "Ceremony", "Styling & Décor", "Stationery & Signage",
+    "Transport", "Hire & Production", "Favours & Gifts", "Other",
+  ],
+  roles: [
+    ["Photographer", "Photography"], ["Second Photographer", "Photography"], ["Photo Booth", "Photography"],
+    ["Videographer", "Videography & Content"], ["Content Creator", "Videography & Content"],
+    ["Wedding Planner", "Planning & Coordination"], ["Wedding Coordinator", "Planning & Coordination"],
+    ["Venue", "Venue & Catering"], ["Caterer", "Venue & Catering"], ["Bar Service", "Venue & Catering"],
+    ["Florist", "Floristry"], ["Hair Stylist", "Hair & Beauty"], ["Makeup Artist", "Hair & Beauty"], ["Barber", "Hair & Beauty"],
+    ["Bridal Boutique", "Attire"], ["Dress Designer", "Attire"], ["Seamstress", "Attire"], ["Menswear", "Attire"],
+    ["Jeweller", "Jewellery & Accessories"], ["Accessories", "Jewellery & Accessories"],
+    ["Wedding Cake", "Cake & Confectionery"], ["Dessert Supplier", "Cake & Confectionery"],
+    ["Band", "Music & Entertainment"], ["DJ", "Music & Entertainment"], ["Ceremony Musician", "Music & Entertainment"],
+    ["Solo Musician", "Music & Entertainment"], ["Entertainment", "Music & Entertainment"],
+    ["Celebrant", "Ceremony"], ["Officiant", "Ceremony"],
+    ["Venue Stylist", "Styling & Décor"], ["Décor Hire", "Styling & Décor"], ["Lighting", "Styling & Décor"],
+    ["Stationer", "Stationery & Signage"], ["Signage", "Stationery & Signage"],
+    ["Wedding Transport", "Transport"], ["Equipment Hire", "Hire & Production"], ["Production", "Hire & Production"],
+    ["Favours", "Favours & Gifts"], ["Wedding Gifts", "Favours & Gifts"], ["Other Supplier", "Other"],
+  ].map(([name, category]) => ({ name, category })),
+};
+
+async function getPlatformSupplierTaxonomy(db: D1Db) {
+  const [categories, roles] = await Promise.all([
+    db.prepare(`
+      SELECT category_key, name, sort_order
+      FROM platform_categories
+      WHERE status = 'active' AND group_name = 'Supplier taxonomy'
+      ORDER BY sort_order, name COLLATE NOCASE
+    `).all(),
+    db.prepare(`
+      SELECT category_key, name, description, sort_order
+      FROM platform_categories
+      WHERE status = 'active' AND group_name = 'Supplier role'
+      ORDER BY sort_order, name COLLATE NOCASE
+    `).all(),
+  ]);
+  const categoryRows = (categories.results || []).map((row: any) => ({
+    key: text(row.category_key).replace(/^supplier-category-/, ""),
+    name: text(row.name),
+    sortOrder: Number(row.sort_order || 0),
+  }));
+  if (!categoryRows.length) return DEFAULT_SUPPLIER_TAXONOMY;
+  const categoryNames = new Map(categoryRows.map((row: any) => [row.key, row.name]));
+  const roleRows = (roles.results || []).map((row: any) => ({
+    key: text(row.category_key).replace(/^supplier-role-/, ""),
+    name: text(row.name),
+    category: categoryNames.get(text(row.description)) || "Other",
+    sortOrder: Number(row.sort_order || 0),
+  }));
+  return {
+    categories: categoryRows.map((row: any) => row.name),
+    roles: roleRows.length ? roleRows : DEFAULT_SUPPLIER_TAXONOMY.roles,
+  };
+}
+
 function hydrateBusiness(workspace: any, profile: any) {
   return {
     workspaceId: text(workspace?.id),
@@ -165,7 +235,7 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
   const workspace = await getWorkspace(db, workspaceId);
   if (!workspace) throw httpError("Business workspace not found.", 404);
 
-  const [profile, categories, serviceAreas, members, entitlements, auditRows] = await Promise.all([
+  const [profile, categories, serviceAreas, members, entitlements, auditRows, supplierTaxonomy] = await Promise.all([
     db.prepare(`SELECT * FROM business_profiles WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first(),
     db.prepare(`
       SELECT pc.*,
@@ -177,6 +247,7 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
        AND bcl.workspace_id = ?
        AND bcl.status = 'active'
       WHERE pc.status = 'active'
+        AND pc.group_name NOT IN ('Supplier taxonomy', 'Supplier role')
       ORDER BY pc.group_name, pc.sort_order, pc.name
     `).bind(workspaceId).all(),
     db.prepare(`
@@ -208,6 +279,7 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
       ORDER BY created_at DESC
       LIMIT 12
     `).bind(workspaceId).all(),
+    getPlatformSupplierTaxonomy(db),
   ]);
 
   const scopeReadiness = [
@@ -237,6 +309,7 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
     serviceAreas: (serviceAreas.results || []).map(hydrateServiceArea),
     members: (members.results || []).map(hydrateMember),
     entitlements: (entitlements.results || []).map(hydrateEntitlement),
+    supplierTaxonomy,
     scopeReadiness,
     recentAudit: (auditRows.results || []).map((row: any) => ({
       id: text(row.id),
@@ -247,6 +320,63 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
       createdAt: row.created_at,
     })),
   };
+}
+
+export async function savePlatformSupplierTaxonomy(db: D1Db, input: any) {
+  const workspaceId = text(input?.workspaceId) || (await getDefaultWorkspaceId(db));
+  const categories = Array.isArray(input?.categories) ? input.categories.map(text).filter(Boolean) : [];
+  const roles = Array.isArray(input?.roles) ? input.roles : [];
+  if (!categories.length) throw httpError("Keep at least one supplier category.");
+  if (!roles.length) throw httpError("Keep at least one Wedding role.");
+
+  const categoryKeys = new Map<string, string>();
+  for (const name of categories) {
+    const key = taxonomyKey(name);
+    if (!key) throw httpError("Every supplier category needs a valid name.");
+    if (categoryKeys.has(key)) throw httpError(`Duplicate supplier category: ${name}.`);
+    categoryKeys.set(key, name);
+  }
+
+  const roleKeys = new Set<string>();
+  const cleanRoles = roles.map((role: any) => {
+    const name = text(role?.name);
+    const key = taxonomyKey(name);
+    const categoryKey = taxonomyKey(role?.category);
+    if (!name || !key) throw httpError("Every Wedding role needs a valid name.");
+    if (roleKeys.has(key)) throw httpError(`Duplicate Wedding role: ${name}.`);
+    if (!categoryKeys.has(categoryKey)) throw httpError(`${name} must use one of the platform supplier categories.`);
+    roleKeys.add(key);
+    return { key, name, categoryKey };
+  });
+
+  const statements: any[] = [
+    db.prepare(`UPDATE platform_categories SET status = 'archived', updated_at = CURRENT_TIMESTAMP WHERE group_name IN ('Supplier taxonomy', 'Supplier role') AND status = 'active'`),
+  ];
+  categories.forEach((name: string, index: number) => {
+    const key = taxonomyKey(name);
+    statements.push(db.prepare(`
+      INSERT INTO platform_categories (category_key, name, group_name, description, icon_key, status, sort_order, created_at, updated_at)
+      VALUES (?, ?, 'Supplier taxonomy', '', 'users', 'active', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ON CONFLICT(category_key) DO UPDATE SET name = excluded.name, group_name = excluded.group_name, description = '', status = 'active', sort_order = excluded.sort_order, updated_at = CURRENT_TIMESTAMP
+    `).bind(`supplier-category-${key}`, name, (index + 1) * 10));
+  });
+  cleanRoles.forEach((role: any, index: number) => {
+    statements.push(db.prepare(`
+      INSERT INTO platform_categories (category_key, name, group_name, description, icon_key, status, sort_order, created_at, updated_at)
+      VALUES (?, ?, 'Supplier role', ?, 'badge', 'active', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ON CONFLICT(category_key) DO UPDATE SET name = excluded.name, group_name = excluded.group_name, description = excluded.description, status = 'active', sort_order = excluded.sort_order, updated_at = CURRENT_TIMESTAMP
+    `).bind(`supplier-role-${role.key}`, role.name, role.categoryKey, (index + 1) * 10));
+  });
+  await db.batch(statements);
+  await audit(db, workspaceId, {
+    eventType: "platform.supplier_taxonomy.updated",
+    entityType: "platform_supplier_taxonomy",
+    entityId: "global",
+    summary: "Updated the global supplier categories and Wedding roles.",
+    metadata: { categoryCount: categories.length, roleCount: cleanRoles.length },
+    actorEmail: input?.actorEmail,
+  });
+  return getPlatformFoundation(db, workspaceId);
 }
 
 export async function updateBusinessProfile(db: D1Db, input: any) {

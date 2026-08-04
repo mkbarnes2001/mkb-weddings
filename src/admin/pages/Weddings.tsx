@@ -26,6 +26,14 @@ function coverFor(wedding: WeddingRecord) {
   return wedding.images.find((image) => image.isCover) || wedding.images[0] || null;
 }
 
+function weddingDateHasArrived(value: string) {
+  const raw = String(value || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return false;
+  const today = new Date();
+  const localToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  return raw <= localToday;
+}
+
 export function Weddings() {
   const [weddings, setWeddings] = useState<WeddingRecord[]>([]);
   const [query, setQuery] = useState("");
@@ -59,16 +67,21 @@ export function Weddings() {
       .finally(() => setLoading(false));
   }, []);
 
+  const storyRecords = useMemo(
+    () => weddings.filter((wedding) => weddingDateHasArrived(wedding.weddingDate)),
+    [weddings],
+  );
+
   const filteredWeddings = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return weddings.filter((wedding) => {
+    return storyRecords.filter((wedding) => {
       const matchesQuery = !q || [wedding.title, wedding.venue, wedding.couple, wedding.slug, wedding.publicationStatus].some((value) => String(value || "").toLowerCase().includes(q));
       const matchesStatus = statusFilter === "all" || wedding.publicationStatus === statusFilter;
       return matchesQuery && matchesStatus;
     });
-  }, [weddings, query, statusFilter]);
+  }, [storyRecords, query, statusFilter]);
 
-  const active = weddings.find((wedding) => wedding.slug === activeSlug) || null;
+  const active = storyRecords.find((wedding) => wedding.slug === activeSlug) || filteredWeddings[0] || null;
 
   function dropOn(targetSlug: string) {
     if (!draggedSlug || draggedSlug === targetSlug) { setDraggedSlug(null); return; }
@@ -137,15 +150,15 @@ export function Weddings() {
 
   if (loading) return <div className="text-neutral-500">Loading weddings…</div>;
 
-  const draftCount = weddings.filter((wedding) => wedding.publicationStatus === "draft").length;
-  const publishedCount = weddings.filter((wedding) => wedding.storyEnabled && wedding.storyStatus === "published" && wedding.storyListVisible).length;
+  const draftCount = storyRecords.filter((wedding) => wedding.publicationStatus === "draft").length;
+  const publishedCount = storyRecords.filter((wedding) => wedding.storyEnabled && wedding.storyStatus === "published" && wedding.storyListVisible).length;
 
   return (
     <AdminPage>
       <AdminPageHeader
         eyebrow="Website content"
         title="Wedding Stories"
-        description="Create and publish Website stories from Wedding Workspaces. New booked weddings originate in CRM Jobs; standalone records remain available for legacy or editorial use."
+        description="New booked weddings originate in CRM Jobs. Website story records appear here only after the wedding date, so future bookings do not create Website placeholders."
         actions={<>
           <Link to="/admin/weddings/new" className="admin-button admin-button--secondary"><Plus className="admin-button__icon" />Add standalone story</Link>
           <button type="button" onClick={saveLayout} disabled={!dirty || saving} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : dirty ? "Save order" : "Saved"}</button>
@@ -155,7 +168,7 @@ export function Weddings() {
       {message ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{message}</div> : null}
       {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{error}</div> : null}
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3"><MiniStat label="Story records" value={weddings.length} /><MiniStat label="Not started / draft" value={draftCount} /><MiniStat label="Published stories" value={publishedCount} /></section>
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3"><MiniStat label="Eligible stories" value={storyRecords.length} /><MiniStat label="Not started / draft" value={draftCount} /><MiniStat label="Published stories" value={publishedCount} /></section>
 
       <AdminToolbar>
         <div className="relative min-w-[220px] flex-1"><Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search couples, venues or stories..." className="h-[34px] w-full border border-black/10 bg-white pl-9 pr-3 text-[11px]" /></div>

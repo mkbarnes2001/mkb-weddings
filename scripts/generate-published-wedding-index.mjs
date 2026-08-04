@@ -42,6 +42,14 @@ function validateWedding(wedding, folderName) {
   return errors;
 }
 
+function weddingDateHasArrived(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return false;
+  const today = new Date().toISOString().slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw <= today;
+  const parsed = Date.parse(`1 ${raw}`);
+  return Number.isFinite(parsed) && new Date(parsed).toISOString().slice(0, 10) <= today;
+}
 function toIndexRecord(wedding) {
   return {
     schemaVersion: 1,
@@ -91,10 +99,10 @@ async function main() {
         continue;
       }
 
-      if (wedding.status !== "published") {
+      if (wedding.status !== "published" || !weddingDateHasArrived(wedding.weddingDate)) {
         skipped.push({
           slug: wedding.slug,
-          status: wedding.status || "draft",
+          status: wedding.status !== "published" ? wedding.status || "draft" : "future",
         });
         continue;
       }

@@ -8,6 +8,7 @@ import {
   getPlatformFoundation,
   saveBusinessCategories,
   saveBusinessServiceArea,
+  savePlatformSupplierTaxonomy,
   updateBusinessMember,
   updateBusinessProfile,
 } from "../../serverless/platform-foundation-d1";
@@ -43,6 +44,7 @@ function permissionForAction(action: string) {
   if (action === "saveBusiness") return "business:update";
   if (["saveCategories", "saveServiceArea", "archiveServiceArea"].includes(action)) return "services:update";
   if (["inviteMember", "updateMember"].includes(action)) return "members:manage";
+  if (action === "saveSupplierTaxonomy") return "platform:admin";
   return "platform:read";
 }
 
@@ -79,6 +81,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     let platform;
     let invitation: Record<string, unknown> | undefined;
     if (action === "saveBusiness") platform = await updateBusinessProfile(context.env.MKB_DB, { ...(body.business || body), workspaceId: auth.workspaceId, actorEmail: auth.email });
+    else if (action === "saveSupplierTaxonomy") {
+      if (auth.platformRole !== "platform_admin") throw platformError("Only a WedPlanned platform administrator can manage the supplier taxonomy.", 403);
+      platform = await savePlatformSupplierTaxonomy(context.env.MKB_DB, { ...body, workspaceId: auth.workspaceId, actorEmail: auth.email });
+    }
     else if (action === "saveCategories") platform = await saveBusinessCategories(context.env.MKB_DB, { ...body, workspaceId: auth.workspaceId, actorEmail: auth.email });
     else if (action === "saveServiceArea") platform = await saveBusinessServiceArea(context.env.MKB_DB, { ...(body.serviceArea || body), workspaceId: auth.workspaceId, actorEmail: auth.email });
     else if (action === "archiveServiceArea") platform = await archiveBusinessServiceArea(context.env.MKB_DB, { ...body, workspaceId: auth.workspaceId, actorEmail: auth.email });

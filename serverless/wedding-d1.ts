@@ -1126,13 +1126,14 @@ export async function listPublicWeddings(db: D1Db, workspaceId = "workspace_mkb_
   const [allResult, publishedResult] = await Promise.all([
     db.prepare(`SELECT slug FROM weddings WHERE workspace_id = ? ORDER BY slug ASC`).bind(workspaceId).all(),
     db.prepare(`
-      SELECT slug, published_json, published_at, story_sort_order
+      SELECT slug, published_json, published_at, story_sort_order, wedding_date
       FROM weddings
       WHERE workspace_id = ?
         AND story_enabled = 1
         AND story_status = 'published'
         AND story_list_visible = 1
         AND published_json <> ''
+        AND date(wedding_date) <= date('now')
       ORDER BY CASE WHEN story_sort_order > 0 THEN 0 ELSE 1 END, story_sort_order ASC, COALESCE(story_published_at, published_at, updated_at) DESC, slug ASC
     `).bind(workspaceId).all(),
   ]);
@@ -1181,13 +1182,14 @@ export async function listPublicWeddings(db: D1Db, workspaceId = "workspace_mkb_
 
 export async function getPublicWedding(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
   const row = await db.prepare(`
-    SELECT slug, published_json, published_at
+    SELECT slug, published_json, published_at, wedding_date
     FROM weddings
     WHERE slug = ?
       AND workspace_id = ?
       AND story_enabled = 1
       AND story_status = 'published'
       AND published_json <> ''
+      AND date(wedding_date) <= date('now')
   `).bind(slug, workspaceId).first();
 
   if (!row?.published_json) return null;

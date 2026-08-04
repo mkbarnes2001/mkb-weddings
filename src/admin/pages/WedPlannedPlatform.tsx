@@ -6,6 +6,7 @@ import {
   Building2,
   Check,
   ChevronDown,
+  ChevronUp,
   Clock,
   Copy,
   CircleDashed,
@@ -16,6 +17,7 @@ import {
   MapPinned,
   MailCheck,
   Plus,
+  RotateCcw,
   Save,
   ShieldCheck,
   Sparkles,
@@ -43,12 +45,19 @@ import type {
   WedPlannedPlatformPayload,
   WedPlannedServiceArea,
 } from "../types/platform";
+import {
+  DEFAULT_SUPPLIER_ROLE_DEFINITIONS,
+  SUPPLIER_CATEGORY_OPTIONS,
+  normaliseSupplierTaxonomy,
+  supplierTaxonomyKey,
+  type SupplierRoleDefinition,
+} from "../data/supplierTaxonomy";
 
-type TabKey = "business" | "services" | "team" | "operations" | "access";
+type TabKey = "business" | "services" | "team" | "taxonomy" | "operations" | "access";
 
 function initialTab(): TabKey {
   const value = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("tab") : "";
-  return value === "services" || value === "team" || value === "operations" || value === "access" ? value : "business";
+  return value === "services" || value === "team" || value === "taxonomy" || value === "operations" || value === "access" ? value : "business";
 }
 
 const emptyArea: Partial<WedPlannedServiceArea> = {
@@ -128,6 +137,17 @@ function labelForScope(status: string) {
   return "Planned";
 }
 
+function duplicateTaxonomyName(values: string[]) {
+  const seen = new Set<string>();
+  for (const value of values) {
+    const key = supplierTaxonomyKey(value);
+    if (!key) return "Every option needs a name.";
+    if (seen.has(key)) return `Duplicate option: ${value.trim()}.`;
+    seen.add(key);
+  }
+  return "";
+}
+
 export function WedPlannedPlatform() {
   const { auth } = useProfessionalAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -140,6 +160,8 @@ export function WedPlannedPlatform() {
   const [error, setError] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [primaryCategory, setPrimaryCategory] = useState("");
+  const [supplierCategories, setSupplierCategories] = useState<string[]>([...SUPPLIER_CATEGORY_OPTIONS]);
+  const [supplierRoles, setSupplierRoles] = useState<SupplierRoleDefinition[]>([...DEFAULT_SUPPLIER_ROLE_DEFINITIONS]);
   const [serviceArea, setServiceArea] = useState(emptyArea);
   const [serviceAreaPreset, setServiceAreaPreset] = useState("");
   const [member, setMember] = useState(emptyMember);
@@ -158,15 +180,18 @@ export function WedPlannedPlatform() {
   const canManageSupport = auth.permissions.includes("support:manage") && auth.accessMode !== "support";
   const canExportData = auth.permissions.includes("data:export") && auth.accessMode !== "support";
   const canRequestDeletion = auth.permissions.includes("deletion:request") && auth.accessMode !== "support";
+  const canManageSupplierTaxonomy = auth.platformRole === "platform_admin";
 
   useEffect(() => {
     const requested = searchParams.get("tab");
-    const next: TabKey = requested === "services" || requested === "team" || requested === "access" || (requested === "operations" && canReadOperations) ? requested : "business";
+    const next: TabKey = requested === "services" || requested === "team" || requested === "access"
+      || (requested === "taxonomy" && canManageSupplierTaxonomy)
+      || (requested === "operations" && canReadOperations) ? requested : "business";
     setTabState(next);
-  }, [canReadOperations, searchParams]);
+  }, [canManageSupplierTaxonomy, canReadOperations, searchParams]);
 
   function setTab(next: TabKey) {
-    const resolved = next === "operations" && !canReadOperations ? "business" : next;
+    const resolved = (next === "operations" && !canReadOperations) || (next === "taxonomy" && !canManageSupplierTaxonomy) ? "business" : next;
     setTabState(resolved);
     setSearchParams(resolved === "business" ? {} : { tab: resolved }, { replace: true });
   }
@@ -177,6 +202,9 @@ export function WedPlannedPlatform() {
     const keys = next.categories.filter((category) => category.selected).map((category) => category.key);
     setSelectedCategories(keys);
     setPrimaryCategory(next.categories.find((category) => category.primary)?.key || keys[0] || "");
+    const taxonomy = normaliseSupplierTaxonomy(next.supplierTaxonomy?.categories, next.supplierTaxonomy?.roles);
+    setSupplierCategories(taxonomy.categories);
+    setSupplierRoles(taxonomy.roles);
   }
 
   useEffect(() => {
@@ -228,6 +256,67 @@ export function WedPlannedPlatform() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function updateSupplierCategory(index: number, value: string) {
+    const previous = supplierCategories[index];
+    setSupplierCategories((current) => current.map((item, itemIndex) => itemIndex === index ? value : item));
+    setSupplierRoles((current) => current.map((role) => supplierTaxonomyKey(role.category) === supplierTaxonomyKey(previous) ? { ...role, category: value } : role));
+    setMessage("");
+    setError("");
+  }
+
+  function removeSupplierCategory(index: number) {
+    if (supplierCategories.length <= 1) {
+      setError("Keep at least one supplier category.");
+      return;
+    }
+    const removed = supplierCategories[index];
+    const next = supplierCategories.filter((_, itemIndex) => itemIndex !== index);
+    const replacement = next[Math.min(index, next.length - 1)] || next[0];
+    setSupplierCategories(next);
+    setSupplierRoles((current) => current.map((role) => supplierTaxonomyKey(role.category) === supplierTaxonomyKey(removed) ? { ...role, category: replacement } : role));
+    setMessage("");
+    setError("");
+  }
+
+  function moveSupplierCategory(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= supplierCategories.length) return;
+    setSupplierCategories((current) => {
+      const next = [...current];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  }
+
+  function moveSupplierRole(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= supplierRoles.length) return;
+    setSupplierRoles((current) => {
+      const next = [...current];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  }
+
+  async function saveSupplierTaxonomy() {
+    const categoryError = duplicateTaxonomyName(supplierCategories);
+    const roleError = duplicateTaxonomyName(supplierRoles.map((role) => role.name));
+    if (categoryError || roleError) {
+      setError(categoryError || roleError);
+      return;
+    }
+    const categoryKeys = new Set(supplierCategories.map(supplierTaxonomyKey));
+    if (supplierRoles.some((role) => !categoryKeys.has(supplierTaxonomyKey(role.category)))) {
+      setError("Each Wedding role must use one of the platform supplier categories.");
+      return;
+    }
+    const taxonomy = normaliseSupplierTaxonomy(supplierCategories, supplierRoles);
+    await run(
+      () => AdminApiService.savePlatformSupplierTaxonomy(taxonomy),
+      "Global supplier categories and Wedding roles saved for every WedPlanned workspace.",
+    );
   }
 
   async function saveBusiness() {
@@ -379,6 +468,7 @@ export function WedPlannedPlatform() {
         <AdminTab active={tab === "business"} onClick={() => setTab("business")}>Business</AdminTab>
         <AdminTab active={tab === "services"} onClick={() => setTab("services")}>Services & areas</AdminTab>
         <AdminTab active={tab === "team"} onClick={() => setTab("team")}>Team</AdminTab>
+        {canManageSupplierTaxonomy ? <AdminTab active={tab === "taxonomy"} onClick={() => setTab("taxonomy")}>Supplier taxonomy</AdminTab> : null}
         {canReadOperations ? <AdminTab active={tab === "operations"} onClick={() => setTab("operations")}>Operations</AdminTab> : null}
         <AdminTab active={tab === "access"} onClick={() => setTab("access")}>Platform access</AdminTab>
       </AdminTabs>
@@ -598,6 +688,36 @@ export function WedPlannedPlatform() {
             </div>
           </AdminPanel>
         </div>
+      ) : null}
+
+      {tab === "taxonomy" && canManageSupplierTaxonomy ? (
+        <section className="supplier-taxonomy-manager">
+          <header className="supplier-taxonomy-manager__header">
+            <div>
+              <p className="admin-eyebrow">Platform-controlled dropdowns</p>
+              <h2>Supplier categories & Wedding roles</h2>
+              <p>These canonical options are shared by every WedPlanned professional. Business workspaces can select them but cannot add, rename or remove them.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={() => { setSupplierCategories([...SUPPLIER_CATEGORY_OPTIONS]); setSupplierRoles([...DEFAULT_SUPPLIER_ROLE_DEFINITIONS]); setMessage(""); setError(""); }} className="admin-button admin-button--secondary admin-button--sm"><RotateCcw className="admin-button__icon" />Restore defaults</button>
+              <button type="button" disabled={saving} onClick={saveSupplierTaxonomy} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : "Save platform taxonomy"}</button>
+            </div>
+          </header>
+          <div className="supplier-taxonomy-manager__grid">
+            <section className="supplier-taxonomy-list-card">
+              <div className="supplier-taxonomy-list-card__heading"><div><strong>Supplier categories</strong><span>{supplierCategories.length} platform options</span></div><button type="button" onClick={() => setSupplierCategories((current) => [...current, `New category ${current.length + 1}`])} className="admin-button admin-button--secondary admin-button--sm"><Plus className="admin-button__icon" />Add category</button></div>
+              <div className="supplier-taxonomy-list">
+                {supplierCategories.map((category, index) => <div key={`${index}-${category}`} className="supplier-taxonomy-row"><input value={category} onChange={(event) => updateSupplierCategory(index, event.target.value)} aria-label={`Platform supplier category ${index + 1}`} /><div className="supplier-taxonomy-row__actions"><button type="button" disabled={index === 0} onClick={() => moveSupplierCategory(index, -1)} title="Move up"><ChevronUp /></button><button type="button" disabled={index === supplierCategories.length - 1} onClick={() => moveSupplierCategory(index, 1)} title="Move down"><ChevronDown /></button><button type="button" disabled={supplierCategories.length <= 1} onClick={() => removeSupplierCategory(index)} title="Remove category"><Trash2 /></button></div></div>)}
+              </div>
+            </section>
+            <section className="supplier-taxonomy-list-card">
+              <div className="supplier-taxonomy-list-card__heading"><div><strong>Wedding roles</strong><span>{supplierRoles.length} platform options</span></div><button type="button" onClick={() => setSupplierRoles((current) => [...current, { name: `New role ${current.length + 1}`, category: supplierCategories[0] || "Other" }])} className="admin-button admin-button--secondary admin-button--sm"><Plus className="admin-button__icon" />Add role</button></div>
+              <div className="supplier-taxonomy-list">
+                {supplierRoles.map((role, index) => <div key={`${index}-${role.name}`} className="supplier-taxonomy-row supplier-taxonomy-row--role"><input value={role.name} onChange={(event) => setSupplierRoles((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item))} aria-label={`Platform Wedding role ${index + 1}`} /><select value={role.category} onChange={(event) => setSupplierRoles((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, category: event.target.value } : item))}>{supplierCategories.map((category) => <option key={category} value={category}>{category}</option>)}</select><div className="supplier-taxonomy-row__actions"><button type="button" disabled={index === 0} onClick={() => moveSupplierRole(index, -1)} title="Move up"><ChevronUp /></button><button type="button" disabled={index === supplierRoles.length - 1} onClick={() => moveSupplierRole(index, 1)} title="Move down"><ChevronDown /></button><button type="button" disabled={supplierRoles.length <= 1} onClick={() => setSupplierRoles((current) => current.filter((_, itemIndex) => itemIndex !== index))} title="Remove role"><Trash2 /></button></div></div>)}
+              </div>
+            </section>
+          </div>
+        </section>
       ) : null}
 
       {tab === "operations" ? (

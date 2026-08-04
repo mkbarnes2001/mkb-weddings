@@ -52,6 +52,19 @@ function emptyState(): PublicWeddingState {
   return { generatedAt: null, managedSlugs: [], weddings: [] };
 }
 
+function weddingDateHasArrived(value: string) {
+  const raw = String(value || "").trim();
+  if (!raw) return false;
+  const today = new Date().toISOString().slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw <= today;
+  const season = raw.match(/^(spring|summer|autumn|fall|winter)\s+(\d{4})$/i);
+  if (season) {
+    const month = { spring: "03", summer: "06", autumn: "09", fall: "09", winter: "12" }[season[1].toLowerCase() as "spring" | "summer" | "autumn" | "fall" | "winter"];
+    return `${season[2]}-${month}-01` <= today;
+  }
+  const parsed = Date.parse(`1 ${raw}`);
+  return Number.isFinite(parsed) && new Date(parsed).toISOString().slice(0, 10) <= today;
+}
 function legacySummary(
   story: (typeof weddingStories)[number],
 ): PublicWeddingSummary {
@@ -119,7 +132,9 @@ function normaliseIndex(
     weddings: document.weddings
       .filter(
         (wedding) =>
-          wedding.storyEnabled === true && wedding.storyStatus === "published",
+          wedding.storyEnabled === true
+          && wedding.storyStatus === "published"
+          && weddingDateHasArrived(wedding.weddingDate),
       )
       .map((wedding) => ({ ...wedding, source })),
   };
@@ -166,6 +181,7 @@ async function loadD1Detail(
       document.slug !== slug ||
       document.storyEnabled !== true ||
       document.storyStatus !== "published" ||
+      !weddingDateHasArrived(document.weddingDate) ||
       !Array.isArray(document.images)
     ) {
       return { status: "failed" };
@@ -193,6 +209,7 @@ async function loadJsonDetail(
       document.slug !== slug ||
       document.storyEnabled !== true ||
       document.storyStatus !== "published" ||
+      !weddingDateHasArrived(document.weddingDate) ||
       !Array.isArray(document.images)
     ) {
       return undefined;
@@ -209,7 +226,7 @@ function mergePublished(state: PublicWeddingState): PublicWeddingSummary[] {
   const map = new Map<string, PublicWeddingSummary>();
 
   weddingStories
-    .filter((story) => !managed.has(story.slug))
+    .filter((story) => !managed.has(story.slug) && weddingDateHasArrived(story.weddingDate))
     .forEach((story) => map.set(story.slug, legacySummary(story)));
 
   state.weddings.forEach((wedding) => map.set(wedding.slug, wedding));
@@ -246,7 +263,7 @@ export class PublicWeddingRepository {
     const jsonState = await loadJsonIndex();
     if (jsonState.managedSlugs.includes(slug)) return undefined;
 
-    const legacy = weddingStories.find((story) => story.slug === slug);
+    const legacy = weddingStories.find((story) => story.slug === slug && weddingDateHasArrived(story.weddingDate));
     return legacy ? legacyDetail(legacy) : undefined;
   }
 }

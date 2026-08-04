@@ -9,7 +9,7 @@ import type { AssetLibraryFilters, AssetLibraryPayload } from "../types/asset";
 import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, ClientGalleryListPayload, ClientGalleryRecord, PrivateOriginalUploadSession, PrivateOriginalUploadedPart } from "../types/clientGallery";
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
-import type { ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
+import type { PlatformSupplierTaxonomy, ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
 import type { CrmAddon, CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmPackage, CrmQuote, CrmQuoteOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate } from "../types/crm";
 import { prepareImageUpload } from "./ImageUploadService";
 
@@ -150,8 +150,6 @@ export type WorkspaceSettings = {
   defaultCountry: string;
   timezone: string;
   currency: string;
-  supplierCategories: string[];
-  supplierRoles: Array<{ name: string; category: string }>;
 };
 
 export type WorkspaceRecord = {
@@ -1141,6 +1139,10 @@ export class AdminApiService {
 
   static async saveWedPlannedCategories(categoryKeys: string[], primaryCategoryKey: string) {
     return (await this.mutateWedPlannedPlatform({ action: "saveCategories", categoryKeys, primaryCategoryKey })).platform;
+  }
+
+  static async savePlatformSupplierTaxonomy(taxonomy: PlatformSupplierTaxonomy) {
+    return (await this.mutateWedPlannedPlatform({ action: "saveSupplierTaxonomy", ...taxonomy })).platform;
   }
 
   static async saveWedPlannedServiceArea(serviceArea: Partial<WedPlannedServiceArea>) {

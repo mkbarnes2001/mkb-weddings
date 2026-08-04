@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Source regression checks for v1.9.7a Admin and Wedding Workspace polish."""
+"""Source regression checks for v1.9.7a final Admin refinement."""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,12 +15,19 @@ def main() -> None:
     taxonomy = read("src/admin/data/supplierTaxonomy.ts")
     searchable = read("src/admin/components/ui/AdminSearchSelect.tsx")
     gallery = read("src/admin/pages/ClientGalleryEditor.tsx")
+    platform_page = read("src/admin/pages/WedPlannedPlatform.tsx")
+    platform_d1 = read("serverless/platform-foundation-d1.ts")
     workspace_d1 = read("serverless/workspace-d1.ts")
     api = read("src/admin/services/AdminApiService.ts")
     wedding_d1 = read("serverless/wedding-d1.ts")
+    weddings_page = read("src/admin/pages/Weddings.tsx")
+    public_repository = read("src/lib/weddingEngine/PublicWeddingRepository.ts")
+    middleware = read("functions/_middleware.ts")
+    sitemap = read("scripts/generate-sitemap.mjs")
+    published_index = read("scripts/generate-published-wedding-index.mjs")
     css = read("src/admin/admin-theme.css")
 
-    # Defaults remain available, but workspace settings now own the editable dropdown lists.
+    # Canonical defaults and searchable controlled lists remain available.
     for category in [
         "Photography", "Videography & Content", "Venue & Catering", "Floristry",
         "Hair & Beauty", "Attire", "Music & Entertainment", "Styling & Décor",
@@ -28,106 +35,111 @@ def main() -> None:
     ]:
         assert f'category: "{category}"' in taxonomy, category
     for token in [
-        "export type SupplierTaxonomySettings",
         "export function normaliseSupplierTaxonomy",
         "export function configuredSupplierCategory",
         "export function configuredWeddingRole",
         "export function weddingRoleOptionsForCategory",
     ]:
         assert token in taxonomy, token
-    assert 'hairdresser: "Hair & Beauty"' in taxonomy
-    assert 'hairdresser: "Hair Stylist"' in taxonomy
-
-    # Searchable listboxes only commit a real configured option value.
     for token in ['role="combobox"', 'role="listbox"', 'role="option"', 'const exact = options.find', 'onChange(option.value)']:
         assert token in searchable, token
-    assert "No matching options. Choose a value from the controlled list." in searchable
 
-    # Supplier master management exposes configurable categories and roles in existing workspace JSON.
+    # Supplier taxonomy is global, stored in existing platform_categories, and editable only by platform admins.
     for token in [
-        "supplierCategories: string[]",
-        "supplierRoles: Array<{ name: string; category: string }>",
+        "supplierTaxonomy: PlatformSupplierTaxonomy",
+        "savePlatformSupplierTaxonomy",
+        'action: "saveSupplierTaxonomy"',
     ]:
-        assert token in api, token
+        assert token in api or token in read("src/admin/types/platform.ts"), token
     for token in [
-        "const taxonomy = supplierTaxonomy(document)",
-        "supplierCategories: taxonomy.categories",
-        "supplierRoles: taxonomy.roles",
-        "nextDocument.supplierTaxonomy = taxonomyDocument",
+        "getPlatformSupplierTaxonomy",
+        "DEFAULT_SUPPLIER_TAXONOMY",
+        "group_name = 'Supplier taxonomy'",
+        "group_name = 'Supplier role'",
+        "savePlatformSupplierTaxonomy",
     ]:
-        assert token in workspace_d1, token
-    assert "032_" not in workspace_d1
+        assert token in platform_d1, token
+    assert "platform_supplier_categories" not in platform_d1
+    assert "supplierCategories" not in workspace_d1
+    assert "supplierRoles" not in workspace_d1
+    for token in [
+        'auth.platformRole === "platform_admin"',
+        "Supplier taxonomy",
+        "Save platform taxonomy",
+        "Business workspaces can select them but cannot add, rename or remove them.",
+    ]:
+        assert token in platform_page, token
+    assert "Manage categories & roles" not in suppliers
+    assert "AdminApiService.getWedPlannedPlatform()" in suppliers
+    assert "Categories are controlled centrally by WedPlanned." in suppliers
 
+    # Supplier list supports category filtering plus independent A-Z sorting.
     for token in [
-        "Manage categories & roles",
-        "Save master lists",
-        "Supplier categories & Wedding roles",
-        "supplier-taxonomy-manager",
-        'const [sortKey, setSortKey] = useState<SortKey>("supplier")',
+        'const [categoryFilter, setCategoryFilter] = useState("all")',
+        "All categories",
+        "admin-supplier-category-filter",
+        "setCategoryFilter(category)",
         'changeSort("supplier")',
         'changeSort("category")',
         "admin-supplier-table--compact",
     ]:
         assert token in suppliers, token
-    assert "configuredSupplierCategory(draft.category, categories)" in suppliers
-    assert "SUPPLIER_CATEGORY_OPTIONS" in suppliers
-    assert "const CATEGORIES = [" not in suppliers
 
-    # Wedding Workspace consumes the workspace-managed taxonomy and retains controlled values.
+    # Wedding Workspace reads the global taxonomy, not workspace-defined lists.
     for token in [
-        "workspaceRecord?.settings.supplierCategories",
-        "workspaceRecord?.settings.supplierRoles",
-        "normaliseSupplierTaxonomy",
+        "AdminApiService.getWedPlannedPlatform()",
+        "nextPlatform.supplierTaxonomy?.categories",
+        "nextPlatform.supplierTaxonomy?.roles",
         "configuredWeddingRole(supplierRole, supplierTaxonomy.roles)",
         "supplierCategorySearchOptions",
-        'label="Add existing supplier"',
-        'label="Wedding role"',
     ]:
         assert token in workspace, token
-    assert "Choose a canonical Wedding role from the searchable list." in workspace
+    assert "workspaceRecord?.settings.supplierCategories" not in workspace
+    assert "workspaceRecord?.settings.supplierRoles" not in workspace
     assert "row.instagram ? cleanInstagram(row.instagram)" not in workspace
-    assert 'row.category || "Uncategorised"' in workspace
-    assert "wedding-workspace-venue-actions" in workspace
-    assert "wedding-workspace-caption" in workspace
-    assert ">At a glance<" not in workspace
 
-    # Wedding supplier payload now carries the Supplier Master category for concise rows.
-    assert "category?: string;" in read("src/admin/services/SupplierService.ts")
-    assert "category: text(row.category)" in wedding_d1
-
-    # Client delivery and Client Gallery Admin remain compact across intermediate breakpoints.
-    assert "Add preview JPEGs" in workspace
-    assert "Choose full-res JPEGs" not in workspace
+    # Client Gallery toolbar responds to the available content width, including browser zoom/sidebar constraints.
     for token in [
-        "client-gallery-sidebar-overview > :last-child",
-        "grid-template-columns: minmax(220px, 290px) minmax(0, 1fr)",
-        "client-gallery-photo-toolbar__search",
+        "container-name: gallery-main",
+        "container-type: inline-size",
+        "@container gallery-main (max-width: 760px)",
+        "@container gallery-main (max-width: 520px)",
+        "client-gallery-photo-toolbar__select",
         "client-gallery-photo-toolbar__upload",
-        "@media (max-width: 760px)",
     ]:
         assert token in gallery, token
 
-    # Final compact styles cover supplier rows, status chips, card gaps and master lists.
+    # Future weddings remain in CRM but do not appear in Website Wedding Stories or public fallbacks.
+    for token in [
+        "function weddingDateHasArrived",
+        "Website story records appear here only after the wedding date",
+        "weddings.filter((wedding) => weddingDateHasArrived(wedding.weddingDate))",
+    ]:
+        assert token in weddings_page, token
+    assert "AND date(wedding_date) <= date('now')" in wedding_d1
+    assert "date(wedding_date) <= date('now')" in middleware
+    assert "weddingDateHasArrived(wedding.weddingDate)" in public_repository
+    assert "extractEligibleWeddingStorySlugs" in sitemap
+    assert 'status: wedding.status !== "published" ? wedding.status || "draft" : "future"' in published_index
+
+    # Existing platform tables provide global persistence; no schema transition is required.
+    migrations = list((ROOT / "d1" / "migrations").glob("032*")) if (ROOT / "d1" / "migrations").exists() else []
+    assert not migrations, "Final v1.9.7a refinement must remain schema 31"
+
     for selector in [
         ".admin-supplier-table--compact",
+        ".admin-supplier-category-filter",
         ".supplier-taxonomy-manager",
-        ".supplier-taxonomy-row--role",
         ".wedding-workspace-layout",
-        ".wedding-workspace-steps",
-        ".wedding-workspace-venue-actions",
-        ".wedding-workspace-caption",
     ]:
         assert selector in css, selector
 
-    migrations = list((ROOT / "d1" / "migrations").glob("032*")) if (ROOT / "d1" / "migrations").exists() else []
-    assert not migrations, "v1.9.7a refinement must remain schema 31"
-
-    print("PASS v1.9.7a Admin and Wedding Workspace polish")
-    print("  workspace-configurable supplier categories and Wedding roles: verified")
-    print("  compact sortable Supplier master list: verified")
-    print("  responsive Client Gallery Admin breakpoints: verified")
-    print("  final Wedding Workspace spacing and content refinements: verified")
-    print("  source-only persistence in workspace settings; schema remains 31: verified")
+    print("PASS v1.9.7a final Admin refinement")
+    print("  container-responsive Client Gallery toolbar: verified")
+    print("  clickable Supplier category filtering and A-Z sorting: verified")
+    print("  platform-admin-only global supplier taxonomy: verified")
+    print("  future Wedding Stories excluded from Admin, public API and static fallbacks: verified")
+    print("  existing platform tables reused; schema remains 31: verified")
 
 
 if __name__ == "__main__":

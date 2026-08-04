@@ -92,6 +92,11 @@ export type WedPlannedAuditEvent = {
   createdAt: string;
 };
 
+export type PlatformSupplierTaxonomy = {
+  categories: string[];
+  roles: Array<{ key?: string; name: string; category: string; sortOrder?: number }>;
+};
+
 export type WedPlannedPlatformPayload = {
   schemaVersion: number;
   brand: {
@@ -104,6 +109,7 @@ export type WedPlannedPlatformPayload = {
   serviceAreas: WedPlannedServiceArea[];
   members: WedPlannedMember[];
   entitlements: WedPlannedEntitlement[];
+  supplierTaxonomy: PlatformSupplierTaxonomy;
   scopeReadiness: WedPlannedScopeReadiness[];
   recentAudit: WedPlannedAuditEvent[];
 };

@@ -36,6 +36,7 @@ import {
   normaliseSupplierTaxonomy,
   weddingRoleOptionsForCategory,
   type SupplierRoleDefinition,
+  type SupplierTaxonomySettings,
 } from "../data/supplierTaxonomy";
 
 const PUBLIC_ORIGIN = "https://www.mkbweddings.co.uk";
@@ -114,6 +115,7 @@ export function WeddingWorkspace() {
   const [venueDirectoryBusy, setVenueDirectoryBusy] = useState(false);
   const [masterSuppliers, setMasterSuppliers] = useState<MasterSupplier[]>([]);
   const [suppliers, setSuppliers] = useState<SupplierRecord[]>([]);
+  const [supplierTaxonomy, setSupplierTaxonomy] = useState<SupplierTaxonomySettings>(() => normaliseSupplierTaxonomy(SUPPLIER_CATEGORY_OPTIONS, DEFAULT_SUPPLIER_ROLE_DEFINITIONS));
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
   const [supplierRole, setSupplierRole] = useState("");
   const [showNewVenue, setShowNewVenue] = useState(false);
@@ -135,19 +137,21 @@ export function WeddingWorkspace() {
   const reload = async () => {
     setError("");
     try {
-      const [nextWorkspace, nextWedding, nextVenues, supplierService, nextLocations, nextWorkspaceRecord] = await Promise.all([
+      const [nextWorkspace, nextWedding, nextVenues, supplierService, nextLocations, nextWorkspaceRecord, nextPlatform] = await Promise.all([
         AdminApiService.getWeddingWorkspace(slug),
         AdminApiService.getJsonWedding(slug),
         AdminApiService.listVenues(),
         SupplierService.load(),
         AdminApiService.getLocations(),
         AdminApiService.getWorkspace(),
+        AdminApiService.getWedPlannedPlatform(),
       ]);
       setWorkspace(nextWorkspace);
       setWedding(nextWedding);
       setVenues(nextVenues.filter((venue) => venue.status !== "archived"));
       setLocationConfig(nextLocations);
       setWorkspaceRecord(nextWorkspaceRecord);
+      setSupplierTaxonomy(normaliseSupplierTaxonomy(nextPlatform.supplierTaxonomy?.categories, nextPlatform.supplierTaxonomy?.roles));
       setVenuePicker(nextWedding.venue || nextWorkspace.wedding.venue || "");
       setShowVenuePicker(!nextWedding.venueSlug);
       setNewVenue((current) => ({
@@ -173,13 +177,6 @@ export function WeddingWorkspace() {
   }, [location.hash, workspace]);
 
   const clientGallery = workspace?.clientGalleries[0] || null;
-  const supplierTaxonomy = useMemo(
-    () => normaliseSupplierTaxonomy(
-      workspaceRecord?.settings.supplierCategories || SUPPLIER_CATEGORY_OPTIONS,
-      workspaceRecord?.settings.supplierRoles || DEFAULT_SUPPLIER_ROLE_DEFINITIONS,
-    ),
-    [workspaceRecord?.settings.supplierCategories, workspaceRecord?.settings.supplierRoles],
-  );
   const supplierCategorySearchOptions = useMemo<AdminSearchSelectOption[]>(
     () => supplierTaxonomy.categories.map((category) => ({ value: category, label: category })),
     [supplierTaxonomy.categories],

@@ -109,21 +109,40 @@ function sitemapIndexEntry(loc) {
   </sitemap>`;
 }
 
-function extractWeddingStorySlugs(fileText) {
-  if (!fileText) return [];
-
-  const slugs = new Set();
-  const slugRegex = /slug\s*:\s*["'`]([^"'`]+)["'`]/g;
-
-  let match;
-  while ((match = slugRegex.exec(fileText)) !== null) {
-    const slug = match[1]?.trim();
-    if (slug) slugs.add(slug);
+function storyDateHasArrived(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return false;
+  const today = new Date().toISOString().slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw <= today;
+  const season = raw.match(/^(spring|summer|autumn|fall|winter)\s+(\d{4})$/i);
+  if (season) {
+    const month = { spring: "03", summer: "06", autumn: "09", fall: "09", winter: "12" }[season[1].toLowerCase()];
+    return `${season[2]}-${month}-01` <= today;
   }
-
-  return Array.from(slugs);
+  const parsed = Date.parse(`1 ${raw}`);
+  return Number.isFinite(parsed) && new Date(parsed).toISOString().slice(0, 10) <= today;
 }
 
+function extractEligibleWeddingStorySlugs(fileText) {
+  if (!fileText) return [];
+
+  const stories = [];
+  const slugRegex = /slug\s*:\s*["'`]([^"'`]+)["'`]/g;
+  const matches = Array.from(fileText.matchAll(slugRegex));
+
+  for (let index = 0; index < matches.length; index += 1) {
+    const match = matches[index];
+    const slug = match[1]?.trim();
+    const start = match.index || 0;
+    const end = matches[index + 1]?.index || fileText.length;
+    const block = fileText.slice(start, end);
+    const dateMatch = block.match(/weddingDate\s*:\s*["'`]([^"'`]+)["'`]/);
+    const weddingDate = dateMatch?.[1]?.trim() || "";
+    if (slug && storyDateHasArrived(weddingDate)) stories.push(slug);
+  }
+
+  return Array.from(new Set(stories));
+}
 function fullFilenameFromThumb(filename) {
   return String(filename || "").replace(/_500\.webp$/i, "_2000.webp");
 }
@@ -195,7 +214,7 @@ pageUrls.add(`${SITE}/gallery/styles`);
 
 // ----- Wedding Story / Blog Pages -----
 const weddingStoriesText = readTextIfExists(WEDDING_STORIES_PATH);
-const weddingStorySlugs = extractWeddingStorySlugs(weddingStoriesText);
+const weddingStorySlugs = extractEligibleWeddingStorySlugs(weddingStoriesText);
 
 for (const slug of weddingStorySlugs) {
   pageUrls.add(`${SITE}/blog/${slug}`);

@@ -114,7 +114,7 @@ export async function onRequest(context: any) {
     try {
       if (!db) return null;
       const row = await db.prepare(
-        "SELECT published_json FROM weddings WHERE slug = ? AND workspace_id = ? AND story_enabled = 1 AND story_status = 'published' AND published_json <> ''",
+        "SELECT published_json FROM weddings WHERE slug = ? AND workspace_id = ? AND story_enabled = 1 AND story_status = 'published' AND published_json <> '' AND date(wedding_date) <= date('now')",
       ).bind(slug, publicWorkspaceId).first();
       if (!row?.published_json) return null;
       return JSON.parse(String(row.published_json));

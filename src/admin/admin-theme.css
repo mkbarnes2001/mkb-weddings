@@ -3239,3 +3239,76 @@
 .wedding-workspace-social-card {
   padding-top: 20px;
 }
+
+/* v1.9.7a final refinement — platform taxonomy and Supplier category filtering */
+.admin-supplier-category-filter {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 100%;
+  gap: 5px;
+  overflow-x: auto;
+  padding: 1px 0 2px;
+  scrollbar-width: thin;
+}
+
+.admin-supplier-category-filter button {
+  display: inline-flex;
+  min-height: 27px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0 8px;
+  color: #525252;
+  font-size: 9px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-supplier-category-filter button span {
+  color: #a3a3a3;
+  font-size: 8px;
+}
+
+.admin-supplier-category-filter button[data-active="true"] {
+  border-color: #111;
+  background: #111;
+  color: #fff;
+}
+
+.admin-supplier-category-filter button[data-active="true"] span {
+  color: rgba(255,255,255,.62);
+}
+
+.admin-supplier-row[role="button"] {
+  cursor: pointer;
+}
+
+.admin-supplier-row[role="button"]:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: -2px;
+}
+
+.admin-supplier-row__category > button {
+  max-width: 100%;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 2px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-supplier-row__category > button:hover {
+  color: #111;
+  text-decoration-color: currentColor;
+}
