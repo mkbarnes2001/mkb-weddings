@@ -111,7 +111,7 @@ def main() -> None:
 
     print("PASS v1.9.8a Platform Administration refinement")
     print("  fixed-width desktop sidebar and compact workspace flyout: verified")
-    print("  duplicate Blog/Website controls removed: verified")
+    print("  duplicate Blog/Studio controls removed: verified")
     print("  duplicate CRM horizontal navigation removed: verified")
     print("  configurable page, section and record backgrounds: verified")
     print("  platform-owned reusable logo/icon library: verified")

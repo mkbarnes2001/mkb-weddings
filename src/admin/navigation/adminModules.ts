@@ -85,18 +85,20 @@ const clientGalleryItems: AdminNavigationItem[] = [
   { key: "orders", label: "Orders", to: "/admin/print-store?tab=orders", icon: ShoppingBag, mobilePrimary: true, match: exactWithQuery("/admin/print-store", "tab", "orders") },
 ];
 
-const websiteItems: AdminNavigationItem[] = [
+const studioItems: AdminNavigationItem[] = [
   { key: "overview", label: "Overview", to: "/admin", icon: Gauge, mobilePrimary: true, match: exactPath("/admin") },
+  { key: "website", label: "Website", to: "/admin/website", icon: Globe2, mobilePrimary: true, match: exactPath("/admin/website") },
   { key: "weddings", label: "Wedding stories", to: "/admin/weddings", icon: FileText, mobilePrimary: true, match: pathPrefix("/admin/weddings") },
-  { key: "galleries", label: "Website galleries", to: "/admin/gallery", icon: Images, mobilePrimary: true, match: (pathname) => pathname === "/admin/gallery" || pathname.startsWith("/admin/gallery/") || pathname === "/admin/collections" },
+  { key: "galleries", label: "Galleries", to: "/admin/gallery", icon: Images, mobilePrimary: true, match: (pathname) => pathname === "/admin/gallery" || pathname.startsWith("/admin/gallery/") || pathname === "/admin/collections" },
   { key: "venues", label: "Venues", to: "/admin/venues", icon: Globe2, mobilePrimary: true, match: pathPrefix("/admin/venues") },
   { key: "locations", label: "Locations", to: "/admin/locations", icon: MapPinned, match: pathPrefix("/admin/locations") },
   { key: "moments", label: "Moments", to: "/admin/moments", icon: Layers3, match: (pathname) => pathPrefix("/admin/moments")(pathname) || pathPrefix("/admin/creative-flash")(pathname) },
   { key: "collections", label: "Collections", to: "/admin/custom-collections", icon: LockKeyhole, match: pathPrefix("/admin/custom-collections") },
   { key: "suppliers", label: "Suppliers", to: "/admin/suppliers", icon: Users, match: pathPrefix("/admin/suppliers") },
   { key: "assets", label: "Asset library", to: "/admin/assets", icon: Database, match: pathPrefix("/admin/assets") },
-  { key: "ai", label: "AI centre", to: "/admin/ai", icon: Bot, match: pathPrefix("/admin/ai") },
+  { key: "ai", label: "AI content", to: "/admin/ai", icon: Bot, match: pathPrefix("/admin/ai") },
   { key: "seo", label: "SEO", to: "/admin/seo", icon: BarChart3, match: pathPrefix("/admin/seo") },
+  { key: "publishing", label: "Publishing", to: "/admin/publishing", icon: Sparkles, match: pathPrefix("/admin/publishing") },
 ];
 
 const businessItems: AdminNavigationItem[] = [
@@ -121,7 +123,8 @@ export const platformAdminItems: AdminNavigationItem[] = [
 export const adminModules: AdminModuleDefinition[] = [
   { key: "crm", label: "CRM", shortLabel: "CRM", description: "Leads, clients, jobs and communications", to: "/admin/crm?view=overview", icon: ContactRound, entitlementKey: "crm", match: (pathname) => pathname.startsWith("/admin/crm") || isWeddingWorkspacePath(pathname), items: crmItems },
   { key: "client-galleries", label: "Client Galleries", shortLabel: "Galleries", description: "Private delivery, selections and sales", to: "/admin/client-galleries/overview", icon: Images, entitlementKey: "client_galleries", match: (pathname) => pathname.startsWith("/admin/client-galleries") || pathname.startsWith("/admin/print-store"), items: clientGalleryItems },
-  { key: "website", label: "Website", shortLabel: "Website", description: "Public galleries, stories and content", to: "/admin", icon: Globe2, entitlementKey: "website_content", match: (pathname) => pathname === "/admin" || ["/admin/website", "/admin/weddings", "/admin/gallery", "/admin/collections", "/admin/locations", "/admin/moments", "/admin/creative-flash", "/admin/custom-collections", "/admin/venues", "/admin/suppliers", "/admin/assets", "/admin/ai", "/admin/seo", "/admin/publishing"].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)), items: websiteItems },
+  // The persisted key remains "website" for entitlement and production configuration compatibility.
+  { key: "website", label: "Studio", shortLabel: "Studio", description: "Website, stories, galleries and public content", to: "/admin", icon: Globe2, entitlementKey: "website_content", match: (pathname) => pathname === "/admin" || ["/admin/studio", "/admin/website", "/admin/weddings", "/admin/gallery", "/admin/collections", "/admin/locations", "/admin/moments", "/admin/creative-flash", "/admin/custom-collections", "/admin/venues", "/admin/suppliers", "/admin/assets", "/admin/ai", "/admin/seo", "/admin/publishing"].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)), items: studioItems },
   { key: "business", label: "Business", shortLabel: "Business", description: "Workspace profile, team, portal and domains", to: "/admin/business", icon: BriefcaseBusiness, entitlementKey: "business_settings", match: (pathname) => pathname.startsWith("/admin/business") || pathname.startsWith("/admin/wedplanned") || pathname.startsWith("/admin/settings"), items: businessItems },
 ];
 

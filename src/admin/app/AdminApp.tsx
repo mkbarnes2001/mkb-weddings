@@ -1,6 +1,6 @@
 import { Navigate, Routes, Route, useParams } from "react-router-dom";
 import { AdminLayout } from "../layouts/AdminLayout";
-import { Dashboard } from "../pages/Dashboard";
+import { Dashboard, PublishingOverview, WebsiteOverview } from "../pages/Dashboard";
 import { BusinessOverview, ClientGalleriesOverview } from "../pages/ModuleOverviews";
 import { CRM } from "../pages/CRM";
 import { CRMEnquiry } from "../pages/CRMEnquiry";
@@ -26,7 +26,6 @@ import { Suppliers } from "../pages/Suppliers";
 import { AICentre } from "../pages/AICentre";
 import { Collections } from "../pages/Collections";
 import { SEOCentre } from "../pages/SEOCentre";
-import { PlaceholderPage } from "../pages/PlaceholderPage";
 import { Settings } from "../pages/Settings";
 import { ClientPortalSettings } from "../pages/ClientPortalSettings";
 import { WedPlannedPlatform } from "../pages/WedPlannedPlatform";
@@ -58,7 +57,8 @@ export function AdminApp() {
     <Routes>
       <Route element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
-        <Route path="website" element={<Navigate to="/admin" replace />} />
+        <Route path="studio" element={<Navigate to="/admin" replace />} />
+        <Route path="website" element={<WebsiteOverview />} />
         <Route path="business" element={<BusinessOverview />} />
         <Route path="wedplanned" element={<WedPlannedPlatform />} />
         <Route path="platform" element={<PlatformAdminRoute />} />
@@ -127,15 +127,7 @@ export function AdminApp() {
         <Route path="print-store" element={<PrintStore />} />
         <Route path="ai" element={<AICentre />} />
         <Route path="seo" element={<SEOCentre />} />
-        <Route
-          path="publishing"
-          element={
-            <PlaceholderPage
-              title="Publishing"
-              description="Build, validate and deploy weddings from one checklist."
-            />
-          }
-        />
+          <Route path="publishing" element={<PublishingOverview />} />
         <Route path="settings/client-portal" element={<ClientPortalSettings />} />
         <Route path="settings" element={<Settings />} />
       </Route>

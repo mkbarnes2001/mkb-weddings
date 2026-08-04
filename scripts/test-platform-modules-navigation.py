@@ -19,11 +19,11 @@ def main() -> None:
     dashboard = read("src/admin/pages/Dashboard.tsx")
     css = read("src/admin/admin-theme.css")
 
-    # Central module architecture is explicit and entitlement-ready without exposing future placeholders.
+    # Central module architecture is explicit and entitlement-ready without exposing unimplemented commercial placeholders.
     for key, label, entitlement in [
         ('key: "crm"', 'label: "CRM"', 'entitlementKey: "crm"'),
         ('key: "client-galleries"', 'label: "Client Galleries"', 'entitlementKey: "client_galleries"'),
-        ('key: "website"', 'label: "Website"', 'entitlementKey: "website_content"'),
+        ('key: "website"', 'label: "Studio"', 'entitlementKey: "website_content"'),
         ('key: "business"', 'label: "Business"', 'entitlementKey: "business_settings"'),
     ]:
         assert key in modules and label in modules and entitlement in modules
@@ -32,7 +32,7 @@ def main() -> None:
     assert 'label: "Contracts"' not in modules
     assert 'label: "Invoices"' not in modules
     assert 'label: "Payments"' not in modules
-    assert 'label: "Publishing"' not in modules
+    assert 'label: "Publishing"' in modules
 
     # Desktop and mobile both use the same resolved module and item source.
     assert "adminModules.map" in layout
@@ -45,7 +45,10 @@ def main() -> None:
     assert "document.title" in layout
 
     # New landing and compatibility routes are additive; legacy routes remain available.
-    assert '<Route path="website" element={<Navigate to="/admin" replace />} />' in app
+    assert '<Route path="studio" element={<Navigate to="/admin" replace />} />' in app
+    assert '<Route path="website" element={<WebsiteOverview />} />' in app
+    assert '<Route path="publishing" element={<PublishingOverview />} />' in app
+    assert "Build, validate and deploy weddings from one checklist." not in app
     assert '<Route path="business" element={<BusinessOverview />} />' in app
     assert '<Route path="client-galleries/overview" element={<ClientGalleriesOverview />} />' in app
     for route in [
@@ -74,9 +77,13 @@ def main() -> None:
     assert "AdminApiService.getPrintStore()" in overviews
     assert "AdminApiService.getWorkspace()" in overviews
     assert "AdminApiService.getWedPlannedPlatform()" in overviews
-    assert "Private client delivery remains separate from the Website module." in overviews
-    assert "Website overview" in dashboard
-    assert "Private client delivery remains in Client Galleries." in dashboard
+    assert "Private client delivery remains separate from Studio." in overviews
+    assert 'title="Studio overview"' in dashboard
+    assert "export function WebsiteOverview" in dashboard
+    assert 'eyebrow="Studio · Website"' in dashboard
+    assert "export function PublishingOverview" in dashboard
+    assert 'eyebrow="Studio · Publishing"' in dashboard
+    assert "Downloads, selections, favourites and print sales remain in Client Galleries." in dashboard
 
     # Responsive presentation is defined without schema or backend changes.
     for selector in [

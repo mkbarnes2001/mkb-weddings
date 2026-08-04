@@ -149,7 +149,7 @@ export function AdminLayout() {
       <div className="admin-layout-grid">
         <aside className="admin-sidebar border-r border-black" style={{ backgroundColor: "#111111", color: "#ffffff" }}>
           <div className="admin-sidebar-identity border-b border-white/10 px-4 py-4">
-            <Link to={isPlatformRoute ? "/admin/platform" : "/admin"} className="admin-sidebar-brand" aria-label={isPlatformRoute ? "Open Platform overview" : "Open Website overview"}>
+            <Link to={isPlatformRoute ? "/admin/platform" : "/admin"} className="admin-sidebar-brand" aria-label={isPlatformRoute ? "Open Platform overview" : "Open Studio overview"}>
               <img src="/favicon-32x32.png" alt="MKB Weddings" />
             </Link>
 
