@@ -2142,7 +2142,6 @@
 .admin-mobile-more { display: none; }
 
 .crm-operations-page .admin-page-header { align-items: center; }
-.crm-operations-tabs { position: sticky; top: 0; z-index: 20; overflow-x: auto; background: rgba(244,242,238,.94); backdrop-filter: blur(12px); }
 .crm-operations-toolbar { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(160px, 210px) auto; align-items: center; gap: 10px; border: 1px solid var(--admin-border); border-radius: 12px; background: rgba(255,255,255,.88); padding: 10px; box-shadow: var(--admin-shadow); }
 .crm-search-control { position: relative; min-width: 0; }
 .crm-search-control > svg { position: absolute; top: 50%; left: 12px; width: 15px; height: 15px; color: #8a8a8a; transform: translateY(-50%); pointer-events: none; }
@@ -3779,4 +3778,21 @@
     min-width: 34px;
     padding: 0;
   }
+}
+
+/* v1.9.8a final UI refinement: module record surfaces */
+.admin-shell:not(.admin-shell--platform) .crm-operation-record,
+.admin-shell:not(.admin-shell--platform) .crm-client-list > a,
+.admin-shell:not(.admin-shell--platform) .crm-schedule-record,
+.admin-shell:not(.admin-shell--platform) .crm-enquiry-card,
+.admin-shell:not(.admin-shell--platform) .questionnaire-template-card {
+  background-color: var(--admin-module-record-background, #fff);
+}
+
+.platform-module-preview {
+  --preview-record: #fff;
+}
+
+.platform-module-preview__record {
+  background: var(--preview-record) !important;
 }

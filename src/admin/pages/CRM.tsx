@@ -9,7 +9,6 @@ import {
   Columns3,
   ExternalLink,
   FileQuestion,
-  Gauge,
   List,
   Mail,
   MapPin,
@@ -31,8 +30,6 @@ import {
   AdminPageHeader,
   AdminPanel,
   AdminStatus,
-  AdminTab,
-  AdminTabs,
 } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
@@ -276,17 +273,6 @@ export function CRM() {
           <div className="mt-4 flex gap-2"><AdminButton variant="primary" onClick={() => void createEnquiry()} disabled={saving}>Create enquiry</AdminButton><AdminButton onClick={() => setShowCreate(false)}>Cancel</AdminButton></div>
         </AdminPanel>
       ) : null}
-
-      <AdminTabs className="crm-operations-tabs">
-        <AdminTab active={view === "overview"} onClick={() => setView("overview")}><Gauge />Overview</AdminTab>
-        <AdminTab active={view === "pipeline"} onClick={() => setView("pipeline")}>Leads</AdminTab>
-        <AdminTab active={view === "jobs"} onClick={() => setView("jobs")}>Jobs</AdminTab>
-        <AdminTab active={view === "schedule"} onClick={() => setView("schedule")}>Schedule</AdminTab>
-        <AdminTab active={view === "contacts"} onClick={() => setView("contacts")}>Clients</AdminTab>
-        <AdminTab active={view === "questionnaires"} onClick={() => setView("questionnaires")}>Questionnaires</AdminTab>
-        <AdminTab active={view === "workflows"} onClick={() => setView("workflows")}>Workflows</AdminTab>
-        <AdminTab active={view === "lead-form"} onClick={() => setView("lead-form")}>Lead form</AdminTab>
-      </AdminTabs>
 
       {view === "overview" ? <div className="grid gap-4">
         <section className="admin-module-metrics">

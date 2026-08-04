@@ -104,6 +104,7 @@ export type PlatformModuleConfiguration = {
   accentColor: string;
   pageBackgroundColor: string;
   sectionBackgroundColor: string;
+  recordBackgroundColor: string;
   iconKey: string;
   markUrl: string;
   activeButtonStyle: "solid" | "soft" | "outline";

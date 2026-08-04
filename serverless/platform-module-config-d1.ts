@@ -5,6 +5,7 @@ export type PlatformModuleConfigurationRecord = {
   accentColor: string;
   pageBackgroundColor: string;
   sectionBackgroundColor: string;
+  recordBackgroundColor: string;
   iconKey: string;
   markUrl: string;
   activeButtonStyle: "solid" | "soft" | "outline";
@@ -28,10 +29,10 @@ export const PLATFORM_MODULE_ICON_KEYS = [
 ] as const;
 
 export const DEFAULT_PLATFORM_MODULE_CONFIGURATIONS: PlatformModuleConfigurationRecord[] = [
-  { moduleKey: "crm", accentColor: "#2563EB", pageBackgroundColor: "#F5F3EF", sectionBackgroundColor: "#FFFFFF", iconKey: "contact-round", markUrl: "", activeButtonStyle: "solid", panelAccentStyle: "edge", status: "active", sortOrder: 10 },
-  { moduleKey: "client-galleries", accentColor: "#7C3AED", pageBackgroundColor: "#F5F3EF", sectionBackgroundColor: "#FFFFFF", iconKey: "images", markUrl: "", activeButtonStyle: "soft", panelAccentStyle: "wash", status: "active", sortOrder: 20 },
-  { moduleKey: "website", accentColor: "#0F766E", pageBackgroundColor: "#F5F3EF", sectionBackgroundColor: "#FFFFFF", iconKey: "globe-2", markUrl: "", activeButtonStyle: "solid", panelAccentStyle: "edge", status: "active", sortOrder: 30 },
-  { moduleKey: "business", accentColor: "#B45309", pageBackgroundColor: "#F5F3EF", sectionBackgroundColor: "#FFFFFF", iconKey: "briefcase-business", markUrl: "", activeButtonStyle: "outline", panelAccentStyle: "header", status: "active", sortOrder: 40 },
+  { moduleKey: "crm", accentColor: "#2563EB", pageBackgroundColor: "#F5F3EF", sectionBackgroundColor: "#FFFFFF", recordBackgroundColor: "#FFFFFF", iconKey: "contact-round", markUrl: "", activeButtonStyle: "solid", panelAccentStyle: "edge", status: "active", sortOrder: 10 },
+  { moduleKey: "client-galleries", accentColor: "#7C3AED", pageBackgroundColor: "#F5F3EF", sectionBackgroundColor: "#FFFFFF", recordBackgroundColor: "#FFFFFF", iconKey: "images", markUrl: "", activeButtonStyle: "soft", panelAccentStyle: "wash", status: "active", sortOrder: 20 },
+  { moduleKey: "website", accentColor: "#0F766E", pageBackgroundColor: "#F5F3EF", sectionBackgroundColor: "#FFFFFF", recordBackgroundColor: "#FFFFFF", iconKey: "globe-2", markUrl: "", activeButtonStyle: "solid", panelAccentStyle: "edge", status: "active", sortOrder: 30 },
+  { moduleKey: "business", accentColor: "#B45309", pageBackgroundColor: "#F5F3EF", sectionBackgroundColor: "#FFFFFF", recordBackgroundColor: "#FFFFFF", iconKey: "briefcase-business", markUrl: "", activeButtonStyle: "outline", panelAccentStyle: "header", status: "active", sortOrder: 40 },
 ];
 
 function text(value: unknown) {
@@ -73,6 +74,7 @@ function hydrate(row: any): PlatformModuleConfigurationRecord {
     accentColor: validColour(row.accent_color) || "#111111",
     pageBackgroundColor: validColour(row.page_background_color) || "#F5F3EF",
     sectionBackgroundColor: validColour(row.section_background_color) || "#FFFFFF",
+    recordBackgroundColor: validColour(row.record_background_color) || "#FFFFFF",
     iconKey: text(row.icon_key),
     markUrl: text(row.mark_url),
     activeButtonStyle: text(row.active_button_style) as PlatformModuleConfigurationRecord["activeButtonStyle"],
@@ -115,6 +117,7 @@ export async function savePlatformModuleConfiguration(db: D1Db, actor: any, inco
   const accentColor = validColour(incoming?.accentColor);
   const pageBackgroundColor = validColour(incoming?.pageBackgroundColor);
   const sectionBackgroundColor = validColour(incoming?.sectionBackgroundColor);
+  const recordBackgroundColor = validColour(incoming?.recordBackgroundColor);
   const iconKey = text(incoming?.iconKey);
   const markUrl = safeMarkUrl(incoming?.markUrl);
   const activeButtonStyle = lower(incoming?.activeButtonStyle || fallback.activeButtonStyle);
@@ -123,6 +126,7 @@ export async function savePlatformModuleConfiguration(db: D1Db, actor: any, inco
   if (!accentColor) details.push("Accent colour must use six-digit hex format, for example #2563EB.");
   if (!pageBackgroundColor) details.push("Page background colour must use six-digit hex format.");
   if (!sectionBackgroundColor) details.push("Section background colour must use six-digit hex format.");
+  if (!recordBackgroundColor) details.push("Record card background colour must use six-digit hex format.");
   if (!PLATFORM_MODULE_ICON_KEYS.includes(iconKey as any)) details.push("Choose a supported module icon.");
   if (!["solid", "soft", "outline"].includes(activeButtonStyle)) details.push("Choose a supported active-button style.");
   if (!["edge", "wash", "header"].includes(panelAccentStyle)) details.push("Choose a supported panel-accent treatment.");
@@ -131,13 +135,14 @@ export async function savePlatformModuleConfiguration(db: D1Db, actor: any, inco
   await db.prepare(`
     INSERT INTO platform_module_configurations (
       module_key, accent_color, page_background_color, section_background_color,
-      icon_key, mark_url, active_button_style, panel_accent_style, status,
+      record_background_color, icon_key, mark_url, active_button_style, panel_accent_style, status,
       sort_order, updated_by_user_id, updated_by_email, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     ON CONFLICT(module_key) DO UPDATE SET
       accent_color = excluded.accent_color,
       page_background_color = excluded.page_background_color,
       section_background_color = excluded.section_background_color,
+      record_background_color = excluded.record_background_color,
       icon_key = excluded.icon_key,
       mark_url = excluded.mark_url,
       active_button_style = excluded.active_button_style,
@@ -152,6 +157,7 @@ export async function savePlatformModuleConfiguration(db: D1Db, actor: any, inco
     accentColor,
     pageBackgroundColor,
     sectionBackgroundColor,
+    recordBackgroundColor,
     iconKey,
     markUrl,
     activeButtonStyle,
@@ -177,6 +183,7 @@ export async function savePlatformModuleConfiguration(db: D1Db, actor: any, inco
       accentColor,
       pageBackgroundColor,
       sectionBackgroundColor,
+      recordBackgroundColor,
       iconKey,
       markUrl,
       activeButtonStyle,

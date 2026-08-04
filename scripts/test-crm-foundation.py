@@ -29,7 +29,7 @@ def main() -> None:
     con = sqlite3.connect(":memory:")
     con.row_factory = sqlite3.Row
     con.executescript(schema_text)
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "33"
+    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "34"
 
     required = {
         "crm_pipeline_stages",
@@ -157,7 +157,7 @@ def main() -> None:
     print("  public lead form: domain-resolved, consent and rate guarded")
     print("  accepted conversion: Job uniqueness and Wedding linkage guarded")
     print("  activity/export/auth integration: verified")
-    print("  schema version: 33")
+    print("  schema version: 34")
 
 
 if __name__ == "__main__":

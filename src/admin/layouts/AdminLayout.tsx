@@ -79,11 +79,13 @@ export function AdminLayout() {
   const accent = isPlatformRoute ? "#0F172A" : currentAppearance.accentColor;
   const pageBackground = isPlatformRoute ? "#F4F5F7" : currentAppearance.pageBackgroundColor;
   const sectionBackground = isPlatformRoute ? "#FFFFFF" : currentAppearance.sectionBackgroundColor;
+  const recordBackground = isPlatformRoute ? "#FFFFFF" : currentAppearance.recordBackgroundColor;
   const shellStyle = {
     "--admin-module-accent": accent,
     "--admin-module-accent-soft": `color-mix(in srgb, ${accent} 14%, transparent)`,
     "--admin-module-page-background": pageBackground,
     "--admin-module-section-background": sectionBackground,
+    "--admin-module-record-background": recordBackground,
     "--admin-bg": pageBackground,
     "--admin-surface": sectionBackground,
     backgroundColor: pageBackground,

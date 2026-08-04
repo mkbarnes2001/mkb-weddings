@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / "d1/schema.sql"
 MIGRATION_32 = ROOT / "d1/migrations/032_platform_administration.sql"
 MIGRATION_33 = ROOT / "d1/migrations/033_platform_style_assets.sql"
+MIGRATION_34 = ROOT / "d1/migrations/034_platform_record_card_colour.sql"
 
 
 def one(con: sqlite3.Connection, sql: str):
@@ -18,15 +19,16 @@ def main() -> None:
     schema_text = SCHEMA.read_text()
     migration_32 = MIGRATION_32.read_text()
     migration_33 = MIGRATION_33.read_text()
+    migration_34 = MIGRATION_34.read_text()
 
     con = sqlite3.connect(":memory:")
     con.executescript(schema_text)
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "33"
+    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "34"
 
     module_columns = {row[1] for row in con.execute("PRAGMA table_info(platform_module_configurations)")}
     assert {
         "module_key", "accent_color", "page_background_color",
-        "section_background_color", "icon_key", "mark_url",
+        "section_background_color", "record_background_color", "icon_key", "mark_url",
         "active_button_style", "panel_accent_style", "status", "sort_order",
         "updated_by_user_id", "updated_by_email",
     }.issubset(module_columns)
@@ -49,11 +51,14 @@ def main() -> None:
     assert one(upgrade, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "32"
     upgrade.executescript(migration_33)
     assert one(upgrade, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "33"
+    upgrade.executescript(migration_34)
+    assert one(upgrade, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "34"
     assert not upgrade.execute("PRAGMA foreign_key_check").fetchall()
 
     layout = (ROOT / "src/admin/layouts/AdminLayout.tsx").read_text()
     navigation = (ROOT / "src/admin/navigation/adminModules.ts").read_text()
     platform_page = (ROOT / "src/admin/pages/PlatformAdmin.tsx").read_text()
+    crm_page = (ROOT / "src/admin/pages/CRM.tsx").read_text()
     platform_api = (ROOT / "functions/api/platform-admin.ts").read_text()
     asset_api = (ROOT / "functions/api/platform-assets.ts").read_text()
     platform_data = (ROOT / "serverless/platform-administration-d1.ts").read_text()
@@ -66,6 +71,7 @@ def main() -> None:
     assert 'label: "Brand assets"' in navigation
     assert 'value === "assets"' in platform_page
     assert "pageBackgroundColor" in platform_page and "sectionBackgroundColor" in platform_page
+    assert "recordBackgroundColor" in platform_page
     assert "uploadPlatformBrandAsset" in platform_page and "deletePlatformBrandAsset" in service
     assert "platform.brand_asset.created" in asset_data
     assert "platform.brand_asset.archived" in asset_data
@@ -87,17 +93,22 @@ def main() -> None:
 
     assert "page_background_color" in module_data
     assert "section_background_color" in module_data
+    assert "record_background_color" in module_data
     assert "--admin-module-page-background" in layout
     assert "--admin-module-section-background" in layout
+    assert "--admin-module-record-background" in layout
     assert "var(--admin-module-section-background" in css
+    assert "var(--admin-module-record-background" in css
+    assert '<AdminTabs className="crm-operations-tabs">' not in crm_page
     assert "saveModuleConfiguration" in platform_api
 
     print("PASS v1.9.8a Platform Administration refinement")
     print("  fixed-width desktop sidebar and unified control card: verified")
     print("  duplicate Blog/Website controls removed: verified")
-    print("  configurable page and section backgrounds: verified")
+    print("  duplicate CRM horizontal navigation removed: verified")
+    print("  configurable page, section and record backgrounds: verified")
     print("  platform-owned reusable logo/icon library: verified")
-    print("  schema transition: 31 -> 32 -> 33")
+    print("  schema transition: 31 -> 32 -> 33 -> 34")
 
 
 if __name__ == "__main__":
