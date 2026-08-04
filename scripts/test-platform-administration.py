@@ -82,9 +82,13 @@ def main() -> None:
     assert "mark_url = ?" in asset_data
     assert "brandAssets" in platform_data and "brandAssets" in types
 
-    assert "admin-sidebar-control-card" in layout
-    assert "Business active" in layout
-    assert 'title="Sign out" aria-label="Sign out"><LogOut /></button>' in layout
+    assert "admin-workspace-menu" in layout
+    assert 'aria-haspopup="menu"' in layout and 'role="menu"' in layout
+    assert "auth.memberships.map" in layout and "chooseWorkspace" in layout
+    assert 'event.key === "Escape"' in layout and 'document.addEventListener("mousedown"' in layout
+    assert "admin-workspace-menu__identity" in layout
+    assert "admin-workspace-menu__signout" in layout
+    assert "admin-sidebar-control-card" not in layout
     assert "admin-sidebar-external" not in layout
     assert "www.mkbweddings.co.uk/blog" not in layout
     assert "admin-external-links" not in layout
@@ -103,7 +107,7 @@ def main() -> None:
     assert "saveModuleConfiguration" in platform_api
 
     print("PASS v1.9.8a Platform Administration refinement")
-    print("  fixed-width desktop sidebar and unified control card: verified")
+    print("  fixed-width desktop sidebar and compact workspace flyout: verified")
     print("  duplicate Blog/Website controls removed: verified")
     print("  duplicate CRM horizontal navigation removed: verified")
     print("  configurable page, section and record backgrounds: verified")

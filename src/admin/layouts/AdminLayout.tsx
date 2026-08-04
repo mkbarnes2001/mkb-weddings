@@ -1,5 +1,5 @@
-import { useEffect, useState, type CSSProperties } from "react";
-import { ArrowLeft, ChevronRight, LogOut, Menu, ShieldCheck, X } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { ArrowLeft, Building2, Check, ChevronDown, ChevronRight, LogOut, Menu, ShieldCheck, X } from "lucide-react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
@@ -23,10 +23,23 @@ function ModuleGlyph({ configuration, Icon }: { configuration: PlatformModuleCon
   return <Icon />;
 }
 
+function initials(value: string) {
+  return value
+    .split(/\s+/)
+    .map((part) => part.trim().slice(0, 1))
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase() || "WP";
+}
+
 export function AdminLayout() {
   const { auth, signOut, switchWorkspace } = useProfessionalAuth();
   const location = useLocation();
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const [workspaceMenuOpen, setWorkspaceMenuOpen] = useState(false);
+  const [workspaceLogoUrl, setWorkspaceLogoUrl] = useState("");
+  const workspaceMenuRef = useRef<HTMLDivElement | null>(null);
   const [moduleConfigurations, setModuleConfigurations] = useState<PlatformModuleConfiguration[]>(defaultAdminModuleConfigurations);
   const isPlatformRoute = location.pathname === "/admin/platform" || location.pathname.startsWith("/admin/platform/");
   const currentModule = resolveAdminModule(location.pathname);
@@ -63,10 +76,15 @@ export function AdminLayout() {
     let active = true;
     AdminApiService.getWedPlannedPlatform()
       .then((platform) => {
-        if (active && platform.moduleConfigurations?.length) setModuleConfigurations(platform.moduleConfigurations);
+        if (!active) return;
+        if (platform.moduleConfigurations?.length) setModuleConfigurations(platform.moduleConfigurations);
+        setWorkspaceLogoUrl(platform.business.logoUrl || "");
       })
       .catch(() => {
-        if (active) setModuleConfigurations(defaultAdminModuleConfigurations);
+        if (active) {
+          setModuleConfigurations(defaultAdminModuleConfigurations);
+          setWorkspaceLogoUrl("");
+        }
       });
     return () => { active = false; };
   }, [auth.workspaceId]);
@@ -74,7 +92,24 @@ export function AdminLayout() {
   useEffect(() => {
     document.title = `${currentSectionLabel} · ${currentContextLabel} · ${isPlatformRoute ? "WedPlanned" : auth.businessName || "WedPlanned"}`;
     setMobileMoreOpen(false);
+    setWorkspaceMenuOpen(false);
   }, [auth.businessName, currentContextLabel, currentSectionLabel, isPlatformRoute, location.pathname, location.search]);
+
+  useEffect(() => {
+    if (!workspaceMenuOpen) return;
+    const closeOutside = (event: MouseEvent) => {
+      if (!workspaceMenuRef.current?.contains(event.target as Node)) setWorkspaceMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setWorkspaceMenuOpen(false);
+    };
+    document.addEventListener("mousedown", closeOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [workspaceMenuOpen]);
 
   const accent = isPlatformRoute ? "#0F172A" : currentAppearance.accentColor;
   const pageBackground = isPlatformRoute ? "#F4F5F7" : currentAppearance.pageBackgroundColor;
@@ -93,12 +128,16 @@ export function AdminLayout() {
   const activeButtonStyle = isPlatformRoute ? "solid" : currentAppearance.activeButtonStyle;
   const panelAccentStyle = isPlatformRoute ? "header" : currentAppearance.panelAccentStyle;
 
-  const controlLink = isPlatformAdmin ? (
-    <Link to={isPlatformRoute ? "/admin/business" : "/admin/platform"} className="admin-platform-entry">
-      {isPlatformRoute ? <ArrowLeft /> : <ShieldCheck />}
-      <span>{isPlatformRoute ? "Business workspace" : "Platform administration"}</span>
-    </Link>
-  ) : null;
+  const activeBusinessName = auth.businessName || "MKB Weddings";
+  const workspaceTriggerLabel = isPlatformRoute ? "WedPlanned platform" : activeBusinessName;
+  const workspaceTriggerDetail = isPlatformRoute ? activeBusinessName : userType;
+  const userName = auth.displayName || auth.email || "WedPlanned user";
+
+  async function chooseWorkspace(workspaceId: string) {
+    setWorkspaceMenuOpen(false);
+    if (workspaceId === auth.workspaceId) return;
+    await switchWorkspace(workspaceId);
+  }
 
   return (
     <div
@@ -114,33 +153,62 @@ export function AdminLayout() {
               <img src="/favicon-32x32.png" alt="MKB Weddings" />
             </Link>
 
-            <section className={`admin-sidebar-control-card ${isPlatformRoute ? "admin-sidebar-control-card--platform" : ""}`}>
-              <header className="admin-sidebar-control-card__header">
-                <div>
-                  <span>{isPlatformRoute ? "Platform control" : "Workspace control"}</span>
-                  <strong>{isPlatformRoute ? "Platform administration" : "Business workspace"}</strong>
-                </div>
-                {auth.authenticated ? <button type="button" onClick={() => void signOut()} className="admin-sidebar-signout" title="Sign out" aria-label="Sign out"><LogOut /></button> : null}
-              </header>
+            <div ref={workspaceMenuRef} className={`admin-workspace-menu ${isPlatformRoute ? "admin-workspace-menu--platform" : ""}`}>
+              <button
+                type="button"
+                className="admin-workspace-menu__trigger"
+                aria-haspopup="menu"
+                aria-expanded={workspaceMenuOpen}
+                onClick={() => setWorkspaceMenuOpen((current) => !current)}
+              >
+                <span className="admin-workspace-menu__mark">
+                  {workspaceLogoUrl ? <img src={workspaceLogoUrl} alt="" /> : <span>{initials(activeBusinessName)}</span>}
+                </span>
+                <span className="admin-workspace-menu__trigger-copy">
+                  <strong>{workspaceTriggerLabel}</strong>
+                  <small>{workspaceTriggerDetail}</small>
+                </span>
+                <ChevronDown className={workspaceMenuOpen ? "open" : ""} aria-hidden="true" />
+              </button>
 
-              {controlLink}
+              {workspaceMenuOpen ? <div className="admin-workspace-menu__flyout" role="menu" aria-label="Workspace and account">
+                <header className="admin-workspace-menu__identity">
+                  <span className="admin-workspace-menu__avatar">{initials(userName)}</span>
+                  <div>
+                    <strong>{userName}</strong>
+                    <small>{auth.email}</small>
+                    <em>{userType}</em>
+                  </div>
+                </header>
 
-              <div className="admin-sidebar-control-card__detail">
-                <span>Business active</span>
-                <strong>{auth.businessName || "MKB Weddings"}</strong>
-              </div>
+                <section className="admin-workspace-menu__section">
+                  <p>Companies</p>
+                  <div className="admin-workspace-menu__companies">
+                    {auth.memberships.map((membership) => {
+                      const active = membership.workspaceId === auth.workspaceId;
+                      const membershipDetail = membership.accessMode === "support"
+                        ? `${membership.supportScope || "read"} support`
+                        : (membership.role || "member").replace(/_/g, " ");
+                      return <button key={membership.id || membership.workspaceId} type="button" role="menuitem" className={active ? "active" : ""} onClick={() => void chooseWorkspace(membership.workspaceId)}>
+                        <span className="admin-workspace-menu__company-mark">{initials(membership.businessName)}</span>
+                        <span><strong>{membership.businessName}</strong><small>{membershipDetail}</small></span>
+                        {active ? <Check aria-label="Current business" /> : null}
+                      </button>;
+                    })}
+                  </div>
+                </section>
 
-              <div className="admin-sidebar-control-card__user">
-                <div className="min-w-0">
-                  <span>User</span>
-                  <strong>{auth.displayName || auth.email}</strong>
-                  <small>{auth.email}</small>
-                </div>
-                <em>{userType}</em>
-              </div>
+                {isPlatformAdmin ? <section className="admin-workspace-menu__section">
+                  <p>Administration</p>
+                  <Link role="menuitem" to={isPlatformRoute ? "/admin/business" : "/admin/platform"} onClick={() => setWorkspaceMenuOpen(false)} className="admin-workspace-menu__admin-link">
+                    {isPlatformRoute ? <ArrowLeft /> : <ShieldCheck />}
+                    <span><strong>{isPlatformRoute ? "Business workspace" : "Platform administration"}</strong><small>{isPlatformRoute ? "Return to the active company" : "Global businesses, modules and access"}</small></span>
+                  </Link>
+                </section> : null}
 
-              {!isPlatformRoute && auth.memberships.length > 1 ? <select value={auth.workspaceId} onChange={(event) => void switchWorkspace(event.target.value)} className="admin-workspace-switcher h-8 w-full rounded-lg border px-2 text-[10px] outline-none" aria-label="Switch business workspace">{auth.memberships.map((membership) => <option key={membership.workspaceId} value={membership.workspaceId} className="text-black">{membership.businessName}</option>)}</select> : null}
-            </section>
+                {auth.authenticated ? <button type="button" role="menuitem" className="admin-workspace-menu__signout" onClick={() => { setWorkspaceMenuOpen(false); void signOut(); }}><LogOut /><span>Sign out</span></button> : null}
+              </div> : null}
+            </div>
           </div>
 
           {!isPlatformRoute ? <div className="admin-module-switcher-wrap border-b border-white/10 p-3">

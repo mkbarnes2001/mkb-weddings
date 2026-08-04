@@ -27,16 +27,16 @@ checks = {
     "platform administrator authority is visible in the session UI": (
         'const isPlatformAdmin = auth.platformRole === "platform_admin";' in layout
         and '? "Platform administrator"' in layout
-        and "admin-sidebar-control-card__user" in layout
+        and "admin-workspace-menu__identity" in layout
     ),
-    "unified workspace control and icon sign-out are visually distinct": (
-        "admin-sidebar-control-card" in layout
-        and "admin-sidebar-control-card__user" in layout
-        and "admin-sidebar-signout" in layout
-        and 'title="Sign out" aria-label="Sign out"><LogOut /></button>' in layout
-        and ".admin-sidebar-control-card {" in theme
-        and ".admin-sidebar-signout {" in theme
-        and "admin-sidebar-account" not in layout
+    "compact workspace flyout and sign-out are visually distinct": (
+        "admin-workspace-menu__trigger" in layout
+        and "admin-workspace-menu__flyout" in layout
+        and "admin-workspace-menu__signout" in layout
+        and ".admin-workspace-menu__trigger {" in theme
+        and ".admin-workspace-menu__flyout {" in theme
+        and ".admin-workspace-menu__signout {" in theme
+        and "admin-sidebar-control-card" not in layout
     ),
     "Supplier categories use a single selection list": (
         'aria-label="Filter suppliers by category"' in suppliers
