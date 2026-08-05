@@ -4265,3 +4265,12 @@
     font-size: .98em;
   }
 }
+
+/* v1.10.0a typography correction: Wed wordmark uses Times New Roman italic */
+.admin-module-wordmark__wed {
+  font-family: "Times New Roman", Times, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  transform: none;
+}
