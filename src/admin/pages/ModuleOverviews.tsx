@@ -8,14 +8,13 @@ import {
   Images,
   LockKeyhole,
   MapPinned,
-  Palette,
   Settings,
   ShoppingBag,
   Store,
   Users,
 } from "lucide-react";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
-import { AdminPage, AdminPageHeader, AdminPanel, AdminStatus } from "../components/ui/AdminUI";
+import { AdminModuleWordmark, AdminPage, AdminPageHeader, AdminPanel, AdminStatus } from "../components/ui/AdminUI";
 import { AdminApiService, type WorkspaceRecord } from "../services/AdminApiService";
 import type { ClientGalleryListPayload } from "../types/clientGallery";
 import type { WedPlannedPlatformPayload } from "../types/platform";
@@ -39,7 +38,7 @@ export function ClientGalleriesOverview() {
     setError("");
     Promise.all([AdminApiService.listClientGalleries(), AdminApiService.getPrintStore()])
       .then(([nextGalleries, nextStore]) => { setGalleries(nextGalleries); setStore(nextStore); })
-      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load Client Galleries overview."));
+      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load WedStore overview."));
   }, [auth.workspaceId]);
 
   const summary = useMemo(() => {
@@ -58,8 +57,8 @@ export function ClientGalleriesOverview() {
 
   return <AdminPage>
     <AdminPageHeader
-      eyebrow="Client Galleries · Private delivery"
-      title="Client Galleries overview"
+      eyebrow="WedStore · Private delivery"
+      title={<AdminModuleWordmark label="WedStore" trailing="overview" />}
       description="Manage private image delivery, client activity, selections, store configuration and orders without mixing these assets with the public website portfolio."
       actions={<Link to="/admin/client-galleries" className="admin-button admin-button--primary admin-button--md"><Images className="admin-button__icon" />Open galleries</Link>}
     />
@@ -91,19 +90,18 @@ export function BusinessOverview() {
     setError("");
     Promise.all([AdminApiService.getWorkspace(), AdminApiService.getWedPlannedPlatform()])
       .then(([nextWorkspace, nextPlatform]) => { setWorkspace(nextWorkspace); setPlatform(nextPlatform); })
-      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load Business overview."));
+      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load WedBusiness overview."));
   }, [auth.workspaceId]);
 
   const selectedCategories = platform?.categories.filter((category) => category.selected) || [];
   const activeMembers = platform?.members.filter((member) => member.status === "active") || [];
   const verifiedDomains = workspace?.domains.filter((domain) => domain.verified) || [];
-  const portalReady = Boolean(workspace?.settings.logoUrl && workspace?.settings.portalWelcomeHeading);
 
   return <AdminPage>
     <AdminPageHeader
-      eyebrow="Business · Workspace configuration"
-      title="Business overview"
-      description="Manage the shared workspace identity, team, service profile, client portal and verified domains used across WedPlanned modules."
+      eyebrow="WedBusiness · Workspace configuration"
+      title={<AdminModuleWordmark label="WedBusiness" trailing="overview" />}
+      description="Manage the shared workspace identity, team, service profile and verified domains used across WedPlanned modules."
       actions={<Link to="/admin/wedplanned?tab=business" className="admin-button admin-button--primary admin-button--md"><Building2 className="admin-button__icon" />Edit business profile</Link>}
       meta={<div className="flex flex-wrap gap-2"><AdminStatus tone={workspace?.status === "active" ? "success" : "warning"}>{workspace?.status || "loading"}</AdminStatus><AdminStatus tone="info">{workspace?.plan || "workspace"}</AdminStatus></div>}
     />
@@ -112,17 +110,16 @@ export function BusinessOverview() {
       <Metric value={activeMembers.length} label="Active team members" detail={`${platform?.members.length || 0} total memberships`} />
       <Metric value={selectedCategories.length} label="Business services" detail={`${platform?.serviceAreas.length || 0} service areas`} />
       <Metric value={verifiedDomains.length} label="Verified domains" detail={`${workspace?.domains.length || 0} registered`} />
-      <Metric value={portalReady ? "Ready" : "Needs setup"} label="Client portal branding" detail={workspace?.settings.portalWelcomeHeading || "No welcome heading"} />
+      <Metric value={workspace?.plan || "Workspace"} label="Workspace plan" detail={workspace?.status || "Loading"} />
     </section>
     <section className="admin-module-destination-grid">
       <Destination to="/admin/wedplanned?tab=business" icon={Building2} title="Business profile" description="Public identity, legal details, contact information and business status." meta={<AdminStatus tone="info">{platform?.business.publicName || auth.businessName}</AdminStatus>} />
       <Destination to="/admin/wedplanned?tab=services" icon={MapPinned} title="Services & areas" description="Choose business categories and define the regions this workspace covers." meta={<AdminStatus tone="neutral">{selectedCategories.length} services</AdminStatus>} />
       <Destination to="/admin/wedplanned?tab=team" icon={Users} title="Team members" description="Invite people and manage workspace-scoped roles and access." meta={<AdminStatus tone="success">{activeMembers.length} active</AdminStatus>} />
-      <Destination to="/admin/settings/client-portal" icon={Palette} title="Client portal" description="Logo, banner, colours, welcome content and hosted portal presentation." meta={<AdminStatus tone={portalReady ? "success" : "warning"}>{portalReady ? "configured" : "review"}</AdminStatus>} />
       <Destination to="/admin/settings" icon={Settings} title="Domains & workspace" description="Workspace name, website details, currency, timezone and verified domains." meta={<AdminStatus tone="info">{verifiedDomains.length} verified</AdminStatus>} />
     </section>
     <AdminPanel title="Isolation boundary" description="Business configuration is workspace-owned and does not grant cross-workspace access.">
-      <div className="admin-module-guidance"><div><LockKeyhole /><span><strong>Tenant scoped</strong><small>Members, domains, portal branding and business data remain attached to the active workspace.</small></span></div><div><Users /><span><strong>Explicit access</strong><small>Team membership and support access are role-scoped, auditable and revocable.</small></span></div><div><Globe2 /><span><strong>Future network links</strong><small>Venue and supplier collaboration must use explicit workspace-to-workspace permissions rather than shared unrestricted access.</small></span></div></div>
+      <div className="admin-module-guidance"><div><LockKeyhole /><span><strong>Tenant scoped</strong><small>Members, domains and business data remain attached to the active workspace.</small></span></div><div><Users /><span><strong>Explicit access</strong><small>Team membership and support access are role-scoped, auditable and revocable.</small></span></div><div><Globe2 /><span><strong>Future network links</strong><small>Venue and supplier collaboration must use explicit workspace-to-workspace permissions rather than shared unrestricted access.</small></span></div></div>
     </AdminPanel>
   </AdminPage>;
 }

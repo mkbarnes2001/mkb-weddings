@@ -23,6 +23,7 @@ import {
 } from "../services/AdminApiService";
 import { ProgressBar } from "../components/ProgressBar";
 import {
+  AdminModuleWordmark,
   AdminButton,
   AdminField,
   AdminPage,
@@ -318,7 +319,7 @@ export function Dashboard() {
   return <AdminPage>
     <AdminPageHeader
       eyebrow="WedStudio · Content operations"
-      title="WedStudio overview"
+      title={<AdminModuleWordmark label="WedStudio" trailing="overview" />}
       description="Monitor website connectivity, content readiness, galleries, assets, metadata, SEO and publishing from one operational dashboard."
       actions={websiteUrl
         ? <a href={websiteUrl} target="_blank" rel="noreferrer" className="admin-button admin-button--primary admin-button--md"><Globe2 className="admin-button__icon" />Open website</a>

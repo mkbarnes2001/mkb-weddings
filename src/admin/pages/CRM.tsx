@@ -23,6 +23,7 @@ import {
   Workflow,
 } from "lucide-react";
 import {
+  AdminModuleWordmark,
   AdminButton,
   AdminEmptyState,
   AdminField,
@@ -234,7 +235,7 @@ export function CRM() {
   if (loading && !crm) return <AdminPage><p className="text-sm text-neutral-500">Loading CRM…</p></AdminPage>;
 
   const pageTitle: Record<View, string> = {
-    overview: "CRM overview",
+    overview: "WedCRM overview",
     pipeline: "Leads overview",
     contacts: "Clients",
     jobs: "Jobs overview",
@@ -247,8 +248,10 @@ export function CRM() {
   return (
     <AdminPage className="crm-operations-page">
       <AdminPageHeader
-        eyebrow="CRM · Client operations"
-        title={pageTitle[view]}
+        eyebrow="WedCRM · Client operations"
+        title={view === "overview"
+          ? <AdminModuleWordmark label="WedCRM" trailing="overview" />
+          : pageTitle[view]}
         description="A clear operational view of leads, bookings, deadlines and client activity across this workspace."
         actions={<div className="flex flex-wrap gap-2"><Link to="/admin/crm/catalogue" className="admin-button admin-button--secondary admin-button--md"><Settings2 className="admin-button__icon" />Catalogue</Link><Link to="/admin/crm/quotes" className="admin-button admin-button--secondary admin-button--md"><FileQuestion className="admin-button__icon" />Quotes</Link>{canManage ? <AdminButton variant="primary" icon={Plus} onClick={() => setShowCreate((current) => !current)}>New enquiry</AdminButton> : null}</div>}
         meta={crm ? <div className="flex flex-wrap gap-2"><AdminStatus tone="info">{crm.stats.open} open leads</AdminStatus><AdminStatus tone="success">{crm.stats.jobs} jobs</AdminStatus><AdminStatus tone="neutral">{crm.contacts.length} clients</AdminStatus></div> : undefined}

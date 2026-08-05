@@ -39,7 +39,7 @@ def main() -> None:
     # Studio overview exposes the complete public-content toolset as
     # operational snapshots rather than repeating sidebar destinations.
     for token in [
-        'title="WedStudio overview"',
+        'label="WedStudio"',
         'label="Website connection"',
         'label="Wedding stories"',
         'label="Public galleries"',

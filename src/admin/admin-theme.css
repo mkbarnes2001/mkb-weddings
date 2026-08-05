@@ -4181,3 +4181,87 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* v1.10.0a — WedPlanned module wordmarks */
+@font-face {
+  font-family: "WedPlanned Canela";
+  src: url("/fonts/canela-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.admin-module-wordmark {
+  display: inline-flex;
+  min-width: 0;
+  align-items: baseline;
+  color: inherit;
+  font-size: 1em;
+  letter-spacing: 0;
+  line-height: .92;
+  white-space: nowrap;
+}
+
+.admin-module-wordmark__wed {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  flex: 0 0 auto;
+  margin-right: -.045em;
+  font-family: "WedPlanned Canela", "Canela", Georgia, serif;
+  font-size: 1.1em;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -.07em;
+  transform: skewX(-5deg);
+  transform-origin: left bottom;
+}
+
+.admin-module-wordmark__name {
+  display: inline-block;
+  min-width: 0;
+  font-family: "Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif;
+  font-size: .94em;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: -.075em;
+}
+
+.admin-module-wordmark__trailing {
+  display: inline-block;
+  margin-left: .34em;
+  font-family: "Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif;
+  font-size: .73em;
+  font-style: normal;
+  font-weight: 650;
+  letter-spacing: -.035em;
+}
+
+.admin-page-title > .admin-module-wordmark {
+  font-size: 1em;
+}
+
+.admin-module-link .admin-module-wordmark {
+  overflow: visible;
+  font-size: 10.5px;
+}
+
+.admin-module-link .admin-module-wordmark span {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.admin-module-navigation__header .admin-module-wordmark {
+  color: #fff;
+  font-size: 11px;
+}
+
+.admin-mobile-module-switcher .admin-module-wordmark {
+  font-size: 9px;
+}
+
+@media (max-width: 620px) {
+  .admin-page-title > .admin-module-wordmark {
+    font-size: .98em;
+  }
+}

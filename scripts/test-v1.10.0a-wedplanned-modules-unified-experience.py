@@ -58,7 +58,8 @@ def main() -> None:
     assert 'pathname.startsWith("/admin/settings"), items: businessItems' not in modules
 
     # WedStudio is the visible public-content workspace.
-    assert 'title="WedStudio overview"' in dashboard
+    assert 'label="WedStudio"' in dashboard
+    assert 'trailing="overview"' in dashboard
     assert 'eyebrow="WedStudio · Website"' in dashboard
     assert 'eyebrow="WedStudio · Publishing"' in dashboard
     assert "Open WedStudio overview" in layout
@@ -148,6 +149,23 @@ def main() -> None:
     )[0]
     assert "admin-module-destination-grid" not in dashboard_function
 
+    # Module names use the shared WedPlanned serif/sans lockup.
+    admin_ui = read("src/admin/components/ui/AdminUI.tsx")
+    crm = read("src/admin/pages/CRM.tsx")
+    overviews = read("src/admin/pages/ModuleOverviews.tsx")
+    admin_css = read("src/admin/admin-theme.css")
+
+    assert "function AdminModuleWordmark" in admin_ui
+    assert "admin-module-wordmark__wed" in admin_ui
+    assert "WedPlanned Canela" in admin_css
+    assert 'overview: "WedCRM overview"' in crm
+    assert 'label="WedCRM"' in crm
+    assert 'label="WedStore"' in overviews
+    assert 'label="WedBusiness"' in overviews
+    assert 'to="/admin/settings/client-portal"' not in overviews
+    assert "Client portal branding" not in overviews
+    assert "portalReady" not in overviews
+
     # This implementation stage is source-only.
     assert not (ROOT / "d1/migrations/035_wedplanned_modules_unified_experience.sql").exists()
     assert not (ROOT / "d1/migrations/035_studio_foundation.sql").exists()
@@ -161,6 +179,7 @@ def main() -> None:
     print("  authenticated portal gallery discovery without capability-token exposure: verified")
     print("  unified Client Portal gallery navigation and delivery cards: verified")
     print("  WedStudio operational snapshots and website connection interface: verified")
+    print("  WedPlanned module wordmarks and corrected overview ownership: verified")
     print("  source-only implementation; schema remains 34: verified")
 
 

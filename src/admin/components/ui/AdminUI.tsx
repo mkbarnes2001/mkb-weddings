@@ -15,6 +15,46 @@ export function AdminPage({ children, className = "" }: { children: ReactNode; c
   return <div className={cx("admin-page", className)}>{children}</div>;
 }
 
+export function AdminModuleWordmark({
+  label,
+  trailing,
+  className = "",
+}: {
+  label: string;
+  trailing?: string;
+  className?: string;
+}) {
+  const moduleName = label.startsWith("Wed")
+    ? label.slice(3)
+    : label;
+
+  const accessibleLabel = trailing
+    ? `${label} ${trailing}`
+    : label;
+
+  return (
+    <span
+      className={cx("admin-module-wordmark", className)}
+      aria-label={accessibleLabel}
+    >
+      <span className="admin-module-wordmark__wed" aria-hidden="true">
+        Wed
+      </span>
+      <span className="admin-module-wordmark__name" aria-hidden="true">
+        {moduleName}
+      </span>
+      {trailing ? (
+        <span
+          className="admin-module-wordmark__trailing"
+          aria-hidden="true"
+        >
+          {trailing}
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
 export function AdminPageHeader({
   eyebrow,
   title,
