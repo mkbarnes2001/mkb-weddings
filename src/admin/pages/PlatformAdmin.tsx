@@ -249,7 +249,7 @@ export function PlatformAdmin() {
   }
 
   async function deleteBrandAsset(assetId: string, assetLabel: string) {
-    if (!window.confirm(`Delete ${assetLabel} from the platform asset library?`)) return;
+    if (!window.confirm(`Delete ${assetLabel} from the WedPlanned asset library?`)) return;
     setSaving(true);
     setMessage("");
     setError("");
@@ -284,7 +284,7 @@ export function PlatformAdmin() {
         <Metric value={platformAdmin.summary.workspaces} label="Business workspaces" detail={`${platformAdmin.summary.activeWorkspaces} active`} />
         <Metric value={platformAdmin.summary.users} label="Platform users" detail={`${platformAdmin.summary.platformAdmins} platform administrators`} />
         <Metric value={platformAdmin.modules.length} label="Configured modules" detail="Global appearance definitions" />
-        <Metric value={platformAdmin.summary.brandAssets} label="Brand assets" detail="Reusable platform logos and icons" />
+        <Metric value={platformAdmin.summary.brandAssets} label="WedPlanned assets" detail="Platform-owned reusable logos and icons" />
       </section>
       <section className="admin-module-destination-grid">
         <Destination to="/admin/platform?section=businesses" icon={Building2} title="Businesses & workspaces" description="Review every tenant boundary, business status, membership count and verified-domain footprint." meta={`${platformAdmin.summary.activeWorkspaces} active`} />
@@ -315,7 +315,8 @@ export function PlatformAdmin() {
       const definition = adminModules.find((item) => item.key === module.moduleKey)!;
       const selectedIcon = adminModuleIconOptions.find((option) => option.key === module.iconKey)?.icon || definition.icon;
       const PreviewIcon = selectedIcon;
-      const markInLibrary = platformAdmin.brandAssets.some((asset) => asset.url === module.markUrl);
+      const moduleMarkAssets = platformAdmin.brandAssets.filter((asset) => asset.assetType === "icon");
+      const markInLibrary = moduleMarkAssets.some((asset) => asset.url === module.markUrl);
       return <AdminPanel key={module.moduleKey} title={definition.label} description={definition.description} icon={PreviewIcon} actions={<AdminStatus tone="info">Global</AdminStatus>}>
         <div className="platform-module-preview" style={{ "--preview-accent": module.accentColor, "--preview-page": module.pageBackgroundColor, "--preview-surface": module.sectionBackgroundColor, "--preview-record": module.recordBackgroundColor } as CSSProperties} data-button-style={module.activeButtonStyle} data-panel-style={module.panelAccentStyle}><span className="platform-module-preview__button"><PreviewIcon />{definition.shortLabel}</span><span className="platform-module-preview__nav">Active navigation</span><span className="platform-module-preview__panel">Section surface</span><span className="platform-module-preview__record">Record card</span></div>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -326,7 +327,7 @@ export function PlatformAdmin() {
           <AdminField label="Record card background" help="Controls repeating operational records such as lead, Job, client and schedule cards."><div className="platform-colour-control"><input type="color" value={module.recordBackgroundColor} onChange={(event) => updateModule(module.moduleKey, { recordBackgroundColor: event.target.value.toUpperCase() })} /><FieldInput value={module.recordBackgroundColor} onChange={(value) => updateModule(module.moduleKey, { recordBackgroundColor: value.toUpperCase() })} /></div></AdminField>
           <AdminField label="Active-button appearance"><FieldSelect value={module.activeButtonStyle} onChange={(value) => updateModule(module.moduleKey, { activeButtonStyle: value as PlatformModuleConfiguration["activeButtonStyle"] })}><option value="solid">Solid accent</option><option value="soft">Soft accent</option><option value="outline">Accent outline</option></FieldSelect></AdminField>
           <AdminField label="Main-panel accent"><FieldSelect value={module.panelAccentStyle} onChange={(value) => updateModule(module.moduleKey, { panelAccentStyle: value as PlatformModuleConfiguration["panelAccentStyle"] })}><option value="edge">Accent edge</option><option value="wash">Accent wash</option><option value="header">Header accent</option></FieldSelect></AdminField>
-          <AdminField label="Logo or mark" help="Choose a reusable asset from the platform Brand assets library. Leave empty to use the selected Lucide icon." className="md:col-span-2"><FieldSelect value={module.markUrl} onChange={(value) => updateModule(module.moduleKey, { markUrl: value })}><option value="">Use selected module icon</option>{module.markUrl && !markInLibrary ? <option value={module.markUrl}>Current external mark</option> : null}{platformAdmin.brandAssets.map((asset) => <option key={asset.id} value={asset.url}>{asset.name} · {asset.assetType}</option>)}</FieldSelect></AdminField>
+          <AdminField label="Module mark" help="Choose a platform-owned WedPlanned icon. Leave empty to use the selected Lucide icon." className="md:col-span-2"><FieldSelect value={module.markUrl} onChange={(value) => updateModule(module.moduleKey, { markUrl: value })}><option value="">Use selected Lucide icon</option>{module.markUrl && !markInLibrary ? <option value={module.markUrl}>Current assigned mark</option> : null}{moduleMarkAssets.map((asset) => <option key={asset.id} value={asset.url}>{asset.name}</option>)}</FieldSelect></AdminField>
         </div>
         <div className="mt-4 flex items-center justify-between gap-3"><Link to="/admin/platform?section=assets" className="admin-inline-link">Manage Brand assets</Link><AdminButton variant="primary" icon={Save} disabled={saving} onClick={() => saveModule(module)}>{saving ? "Saving…" : `Save ${definition.shortLabel}`}</AdminButton></div>
       </AdminPanel>;
@@ -341,7 +342,7 @@ export function PlatformAdmin() {
           <AdminButton variant="primary" icon={Upload} disabled={assetUploading || !assetFile} onClick={uploadBrandAsset}>{assetUploading ? "Uploading…" : "Upload asset"}</AdminButton>
         </div>
       </AdminPanel>
-      <AdminPanel title="Brand asset library" description="Select these assets from Module configuration. Assets assigned to a module cannot be deleted." icon={Images} actions={<AdminStatus tone="info">{platformAdmin.brandAssets.length} assets</AdminStatus>}>
+      <AdminPanel title="WedPlanned asset library" description="Platform-owned reusable logos and icons. Only icon assets can be selected as module marks; assigned assets cannot be deleted." icon={Images} actions={<AdminStatus tone="info">{platformAdmin.brandAssets.length} assets</AdminStatus>}>
         {platformAdmin.brandAssets.length ? <div className="platform-brand-asset-grid">{platformAdmin.brandAssets.map((asset) => <article key={asset.id} className="platform-brand-asset-card"><div className="platform-brand-asset-card__preview"><img src={asset.url} alt="" /></div><div className="platform-brand-asset-card__body"><div><strong>{asset.name}</strong><span>{asset.assetType} · {(asset.sizeBytes / 1024).toFixed(0)} KB</span></div><button type="button" className="admin-icon-control admin-icon-control--danger" onClick={() => deleteBrandAsset(asset.id, asset.name)} disabled={saving} title="Delete asset" aria-label={`Delete ${asset.name}`}><Trash2 /></button></div></article>)}</div> : <div className="admin-empty-state"><span className="admin-empty-state__icon"><Images /></span><h3>No platform brand assets</h3><p>Upload a logo or icon above, then assign it to a module from Module configuration.</p></div>}
       </AdminPanel>
     </div> : null}

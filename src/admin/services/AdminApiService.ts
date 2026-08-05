@@ -147,6 +147,14 @@ export type WorkspaceSettings = {
   portalWelcomeHeading: string;
   portalWelcomeMessage: string;
   portalFooterText: string;
+  websiteConnectionPlatform: "none" | "wordpress" | "squarespace" | "html";
+  websiteConnectionDomain: string;
+  websiteConnectionStatus: "not_configured" | "configured";
+  websiteConnectionLastCheckedAt: string;
+  websiteConnectionGalleries: boolean;
+  websiteConnectionStories: boolean;
+  websiteConnectionVenues: boolean;
+  websiteConnectionMoments: boolean;
   defaultCountry: string;
   timezone: string;
   currency: string;

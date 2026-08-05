@@ -29,7 +29,8 @@ def main() -> None:
         assert setting in workspace, setting
         assert setting in admin_api, setting
     assert "document_json = excluded.document_json" in workspace
-    assert "const nextDocument = { ...document, portal: portalDocument }" in workspace
+    assert "portal: portalDocument" in workspace
+    assert "websiteConnection: websiteConnectionDocument" in workspace
 
     # Workspace-safe R2 uploads are restricted to supported portal images.
     assert 'new Set(["logo", "banner"])' in upload_route
@@ -60,10 +61,11 @@ def main() -> None:
         assert field in portal_service, field
         assert field in portal_ui, field
     assert "WHERE workspace_id = ? LIMIT 1" in portal_service
-    assert 'type PortalView = "home" | "quotes" | "questionnaires"' in portal_ui
+    assert 'type PortalView = "home" | "quotes" | "questionnaires" | "galleries"' in portal_ui
     assert "client-portal-hero" in portal_ui
     assert "client-portal-nav" in portal_ui
     assert "client-portal-home-grid" in portal_ui
+    assert 'setView("galleries")' in portal_ui
     assert "setView(\"home\")" in portal_ui
     assert "firstQuote" not in portal_ui
 

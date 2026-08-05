@@ -1147,6 +1147,96 @@ export async function verifyPortalMagicLink(db: D1Db, rawToken: string) {
   return { ok: true, status: 200, sessionToken: rawSession, returnPath } as const;
 }
 
+async function portalGalleriesForIdentity(
+  db: D1Db,
+  workspaceId: string,
+  identity: { id: string; email: string },
+) {
+  const emailNormalized = text(identity.email).toLowerCase();
+
+  const result = await db.prepare(`
+    SELECT
+      cg.id,
+      cg.slug,
+      cg.title,
+      cg.client_name,
+      cg.intro,
+      cg.expires_at,
+      cg.allow_favourites,
+      cg.allow_downloads,
+      cg.updated_at,
+      w.couple,
+      w.venue,
+      w.wedding_date,
+      COALESCE(
+        (
+          SELECT thumb.url
+          FROM asset_files thumb
+          WHERE thumb.asset_id = cg.cover_asset_id
+            AND thumb.variant = 'thumb'
+            AND thumb.status = 'active'
+          LIMIT 1
+        ),
+        (
+          SELECT web.url
+          FROM asset_files web
+          WHERE web.asset_id = cg.cover_asset_id
+            AND web.variant = 'web'
+            AND web.status = 'active'
+          LIMIT 1
+        ),
+        ''
+      ) AS cover_url
+    FROM client_galleries cg
+    LEFT JOIN weddings w
+      ON w.slug = cg.wedding_slug
+      AND w.workspace_id = cg.workspace_id
+    WHERE cg.workspace_id = ?
+      AND cg.status = 'live'
+      AND (
+        trim(COALESCE(cg.expires_at, '')) = ''
+        OR datetime(cg.expires_at) > CURRENT_TIMESTAMP
+      )
+      AND (
+        lower(trim(cg.client_email)) = ?
+        OR EXISTS (
+          SELECT 1
+          FROM client_gallery_contacts contact
+          WHERE contact.gallery_id = cg.id
+            AND contact.status = 'active'
+            AND contact.email_normalized = ?
+        )
+        OR EXISTS (
+          SELECT 1
+          FROM client_identity_gallery_visitors linked
+          WHERE linked.gallery_id = cg.id
+            AND linked.identity_id = ?
+        )
+      )
+    ORDER BY cg.updated_at DESC, cg.title COLLATE NOCASE
+  `).bind(
+    workspaceId,
+    emailNormalized,
+    emailNormalized,
+    identity.id,
+  ).all();
+
+  return (result.results || []).map((row: any) => ({
+    id: text(row.id),
+    slug: text(row.slug),
+    title: text(row.title),
+    clientName: text(row.client_name),
+    intro: text(row.intro),
+    expiresAt: text(row.expires_at),
+    allowFavourites: Number(row.allow_favourites || 0) === 1,
+    allowDownloads: Number(row.allow_downloads || 0) === 1,
+    couple: text(row.couple),
+    venue: text(row.venue),
+    weddingDate: text(row.wedding_date),
+    coverUrl: text(row.cover_url),
+  }));
+}
+
 export async function getPublicPortal(db: D1Db, request: Request, workspaceId: string) {
   const workspace = await db.prepare(`SELECT business_name, logo_url, accent_color, contact_email, document_json FROM workspace_settings WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first();
   const workspaceDocument = json<any>(workspace?.document_json, {});
@@ -1164,7 +1254,7 @@ export async function getPublicPortal(db: D1Db, request: Request, workspaceId: s
     contactEmail: text(workspace?.contact_email),
   };
   const identity = await publicIdentity(db, request, workspaceId);
-  if (!identity) return { authenticated: false, identity: null, business, jobs: [], quotes: [] };
+  if (!identity) return { authenticated: false, identity: null, business, jobs: [], quotes: [], galleries: [] };
   const accessRows = await portalAccessForIdentity(db, workspaceId, identity.id);
   const jobs = [];
   for (const access of accessRows.results || []) {
@@ -1189,6 +1279,7 @@ export async function getPublicPortal(db: D1Db, request: Request, workspaceId: s
     business,
     jobs,
     quotes: await getPublicQuotesForIdentity(db, workspaceId, identity.id),
+    galleries: await portalGalleriesForIdentity(db, workspaceId, identity),
   };
 }
 

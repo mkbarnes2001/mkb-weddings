@@ -68,7 +68,7 @@ def main() -> None:
     types = (ROOT / "src/admin/types/platform.ts").read_text()
     css = (ROOT / "src/admin/admin-theme.css").read_text()
 
-    assert 'label: "Brand assets"' in navigation
+    assert 'label: "WedPlanned assets"' in navigation
     assert 'value === "assets"' in platform_page
     assert "pageBackgroundColor" in platform_page and "sectionBackgroundColor" in platform_page
     assert "recordBackgroundColor" in platform_page
@@ -111,7 +111,7 @@ def main() -> None:
 
     print("PASS v1.9.8a Platform Administration refinement")
     print("  fixed-width desktop sidebar and compact workspace flyout: verified")
-    print("  duplicate Blog/Studio controls removed: verified")
+    print("  duplicate Blog/WedStudio controls removed: verified")
     print("  duplicate CRM horizontal navigation removed: verified")
     print("  configurable page, section and record backgrounds: verified")
     print("  platform-owned reusable logo/icon library: verified")

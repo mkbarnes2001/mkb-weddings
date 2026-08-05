@@ -20,6 +20,13 @@ function colour(value: unknown, fallback: string) {
   return /^#[0-9a-f]{6}$/i.test(candidate) ? candidate : fallback;
 }
 
+function flag(value: unknown, fallback = false) {
+  if (typeof value === "boolean") return value;
+  if (value === 1 || value === "1" || String(value).toLowerCase() === "true") return true;
+  if (value === 0 || value === "0" || String(value).toLowerCase() === "false") return false;
+  return fallback;
+}
+
 
 function httpError(message: string, statusCode = 400, details: string[] = []) {
   const error = new Error(message) as Error & { statusCode?: number; details?: string[] };
@@ -31,6 +38,12 @@ function httpError(message: string, statusCode = 400, details: string[] = []) {
 function hydrate(workspace: any, settings: any, domains: any[]) {
   const document = json<any>(settings?.document_json, {});
   const portal = document?.portal && typeof document.portal === "object" ? document.portal : {};
+  const websiteConnection = document?.websiteConnection && typeof document.websiteConnection === "object"
+    ? document.websiteConnection
+    : {};
+  const websiteConnectionPlatform = ["wordpress", "squarespace", "html"].includes(text(websiteConnection.platform))
+    ? text(websiteConnection.platform)
+    : "none";
   return {
     id: text(workspace?.id),
     slug: text(workspace?.slug),
@@ -53,6 +66,14 @@ function hydrate(workspace: any, settings: any, domains: any[]) {
       portalWelcomeHeading: text(portal.welcomeHeading || "Welcome to your client portal"),
       portalWelcomeMessage: text(portal.welcomeMessage || "Everything for your booking is organised here in one secure place."),
       portalFooterText: text(portal.footerText),
+      websiteConnectionPlatform,
+      websiteConnectionDomain: text(websiteConnection.domain || settings?.website_url),
+      websiteConnectionStatus: text(websiteConnection.status) === "configured" ? "configured" : "not_configured",
+      websiteConnectionLastCheckedAt: text(websiteConnection.lastCheckedAt),
+      websiteConnectionGalleries: flag(websiteConnection.galleries, true),
+      websiteConnectionStories: flag(websiteConnection.stories, true),
+      websiteConnectionVenues: flag(websiteConnection.venues, true),
+      websiteConnectionMoments: flag(websiteConnection.moments, true),
       defaultCountry: text(settings?.default_country || "GB"),
       timezone: text(settings?.timezone || "Europe/London"),
       currency: text(settings?.currency || "GBP"),
@@ -92,6 +113,9 @@ export async function updateWorkspaceSettings(db: D1Db, incoming: any) {
   const existingSettingsRow = await db.prepare(`SELECT document_json FROM workspace_settings WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first();
   const document = json<any>(existingSettingsRow?.document_json, {});
   const existingPortal = document?.portal && typeof document.portal === "object" ? document.portal : {};
+  const existingWebsiteConnection = document?.websiteConnection && typeof document.websiteConnection === "object"
+    ? document.websiteConnection
+    : {};
   const supplied = (key: string) => Object.prototype.hasOwnProperty.call(settings, key);
   const portalDocument = {
     ...existingPortal,
@@ -102,7 +126,61 @@ export async function updateWorkspaceSettings(db: D1Db, incoming: any) {
     welcomeMessage: supplied("portalWelcomeMessage") ? text(settings.portalWelcomeMessage || "Everything for your booking is organised here in one secure place.") : text(existingPortal.welcomeMessage || "Everything for your booking is organised here in one secure place."),
     footerText: supplied("portalFooterText") ? text(settings.portalFooterText) : text(existingPortal.footerText),
   };
-  const nextDocument = { ...document, portal: portalDocument } as any;
+  const websiteConnectionPlatform = supplied("websiteConnectionPlatform")
+    ? text(settings.websiteConnectionPlatform)
+    : text(existingWebsiteConnection.platform || "none");
+
+  if (!["none", "wordpress", "squarespace", "html"].includes(websiteConnectionPlatform)) {
+    throw httpError("Workspace validation failed.", 400, ["Choose a supported website connection type."]);
+  }
+
+  const websiteConnectionDomain = supplied("websiteConnectionDomain")
+    ? text(settings.websiteConnectionDomain)
+    : text(existingWebsiteConnection.domain);
+
+  if (websiteConnectionDomain && !/^https?:\/\//i.test(websiteConnectionDomain)) {
+    throw httpError("Workspace validation failed.", 400, ["Connected website must begin with http:// or https://."]);
+  }
+
+  const requestedWebsiteConnectionStatus = supplied("websiteConnectionStatus")
+    ? text(settings.websiteConnectionStatus)
+    : text(existingWebsiteConnection.status);
+
+  const websiteConnectionStatus =
+    websiteConnectionPlatform !== "none"
+    && Boolean(websiteConnectionDomain)
+    && requestedWebsiteConnectionStatus === "configured"
+      ? "configured"
+      : "not_configured";
+
+  const websiteConnectionDocument = {
+    ...existingWebsiteConnection,
+    platform: websiteConnectionPlatform,
+    domain: websiteConnectionDomain,
+    status: websiteConnectionStatus,
+    lastCheckedAt: supplied("websiteConnectionLastCheckedAt")
+      ? text(settings.websiteConnectionLastCheckedAt)
+      : text(existingWebsiteConnection.lastCheckedAt),
+    galleries: supplied("websiteConnectionGalleries")
+      ? flag(settings.websiteConnectionGalleries, true)
+      : flag(existingWebsiteConnection.galleries, true),
+    stories: supplied("websiteConnectionStories")
+      ? flag(settings.websiteConnectionStories, true)
+      : flag(existingWebsiteConnection.stories, true),
+    venues: supplied("websiteConnectionVenues")
+      ? flag(settings.websiteConnectionVenues, true)
+      : flag(existingWebsiteConnection.venues, true),
+    moments: supplied("websiteConnectionMoments")
+      ? flag(settings.websiteConnectionMoments, true)
+      : flag(existingWebsiteConnection.moments, true),
+  };
+
+  const nextDocument = {
+    ...document,
+    portal: portalDocument,
+    websiteConnection: websiteConnectionDocument,
+  } as any;
+
   const websiteUrl = text(settings.websiteUrl);
   if (websiteUrl && !/^https?:\/\//i.test(websiteUrl)) {
     throw httpError("Workspace validation failed.", 400, ["Website URL must begin with http:// or https://."]);

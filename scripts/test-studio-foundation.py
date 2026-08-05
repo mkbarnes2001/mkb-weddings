@@ -19,7 +19,7 @@ def main() -> None:
     schema = read("d1/schema.sql")
 
     # Studio is the visible product identity while the persisted Website key remains stable.
-    assert 'key: "website", label: "Studio", shortLabel: "Studio"' in modules
+    assert 'key: "website", label: "WedStudio", shortLabel: "WedStudio"' in modules
     assert 'entitlementKey: "website_content"' in modules
     assert 'items: studioItems' in modules
     assert 'export type PlatformModuleKey = "crm" | "client-galleries" | "website" | "business";' in platform_types
@@ -36,26 +36,29 @@ def main() -> None:
     assert 'export function PublishingOverview()' in dashboard
     assert "Build, validate and deploy weddings from one checklist." not in app
 
-    # Studio overview exposes the complete existing public-content toolset.
+    # Studio overview exposes the complete public-content toolset as
+    # operational snapshots rather than repeating sidebar destinations.
     for token in [
-        'title="Studio overview"',
+        'title="WedStudio overview"',
+        'label="Website connection"',
+        'label="Wedding stories"',
+        'label="Public galleries"',
+        'label="Venues and locations"',
+        'label="Moments and collections"',
+        'label="Asset library"',
+        'label="AI content"',
+        'label="SEO readiness"',
+        'label="Publishing"',
         'title="Website"',
-        'title="Wedding stories"',
-        'title="Galleries"',
-        'title="Venues & locations"',
-        'title="Moments & collections"',
-        'title="Asset library"',
-        'title="AI content"',
-        'title="SEO"',
-        'title="Publishing"',
-        'eyebrow="Studio · Publishing"',
+        'title="Website connection"',
+        'eyebrow="WedStudio · Publishing"',
         'title="Publishing workflow"',
     ]:
         assert token in dashboard, token
 
-    assert 'Open Studio overview' in layout
-    assert "Private client delivery remains separate from Studio." in overviews
-    assert "managed in Studio." in overviews
+    assert 'Open WedStudio overview' in layout
+    assert "Private client delivery remains separate from WedStudio." in overviews
+    assert "managed in WedStudio." in overviews
 
     # Existing editing routes remain unchanged and no schema transition is introduced.
     for route in [
@@ -76,7 +79,7 @@ def main() -> None:
     assert not (ROOT / "d1/migrations/035_studio_foundation.sql").exists()
 
     print("PASS v1.9.9a Studio Foundation")
-    print("  Website module renamed visibly to Studio: verified")
+    print("  Website module renamed visibly to WedStudio: verified")
     print("  persisted Website module key and entitlement compatibility: verified")
     print("  Website and Publishing sections plus Studio alias route: verified")
     print("  existing content routes and module boundaries preserved: verified")

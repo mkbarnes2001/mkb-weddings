@@ -3904,3 +3904,168 @@ footer .logo-mkb, footer .logo-weddings {
   .client-portal-home-grid { grid-template-columns: 1fr; }
   .client-portal-sidebar { max-height: 42vh; overflow-y: auto; }
 }
+
+/* v1.10.0a — unified Client Portal gallery delivery */
+.client-portal-gallery-links {
+  display: grid;
+  gap: 8px;
+}
+
+.client-portal-gallery-links a {
+  display: grid;
+  grid-template-columns: 30px minmax(0,1fr);
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(17,17,17,.09);
+  border-radius: 12px;
+  background: rgba(255,255,255,.72);
+  padding: 10px;
+  color: #171717;
+  text-decoration: none;
+}
+
+.client-portal-gallery-links a > svg {
+  width: 16px;
+  height: 16px;
+  margin: 0 auto;
+  color: var(--portal-accent);
+}
+
+.client-portal-gallery-links strong,
+.client-portal-gallery-links small {
+  display: block;
+}
+
+.client-portal-gallery-links strong {
+  font-size: 10px;
+}
+
+.client-portal-gallery-links small {
+  margin-top: 3px;
+  color: #777;
+  font-size: 8.5px;
+}
+
+.client-portal-gallery-view {
+  padding: 32px;
+}
+
+.client-portal-section-heading > span {
+  color: var(--portal-accent);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.client-portal-section-heading h1 {
+  margin: 7px 0 0;
+  font-size: clamp(24px,3vw,38px);
+}
+
+.client-portal-section-heading p {
+  max-width: 720px;
+  margin: 10px 0 0;
+  color: #707070;
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.client-portal-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.client-portal-gallery-card {
+  overflow: hidden;
+  border: 1px solid rgba(17,17,17,.09);
+  border-radius: 18px;
+  background: #fff;
+  color: #171717;
+  text-decoration: none;
+  box-shadow: 0 12px 34px rgba(17,17,17,.05);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.client-portal-gallery-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 42px rgba(17,17,17,.09);
+}
+
+.client-portal-gallery-card__cover {
+  display: grid;
+  aspect-ratio: 16 / 9;
+  place-items: center;
+  overflow: hidden;
+  background: var(--portal-secondary);
+  color: var(--portal-accent);
+}
+
+.client-portal-gallery-card__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.client-portal-gallery-card__cover svg {
+  width: 34px;
+  height: 34px;
+}
+
+.client-portal-gallery-card__body {
+  padding: 18px;
+}
+
+.client-portal-gallery-card__body > small {
+  color: #888;
+  font-size: 8.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.client-portal-gallery-card__body h2 {
+  margin: 7px 0 0;
+  font-size: 18px;
+}
+
+.client-portal-gallery-card__body p {
+  min-height: 32px;
+  margin: 7px 0 0;
+  color: #777;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.client-portal-gallery-card__body > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.client-portal-gallery-card__body > div span {
+  border-radius: 999px;
+  background: var(--portal-secondary);
+  padding: 5px 8px;
+  color: #555;
+  font-size: 8px;
+}
+
+.client-portal-gallery-card__body > div strong {
+  margin-left: auto;
+  color: var(--portal-accent);
+  font-size: 9px;
+}
+
+@media (max-width: 760px) {
+  .client-portal-gallery-view {
+    padding: 22px 16px;
+  }
+
+  .client-portal-gallery-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft, CalendarDays, CheckCircle2, Download, FileText, Home, LogOut, Mail, PackageCheck, Paperclip, Plus, Save, Search, Send, Trash2, XCircle } from "lucide-react";
+import { ArrowLeft, CalendarDays, CheckCircle2, Download, FileText, Home, Images, LogOut, Mail, PackageCheck, Paperclip, Plus, Save, Search, Send, Trash2, XCircle } from "lucide-react";
 
 type SupplierDirectoryOption = {
   id: string;
@@ -71,6 +71,21 @@ type PortalQuoteAcceptance = { optionId: string; acceptedAt: string; subtotalAmo
 type PortalQuote = { id: string; reference: string; status: string; clientName: string; partnerName: string; eventDate: string; venueText: string; acceptedJobId: string; acceptance?: PortalQuoteAcceptance | null; currentVersion: { id: string; versionNumber: number; status: string; expiresAt: string; clientNotes: string; discountType: "none" | "fixed" | "percentage"; discountValue: number; taxTreatment: "none" | "inclusive" | "exclusive"; taxRateBasisPoints: number; currency: string; options: PortalQuoteOption[] } };
 type PortalQuoteSummary = { id: string; reference: string; status: string; eventDate: string; venueText: string; acceptedJobId: string; updatedAt: string };
 
+type PortalGallery = {
+  id: string;
+  slug: string;
+  title: string;
+  clientName: string;
+  intro: string;
+  expiresAt: string;
+  allowFavourites: boolean;
+  allowDownloads: boolean;
+  couple: string;
+  venue: string;
+  weddingDate: string;
+  coverUrl: string;
+};
+
 type PortalPayload = {
   authenticated: boolean;
   identity: { id: string; email: string; displayName: string } | null;
@@ -88,6 +103,7 @@ type PortalPayload = {
   };
   jobs: PortalJob[];
   quotes: PortalQuoteSummary[];
+  galleries: PortalGallery[];
 };
 
 function formatDate(value: string) {
@@ -118,6 +134,16 @@ function formatBytes(value: number) {
 
 function portalApiPath(path: string) {
   const url = new URL(path, window.location.origin);
+  const workspace = new URLSearchParams(window.location.search).get("workspace");
+  if (workspace) url.searchParams.set("workspace", workspace);
+  return `${url.pathname}${url.search}`;
+}
+
+function portalGalleryPath(gallery: PortalGallery) {
+  const url = new URL(
+    `/client-gallery/${encodeURIComponent(gallery.slug)}`,
+    window.location.origin,
+  );
   const workspace = new URLSearchParams(window.location.search).get("workspace");
   if (workspace) url.searchParams.set("workspace", workspace);
   return `${url.pathname}${url.search}`;
@@ -205,7 +231,7 @@ function SupplierQuestion({
   );
 }
 
-type PortalView = "home" | "quotes" | "questionnaires";
+type PortalView = "home" | "quotes" | "questionnaires" | "galleries";
 
 function contrastColour(hex: string) {
   const value = /^#[0-9a-f]{6}$/i.test(hex) ? hex.slice(1) : "111111";
@@ -377,7 +403,7 @@ export function ClientPortal() {
 
   async function signOut() {
     await fetch("/api/public/client-auth/sign-out", { method: "POST", credentials: "include" }).catch(() => {});
-    setPortal({ authenticated: false, identity: null, jobs: [], quotes: [] });
+    setPortal({ authenticated: false, identity: null, jobs: [], quotes: [], galleries: [] });
     setView("home"); setSelectedId(""); setSelectedQuoteId("");
     setQuestionnaire(null); setQuote(null);
   }
@@ -392,6 +418,7 @@ export function ClientPortal() {
     "--portal-on-accent": contrastColour(accent),
   } as CSSProperties;
   const allQuestionnaires = portal?.jobs.flatMap((job) => job.questionnaires.map((item) => ({ ...item, job }))) || [];
+  const galleries = portal?.galleries || [];
   const completedQuestionnaires = allQuestionnaires.filter((item) => item.status === "completed").length;
   const pendingQuestionnaires = allQuestionnaires.length - completedQuestionnaires;
   const primaryJob = portal?.jobs[0] || null;
@@ -445,6 +472,7 @@ export function ClientPortal() {
         <button className={view === "home" ? "active" : ""} onClick={() => { setView("home"); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><Home />Home</button>
         {portal.quotes.length ? <button className={view === "quotes" ? "active" : ""} onClick={() => { setView("quotes"); setSelectedId(""); setQuestionnaire(null); }}><PackageCheck />Quotes</button> : null}
         {allQuestionnaires.length ? <button className={view === "questionnaires" ? "active" : ""} onClick={() => { setView("questionnaires"); setSelectedQuoteId(""); setQuote(null); }}><FileText />Questionnaires</button> : null}
+        {galleries.length ? <button className={view === "galleries" ? "active" : ""} onClick={() => { setView("galleries"); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><Images />Galleries</button> : null}
       </nav>
       {view === "home" ? <main className="client-portal-home">
         {error ? <div className="client-portal-alert client-portal-alert--error">{error}</div> : null}
@@ -461,17 +489,48 @@ export function ClientPortal() {
         <section className="client-portal-home-grid">
           {portal.quotes.length ? <button onClick={() => setView("quotes")}><PackageCheck /><span><small>Quotes</small><strong>{acceptedQuotes ? `${acceptedQuotes} accepted` : `${portal.quotes.length} available`}</strong><em>Review package options and booking details</em></span></button> : null}
           {allQuestionnaires.length ? <button onClick={() => setView("questionnaires")}><FileText /><span><small>Questionnaires</small><strong>{pendingQuestionnaires ? `${pendingQuestionnaires} to complete` : "Complete"}</strong><em>{completedQuestionnaires} of {allQuestionnaires.length} completed</em></span></button> : null}
+          {galleries.length ? <button onClick={() => setView("galleries")}><Images /><span><small>Galleries</small><strong>{galleries.length === 1 ? "1 gallery ready" : `${galleries.length} galleries ready`}</strong><em>View photographs, favourites, selections and downloads</em></span></button> : null}
         </section>
-        {!portal.jobs.length && !portal.quotes.length ? <div className="client-portal-empty"><FileText /><h2>Nothing is waiting for you</h2><p>No active quotes or bookings are linked to this email.</p></div> : null}
+        {!portal.jobs.length && !portal.quotes.length && !galleries.length ? <div className="client-portal-empty"><FileText /><h2>Nothing is waiting for you</h2><p>No active quotes, bookings or galleries are linked to this email.</p></div> : null}
       </main> : <div className="client-portal-layout">
         <aside className="client-portal-sidebar">
           {view === "quotes" ? <><p className="client-portal-eyebrow">Your quotes</p><div className="client-portal-quote-links">{portal.quotes.map((item) => <button key={item.id} className={selectedQuoteId === item.id ? "active" : ""} onClick={() => { setSelectedQuoteId(item.id); setSelectedId(""); setQuestionnaire(null); }}><PackageCheck /><span><strong>{item.reference}</strong><small>{item.status.replace(/_/g, " ")} · {formatDate(item.eventDate)}</small></span>{item.status === "accepted" ? <CheckCircle2 /> : null}</button>)}</div></> : null}
           {view === "questionnaires" ? <><p className="client-portal-eyebrow">Your questionnaires</p>{portal.jobs.map((job) => <section key={job.id} className="client-portal-job"><h2>{job.title}</h2><p><CalendarDays />{formatDate(job.eventDate)}</p><p>{job.venueText || "Venue TBC"}</p><div>{job.questionnaires.map((item) => <button key={item.id} className={selectedId === item.id ? "active" : ""} onClick={() => { setSelectedId(item.id); setSelectedQuoteId(""); setQuote(null); }}><FileText /><span>{item.title}<small>{item.status.replace(/_/g, " ")}</small></span>{item.status === "completed" ? <CheckCircle2 /> : null}</button>)}</div></section>)}</> : null}
+          {view === "galleries" ? <><p className="client-portal-eyebrow">Your galleries</p><div className="client-portal-gallery-links">{galleries.map((gallery) => <a key={gallery.id} href={portalGalleryPath(gallery)}><Images /><span><strong>{gallery.title}</strong><small>{gallery.weddingDate ? formatDate(gallery.weddingDate) : "Gallery ready"}</small></span></a>)}</div></> : null}
         </aside>
         <main className="client-portal-main">
           {error ? <div className="client-portal-alert client-portal-alert--error">{error}</div> : null}
           {message ? <div className="client-portal-alert client-portal-alert--success">{message}</div> : null}
-          {quote ? <article className="portal-quote-card">
+          {view === "galleries" ? <section className="client-portal-gallery-view">
+            <div className="client-portal-section-heading">
+              <span>Gallery delivery</span>
+              <h1>Your galleries</h1>
+              <p>Open a gallery to view photographs, create favourites, complete selections, download permitted files and access print ordering.</p>
+            </div>
+
+            <div className="client-portal-gallery-grid">
+              {galleries.map((gallery) => <a
+                key={gallery.id}
+                href={portalGalleryPath(gallery)}
+                className="client-portal-gallery-card"
+              >
+                <div className="client-portal-gallery-card__cover">
+                  {gallery.coverUrl ? <img src={gallery.coverUrl} alt="" /> : <Images />}
+                </div>
+
+                <div className="client-portal-gallery-card__body">
+                  <small>{gallery.weddingDate ? formatDate(gallery.weddingDate) : "Client gallery"}</small>
+                  <h2>{gallery.title}</h2>
+                  <p>{gallery.venue || gallery.intro || "Your private photographs are ready to view."}</p>
+                  <div>
+                    {gallery.allowFavourites ? <span>Favourites</span> : null}
+                    {gallery.allowDownloads ? <span>Downloads</span> : null}
+                    <strong>Open gallery</strong>
+                  </div>
+                </div>
+              </a>)}
+            </div>
+          </section> : quote ? <article className="portal-quote-card">
             <div className="portal-quote-heading"><button className="client-portal-back" onClick={() => setSelectedQuoteId("")}><ArrowLeft />Back</button><span>{portal.business?.name || "WedPlanned"}</span><h1>Your quote</h1><p className="portal-quote-client">Prepared for {quote.clientName}{quote.partnerName ? ` and ${quote.partnerName}` : ""}</p><div className="portal-quote-meta"><strong>{quote.reference}</strong><span>Version {quote.currentVersion.versionNumber}</span><span>{formatDate(quote.eventDate)}</span><span>{quote.venueText || "Venue TBC"}</span>{quote.currentVersion.expiresAt ? <span>Expires {formatDate(quote.currentVersion.expiresAt)}</span> : null}</div>{quote.currentVersion.clientNotes ? <p>{quote.currentVersion.clientNotes}</p> : null}</div>
             <div className="portal-package-grid">{quote.currentVersion.options.map((option) => <button type="button" key={option.id} className={`portal-package-card ${selectedOptionId === option.id ? "selected" : ""}`} disabled={["accepted", "declined", "expired"].includes(quote.currentVersion.status)} onClick={() => chooseQuoteOption(option)}>{option.recommended ? <em>Recommended</em> : null}<span className="portal-package-check">{selectedOptionId === option.id ? <CheckCircle2 /> : null}</span><h2>{option.name}</h2>{option.description ? <p>{option.description}</p> : null}<strong>{money(option.basePriceAmount, option.currency)}</strong>{option.coverageMinutes ? <small>{Math.round(option.coverageMinutes / 60)} hours coverage</small> : null}<ul>{option.includedItems.map((item) => <li key={item}>{item}</li>)}</ul>{option.deliverables.length ? <div className="portal-package-deliverables"><b>Deliverables</b>{option.deliverables.map((item) => <span key={item}>{item}</span>)}</div> : null}</button>)}</div>
             {displayedQuoteAddons.length ? <section className="portal-quote-addons"><h2>{acceptedQuote ? "Selected extras" : "Optional extras"}</h2><p>{acceptedQuote ? "Extras included in your accepted booking." : "Select permitted extras for your chosen package."}</p>{displayedQuoteAddons.map((addon) => { const quantity = addonQuantities[addon.id] ?? addon.defaultQuantity; const mandatory = addon.requirement === "mandatory"; return <div key={addon.id} className="portal-quote-addon"><div><strong>{addon.name}{mandatory ? <small>Required</small> : addon.requirement === "recommended" ? <small>Recommended</small> : null}</strong><p>{addon.description}</p></div><span>{money(addon.unitPriceAmount, addon.currency)}</span>{acceptedQuote ? <strong className="portal-quote-addon-accepted">× {quantity}</strong> : <label><span>Quantity</span><input type="number" min={mandatory ? Math.max(1, addon.minimumQuantity) : 0} max={addon.maximumQuantity} value={quantity} onChange={(event) => { const raw = Math.max(0, Math.min(addon.maximumQuantity, Number(event.target.value) || 0)); const next = mandatory ? Math.max(1, addon.minimumQuantity, raw) : raw > 0 ? Math.max(addon.minimumQuantity, raw) : 0; setAddonQuantities((current) => ({ ...current, [addon.id]: next })); }} /></label>}</div>; })}</section> : null}

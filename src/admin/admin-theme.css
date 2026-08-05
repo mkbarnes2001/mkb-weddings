@@ -3978,3 +3978,206 @@
 .platform-module-preview__record {
   background: var(--preview-record) !important;
 }
+
+/* v1.10.0a — WedStudio operational dashboard and website connection */
+.admin-studio-snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 9px;
+}
+
+.admin-studio-snapshot {
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) auto;
+  align-items: start;
+  gap: 11px;
+  min-width: 0;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: rgba(255,255,255,.88);
+  color: var(--admin-text);
+  padding: 14px;
+  text-decoration: none;
+  box-shadow: var(--admin-shadow);
+  transition: border-color 120ms ease, transform 120ms ease;
+}
+
+.admin-studio-snapshot:hover {
+  border-color: var(--admin-border-strong);
+  transform: translateY(-1px);
+}
+
+.admin-studio-snapshot__icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background: var(--admin-surface-muted);
+  color: #333;
+}
+
+.admin-studio-snapshot__icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.admin-studio-snapshot__content {
+  min-width: 0;
+}
+
+.admin-studio-snapshot__content small,
+.admin-studio-snapshot__content strong,
+.admin-studio-snapshot__content em {
+  display: block;
+}
+
+.admin-studio-snapshot__content small {
+  color: var(--admin-muted);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 650;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.admin-studio-snapshot__content strong {
+  margin-top: 5px;
+  overflow: hidden;
+  font-size: 10.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-studio-snapshot__content em {
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--admin-muted);
+  font-size: 8.7px;
+  font-style: normal;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+}
+
+.website-connection-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1.08fr) minmax(340px,.92fr);
+  gap: 12px;
+}
+
+.website-connection-form {
+  display: grid;
+  gap: 14px;
+}
+
+.website-connection-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+}
+
+.website-connection-checkboxes label {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  align-items: start;
+  gap: 9px;
+  border: 1px solid var(--admin-border);
+  border-radius: 11px;
+  background: var(--admin-surface-muted);
+  padding: 11px;
+  cursor: pointer;
+}
+
+.website-connection-checkboxes input {
+  margin-top: 2px;
+}
+
+.website-connection-checkboxes strong,
+.website-connection-checkboxes small {
+  display: block;
+}
+
+.website-connection-checkboxes strong {
+  font-size: 9.5px;
+}
+
+.website-connection-checkboxes small {
+  margin-top: 3px;
+  color: var(--admin-muted);
+  font-size: 8.5px;
+  line-height: 1.45;
+}
+
+.website-connection-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.website-connection-actions small {
+  color: var(--admin-muted);
+  font-size: 8.7px;
+}
+
+.website-embed-code {
+  min-height: 190px;
+  font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  font-size: 9.5px;
+  line-height: 1.6;
+}
+
+.website-connection-note {
+  display: grid;
+  grid-template-columns: 24px minmax(0,1fr);
+  gap: 9px;
+  margin-top: 12px;
+  border-radius: 11px;
+  background: var(--admin-surface-muted);
+  padding: 11px;
+}
+
+.website-connection-note > svg {
+  width: 16px;
+  height: 16px;
+  margin: 1px 0 0 3px;
+}
+
+.website-connection-note strong,
+.website-connection-note small {
+  display: block;
+}
+
+.website-connection-note strong {
+  font-size: 9.5px;
+}
+
+.website-connection-note small {
+  margin-top: 3px;
+  color: var(--admin-muted);
+  font-size: 8.5px;
+  line-height: 1.5;
+}
+
+.portal-branding-preview__cards {
+  grid-template-columns: repeat(3,minmax(0,1fr));
+}
+
+@media (max-width: 1100px) {
+  .admin-studio-snapshot-grid {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+
+  .website-connection-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-studio-snapshot-grid,
+  .website-connection-checkboxes {
+    grid-template-columns: 1fr;
+  }
+}

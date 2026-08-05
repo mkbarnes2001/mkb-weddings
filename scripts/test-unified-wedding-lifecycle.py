@@ -89,7 +89,7 @@ def main() -> None:
     # Website navigation is explicitly editorial; the operational workspace resolves to CRM.
     assert 'label: "Wedding stories"' in modules
     assert "isWeddingWorkspacePath" in modules
-    assert 'pathname.startsWith("/admin/crm") || isWeddingWorkspacePath(pathname)' in modules
+    assert 'pathname.startsWith("/admin/crm") || pathname === "/admin/settings/client-portal" || isWeddingWorkspacePath(pathname)' in modules
     assert 'currentSectionLabel = isWeddingWorkspacePath(location.pathname) ? "Wedding Workspace"' in layout
     assert 'title="Wedding Stories"' in weddings_page
     assert 'eyebrow="Website content"' in weddings_page

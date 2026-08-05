@@ -21,10 +21,10 @@ def main() -> None:
 
     # Central module architecture is explicit and entitlement-ready without exposing unimplemented commercial placeholders.
     for key, label, entitlement in [
-        ('key: "crm"', 'label: "CRM"', 'entitlementKey: "crm"'),
-        ('key: "client-galleries"', 'label: "Client Galleries"', 'entitlementKey: "client_galleries"'),
-        ('key: "website"', 'label: "Studio"', 'entitlementKey: "website_content"'),
-        ('key: "business"', 'label: "Business"', 'entitlementKey: "business_settings"'),
+        ('key: "crm"', 'label: "WedCRM"', 'entitlementKey: "crm"'),
+        ('key: "client-galleries"', 'label: "WedStore"', 'entitlementKey: "client_galleries"'),
+        ('key: "website"', 'label: "WedStudio"', 'entitlementKey: "website_content"'),
+        ('key: "business"', 'label: "WedBusiness"', 'entitlementKey: "business_settings"'),
     ]:
         assert key in modules and label in modules and entitlement in modules
     assert "requiredPermission" in modules
@@ -77,13 +77,13 @@ def main() -> None:
     assert "AdminApiService.getPrintStore()" in overviews
     assert "AdminApiService.getWorkspace()" in overviews
     assert "AdminApiService.getWedPlannedPlatform()" in overviews
-    assert "Private client delivery remains separate from Studio." in overviews
-    assert 'title="Studio overview"' in dashboard
+    assert "Private client delivery remains separate from WedStudio." in overviews
+    assert 'title="WedStudio overview"' in dashboard
     assert "export function WebsiteOverview" in dashboard
-    assert 'eyebrow="Studio · Website"' in dashboard
+    assert 'eyebrow="WedStudio · Website"' in dashboard
     assert "export function PublishingOverview" in dashboard
-    assert 'eyebrow="Studio · Publishing"' in dashboard
-    assert "Downloads, selections, favourites and print sales remain in Client Galleries." in dashboard
+    assert 'eyebrow="WedStudio · Publishing"' in dashboard
+    assert "Downloads, selections, favourites and print sales remain in WedStore and are surfaced to clients through the Client Portal." in dashboard
 
     # Responsive presentation is defined without schema or backend changes.
     for selector in [

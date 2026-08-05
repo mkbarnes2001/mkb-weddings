@@ -124,7 +124,7 @@ export function ClientPortalSettings() {
       <AdminPageHeader
         eyebrow="Client experience"
         title="Client portal"
-        description="Brand the secure workspace your clients use for quotes, questionnaires and booking activity. These settings are isolated to the active business workspace."
+        description="Brand the secure workspace your clients use for quotes, questionnaires, booking activity and gallery delivery. These settings are isolated to the active business workspace."
         actions={<><AdminLinkButton href={openUrl} target="_blank" rel="noreferrer" variant="secondary" icon={ExternalLink}>Open portal</AdminLinkButton><AdminButton variant="primary" icon={Save} onClick={() => void save()} disabled={saving || Boolean(uploading)}>{saving ? "Saving…" : "Save branding"}</AdminButton></>}
         meta={<AdminStatus tone="success">Workspace branded</AdminStatus>}
       />
@@ -171,8 +171,8 @@ export function ClientPortalSettings() {
                 <div className="portal-branding-preview__hero" style={settings.portalBannerUrl ? { backgroundImage: `linear-gradient(90deg, rgba(0,0,0,.22), rgba(0,0,0,.05)), url(${settings.portalBannerUrl})` } : undefined}>
                   <div className="portal-branding-preview__identity">{settings.logoUrl ? <img src={settings.logoUrl} alt="" /> : <span>{workspace.name.slice(0, 2).toUpperCase()}</span>}<div><strong>{settings.businessName || workspace.name}</strong><small>Client portal</small></div></div>
                 </div>
-                <nav><b>Home</b><span>Quotes</span><span>Questionnaires</span></nav>
-                <main><p className="portal-branding-preview__eyebrow">Welcome, Louise</p><h3>{settings.portalWelcomeHeading}</h3><p>{settings.portalWelcomeMessage}</p><div className="portal-branding-preview__event"><small>Your wedding</small><strong>Louise & William</strong><span>6 August 2026 · Killeavy Castle</span></div><div className="portal-branding-preview__cards"><article><small>Quote</small><strong>Accepted</strong></article><article><small>Questionnaire</small><strong>Complete</strong></article></div></main>
+                <nav><b>Home</b><span>Quotes</span><span>Questionnaires</span><span>Galleries</span></nav>
+                <main><p className="portal-branding-preview__eyebrow">Welcome, Louise</p><h3>{settings.portalWelcomeHeading}</h3><p>{settings.portalWelcomeMessage}</p><div className="portal-branding-preview__event"><small>Your wedding</small><strong>Louise & William</strong><span>6 August 2026 · Killeavy Castle</span></div><div className="portal-branding-preview__cards"><article><small>Quote</small><strong>Accepted</strong></article><article><small>Questionnaire</small><strong>Complete</strong></article><article><small>Gallery</small><strong>Ready</strong></article></div></main>
               </div>
             </div>
           </AdminPanel>
