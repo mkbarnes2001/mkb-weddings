@@ -107,6 +107,8 @@ export type PlatformModuleConfiguration = {
   recordBackgroundColor: string;
   iconKey: string;
   markUrl: string;
+  wordmarkUrl: string;
+  compactWordmarkUrl: string;
   activeButtonStyle: "solid" | "soft" | "outline";
   panelAccentStyle: "edge" | "wash" | "header";
   status: "active" | "archived";
@@ -154,9 +156,19 @@ export type PlatformAdministrationUser = {
   createdAt: string;
 };
 
+
+export type PlatformBrandingIdentity = {
+  platformName: string;
+  wordmarkUrl: string;
+  compactWordmarkUrl: string;
+  iconUrl: string;
+  updatedAt?: string;
+};
+
 export type PlatformAdministrationPayload = {
   schemaVersion: number;
   brand: { name: string; primaryDomain: string; ukDomain: string };
+  platformIdentity: PlatformBrandingIdentity;
   summary: { workspaces: number; activeWorkspaces: number; users: number; platformAdmins: number; brandAssets: number };
   workspaces: PlatformAdministrationWorkspace[];
   users: PlatformAdministrationUser[];
@@ -173,6 +185,7 @@ export type WedPlannedPlatformPayload = {
     primaryDomain: string;
     ukDomain: string;
   };
+  platformIdentity: PlatformBrandingIdentity;
   business: WedPlannedBusiness;
   categories: WedPlannedCategory[];
   serviceAreas: WedPlannedServiceArea[];

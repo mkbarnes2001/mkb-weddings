@@ -130,11 +130,47 @@ export async function archivePlatformBrandAsset(db: D1Db, actor: any, assetId: s
   const reference = await db.prepare(`
     SELECT module_key
     FROM platform_module_configurations
-    WHERE status = 'active' AND mark_url = ?
+    WHERE status = 'active'
+      AND (
+        mark_url = ?
+        OR wordmark_url = ?
+        OR compact_wordmark_url = ?
+      )
     LIMIT 1
-  `).bind(text(asset.url)).first();
+  `).bind(
+    text(asset.url),
+    text(asset.url),
+    text(asset.url),
+  ).first();
+
   if (reference) {
-    throw httpError(`This asset is assigned to the ${text(reference.module_key)} module. Choose another mark before deleting it.`, 409);
+    throw httpError(
+      `This asset is assigned to the ${text(reference.module_key)} module. Choose another asset before deleting it.`,
+      409,
+    );
+  }
+
+  const platformReference = await db.prepare(`
+    SELECT id
+    FROM platform_branding_settings
+    WHERE id = 'default'
+      AND (
+        wordmark_url = ?
+        OR compact_wordmark_url = ?
+        OR icon_url = ?
+      )
+    LIMIT 1
+  `).bind(
+    text(asset.url),
+    text(asset.url),
+    text(asset.url),
+  ).first();
+
+  if (platformReference) {
+    throw httpError(
+      "This asset is assigned to the WedPlanned platform identity. Choose another asset before deleting it.",
+      409,
+    );
   }
 
   await db.prepare(`

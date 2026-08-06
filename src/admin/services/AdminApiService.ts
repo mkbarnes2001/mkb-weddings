@@ -9,7 +9,7 @@ import type { AssetLibraryFilters, AssetLibraryPayload } from "../types/asset";
 import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, ClientGalleryListPayload, ClientGalleryRecord, PrivateOriginalUploadSession, PrivateOriginalUploadedPart } from "../types/clientGallery";
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
-import type { PlatformAdministrationPayload, PlatformBrandAsset, PlatformModuleConfiguration, PlatformSupplierTaxonomy, ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
+import type { PlatformAdministrationPayload, PlatformBrandAsset, PlatformBrandingIdentity, PlatformModuleConfiguration, PlatformSupplierTaxonomy, ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
 import type { CrmAddon, CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmPackage, CrmQuote, CrmQuoteOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate } from "../types/crm";
 import { prepareImageUpload } from "./ImageUploadService";
 
@@ -1167,7 +1167,21 @@ export class AdminApiService {
   }
 
   static async savePlatformModuleConfiguration(module: PlatformModuleConfiguration) {
-    return this.mutatePlatformAdministration({ action: "saveModuleConfiguration", module });
+    return this.mutatePlatformAdministration({
+      action: "saveModuleConfiguration",
+      module,
+    });
+  }
+
+  static async savePlatformBrandingAndModules(
+    modules: PlatformModuleConfiguration[],
+    platformIdentity: PlatformBrandingIdentity,
+  ) {
+    return this.mutatePlatformAdministration({
+      action: "saveBrandingAndModules",
+      modules,
+      platformIdentity,
+    });
   }
 
   static async uploadPlatformBrandAsset(name: string, assetType: PlatformBrandAsset["assetType"], file: File) {

@@ -26,6 +26,7 @@ import {
 import {
   AdminButton,
   AdminField,
+  AdminModuleWordmark,
   AdminPage,
   AdminPageHeader,
   AdminPanel,
@@ -47,6 +48,7 @@ import {
 } from "../data/supplierTaxonomy";
 import type {
   PlatformAdministrationPayload,
+  PlatformBrandingIdentity,
   PlatformModuleConfiguration,
   WedPlannedOperationsPayload,
 } from "../types/platform";
@@ -90,14 +92,56 @@ function Destination({ to, icon: Icon, title, description, meta }: { to: string;
   return <Link to={to} className="admin-module-destination"><span className="admin-module-destination__icon"><Icon /></span><div><strong>{title}</strong><p>{description}</p><div className="admin-module-destination__meta"><AdminStatus tone="info">{meta}</AdminStatus></div></div><ArrowRight className="admin-module-destination__arrow" /></Link>;
 }
 
-const moduleLabels = new Map(adminModules.map((module) => [module.key, module.label]));
+const DEFAULT_PLATFORM_IDENTITY: PlatformBrandingIdentity = {
+  platformName: "WedPlanned",
+  wordmarkUrl: "",
+  compactWordmarkUrl: "",
+  iconUrl: "",
+};
+
+function moduleFingerprint(module: PlatformModuleConfiguration) {
+  return JSON.stringify({
+    moduleKey: module.moduleKey,
+    accentColor: module.accentColor,
+    pageBackgroundColor: module.pageBackgroundColor,
+    sectionBackgroundColor: module.sectionBackgroundColor,
+    recordBackgroundColor: module.recordBackgroundColor,
+    iconKey: module.iconKey,
+    markUrl: module.markUrl,
+    wordmarkUrl: module.wordmarkUrl,
+    compactWordmarkUrl: module.compactWordmarkUrl,
+    activeButtonStyle: module.activeButtonStyle,
+    panelAccentStyle: module.panelAccentStyle,
+    status: module.status,
+    sortOrder: module.sortOrder,
+  });
+}
+
+function identityFingerprint(identity: PlatformBrandingIdentity) {
+  return JSON.stringify({
+    platformName: identity.platformName,
+    wordmarkUrl: identity.wordmarkUrl,
+    compactWordmarkUrl: identity.compactWordmarkUrl,
+    iconUrl: identity.iconUrl,
+  });
+}
+
 
 export function PlatformAdmin() {
   const { auth } = useProfessionalAuth();
   const [searchParams] = useSearchParams();
   const section = sectionFromSearch(searchParams);
   const [platformAdmin, setPlatformAdmin] = useState<PlatformAdministrationPayload | null>(null);
-  const [modules, setModules] = useState<PlatformModuleConfiguration[]>(defaultAdminModuleConfigurations);
+  const [modules, setModules] = useState<PlatformModuleConfiguration[]>(
+    defaultAdminModuleConfigurations,
+  );
+  const [savedModules, setSavedModules] = useState<
+    PlatformModuleConfiguration[]
+  >(defaultAdminModuleConfigurations);
+  const [platformIdentity, setPlatformIdentity] =
+    useState<PlatformBrandingIdentity>(DEFAULT_PLATFORM_IDENTITY);
+  const [savedPlatformIdentity, setSavedPlatformIdentity] =
+    useState<PlatformBrandingIdentity>(DEFAULT_PLATFORM_IDENTITY);
   const [supplierCategories, setSupplierCategories] = useState<string[]>([...SUPPLIER_CATEGORY_OPTIONS]);
   const [supplierRoles, setSupplierRoles] = useState<SupplierRoleDefinition[]>([...DEFAULT_SUPPLIER_ROLE_DEFINITIONS]);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(auth.workspaceId);
@@ -118,13 +162,54 @@ export function PlatformAdmin() {
   const [assetInputKey, setAssetInputKey] = useState(0);
   const [assetUploading, setAssetUploading] = useState(false);
 
-  function apply(next: PlatformAdministrationPayload) {
+  const changedModuleCount = useMemo(
+    () => modules.filter((module) => {
+      const saved = savedModules.find(
+        (candidate) => candidate.moduleKey === module.moduleKey,
+      );
+      return !saved || moduleFingerprint(module) !== moduleFingerprint(saved);
+    }).length,
+    [modules, savedModules],
+  );
+
+  const identityDirty = useMemo(
+    () => identityFingerprint(platformIdentity)
+      !== identityFingerprint(savedPlatformIdentity),
+    [platformIdentity, savedPlatformIdentity],
+  );
+
+  const brandingDirty = changedModuleCount > 0 || identityDirty;
+
+  function apply(
+    next: PlatformAdministrationPayload,
+    preserveBrandingDraft = false,
+  ) {
     setPlatformAdmin(next);
-    setModules(next.modules?.length ? next.modules : defaultAdminModuleConfigurations);
-    const taxonomy = normaliseSupplierTaxonomy(next.supplierTaxonomy?.categories, next.supplierTaxonomy?.roles);
+
+    if (!preserveBrandingDraft) {
+      const nextModules = next.modules?.length
+        ? next.modules
+        : defaultAdminModuleConfigurations;
+      const nextIdentity = next.platformIdentity
+        || DEFAULT_PLATFORM_IDENTITY;
+
+      setModules(nextModules.map((module) => ({ ...module })));
+      setSavedModules(nextModules.map((module) => ({ ...module })));
+      setPlatformIdentity({ ...nextIdentity });
+      setSavedPlatformIdentity({ ...nextIdentity });
+    }
+
+    const taxonomy = normaliseSupplierTaxonomy(
+      next.supplierTaxonomy?.categories,
+      next.supplierTaxonomy?.roles,
+    );
     setSupplierCategories(taxonomy.categories);
     setSupplierRoles(taxonomy.roles);
-    setSelectedWorkspaceId((current) => next.workspaces.some((workspace) => workspace.id === current) ? current : next.workspaces[0]?.id || auth.workspaceId);
+    setSelectedWorkspaceId((current) => (
+      next.workspaces.some((workspace) => workspace.id === current)
+        ? current
+        : next.workspaces[0]?.id || auth.workspaceId
+    ));
   }
 
   useEffect(() => {
@@ -133,6 +218,20 @@ export function PlatformAdmin() {
       .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load platform administration."))
       .finally(() => setLoading(false));
   }, [auth.workspaceId]);
+
+  useEffect(() => {
+    if (!brandingDirty) return;
+
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", warnBeforeUnload);
+    };
+  }, [brandingDirty]);
 
   useEffect(() => {
     if (section !== "operations" || !selectedWorkspaceId) return;
@@ -225,8 +324,34 @@ export function PlatformAdmin() {
     setError("");
   }
 
-  async function saveModule(module: PlatformModuleConfiguration) {
-    await runAdmin(() => AdminApiService.savePlatformModuleConfiguration(module), `${moduleLabels.get(module.moduleKey) || module.moduleKey} module appearance saved.`);
+  async function saveBrandingAndModules() {
+    if (!brandingDirty) return;
+
+    const saved = await runAdmin(
+      () => AdminApiService.savePlatformBrandingAndModules(
+        modules,
+        platformIdentity,
+      ),
+      "WedPlanned platform and module branding saved.",
+    );
+
+    if (saved) {
+      window.dispatchEvent(
+        new CustomEvent("wedplanned:branding-updated", {
+          detail: {
+            modules: modules.map((module) => ({ ...module })),
+            platformIdentity: { ...platformIdentity },
+          },
+        }),
+      );
+    }
+  }
+
+  function resetBrandingDraft() {
+    setModules(savedModules.map((module) => ({ ...module })));
+    setPlatformIdentity({ ...savedPlatformIdentity });
+    setMessage("");
+    setError("");
   }
 
   async function uploadBrandAsset() {
@@ -236,7 +361,7 @@ export function PlatformAdmin() {
     setError("");
     try {
       const next = await AdminApiService.uploadPlatformBrandAsset(assetName.trim() || assetFile.name.replace(/\.[^.]+$/, ""), assetType, assetFile);
-      apply(next);
+      apply(next, brandingDirty);
       setAssetName("");
       setAssetFile(null);
       setAssetInputKey((current) => current + 1);
@@ -254,7 +379,10 @@ export function PlatformAdmin() {
     setMessage("");
     setError("");
     try {
-      apply(await AdminApiService.deletePlatformBrandAsset(assetId));
+      apply(
+        await AdminApiService.deletePlatformBrandAsset(assetId),
+        brandingDirty,
+      );
       setMessage("Platform brand asset deleted.");
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : "Unable to delete the platform brand asset.");
@@ -267,6 +395,13 @@ export function PlatformAdmin() {
 
   if (loading) return <div className="admin-page text-sm text-neutral-500">Loading Platform administration…</div>;
   if (!platformAdmin) return <div className="admin-page rounded-xl bg-red-50 p-5 text-sm text-red-800">{error || "Platform administration is unavailable."}</div>;
+
+  const logoAssets = platformAdmin.brandAssets.filter(
+    (asset) => asset.assetType === "logo",
+  );
+  const iconAssets = platformAdmin.brandAssets.filter(
+    (asset) => asset.assetType === "icon",
+  );
 
   return <AdminPage className="platform-admin-page">
     <AdminPageHeader
@@ -311,30 +446,523 @@ export function PlatformAdmin() {
       </div>
     </section> : null}
 
-    {section === "modules" ? <div className="platform-module-config-grid">{modules.map((module) => {
-      const definition = adminModules.find((item) => item.key === module.moduleKey)!;
-      const selectedIcon = adminModuleIconOptions.find((option) => option.key === module.iconKey)?.icon || definition.icon;
-      const PreviewIcon = selectedIcon;
-      const moduleMarkAssets = platformAdmin.brandAssets.filter((asset) => asset.assetType === "icon");
-      const markInLibrary = moduleMarkAssets.some((asset) => asset.url === module.markUrl);
-      return <AdminPanel key={module.moduleKey} title={definition.label} description={definition.description} icon={PreviewIcon} actions={<AdminStatus tone="info">Global</AdminStatus>}>
-        <div className="platform-module-preview" style={{ "--preview-accent": module.accentColor, "--preview-page": module.pageBackgroundColor, "--preview-surface": module.sectionBackgroundColor, "--preview-record": module.recordBackgroundColor } as CSSProperties} data-button-style={module.activeButtonStyle} data-panel-style={module.panelAccentStyle}><span className="platform-module-preview__button"><PreviewIcon />{definition.shortLabel}</span><span className="platform-module-preview__nav">Active navigation</span><span className="platform-module-preview__panel">Section surface</span><span className="platform-module-preview__record">Record card</span></div>
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
-          <AdminField label="Accent colour"><div className="platform-colour-control"><input type="color" value={module.accentColor} onChange={(event) => updateModule(module.moduleKey, { accentColor: event.target.value.toUpperCase() })} /><FieldInput value={module.accentColor} onChange={(value) => updateModule(module.moduleKey, { accentColor: value.toUpperCase() })} /></div></AdminField>
-          <AdminField label="Module icon"><FieldSelect value={module.iconKey} onChange={(value) => updateModule(module.moduleKey, { iconKey: value })}>{adminModuleIconOptions.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}</FieldSelect></AdminField>
-          <AdminField label="Page background"><div className="platform-colour-control"><input type="color" value={module.pageBackgroundColor} onChange={(event) => updateModule(module.moduleKey, { pageBackgroundColor: event.target.value.toUpperCase() })} /><FieldInput value={module.pageBackgroundColor} onChange={(value) => updateModule(module.moduleKey, { pageBackgroundColor: value.toUpperCase() })} /></div></AdminField>
-          <AdminField label="Section background"><div className="platform-colour-control"><input type="color" value={module.sectionBackgroundColor} onChange={(event) => updateModule(module.moduleKey, { sectionBackgroundColor: event.target.value.toUpperCase() })} /><FieldInput value={module.sectionBackgroundColor} onChange={(value) => updateModule(module.moduleKey, { sectionBackgroundColor: value.toUpperCase() })} /></div></AdminField>
-          <AdminField label="Record card background" help="Controls repeating operational records such as lead, Job, client and schedule cards."><div className="platform-colour-control"><input type="color" value={module.recordBackgroundColor} onChange={(event) => updateModule(module.moduleKey, { recordBackgroundColor: event.target.value.toUpperCase() })} /><FieldInput value={module.recordBackgroundColor} onChange={(value) => updateModule(module.moduleKey, { recordBackgroundColor: value.toUpperCase() })} /></div></AdminField>
-          <AdminField label="Active-button appearance"><FieldSelect value={module.activeButtonStyle} onChange={(value) => updateModule(module.moduleKey, { activeButtonStyle: value as PlatformModuleConfiguration["activeButtonStyle"] })}><option value="solid">Solid accent</option><option value="soft">Soft accent</option><option value="outline">Accent outline</option></FieldSelect></AdminField>
-          <AdminField label="Main-panel accent"><FieldSelect value={module.panelAccentStyle} onChange={(value) => updateModule(module.moduleKey, { panelAccentStyle: value as PlatformModuleConfiguration["panelAccentStyle"] })}><option value="edge">Accent edge</option><option value="wash">Accent wash</option><option value="header">Header accent</option></FieldSelect></AdminField>
-          <AdminField label="Module mark" help="Choose a platform-owned WedPlanned icon. Leave empty to use the selected Lucide icon." className="md:col-span-2"><FieldSelect value={module.markUrl} onChange={(value) => updateModule(module.moduleKey, { markUrl: value })}><option value="">Use selected Lucide icon</option>{module.markUrl && !markInLibrary ? <option value={module.markUrl}>Current assigned mark</option> : null}{moduleMarkAssets.map((asset) => <option key={asset.id} value={asset.url}>{asset.name}</option>)}</FieldSelect></AdminField>
+    {section === "modules" ? <section className="platform-branding-editor">
+      <header className="platform-branding-editor__toolbar">
+        <div className="platform-branding-editor__summary">
+          <div>
+            <p className="admin-eyebrow">Global platform presentation</p>
+            <h2>Branding &amp; modules</h2>
+            <p>Assign uploaded artwork and control the shared visual system used across every WedPlanned business.</p>
+          </div>
+          <AdminStatus tone={brandingDirty ? "warning" : "success"}>
+            {brandingDirty
+              ? `${changedModuleCount + (identityDirty ? 1 : 0)} unsaved section${changedModuleCount + (identityDirty ? 1 : 0) === 1 ? "" : "s"}`
+              : "All changes saved"}
+          </AdminStatus>
         </div>
-        <div className="mt-4 flex items-center justify-between gap-3"><Link to="/admin/platform?section=assets" className="admin-inline-link">Manage Brand assets</Link><AdminButton variant="primary" icon={Save} disabled={saving} onClick={() => saveModule(module)}>{saving ? "Saving…" : `Save ${definition.shortLabel}`}</AdminButton></div>
-      </AdminPanel>;
-    })}</div> : null}
+
+        <div className="platform-branding-editor__actions">
+          <Link
+            to="/admin/platform?section=assets"
+            className="admin-button admin-button--secondary"
+          >
+            <Images className="admin-button__icon" />
+            Manage assets
+          </Link>
+
+          <AdminButton
+            variant="secondary"
+            icon={RotateCcw}
+            disabled={saving || !brandingDirty}
+            onClick={resetBrandingDraft}
+          >
+            Reset changes
+          </AdminButton>
+
+          <AdminButton
+            variant="primary"
+            icon={Save}
+            disabled={saving || !brandingDirty}
+            onClick={saveBrandingAndModules}
+          >
+            {saving ? "Saving…" : "Save changes"}
+          </AdminButton>
+        </div>
+      </header>
+
+      <AdminPanel
+        title="WedPlanned platform identity"
+        description="Global artwork used by the application shell and compact mobile presentation."
+        icon={Palette}
+        actions={
+          <AdminStatus tone={identityDirty ? "warning" : "info"}>
+            {identityDirty ? "Changed" : "Global"}
+          </AdminStatus>
+        }
+      >
+        <div className="platform-identity-editor">
+          <div className="platform-identity-preview-grid">
+            <div className="platform-identity-preview platform-identity-preview--light">
+              <span>Desktop wordmark</span>
+              {platformIdentity.wordmarkUrl
+                ? <img
+                    src={platformIdentity.wordmarkUrl}
+                    alt={platformIdentity.platformName}
+                  />
+                : <AdminModuleWordmark
+                    label={platformIdentity.platformName}
+                  />}
+            </div>
+
+            <div className="platform-identity-preview platform-identity-preview--dark">
+              <span>Compact identity</span>
+              {platformIdentity.compactWordmarkUrl
+                ? <img
+                    src={platformIdentity.compactWordmarkUrl}
+                    alt={platformIdentity.platformName}
+                  />
+                : platformIdentity.iconUrl
+                  ? <img
+                      src={platformIdentity.iconUrl}
+                      alt={platformIdentity.platformName}
+                    />
+                  : <strong>WP</strong>}
+            </div>
+          </div>
+
+          <section className="platform-module-control-group">
+            <header>
+              <strong>Platform artwork</strong>
+              <span>Choose uploaded wordmark and icon assets.</span>
+            </header>
+
+            <div className="platform-module-field-grid">
+              <AdminField label="Accessible platform name">
+                <FieldInput
+                  value={platformIdentity.platformName}
+                  onChange={(value) => {
+                    setPlatformIdentity((current) => ({
+                      ...current,
+                      platformName: value,
+                    }));
+                    setMessage("");
+                    setError("");
+                  }}
+                />
+              </AdminField>
+
+              <AdminField label="Desktop wordmark">
+                <FieldSelect
+                  value={platformIdentity.wordmarkUrl}
+                  onChange={(value) => {
+                    setPlatformIdentity((current) => ({
+                      ...current,
+                      wordmarkUrl: value,
+                    }));
+                    setMessage("");
+                    setError("");
+                  }}
+                >
+                  <option value="">Use text fallback</option>
+                  {platformIdentity.wordmarkUrl
+                    && !logoAssets.some(
+                      (asset) => asset.url === platformIdentity.wordmarkUrl,
+                    )
+                    ? <option value={platformIdentity.wordmarkUrl}>Current assigned asset</option>
+                    : null}
+                  {logoAssets.map((asset) => (
+                    <option key={asset.id} value={asset.url}>
+                      {asset.name}
+                    </option>
+                  ))}
+                </FieldSelect>
+              </AdminField>
+
+              <AdminField label="Compact / mobile wordmark">
+                <FieldSelect
+                  value={platformIdentity.compactWordmarkUrl}
+                  onChange={(value) => {
+                    setPlatformIdentity((current) => ({
+                      ...current,
+                      compactWordmarkUrl: value,
+                    }));
+                    setMessage("");
+                    setError("");
+                  }}
+                >
+                  <option value="">Use platform icon</option>
+                  {platformIdentity.compactWordmarkUrl
+                    && !logoAssets.some(
+                      (asset) =>
+                        asset.url === platformIdentity.compactWordmarkUrl,
+                    )
+                    ? <option value={platformIdentity.compactWordmarkUrl}>Current assigned asset</option>
+                    : null}
+                  {logoAssets.map((asset) => (
+                    <option key={asset.id} value={asset.url}>
+                      {asset.name}
+                    </option>
+                  ))}
+                </FieldSelect>
+              </AdminField>
+
+              <AdminField label="Platform icon">
+                <FieldSelect
+                  value={platformIdentity.iconUrl}
+                  onChange={(value) => {
+                    setPlatformIdentity((current) => ({
+                      ...current,
+                      iconUrl: value,
+                    }));
+                    setMessage("");
+                    setError("");
+                  }}
+                >
+                  <option value="">Use built-in icon</option>
+                  {platformIdentity.iconUrl
+                    && !iconAssets.some(
+                      (asset) => asset.url === platformIdentity.iconUrl,
+                    )
+                    ? <option value={platformIdentity.iconUrl}>Current assigned asset</option>
+                    : null}
+                  {iconAssets.map((asset) => (
+                    <option key={asset.id} value={asset.url}>
+                      {asset.name}
+                    </option>
+                  ))}
+                </FieldSelect>
+              </AdminField>
+            </div>
+          </section>
+        </div>
+      </AdminPanel>
+
+      <div className="platform-module-config-grid">
+        {modules.map((module) => {
+          const definition = adminModules.find(
+            (item) => item.key === module.moduleKey,
+          )!;
+          const selectedIcon = adminModuleIconOptions.find(
+            (option) => option.key === module.iconKey,
+          )?.icon || definition.icon;
+          const PreviewIcon = selectedIcon;
+          const savedModule = savedModules.find(
+            (candidate) => candidate.moduleKey === module.moduleKey,
+          );
+          const moduleDirty = !savedModule
+            || moduleFingerprint(module) !== moduleFingerprint(savedModule);
+          const markInLibrary = iconAssets.some(
+            (asset) => asset.url === module.markUrl,
+          );
+          const wordmarkInLibrary = logoAssets.some(
+            (asset) => asset.url === module.wordmarkUrl,
+          );
+          const compactInLibrary = logoAssets.some(
+            (asset) => asset.url === module.compactWordmarkUrl,
+          );
+
+          return <AdminPanel
+            key={module.moduleKey}
+            className="platform-module-config-card"
+            title={definition.label}
+            description={definition.description}
+            icon={PreviewIcon}
+            actions={
+              <AdminStatus tone={moduleDirty ? "warning" : "info"}>
+                {moduleDirty ? "Changed" : "Global"}
+              </AdminStatus>
+            }
+          >
+            <div
+              className="platform-module-preview platform-module-preview--brand"
+              style={{
+                "--preview-accent": module.accentColor,
+                "--preview-page": module.pageBackgroundColor,
+                "--preview-surface": module.sectionBackgroundColor,
+                "--preview-record": module.recordBackgroundColor,
+              } as CSSProperties}
+              data-button-style={module.activeButtonStyle}
+              data-panel-style={module.panelAccentStyle}
+            >
+              <span className="platform-module-preview__brand">
+                {module.markUrl
+                  ? <img
+                      className="platform-module-preview__mark"
+                      src={module.markUrl}
+                      alt=""
+                      aria-hidden="true"
+                    />
+                  : <PreviewIcon />}
+
+                {module.wordmarkUrl
+                  ? <img
+                      className="platform-module-preview__wordmark"
+                      src={module.wordmarkUrl}
+                      alt={definition.label}
+                    />
+                  : <AdminModuleWordmark label={definition.shortLabel} />}
+              </span>
+
+              <span className="platform-module-preview__nav">
+                Active navigation
+              </span>
+              <span className="platform-module-preview__panel">
+                Section surface
+              </span>
+              <span className="platform-module-preview__record">
+                Record card
+              </span>
+            </div>
+
+            <div className="platform-module-control-stack">
+              <section className="platform-module-control-group">
+                <header>
+                  <strong>Identity</strong>
+                  <span>Icon and uploaded wordmarks.</span>
+                </header>
+
+                <div className="platform-module-field-grid">
+                  <AdminField label="Fallback icon">
+                    <FieldSelect
+                      value={module.iconKey}
+                      onChange={(value) => updateModule(
+                        module.moduleKey,
+                        { iconKey: value },
+                      )}
+                    >
+                      {adminModuleIconOptions.map((option) => (
+                        <option key={option.key} value={option.key}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </FieldSelect>
+                  </AdminField>
+
+                  <AdminField label="Module icon asset">
+                    <FieldSelect
+                      value={module.markUrl}
+                      onChange={(value) => updateModule(
+                        module.moduleKey,
+                        { markUrl: value },
+                      )}
+                    >
+                      <option value="">Use fallback icon</option>
+                      {module.markUrl && !markInLibrary
+                        ? <option value={module.markUrl}>Current assigned asset</option>
+                        : null}
+                      {iconAssets.map((asset) => (
+                        <option key={asset.id} value={asset.url}>
+                          {asset.name}
+                        </option>
+                      ))}
+                    </FieldSelect>
+                  </AdminField>
+
+                  <AdminField label="Desktop wordmark">
+                    <FieldSelect
+                      value={module.wordmarkUrl}
+                      onChange={(value) => updateModule(
+                        module.moduleKey,
+                        { wordmarkUrl: value },
+                      )}
+                    >
+                      <option value="">Use text fallback</option>
+                      {module.wordmarkUrl && !wordmarkInLibrary
+                        ? <option value={module.wordmarkUrl}>Current assigned asset</option>
+                        : null}
+                      {logoAssets.map((asset) => (
+                        <option key={asset.id} value={asset.url}>
+                          {asset.name}
+                        </option>
+                      ))}
+                    </FieldSelect>
+                  </AdminField>
+
+                  <AdminField label="Compact / mobile wordmark">
+                    <FieldSelect
+                      value={module.compactWordmarkUrl}
+                      onChange={(value) => updateModule(
+                        module.moduleKey,
+                        { compactWordmarkUrl: value },
+                      )}
+                    >
+                      <option value="">Use desktop wordmark</option>
+                      {module.compactWordmarkUrl && !compactInLibrary
+                        ? <option value={module.compactWordmarkUrl}>Current assigned asset</option>
+                        : null}
+                      {logoAssets.map((asset) => (
+                        <option key={asset.id} value={asset.url}>
+                          {asset.name}
+                        </option>
+                      ))}
+                    </FieldSelect>
+                  </AdminField>
+                </div>
+              </section>
+
+              <section className="platform-module-control-group">
+                <header>
+                  <strong>Colour system</strong>
+                  <span>Page, panel and operational record surfaces.</span>
+                </header>
+
+                <div className="platform-module-field-grid">
+                  <AdminField label="Accent colour">
+                    <div className="platform-colour-control">
+                      <input
+                        type="color"
+                        value={module.accentColor}
+                        onChange={(event) => updateModule(
+                          module.moduleKey,
+                          {
+                            accentColor:
+                              event.target.value.toUpperCase(),
+                          },
+                        )}
+                      />
+                      <FieldInput
+                        value={module.accentColor}
+                        onChange={(value) => updateModule(
+                          module.moduleKey,
+                          { accentColor: value.toUpperCase() },
+                        )}
+                      />
+                    </div>
+                  </AdminField>
+
+                  <AdminField label="Page background">
+                    <div className="platform-colour-control">
+                      <input
+                        type="color"
+                        value={module.pageBackgroundColor}
+                        onChange={(event) => updateModule(
+                          module.moduleKey,
+                          {
+                            pageBackgroundColor:
+                              event.target.value.toUpperCase(),
+                          },
+                        )}
+                      />
+                      <FieldInput
+                        value={module.pageBackgroundColor}
+                        onChange={(value) => updateModule(
+                          module.moduleKey,
+                          {
+                            pageBackgroundColor:
+                              value.toUpperCase(),
+                          },
+                        )}
+                      />
+                    </div>
+                  </AdminField>
+
+                  <AdminField label="Section background">
+                    <div className="platform-colour-control">
+                      <input
+                        type="color"
+                        value={module.sectionBackgroundColor}
+                        onChange={(event) => updateModule(
+                          module.moduleKey,
+                          {
+                            sectionBackgroundColor:
+                              event.target.value.toUpperCase(),
+                          },
+                        )}
+                      />
+                      <FieldInput
+                        value={module.sectionBackgroundColor}
+                        onChange={(value) => updateModule(
+                          module.moduleKey,
+                          {
+                            sectionBackgroundColor:
+                              value.toUpperCase(),
+                          },
+                        )}
+                      />
+                    </div>
+                  </AdminField>
+
+                  <AdminField
+                    label="Record card background"
+                    help="Used by repeating lead, Job, client and schedule records."
+                  >
+                    <div className="platform-colour-control">
+                      <input
+                        type="color"
+                        value={module.recordBackgroundColor}
+                        onChange={(event) => updateModule(
+                          module.moduleKey,
+                          {
+                            recordBackgroundColor:
+                              event.target.value.toUpperCase(),
+                          },
+                        )}
+                      />
+                      <FieldInput
+                        value={module.recordBackgroundColor}
+                        onChange={(value) => updateModule(
+                          module.moduleKey,
+                          {
+                            recordBackgroundColor:
+                              value.toUpperCase(),
+                          },
+                        )}
+                      />
+                    </div>
+                  </AdminField>
+                </div>
+              </section>
+
+              <section className="platform-module-control-group">
+                <header>
+                  <strong>Interaction</strong>
+                  <span>Navigation and primary panel treatments.</span>
+                </header>
+
+                <div className="platform-module-field-grid">
+                  <AdminField label="Active-button appearance">
+                    <FieldSelect
+                      value={module.activeButtonStyle}
+                      onChange={(value) => updateModule(
+                        module.moduleKey,
+                        {
+                          activeButtonStyle:
+                            value as PlatformModuleConfiguration["activeButtonStyle"],
+                        },
+                      )}
+                    >
+                      <option value="solid">Solid accent</option>
+                      <option value="soft">Soft accent</option>
+                      <option value="outline">Accent outline</option>
+                    </FieldSelect>
+                  </AdminField>
+
+                  <AdminField label="Main-panel accent">
+                    <FieldSelect
+                      value={module.panelAccentStyle}
+                      onChange={(value) => updateModule(
+                        module.moduleKey,
+                        {
+                          panelAccentStyle:
+                            value as PlatformModuleConfiguration["panelAccentStyle"],
+                        },
+                      )}
+                    >
+                      <option value="edge">Accent edge</option>
+                      <option value="wash">Accent wash</option>
+                      <option value="header">Header accent</option>
+                    </FieldSelect>
+                  </AdminField>
+                </div>
+              </section>
+            </div>
+          </AdminPanel>;
+        })}
+      </div>
+    </section> : null}
 
     {section === "assets" ? <div className="space-y-5">
-      <AdminPanel title="Add platform brand asset" description="Upload reusable platform-owned logos and icons. PNG, JPEG and WebP files up to 3 MB are supported." icon={ImagePlus}>
+      <AdminPanel title="Add platform brand asset" description="Upload reusable transparent wordmarks and icons. PNG and WebP are recommended; JPEG is supported for legacy artwork. Files may be up to 3 MB." icon={ImagePlus}>
         <div className="platform-asset-upload-grid">
           <AdminField label="Asset name"><FieldInput value={assetName} onChange={setAssetName} placeholder="For example: WedPlanned monogram" /></AdminField>
           <AdminField label="Asset type"><FieldSelect value={assetType} onChange={(value) => setAssetType(value as "logo" | "icon")}><option value="logo">Logo / mark</option><option value="icon">Icon</option></FieldSelect></AdminField>
@@ -342,7 +970,7 @@ export function PlatformAdmin() {
           <AdminButton variant="primary" icon={Upload} disabled={assetUploading || !assetFile} onClick={uploadBrandAsset}>{assetUploading ? "Uploading…" : "Upload asset"}</AdminButton>
         </div>
       </AdminPanel>
-      <AdminPanel title="WedPlanned asset library" description="Platform-owned reusable logos and icons. Only icon assets can be selected as module marks; assigned assets cannot be deleted." icon={Images} actions={<AdminStatus tone="info">{platformAdmin.brandAssets.length} assets</AdminStatus>}>
+      <AdminPanel title="WedPlanned asset library" description="Platform-owned artwork for desktop wordmarks, compact mobile identities and module icons. Assigned assets cannot be deleted." icon={Images} actions={<AdminStatus tone="info">{platformAdmin.brandAssets.length} assets</AdminStatus>}>
         {platformAdmin.brandAssets.length ? <div className="platform-brand-asset-grid">{platformAdmin.brandAssets.map((asset) => <article key={asset.id} className="platform-brand-asset-card"><div className="platform-brand-asset-card__preview"><img src={asset.url} alt="" /></div><div className="platform-brand-asset-card__body"><div><strong>{asset.name}</strong><span>{asset.assetType} · {(asset.sizeBytes / 1024).toFixed(0)} KB</span></div><button type="button" className="admin-icon-control admin-icon-control--danger" onClick={() => deleteBrandAsset(asset.id, asset.name)} disabled={saving} title="Delete asset" aria-label={`Delete ${asset.name}`}><Trash2 /></button></div></article>)}</div> : <div className="admin-empty-state"><span className="admin-empty-state__icon"><Images /></span><h3>No platform brand assets</h3><p>Upload a logo or icon above, then assign it to a module from Module configuration.</p></div>}
       </AdminPanel>
     </div> : null}

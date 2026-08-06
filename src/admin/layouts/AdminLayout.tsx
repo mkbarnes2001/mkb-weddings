@@ -4,7 +4,7 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminModuleWordmark } from "../components/ui/AdminUI";
 import { AdminApiService } from "../services/AdminApiService";
-import type { PlatformModuleConfiguration } from "../types/platform";
+import type { PlatformBrandingIdentity, PlatformModuleConfiguration } from "../types/platform";
 import {
   adminModules,
   defaultAdminModuleConfigurations,
@@ -19,9 +19,98 @@ import {
   visibleModuleItems,
 } from "../navigation/adminModules";
 
+const DEFAULT_PLATFORM_IDENTITY: PlatformBrandingIdentity = {
+  platformName: "WedPlanned",
+  wordmarkUrl: "",
+  compactWordmarkUrl: "",
+  iconUrl: "",
+};
+
+type BrandingUpdatedDetail = {
+  modules: PlatformModuleConfiguration[];
+  platformIdentity: PlatformBrandingIdentity;
+};
+
 function ModuleGlyph({ configuration, Icon }: { configuration: PlatformModuleConfiguration; Icon: typeof ShieldCheck }) {
   if (configuration.markUrl) return <img src={configuration.markUrl} alt="" aria-hidden="true" className="admin-module-mark" />;
   return <Icon />;
+}
+
+function PlatformIdentityAsset({
+  identity,
+  variant,
+}: {
+  identity: PlatformBrandingIdentity;
+  variant: "desktop" | "compact" | "icon";
+}) {
+  const source = variant === "desktop"
+    ? identity.wordmarkUrl
+      || identity.compactWordmarkUrl
+      || identity.iconUrl
+    : variant === "compact"
+      ? identity.compactWordmarkUrl
+        || identity.wordmarkUrl
+      : identity.iconUrl
+        || identity.compactWordmarkUrl
+        || identity.wordmarkUrl;
+
+  if (source) {
+    return (
+      <img
+        src={source}
+        alt={identity.platformName}
+        className={`admin-platform-identity-asset admin-platform-identity-asset--${variant}`}
+      />
+    );
+  }
+
+  if (variant === "icon") {
+    return (
+      <span
+        className="admin-platform-identity-fallback"
+        aria-label={identity.platformName}
+      >
+        {initials(identity.platformName)}
+      </span>
+    );
+  }
+
+  return (
+    <AdminModuleWordmark
+      label={identity.platformName}
+      className={`admin-platform-identity-fallback-wordmark admin-platform-identity-fallback-wordmark--${variant}`}
+    />
+  );
+}
+
+function ModuleIdentityWordmark({
+  configuration,
+  label,
+  compact = false,
+}: {
+  configuration: PlatformModuleConfiguration;
+  label: string;
+  compact?: boolean;
+}) {
+  const source = compact
+    ? configuration.compactWordmarkUrl || configuration.wordmarkUrl
+    : configuration.wordmarkUrl;
+
+  if (source) {
+    return (
+      <img
+        src={source}
+        alt={label}
+        className={`admin-module-wordmark-asset ${
+          compact
+            ? "admin-module-wordmark-asset--compact"
+            : "admin-module-wordmark-asset--desktop"
+        }`}
+      />
+    );
+  }
+
+  return <AdminModuleWordmark label={label} />;
 }
 
 function initials(value: string) {
@@ -40,6 +129,8 @@ export function AdminLayout() {
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [workspaceMenuOpen, setWorkspaceMenuOpen] = useState(false);
   const [workspaceLogoUrl, setWorkspaceLogoUrl] = useState("");
+  const [platformIdentity, setPlatformIdentity] =
+    useState<PlatformBrandingIdentity>(DEFAULT_PLATFORM_IDENTITY);
   const workspaceMenuRef = useRef<HTMLDivElement | null>(null);
   const [moduleConfigurations, setModuleConfigurations] = useState<PlatformModuleConfiguration[]>(defaultAdminModuleConfigurations);
   const isPlatformRoute = location.pathname === "/admin/platform" || location.pathname.startsWith("/admin/platform/");
@@ -75,26 +166,70 @@ export function AdminLayout() {
 
   useEffect(() => {
     let active = true;
+
     AdminApiService.getWedPlannedPlatform()
       .then((platform) => {
         if (!active) return;
-        if (platform.moduleConfigurations?.length) setModuleConfigurations(platform.moduleConfigurations);
+
+        if (platform.moduleConfigurations?.length) {
+          setModuleConfigurations(platform.moduleConfigurations);
+        }
+
+        setPlatformIdentity(
+          platform.platformIdentity || DEFAULT_PLATFORM_IDENTITY,
+        );
         setWorkspaceLogoUrl(platform.business.logoUrl || "");
       })
       .catch(() => {
-        if (active) {
-          setModuleConfigurations(defaultAdminModuleConfigurations);
-          setWorkspaceLogoUrl("");
-        }
+        if (!active) return;
+
+        setModuleConfigurations(defaultAdminModuleConfigurations);
+        setPlatformIdentity(DEFAULT_PLATFORM_IDENTITY);
+        setWorkspaceLogoUrl("");
       });
-    return () => { active = false; };
+
+    return () => {
+      active = false;
+    };
   }, [auth.workspaceId]);
 
   useEffect(() => {
-    document.title = `${currentSectionLabel} · ${currentContextLabel} · ${isPlatformRoute ? "WedPlanned" : auth.businessName || "WedPlanned"}`;
+    const applyBrandingUpdate = (event: Event) => {
+      const detail = (
+        event as CustomEvent<BrandingUpdatedDetail>
+      ).detail;
+
+      if (!detail) return;
+
+      if (detail.modules?.length) {
+        setModuleConfigurations(
+          detail.modules.map((module) => ({ ...module })),
+        );
+      }
+
+      if (detail.platformIdentity) {
+        setPlatformIdentity({ ...detail.platformIdentity });
+      }
+    };
+
+    window.addEventListener(
+      "wedplanned:branding-updated",
+      applyBrandingUpdate,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "wedplanned:branding-updated",
+        applyBrandingUpdate,
+      );
+    };
+  }, []);
+
+  useEffect(() => {
+    document.title = `${currentSectionLabel} · ${currentContextLabel} · ${isPlatformRoute ? platformIdentity.platformName : auth.businessName || platformIdentity.platformName}`;
     setMobileMoreOpen(false);
     setWorkspaceMenuOpen(false);
-  }, [auth.businessName, currentContextLabel, currentSectionLabel, isPlatformRoute, location.pathname, location.search]);
+  }, [auth.businessName, currentContextLabel, currentSectionLabel, isPlatformRoute, location.pathname, location.search, platformIdentity.platformName]);
 
   useEffect(() => {
     if (!workspaceMenuOpen) return;
@@ -130,9 +265,15 @@ export function AdminLayout() {
   const panelAccentStyle = isPlatformRoute ? "header" : currentAppearance.panelAccentStyle;
 
   const activeBusinessName = auth.businessName || "MKB Weddings";
-  const workspaceTriggerLabel = isPlatformRoute ? "WedPlanned platform" : activeBusinessName;
-  const workspaceTriggerDetail = isPlatformRoute ? activeBusinessName : userType;
-  const userName = auth.displayName || auth.email || "WedPlanned user";
+  const workspaceTriggerLabel = isPlatformRoute
+    ? `${platformIdentity.platformName} platform`
+    : activeBusinessName;
+  const workspaceTriggerDetail = isPlatformRoute
+    ? activeBusinessName
+    : userType;
+  const userName = auth.displayName
+    || auth.email
+    || `${platformIdentity.platformName} user`;
 
   async function chooseWorkspace(workspaceId: string) {
     setWorkspaceMenuOpen(false);
@@ -150,8 +291,19 @@ export function AdminLayout() {
       <div className="admin-layout-grid">
         <aside className="admin-sidebar border-r border-black" style={{ backgroundColor: "#111111", color: "#ffffff" }}>
           <div className="admin-sidebar-identity border-b border-white/10 px-4 py-4">
-            <Link to={isPlatformRoute ? "/admin/platform" : "/admin"} className="admin-sidebar-brand" aria-label={isPlatformRoute ? "Open Platform overview" : "Open WedStudio overview"}>
-              <img src="/favicon-32x32.png" alt="MKB Weddings" />
+            <Link
+              to={isPlatformRoute ? "/admin/platform" : "/admin"}
+              className="admin-sidebar-brand"
+              aria-label={
+                isPlatformRoute
+                  ? "Open Platform overview"
+                  : "Open WedStudio overview"
+              }
+            >
+              <PlatformIdentityAsset
+                identity={platformIdentity}
+                variant="desktop"
+              />
             </Link>
 
             <div ref={workspaceMenuRef} className={`admin-workspace-menu ${isPlatformRoute ? "admin-workspace-menu--platform" : ""}`}>
@@ -219,13 +371,13 @@ export function AdminLayout() {
                 const appearance = resolveAdminModuleAppearance(module.key, moduleConfigurations);
                 const Icon = resolveAdminModuleIcon(module, appearance);
                 const active = module.key === currentModule.key;
-                return <Link key={module.key} to={module.to} className={`admin-module-link ${active ? "admin-module-link--active" : ""}`} aria-current={active ? "page" : undefined} style={{ "--module-link-accent": appearance.accentColor } as CSSProperties}><ModuleGlyph configuration={appearance} Icon={Icon} /><AdminModuleWordmark label={module.shortLabel} /></Link>;
+                return <Link key={module.key} to={module.to} className={`admin-module-link ${active ? "admin-module-link--active" : ""}`} aria-current={active ? "page" : undefined} style={{ "--module-link-accent": appearance.accentColor } as CSSProperties}><ModuleGlyph configuration={appearance} Icon={Icon} /><ModuleIdentityWordmark configuration={appearance} label={module.shortLabel} /></Link>;
               })}
             </div>
           </div> : null}
 
           <nav className="admin-module-navigation min-h-0 flex-1 overflow-y-auto p-3" aria-label={`${currentContextLabel} navigation`}>
-            <div className="admin-module-navigation__header"><ContextIcon /><div><strong>{isPlatformRoute ? currentContextLabel : <AdminModuleWordmark label={currentModule.label} />}</strong><span>{isPlatformRoute ? "Global businesses, taxonomy, modules, assets, operations and access" : currentModule.description}</span></div></div>
+            <div className="admin-module-navigation__header"><ContextIcon /><div><strong>{isPlatformRoute ? currentContextLabel : <ModuleIdentityWordmark configuration={currentAppearance} label={currentModule.label} />}</strong><span>{isPlatformRoute ? "Global businesses, taxonomy, modules, assets, operations and access" : currentModule.description}</span></div></div>
             <div className="admin-module-navigation__items mt-3" data-layout="list">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -239,8 +391,25 @@ export function AdminLayout() {
         <section className="admin-main-region">
           <header className="admin-topbar admin-mobile-header">
             <div className="admin-mobile-header__inner">
-              <img src="/favicon-32x32.png" alt="" aria-hidden="true" />
-              <div className="admin-mobile-header__workspace"><strong>{isPlatformRoute ? "WedPlanned platform" : auth.businessName || "MKB Weddings"}</strong><span>{currentContextLabel} · {currentSectionLabel}</span></div>
+              <span className="admin-mobile-platform-mark">
+                <PlatformIdentityAsset
+                  identity={platformIdentity}
+                  variant="icon"
+                />
+              </span>
+              <div className="admin-mobile-header__workspace">
+                <strong>
+                  {isPlatformRoute ? (
+                    <PlatformIdentityAsset
+                      identity={platformIdentity}
+                      variant="compact"
+                    />
+                  ) : auth.businessName || "MKB Weddings"}
+                </strong>
+                <span>
+                  {currentContextLabel} · {currentSectionLabel}
+                </span>
+              </div>
               <button type="button" onClick={() => setMobileMoreOpen(true)} aria-label="Open Admin menu"><Menu /></button>
             </div>
           </header>
@@ -254,7 +423,7 @@ export function AdminLayout() {
             <Outlet />
           </main>
 
-          {mobileMoreOpen ? <div className="admin-mobile-more" role="dialog" aria-modal="true" aria-label="Admin navigation"><button className="admin-mobile-more__backdrop" type="button" onClick={() => setMobileMoreOpen(false)} aria-label="Close menu"></button><section><header><div><strong>{currentContextLabel}</strong><span>{isPlatformRoute ? "WedPlanned platform" : auth.businessName}</span></div><button type="button" onClick={() => setMobileMoreOpen(false)} aria-label="Close menu"><X /></button></header>{!isPlatformRoute ? <div className="admin-mobile-module-switcher">{adminModules.map((module) => { const appearance = resolveAdminModuleAppearance(module.key, moduleConfigurations); const Icon = resolveAdminModuleIcon(module, appearance); const active = module.key === currentModule.key; return <Link key={module.key} to={module.to} onClick={() => setMobileMoreOpen(false)} className={active ? "active" : ""} style={{ "--module-link-accent": appearance.accentColor } as CSSProperties}><ModuleGlyph configuration={appearance} Icon={Icon} /><AdminModuleWordmark label={module.shortLabel} /></Link>; })}</div> : null}<nav>{navItems.map((item) => { const Icon = item.icon; const active = isAdminNavigationItemActive(item, location.pathname, location.search); return <Link key={item.key} to={item.to} onClick={() => setMobileMoreOpen(false)} className={active ? "active" : ""}><Icon /><span>{item.label}</span></Link>; })}</nav><footer className="admin-mobile-control-footer">{isPlatformAdmin ? <Link to={isPlatformRoute ? "/admin/business" : "/admin/platform"} onClick={() => setMobileMoreOpen(false)}><ShieldCheck />{isPlatformRoute ? "Business workspace" : "Platform administration"}</Link> : null}{auth.authenticated ? <div className="admin-mobile-control-footer__user"><span><strong>{auth.displayName || auth.email}</strong><small>{userType}</small></span><button type="button" onClick={() => void signOut()} title="Sign out" aria-label="Sign out"><LogOut /></button></div> : null}</footer></section></div> : null}
+          {mobileMoreOpen ? <div className="admin-mobile-more" role="dialog" aria-modal="true" aria-label="Admin navigation"><button className="admin-mobile-more__backdrop" type="button" onClick={() => setMobileMoreOpen(false)} aria-label="Close menu"></button><section><header><div><strong>{currentContextLabel}</strong><span>{isPlatformRoute ? `${platformIdentity.platformName} platform` : auth.businessName}</span></div><button type="button" onClick={() => setMobileMoreOpen(false)} aria-label="Close menu"><X /></button></header>{!isPlatformRoute ? <div className="admin-mobile-module-switcher">{adminModules.map((module) => { const appearance = resolveAdminModuleAppearance(module.key, moduleConfigurations); const Icon = resolveAdminModuleIcon(module, appearance); const active = module.key === currentModule.key; return <Link key={module.key} to={module.to} onClick={() => setMobileMoreOpen(false)} className={active ? "active" : ""} style={{ "--module-link-accent": appearance.accentColor } as CSSProperties}><ModuleGlyph configuration={appearance} Icon={Icon} /><ModuleIdentityWordmark configuration={appearance} label={module.shortLabel} compact /></Link>; })}</div> : null}<nav>{navItems.map((item) => { const Icon = item.icon; const active = isAdminNavigationItemActive(item, location.pathname, location.search); return <Link key={item.key} to={item.to} onClick={() => setMobileMoreOpen(false)} className={active ? "active" : ""}><Icon /><span>{item.label}</span></Link>; })}</nav><footer className="admin-mobile-control-footer">{isPlatformAdmin ? <Link to={isPlatformRoute ? "/admin/business" : "/admin/platform"} onClick={() => setMobileMoreOpen(false)}><ShieldCheck />{isPlatformRoute ? "Business workspace" : "Platform administration"}</Link> : null}{auth.authenticated ? <div className="admin-mobile-control-footer__user"><span><strong>{auth.displayName || auth.email}</strong><small>{userType}</small></span><button type="button" onClick={() => void signOut()} title="Sign out" aria-label="Sign out"><LogOut /></button></div> : null}</footer></section></div> : null}
 
           <nav className="admin-mobile-bottom-nav" aria-label={`${currentContextLabel} primary navigation`}>
             {mobileItems.map((item) => { const Icon = item.icon; const active = isAdminNavigationItemActive(item, location.pathname, location.search); return <Link key={item.key} to={item.to} className={active ? "active" : ""}><Icon /><span>{item.label}</span></Link>; })}

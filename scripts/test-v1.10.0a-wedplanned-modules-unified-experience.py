@@ -65,12 +65,16 @@ def main() -> None:
     assert "Open WedStudio overview" in layout
     assert "Private client delivery remains separate from WedStudio." in overviews
 
-    # Custom module marks are drawn only from platform-owned icon assets.
+    # Module icons remain restricted to platform-owned icon assets.
+    # Wordmarks are assigned separately from platform-owned logo assets.
     assert 'asset.assetType === "icon"' in platform
-    assert "moduleMarkAssets.map" in platform
+    assert 'asset.assetType === "logo"' in platform
+    assert "iconAssets.map" in platform
+    assert "logoAssets.map" in platform
     assert "platformAdmin.brandAssets.map((asset) => <option" not in platform
-    assert 'label="Module mark"' in platform
-    assert "platform-owned WedPlanned icon" in platform
+    assert 'label="Module icon asset"' in platform
+    assert 'label="Desktop wordmark"' in platform
+    assert 'label="Compact / mobile wordmark"' in platform
     assert 'title="WedPlanned asset library"' in platform
 
     # Website connections are workspace-owned and persist in the existing JSON envelope.

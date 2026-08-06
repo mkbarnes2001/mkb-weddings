@@ -7,6 +7,7 @@ SCHEMA = ROOT / "d1/schema.sql"
 MIGRATION_32 = ROOT / "d1/migrations/032_platform_administration.sql"
 MIGRATION_33 = ROOT / "d1/migrations/033_platform_style_assets.sql"
 MIGRATION_34 = ROOT / "d1/migrations/034_platform_record_card_colour.sql"
+MIGRATION_35 = ROOT / "d1/migrations/035_platform_branding_assets.sql"
 
 
 def one(con: sqlite3.Connection, sql: str):
@@ -20,15 +21,17 @@ def main() -> None:
     migration_32 = MIGRATION_32.read_text()
     migration_33 = MIGRATION_33.read_text()
     migration_34 = MIGRATION_34.read_text()
+    migration_35 = MIGRATION_35.read_text()
 
     con = sqlite3.connect(":memory:")
     con.executescript(schema_text)
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "34"
+    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "35"
 
     module_columns = {row[1] for row in con.execute("PRAGMA table_info(platform_module_configurations)")}
     assert {
         "module_key", "accent_color", "page_background_color",
         "section_background_color", "record_background_color", "icon_key", "mark_url",
+        "wordmark_url", "compact_wordmark_url",
         "active_button_style", "panel_accent_style", "status", "sort_order",
         "updated_by_user_id", "updated_by_email",
     }.issubset(module_columns)
@@ -41,6 +44,20 @@ def main() -> None:
         "size_bytes", "status", "uploaded_by_user_id", "uploaded_by_email",
     }.issubset(asset_columns)
     assert "workspace_id" not in asset_columns
+
+    branding_columns = {
+        row[1]
+        for row in con.execute("PRAGMA table_info(platform_branding_settings)")
+    }
+    assert {
+        "id", "platform_name", "wordmark_url",
+        "compact_wordmark_url", "icon_url",
+        "updated_by_user_id", "updated_by_email",
+    }.issubset(branding_columns)
+    assert one(
+        con,
+        "SELECT COUNT(*) FROM platform_branding_settings WHERE id='default'",
+    )[0] == 1
     assert not con.execute("PRAGMA foreign_key_check").fetchall()
 
     prefix = schema_text.split("-- v1.9.8a: WedPlanned platform administration", 1)[0]
@@ -53,6 +70,8 @@ def main() -> None:
     assert one(upgrade, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "33"
     upgrade.executescript(migration_34)
     assert one(upgrade, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "34"
+    upgrade.executescript(migration_35)
+    assert one(upgrade, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "35"
     assert not upgrade.execute("PRAGMA foreign_key_check").fetchall()
 
     layout = (ROOT / "src/admin/layouts/AdminLayout.tsx").read_text()
@@ -64,6 +83,7 @@ def main() -> None:
     platform_data = (ROOT / "serverless/platform-administration-d1.ts").read_text()
     module_data = (ROOT / "serverless/platform-module-config-d1.ts").read_text()
     asset_data = (ROOT / "serverless/platform-brand-assets-d1.ts").read_text()
+    branding_data = (ROOT / "serverless/platform-branding-d1.ts").read_text()
     service = (ROOT / "src/admin/services/AdminApiService.ts").read_text()
     types = (ROOT / "src/admin/types/platform.ts").read_text()
     css = (ROOT / "src/admin/admin-theme.css").read_text()
@@ -80,6 +100,10 @@ def main() -> None:
     assert "MKB_IMAGES.put" in asset_api
     assert "platform/brand-assets/" in asset_api
     assert "mark_url = ?" in asset_data
+    assert "wordmark_url = ?" in asset_data
+    assert "compact_wordmark_url = ?" in asset_data
+    assert "platform_branding_settings" in asset_data
+    assert "platform.branding.updated" in branding_data
     assert "brandAssets" in platform_data and "brandAssets" in types
 
     assert "admin-workspace-menu" in layout
@@ -108,6 +132,11 @@ def main() -> None:
     assert "var(--admin-module-record-background" in css
     assert '<AdminTabs className="crm-operations-tabs">' not in crm_page
     assert "saveModuleConfiguration" in platform_api
+    assert "saveBrandingAndModules" in platform_api
+    assert "savePlatformModuleConfigurations" in module_data
+    assert "platformIdentity" in platform_data
+    assert "PlatformBrandingIdentity" in types
+    assert "savePlatformBrandingAndModules" in service
 
     print("PASS v1.9.8a Platform Administration refinement")
     print("  fixed-width desktop sidebar and compact workspace flyout: verified")
@@ -115,7 +144,8 @@ def main() -> None:
     print("  duplicate CRM horizontal navigation removed: verified")
     print("  configurable page, section and record backgrounds: verified")
     print("  platform-owned reusable logo/icon library: verified")
-    print("  schema transition: 31 -> 32 -> 33 -> 34")
+    print("  exact platform and module wordmark assignments: verified")
+    print("  schema transition: 31 -> 32 -> 33 -> 34 -> 35")
 
 
 if __name__ == "__main__":

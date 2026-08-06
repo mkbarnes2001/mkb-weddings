@@ -23,7 +23,15 @@ def main() -> None:
     assert 'entitlementKey: "website_content"' in modules
     assert 'items: studioItems' in modules
     assert 'export type PlatformModuleKey = "crm" | "client-galleries" | "website" | "business";' in platform_types
-    assert 'PLATFORM_MODULE_KEYS = ["crm", "client-galleries", "website", "business"]' in module_data
+    assert 'export const PLATFORM_MODULE_KEYS = [' in module_data
+    for module_key in [
+        '"crm"',
+        '"client-galleries"',
+        '"website"',
+        '"business"',
+    ]:
+        assert module_key in module_data
+    assert "] as const;" in module_data
     assert "CHECK (module_key IN ('crm', 'client-galleries', 'website', 'business'))" in schema
 
     # Website is now a section inside Studio and both old and intuitive entry routes remain valid.
