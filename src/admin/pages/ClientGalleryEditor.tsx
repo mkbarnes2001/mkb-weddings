@@ -446,7 +446,7 @@ export function ClientGalleryEditor() {
         .client-gallery-editor-kicker {
           margin: 0 0 2px;
           color: #737373;
-          font-size: 8.5px;
+          font-size: calc((8.5px) * var(--admin-font-scale-effective, 1));
           font-weight: 650;
           letter-spacing: .14em;
           line-height: 1.2;
@@ -454,7 +454,7 @@ export function ClientGalleryEditor() {
         }
         .client-gallery-editor-title {
           margin: 0;
-          font-size: 17px;
+          font-size: calc((17px) * var(--admin-font-scale-effective, 1));
           font-weight: 650;
           letter-spacing: -.025em;
           line-height: 1.1;
@@ -463,7 +463,7 @@ export function ClientGalleryEditor() {
           margin: 3px 0 0;
           overflow: hidden;
           color: #737373;
-          font-size: 9.5px;
+          font-size: calc((9.5px) * var(--admin-font-scale-effective, 1));
           line-height: 1.35;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -488,7 +488,7 @@ export function ClientGalleryEditor() {
           background: #fff;
           color: #262626;
           padding: 0 10px;
-          font-size: 9px !important;
+          font-size: calc((9px) * var(--admin-font-scale-effective, 1)) !important;
           font-weight: 600 !important;
           line-height: 1;
           text-decoration: none;
@@ -508,7 +508,7 @@ export function ClientGalleryEditor() {
           opacity: .38;
         }
         .client-gallery-editor-action span {
-          font-size: 9px !important;
+          font-size: calc((9px) * var(--admin-font-scale-effective, 1)) !important;
           font-weight: 600 !important;
           line-height: 1 !important;
         }
@@ -560,7 +560,7 @@ export function ClientGalleryEditor() {
           flex-direction: column;
           align-items: center;
           gap: 4px;
-          font-size: 8.75px;
+          font-size: calc((8.75px) * var(--admin-font-scale-effective, 1));
           line-height: 1.1;
           color: #737373;
         }
@@ -604,14 +604,14 @@ export function ClientGalleryEditor() {
         }
         .client-gallery-settings-nav-label {
           display: block;
-          font-size: 10.5px;
+          font-size: calc((10.5px) * var(--admin-font-scale-effective, 1));
           font-weight: 650;
           line-height: 1.15;
         }
         .client-gallery-settings-nav-description {
           display: block;
           margin-top: 2px;
-          font-size: 8.75px;
+          font-size: calc((8.75px) * var(--admin-font-scale-effective, 1));
           line-height: 1.25;
         }
         .client-gallery-editor-main {
@@ -631,7 +631,7 @@ export function ClientGalleryEditor() {
         }
         .client-gallery-summary-details {
           padding: 12px 14px 14px;
-          font-size: 11px;
+          font-size: calc((11px) * var(--admin-font-scale-effective, 1));
         }
         .client-gallery-summary-card {
           border: 0 !important;
@@ -645,7 +645,7 @@ export function ClientGalleryEditor() {
         .client-gallery-summary-label {
           margin: 0;
           color: #a3a3a3;
-          font-size: 8px;
+          font-size: calc((8px) * var(--admin-font-scale-effective, 1));
           font-weight: 600;
           letter-spacing: .11em;
           line-height: 1.1;
@@ -653,14 +653,14 @@ export function ClientGalleryEditor() {
         }
         .client-gallery-summary-value {
           margin-top: 4px;
-          font-size: 11px;
+          font-size: calc((11px) * var(--admin-font-scale-effective, 1));
           font-weight: 500;
           line-height: 1.25;
         }
         .client-gallery-summary-secondary {
           margin-top: 2px;
           color: #737373;
-          font-size: 9.5px;
+          font-size: calc((9.5px) * var(--admin-font-scale-effective, 1));
           line-height: 1.25;
         }
         .client-gallery-access-panel {
@@ -685,14 +685,14 @@ export function ClientGalleryEditor() {
           flex: 0 0 auto;
         }
         .client-gallery-access-option strong {
-          font-size: 12px !important;
+          font-size: calc((12px) * var(--admin-font-scale-effective, 1)) !important;
           line-height: 1.25;
         }
         .client-gallery-access-option .client-gallery-access-help {
           display: block;
           margin-top: 3px;
           color: #737373;
-          font-size: 10px;
+          font-size: calc((10px) * var(--admin-font-scale-effective, 1));
           line-height: 1.4;
         }
         .client-gallery-access-advanced {
@@ -702,13 +702,13 @@ export function ClientGalleryEditor() {
           padding: 11px 12px !important;
         }
         .client-gallery-access-advanced summary {
-          font-size: 10.5px !important;
+          font-size: calc((10.5px) * var(--admin-font-scale-effective, 1)) !important;
         }
         .client-gallery-access-save {
           width: auto;
           margin-left: 8px;
           padding: 9px 13px !important;
-          font-size: 10px;
+          font-size: calc((10px) * var(--admin-font-scale-effective, 1));
         }
         .client-gallery-authorised-panel {
           padding: 18px !important;
@@ -778,7 +778,7 @@ export function ClientGalleryEditor() {
         }
         .client-gallery-activity-stat-value {
           display: block;
-          font-size: 15px;
+          font-size: calc((15px) * var(--admin-font-scale-effective, 1));
           line-height: 1;
           font-weight: 650;
           color: #171717;
@@ -787,7 +787,7 @@ export function ClientGalleryEditor() {
           display: block;
           margin-top: 3px;
           overflow: hidden;
-          font-size: 9.5px;
+          font-size: calc((9.5px) * var(--admin-font-scale-effective, 1));
           line-height: 1.2;
           color: #737373;
           text-overflow: ellipsis;
@@ -795,7 +795,7 @@ export function ClientGalleryEditor() {
         }
         .client-gallery-section-title {
           margin: 0;
-          font-size: 13px !important;
+          font-size: calc((13px) * var(--admin-font-scale-effective, 1)) !important;
           line-height: 1.2 !important;
           font-weight: 650 !important;
           letter-spacing: 0 !important;
@@ -808,7 +808,7 @@ export function ClientGalleryEditor() {
         .client-gallery-section-description {
           margin-top: 5px;
           max-width: 720px;
-          font-size: 10.5px !important;
+          font-size: calc((10.5px) * var(--admin-font-scale-effective, 1)) !important;
           line-height: 1.45 !important;
           color: #737373;
         }
@@ -828,18 +828,18 @@ export function ClientGalleryEditor() {
           background: #fafafa;
           padding: 0 7px;
           color: #737373;
-          font-size: 8.5px;
+          font-size: calc((8.5px) * var(--admin-font-scale-effective, 1));
           font-weight: 600;
           letter-spacing: .035em;
           line-height: 1;
           text-transform: uppercase;
         }
         .client-gallery-visitors-table {
-          font-size: 10.5px;
+          font-size: calc((10.5px) * var(--admin-font-scale-effective, 1));
           line-height: 1.35;
         }
         .client-gallery-visitors-table th {
-          font-size: 8px;
+          font-size: calc((8px) * var(--admin-font-scale-effective, 1));
           letter-spacing: .075em;
         }
         .client-gallery-panel-header {
@@ -907,7 +907,7 @@ export function ClientGalleryEditor() {
           display: block;
           margin-bottom: 4px;
           color: #737373;
-          font-size: 8.5px;
+          font-size: calc((8.5px) * var(--admin-font-scale-effective, 1));
           font-weight: 650;
           letter-spacing: .07em;
           text-transform: uppercase;
@@ -948,7 +948,7 @@ export function ClientGalleryEditor() {
         }
         @media (max-width: 1320px) {
           .client-gallery-editor-shell { grid-template-columns: 290px minmax(0,1fr); gap: 18px; }
-          .client-gallery-primary-tab { font-size: 9.5px; }
+          .client-gallery-primary-tab { font-size: calc((9.5px) * var(--admin-font-scale-effective, 1)); }
         }
         @media (max-width: 1120px) {
           .client-gallery-editor-header {
@@ -1025,7 +1025,7 @@ export function ClientGalleryEditor() {
             flex-direction: column;
             padding: 11px 12px;
           }
-          .client-gallery-editor-title { font-size: 16px; }
+          .client-gallery-editor-title { font-size: calc((16px) * var(--admin-font-scale-effective, 1)); }
           .client-gallery-editor-subtitle { white-space: normal; }
           .client-gallery-editor-actions {
             width: 100%;
@@ -1036,7 +1036,7 @@ export function ClientGalleryEditor() {
             width: 100%;
             min-width: 0;
             padding-inline: 7px;
-            font-size: 9px;
+            font-size: calc((9px) * var(--admin-font-scale-effective, 1));
           }
           .client-gallery-share-popover {
             left: 0;
@@ -1046,7 +1046,7 @@ export function ClientGalleryEditor() {
           .client-gallery-editor-shell { gap: 14px; }
           .client-gallery-sidebar-overview { grid-template-columns: minmax(0,1fr); }
           .client-gallery-primary-tabs { position: sticky; top: 0; z-index: 5; background: #fff; }
-          .client-gallery-primary-tab { padding: 8px 3px; font-size: 8.5px; }
+          .client-gallery-primary-tab { padding: 8px 3px; font-size: calc((8.5px) * var(--admin-font-scale-effective, 1)); }
           .client-gallery-context-menu { padding: 10px; }
           .client-gallery-activity-stats { grid-template-columns: minmax(0,1fr); }
           .client-gallery-activity-stat { padding: 10px 12px; }

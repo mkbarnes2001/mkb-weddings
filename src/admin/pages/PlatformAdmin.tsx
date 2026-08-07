@@ -130,6 +130,105 @@ function identityFingerprint(identity: PlatformBrandingIdentity) {
 }
 
 
+
+function PlatformScaleControl({
+  label,
+  value,
+  onChange,
+  help,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  help?: string;
+}) {
+  const safeValue = Math.min(140, Math.max(75, Number(value) || 100));
+
+  return (
+    <AdminField label={label} help={help}>
+      <div className="platform-scale-control">
+        <input
+          type="range"
+          min="75"
+          max="140"
+          step="1"
+          value={safeValue}
+          onChange={(event) => onChange(Number(event.target.value))}
+        />
+
+        <label>
+          <input
+            type="number"
+            min="75"
+            max="140"
+            step="1"
+            value={safeValue}
+            onChange={(event) => {
+              const next = Math.min(
+                140,
+                Math.max(75, Number(event.target.value) || 100),
+              );
+              onChange(next);
+            }}
+          />
+          <span>%</span>
+        </label>
+      </div>
+    </AdminField>
+  );
+}
+
+function PlatformOptionalColourControl({
+  label,
+  value,
+  fallback,
+  onChange,
+  help,
+}: {
+  label: string;
+  value: string;
+  fallback: string;
+  onChange: (value: string) => void;
+  help?: string;
+}) {
+  const validValue = /^#[0-9A-Fa-f]{6}$/.test(value)
+    ? value
+    : fallback;
+
+  return (
+    <AdminField label={label} help={help}>
+      <div className="platform-colour-control platform-colour-control--optional">
+        <input
+          type="color"
+          value={validValue}
+          onChange={(event) =>
+            onChange(event.target.value.toUpperCase())
+          }
+        />
+
+        <input
+          className="admin-field-input"
+          value={value}
+          placeholder="Use current default"
+          onChange={(event) =>
+            onChange(event.target.value.toUpperCase())
+          }
+        />
+
+        {value ? (
+          <button
+            type="button"
+            className="platform-colour-reset"
+            onClick={() => onChange("")}
+          >
+            Default
+          </button>
+        ) : null}
+      </div>
+    </AdminField>
+  );
+}
+
 export function PlatformAdmin() {
   const { auth } = useProfessionalAuth();
   const [searchParams] = useSearchParams();
@@ -685,6 +784,139 @@ export function PlatformAdmin() {
               </AdminField>
             </div>
           </section>
+
+          <section className="platform-module-control-group">
+            <header>
+              <strong>Global Admin typography</strong>
+              <span>
+                Platform-wide font sizing. 100% reproduces the current Admin interface.
+                Module-specific controls below can refine these values.
+              </span>
+            </header>
+
+            <div className="platform-module-field-grid platform-module-field-grid--scales">
+              <PlatformScaleControl
+                label="Overall Admin text"
+                value={platformIdentity.adminFontScale}
+                help="Master scale applied across Admin body text, records, forms and supporting content."
+                onChange={(value) => {
+                  setPlatformIdentity((current) => ({
+                    ...current,
+                    adminFontScale: value,
+                  }));
+                  setMessage("");
+                  setError("");
+                }}
+              />
+
+              <PlatformScaleControl
+                label="Headings"
+                value={platformIdentity.adminHeadingFontScale}
+                help="Additional scale for page, panel and operational headings."
+                onChange={(value) => {
+                  setPlatformIdentity((current) => ({
+                    ...current,
+                    adminHeadingFontScale: value,
+                  }));
+                  setMessage("");
+                  setError("");
+                }}
+              />
+
+              <PlatformScaleControl
+                label="Buttons & controls"
+                value={platformIdentity.adminButtonFontScale}
+                help="Additional scale for buttons and primary controls."
+                onChange={(value) => {
+                  setPlatformIdentity((current) => ({
+                    ...current,
+                    adminButtonFontScale: value,
+                  }));
+                  setMessage("");
+                  setError("");
+                }}
+              />
+
+              <PlatformScaleControl
+                label="Navigation & menus"
+                value={platformIdentity.adminNavigationFontScale}
+                help="Additional scale for desktop and mobile navigation labels."
+                onChange={(value) => {
+                  setPlatformIdentity((current) => ({
+                    ...current,
+                    adminNavigationFontScale: value,
+                  }));
+                  setMessage("");
+                  setError("");
+                }}
+              />
+
+              <PlatformScaleControl
+                label="Status / helper text"
+                value={platformIdentity.adminMetaFontScale}
+                help="Additional scale for badges, metadata, helper copy and compact labels."
+                onChange={(value) => {
+                  setPlatformIdentity((current) => ({
+                    ...current,
+                    adminMetaFontScale: value,
+                  }));
+                  setMessage("");
+                  setError("");
+                }}
+              />
+            </div>
+          </section>
+
+          <section className="platform-module-control-group">
+            <header>
+              <strong>Global Admin logo sizing</strong>
+              <span>
+                Default logo scales for page headers, desktop navigation and mobile navigation.
+              </span>
+            </header>
+
+            <div className="platform-module-field-grid platform-module-field-grid--scales">
+              <PlatformScaleControl
+                label="Page-header logos"
+                value={platformIdentity.pageHeaderLogoScale}
+                onChange={(value) => {
+                  setPlatformIdentity((current) => ({
+                    ...current,
+                    pageHeaderLogoScale: value,
+                  }));
+                  setMessage("");
+                  setError("");
+                }}
+              />
+
+              <PlatformScaleControl
+                label="Desktop sidebar logos"
+                value={platformIdentity.sidebarLogoScale}
+                onChange={(value) => {
+                  setPlatformIdentity((current) => ({
+                    ...current,
+                    sidebarLogoScale: value,
+                  }));
+                  setMessage("");
+                  setError("");
+                }}
+              />
+
+              <PlatformScaleControl
+                label="Mobile logos"
+                value={platformIdentity.mobileLogoScale}
+                onChange={(value) => {
+                  setPlatformIdentity((current) => ({
+                    ...current,
+                    mobileLogoScale: value,
+                  }));
+                  setMessage("");
+                  setError("");
+                }}
+              />
+            </div>
+          </section>
+
         </div>
       </AdminPanel>
 
@@ -996,7 +1228,223 @@ export function PlatformAdmin() {
                 </div>
               </section>
 
-              <section className="platform-module-control-group">
+
+          <section className="platform-module-control-group">
+            <header>
+              <strong>Desktop navigation</strong>
+              <span>
+                Optional module-specific colours for the left sidebar and its navigation buttons.
+                Leave a colour blank to retain the existing default behaviour.
+              </span>
+            </header>
+
+            <div className="platform-module-field-grid">
+              <PlatformOptionalColourControl
+                label="Sidebar background"
+                value={module.desktopNavBackgroundColor}
+                fallback="#111111"
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    desktopNavBackgroundColor: value,
+                  })
+                }
+              />
+
+              <PlatformOptionalColourControl
+                label="Menu text & icons"
+                value={module.desktopNavTextColor}
+                fallback="#FFFFFF"
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    desktopNavTextColor: value,
+                  })
+                }
+              />
+
+              <PlatformOptionalColourControl
+                label="Normal menu button"
+                value={module.desktopNavButtonColor}
+                fallback="#191919"
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    desktopNavButtonColor: value,
+                  })
+                }
+              />
+
+              <PlatformOptionalColourControl
+                label="Active menu button"
+                value={module.desktopNavActiveColor}
+                fallback={module.accentColor}
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    desktopNavActiveColor: value,
+                  })
+                }
+              />
+
+              <PlatformOptionalColourControl
+                label="Active text & icons"
+                value={module.desktopNavActiveTextColor}
+                fallback="#FFFFFF"
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    desktopNavActiveTextColor: value,
+                  })
+                }
+              />
+            </div>
+          </section>
+
+          <section className="platform-module-control-group">
+            <header>
+              <strong>Mobile navigation</strong>
+              <span>
+                Independent colours for the mobile module picker, More menu and bottom navigation.
+              </span>
+            </header>
+
+            <div className="platform-module-field-grid">
+              <PlatformOptionalColourControl
+                label="Mobile menu background"
+                value={module.mobileNavBackgroundColor}
+                fallback="#FFFFFF"
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    mobileNavBackgroundColor: value,
+                  })
+                }
+              />
+
+              <PlatformOptionalColourControl
+                label="Mobile text & icons"
+                value={module.mobileNavTextColor}
+                fallback="#222222"
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    mobileNavTextColor: value,
+                  })
+                }
+              />
+
+              <PlatformOptionalColourControl
+                label="Normal mobile button"
+                value={module.mobileNavButtonColor}
+                fallback="#FAF9F7"
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    mobileNavButtonColor: value,
+                  })
+                }
+              />
+
+              <PlatformOptionalColourControl
+                label="Active mobile button"
+                value={module.mobileNavActiveColor}
+                fallback={module.accentColor}
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    mobileNavActiveColor: value,
+                  })
+                }
+              />
+
+              <PlatformOptionalColourControl
+                label="Active mobile text & icons"
+                value={module.mobileNavActiveTextColor}
+                fallback="#FFFFFF"
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    mobileNavActiveTextColor: value,
+                  })
+                }
+              />
+            </div>
+          </section>
+
+          <section className="platform-module-control-group">
+            <header>
+              <strong>Typography & logo sizing</strong>
+              <span>
+                Module-specific scales multiply the global Admin defaults above.
+                100% leaves the global value unchanged.
+              </span>
+            </header>
+
+            <div className="platform-module-field-grid platform-module-field-grid--scales">
+              <PlatformScaleControl
+                label="All module text"
+                value={module.moduleFontScale}
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    moduleFontScale: value,
+                  })
+                }
+              />
+
+              <PlatformScaleControl
+                label="Module headings"
+                value={module.headingFontScale}
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    headingFontScale: value,
+                  })
+                }
+              />
+
+              <PlatformScaleControl
+                label="Module buttons"
+                value={module.buttonFontScale}
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    buttonFontScale: value,
+                  })
+                }
+              />
+
+              <PlatformScaleControl
+                label="Navigation text"
+                value={module.navigationFontScale}
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    navigationFontScale: value,
+                  })
+                }
+              />
+
+              <PlatformScaleControl
+                label="Page-header logo"
+                value={module.pageHeaderLogoScale}
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    pageHeaderLogoScale: value,
+                  })
+                }
+              />
+
+              <PlatformScaleControl
+                label="Sidebar logo"
+                value={module.sidebarLogoScale}
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    sidebarLogoScale: value,
+                  })
+                }
+              />
+
+              <PlatformScaleControl
+                label="Mobile logo"
+                value={module.mobileLogoScale}
+                onChange={(value) =>
+                  updateModule(module.moduleKey, {
+                    mobileLogoScale: value,
+                  })
+                }
+              />
+            </div>
+          </section>
+
+<section className="platform-module-control-group">
                 <header>
                   <strong>Interaction</strong>
                   <span>Navigation and primary panel treatments.</span>

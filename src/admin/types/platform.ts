@@ -105,6 +105,23 @@ export type PlatformModuleConfiguration = {
   pageBackgroundColor: string;
   sectionBackgroundColor: string;
   recordBackgroundColor: string;
+  desktopNavBackgroundColor: string;
+  desktopNavTextColor: string;
+  desktopNavButtonColor: string;
+  desktopNavActiveColor: string;
+  desktopNavActiveTextColor: string;
+  mobileNavBackgroundColor: string;
+  mobileNavTextColor: string;
+  mobileNavButtonColor: string;
+  mobileNavActiveColor: string;
+  mobileNavActiveTextColor: string;
+  moduleFontScale: number;
+  headingFontScale: number;
+  buttonFontScale: number;
+  navigationFontScale: number;
+  pageHeaderLogoScale: number;
+  sidebarLogoScale: number;
+  mobileLogoScale: number;
   iconKey: string;
   markUrl: string;
   wordmarkUrl: string;
@@ -164,6 +181,14 @@ export type PlatformBrandingIdentity = {
   darkWordmarkUrl: string;
   compactWordmarkUrl: string;
   iconUrl: string;
+  adminFontScale: number;
+  adminHeadingFontScale: number;
+  adminButtonFontScale: number;
+  adminNavigationFontScale: number;
+  adminMetaFontScale: number;
+  pageHeaderLogoScale: number;
+  sidebarLogoScale: number;
+  mobileLogoScale: number;
   updatedAt?: string;
 };
 

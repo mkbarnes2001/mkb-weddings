@@ -6,6 +6,23 @@ export type PlatformModuleConfigurationRecord = {
   pageBackgroundColor: string;
   sectionBackgroundColor: string;
   recordBackgroundColor: string;
+  desktopNavBackgroundColor: string;
+  desktopNavTextColor: string;
+  desktopNavButtonColor: string;
+  desktopNavActiveColor: string;
+  desktopNavActiveTextColor: string;
+  mobileNavBackgroundColor: string;
+  mobileNavTextColor: string;
+  mobileNavButtonColor: string;
+  mobileNavActiveColor: string;
+  mobileNavActiveTextColor: string;
+  moduleFontScale: number;
+  headingFontScale: number;
+  buttonFontScale: number;
+  navigationFontScale: number;
+  pageHeaderLogoScale: number;
+  sidebarLogoScale: number;
+  mobileLogoScale: number;
   iconKey: string;
   markUrl: string;
   wordmarkUrl: string;
@@ -44,7 +61,7 @@ PlatformModuleConfigurationRecord[] = [
     accentColor: "#2563EB",
     pageBackgroundColor: "#F5F3EF",
     sectionBackgroundColor: "#FFFFFF",
-    recordBackgroundColor: "#FFFFFF",
+    recordBackgroundColor: "#FFFFFF", desktopNavBackgroundColor: "", desktopNavTextColor: "", desktopNavButtonColor: "", desktopNavActiveColor: "", desktopNavActiveTextColor: "", mobileNavBackgroundColor: "", mobileNavTextColor: "", mobileNavButtonColor: "", mobileNavActiveColor: "", mobileNavActiveTextColor: "", moduleFontScale: 100, headingFontScale: 100, buttonFontScale: 100, navigationFontScale: 100, pageHeaderLogoScale: 100, sidebarLogoScale: 100, mobileLogoScale: 100,
     iconKey: "contact-round",
     markUrl: "",
     wordmarkUrl: "",
@@ -60,7 +77,7 @@ PlatformModuleConfigurationRecord[] = [
     accentColor: "#7C3AED",
     pageBackgroundColor: "#F5F3EF",
     sectionBackgroundColor: "#FFFFFF",
-    recordBackgroundColor: "#FFFFFF",
+    recordBackgroundColor: "#FFFFFF", desktopNavBackgroundColor: "", desktopNavTextColor: "", desktopNavButtonColor: "", desktopNavActiveColor: "", desktopNavActiveTextColor: "", mobileNavBackgroundColor: "", mobileNavTextColor: "", mobileNavButtonColor: "", mobileNavActiveColor: "", mobileNavActiveTextColor: "", moduleFontScale: 100, headingFontScale: 100, buttonFontScale: 100, navigationFontScale: 100, pageHeaderLogoScale: 100, sidebarLogoScale: 100, mobileLogoScale: 100,
     iconKey: "images",
     markUrl: "",
     wordmarkUrl: "",
@@ -76,7 +93,7 @@ PlatformModuleConfigurationRecord[] = [
     accentColor: "#0F766E",
     pageBackgroundColor: "#F5F3EF",
     sectionBackgroundColor: "#FFFFFF",
-    recordBackgroundColor: "#FFFFFF",
+    recordBackgroundColor: "#FFFFFF", desktopNavBackgroundColor: "", desktopNavTextColor: "", desktopNavButtonColor: "", desktopNavActiveColor: "", desktopNavActiveTextColor: "", mobileNavBackgroundColor: "", mobileNavTextColor: "", mobileNavButtonColor: "", mobileNavActiveColor: "", mobileNavActiveTextColor: "", moduleFontScale: 100, headingFontScale: 100, buttonFontScale: 100, navigationFontScale: 100, pageHeaderLogoScale: 100, sidebarLogoScale: 100, mobileLogoScale: 100,
     iconKey: "globe-2",
     markUrl: "",
     wordmarkUrl: "",
@@ -92,7 +109,7 @@ PlatformModuleConfigurationRecord[] = [
     accentColor: "#B45309",
     pageBackgroundColor: "#F5F3EF",
     sectionBackgroundColor: "#FFFFFF",
-    recordBackgroundColor: "#FFFFFF",
+    recordBackgroundColor: "#FFFFFF", desktopNavBackgroundColor: "", desktopNavTextColor: "", desktopNavButtonColor: "", desktopNavActiveColor: "", desktopNavActiveTextColor: "", mobileNavBackgroundColor: "", mobileNavTextColor: "", mobileNavButtonColor: "", mobileNavActiveColor: "", mobileNavActiveTextColor: "", moduleFontScale: 100, headingFontScale: 100, buttonFontScale: 100, navigationFontScale: 100, pageHeaderLogoScale: 100, sidebarLogoScale: 100, mobileLogoScale: 100,
     iconKey: "briefcase-business",
     markUrl: "",
     wordmarkUrl: "",
@@ -126,6 +143,32 @@ function httpError(message: string, statusCode = 400, details: string[] = []) {
 function validColour(value: unknown) {
   const candidate = text(value).toUpperCase();
   return /^#[0-9A-F]{6}$/.test(candidate) ? candidate : "";
+}
+
+function optionalColour(value: unknown) {
+  const candidate = text(value);
+  if (!candidate) return "";
+  return validColour(candidate);
+}
+
+function hydratedScale(value: unknown) {
+  const parsed = Number.parseInt(String(value ?? ""), 10);
+  return Number.isFinite(parsed) && parsed >= 75 && parsed <= 140
+    ? parsed
+    : 100;
+}
+
+function requiredScale(value: unknown, label: string) {
+  const parsed = Number.parseInt(String(value ?? ""), 10);
+
+  if (!Number.isFinite(parsed) || parsed < 75 || parsed > 140) {
+    throw httpError(
+      `${label} must be between 75% and 140%.`,
+      400,
+    );
+  }
+
+  return parsed;
 }
 
 function safeAssetUrl(value: unknown) {
@@ -166,26 +209,36 @@ function requirePlatformAdmin(actor: any) {
 
 function hydrate(row: any): PlatformModuleConfigurationRecord {
   return {
-    moduleKey: text(row.module_key) as
-      PlatformModuleConfigurationRecord["moduleKey"],
+    moduleKey: text(row.module_key) as PlatformModuleConfigurationRecord["moduleKey"],
     accentColor: validColour(row.accent_color) || "#111111",
-    pageBackgroundColor:
-      validColour(row.page_background_color) || "#F5F3EF",
-    sectionBackgroundColor:
-      validColour(row.section_background_color) || "#FFFFFF",
-    recordBackgroundColor:
-      validColour(row.record_background_color) || "#FFFFFF",
+    pageBackgroundColor: validColour(row.page_background_color) || "#F5F3EF",
+    sectionBackgroundColor: validColour(row.section_background_color) || "#FFFFFF",
+    recordBackgroundColor: validColour(row.record_background_color) || "#FFFFFF",
+    desktopNavBackgroundColor: optionalColour(row.desktop_nav_background_color),
+    desktopNavTextColor: optionalColour(row.desktop_nav_text_color),
+    desktopNavButtonColor: optionalColour(row.desktop_nav_button_color),
+    desktopNavActiveColor: optionalColour(row.desktop_nav_active_color),
+    desktopNavActiveTextColor: optionalColour(row.desktop_nav_active_text_color),
+    mobileNavBackgroundColor: optionalColour(row.mobile_nav_background_color),
+    mobileNavTextColor: optionalColour(row.mobile_nav_text_color),
+    mobileNavButtonColor: optionalColour(row.mobile_nav_button_color),
+    mobileNavActiveColor: optionalColour(row.mobile_nav_active_color),
+    mobileNavActiveTextColor: optionalColour(row.mobile_nav_active_text_color),
+    moduleFontScale: hydratedScale(row.module_font_scale),
+    headingFontScale: hydratedScale(row.heading_font_scale),
+    buttonFontScale: hydratedScale(row.button_font_scale),
+    navigationFontScale: hydratedScale(row.navigation_font_scale),
+    pageHeaderLogoScale: hydratedScale(row.page_header_logo_scale),
+    sidebarLogoScale: hydratedScale(row.sidebar_logo_scale),
+    mobileLogoScale: hydratedScale(row.mobile_logo_scale),
     iconKey: text(row.icon_key),
     markUrl: text(row.mark_url),
     wordmarkUrl: text(row.wordmark_url),
     darkWordmarkUrl: text(row.dark_wordmark_url),
     compactWordmarkUrl: text(row.compact_wordmark_url),
-    activeButtonStyle: text(row.active_button_style) as
-      PlatformModuleConfigurationRecord["activeButtonStyle"],
-    panelAccentStyle: text(row.panel_accent_style) as
-      PlatformModuleConfigurationRecord["panelAccentStyle"],
-    status: text(row.status || "active") as
-      PlatformModuleConfigurationRecord["status"],
+    activeButtonStyle: text(row.active_button_style) as PlatformModuleConfigurationRecord["activeButtonStyle"],
+    panelAccentStyle: text(row.panel_accent_style) as PlatformModuleConfigurationRecord["panelAccentStyle"],
+    status: text(row.status || "active") as PlatformModuleConfigurationRecord["status"],
     sortOrder: Number(row.sort_order || 0),
     updatedAt: row.updated_at || undefined,
   };
@@ -236,21 +289,75 @@ function normalisePlatformModuleConfiguration(
 
   const accentColor = validColour(incoming?.accentColor);
   const pageBackgroundColor = validColour(incoming?.pageBackgroundColor);
-  const sectionBackgroundColor = validColour(
-    incoming?.sectionBackgroundColor,
+  const sectionBackgroundColor = validColour(incoming?.sectionBackgroundColor);
+  const recordBackgroundColor = validColour(incoming?.recordBackgroundColor);
+
+  const desktopNavBackgroundColor = optionalColour(
+    incoming?.desktopNavBackgroundColor,
   );
-  const recordBackgroundColor = validColour(
-    incoming?.recordBackgroundColor,
+  const desktopNavTextColor = optionalColour(
+    incoming?.desktopNavTextColor,
   );
+  const desktopNavButtonColor = optionalColour(
+    incoming?.desktopNavButtonColor,
+  );
+  const desktopNavActiveColor = optionalColour(
+    incoming?.desktopNavActiveColor,
+  );
+  const desktopNavActiveTextColor = optionalColour(
+    incoming?.desktopNavActiveTextColor,
+  );
+
+  const mobileNavBackgroundColor = optionalColour(
+    incoming?.mobileNavBackgroundColor,
+  );
+  const mobileNavTextColor = optionalColour(
+    incoming?.mobileNavTextColor,
+  );
+  const mobileNavButtonColor = optionalColour(
+    incoming?.mobileNavButtonColor,
+  );
+  const mobileNavActiveColor = optionalColour(
+    incoming?.mobileNavActiveColor,
+  );
+  const mobileNavActiveTextColor = optionalColour(
+    incoming?.mobileNavActiveTextColor,
+  );
+
+  const moduleFontScale = requiredScale(
+    incoming?.moduleFontScale ?? fallback.moduleFontScale,
+    "Module text scale",
+  );
+  const headingFontScale = requiredScale(
+    incoming?.headingFontScale ?? fallback.headingFontScale,
+    "Module heading scale",
+  );
+  const buttonFontScale = requiredScale(
+    incoming?.buttonFontScale ?? fallback.buttonFontScale,
+    "Module button scale",
+  );
+  const navigationFontScale = requiredScale(
+    incoming?.navigationFontScale ?? fallback.navigationFontScale,
+    "Module navigation scale",
+  );
+  const pageHeaderLogoScale = requiredScale(
+    incoming?.pageHeaderLogoScale ?? fallback.pageHeaderLogoScale,
+    "Page-header logo scale",
+  );
+  const sidebarLogoScale = requiredScale(
+    incoming?.sidebarLogoScale ?? fallback.sidebarLogoScale,
+    "Sidebar logo scale",
+  );
+  const mobileLogoScale = requiredScale(
+    incoming?.mobileLogoScale ?? fallback.mobileLogoScale,
+    "Mobile logo scale",
+  );
+
   const iconKey = text(incoming?.iconKey);
   const markUrl = safeAssetUrl(incoming?.markUrl);
   const wordmarkUrl = safeAssetUrl(incoming?.wordmarkUrl);
-  const darkWordmarkUrl = safeAssetUrl(
-    incoming?.darkWordmarkUrl,
-  );
-  const compactWordmarkUrl = safeAssetUrl(
-    incoming?.compactWordmarkUrl,
-  );
+  const darkWordmarkUrl = safeAssetUrl(incoming?.darkWordmarkUrl);
+  const compactWordmarkUrl = safeAssetUrl(incoming?.compactWordmarkUrl);
 
   const activeButtonStyle = lower(
     incoming?.activeButtonStyle || fallback.activeButtonStyle,
@@ -269,21 +376,34 @@ function normalisePlatformModuleConfiguration(
   }
 
   if (!pageBackgroundColor) {
-    details.push(
-      "Page background colour must use six-digit hex format.",
-    );
+    details.push("Page background colour must use six-digit hex format.");
   }
 
   if (!sectionBackgroundColor) {
-    details.push(
-      "Section background colour must use six-digit hex format.",
-    );
+    details.push("Section background colour must use six-digit hex format.");
   }
 
   if (!recordBackgroundColor) {
-    details.push(
-      "Record card background colour must use six-digit hex format.",
-    );
+    details.push("Record card background colour must use six-digit hex format.");
+  }
+
+  const optionalColours: Array<[unknown, string, string]> = [
+    [incoming?.desktopNavBackgroundColor, desktopNavBackgroundColor, "Desktop navigation background"],
+    [incoming?.desktopNavTextColor, desktopNavTextColor, "Desktop navigation text"],
+    [incoming?.desktopNavButtonColor, desktopNavButtonColor, "Desktop navigation button"],
+    [incoming?.desktopNavActiveColor, desktopNavActiveColor, "Desktop active button"],
+    [incoming?.desktopNavActiveTextColor, desktopNavActiveTextColor, "Desktop active text"],
+    [incoming?.mobileNavBackgroundColor, mobileNavBackgroundColor, "Mobile navigation background"],
+    [incoming?.mobileNavTextColor, mobileNavTextColor, "Mobile navigation text"],
+    [incoming?.mobileNavButtonColor, mobileNavButtonColor, "Mobile navigation button"],
+    [incoming?.mobileNavActiveColor, mobileNavActiveColor, "Mobile active button"],
+    [incoming?.mobileNavActiveTextColor, mobileNavActiveTextColor, "Mobile active text"],
+  ];
+
+  for (const [raw, normalised, label] of optionalColours) {
+    if (text(raw) && !normalised) {
+      details.push(`${label} colour must use six-digit hex format.`);
+    }
   }
 
   if (!PLATFORM_MODULE_ICON_KEYS.includes(iconKey as any)) {
@@ -312,6 +432,23 @@ function normalisePlatformModuleConfiguration(
     pageBackgroundColor,
     sectionBackgroundColor,
     recordBackgroundColor,
+    desktopNavBackgroundColor,
+    desktopNavTextColor,
+    desktopNavButtonColor,
+    desktopNavActiveColor,
+    desktopNavActiveTextColor,
+    mobileNavBackgroundColor,
+    mobileNavTextColor,
+    mobileNavButtonColor,
+    mobileNavActiveColor,
+    mobileNavActiveTextColor,
+    moduleFontScale,
+    headingFontScale,
+    buttonFontScale,
+    navigationFontScale,
+    pageHeaderLogoScale,
+    sidebarLogoScale,
+    mobileLogoScale,
     iconKey,
     markUrl,
     wordmarkUrl,
@@ -336,6 +473,23 @@ function preparePlatformModuleUpsert(
       page_background_color,
       section_background_color,
       record_background_color,
+      desktop_nav_background_color,
+      desktop_nav_text_color,
+      desktop_nav_button_color,
+      desktop_nav_active_color,
+      desktop_nav_active_text_color,
+      mobile_nav_background_color,
+      mobile_nav_text_color,
+      mobile_nav_button_color,
+      mobile_nav_active_color,
+      mobile_nav_active_text_color,
+      module_font_scale,
+      heading_font_scale,
+      button_font_scale,
+      navigation_font_scale,
+      page_header_logo_scale,
+      sidebar_logo_scale,
+      mobile_logo_scale,
       icon_key,
       mark_url,
       wordmark_url,
@@ -350,30 +504,33 @@ function preparePlatformModuleUpsert(
       created_at,
       updated_at
     ) VALUES (
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      ?,
-      'active',
-      ?,
-      ?,
-      ?,
-      CURRENT_TIMESTAMP,
-      CURRENT_TIMESTAMP
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?, ?, ?,
+      'active', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     )
     ON CONFLICT(module_key) DO UPDATE SET
       accent_color = excluded.accent_color,
       page_background_color = excluded.page_background_color,
       section_background_color = excluded.section_background_color,
       record_background_color = excluded.record_background_color,
+      desktop_nav_background_color = excluded.desktop_nav_background_color,
+      desktop_nav_text_color = excluded.desktop_nav_text_color,
+      desktop_nav_button_color = excluded.desktop_nav_button_color,
+      desktop_nav_active_color = excluded.desktop_nav_active_color,
+      desktop_nav_active_text_color = excluded.desktop_nav_active_text_color,
+      mobile_nav_background_color = excluded.mobile_nav_background_color,
+      mobile_nav_text_color = excluded.mobile_nav_text_color,
+      mobile_nav_button_color = excluded.mobile_nav_button_color,
+      mobile_nav_active_color = excluded.mobile_nav_active_color,
+      mobile_nav_active_text_color = excluded.mobile_nav_active_text_color,
+      module_font_scale = excluded.module_font_scale,
+      heading_font_scale = excluded.heading_font_scale,
+      button_font_scale = excluded.button_font_scale,
+      navigation_font_scale = excluded.navigation_font_scale,
+      page_header_logo_scale = excluded.page_header_logo_scale,
+      sidebar_logo_scale = excluded.sidebar_logo_scale,
+      mobile_logo_scale = excluded.mobile_logo_scale,
       icon_key = excluded.icon_key,
       mark_url = excluded.mark_url,
       wordmark_url = excluded.wordmark_url,
@@ -386,23 +543,40 @@ function preparePlatformModuleUpsert(
       updated_by_user_id = excluded.updated_by_user_id,
       updated_by_email = excluded.updated_by_email,
       updated_at = CURRENT_TIMESTAMP
-    `).bind(
-      module.moduleKey,
-      module.accentColor,
-      module.pageBackgroundColor,
-      module.sectionBackgroundColor,
-      module.recordBackgroundColor,
-      module.iconKey,
-      module.markUrl,
-      module.wordmarkUrl,
-      module.darkWordmarkUrl,
-      module.compactWordmarkUrl,
-      module.activeButtonStyle,
-      module.panelAccentStyle,
-      module.sortOrder,
-      text(actor?.userId) || null,
-      lower(actor?.email),
-    );
+  `).bind(
+    module.moduleKey,
+    module.accentColor,
+    module.pageBackgroundColor,
+    module.sectionBackgroundColor,
+    module.recordBackgroundColor,
+    module.desktopNavBackgroundColor,
+    module.desktopNavTextColor,
+    module.desktopNavButtonColor,
+    module.desktopNavActiveColor,
+    module.desktopNavActiveTextColor,
+    module.mobileNavBackgroundColor,
+    module.mobileNavTextColor,
+    module.mobileNavButtonColor,
+    module.mobileNavActiveColor,
+    module.mobileNavActiveTextColor,
+    module.moduleFontScale,
+    module.headingFontScale,
+    module.buttonFontScale,
+    module.navigationFontScale,
+    module.pageHeaderLogoScale,
+    module.sidebarLogoScale,
+    module.mobileLogoScale,
+    module.iconKey,
+    module.markUrl,
+    module.wordmarkUrl,
+    module.darkWordmarkUrl,
+    module.compactWordmarkUrl,
+    module.activeButtonStyle,
+    module.panelAccentStyle,
+    module.sortOrder,
+    text(actor?.userId) || null,
+    lower(actor?.email),
+  );
 }
 
 function preparePlatformModuleAudit(
@@ -440,19 +614,7 @@ function preparePlatformModuleAudit(
     lower(actor?.email),
     module.moduleKey,
     `Updated ${module.moduleKey} module appearance.`,
-    JSON.stringify({
-      accentColor: module.accentColor,
-      pageBackgroundColor: module.pageBackgroundColor,
-      sectionBackgroundColor: module.sectionBackgroundColor,
-      recordBackgroundColor: module.recordBackgroundColor,
-      iconKey: module.iconKey,
-      markUrl: module.markUrl,
-      wordmarkUrl: module.wordmarkUrl,
-      darkWordmarkUrl: module.darkWordmarkUrl,
-      compactWordmarkUrl: module.compactWordmarkUrl,
-      activeButtonStyle: module.activeButtonStyle,
-      panelAccentStyle: module.panelAccentStyle,
-    }),
+    JSON.stringify(module),
   );
 }
 

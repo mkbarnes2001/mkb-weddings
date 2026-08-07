@@ -25,6 +25,14 @@ const DEFAULT_PLATFORM_IDENTITY: PlatformBrandingIdentity = {
   darkWordmarkUrl: "",
   compactWordmarkUrl: "",
   iconUrl: "",
+  adminFontScale: 100,
+  adminHeadingFontScale: 100,
+  adminButtonFontScale: 100,
+  adminNavigationFontScale: 100,
+  adminMetaFontScale: 100,
+  pageHeaderLogoScale: 100,
+  sidebarLogoScale: 100,
+  mobileLogoScale: 100,
 };
 
 type BrandingUpdatedDetail = {
@@ -256,12 +264,99 @@ export function AdminLayout() {
   const pageBackground = isPlatformRoute ? "#F4F5F7" : currentAppearance.pageBackgroundColor;
   const sectionBackground = isPlatformRoute ? "#FFFFFF" : currentAppearance.sectionBackgroundColor;
   const recordBackground = isPlatformRoute ? "#FFFFFF" : currentAppearance.recordBackgroundColor;
+
+  const globalFontScale =
+    (platformIdentity.adminFontScale || 100) / 100;
+
+  const moduleFontScale = isPlatformRoute
+    ? 1
+    : (currentAppearance.moduleFontScale || 100) / 100;
+
+  const baseFontScale =
+    globalFontScale * moduleFontScale;
+
+  const headingFontScale =
+    baseFontScale
+    * ((platformIdentity.adminHeadingFontScale || 100) / 100)
+    * (isPlatformRoute
+      ? 1
+      : (currentAppearance.headingFontScale || 100) / 100);
+
+  const buttonFontScale =
+    baseFontScale
+    * ((platformIdentity.adminButtonFontScale || 100) / 100)
+    * (isPlatformRoute
+      ? 1
+      : (currentAppearance.buttonFontScale || 100) / 100);
+
+  const navigationFontScale =
+    baseFontScale
+    * ((platformIdentity.adminNavigationFontScale || 100) / 100)
+    * (isPlatformRoute
+      ? 1
+      : (currentAppearance.navigationFontScale || 100) / 100);
+
+  const metaFontScale =
+    baseFontScale
+    * ((platformIdentity.adminMetaFontScale || 100) / 100);
+
+  const pageHeaderLogoScale =
+    ((platformIdentity.pageHeaderLogoScale || 100) / 100)
+    * (isPlatformRoute
+      ? 1
+      : (currentAppearance.pageHeaderLogoScale || 100) / 100);
+
+  const sidebarLogoScale =
+    ((platformIdentity.sidebarLogoScale || 100) / 100)
+    * (isPlatformRoute
+      ? 1
+      : (currentAppearance.sidebarLogoScale || 100) / 100);
+
+  const mobileLogoScale =
+    ((platformIdentity.mobileLogoScale || 100) / 100)
+    * (isPlatformRoute
+      ? 1
+      : (currentAppearance.mobileLogoScale || 100) / 100);
+
   const shellStyle = {
     "--admin-module-accent": accent,
     "--admin-module-accent-soft": `color-mix(in srgb, ${accent} 14%, transparent)`,
     "--admin-module-page-background": pageBackground,
     "--admin-module-section-background": sectionBackground,
     "--admin-module-record-background": recordBackground,
+
+    "--admin-font-scale-effective": baseFontScale,
+    "--admin-heading-scale-effective": headingFontScale,
+    "--admin-button-scale-effective": buttonFontScale,
+    "--admin-navigation-scale-effective": navigationFontScale,
+    "--admin-meta-scale-effective": metaFontScale,
+
+    "--admin-page-header-logo-scale-effective": pageHeaderLogoScale,
+    "--admin-sidebar-logo-scale-effective": sidebarLogoScale,
+    "--admin-mobile-logo-scale-effective": mobileLogoScale,
+
+    "--admin-desktop-nav-background-color":
+      currentAppearance.desktopNavBackgroundColor || "#111111",
+    "--admin-desktop-nav-text-color":
+      currentAppearance.desktopNavTextColor || "#FFFFFF",
+    "--admin-desktop-nav-button-color":
+      currentAppearance.desktopNavButtonColor || "#191919",
+    "--admin-desktop-nav-active-color":
+      currentAppearance.desktopNavActiveColor || accent,
+    "--admin-desktop-nav-active-text-color":
+      currentAppearance.desktopNavActiveTextColor || "#FFFFFF",
+
+    "--admin-mobile-nav-background-color":
+      currentAppearance.mobileNavBackgroundColor || "#FFFFFF",
+    "--admin-mobile-nav-text-color":
+      currentAppearance.mobileNavTextColor || "#222222",
+    "--admin-mobile-nav-button-color":
+      currentAppearance.mobileNavButtonColor || "#FAF9F7",
+    "--admin-mobile-nav-active-color":
+      currentAppearance.mobileNavActiveColor || accent,
+    "--admin-mobile-nav-active-text-color":
+      currentAppearance.mobileNavActiveTextColor || "#FFFFFF",
+
     "--admin-bg": pageBackground,
     "--admin-surface": sectionBackground,
     backgroundColor: pageBackground,
@@ -292,9 +387,65 @@ export function AdminLayout() {
       style={shellStyle}
       data-active-button-style={activeButtonStyle}
       data-panel-accent={panelAccentStyle}
+      data-desktop-nav-background-custom={
+        !isPlatformRoute && Boolean(currentAppearance.desktopNavBackgroundColor)
+          ? "true"
+          : "false"
+      }
+      data-desktop-nav-text-custom={
+        !isPlatformRoute && Boolean(currentAppearance.desktopNavTextColor)
+          ? "true"
+          : "false"
+      }
+      data-desktop-nav-button-custom={
+        !isPlatformRoute && Boolean(currentAppearance.desktopNavButtonColor)
+          ? "true"
+          : "false"
+      }
+      data-desktop-nav-active-custom={
+        !isPlatformRoute && Boolean(currentAppearance.desktopNavActiveColor)
+          ? "true"
+          : "false"
+      }
+      data-desktop-nav-active-text-custom={
+        !isPlatformRoute && Boolean(currentAppearance.desktopNavActiveTextColor)
+          ? "true"
+          : "false"
+      }
+      data-mobile-nav-background-custom={
+        !isPlatformRoute && Boolean(currentAppearance.mobileNavBackgroundColor)
+          ? "true"
+          : "false"
+      }
+      data-mobile-nav-text-custom={
+        !isPlatformRoute && Boolean(currentAppearance.mobileNavTextColor)
+          ? "true"
+          : "false"
+      }
+      data-mobile-nav-button-custom={
+        !isPlatformRoute && Boolean(currentAppearance.mobileNavButtonColor)
+          ? "true"
+          : "false"
+      }
+      data-mobile-nav-active-custom={
+        !isPlatformRoute && Boolean(currentAppearance.mobileNavActiveColor)
+          ? "true"
+          : "false"
+      }
+      data-mobile-nav-active-text-custom={
+        !isPlatformRoute && Boolean(currentAppearance.mobileNavActiveTextColor)
+          ? "true"
+          : "false"
+      }
     >
       <div className="admin-layout-grid">
-        <aside className="admin-sidebar border-r border-black" style={{ backgroundColor: "#111111", color: "#ffffff" }}>
+        <aside
+            className="admin-sidebar border-r border-black"
+            style={{
+              backgroundColor: "var(--admin-desktop-nav-background-color)",
+              color: "var(--admin-desktop-nav-text-color)",
+            }}
+          >
           <div className="admin-sidebar-identity border-b border-white/10 px-4 py-4">
             <Link
               to={isPlatformRoute ? "/admin/platform" : "/admin"}
