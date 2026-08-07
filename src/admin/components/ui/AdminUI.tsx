@@ -1,3 +1,5 @@
+import { useOutletContext } from "react-router-dom";
+import type { PlatformModuleConfiguration } from "../../types/platform";
 import type {
   AnchorHTMLAttributes,
   ButtonHTMLAttributes,
@@ -54,6 +56,45 @@ export function AdminModuleWordmark({
     </span>
   );
 }
+
+export function AdminModulePageWordmark({
+  label,
+  trailing,
+}: {
+  label: string;
+  trailing?: string;
+}) {
+  const { moduleAppearance } = useOutletContext<{
+    moduleAppearance?: PlatformModuleConfiguration;
+  }>();
+
+  const source = moduleAppearance?.wordmarkUrl || "";
+
+  if (!source) {
+    return (
+      <AdminModuleWordmark
+        label={label}
+        trailing={trailing}
+      />
+    );
+  }
+
+  return (
+    <span className="admin-module-page-wordmark">
+      <img
+        src={source}
+        alt={label}
+        className="admin-module-page-wordmark__asset"
+      />
+      {trailing ? (
+        <span className="admin-module-page-wordmark__trailing">
+          {trailing}
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
 
 export function AdminPageHeader({
   eyebrow,

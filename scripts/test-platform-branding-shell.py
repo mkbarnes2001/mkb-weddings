@@ -25,8 +25,10 @@ def main() -> None:
 
     assert "platform.platformIdentity" in layout
     assert "configuration.wordmarkUrl" in layout
+    assert "configuration.darkWordmarkUrl" in layout
     assert "configuration.compactWordmarkUrl" in layout
     assert "identity.wordmarkUrl" in layout
+    assert "identity.darkWordmarkUrl" in layout
     assert "identity.compactWordmarkUrl" in layout
     assert "identity.iconUrl" in layout
 
@@ -60,7 +62,7 @@ def main() -> None:
     print("PASS v1.10.1a platform branding shell")
     print("  global desktop platform wordmark: verified")
     print("  mobile platform icon and compact identity: verified")
-    print("  desktop module wordmark assignments: verified")
+    print("  light/dark desktop module wordmark assignments: verified")
     print("  compact mobile module assignments: verified")
     print("  immediate post-save shell refresh: verified")
 

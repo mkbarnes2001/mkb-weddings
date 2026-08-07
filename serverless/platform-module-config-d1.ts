@@ -9,6 +9,7 @@ export type PlatformModuleConfigurationRecord = {
   iconKey: string;
   markUrl: string;
   wordmarkUrl: string;
+  darkWordmarkUrl: string;
   compactWordmarkUrl: string;
   activeButtonStyle: "solid" | "soft" | "outline";
   panelAccentStyle: "edge" | "wash" | "header";
@@ -47,6 +48,7 @@ PlatformModuleConfigurationRecord[] = [
     iconKey: "contact-round",
     markUrl: "",
     wordmarkUrl: "",
+    darkWordmarkUrl: "",
     compactWordmarkUrl: "",
     activeButtonStyle: "solid",
     panelAccentStyle: "edge",
@@ -62,6 +64,7 @@ PlatformModuleConfigurationRecord[] = [
     iconKey: "images",
     markUrl: "",
     wordmarkUrl: "",
+    darkWordmarkUrl: "",
     compactWordmarkUrl: "",
     activeButtonStyle: "soft",
     panelAccentStyle: "wash",
@@ -77,6 +80,7 @@ PlatformModuleConfigurationRecord[] = [
     iconKey: "globe-2",
     markUrl: "",
     wordmarkUrl: "",
+    darkWordmarkUrl: "",
     compactWordmarkUrl: "",
     activeButtonStyle: "solid",
     panelAccentStyle: "edge",
@@ -92,6 +96,7 @@ PlatformModuleConfigurationRecord[] = [
     iconKey: "briefcase-business",
     markUrl: "",
     wordmarkUrl: "",
+    darkWordmarkUrl: "",
     compactWordmarkUrl: "",
     activeButtonStyle: "outline",
     panelAccentStyle: "header",
@@ -173,6 +178,7 @@ function hydrate(row: any): PlatformModuleConfigurationRecord {
     iconKey: text(row.icon_key),
     markUrl: text(row.mark_url),
     wordmarkUrl: text(row.wordmark_url),
+    darkWordmarkUrl: text(row.dark_wordmark_url),
     compactWordmarkUrl: text(row.compact_wordmark_url),
     activeButtonStyle: text(row.active_button_style) as
       PlatformModuleConfigurationRecord["activeButtonStyle"],
@@ -239,12 +245,17 @@ function normalisePlatformModuleConfiguration(
   const iconKey = text(incoming?.iconKey);
   const markUrl = safeAssetUrl(incoming?.markUrl);
   const wordmarkUrl = safeAssetUrl(incoming?.wordmarkUrl);
+  const darkWordmarkUrl = safeAssetUrl(
+    incoming?.darkWordmarkUrl,
+  );
   const compactWordmarkUrl = safeAssetUrl(
     incoming?.compactWordmarkUrl,
   );
+
   const activeButtonStyle = lower(
     incoming?.activeButtonStyle || fallback.activeButtonStyle,
   ) as PlatformModuleConfigurationRecord["activeButtonStyle"];
+
   const panelAccentStyle = lower(
     incoming?.panelAccentStyle || fallback.panelAccentStyle,
   ) as PlatformModuleConfigurationRecord["panelAccentStyle"];
@@ -304,6 +315,7 @@ function normalisePlatformModuleConfiguration(
     iconKey,
     markUrl,
     wordmarkUrl,
+    darkWordmarkUrl,
     compactWordmarkUrl,
     activeButtonStyle,
     panelAccentStyle,
@@ -327,6 +339,7 @@ function preparePlatformModuleUpsert(
       icon_key,
       mark_url,
       wordmark_url,
+      dark_wordmark_url,
       compact_wordmark_url,
       active_button_style,
       panel_accent_style,
@@ -337,6 +350,7 @@ function preparePlatformModuleUpsert(
       created_at,
       updated_at
     ) VALUES (
+      ?,
       ?,
       ?,
       ?,
@@ -363,6 +377,7 @@ function preparePlatformModuleUpsert(
       icon_key = excluded.icon_key,
       mark_url = excluded.mark_url,
       wordmark_url = excluded.wordmark_url,
+      dark_wordmark_url = excluded.dark_wordmark_url,
       compact_wordmark_url = excluded.compact_wordmark_url,
       active_button_style = excluded.active_button_style,
       panel_accent_style = excluded.panel_accent_style,
@@ -371,22 +386,23 @@ function preparePlatformModuleUpsert(
       updated_by_user_id = excluded.updated_by_user_id,
       updated_by_email = excluded.updated_by_email,
       updated_at = CURRENT_TIMESTAMP
-  `).bind(
-    module.moduleKey,
-    module.accentColor,
-    module.pageBackgroundColor,
-    module.sectionBackgroundColor,
-    module.recordBackgroundColor,
-    module.iconKey,
-    module.markUrl,
-    module.wordmarkUrl,
-    module.compactWordmarkUrl,
-    module.activeButtonStyle,
-    module.panelAccentStyle,
-    module.sortOrder,
-    text(actor?.userId) || null,
-    lower(actor?.email),
-  );
+    `).bind(
+      module.moduleKey,
+      module.accentColor,
+      module.pageBackgroundColor,
+      module.sectionBackgroundColor,
+      module.recordBackgroundColor,
+      module.iconKey,
+      module.markUrl,
+      module.wordmarkUrl,
+      module.darkWordmarkUrl,
+      module.compactWordmarkUrl,
+      module.activeButtonStyle,
+      module.panelAccentStyle,
+      module.sortOrder,
+      text(actor?.userId) || null,
+      lower(actor?.email),
+    );
 }
 
 function preparePlatformModuleAudit(
@@ -432,6 +448,7 @@ function preparePlatformModuleAudit(
       iconKey: module.iconKey,
       markUrl: module.markUrl,
       wordmarkUrl: module.wordmarkUrl,
+      darkWordmarkUrl: module.darkWordmarkUrl,
       compactWordmarkUrl: module.compactWordmarkUrl,
       activeButtonStyle: module.activeButtonStyle,
       panelAccentStyle: module.panelAccentStyle,

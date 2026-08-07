@@ -4684,3 +4684,38 @@
     height: 16px;
   }
 }
+
+/* v1.10.1a hotfix1 — surface-aware module wordmarks */
+.admin-module-page-wordmark {
+  display: inline-flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: .34em;
+  vertical-align: middle;
+}
+
+.admin-module-page-wordmark__asset {
+  display: block;
+  width: auto;
+  max-width: min(240px, 60vw);
+  height: 36px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.admin-module-page-wordmark__trailing {
+  display: inline-block;
+  color: inherit;
+  font-family: "Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif;
+  font-size: .73em;
+  font-style: normal;
+  font-weight: 650;
+  letter-spacing: -.035em;
+}
+
+@media (max-width: 620px) {
+  .admin-module-page-wordmark__asset {
+    max-width: min(190px, 58vw);
+    height: 30px;
+  }
+}

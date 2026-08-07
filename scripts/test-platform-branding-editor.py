@@ -17,7 +17,8 @@ def main() -> None:
 
     assert "platform-branding-editor__toolbar" in page
     assert "WedPlanned platform identity" in page
-    assert "Desktop wordmark" in page
+    assert "Light background wordmark" in page
+    assert "Dark background wordmark" in page
     assert "Compact / mobile wordmark" in page
     assert "Module icon asset" in page
     assert "Colour system" in page
@@ -52,7 +53,7 @@ def main() -> None:
     print("PASS v1.10.1a platform branding editor")
     print("  one page-level save action: verified")
     print("  unsaved-change tracking and reset: verified")
-    print("  platform and module asset assignments: verified")
+    print("  platform and module light/dark/compact asset assignments: verified")
     print("  grouped professional responsive layout: verified")
     print("  per-card module save actions removed: verified")
 

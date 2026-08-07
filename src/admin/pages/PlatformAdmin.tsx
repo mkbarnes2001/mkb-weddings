@@ -95,6 +95,7 @@ function Destination({ to, icon: Icon, title, description, meta }: { to: string;
 const DEFAULT_PLATFORM_IDENTITY: PlatformBrandingIdentity = {
   platformName: "WedPlanned",
   wordmarkUrl: "",
+  darkWordmarkUrl: "",
   compactWordmarkUrl: "",
   iconUrl: "",
 };
@@ -109,6 +110,7 @@ function moduleFingerprint(module: PlatformModuleConfiguration) {
     iconKey: module.iconKey,
     markUrl: module.markUrl,
     wordmarkUrl: module.wordmarkUrl,
+    darkWordmarkUrl: module.darkWordmarkUrl,
     compactWordmarkUrl: module.compactWordmarkUrl,
     activeButtonStyle: module.activeButtonStyle,
     panelAccentStyle: module.panelAccentStyle,
@@ -121,6 +123,7 @@ function identityFingerprint(identity: PlatformBrandingIdentity) {
   return JSON.stringify({
     platformName: identity.platformName,
     wordmarkUrl: identity.wordmarkUrl,
+    darkWordmarkUrl: identity.darkWordmarkUrl,
     compactWordmarkUrl: identity.compactWordmarkUrl,
     iconUrl: identity.iconUrl,
   });
@@ -503,7 +506,7 @@ export function PlatformAdmin() {
         <div className="platform-identity-editor">
           <div className="platform-identity-preview-grid">
             <div className="platform-identity-preview platform-identity-preview--light">
-              <span>Desktop wordmark</span>
+              <span>Light background wordmark</span>
               {platformIdentity.wordmarkUrl
                 ? <img
                     src={platformIdentity.wordmarkUrl}
@@ -515,7 +518,19 @@ export function PlatformAdmin() {
             </div>
 
             <div className="platform-identity-preview platform-identity-preview--dark">
-              <span>Compact identity</span>
+              <span>Dark background wordmark</span>
+              {platformIdentity.darkWordmarkUrl || platformIdentity.wordmarkUrl
+                ? <img
+                    src={platformIdentity.darkWordmarkUrl || platformIdentity.wordmarkUrl}
+                    alt={platformIdentity.platformName}
+                  />
+                : <AdminModuleWordmark
+                    label={platformIdentity.platformName}
+                  />}
+            </div>
+
+            <div className="platform-identity-preview platform-identity-preview--compact">
+              <span>Compact / mobile identity</span>
               {platformIdentity.compactWordmarkUrl
                 ? <img
                     src={platformIdentity.compactWordmarkUrl}
@@ -551,7 +566,7 @@ export function PlatformAdmin() {
                 />
               </AdminField>
 
-              <AdminField label="Desktop wordmark">
+              <AdminField label="Light background wordmark">
                 <FieldSelect
                   value={platformIdentity.wordmarkUrl}
                   onChange={(value) => {
@@ -570,6 +585,42 @@ export function PlatformAdmin() {
                     )
                     ? <option value={platformIdentity.wordmarkUrl}>Current assigned asset</option>
                     : null}
+                  {logoAssets.map((asset) => (
+                    <option key={asset.id} value={asset.url}>
+                      {asset.name}
+                    </option>
+                  ))}
+                </FieldSelect>
+              </AdminField>
+
+              <AdminField label="Dark background wordmark">
+                <FieldSelect
+                  value={platformIdentity.darkWordmarkUrl}
+                  onChange={(value) => {
+                    setPlatformIdentity((current) => ({
+                      ...current,
+                      darkWordmarkUrl: value,
+                    }));
+                    setMessage("");
+                    setError("");
+                  }}
+                >
+                  <option value="">
+                    Use light background wordmark
+                  </option>
+
+                  {platformIdentity.darkWordmarkUrl
+                    && !logoAssets.some(
+                      (asset) =>
+                        asset.url === platformIdentity.darkWordmarkUrl,
+                    )
+                    ? (
+                      <option value={platformIdentity.darkWordmarkUrl}>
+                        Current assigned asset
+                      </option>
+                    )
+                    : null}
+
                   {logoAssets.map((asset) => (
                     <option key={asset.id} value={asset.url}>
                       {asset.name}
@@ -657,6 +708,9 @@ export function PlatformAdmin() {
           const wordmarkInLibrary = logoAssets.some(
             (asset) => asset.url === module.wordmarkUrl,
           );
+          const darkWordmarkInLibrary = logoAssets.some(
+            (asset) => asset.url === module.darkWordmarkUrl,
+          );
           const compactInLibrary = logoAssets.some(
             (asset) => asset.url === module.compactWordmarkUrl,
           );
@@ -694,10 +748,10 @@ export function PlatformAdmin() {
                     />
                   : <PreviewIcon />}
 
-                {module.wordmarkUrl
+                {module.darkWordmarkUrl || module.wordmarkUrl
                   ? <img
                       className="platform-module-preview__wordmark"
-                      src={module.wordmarkUrl}
+                      src={module.darkWordmarkUrl || module.wordmarkUrl}
                       alt={definition.label}
                     />
                   : <AdminModuleWordmark label={definition.shortLabel} />}
@@ -718,7 +772,7 @@ export function PlatformAdmin() {
               <section className="platform-module-control-group">
                 <header>
                   <strong>Identity</strong>
-                  <span>Icon and uploaded wordmarks.</span>
+                  <span>Icon plus light, dark and compact wordmarks.</span>
                 </header>
 
                 <div className="platform-module-field-grid">
@@ -758,7 +812,7 @@ export function PlatformAdmin() {
                     </FieldSelect>
                   </AdminField>
 
-                  <AdminField label="Desktop wordmark">
+                  <AdminField label="Light background wordmark">
                     <FieldSelect
                       value={module.wordmarkUrl}
                       onChange={(value) => updateModule(
@@ -770,6 +824,35 @@ export function PlatformAdmin() {
                       {module.wordmarkUrl && !wordmarkInLibrary
                         ? <option value={module.wordmarkUrl}>Current assigned asset</option>
                         : null}
+                      {logoAssets.map((asset) => (
+                        <option key={asset.id} value={asset.url}>
+                          {asset.name}
+                        </option>
+                      ))}
+                    </FieldSelect>
+                  </AdminField>
+
+                  <AdminField label="Dark background wordmark">
+                    <FieldSelect
+                      value={module.darkWordmarkUrl}
+                      onChange={(value) => updateModule(
+                        module.moduleKey,
+                        { darkWordmarkUrl: value },
+                      )}
+                    >
+                      <option value="">
+                        Use light background wordmark
+                      </option>
+
+                      {module.darkWordmarkUrl
+                        && !darkWordmarkInLibrary
+                        ? (
+                          <option value={module.darkWordmarkUrl}>
+                            Current assigned asset
+                          </option>
+                        )
+                        : null}
+
                       {logoAssets.map((asset) => (
                         <option key={asset.id} value={asset.url}>
                           {asset.name}

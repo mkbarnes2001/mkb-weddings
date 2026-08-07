@@ -73,7 +73,8 @@ def main() -> None:
     assert "logoAssets.map" in platform
     assert "platformAdmin.brandAssets.map((asset) => <option" not in platform
     assert 'label="Module icon asset"' in platform
-    assert 'label="Desktop wordmark"' in platform
+    assert 'label="Light background wordmark"' in platform
+    assert 'label="Dark background wordmark"' in platform
     assert 'label="Compact / mobile wordmark"' in platform
     assert 'title="WedPlanned asset library"' in platform
 

@@ -108,6 +108,7 @@ export type PlatformModuleConfiguration = {
   iconKey: string;
   markUrl: string;
   wordmarkUrl: string;
+  darkWordmarkUrl: string;
   compactWordmarkUrl: string;
   activeButtonStyle: "solid" | "soft" | "outline";
   panelAccentStyle: "edge" | "wash" | "header";
@@ -160,6 +161,7 @@ export type PlatformAdministrationUser = {
 export type PlatformBrandingIdentity = {
   platformName: string;
   wordmarkUrl: string;
+  darkWordmarkUrl: string;
   compactWordmarkUrl: string;
   iconUrl: string;
   updatedAt?: string;

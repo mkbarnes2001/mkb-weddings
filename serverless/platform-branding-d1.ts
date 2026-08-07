@@ -3,6 +3,7 @@ type D1Db = any;
 export type PlatformBrandingIdentityRecord = {
   platformName: string;
   wordmarkUrl: string;
+  darkWordmarkUrl: string;
   compactWordmarkUrl: string;
   iconUrl: string;
   updatedAt?: string;
@@ -11,6 +12,7 @@ export type PlatformBrandingIdentityRecord = {
 export const DEFAULT_PLATFORM_BRANDING_IDENTITY: PlatformBrandingIdentityRecord = {
   platformName: "WedPlanned",
   wordmarkUrl: "",
+  darkWordmarkUrl: "",
   compactWordmarkUrl: "",
   iconUrl: "",
 };
@@ -75,6 +77,7 @@ function hydrate(row: any): PlatformBrandingIdentityRecord {
   return {
     platformName: text(row.platform_name) || "WedPlanned",
     wordmarkUrl: text(row.wordmark_url),
+    darkWordmarkUrl: text(row.dark_wordmark_url),
     compactWordmarkUrl: text(row.compact_wordmark_url),
     iconUrl: text(row.icon_url),
     updatedAt: row.updated_at || undefined,
@@ -103,6 +106,9 @@ function normalisePlatformBrandingIdentity(
     incoming?.platformName || "WedPlanned",
   ).slice(0, 80);
   const wordmarkUrl = safeAssetUrl(incoming?.wordmarkUrl);
+  const darkWordmarkUrl = safeAssetUrl(
+    incoming?.darkWordmarkUrl,
+  );
   const compactWordmarkUrl = safeAssetUrl(
     incoming?.compactWordmarkUrl,
   );
@@ -115,6 +121,7 @@ function normalisePlatformBrandingIdentity(
   return {
     platformName,
     wordmarkUrl,
+    darkWordmarkUrl,
     compactWordmarkUrl,
     iconUrl,
   };
@@ -130,6 +137,7 @@ function preparePlatformBrandingUpsert(
       id,
       platform_name,
       wordmark_url,
+      dark_wordmark_url,
       compact_wordmark_url,
       icon_url,
       updated_by_user_id,
@@ -144,12 +152,14 @@ function preparePlatformBrandingUpsert(
       ?,
       ?,
       ?,
+      ?,
       CURRENT_TIMESTAMP,
       CURRENT_TIMESTAMP
     )
     ON CONFLICT(id) DO UPDATE SET
       platform_name = excluded.platform_name,
       wordmark_url = excluded.wordmark_url,
+      dark_wordmark_url = excluded.dark_wordmark_url,
       compact_wordmark_url = excluded.compact_wordmark_url,
       icon_url = excluded.icon_url,
       updated_by_user_id = excluded.updated_by_user_id,
@@ -158,6 +168,7 @@ function preparePlatformBrandingUpsert(
   `).bind(
     identity.platformName,
     identity.wordmarkUrl,
+    identity.darkWordmarkUrl,
     identity.compactWordmarkUrl,
     identity.iconUrl,
     text(actor?.userId) || null,

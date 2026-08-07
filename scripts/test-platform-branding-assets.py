@@ -23,7 +23,7 @@ def main() -> None:
     assert one(
         con,
         "SELECT value FROM schema_meta WHERE key='schema_version'",
-    )[0] == "35"
+    )[0] == "36"
 
     module_columns = {
         row[1]
@@ -34,6 +34,7 @@ def main() -> None:
     assert {
         "mark_url",
         "wordmark_url",
+        "dark_wordmark_url",
         "compact_wordmark_url",
     }.issubset(module_columns)
 
@@ -47,6 +48,7 @@ def main() -> None:
         "id",
         "platform_name",
         "wordmark_url",
+        "dark_wordmark_url",
         "compact_wordmark_url",
         "icon_url",
         "updated_by_user_id",
@@ -59,13 +61,14 @@ def main() -> None:
         SELECT
           platform_name,
           wordmark_url,
+          dark_wordmark_url,
           compact_wordmark_url,
           icon_url
         FROM platform_branding_settings
         WHERE id='default'
         """,
     )
-    assert identity == ("WedPlanned", "", "", "")
+    assert identity == ("WedPlanned", "", "", "", "")
     assert not con.execute("PRAGMA foreign_key_check").fetchall()
 
     prefix = schema.split(
@@ -120,6 +123,7 @@ def main() -> None:
 
     for token in (
         "wordmarkUrl",
+        "darkWordmarkUrl",
         "compactWordmarkUrl",
         "savePlatformModuleConfigurations",
     ):
@@ -139,6 +143,7 @@ def main() -> None:
     assert "PlatformBrandingIdentity" in types
     assert "savePlatformBrandingAndModules" in service
     assert navigation.count('wordmarkUrl: ""') == 4
+    assert navigation.count('darkWordmarkUrl: ""') == 4
     assert navigation.count('compactWordmarkUrl: ""') == 4
 
     print("PASS v1.10.1a platform branding contract")

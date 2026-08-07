@@ -134,10 +134,12 @@ export async function archivePlatformBrandAsset(db: D1Db, actor: any, assetId: s
       AND (
         mark_url = ?
         OR wordmark_url = ?
+        OR dark_wordmark_url = ?
         OR compact_wordmark_url = ?
       )
     LIMIT 1
   `).bind(
+    text(asset.url),
     text(asset.url),
     text(asset.url),
     text(asset.url),
@@ -156,11 +158,13 @@ export async function archivePlatformBrandAsset(db: D1Db, actor: any, assetId: s
     WHERE id = 'default'
       AND (
         wordmark_url = ?
+        OR dark_wordmark_url = ?
         OR compact_wordmark_url = ?
         OR icon_url = ?
       )
     LIMIT 1
   `).bind(
+    text(asset.url),
     text(asset.url),
     text(asset.url),
     text(asset.url),
