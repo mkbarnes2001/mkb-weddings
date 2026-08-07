@@ -58,8 +58,8 @@ def main() -> None:
     assert 'pathname.startsWith("/admin/settings"), items: businessItems' not in modules
 
     # WedStudio is the visible public-content workspace.
-    assert 'label="WedStudio"' in dashboard
-    assert 'trailing="overview"' in dashboard
+    assert 'eyebrow="WedStudio · Content operations"' in dashboard
+    assert 'title="Dashboard"' in dashboard
     assert 'eyebrow="WedStudio · Website"' in dashboard
     assert 'eyebrow="WedStudio · Publishing"' in dashboard
     assert "Open WedStudio overview" in layout
@@ -164,9 +164,11 @@ def main() -> None:
     assert "admin-module-wordmark__wed" in admin_ui
     assert "WedPlanned Canela" in admin_css
     assert 'overview: "WedCRM overview"' in crm
-    assert 'label="WedCRM"' in crm
-    assert 'label="WedStore"' in overviews
-    assert 'label="WedBusiness"' in overviews
+    assert 'eyebrow="WedCRM · Client operations"' in crm
+    assert '? "Dashboard"' in crm
+    assert 'eyebrow="WedStore · Private delivery"' in overviews
+    assert 'eyebrow="WedBusiness · Workspace configuration"' in overviews
+    assert overviews.count('title="Dashboard"') >= 2
     assert 'to="/admin/settings/client-portal"' not in overviews
     assert "Client portal branding" not in overviews
     assert "portalReady" not in overviews

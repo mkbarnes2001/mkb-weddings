@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import type { VenueDocument, VenueSummary } from "../types/venue";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 type CsvRow = Record<string, string>;
 
@@ -341,26 +342,47 @@ export function VenueMigration() {
 
   return (
     <div className="space-y-7">
-      <Link
-        to="/admin/venues"
-        className="inline-flex items-center gap-2 text-sm text-neutral-600"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to venues
-      </Link>
-
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-          Venue Migration
-        </p>
-        <h1 className="font-serif text-5xl md:text-6xl">
-          Import venue CSV
-        </h1>
-        <p className="mt-4 max-w-2xl text-white/60">
-          Preview and import records from public/galleryvenuedesc.csv.
-          Existing venue slugs are skipped.
-        </p>
-      </section>
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to="/admin/venues"
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to venues
+          </Link>
+        }
+        title="Venue migration"
+        description="Preview and import venue records from the existing CSV source."
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{summary.total} CSV rows</span>
+            <span className="text-neutral-400">·</span>
+            <span>{summary.ready} ready</span>
+            <span className="text-neutral-400">·</span>
+            <span>{summary.duplicates} existing</span>
+            <span className="text-neutral-400">·</span>
+            <span>{summary.invalid} invalid</span>
+          </div>
+        }
+        actions={
+          <button
+            type="button"
+            onClick={runMigration}
+            disabled={running || summary.ready === 0}
+            className="admin-button admin-button--primary"
+          >
+            {running ? (
+              <Loader2 className="admin-button__icon animate-spin" />
+            ) : (
+              <FileUp className="admin-button__icon" />
+            )}
+            {running
+              ? "Importing…"
+              : `Import ${summary.ready} venues`}
+          </button>
+        }
+      />
 
       {error ? (
         <section className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
@@ -415,21 +437,6 @@ export function VenueMigration() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={runMigration}
-            disabled={running || summary.ready === 0}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"
-          >
-            {running ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <FileUp className="h-4 w-4" />
-            )}
-            {running
-              ? "Importing…"
-              : `Import ${summary.ready} venues`}
-          </button>
         </div>
 
         <div className="overflow-x-auto">

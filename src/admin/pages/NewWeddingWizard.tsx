@@ -22,6 +22,7 @@ import {
   type VenueDirectoryEntry,
 } from "../services/VenueDirectoryService";
 import { VenueAutocomplete } from "../components/VenueAutocomplete";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 const steps = [
   "Wedding",
@@ -179,57 +180,62 @@ export function NewWeddingWizard() {
   if (createdSlug) {
     return (
       <div className="space-y-7">
-        <section className="rounded-[32px] bg-emerald-950 p-8 text-white md:p-10">
-          <CheckCircle2 className="mb-6 h-10 w-10 text-emerald-300" />
-          <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-            Wedding created
-          </p>
-          <h1 className="mb-4 font-serif text-4xl leading-tight md:text-6xl">
-            The wedding record is ready.
-          </h1>
-          <p className="max-w-2xl text-white/65">
-            A new wedding record has been created directly in D1.
-          </p>
-        </section>
+        <AdminPageHeader
+          title="Wedding created"
+          meta={
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="admin-status admin-status--success">
+                Created
+              </span>
+              <code className="text-[10px]">
+                d1://weddings/{createdSlug}
+              </code>
+            </div>
+          }
+          actions={
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `/admin/weddings/${createdSlug}/workspace`,
+                  )
+                }
+                className="admin-button admin-button--primary"
+              >
+                Open Wedding Workspace
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setCreatedSlug("");
+                  setStep(0);
+                  setDraft({
+                    couple: "",
+                    venue: originVenue?.name || "",
+                    venueSlug: originVenue?.slug,
+                    venueId: originVenue?.id,
+                    weddingDate: "",
+                    title: "",
+                    slug: "",
+                    photographer: "MKB Weddings",
+                    status: "draft",
+                  });
+                }}
+                className="admin-button admin-button--secondary"
+              >
+                Create another
+              </button>
+            </div>
+          }
+        />
 
         <section className="rounded-[28px] border border-black/10 bg-white/75 p-7">
-          <p className="mb-2 text-xs uppercase tracking-[0.2em] text-neutral-500">
-            Created
+          <p className="text-sm text-neutral-600">
+            The wedding record has been created directly in D1
+            and is ready in the Wedding Workspace.
           </p>
-          <code className="text-sm">
-            d1://weddings/{createdSlug}
-          </code>
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => navigate(`/admin/weddings/${createdSlug}/workspace`)}
-              className="rounded-full bg-black px-5 py-3 text-sm text-white"
-            >
-              Open Wedding Workspace
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setCreatedSlug("");
-                setStep(0);
-                setDraft({
-                  couple: "",
-                  venue: originVenue?.name || "",
-                  venueSlug: originVenue?.slug,
-                  venueId: originVenue?.id,
-                  weddingDate: "",
-                  title: "",
-                  slug: "",
-                  photographer: "MKB Weddings",
-                  status: "draft",
-                });
-              }}
-              className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm"
-            >
-              Create another
-            </button>
-          </div>
         </section>
       </div>
     );
@@ -237,44 +243,50 @@ export function NewWeddingWizard() {
 
   return (
     <div className="space-y-7">
-      <Link
-        to={
-          returnTo ||
-          (originVenueSlug
-            ? `/admin/venues/${originVenueSlug}`
-            : "/admin/weddings")
-        }
-        className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to weddings
-      </Link>
-
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <div className="flex flex-col justify-between gap-6 xl:flex-row xl:items-start">
-          <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-              New Wedding Wizard
-            </p>
-            <h1 className="mb-4 font-serif text-4xl leading-tight md:text-6xl">
-              Create a wedding record.
-            </h1>
-            <p className="max-w-2xl text-white/65">
-              The wizard creates the core wedding record directly in D1. Image import and AI processing plug into the same repository workflow.
-            </p>
-          </div>
-
-          <div
-            className={`rounded-2xl border px-4 py-3 text-sm ${
-              apiOnline
-                ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-100"
-                : "border-amber-300/30 bg-amber-300/10 text-amber-100"
-            }`}
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to={
+              returnTo
+              || (
+                originVenueSlug
+                  ? `/admin/venues/${originVenueSlug}`
+                  : "/admin/weddings"
+              )
+            }
+            className="admin-inline-link inline-flex items-center gap-1"
           >
-            {apiOnline ? "Admin API connected" : "Admin API unavailable"}
+            <ArrowLeft size={13} />
+            Back to weddings
+          </Link>
+        }
+        title="New wedding"
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="admin-status admin-status--info">
+              Step {step + 1} of {steps.length}
+            </span>
+
+            <span
+              className={
+                apiOnline
+                  ? "admin-status admin-status--success"
+                  : "admin-status admin-status--warning"
+              }
+            >
+              {apiOnline
+                ? "Admin API connected"
+                : "Admin API unavailable"}
+            </span>
+
+            {originVenue ? (
+              <span className="text-neutral-500">
+                {originVenue.name}
+              </span>
+            ) : null}
           </div>
-        </div>
-      </section>
+        }
+      />
 
       {originVenue ? (
         <section className="rounded-[24px] border border-emerald-200 bg-emerald-50 p-5">

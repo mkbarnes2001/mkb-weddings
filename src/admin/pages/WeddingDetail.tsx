@@ -21,6 +21,7 @@ import { ProgressBar } from "../components/ProgressBar";
 import { StatusBadge } from "../components/Badge";
 import { SupplierService } from "../services/SupplierService";
 import { AdminApiService } from "../services/AdminApiService";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 export function WeddingDetail() {
   const { slug } = useParams();
@@ -108,117 +109,77 @@ export function WeddingDetail() {
 
   return (
     <div className="space-y-7">
-      <Link
-        to="/admin/weddings"
-        className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to weddings
-      </Link>
-
       {recordError ? <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{recordError}</div> : null}
 
-      <section className="overflow-hidden rounded-[32px] bg-black text-white">
-        <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="p-8 md:p-10">
-            <div className="mb-5 flex flex-wrap items-center gap-3">
-              <StatusBadge status={wedding.status} />
-
-              <span className="rounded-full border border-white/15 px-3 py-1 text-xs text-white/60">
-                {wedding.storage}
-              </span>
-
-              <span className="rounded-full border border-white/15 px-3 py-1 text-xs capitalize text-white/60">
-                {wedding.publicationStatus}
-              </span>
-            </div>
-
-            <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-              Wedding control centre
-            </p>
-
-            <h1 className="mb-4 font-serif text-4xl leading-tight md:text-6xl">
-              {wedding.title}
-            </h1>
-
-            <p className="text-white/65">
-              {wedding.couple} · {wedding.venue} ·{" "}
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to="/admin/weddings"
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to weddings
+          </Link>
+        }
+        title="Wedding details"
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge status={wedding.status} />
+            <span>{wedding.couple}</span>
+            <span className="text-neutral-400">·</span>
+            <span>{wedding.venue}</span>
+            <span className="text-neutral-400">
               {wedding.weddingDate}
-            </p>
-
-            {wedding.intro ? (
-              <p className="mt-6 max-w-2xl leading-relaxed text-white/60">
-                {wedding.intro}
-              </p>
-            ) : null}
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                to={`/admin/weddings/${wedding.slug}/workspace`}
-                className="rounded-full bg-white px-5 py-3 text-sm text-black hover:bg-white/90 inline-flex items-center gap-2"
-              >
-                <LayoutDashboard className="h-4 w-4" /> Wedding Workspace
-              </Link>
-
-              {isManagedWedding ? (
-                <Link
-                  to={`/admin/weddings/${wedding.slug}/content`}
-                  className="rounded-full border border-white/20 px-5 py-3 text-sm text-white/80 hover:bg-white/10"
-                >
-                  Edit master content
-                </Link>
-              ) : null}
-
-              <Link
-                to={`/admin/weddings/${wedding.slug}/images`}
-                className={`rounded-full px-5 py-3 text-sm ${
-                  isManagedWedding
-                    ? "border border-white/20 text-white/80 hover:bg-white/10"
-                    : "bg-white text-black hover:bg-white/90"
-                }`}
-              >
-                Open image manager
-              </Link>
-
-              <Link
-                to={`/admin/weddings/${wedding.slug}/publish`}
-                className="rounded-full border border-white/20 px-5 py-3 text-sm text-white/80 hover:bg-white/10"
-              >
-                Publish
-              </Link>
-
-              <a
-                href={`/blog/${wedding.slug}`}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-full border border-white/20 px-5 py-3 text-sm text-white/80 hover:bg-white/10"
-              >
-                Open public story
-              </a>
-            </div>
-
-            {!isManagedWedding ? (
-              <p className="mt-5 max-w-xl text-sm leading-relaxed text-amber-200/80">
-                This wedding is managed directly in D1.
-              </p>
-            ) : null}
+            </span>
+            <span className="text-neutral-400">
+              {wedding.publicationStatus}
+            </span>
           </div>
+        }
+        actions={
+          <div className="flex flex-wrap justify-end gap-2">
+            <Link
+              to={`/admin/weddings/${wedding.slug}/workspace`}
+              className="admin-button admin-button--primary"
+            >
+              <LayoutDashboard className="admin-button__icon" />
+              Wedding Workspace
+            </Link>
 
-          {cover ? (
-            <div className="min-h-[340px] bg-white/10">
-              <img
-                src={cover.fullSrc}
-                alt={cover.aiAlt || wedding.title}
-                className="h-full w-full object-cover opacity-90"
-              />
-            </div>
-          ) : (
-            <div className="flex min-h-[340px] items-center justify-center bg-white/5 text-sm text-white/35">
-              No cover image selected
-            </div>
-          )}
-        </div>
-      </section>
+            {isManagedWedding ? (
+              <Link
+                to={`/admin/weddings/${wedding.slug}/content`}
+                className="admin-button admin-button--secondary"
+              >
+                Edit content
+              </Link>
+            ) : null}
+
+            <Link
+              to={`/admin/weddings/${wedding.slug}/images`}
+              className="admin-button admin-button--secondary"
+            >
+              Open images
+            </Link>
+
+            <Link
+              to={`/admin/weddings/${wedding.slug}/publish`}
+              className="admin-button admin-button--secondary"
+            >
+              Publish
+            </Link>
+
+            <a
+              href={`/blog/${wedding.slug}`}
+              target="_blank"
+              rel="noreferrer"
+              className="admin-button admin-button--secondary"
+            >
+              Open story
+            </a>
+          </div>
+        }
+      />
 
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-4">
         <MetricCard

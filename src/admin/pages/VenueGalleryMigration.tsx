@@ -14,6 +14,7 @@ import type {
   VenueGalleryMigrationPreview,
   VenueGalleryMigrationResult,
 } from "../services/AdminApiService";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 type MigrationMode = "refresh" | "merge";
 
@@ -77,26 +78,32 @@ export function VenueGalleryMigration() {
 
   return (
     <div className="space-y-7">
-      <Link
-        to="/admin/venues"
-        className="inline-flex items-center gap-2 text-sm text-neutral-600"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to venues
-      </Link>
-
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-          Existing Asset Migration
-        </p>
-        <h1 className="font-serif text-5xl md:text-6xl">
-          Import venue galleries
-        </h1>
-        <p className="mt-4 max-w-3xl text-white/60">
-          Adopt the images already stored in Cloudflare R2. No files are
-          uploaded, copied or resized during this migration.
-        </p>
-      </section>
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to="/admin/venues"
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to venues
+          </Link>
+        }
+        title="Gallery migration"
+        description="Adopt venue gallery images already stored in Cloudflare R2 without uploading or copying files."
+        meta={
+          preview ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span>{preview.totalRows} CSV images</span>
+              <span className="text-neutral-400">·</span>
+              <span>{preview.matchedVenues} venues matched</span>
+              <span className="text-neutral-400">·</span>
+              <span>{preview.readyRows} ready</span>
+            </div>
+          ) : (
+            <span>Reading migration source</span>
+          )
+        }
+      />
 
       {error ? (
         <section className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">

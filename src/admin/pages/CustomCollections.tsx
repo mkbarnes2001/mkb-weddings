@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import type { CustomCollection } from "../types/customCollection";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 function slugify(value: string) {
   return value
@@ -139,27 +140,23 @@ export function CustomCollections() {
 
   return (
     <div className="space-y-7">
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-              Gallery Settings
-            </p>
-            <h1 className="font-serif text-5xl md:text-6xl">Photographer galleries</h1>
-            <p className="mt-4 max-w-3xl text-white/60">
-              Create and configure galleries such as Beach Weddings, Winter Weddings,
-              Black &amp; White or Castle Weddings. Images are referenced, never duplicated.
-            </p>
-          </div>
-
+      <AdminPageHeader
+        eyebrow={
           <Link
             to="/admin/gallery"
-            className="rounded-full border border-white/20 px-5 py-3 text-center text-sm"
+            className="admin-inline-link"
           >
             Back to Gallery Management
           </Link>
-        </div>
-      </section>
+        }
+        title="Custom collections"
+        description="Create and configure photographer galleries. Images are referenced rather than duplicated."
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{sorted.length} galleries</span>
+          </div>
+        }
+      />
 
       {message ? (
         <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">

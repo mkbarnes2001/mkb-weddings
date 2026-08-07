@@ -6,6 +6,7 @@ import { WeddingService } from "../services/WeddingService";
 import type { WeddingRecord } from "../types/wedding";
 import { ProgressBar } from "../components/ProgressBar";
 import { StatusBadge } from "../components/Badge";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 export function WeddingStory() {
   const { slug } = useParams();
@@ -54,43 +55,35 @@ export function WeddingStory() {
 
   return (
     <div className="space-y-7">
-      <Link
-        to={`/admin/weddings/${story.slug}`}
-        className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to wedding
-      </Link>
-
-      <section className="rounded-[32px] bg-black text-white p-8 md:p-10">
-        <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-6">
-          <div>
-            <div className="mb-5">
-              <StatusBadge status={wedding.status} />
-            </div>
-
-            <p className="uppercase tracking-[0.25em] text-xs text-white/45 mb-4">
-              Story Intelligence
-            </p>
-
-            <h1 className="text-4xl md:text-6xl font-serif leading-tight mb-4">
-              {story.title}
-            </h1>
-
-            <p className="text-white/65">
-              {story.couple} · {story.venue} · {story.weddingDate}
-            </p>
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to={`/admin/weddings/${story.slug}`}
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to wedding
+          </Link>
+        }
+        title="Story"
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge status={wedding.status} />
+            <span>{story.title}</span>
+            <span className="text-neutral-400">·</span>
+            <span>{story.venue}</span>
           </div>
-
+        }
+        actions={
           <Link
             to={`/admin/weddings/${story.slug}/content`}
-            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black hover:bg-white/90"
+            className="admin-button admin-button--primary"
           >
-            <Pencil className="w-4 h-4" />
+            <Pencil className="admin-button__icon" />
             Edit master content
           </Link>
-        </div>
-      </section>
+        }
+      />
 
       <section className="grid grid-cols-1 lg:grid-cols-4 gap-5">
         <div className="rounded-[28px] border border-black/10 bg-white/75 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">

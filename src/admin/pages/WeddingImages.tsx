@@ -23,6 +23,7 @@ import {
   type ImageFilterMode,
 } from "../components/imageManager/ImageToolbar";
 import { normaliseOrder } from "../imageWorkflow/imageWorkflowUtils";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 export function WeddingImages() {
   const { slug } = useParams();
@@ -314,44 +315,46 @@ export function WeddingImages() {
 
   return (
     <div className="space-y-7">
-      <Link
-        to={`/admin/weddings/${wedding.slug}`}
-        className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to wedding
-      </Link>
-
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-          <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-              Image Manager
-            </p>
-            <h1 className="mb-4 font-serif text-4xl leading-tight md:text-6xl">
-              {wedding.couple}
-            </h1>
-            <p className="text-white/65">
-              {wedding.venue} · {images.length} images ·{" "}
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to={`/admin/weddings/${wedding.slug}`}
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to wedding
+          </Link>
+        }
+        title="Images"
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{wedding.couple}</span>
+            <span className="text-neutral-400">·</span>
+            <span>{wedding.venue}</span>
+            <span className="text-neutral-400">
+              {images.length} images
+            </span>
+            <span className="text-neutral-400">
               {filteredImages.length} shown
-            </p>
+            </span>
           </div>
-
+        }
+        actions={
           <button
             type="button"
             onClick={saveImages}
             disabled={saving || !dirty}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black disabled:opacity-40"
+            className="admin-button admin-button--primary"
           >
-            <Save className="h-4 w-4" />
+            <Save className="admin-button__icon" />
             {saving
               ? "Saving..."
               : dirty
                 ? "Save all changes"
                 : "Saved"}
           </button>
-        </div>
-      </section>
+        }
+      />
 
       <ImageToolbar
         query={query}

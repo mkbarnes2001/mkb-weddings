@@ -4719,3 +4719,191 @@
     height: 30px;
   }
 }
+
+/* v1.10.1a hotfix2 — compact universal Admin page headers */
+
+.admin-page-header {
+  display: flex;
+  min-width: 0;
+  min-height: 72px;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: 10px 16px;
+}
+
+.admin-page-header__brand {
+  display: flex;
+  width: 158px;
+  min-width: 158px;
+  min-height: 42px;
+  align-items: center;
+  padding-right: 16px;
+  border-right: 1px solid var(--admin-border);
+}
+
+.admin-page-header__identity-asset {
+  display: block;
+  width: auto;
+  max-width: 142px;
+  height: 29px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.admin-page-header__identity-fallback {
+  max-width: 142px;
+  font-size: 23px;
+  line-height: 1;
+}
+
+.admin-page-header__content {
+  display: flex;
+  min-width: 145px;
+  max-width: 320px;
+  flex: 0 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+}
+
+.admin-page-title {
+  overflow: hidden;
+  max-width: 100%;
+  margin: 0;
+  font-size: clamp(1rem, 1.3vw, 1.25rem);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+}
+
+.admin-page-header__back {
+  min-width: 0;
+  line-height: 1.1;
+}
+
+.admin-page-header__back .admin-inline-link {
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+/*
+ * Keep existing page descriptions available to assistive technology,
+ * while removing the long explanatory copy from the compact visual header.
+ */
+.admin-page-description {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.admin-page-summary {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  margin: 0;
+}
+
+.admin-page-meta {
+  margin-top: 0;
+}
+
+.admin-page-actions {
+  display: flex;
+  width: auto;
+  min-width: max-content;
+  flex: 0 0 auto;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+@media (max-width: 1000px) {
+  .admin-page-header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .admin-page-header__content {
+    flex: 1 1 220px;
+    max-width: none;
+  }
+
+  .admin-page-summary {
+    width: auto;
+    flex: 1 0 calc(100% - 174px);
+    margin-left: 174px;
+  }
+
+  .admin-page-actions {
+    width: auto;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-page-header {
+    min-height: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px 12px;
+    padding: 10px 12px;
+  }
+
+  .admin-page-header__brand {
+    width: 124px;
+    min-width: 124px;
+    min-height: 34px;
+    padding-right: 12px;
+  }
+
+  .admin-page-header__identity-asset {
+    max-width: 110px;
+    height: 24px;
+  }
+
+  .admin-page-header__identity-fallback {
+    max-width: 110px;
+    font-size: 19px;
+  }
+
+  .admin-page-header__content {
+    min-width: 0;
+    flex: 1 1 calc(100% - 136px);
+  }
+
+  .admin-page-summary {
+    width: 100%;
+    flex: 1 0 100%;
+    margin-left: 0;
+    padding-top: 8px;
+    border-top: 1px solid var(--admin-border);
+  }
+
+  .admin-page-actions {
+    width: 100%;
+    min-width: 0;
+    flex: 1 0 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}

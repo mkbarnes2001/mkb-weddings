@@ -13,6 +13,7 @@ import {
 import { AdminApiService } from "../services/AdminApiService";
 import type { StoredWeddingDocument } from "../services/AdminApiService";
 import type { VenueSummary } from "../types/venue";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 type UploadFile = {
   id: string;
@@ -242,27 +243,38 @@ export function VenueUpload() {
 
   return (
     <div className="space-y-7">
-      <Link
-        to={`/admin/venues/${slug}/gallery`}
-        className="inline-flex items-center gap-2 text-sm text-neutral-600"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to venue gallery
-      </Link>
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to={`/admin/venues/${slug}/gallery`}
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to venue gallery
+          </Link>
+        }
+        title="Image upload"
+        description="Upload finished JPEG, PNG or WebP images to the selected venue wedding."
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{venue?.name || "Venue"}</span>
 
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-          Finished Image Intake
-        </p>
-        <h1 className="font-serif text-5xl md:text-6xl">
-          Upload edited images
-        </h1>
-        <p className="mt-4 max-w-2xl text-white/60">
-          Upload finished JPEG, PNG or WebP files after culling and editing in
-          Lightroom. Images are prepared in your browser, stored directly in
-          Cloudflare R2 and registered in D1. RAW files are intentionally not supported.
-        </p>
-      </section>
+            {selectedWedding ? (
+              <>
+                <span className="text-neutral-400">·</span>
+                <span>{selectedWedding.couple}</span>
+              </>
+            ) : null}
+
+            {files.length ? (
+              <>
+                <span className="text-neutral-400">·</span>
+                <span>{queuedCount} queued</span>
+              </>
+            ) : null}
+          </div>
+        }
+      />
 
       {requestedWeddingSlug && selectedWedding ? (
         <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">

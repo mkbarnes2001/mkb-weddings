@@ -129,39 +129,30 @@ def main() -> None:
     assert "configuration.darkWordmarkUrl" in layout
     assert "identity.darkWordmarkUrl" in layout
 
-    assert (
-        '<Outlet context={{ moduleAppearance: currentAppearance }} />'
-        in layout
-    )
+    assert "moduleAppearance: currentAppearance" in layout
+    assert "moduleLabel: currentModule.label" in layout
+    assert "platformIdentity" in layout
+    assert "isPlatformRoute" in layout
 
-    # Light page-heading identity.
-    assert "AdminModulePageWordmark" in ui
+    # Light page-heading identity is supplied by the shared page header.
+    assert "function AdminPageHeaderIdentity" in ui
     assert "moduleAppearance?.wordmarkUrl" in ui
-    assert "admin-module-page-wordmark__asset" in ui
+    assert "platformIdentity?.wordmarkUrl" in ui
+    assert "admin-page-header__identity-asset" in ui
+    assert "<AdminPageHeaderIdentity />" in ui
 
-    assert (
-        '<AdminModulePageWordmark label="WedCRM" '
-        'trailing="overview" />'
-        in crm
-    )
+    assert '<AdminPageHeader' in crm
+    assert 'eyebrow="WedCRM · Client operations"' in crm
+    assert '? "Dashboard"' in crm
 
-    assert (
-        '<AdminModulePageWordmark label="WedStudio" '
-        'trailing="overview" />'
-        in dashboard
-    )
+    assert '<AdminPageHeader' in dashboard
+    assert 'eyebrow="WedStudio · Content operations"' in dashboard
+    assert 'title="Dashboard"' in dashboard
 
-    assert (
-        '<AdminModulePageWordmark label="WedStore" '
-        'trailing="overview" />'
-        in overviews
-    )
-
-    assert (
-        '<AdminModulePageWordmark label="WedBusiness" '
-        'trailing="overview" />'
-        in overviews
-    )
+    assert overviews.count("<AdminPageHeader") >= 2
+    assert 'eyebrow="WedStore · Private delivery"' in overviews
+    assert 'eyebrow="WedBusiness · Workspace configuration"' in overviews
+    assert overviews.count('title="Dashboard"') >= 2
 
     # Branding editor.
     assert editor.count(

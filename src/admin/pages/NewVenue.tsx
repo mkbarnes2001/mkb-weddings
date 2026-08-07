@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AlertCircle, ArrowLeft, Save } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import type { VenueDocument } from "../types/venue";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 function slugify(value: string) {
   return value.trim().toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -53,15 +54,40 @@ export function NewVenue() {
 
   return (
     <div className="space-y-7">
-      <Link to="/admin/venues" className="inline-flex items-center gap-2 text-sm text-neutral-600">
-        <ArrowLeft className="h-4 w-4" />
-        Back to venues
-      </Link>
-
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">Venue Repository</p>
-        <h1 className="font-serif text-5xl md:text-6xl">New venue</h1>
-      </section>
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to="/admin/venues"
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to venues
+          </Link>
+        }
+        title="New venue"
+        description="Create a new venue repository record."
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="admin-status admin-status--neutral">
+              Draft
+            </span>
+            <span>
+              {name.trim() || "New venue record"}
+            </span>
+          </div>
+        }
+        actions={
+          <button
+            type="button"
+            onClick={createVenue}
+            disabled={saving}
+            className="admin-button admin-button--primary"
+          >
+            <Save className="admin-button__icon" />
+            {saving ? "Creating…" : "Create venue"}
+          </button>
+        }
+      />
 
       {error ? (
         <section className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
@@ -77,10 +103,6 @@ export function NewVenue() {
           <Field label="County" value={county} onChange={setCounty} />
         </div>
 
-        <button type="button" onClick={createVenue} disabled={saving} className="mt-7 inline-flex items-center gap-2 rounded-full bg-black px-6 py-3 text-sm text-white disabled:opacity-40">
-          <Save className="h-4 w-4" />
-          {saving ? "Creating…" : "Create venue"}
-        </button>
       </section>
     </div>
   );

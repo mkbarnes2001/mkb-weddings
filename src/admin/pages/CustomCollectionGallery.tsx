@@ -18,6 +18,7 @@ import type {
   CustomCollectionAssignmentOption,
   CustomCollectionImage,
 } from "../types/customCollection";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 type Filter = "all" | "included" | "excluded" | "hidden";
 
@@ -369,52 +370,60 @@ export function CustomCollectionGallery() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[30px] bg-black p-7 text-white md:p-9">
-        <Link
-          to="/admin/custom-collections"
-          className="mb-4 inline-flex items-center gap-2 text-sm text-white/60"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to custom collections
-        </Link>
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="mb-2 text-xs uppercase tracking-[0.25em] text-white/45">
-              Custom Collection Manager
-            </p>
-            <h1 className="font-serif text-4xl md:text-5xl">{collection.name}</h1>
-            <p className="mt-3 max-w-3xl text-sm text-white/60">
-              Add images, curate their exact order, hide individual photographs and choose the gallery hero.
-            </p>
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to="/admin/custom-collections"
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to custom collections
+          </Link>
+        }
+        title="Collection gallery"
+        description="Add images, curate their exact order, hide individual photographs and choose the gallery hero."
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{collection.name}</span>
+            <span className="text-neutral-400">·</span>
+            <span>{images.length} available</span>
+            <span className="text-neutral-400">·</span>
+            <span>{includedCount} included</span>
+            <span className="text-neutral-400">·</span>
+            <span>{visibleCount} visible</span>
           </div>
-          <div className="flex flex-wrap gap-3">
+        }
+        actions={
+          <div className="flex flex-wrap gap-2">
             {collection.status === "active" ? (
               <a
-                href={`https://www.mkbweddings.co.uk/gallery/collection/${encodeURIComponent(collection.slug)}`}
+                href={`https://www.mkbweddings.co.uk/gallery/collection/${encodeURIComponent(
+                  collection.slug,
+                )}`}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full border border-white/20 px-5 py-3 text-sm"
+                className="admin-button admin-button--secondary"
               >
                 View live gallery
               </a>
             ) : null}
+
             <button
               type="button"
               onClick={() => void save()}
               disabled={saving || !dirty}
-              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black disabled:opacity-40"
+              className="admin-button admin-button--primary"
             >
-              <Save className="h-4 w-4" />
-              {saving ? "Saving…" : dirty ? "Save gallery" : "Saved"}
+              <Save className="admin-button__icon" />
+              {saving
+                ? "Saving…"
+                : dirty
+                  ? "Save gallery"
+                  : "Saved"}
             </button>
           </div>
-        </div>
-        <div className="mt-7 grid grid-cols-3 gap-3">
-          <Stat label="Available" value={images.length} />
-          <Stat label="Included" value={includedCount} />
-          <Stat label="Visible" value={visibleCount} />
-        </div>
-      </section>
+        }
+      />
 
       {message ? (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">

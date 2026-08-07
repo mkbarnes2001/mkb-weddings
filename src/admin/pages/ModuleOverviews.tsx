@@ -14,7 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
-import { AdminModulePageWordmark, AdminPage, AdminPageHeader, AdminPanel, AdminStatus } from "../components/ui/AdminUI";
+import { AdminPage, AdminPageHeader, AdminPanel, AdminStatus } from "../components/ui/AdminUI";
 import { AdminApiService, type WorkspaceRecord } from "../services/AdminApiService";
 import type { ClientGalleryListPayload } from "../types/clientGallery";
 import type { WedPlannedPlatformPayload } from "../types/platform";
@@ -58,7 +58,7 @@ export function ClientGalleriesOverview() {
   return <AdminPage>
     <AdminPageHeader
       eyebrow="WedStore · Private delivery"
-      title={<AdminModulePageWordmark label="WedStore" trailing="overview" />}
+      title="Dashboard"
       description="Manage private image delivery, client activity, selections, store configuration and orders without mixing these assets with the public website portfolio."
       actions={<Link to="/admin/client-galleries" className="admin-button admin-button--primary admin-button--md"><Images className="admin-button__icon" />Open galleries</Link>}
     />
@@ -100,7 +100,7 @@ export function BusinessOverview() {
   return <AdminPage>
     <AdminPageHeader
       eyebrow="WedBusiness · Workspace configuration"
-      title={<AdminModulePageWordmark label="WedBusiness" trailing="overview" />}
+      title="Dashboard"
       description="Manage the shared workspace identity, team, service profile and verified domains used across WedPlanned modules."
       actions={<Link to="/admin/wedplanned?tab=business" className="admin-button admin-button--primary admin-button--md"><Building2 className="admin-button__icon" />Edit business profile</Link>}
       meta={<div className="flex flex-wrap gap-2"><AdminStatus tone={workspace?.status === "active" ? "success" : "warning"}>{workspace?.status || "loading"}</AdminStatus><AdminStatus tone="info">{workspace?.plan || "workspace"}</AdminStatus></div>}

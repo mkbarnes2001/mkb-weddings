@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, Instagram, Pencil, Users } from "lucide-react"
 import { WeddingService } from "../services/WeddingService";
 import type { WeddingRecord } from "../types/wedding";
 import { SupplierService, type SupplierRecord } from "../services/SupplierService";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 export function WeddingSuppliers() {
   const { slug } = useParams();
@@ -21,13 +22,38 @@ export function WeddingSuppliers() {
 
   return (
     <div className="space-y-7">
-      <Link to={`/admin/weddings/${wedding.slug}`} className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black"><ArrowLeft className="w-4 h-4" />Back to wedding</Link>
-      <section className="rounded-[32px] bg-black text-white p-8 md:p-10">
-        <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-6">
-          <div><p className="uppercase tracking-[0.25em] text-xs text-white/45 mb-4">Wedding Suppliers</p><h1 className="text-4xl md:text-6xl font-serif leading-tight mb-4">{wedding.couple}</h1><p className="text-white/65">{wedding.venue} · {suppliers.length} supplier rows</p></div>
-          <Link to={`/admin/weddings/${wedding.slug}/suppliers/edit`} className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black hover:bg-white/90"><Pencil className="w-4 h-4" />Edit suppliers</Link>
-        </div>
-      </section>
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to={`/admin/weddings/${wedding.slug}`}
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to wedding
+          </Link>
+        }
+        title="Suppliers"
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{wedding.couple}</span>
+            <span className="text-neutral-400">·</span>
+            <span>{wedding.venue}</span>
+            <span className="text-neutral-400">
+              {suppliers.length} supplier rows
+            </span>
+          </div>
+        }
+        actions={
+          <Link
+            to={`/admin/weddings/${wedding.slug}/suppliers/edit`}
+            className="admin-button admin-button--primary"
+          >
+            <Pencil className="admin-button__icon" />
+            Edit suppliers
+          </Link>
+        }
+      />
+
       {suppliers.length === 0 ? (
         <section className="rounded-[28px] border border-amber-200 bg-amber-50 p-7 text-amber-900"><div className="flex items-start gap-4"><Users className="w-6 h-6 mt-1" /><div><h2 className="text-2xl font-serif mb-2">No suppliers added yet</h2><p className="text-sm leading-relaxed">Open the supplier editor to add supplier records directly to this D1 wedding draft.</p></div></div></section>
       ) : (

@@ -4,6 +4,7 @@ import { ArrowLeft, Check, Eye, EyeOff, GripVertical, Save, Search, Star, X } fr
 import { AdminApiService } from "../services/AdminApiService";
 import type { CustomCollectionAssignmentOption } from "../types/customCollection";
 import type { CreativeFlashGallerySettings, MomentGalleryImage, MomentRecord } from "../types/moment";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 type Filter = "all" | "shown" | "hidden";
 const unique = (values: string[]) => [...new Set(values.filter(Boolean))];
@@ -102,14 +103,54 @@ export function CreativeFlashGallery() {
 
   const shownCount = images.length - hidden.size;
   return <div className="space-y-6">
-    <section className="rounded-[30px] bg-black p-7 text-white md:p-9">
-      <Link to="/admin/gallery" className="mb-4 inline-flex items-center gap-2 text-sm text-white/60"><ArrowLeft className="h-4 w-4"/>Back to collections</Link>
-      <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-        <div><p className="mb-2 text-xs uppercase tracking-[0.25em] text-white/45">Gallery Manager</p><h1 className="font-serif text-4xl md:text-5xl">Creative Flash</h1><p className="mt-3 text-sm text-white/60">Reorder, hide, classify and choose the Creative Flash hero using the same workflow as Moments.</p></div>
-        <div className="flex gap-3"><a href="https://www.mkbweddings.co.uk/gallery/creative-flash" target="_blank" rel="noreferrer" className="rounded-full border border-white/20 px-5 py-3 text-sm">View live gallery</a><button onClick={save} disabled={saving || !dirty} className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black disabled:opacity-40"><Save className="h-4 w-4"/>{saving ? "Saving…" : dirty ? "Save gallery" : "Saved"}</button></div>
-      </div>
-      <div className="mt-7 grid grid-cols-3 gap-3"><Stat label="Assigned" value={images.length}/><Stat label="Shown" value={shownCount}/><Stat label="Hidden" value={hidden.size}/></div>
-    </section>
+    <AdminPageHeader
+      eyebrow={
+        <Link
+          to="/admin/gallery"
+          className="admin-inline-link inline-flex items-center gap-1"
+        >
+          <ArrowLeft size={13} />
+          Back to collections
+        </Link>
+      }
+      title="Creative Flash"
+      description="Reorder, hide, classify and choose the Creative Flash hero using the same workflow as Moments."
+      meta={
+        <div className="flex flex-wrap items-center gap-2">
+          <span>{images.length} assigned</span>
+          <span className="text-neutral-400">·</span>
+          <span>{shownCount} shown</span>
+          <span className="text-neutral-400">·</span>
+          <span>{hidden.size} hidden</span>
+        </div>
+      }
+      actions={
+        <div className="flex flex-wrap gap-2">
+          <a
+            href="https://www.mkbweddings.co.uk/gallery/creative-flash"
+            target="_blank"
+            rel="noreferrer"
+            className="admin-button admin-button--secondary"
+          >
+            View live gallery
+          </a>
+
+          <button
+            type="button"
+            onClick={save}
+            disabled={saving || !dirty}
+            className="admin-button admin-button--primary"
+          >
+            <Save className="admin-button__icon" />
+            {saving
+              ? "Saving…"
+              : dirty
+                ? "Save gallery"
+                : "Saved"}
+          </button>
+        </div>
+      }
+    />
     {message && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{message}</div>}{error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{error}</div>}
     <section className="rounded-[24px] border border-black/10 bg-white/85 p-4"><div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between"><div className="relative flex-1 xl:max-w-xl"><Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"/><input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search venue, wedding or filename…" className="w-full rounded-full border border-black/10 py-2.5 pl-11 pr-4 text-sm"/></div><div className="flex gap-2">{([['all',`All ${images.length}`],['shown',`Shown ${shownCount}`],['hidden',`Hidden ${hidden.size}`]] as const).map(([v,l])=><button key={v} onClick={()=>setFilter(v)} className={`rounded-full px-4 py-2 text-sm ${filter===v?'bg-black text-white':'border border-black/10 bg-white'}`}>{l}</button>)}</div></div>
       {selected.size>0 && <div className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl bg-neutral-100 p-3"><strong className="text-sm">{selected.size} selected</strong><button onClick={()=>showKeys([...selected])} className="rounded-full border bg-white px-4 py-2 text-sm">Show</button><button onClick={()=>hideKeys([...selected])} className="rounded-full border bg-white px-4 py-2 text-sm">Hide</button><span className="text-xs text-neutral-500">Drag the grip on any selected image to move the selection together.</span><button onClick={()=>setSelected(new Set())} className="ml-auto rounded-full border bg-white p-2"><X className="h-4 w-4"/></button></div>}

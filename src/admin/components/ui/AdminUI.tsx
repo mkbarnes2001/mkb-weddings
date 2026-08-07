@@ -1,5 +1,8 @@
 import { useOutletContext } from "react-router-dom";
-import type { PlatformModuleConfiguration } from "../../types/platform";
+import type {
+  PlatformBrandingIdentity,
+  PlatformModuleConfiguration,
+} from "../../types/platform";
 import type {
   AnchorHTMLAttributes,
   ButtonHTMLAttributes,
@@ -96,6 +99,60 @@ export function AdminModulePageWordmark({
 }
 
 
+type AdminPageHeaderOutletContext = {
+  moduleAppearance?: PlatformModuleConfiguration;
+  moduleLabel?: string;
+  platformIdentity?: PlatformBrandingIdentity;
+  isPlatformRoute?: boolean;
+};
+
+function AdminPageHeaderIdentity() {
+  const {
+    moduleAppearance,
+    moduleLabel,
+    platformIdentity,
+    isPlatformRoute,
+  } = useOutletContext<AdminPageHeaderOutletContext>();
+
+  if (isPlatformRoute) {
+    const label = platformIdentity?.platformName || "WedPlanned";
+    const source =
+      platformIdentity?.wordmarkUrl
+      || platformIdentity?.compactWordmarkUrl
+      || platformIdentity?.iconUrl
+      || "";
+
+    return source ? (
+      <img
+        src={source}
+        alt={label}
+        className="admin-page-header__identity-asset"
+      />
+    ) : (
+      <AdminModuleWordmark
+        label={label}
+        className="admin-page-header__identity-fallback"
+      />
+    );
+  }
+
+  const label = moduleLabel || "WedPlanned";
+  const source = moduleAppearance?.wordmarkUrl || "";
+
+  return source ? (
+    <img
+      src={source}
+      alt={label}
+      className="admin-page-header__identity-asset"
+    />
+  ) : (
+    <AdminModuleWordmark
+      label={label}
+      className="admin-page-header__identity-fallback"
+    />
+  );
+}
+
 export function AdminPageHeader({
   eyebrow,
   title,
@@ -111,15 +168,44 @@ export function AdminPageHeader({
   meta?: ReactNode;
   className?: string;
 }) {
+  const backControl =
+    eyebrow && typeof eyebrow !== "string"
+      ? eyebrow
+      : null;
+
   return (
     <header className={cx("admin-page-header", className)}>
-      <div className="admin-page-header__content">
-        {eyebrow ? <div className="admin-eyebrow">{eyebrow}</div> : null}
-        <h1 className="admin-page-title">{title}</h1>
-        {description ? <p className="admin-page-description">{description}</p> : null}
-        {meta ? <div className="admin-page-meta">{meta}</div> : null}
+      <div className="admin-page-header__brand">
+        <AdminPageHeaderIdentity />
       </div>
-      {actions ? <div className="admin-page-actions">{actions}</div> : null}
+
+      <div className="admin-page-header__content">
+        {backControl ? (
+          <div className="admin-page-header__back">
+            {backControl}
+          </div>
+        ) : null}
+
+        <h1 className="admin-page-title">{title}</h1>
+
+        {description ? (
+          <p className="admin-page-description">
+            {description}
+          </p>
+        ) : null}
+      </div>
+
+      {meta ? (
+        <div className="admin-page-summary admin-page-meta">
+          {meta}
+        </div>
+      ) : null}
+
+      {actions ? (
+        <div className="admin-page-actions">
+          {actions}
+        </div>
+      ) : null}
     </header>
   );
 }

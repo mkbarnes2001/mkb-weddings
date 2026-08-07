@@ -18,6 +18,7 @@ import type {
   MomentRecord,
   MomentRepositoryDocument,
 } from "../types/moment";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 type GalleryFilter = "all" | "shown" | "hidden";
 
@@ -398,53 +399,58 @@ export function MomentGallery() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[30px] bg-black p-7 text-white md:p-9">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <Link
-              to="/admin/moments"
-              className="mb-4 inline-flex items-center gap-2 text-sm text-white/60 hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to moments
-            </Link>
-            <p className="mb-2 text-xs uppercase tracking-[0.25em] text-white/45">
-              Moment Gallery Manager
-            </p>
-            <h1 className="font-serif text-4xl md:text-5xl">{moment.name}</h1>
-            <p className="mt-3 max-w-3xl text-sm text-white/60">
-              Drag any photograph using its white grip handle to set the exact gallery order.
-              Select several photographs first to move them together as one group.
-            </p>
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to="/admin/moments"
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to moments
+          </Link>
+        }
+        title="Moment gallery"
+        description="Drag photographs to set the exact gallery order and control visibility."
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{moment.name}</span>
+            <span className="text-neutral-400">·</span>
+            <span>{images.length} assigned</span>
+            <span className="text-neutral-400">·</span>
+            <span>{shownCount} shown</span>
+            <span className="text-neutral-400">·</span>
+            <span>{hiddenCount} hidden</span>
           </div>
-
-          <div className="flex flex-wrap gap-3">
+        }
+        actions={
+          <div className="flex flex-wrap gap-2">
             <a
-              href={`https://www.mkbweddings.co.uk/gallery/moment/${encodeURIComponent(moment.slug)}`}
+              href={`https://www.mkbweddings.co.uk/gallery/moment/${encodeURIComponent(
+                moment.slug,
+              )}`}
               target="_blank"
               rel="noreferrer"
-              className="rounded-full border border-white/20 px-5 py-3 text-sm"
+              className="admin-button admin-button--secondary"
             >
               View live gallery
             </a>
+
             <button
               type="button"
               onClick={save}
               disabled={saving || !dirty}
-              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black disabled:opacity-40"
+              className="admin-button admin-button--primary"
             >
-              <Save className="h-4 w-4" />
-              {saving ? "Saving…" : dirty ? "Save gallery" : "Saved"}
+              <Save className="admin-button__icon" />
+              {saving
+                ? "Saving…"
+                : dirty
+                  ? "Save gallery"
+                  : "Saved"}
             </button>
           </div>
-        </div>
-
-        <div className="mt-7 grid grid-cols-3 gap-3">
-          <Stat label="Assigned" value={images.length} />
-          <Stat label="Shown" value={shownCount} />
-          <Stat label="Hidden" value={hiddenCount} />
-        </div>
-      </section>
+        }
+      />
 
       {message ? (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">

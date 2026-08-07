@@ -5,6 +5,7 @@ import { CollectionService } from "../services/CollectionService";
 import type { ImageCollection } from "../types/collection";
 import { WeddingService } from "../services/WeddingService";
 import type { WeddingRecord } from "../types/wedding";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 function statusClasses(status: ImageCollection["status"]) {
   if (status === "active") return "bg-emerald-50 text-emerald-700 border-emerald-200";
@@ -37,18 +38,28 @@ export function WeddingCollections() {
 
   return (
     <div className="space-y-7">
-      <Link to={`/admin/weddings/${wedding.slug}`} className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black">
-        <ArrowLeft className="w-4 h-4" />
-        Back to wedding
-      </Link>
-
-      <section className="rounded-[32px] bg-black text-white p-8 md:p-10">
-        <p className="uppercase tracking-[0.25em] text-xs text-white/45 mb-4">Wedding Collections</p>
-        <h1 className="text-4xl md:text-6xl font-serif leading-tight mb-4">{wedding.couple}</h1>
-        <p className="text-white/65">
-          {wedding.venue} · blog, venue, portfolio and social image sets
-        </p>
-      </section>
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to={`/admin/weddings/${wedding.slug}`}
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to wedding
+          </Link>
+        }
+        title="Collections"
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{wedding.couple}</span>
+            <span className="text-neutral-400">·</span>
+            <span>{wedding.venue}</span>
+            <span className="text-neutral-400">
+              {collections.length} collections
+            </span>
+          </div>
+        }
+      />
 
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
         {collections.map((collection) => (

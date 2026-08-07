@@ -38,6 +38,7 @@ import {
   type SupplierRoleDefinition,
   type SupplierTaxonomySettings,
 } from "../data/supplierTaxonomy";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 const PUBLIC_ORIGIN = "https://www.mkbweddings.co.uk";
 
@@ -694,31 +695,70 @@ export function WeddingWorkspace() {
 
   return (
     <div className="wedding-workspace space-y-5" style={{ maxWidth: 1580 }}>
-      <Link to={workspace.job ? `/admin/crm/jobs/${workspace.job.id}` : "/admin/weddings"} className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black">
-        <ArrowLeft className="h-4 w-4" /> {workspace.job ? `CRM Job ${workspace.job.reference}` : "Wedding Stories"}
-      </Link>
-
-      <section className="wedding-workspace-hero bg-black text-white">
-        <p className="text-xs uppercase tracking-[0.22em] text-white/45">Wedding Workspace</p>
-        <div className="mt-3 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <h1 className="wedding-workspace-hero__title" style={{ fontWeight: 600, letterSpacing: "-.025em" }}>{workspace.wedding.couple || workspace.wedding.title}</h1>
-            <p className="mt-2 text-sm text-white/60">{workspace.wedding.venue || "Venue not linked"}{workspace.wedding.weddingDate ? ` · ${displayDate(workspace.wedding.weddingDate)}` : ""}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {workspace.job ? <Link to={`/admin/crm/jobs/${workspace.job.id}`} className="wedding-workspace-hero__action">Open CRM Job</Link> : null}
-            <Link to={`/admin/weddings/${slug}/content`} className="wedding-workspace-hero__action">Master content</Link>
-            <Link to={`/admin/weddings/${slug}/publish`} className="wedding-workspace-hero__action">Publishing</Link>
-          </div>
-        </div>
-        <div className="wedding-workspace-steps">
-          {setupSteps.map((step) => (
-            <span key={step.label} className={`wedding-workspace-step ${step.done ? "is-done" : ""}`}>
-              {step.done ? <Check className="h-3.5 w-3.5" /> : null}{step.label}
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to={
+              workspace.job
+                ? `/admin/crm/jobs/${workspace.job.id}`
+                : "/admin/weddings"
+            }
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            {workspace.job
+              ? `CRM Job ${workspace.job.reference}`
+              : "Wedding Stories"}
+          </Link>
+        }
+        title="Wedding Workspace"
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>
+              {workspace.wedding.couple
+                || workspace.wedding.title}
             </span>
-          ))}
-        </div>
-      </section>
+            <span className="text-neutral-400">·</span>
+            <span>
+              {workspace.wedding.venue
+                || "Venue not linked"}
+            </span>
+            {workspace.wedding.weddingDate ? (
+              <span className="text-neutral-400">
+                {displayDate(workspace.wedding.weddingDate)}
+              </span>
+            ) : null}
+            <span className="text-neutral-400">
+              {setupSteps.filter((step) => step.done).length}
+              /{setupSteps.length} setup steps
+            </span>
+          </div>
+        }
+        actions={
+          <div className="flex flex-wrap gap-2">
+            {workspace.job ? (
+              <Link
+                to={`/admin/crm/jobs/${workspace.job.id}`}
+                className="admin-button admin-button--secondary"
+              >
+                Open CRM Job
+              </Link>
+            ) : null}
+            <Link
+              to={`/admin/weddings/${slug}/content`}
+              className="admin-button admin-button--secondary"
+            >
+              Master content
+            </Link>
+            <Link
+              to={`/admin/weddings/${slug}/publish`}
+              className="admin-button admin-button--primary"
+            >
+              Publishing
+            </Link>
+          </div>
+        }
+      />
 
       {message ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{message}</div> : null}
       {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{error}</div> : null}

@@ -7,6 +7,7 @@ import {
   type LocationGallerySettings,
   type LocationTypeDefinition,
 } from "../services/AdminApiService";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 const FALLBACK_SETTINGS: LocationGallerySettings = {
   enabled: true,
@@ -97,26 +98,55 @@ export function LocationGallerySettingsPage() {
 
   return (
     <div className="space-y-7">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-          <Link to="/admin/gallery" className="mb-4 inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-black">
-            <ArrowLeft className="h-4 w-4" /> Gallery Management
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to="/admin/gallery"
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Gallery Management
           </Link>
-          <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Dynamic gallery</p>
-          <h1 className="mt-2 font-serif text-4xl">Location Gallery</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-neutral-600">
-            Choose which workspace location type powers the public gallery, then customise its title, route, hero and SEO independently from the Location database.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <a href={publicHref} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm">
-            <ExternalLink className="h-4 w-4" /> View live
-          </a>
-          <button type="button" onClick={() => void save()} disabled={saving} className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40">
-            <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save gallery"}
-          </button>
-        </div>
-      </div>
+        }
+        title="Location Gallery"
+        description="Choose which workspace location type powers the public gallery and configure its public presentation."
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>
+              {activeType?.pluralLabel
+                || settings.pluralLabel
+                || "Locations"}
+            </span>
+            <span className="text-neutral-400">·</span>
+            <span>{publicLocations.length} public</span>
+            <span className="text-neutral-400">·</span>
+            <span>{sourceLocations.length} available</span>
+          </div>
+        }
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={publicHref}
+              target="_blank"
+              rel="noreferrer"
+              className="admin-button admin-button--secondary"
+            >
+              <ExternalLink className="admin-button__icon" />
+              View live
+            </a>
+
+            <button
+              type="button"
+              onClick={() => void save()}
+              disabled={saving}
+              className="admin-button admin-button--primary"
+            >
+              <Save className="admin-button__icon" />
+              {saving ? "Saving…" : "Save gallery"}
+            </button>
+          </div>
+        }
+      />
 
       {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div> : null}
       {message ? <div className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700"><CheckCircle2 className="h-4 w-4" />{message}</div> : null}

@@ -28,6 +28,7 @@ import {
   AdminApiService,
   type SupplierSaveResult,
 } from "../services/AdminApiService";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 const EMPTY_SUPPLIER: SupplierRecord = {
   blogSlug: "",
@@ -192,46 +193,34 @@ export function WeddingSupplierEditor() {
 
   return (
     <div className="space-y-7">
-      <Link
-        to={`/admin/weddings/${wedding.slug}/suppliers`}
-        className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to suppliers
-      </Link>
-
-      <section className="rounded-[32px] bg-black text-white p-8 md:p-10">
-        <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-6">
-          <div>
-            <p className="uppercase tracking-[0.25em] text-xs text-white/45 mb-4">
-              Supplier Editor
-            </p>
-            <h1 className="text-4xl md:text-6xl font-serif leading-tight mb-4">
-              {wedding.couple}
-            </h1>
-            <p className="text-white/65">
-              Search the reusable supplier master database. A new name entered here is added to the master database when you save.
-            </p>
-          </div>
-
-          <div
-            className={`rounded-2xl border px-4 py-3 text-sm ${
-              apiOnline
-                ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-100"
-                : "border-amber-300/30 bg-amber-300/10 text-amber-100"
-            }`}
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to={`/admin/weddings/${wedding.slug}/suppliers`}
+            className="admin-inline-link inline-flex items-center gap-1"
           >
-            <div className="flex items-center gap-2">
-              {apiOnline ? (
-                <CheckCircle2 className="w-4 h-4" />
-              ) : (
-                <AlertCircle className="w-4 h-4" />
-              )}
-              {apiOnline ? "Admin API connected" : "Admin API unavailable"}
-            </div>
+            <ArrowLeft size={13} />
+            Back to suppliers
+          </Link>
+        }
+        title="Supplier editor"
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{wedding.couple}</span>
+            <span
+              className={
+                apiOnline
+                  ? "admin-status admin-status--success"
+                  : "admin-status admin-status--warning"
+              }
+            >
+              {apiOnline
+                ? "Admin API connected"
+                : "Admin API unavailable"}
+            </span>
           </div>
-        </div>
-      </section>
+        }
+      />
 
       <section className="space-y-4">
         {rows.map((row, index) => {

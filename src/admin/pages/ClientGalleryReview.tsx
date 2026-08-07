@@ -7,6 +7,7 @@ import type {
   ClientGalleryFavouriteAsset,
   ClientGalleryFavouritesPayload,
 } from "../types/clientGallery";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 type ReviewAsset = ClientGalleryFavouriteAsset & { sourceLabel?: string };
 
@@ -141,32 +142,74 @@ export function ClientGalleryReview() {
 
   return (
     <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <div>
-          <Link to={`/admin/client-galleries/${id}`} className="inline-flex items-center gap-2 text-xs text-neutral-500 hover:text-black mb-2">
-            <ArrowLeft className="h-4 w-4" /> Back to Client Gallery
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to={`/admin/client-galleries/${id}`}
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to Client Gallery
           </Link>
-          <div className="flex items-center gap-2">
-            {source === "favourites" ? <Heart className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
-            <h1 className="text-xl font-semibold">{review.title}</h1>
+        }
+        title="Gallery review"
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            {source === "favourites" ? (
+              <Heart className="h-4 w-4" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4" />
+            )}
+
+            <span>{review.title}</span>
+
+            {review.subtitle ? (
+              <span className="text-neutral-500">
+                {review.subtitle}
+              </span>
+            ) : null}
+
+            <span className="text-neutral-400">
+              {review.assets.length} images
+            </span>
+
+            <span className="text-neutral-400">
+              {originalCount} full-resolution originals
+            </span>
           </div>
-          {review.subtitle ? <p className="mt-1 text-sm text-neutral-500">{review.subtitle}</p> : null}
-          <p className="mt-1 text-xs text-neutral-400">{review.assets.length} images · {originalCount} full-resolution originals</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button onClick={copyFilenames} disabled={!review.assets.length} className="rounded-lg border border-black/15 px-3 py-2 text-sm inline-flex items-center gap-2 disabled:opacity-40">
-            <Copy className="h-4 w-4" /> Copy filenames
-          </button>
-          <button onClick={downloadCsv} disabled={!review.assets.length} className="rounded-lg border border-black/15 px-3 py-2 text-sm inline-flex items-center gap-2 disabled:opacity-40">
-            <Download className="h-4 w-4" /> CSV
-          </button>
-          {originalCount ? (
-            <a href={bulkUrl} className="rounded-lg bg-black text-white px-4 py-2 text-sm inline-flex items-center gap-2">
-              <Download className="h-4 w-4" /> Download all originals
-            </a>
-          ) : null}
-        </div>
-      </div>
+        }
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={copyFilenames}
+              disabled={!review.assets.length}
+              className="admin-button admin-button--secondary"
+            >
+              <Copy className="admin-button__icon" />
+              Copy filenames
+            </button>
+
+            <button
+              onClick={downloadCsv}
+              disabled={!review.assets.length}
+              className="admin-button admin-button--secondary"
+            >
+              <Download className="admin-button__icon" />
+              CSV
+            </button>
+
+            {originalCount ? (
+              <a
+                href={bulkUrl}
+                className="admin-button admin-button--primary"
+              >
+                <Download className="admin-button__icon" />
+                Download all originals
+              </a>
+            ) : null}
+          </div>
+        }
+      />
 
       {error ? <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}
       {message ? <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{message}</div> : null}

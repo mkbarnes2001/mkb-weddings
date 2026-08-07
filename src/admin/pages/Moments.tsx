@@ -9,7 +9,7 @@ import {
   Save,
   Trash2,
 } from "lucide-react";
-import { AdminButton } from "../components/ui/AdminUI";
+import { AdminButton, AdminPageHeader } from "../components/ui/AdminUI";
 import { AdminApiService } from "../services/AdminApiService";
 import type {
   MomentRecord,
@@ -242,24 +242,19 @@ export function Moments() {
 
   return (
     <div className="space-y-7">
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-              Default Gallery · Moments
-            </p>
-            <h1 className="font-serif text-5xl md:text-6xl">
-              Moment categories
-            </h1>
-            <p className="mt-4 max-w-2xl text-white/60">
-              This is a default dynamic gallery, but its categories are yours to customise. Create, rename, reorder or archive moments and control which cards appear publicly.
-            </p>
+      <AdminPageHeader
+        title="Moments"
+        description="Create, rename, reorder or archive moment categories and control which cards appear publicly."
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{document.moments.length} categories</span>
           </div>
-
-          <div className="flex flex-wrap items-center gap-2 self-start md:self-center">
+        }
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
             <AdminButton
               type="button"
-              variant="primary"
+              variant="secondary"
               size="sm"
               icon={Plus}
               onClick={addMoment}
@@ -275,11 +270,15 @@ export function Moments() {
               onClick={save}
               disabled={saving || !dirty}
             >
-              {saving ? "Saving…" : dirty ? "Save moments" : "Saved"}
+              {saving
+                ? "Saving…"
+                : dirty
+                  ? "Save moments"
+                  : "Saved"}
             </AdminButton>
           </div>
-        </div>
-      </section>
+        }
+      />
 
       {message ? (
         <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">

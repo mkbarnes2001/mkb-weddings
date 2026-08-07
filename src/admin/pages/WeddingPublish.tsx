@@ -25,6 +25,7 @@ import {
   type WeddingPublishPreview,
   type WeddingPublishResult,
 } from "../services/AdminApiService";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 function CheckRow({
   check,
@@ -203,55 +204,57 @@ export function WeddingPublish() {
 
   return (
     <div className="space-y-7">
-      <Link
-        to={`/admin/weddings/${wedding.slug}`}
-        className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to wedding
-      </Link>
-
-      <section
-        className={`rounded-[32px] p-8 md:p-10 text-white ${
-          isCurrentlyLive
-            ? "bg-emerald-950"
-            : "bg-black"
-        }`}
-      >
-        <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-6">
-          <div>
-            <p className="uppercase tracking-[0.25em] text-xs text-white/45 mb-4">
-              Wedding Story Publishing
-            </p>
-
-            <h1 className="text-4xl md:text-6xl font-serif leading-tight mb-4">
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to={`/admin/weddings/${wedding.slug}`}
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to wedding
+          </Link>
+        }
+        title="Publishing"
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={
+                isCurrentlyLive
+                  ? "admin-status admin-status--success"
+                  : storyEnabled
+                    ? "admin-status admin-status--warning"
+                    : "admin-status admin-status--neutral"
+              }
+            >
               {isCurrentlyLive
                 ? "Story is live"
                 : storyEnabled
                   ? "Story is in draft"
                   : "Private wedding"}
-            </h1>
+            </span>
 
-            <p className="text-white/65">
-              {wedding.couple} ·{" "}
-              {wedding.venue} ·{" "}
+            <span>{wedding.couple}</span>
+            <span className="text-neutral-400">·</span>
+            <span>{wedding.venue}</span>
+            <span className="text-neutral-400">
               {wedding.weddingDate}
-            </p>
+            </span>
           </div>
-
-          {isCurrentlyLive ? (
+        }
+        actions={
+          isCurrentlyLive ? (
             <a
               href={`/blog/${wedding.slug}`}
               target="_blank"
               rel="noreferrer"
-              className="rounded-full bg-white text-black px-5 py-3 text-sm hover:bg-white/90 inline-flex items-center gap-2"
+              className="admin-button admin-button--primary"
             >
               Open public story
-              <ExternalLink className="w-4 h-4" />
+              <ExternalLink className="admin-button__icon" />
             </a>
-          ) : null}
-        </div>
-      </section>
+          ) : undefined
+        }
+      />
 
       <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">

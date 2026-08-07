@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   Activity,
+  ArrowLeft,
   AlertCircle,
   ArrowUpDown,
   Check,
@@ -39,6 +40,7 @@ import { uploadPrivateOriginal } from "../lib/privateOriginalUpload";
 import type { AssetRecord } from "../types/asset";
 import type { ClientGalleryAlbum, ClientGalleryDetailPayload, ClientGalleryRecord } from "../types/clientGallery";
 import type { ClientGalleryStoreAdminPayload } from "../types/printStore";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 function publicUrl(slug: string, token: string) {
   const segment = slug ? encodeURIComponent(slug) : encodeURIComponent(token);
@@ -1092,42 +1094,146 @@ export function ClientGalleryEditor() {
           .client-gallery-photo-toolbar__search { grid-column: 1 / -1; }
         }
       `}</style>
-      <section className="client-gallery-editor-header">
-        <div className="client-gallery-editor-header-copy">
-          <p className="client-gallery-editor-kicker">Gallery workspace</p>
-          <h1 className="client-gallery-editor-title">Client Gallery Admin</h1>
-          <p className="client-gallery-editor-subtitle">{gallery.title}</p>
-        </div>
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to="/admin/client-galleries"
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to galleries
+          </Link>
+        }
+        title="Client gallery"
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{gallery.title}</span>
 
-        <div className="client-gallery-editor-actions">
-          {draft.weddingSlug ? <Link
-            to={`/admin/weddings/${encodeURIComponent(String(draft.weddingSlug))}/workspace`}
-            className="client-gallery-editor-action"
-            title="Open wedding workspace"
-          ><ExternalLink /><span>Workspace</span></Link> : <span className="client-gallery-editor-action" aria-disabled="true"><ExternalLink /><span>Workspace</span></span>}
-          <a
-            href={gallery.status === "live" ? shareUrl : undefined}
-            target="_blank"
-            rel="noreferrer"
-            aria-disabled={gallery.status !== "live"}
-            className="client-gallery-editor-action"
-            title="Preview client gallery"
-          ><Eye /><span>Preview</span></a>
-          <button
-            type="button"
-            onClick={() => setShowShare((value) => !value)}
-            className="client-gallery-editor-action"
-            data-primary="true"
-            title="Share client gallery"
-          ><Copy /><span>Share</span></button>
-          {showShare ? <div className="client-gallery-share-popover rounded-2xl border border-black/10 bg-white p-4 shadow-xl">
-            <div className="flex items-center justify-between gap-3"><strong className="text-sm">Share private gallery</strong><button onClick={() => setShowShare(false)}><X className="h-4 w-4" /></button></div>
-            <p className="mt-3 text-xs text-neutral-500 break-all">{shareUrl}</p>
-            <button disabled={gallery.status !== "live"} onClick={async () => { await navigator.clipboard?.writeText(shareUrl); setMessage("Private gallery link copied."); setShowShare(false); }} className="mt-3 w-full rounded-lg bg-black text-white px-3 py-2 text-sm disabled:opacity-40">Copy gallery link</button>
-            <div className="mt-3 rounded-lg bg-neutral-50 p-3 text-xs text-neutral-600">Status: <strong>{gallery.status.toUpperCase()}</strong><br />PIN: <strong>{gallery.pinEnabled ? "Enabled" : "Not enabled"}</strong><br />Email access: <strong>{gallery.requireEmail ? "Required" : "Optional"}</strong></div>
-          </div> : null}
-        </div>
-      </section>
+            <span
+              className={
+                gallery.status === "live"
+                  ? "admin-status admin-status--success"
+                  : "admin-status admin-status--neutral"
+              }
+            >
+              {gallery.status}
+            </span>
+
+            <span className="text-neutral-400">
+              {gallery.assetCount} photos
+            </span>
+          </div>
+        }
+        actions={
+          <div className="client-gallery-editor-actions">
+            {draft.weddingSlug ? (
+              <Link
+                to={`/admin/weddings/${encodeURIComponent(
+                  String(draft.weddingSlug),
+                )}/workspace`}
+                className="client-gallery-editor-action"
+                title="Open wedding workspace"
+              >
+                <ExternalLink />
+                <span>Workspace</span>
+              </Link>
+            ) : (
+              <span
+                className="client-gallery-editor-action"
+                aria-disabled="true"
+              >
+                <ExternalLink />
+                <span>Workspace</span>
+              </span>
+            )}
+
+            <a
+              href={
+                gallery.status === "live"
+                  ? shareUrl
+                  : undefined
+              }
+              target="_blank"
+              rel="noreferrer"
+              aria-disabled={gallery.status !== "live"}
+              className="client-gallery-editor-action"
+              title="Preview client gallery"
+            >
+              <Eye />
+              <span>Preview</span>
+            </a>
+
+            <button
+              type="button"
+              onClick={() =>
+                setShowShare((value) => !value)
+              }
+              className="client-gallery-editor-action"
+              data-primary="true"
+              title="Share client gallery"
+            >
+              <Copy />
+              <span>Share</span>
+            </button>
+
+            {showShare ? (
+              <div className="client-gallery-share-popover rounded-2xl border border-black/10 bg-white p-4 shadow-xl">
+                <div className="flex items-center justify-between gap-3">
+                  <strong className="text-sm">
+                    Share private gallery
+                  </strong>
+                  <button
+                    onClick={() => setShowShare(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <p className="mt-3 break-all text-xs text-neutral-500">
+                  {shareUrl}
+                </p>
+
+                <button
+                  disabled={gallery.status !== "live"}
+                  onClick={async () => {
+                    await navigator.clipboard?.writeText(
+                      shareUrl,
+                    );
+                    setMessage(
+                      "Private gallery link copied.",
+                    );
+                    setShowShare(false);
+                  }}
+                  className="mt-3 w-full rounded-lg bg-black px-3 py-2 text-sm text-white disabled:opacity-40"
+                >
+                  Copy gallery link
+                </button>
+
+                <div className="mt-3 rounded-lg bg-neutral-50 p-3 text-xs text-neutral-600">
+                  Status:{" "}
+                  <strong>
+                    {gallery.status.toUpperCase()}
+                  </strong>
+                  <br />
+                  PIN:{" "}
+                  <strong>
+                    {gallery.pinEnabled
+                      ? "Enabled"
+                      : "Not enabled"}
+                  </strong>
+                  <br />
+                  Email access:{" "}
+                  <strong>
+                    {gallery.requireEmail
+                      ? "Required"
+                      : "Optional"}
+                  </strong>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        }
+      />
 
       <div className="client-gallery-editor-shell mt-4">
         <aside className="client-gallery-editor-sidebar rounded-2xl border border-black/10 bg-white">

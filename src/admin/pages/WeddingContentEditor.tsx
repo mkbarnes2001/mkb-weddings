@@ -17,6 +17,7 @@ import {
   type MasterSupplier,
   type SupplierRecord,
 } from "../services/SupplierService";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 type WeddingFactsRecord = {
   season?: string;
@@ -333,51 +334,43 @@ export function WeddingContentEditor() {
 
   return (
     <div className="space-y-7">
-      <Link
-        to={`/admin/weddings/${wedding.slug}`}
-        className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to wedding
-      </Link>
-
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-          <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-              Master Wedding Record
-            </p>
-            <h1 className="font-serif text-4xl leading-tight md:text-6xl">
-              {wedding.couple || "Untitled wedding"}
-            </h1>
-            <p className="mt-4 text-white/60">
-              Content saved directly to wedding.json.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to={`/admin/weddings/${wedding.slug}`}
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to wedding
+          </Link>
+        }
+        title="Master content"
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{wedding.couple || "Untitled wedding"}</span>
             {dirty ? (
-              <span className="rounded-full bg-amber-300/15 px-4 py-2 text-sm text-amber-100">
+              <span className="admin-status admin-status--warning">
                 Unsaved changes
               </span>
             ) : null}
-
-            <button
-              type="button"
-              onClick={saveWedding}
-              disabled={
-                saving ||
-                !dirty ||
-                validationErrors.length > 0
-              }
-              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm text-black disabled:opacity-40"
-            >
-              <Save className="h-4 w-4" />
-              {saving ? "Saving…" : "Save wedding"}
-            </button>
           </div>
-        </div>
-      </section>
+        }
+        actions={
+          <button
+            type="button"
+            onClick={saveWedding}
+            disabled={
+              saving
+              || !dirty
+              || validationErrors.length > 0
+            }
+            className="admin-button admin-button--primary"
+          >
+            <Save className="admin-button__icon" />
+            {saving ? "Saving…" : "Save wedding"}
+          </button>
+        }
+      />
 
       {message ? (
         <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">

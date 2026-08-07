@@ -30,6 +30,7 @@ import type {
   VenueGalleryItem,
   VenueSummary,
 } from "../types/venue";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 type AggregatedAsset = ManagedWeddingImage & {
   assetId: string;
@@ -870,70 +871,74 @@ export function VenueGallery() {
 
   return (
     <div className="space-y-7">
-      <Link
-        to={`/admin/venues/${venue.slug}`}
-        className="inline-flex items-center gap-2 text-sm text-neutral-600"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to venue
-      </Link>
-
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-              Venue Gallery Manager
-            </p>
-            <h1 className="font-serif text-5xl md:text-6xl">
-              {venue.name}
-            </h1>
-            <p className="mt-4 text-white/60">
-              {assets.length} available ·{" "}
-              {items.filter((item) => item.included).length} included
-            </p>
-            <p className="mt-2 max-w-2xl text-sm text-white/45">
-              Gallery membership is synchronised back to each wedding image
-              record when you save.
-            </p>
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to={`/admin/venues/${venue.slug}`}
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to venue
+          </Link>
+        }
+        title="Venue gallery"
+        description="Manage venue gallery membership, order and publishing."
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{venue.name}</span>
+            <span className="text-neutral-400">·</span>
+            <span>{assets.length} available</span>
+            <span className="text-neutral-400">·</span>
+            <span>
+              {items.filter((item) => item.included).length}
+              {" "}included
+            </span>
           </div>
-
-          <div className="flex flex-wrap gap-3">
+        }
+        actions={
+          <div className="flex flex-wrap gap-2">
             <Link
               to={`/admin/venues/${venue.slug}/upload`}
-              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-black bg-black px-3.5 text-[10px] font-medium text-white"
+              className="admin-button admin-button--secondary"
             >
               Upload images
             </Link>
+
             <Link
               to="/admin/moments"
-              className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-black bg-black px-3.5 text-[10px] font-medium text-white"
+              className="admin-button admin-button--secondary"
             >
               Manage moments
             </Link>
-          <button
-            type="button"
-            onClick={publishVenue}
-            disabled={publishing || saving}
-            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-black bg-black px-3.5 text-[10px] font-medium text-white disabled:opacity-40"
-          >
-            <CloudUpload className="h-4 w-4" />
-            {publishing
-              ? "Publishing…"
-              : "Publish venue"}
-          </button>
 
-          <button
-            type="button"
-            onClick={saveGallery}
-            disabled={saving || !dirty}
-            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-black bg-black px-3.5 text-[10px] font-medium text-white disabled:opacity-40"
-          >
-            <Save className="h-4 w-4" />
-            {saving ? "Saving…" : dirty ? "Save gallery" : "Saved"}
-          </button>
+            <button
+              type="button"
+              onClick={publishVenue}
+              disabled={publishing || saving}
+              className="admin-button admin-button--secondary"
+            >
+              <CloudUpload className="admin-button__icon" />
+              {publishing
+                ? "Publishing…"
+                : "Publish venue"}
+            </button>
+
+            <button
+              type="button"
+              onClick={saveGallery}
+              disabled={saving || !dirty}
+              className="admin-button admin-button--primary"
+            >
+              <Save className="admin-button__icon" />
+              {saving
+                ? "Saving…"
+                : dirty
+                  ? "Save gallery"
+                  : "Saved"}
+            </button>
           </div>
-        </div>
-      </section>
+        }
+      />
 
       {message ? (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">

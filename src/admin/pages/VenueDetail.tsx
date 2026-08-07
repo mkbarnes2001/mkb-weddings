@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import type { VenueSummary } from "../types/venue";
+import { AdminPageHeader } from "../components/ui/AdminUI";
 
 export function VenueDetail() {
   const { slug } = useParams();
@@ -59,49 +60,60 @@ export function VenueDetail() {
 
   return (
     <div className="space-y-7">
-      <Link
-        to="/admin/venues"
-        className="inline-flex items-center gap-2 text-sm text-neutral-600"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to venues
-      </Link>
-
-      <section className="rounded-[32px] bg-black p-8 text-white md:p-10">
-        <div className="flex flex-col gap-7 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.25em] text-white/45">
-              Venue Control Centre
-            </p>
-            <h1 className="font-serif text-5xl md:text-6xl">
-              {venue.name}
-            </h1>
-            <p className="mt-4 text-white/60">
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to="/admin/venues"
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Back to venues
+          </Link>
+        }
+        title="Venue details"
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{venue.name}</span>
+            <span className="text-neutral-400">·</span>
+            <span>
               {location || "Location not set"}
-            </p>
+            </span>
+            <span className="text-neutral-400">·</span>
+            <span
+              className={
+                venue.status === "published"
+                  ? "admin-status admin-status--success"
+                  : "admin-status admin-status--neutral"
+              }
+            >
+              {venue.status}
+            </span>
           </div>
-
-          <div className="flex flex-wrap gap-3">
+        }
+        actions={
+          <div className="flex flex-wrap gap-2">
             {venue.links.website ? (
               <a
                 href={venue.links.website}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm text-white/80"
+                className="admin-button admin-button--secondary"
               >
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className="admin-button__icon" />
                 Website
               </a>
             ) : null}
 
             {venue.links.instagram ? (
               <a
-                href={normaliseInstagramUrl(venue.links.instagram)}
+                href={normaliseInstagramUrl(
+                  venue.links.instagram,
+                )}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm text-white/80"
+                className="admin-button admin-button--secondary"
               >
-                <Instagram className="h-4 w-4" />
+                <Instagram className="admin-button__icon" />
                 Instagram
               </a>
             ) : null}
@@ -111,15 +123,15 @@ export function VenueDetail() {
                 href={venue.links.googleMaps}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm text-white/80"
+                className="admin-button admin-button--secondary"
               >
-                <MapPin className="h-4 w-4" />
+                <MapPin className="admin-button__icon" />
                 Map
               </a>
             ) : null}
           </div>
-        </div>
-      </section>
+        }
+      />
 
       <section className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
         <Metric

@@ -67,7 +67,8 @@ def main() -> None:
     assert 'setSearchParams(next === "pipeline" ? {} : { view: next }' in crm
     assert 'title="CRM overview"' not in crm  # title is resolved through the existing page-title map
     assert 'overview: "WedCRM overview"' in crm
-    assert 'label="WedCRM"' in crm
+    assert 'eyebrow="WedCRM · Client operations"' in crm
+    assert '? "Dashboard"' in crm
     assert 'Communications remain attached to the relevant lead, client or Job record.' in crm
     assert 'useSearchParams' in store and 'const validTabs: Tab[] = ["catalogue", "pricing", "orders"]' in store
     assert 'setSearchParams(next === "catalogue" ? {} : { tab: next }' in store
@@ -79,8 +80,8 @@ def main() -> None:
     assert "AdminApiService.getWorkspace()" in overviews
     assert "AdminApiService.getWedPlannedPlatform()" in overviews
     assert "Private client delivery remains separate from WedStudio." in overviews
-    assert 'label="WedStudio"' in dashboard
-    assert 'trailing="overview"' in dashboard
+    assert 'eyebrow="WedStudio · Content operations"' in dashboard
+    assert 'title="Dashboard"' in dashboard
     assert "export function WebsiteOverview" in dashboard
     assert 'eyebrow="WedStudio · Website"' in dashboard
     assert "export function PublishingOverview" in dashboard
