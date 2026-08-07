@@ -156,6 +156,112 @@ function identityFingerprint(identity: PlatformBrandingIdentity) {
 
 
 
+function PlatformFontSizeControl({
+  label,
+  value,
+  onChange,
+  basePx,
+  parentScale = 1,
+  preview,
+  help,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  basePx: number;
+  parentScale?: number;
+  preview: string;
+  help?: string;
+}) {
+  const safeScale = Math.min(
+    140,
+    Math.max(75, Number(value) || 100),
+  );
+  const safeParentScale =
+    Number.isFinite(parentScale) && parentScale > 0
+      ? parentScale
+      : 1;
+
+  const pixelsForScale = (scale: number) =>
+    Math.round(
+      basePx
+      * safeParentScale
+      * (scale / 100)
+      * 2,
+    ) / 2;
+
+  const pixelValue = pixelsForScale(safeScale);
+  const minimumPixels = pixelsForScale(75);
+  const maximumPixels = pixelsForScale(140);
+
+  const commitPixels = (pixels: number) => {
+    if (!Number.isFinite(pixels)) return;
+
+    const nextScale = Math.round(
+      (pixels / (basePx * safeParentScale)) * 100,
+    );
+
+    onChange(
+      Math.min(
+        140,
+        Math.max(75, nextScale),
+      ),
+    );
+  };
+
+  return (
+    <AdminField label={label} help={help}>
+      <div className="platform-font-size-control">
+        <div className="platform-font-size-control__adjuster">
+          <input
+            type="range"
+            min={minimumPixels}
+            max={maximumPixels}
+            step="0.5"
+            value={pixelValue}
+            aria-label={`${label} size`}
+            onChange={(event) =>
+              commitPixels(Number(event.target.value))}
+          />
+
+          <label className="platform-font-size-control__value">
+            <input
+              type="number"
+              min={minimumPixels}
+              max={maximumPixels}
+              step="0.5"
+              value={pixelValue}
+              aria-label={`${label} pixels`}
+              onChange={(event) => {
+                if (event.target.value !== "") {
+                  commitPixels(Number(event.target.value));
+                }
+              }}
+            />
+            <span>px</span>
+          </label>
+        </div>
+
+        <div
+          className="platform-font-size-preview"
+          aria-label={`${label} preview`}
+        >
+          <span
+            style={{
+              fontSize: `${pixelValue}px`,
+              lineHeight: 1.2,
+            }}
+          >
+            {preview}
+          </span>
+          <small>Preview · {pixelValue}px</small>
+        </div>
+      </div>
+    </AdminField>
+  );
+}
+
+
 function PlatformScaleControl({
   label,
   value,
@@ -813,14 +919,11 @@ export function PlatformAdmin() {
           <section className="platform-module-control-group">
             <header>
               <strong>Global Admin typography</strong>
-              <span>
-                Platform-wide font sizing. 100% reproduces the current Admin interface.
-                Module-specific controls below can refine these values.
-              </span>
+              <span>Set reference font sizes in pixels with a live preview. These values apply across every Admin module.</span>
             </header>
 
             <div className="platform-module-field-grid platform-module-field-grid--scales">
-              <PlatformScaleControl
+              <PlatformFontSizeControl
                 label="Overall Admin text"
                 value={platformIdentity.adminFontScale}
                 help="Master scale applied across Admin body text, records, forms and supporting content."
@@ -832,9 +935,12 @@ export function PlatformAdmin() {
                   setMessage("");
                   setError("");
                 }}
-              />
 
-              <PlatformScaleControl
+                basePx={11}
+                preview="Body text"
+                />
+
+              <PlatformFontSizeControl
                 label="Headings"
                 value={platformIdentity.adminHeadingFontScale}
                 help="Additional scale for page, panel and operational headings."
@@ -846,9 +952,13 @@ export function PlatformAdmin() {
                   setMessage("");
                   setError("");
                 }}
-              />
 
-              <PlatformScaleControl
+                basePx={18}
+                preview="Heading"
+                parentScale={(platformIdentity.adminFontScale || 100) / 100}
+                />
+
+              <PlatformFontSizeControl
                 label="Buttons & controls"
                 value={platformIdentity.adminButtonFontScale}
                 help="Additional scale for buttons and primary controls."
@@ -860,9 +970,13 @@ export function PlatformAdmin() {
                   setMessage("");
                   setError("");
                 }}
-              />
 
-              <PlatformScaleControl
+                basePx={10}
+                preview="Button text"
+                parentScale={(platformIdentity.adminFontScale || 100) / 100}
+                />
+
+              <PlatformFontSizeControl
                 label="Navigation & menus"
                 value={platformIdentity.adminNavigationFontScale}
                 help="Additional scale for desktop and mobile navigation labels."
@@ -874,9 +988,13 @@ export function PlatformAdmin() {
                   setMessage("");
                   setError("");
                 }}
-              />
 
-              <PlatformScaleControl
+                basePx={9}
+                preview="Navigation"
+                parentScale={(platformIdentity.adminFontScale || 100) / 100}
+                />
+
+              <PlatformFontSizeControl
                 label="Status / helper text"
                 value={platformIdentity.adminMetaFontScale}
                 help="Additional scale for badges, metadata, helper copy and compact labels."
@@ -888,7 +1006,11 @@ export function PlatformAdmin() {
                   setMessage("");
                   setError("");
                 }}
-              />
+
+                basePx={8.5}
+                preview="Helper text"
+                parentScale={(platformIdentity.adminFontScale || 100) / 100}
+                />
             </div>
           </section>
 
@@ -1389,53 +1511,18 @@ export function PlatformAdmin() {
 
           <section className="platform-module-control-group">
             <header>
-              <strong>Typography & logo sizing</strong>
-              <span>
-                Module-specific scales multiply the global Admin defaults above.
-                100% leaves the global value unchanged.
-              </span>
+              <strong>Logo sizing</strong>
+              <span>Module-specific page-header, desktop sidebar and mobile logo sizes.</span>
             </header>
 
             <div className="platform-module-field-grid platform-module-field-grid--scales">
-              <PlatformScaleControl
-                label="All module text"
-                value={module.moduleFontScale}
-                onChange={(value) =>
-                  updateModule(module.moduleKey, {
-                    moduleFontScale: value,
-                  })
-                }
-              />
 
-              <PlatformScaleControl
-                label="Module headings"
-                value={module.headingFontScale}
-                onChange={(value) =>
-                  updateModule(module.moduleKey, {
-                    headingFontScale: value,
-                  })
-                }
-              />
 
-              <PlatformScaleControl
-                label="Module buttons"
-                value={module.buttonFontScale}
-                onChange={(value) =>
-                  updateModule(module.moduleKey, {
-                    buttonFontScale: value,
-                  })
-                }
-              />
 
-              <PlatformScaleControl
-                label="Navigation text"
-                value={module.navigationFontScale}
-                onChange={(value) =>
-                  updateModule(module.moduleKey, {
-                    navigationFontScale: value,
-                  })
-                }
-              />
+
+
+
+
 
               <PlatformScaleControl
                 label="Page-header logo"

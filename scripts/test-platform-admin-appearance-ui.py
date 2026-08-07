@@ -33,7 +33,8 @@ def main() -> None:
     ):
         assert token in page, token
 
-    # Module desktop/mobile controls.
+    # Module desktop/mobile controls and logo sizing remain.
+    # Typography itself is platform-global from hotfix5 onward.
     for token in (
         "Desktop navigation",
         "Sidebar background",
@@ -44,16 +45,23 @@ def main() -> None:
         "Mobile menu background",
         "Normal mobile button",
         "Active mobile button",
-        "Typography & logo sizing",
-        "moduleFontScale",
-        "headingFontScale",
-        "buttonFontScale",
-        "navigationFontScale",
+        "Logo sizing",
         "pageHeaderLogoScale",
         "sidebarLogoScale",
         "mobileLogoScale",
     ):
         assert token in page, token
+
+    for field in (
+        "moduleFontScale",
+        "headingFontScale",
+        "buttonFontScale",
+        "navigationFontScale",
+    ):
+        assert f"value={{module.{field}}}" not in page, field
+        assert f"currentAppearance.{field}" not in layout, field
+
+    assert "Typography & logo sizing" not in page
 
     # Runtime CSS variables.
     for token in (
@@ -88,6 +96,8 @@ def main() -> None:
 
     for selector in (
         ".platform-scale-control",
+        ".platform-font-size-control",
+        ".platform-font-size-preview",
         ".platform-colour-control--optional",
         ".platform-colour-reset",
         'data-desktop-nav-active-custom="true"',
@@ -166,6 +176,7 @@ def main() -> None:
 
     print("PASS v1.10.1a hotfix3 Admin appearance editor/runtime")
     print("  global Admin typography controls: verified")
+    print("  per-module typography UI/runtime removed: verified")
     print("  global and per-module logo scales: verified")
     print("  desktop module navigation colours: verified")
     print("  mobile module navigation colours: verified")

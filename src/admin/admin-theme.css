@@ -5308,3 +5308,160 @@
   --admin-navigation-scale-effective: 1;
   --admin-meta-scale-effective: 1;
 }
+
+
+/* v1.10.1a hotfix5 — responsive global typography controls */
+
+.platform-font-size-control {
+  display: grid;
+  min-width: 0;
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(min(100%, 190px), 1fr)
+    );
+  align-items: stretch;
+  gap: 10px;
+}
+
+.platform-font-size-control__adjuster {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(90px, 1fr) 78px;
+  align-items: center;
+  gap: 9px;
+}
+
+.platform-font-size-control__adjuster > input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  accent-color: #111;
+}
+
+.platform-font-size-control__value {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.platform-font-size-control__value input {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  padding: 0 6px;
+  font: inherit;
+  text-align: right;
+  outline: none;
+}
+
+.platform-font-size-control__value span {
+  padding-right: 7px;
+  color: var(--admin-muted);
+  white-space: nowrap;
+}
+
+.platform-font-size-preview {
+  display: flex;
+  min-width: 0;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  overflow: hidden;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background: #fff;
+  padding: 8px 10px;
+}
+
+.platform-font-size-preview > span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--admin-text);
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.platform-font-size-preview > small {
+  flex: 0 0 auto;
+  color: var(--admin-muted);
+  white-space: nowrap;
+}
+
+/*
+ * Use available width, not only viewport width. This prevents the
+ * fixed desktop sidebar from squeezing two-column settings until
+ * labels and controls overlap.
+ */
+.platform-identity-editor {
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(min(100%, 420px), 1fr)
+    );
+}
+
+.platform-module-config-grid {
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(min(100%, 520px), 1fr)
+    );
+}
+
+.platform-module-field-grid {
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(min(100%, 220px), 1fr)
+    );
+}
+
+.platform-module-field-grid--scales {
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(min(100%, 240px), 1fr)
+    );
+}
+
+@media (max-width: 1080px) {
+  .platform-module-control-group > header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .platform-module-control-group > header span {
+    text-align: left;
+  }
+}
+
+@media (max-width: 900px) {
+  .platform-font-size-control {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .platform-module-field-grid,
+  .platform-module-field-grid--scales {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .platform-font-size-control__adjuster {
+    grid-template-columns: minmax(0, 1fr) 74px;
+  }
+
+  .platform-font-size-preview {
+    min-height: 44px;
+  }
+}

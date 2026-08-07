@@ -268,33 +268,19 @@ export function AdminLayout() {
   const globalFontScale =
     (platformIdentity.adminFontScale || 100) / 100;
 
-  const moduleFontScale = isPlatformRoute
-    ? 1
-    : (currentAppearance.moduleFontScale || 100) / 100;
-
-  const baseFontScale =
-    globalFontScale * moduleFontScale;
+  const baseFontScale = globalFontScale;
 
   const headingFontScale =
     baseFontScale
-    * ((platformIdentity.adminHeadingFontScale || 100) / 100)
-    * (isPlatformRoute
-      ? 1
-      : (currentAppearance.headingFontScale || 100) / 100);
+    * ((platformIdentity.adminHeadingFontScale || 100) / 100);
 
   const buttonFontScale =
     baseFontScale
-    * ((platformIdentity.adminButtonFontScale || 100) / 100)
-    * (isPlatformRoute
-      ? 1
-      : (currentAppearance.buttonFontScale || 100) / 100);
+    * ((platformIdentity.adminButtonFontScale || 100) / 100);
 
   const navigationFontScale =
     baseFontScale
-    * ((platformIdentity.adminNavigationFontScale || 100) / 100)
-    * (isPlatformRoute
-      ? 1
-      : (currentAppearance.navigationFontScale || 100) / 100);
+    * ((platformIdentity.adminNavigationFontScale || 100) / 100);
 
   const metaFontScale =
     baseFontScale
