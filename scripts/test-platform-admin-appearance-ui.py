@@ -102,6 +102,68 @@ def main() -> None:
     assert page.count("onClick={saveBrandingAndModules}") == 1
     assert page.count("Save changes") == 1
 
+    DIRTY_STATE_FINGERPRINT_FIELDS = (
+        "desktopNavBackgroundColor",
+        "desktopNavTextColor",
+        "desktopNavButtonColor",
+        "desktopNavActiveColor",
+        "desktopNavActiveTextColor",
+        "mobileNavBackgroundColor",
+        "mobileNavTextColor",
+        "mobileNavButtonColor",
+        "mobileNavActiveColor",
+        "mobileNavActiveTextColor",
+        "moduleFontScale",
+        "headingFontScale",
+        "buttonFontScale",
+        "navigationFontScale",
+        "pageHeaderLogoScale",
+        "sidebarLogoScale",
+        "mobileLogoScale",
+    )
+
+    GLOBAL_DIRTY_STATE_FINGERPRINT_FIELDS = (
+        "adminFontScale",
+        "adminHeadingFontScale",
+        "adminButtonFontScale",
+        "adminNavigationFontScale",
+        "adminMetaFontScale",
+        "pageHeaderLogoScale",
+        "sidebarLogoScale",
+        "mobileLogoScale",
+    )
+
+    platform_admin_source = (
+        ROOT / "src/admin/pages/PlatformAdmin.tsx"
+    ).read_text(encoding="utf-8")
+
+    module_fingerprint = platform_admin_source.split(
+        "function moduleFingerprint",
+        1,
+    )[1].split(
+        "function identityFingerprint",
+        1,
+    )[0]
+
+    identity_fingerprint = platform_admin_source.split(
+        "function identityFingerprint",
+        1,
+    )[1].split(
+        "function PlatformScaleControl",
+        1,
+    )[0]
+
+    for field in DIRTY_STATE_FINGERPRINT_FIELDS:
+        assert f"module.{field}" in module_fingerprint, field
+
+    for field in GLOBAL_DIRTY_STATE_FINGERPRINT_FIELDS:
+        assert f"identity.{field}" in identity_fingerprint, field
+
+    assert (
+        "const brandingDirty = changedModuleCount > 0 || identityDirty;"
+        in platform_admin_source
+    )
+
     print("PASS v1.10.1a hotfix3 Admin appearance editor/runtime")
     print("  global Admin typography controls: verified")
     print("  global and per-module logo scales: verified")
