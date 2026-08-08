@@ -43,12 +43,11 @@ export const onRequestGet: PagesFunction<Env> = async (
   );
 };
 
-export const onRequestOptions: PagesFunction<Env> = async (
-  () => new Response(
+export const onRequestOptions: PagesFunction<Env> = async () =>
+  new Response(
     null,
     {
       status: 204,
       headers: publicHeaders(),
     },
-  )
-);
+  );

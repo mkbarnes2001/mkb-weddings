@@ -10,7 +10,7 @@ compatibility_date = "2026-08-08"
 # This binding is deliberately limited to the isolated WedPlanned
 # Pages Functions runtime. The only function currently exposed is the
 # published-theme GET endpoint under /api/theme.
-[[d1_databases]]
+[[env.production.d1_databases]]
 binding = "MKB_DB"
 database_name = "mkb-intelligence-prod"
 database_id = "47a3d7f6-6586-4d54-8cfc-bf065ef879dc"

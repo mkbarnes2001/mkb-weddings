@@ -29,7 +29,7 @@ def main() -> None:
     for token in (
         'name = "wedplanned"',
         'pages_build_output_dir = "../../build-wedplanned"',
-        '[[d1_databases]]',
+        '[[env.production.d1_databases]]',
         'binding = "MKB_DB"',
         'database_name = "mkb-intelligence-prod"',
         'database_id = "47a3d7f6-6586-4d54-8cfc-bf065ef879dc"',
@@ -37,7 +37,7 @@ def main() -> None:
         require(CONFIG, token)
 
     assert CONFIG.count(
-        '[[d1_databases]]'
+        '[[env.production.d1_databases]]'
     ) == 1
 
     # Public runtime exposes only the published theme reader.
@@ -53,6 +53,7 @@ def main() -> None:
     for token in (
         "onRequestGet",
         "onRequestOptions",
+        "export const onRequestOptions: PagesFunction<Env> = async () =>",
         "publishedVersion",
         "publishedAt",
         "appearance.theme",
