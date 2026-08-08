@@ -16,7 +16,10 @@
     "build:website": "npm run sitemap && vite build --config vite.public.config.ts && cp public/_redirects build/_redirects",
     "build:admin": "vite build --config vite.admin.config.ts && cp config/admin/_redirects build-admin/_redirects",
     "preview:website": "vite preview --config vite.public.config.ts",
-    "preview:admin": "vite preview --config vite.admin.config.ts"
+    "preview:admin": "vite preview --config vite.admin.config.ts",
+    "dev:wedplanned": "vite --config vite.wedplanned.config.ts",
+    "build:wedplanned": "vite build --config vite.wedplanned.config.ts",
+    "preview:wedplanned": "vite preview --config vite.wedplanned.config.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.975.0",

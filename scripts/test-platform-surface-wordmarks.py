@@ -151,7 +151,7 @@ def main() -> None:
 
     assert overviews.count("<AdminPageHeader") >= 2
     assert 'eyebrow="WedStore · Private delivery"' in overviews
-    assert 'eyebrow="WedBusiness · Workspace configuration"' in overviews
+    assert 'eyebrow="WedNav · Business home"' in overviews
     assert overviews.count('title="Dashboard"') >= 2
 
     # Branding editor.

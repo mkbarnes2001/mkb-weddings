@@ -19,7 +19,7 @@ def main() -> None:
     schema = read("d1/schema.sql")
 
     # Studio is the visible product identity while the persisted Website key remains stable.
-    assert 'key: "website", label: "WedStudio", shortLabel: "WedStudio"' in modules
+    assert 'key: "website", label: "WedStudio", shortLabel: "W.STU"' in modules
     assert 'entitlementKey: "website_content"' in modules
     assert 'items: studioItems' in modules
     assert 'export type PlatformModuleKey = "crm" | "client-galleries" | "website" | "business";' in platform_types
@@ -37,7 +37,7 @@ def main() -> None:
     # Website is now a section inside Studio and both old and intuitive entry routes remain valid.
     assert '{ key: "website", label: "Website", to: "/admin/website"' in modules
     assert '{ key: "publishing", label: "Publishing", to: "/admin/publishing"' in modules
-    assert '<Route path="studio" element={<Navigate to="/admin" replace />} />' in app
+    assert '<Route path="studio" element={<Dashboard />} />' in app
     assert '<Route path="website" element={<WebsiteOverview />} />' in app
     assert '<Route path="publishing" element={<PublishingOverview />} />' in app
     assert 'export function WebsiteOverview()' in dashboard
@@ -65,7 +65,7 @@ def main() -> None:
     ]:
         assert token in dashboard, token
 
-    assert 'Open WedStudio overview' in layout
+    assert 'Open WedNav overview' in layout
     assert "Private client delivery remains separate from WedStudio." in overviews
     assert "managed in WedStudio." in overviews
 

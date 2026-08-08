@@ -40,7 +40,7 @@ def main() -> None:
         ('key: "crm"', 'label: "WedCRM"', 'entitlementKey: "crm"'),
         ('key: "client-galleries"', 'label: "WedStore"', 'entitlementKey: "client_galleries"'),
         ('key: "website"', 'label: "WedStudio"', 'entitlementKey: "website_content"'),
-        ('key: "business"', 'label: "WedBusiness"', 'entitlementKey: "business_settings"'),
+        ('key: "business"', 'label: "WedNav"', 'entitlementKey: "business_settings"'),
     ]:
         assert key in modules and label in modules and entitlement in modules
 
@@ -54,15 +54,17 @@ def main() -> None:
     assert 'to: "/admin/settings/client-portal"' in crm_items
     assert 'key: "client-portal"' not in business_items
     assert 'pathname === "/admin/settings/client-portal"' in modules
-    assert 'pathname === "/admin/settings", items: businessItems' in modules
-    assert 'pathname.startsWith("/admin/settings"), items: businessItems' not in modules
+    assert 'pathname === "/admin/settings"' in modules
+    assert 'pathname.startsWith("/admin/suppliers")' in modules
+    assert 'items: businessItems' in modules
+    assert 'pathname.startsWith("/admin/settings")' not in modules
 
     # WedStudio is the visible public-content workspace.
     assert 'eyebrow="WedStudio · Content operations"' in dashboard
     assert 'title="Dashboard"' in dashboard
     assert 'eyebrow="WedStudio · Website"' in dashboard
     assert 'eyebrow="WedStudio · Publishing"' in dashboard
-    assert "Open WedStudio overview" in layout
+    assert "Open WedNav overview" in layout
     assert "Private client delivery remains separate from WedStudio." in overviews
 
     # Module icons remain restricted to platform-owned icon assets.
@@ -167,7 +169,7 @@ def main() -> None:
     assert 'eyebrow="WedCRM · Client operations"' in crm
     assert '? "Dashboard"' in crm
     assert 'eyebrow="WedStore · Private delivery"' in overviews
-    assert 'eyebrow="WedBusiness · Workspace configuration"' in overviews
+    assert 'eyebrow="WedNav · Business home"' in overviews
     assert overviews.count('title="Dashboard"') >= 2
     assert 'to="/admin/settings/client-portal"' not in overviews
     assert "Client portal branding" not in overviews
@@ -178,7 +180,7 @@ def main() -> None:
     assert not (ROOT / "d1/migrations/035_studio_foundation.sql").exists()
 
     print("PASS v1.10.0a WedPlanned module identity foundation")
-    print("  WedCRM, WedStudio, WedStore and WedBusiness identities: verified")
+    print("  WedNav, WedCRM, WedStudio and WedStore identities: verified")
     print("  persisted module keys and entitlement compatibility: verified")
     print("  Client Portal administration moved to WedCRM navigation: verified")
     print("  platform-owned icon assets enforced for custom module marks: verified")

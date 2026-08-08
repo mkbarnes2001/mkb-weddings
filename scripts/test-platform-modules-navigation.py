@@ -24,7 +24,7 @@ def main() -> None:
         ('key: "crm"', 'label: "WedCRM"', 'entitlementKey: "crm"'),
         ('key: "client-galleries"', 'label: "WedStore"', 'entitlementKey: "client_galleries"'),
         ('key: "website"', 'label: "WedStudio"', 'entitlementKey: "website_content"'),
-        ('key: "business"', 'label: "WedBusiness"', 'entitlementKey: "business_settings"'),
+        ('key: "business"', 'label: "WedNav"', 'entitlementKey: "business_settings"'),
     ]:
         assert key in modules and label in modules and entitlement in modules
     assert "requiredPermission" in modules
@@ -45,7 +45,8 @@ def main() -> None:
     assert "document.title" in layout
 
     # New landing and compatibility routes are additive; legacy routes remain available.
-    assert '<Route path="studio" element={<Navigate to="/admin" replace />} />' in app
+    assert '<Route index element={<BusinessOverview />} />' in app
+    assert '<Route path="studio" element={<Dashboard />} />' in app
     assert '<Route path="website" element={<WebsiteOverview />} />' in app
     assert '<Route path="publishing" element={<PublishingOverview />} />' in app
     assert "Build, validate and deploy weddings from one checklist." not in app

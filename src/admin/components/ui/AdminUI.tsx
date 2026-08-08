@@ -29,6 +29,7 @@ export function AdminModuleWordmark({
   trailing?: string;
   className?: string;
 }) {
+  const isCompactLabel = label.startsWith("W.");
   const moduleName = label.startsWith("Wed")
     ? label.slice(3)
     : label;
@@ -42,12 +43,20 @@ export function AdminModuleWordmark({
       className={cx("admin-module-wordmark", className)}
       aria-label={accessibleLabel}
     >
-      <span className="admin-module-wordmark__wed" aria-hidden="true">
-        Wed
-      </span>
-      <span className="admin-module-wordmark__name" aria-hidden="true">
-        {moduleName}
-      </span>
+      {isCompactLabel ? (
+        <span className="admin-module-wordmark__name" aria-hidden="true">
+          {moduleName}
+        </span>
+      ) : (
+        <>
+          <span className="admin-module-wordmark__wed" aria-hidden="true">
+            Wed
+          </span>
+          <span className="admin-module-wordmark__name" aria-hidden="true">
+            {moduleName}
+          </span>
+        </>
+      )}
       {trailing ? (
         <span
           className="admin-module-wordmark__trailing"

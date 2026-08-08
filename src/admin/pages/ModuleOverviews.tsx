@@ -90,7 +90,7 @@ export function BusinessOverview() {
     setError("");
     Promise.all([AdminApiService.getWorkspace(), AdminApiService.getWedPlannedPlatform()])
       .then(([nextWorkspace, nextPlatform]) => { setWorkspace(nextWorkspace); setPlatform(nextPlatform); })
-      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load WedBusiness overview."));
+      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load WedNav overview."));
   }, [auth.workspaceId]);
 
   const selectedCategories = platform?.categories.filter((category) => category.selected) || [];
@@ -99,9 +99,9 @@ export function BusinessOverview() {
 
   return <AdminPage>
     <AdminPageHeader
-      eyebrow="WedBusiness · Workspace configuration"
+      eyebrow="WedNav · Business home"
       title="Dashboard"
-      description="Manage the shared workspace identity, team, service profile and verified domains used across WedPlanned modules."
+      description="Your central WedPlanned business home for workspace identity, services, suppliers, team and access to the specialist products."
       actions={<Link to="/admin/wedplanned?tab=business" className="admin-button admin-button--primary admin-button--md"><Building2 className="admin-button__icon" />Edit business profile</Link>}
       meta={<div className="flex flex-wrap gap-2"><AdminStatus tone={workspace?.status === "active" ? "success" : "warning"}>{workspace?.status || "loading"}</AdminStatus><AdminStatus tone="info">{workspace?.plan || "workspace"}</AdminStatus></div>}
     />
@@ -115,9 +115,17 @@ export function BusinessOverview() {
     <section className="admin-module-destination-grid">
       <Destination to="/admin/wedplanned?tab=business" icon={Building2} title="Business profile" description="Public identity, legal details, contact information and business status." meta={<AdminStatus tone="info">{platform?.business.publicName || auth.businessName}</AdminStatus>} />
       <Destination to="/admin/wedplanned?tab=services" icon={MapPinned} title="Services & areas" description="Choose business categories and define the regions this workspace covers." meta={<AdminStatus tone="neutral">{selectedCategories.length} services</AdminStatus>} />
+      <Destination to="/admin/suppliers" icon={Users} title="Suppliers" description="Maintain the workspace supplier master database for reuse across weddings, jobs and content." />
       <Destination to="/admin/wedplanned?tab=team" icon={Users} title="Team members" description="Invite people and manage workspace-scoped roles and access." meta={<AdminStatus tone="success">{activeMembers.length} active</AdminStatus>} />
       <Destination to="/admin/settings" icon={Settings} title="Domains & workspace" description="Workspace name, website details, currency, timezone and verified domains." meta={<AdminStatus tone="info">{verifiedDomains.length} verified</AdminStatus>} />
     </section>
+    <AdminPanel title="Your WedPlanned products" description="WedNav is the business home. Open the specialist product when you need to manage clients, content or commerce.">
+      <div className="admin-module-destination-grid">
+        <Destination to="/admin/crm?view=overview" icon={Users} title="WedCRM" description="Manage enquiries, clients, Jobs, workflows, quotes, questionnaires and Client Portal activity." />
+        <Destination to="/admin/studio" icon={Globe2} title="WedStudio" description="Manage the website, public galleries, wedding stories, locations, content, SEO and publishing." />
+        <Destination to="/admin/client-galleries/overview" icon={Store} title="WedStore" description="Manage private client delivery, gallery commerce, orders and fulfilment." />
+      </div>
+    </AdminPanel>
     <AdminPanel title="Isolation boundary" description="Business configuration is workspace-owned and does not grant cross-workspace access.">
       <div className="admin-module-guidance"><div><LockKeyhole /><span><strong>Tenant scoped</strong><small>Members, domains and business data remain attached to the active workspace.</small></span></div><div><Users /><span><strong>Explicit access</strong><small>Team membership and support access are role-scoped, auditable and revocable.</small></span></div><div><Globe2 /><span><strong>Future network links</strong><small>Venue and supplier collaboration must use explicit workspace-to-workspace permissions rather than shared unrestricted access.</small></span></div></div>
     </AdminPanel>

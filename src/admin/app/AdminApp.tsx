@@ -56,8 +56,8 @@ export function AdminApp() {
   return (
     <Routes>
       <Route element={<AdminLayout />}>
-        <Route index element={<Dashboard />} />
-        <Route path="studio" element={<Navigate to="/admin" replace />} />
+        <Route index element={<BusinessOverview />} />
+        <Route path="studio" element={<Dashboard />} />
         <Route path="website" element={<WebsiteOverview />} />
         <Route path="business" element={<BusinessOverview />} />
         <Route path="wedplanned" element={<WedPlannedPlatform />} />
@@ -140,7 +140,7 @@ function PlatformAdminRoute() {
   const { auth } = useProfessionalAuth();
   return auth.platformRole === "platform_admin" && auth.permissions.includes("platform:admin")
     ? <PlatformAdmin />
-    : <Navigate to="/admin/business" replace />;
+    : <Navigate to="/admin" replace />;
 }
 
 function LegacyWeddingStoryEditorRedirect() {
