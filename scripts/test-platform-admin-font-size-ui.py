@@ -133,9 +133,20 @@ def main() -> None:
     ):
         assert token in css, token
 
-    # Source-only release: canonical schema remains 37.
+    # Historical source-only boundary: v1.10.1a hotfix5
+    # itself introduced no schema change. Validate the canonical
+    # schema immediately before the later v1.10.3a migration.
+    public_appearance_marker = '-- v1.10.3a: WedPlanned public website appearance and publication history.'
+
+    assert public_appearance_marker in schema
+
+    historical_schema = schema.split(
+        public_appearance_marker,
+        1,
+    )[0]
+
     con = sqlite3.connect(":memory:")
-    con.executescript(schema)
+    con.executescript(historical_schema)
 
     version = con.execute(
         "SELECT value FROM schema_meta "
@@ -148,8 +159,14 @@ def main() -> None:
         "PRAGMA foreign_key_check"
     ).fetchall()
 
-    assert not list(
-        (ROOT / "d1/migrations").glob("038*")
+    migration_038 = (
+        ROOT
+        / "d1/migrations/038_wedplanned_public_appearance.sql"
+    )
+
+    assert migration_038.exists()
+    assert migration_038.read_text().startswith(
+        public_appearance_marker
     )
 
     print(
@@ -171,7 +188,7 @@ def main() -> None:
         "  intermediate-width wrapping prevents overlap: verified"
     )
     print(
-        "  schema remains 37: verified"
+        "  historical schema-37 source-only boundary: verified"
     )
 
 

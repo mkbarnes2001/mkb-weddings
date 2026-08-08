@@ -28,6 +28,51 @@ function httpError(message: string, statusCode = 400) {
   return error;
 }
 
+function jsonReferencesAsset(
+  jsonInput: unknown,
+  assetUrl: string,
+) {
+  try {
+    const root = JSON.parse(
+      text(jsonInput) || "{}",
+    );
+
+    const pending: unknown[] = [root];
+
+    while (pending.length) {
+      const current = pending.pop();
+
+      if (typeof current === "string") {
+        if (current === assetUrl) {
+          return true;
+        }
+
+        continue;
+      }
+
+      if (Array.isArray(current)) {
+        pending.push(...current);
+        continue;
+      }
+
+      if (
+        current
+        && typeof current === "object"
+      ) {
+        pending.push(
+          ...Object.values(
+            current as Record<string, unknown>,
+          ),
+        );
+      }
+    }
+  } catch {
+    return false;
+  }
+
+  return false;
+}
+
 function requirePlatformAdmin(actor: any) {
   if (text(actor?.platformRole) !== "platform_admin" || !(actor?.permissions || []).includes("platform:admin")) {
     throw httpError("WedPlanned platform administrator access is required.", 403);
@@ -173,6 +218,66 @@ export async function archivePlatformBrandAsset(db: D1Db, actor: any, assetId: s
   if (platformReference) {
     throw httpError(
       "This asset is assigned to the WedPlanned platform identity. Choose another asset before deleting it.",
+      409,
+    );
+  }
+
+  const publicAppearanceReference =
+    await db.prepare(`
+      SELECT
+        draft_json,
+        published_json,
+        published_version
+      FROM platform_public_site_appearance
+      WHERE id = 'wedplanned'
+      LIMIT 1
+    `).first();
+
+  const assetUrl = text(asset.url);
+
+  if (
+    publicAppearanceReference
+    && (
+      jsonReferencesAsset(
+        publicAppearanceReference.draft_json,
+        assetUrl,
+      )
+      || jsonReferencesAsset(
+        publicAppearanceReference.published_json,
+        assetUrl,
+      )
+    )
+  ) {
+    throw httpError(
+      "This asset is assigned to the WedPlanned public website appearance. Choose another asset and save or publish the replacement before deleting it.",
+      409,
+    );
+  }
+
+  const appearanceVersions =
+    await db.prepare(`
+      SELECT
+        version,
+        theme_json
+      FROM platform_public_site_appearance_versions
+      WHERE site_key = 'wedplanned'
+      ORDER BY version DESC
+    `).all();
+
+  const historicalReference =
+    (appearanceVersions.results || []).find(
+      (row: any) =>
+        jsonReferencesAsset(
+          row.theme_json,
+          assetUrl,
+        ),
+    );
+
+  if (historicalReference) {
+    throw httpError(
+      `This asset is retained by WedPlanned public appearance version ${Number(
+        historicalReference.version || 0,
+      )}. It cannot be deleted while that rollback version exists.`,
       409,
     );
   }

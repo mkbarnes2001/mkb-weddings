@@ -28,7 +28,7 @@ def main() -> None:
     assert one(
         con,
         "SELECT value FROM schema_meta WHERE key='schema_version'",
-    )[0] == "37"
+    )[0] == "38"
 
     module_columns = {
         row[1]

@@ -1,3 +1,4 @@
+import { PublicSiteAppearanceEditor } from "../components/PublicSiteAppearanceEditor";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -53,11 +54,11 @@ import type {
   WedPlannedOperationsPayload,
 } from "../types/platform";
 
-type SectionKey = "overview" | "businesses" | "taxonomy" | "modules" | "assets" | "operations" | "access";
+type SectionKey = "overview" | "public-appearance" | "businesses" | "taxonomy" | "modules" | "assets" | "operations" | "access";
 
 function sectionFromSearch(params: URLSearchParams): SectionKey {
   const value = params.get("section");
-  return value === "businesses" || value === "taxonomy" || value === "modules" || value === "assets" || value === "operations" || value === "access" ? value : "overview";
+  return value === "public-appearance" || value === "businesses" || value === "taxonomy" || value === "modules" || value === "assets" || value === "operations" || value === "access" ? value : "overview";
 }
 
 function FieldInput({ value, onChange, placeholder = "", type = "text" }: {
@@ -658,6 +659,7 @@ export function PlatformAdmin() {
         <Destination to="/admin/platform?section=businesses" icon={Building2} title="Businesses & workspaces" description="Review every tenant boundary, business status, membership count and verified-domain footprint." meta={`${platformAdmin.summary.activeWorkspaces} active`} />
         <Destination to="/admin/platform?section=taxonomy" icon={Users} title="Supplier taxonomy" description="Manage the canonical supplier categories and Wedding roles shared by every workspace." meta={`${platformAdmin.supplierTaxonomy.roles.length} roles`} />
         <Destination to="/admin/platform?section=modules" icon={Palette} title="Module configuration" description="Control module accents, page and section colours, icons, marks and navigation treatments." meta={`${platformAdmin.modules.length} modules`} />
+        <Destination to="/admin/platform?section=public-appearance" icon={Palette} title="Public website appearance" description="Control WedPlanned public-site branding, typography, colours, responsive sizing and publishing." meta="Draft & publish" />
         <Destination to="/admin/platform?section=assets" icon={Images} title="Brand assets" description="Upload reusable platform-owned logos and icons, then assign them to modules." meta={`${platformAdmin.brandAssets.length} assets`} />
         <Destination to="/admin/platform?section=operations" icon={ShieldCheck} title="Platform operations" description="Select a business workspace before managing support access, exports or staged deletion." meta="Workspace scoped" />
         <Destination to="/admin/platform?section=access" icon={ContactRound} title="Platform access" description="Review platform identities, roles and the enforced administrator boundary." meta={`${platformAdmin.summary.users} users`} />
@@ -1603,6 +1605,12 @@ export function PlatformAdmin() {
         })}
       </div>
     </section> : null}
+    {section === "public-appearance" ? (
+      <PublicSiteAppearanceEditor
+        brandAssets={platformAdmin.brandAssets}
+      />
+    ) : null}
+
 
     {section === "assets" ? <div className="space-y-5">
       <AdminPanel title="Add platform brand asset" description="Upload reusable transparent wordmarks and icons. PNG and WebP are recommended; JPEG is supported for legacy artwork. Files may be up to 3 MB." icon={ImagePlus}>

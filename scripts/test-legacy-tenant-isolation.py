@@ -271,7 +271,7 @@ def main() -> None:
         columns = {row[1] for row in con.execute(f"PRAGMA table_info({table})")}
         assert "workspace_id" in columns, f"{table} is missing workspace_id"
 
-    assert execute_one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "37"
+    assert execute_one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "38"
     assert not con.execute("PRAGMA foreign_key_check").fetchall()
 
     assert_source_contains(

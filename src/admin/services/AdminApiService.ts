@@ -11,6 +11,10 @@ import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
 import type { PlatformAdministrationPayload, PlatformBrandAsset, PlatformBrandingIdentity, PlatformModuleConfiguration, PlatformSupplierTaxonomy, ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
 import type { CrmAddon, CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmPackage, CrmQuote, CrmQuoteOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate } from "../types/crm";
+import type {
+  WedPlannedPublicAppearanceAdministration,
+  WedPlannedPublicTheme,
+} from "../types/publicAppearance";
 import { prepareImageUpload } from "./ImageUploadService";
 
 const API_BASE =
@@ -1147,6 +1151,53 @@ export class AdminApiService {
 
   static async saveWedPlannedCategories(categoryKeys: string[], primaryCategoryKey: string) {
     return (await this.mutateWedPlannedPlatform({ action: "saveCategories", categoryKeys, primaryCategoryKey })).platform;
+  }
+
+  static async getWedPlannedPublicAppearance() {
+    const result = await request<{
+      ok: true;
+      appearance: WedPlannedPublicAppearanceAdministration;
+    }>("/api/platform-public-appearance");
+
+    return result.appearance;
+  }
+
+  static async mutateWedPlannedPublicAppearance(
+    payload: Record<string, unknown>,
+  ) {
+    const result = await request<{
+      ok: true;
+      appearance: WedPlannedPublicAppearanceAdministration;
+    }>("/api/platform-public-appearance", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    return result.appearance;
+  }
+
+  static async saveWedPlannedPublicAppearanceDraft(
+    theme: WedPlannedPublicTheme,
+  ) {
+    return this.mutateWedPlannedPublicAppearance({
+      action: "saveDraft",
+      theme,
+    });
+  }
+
+  static async publishWedPlannedPublicAppearance() {
+    return this.mutateWedPlannedPublicAppearance({
+      action: "publish",
+    });
+  }
+
+  static async restoreWedPlannedPublicAppearanceVersionToDraft(
+    version: number,
+  ) {
+    return this.mutateWedPlannedPublicAppearance({
+      action: "restoreVersionToDraft",
+      version,
+    });
   }
 
   static async getPlatformAdministration() {

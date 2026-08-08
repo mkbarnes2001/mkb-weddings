@@ -28,7 +28,7 @@ def main() -> None:
     con = sqlite3.connect(":memory:")
     con.row_factory = sqlite3.Row
     con.executescript(schema_text)
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "37"
+    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "38"
     tables = {row[0] for row in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
     assert "crm_supplier_submissions" in tables
     assert one(con, "SELECT COUNT(*) FROM crm_questionnaire_templates WHERE workspace_id=? AND schema_json LIKE '%\"type\":\"supplier\"%'", (A,))[0] >= 1

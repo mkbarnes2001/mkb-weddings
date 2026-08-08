@@ -115,6 +115,7 @@ export const platformAdminItems: AdminNavigationItem[] = [
   { key: "businesses", label: "Businesses & workspaces", to: "/admin/platform?section=businesses", icon: Building2, mobilePrimary: true, match: exactWithQuery("/admin/platform", "section", "businesses") },
   { key: "taxonomy", label: "Supplier taxonomy", to: "/admin/platform?section=taxonomy", icon: Users, match: exactWithQuery("/admin/platform", "section", "taxonomy") },
   { key: "modules", label: "Module configuration", to: "/admin/platform?section=modules", icon: Palette, mobilePrimary: true, match: exactWithQuery("/admin/platform", "section", "modules") },
+  { key: "public-appearance", label: "Public website", to: "/admin/platform?section=public-appearance", icon: Globe2, match: exactWithQuery("/admin/platform", "section", "public-appearance") },
   { key: "assets", label: "WedPlanned assets", to: "/admin/platform?section=assets", icon: Images, match: exactWithQuery("/admin/platform", "section", "assets") },
   { key: "operations", label: "Platform operations", to: "/admin/platform?section=operations", icon: ShieldCheck, match: exactWithQuery("/admin/platform", "section", "operations") },
   { key: "access", label: "Platform access", to: "/admin/platform?section=access", icon: ContactRound, mobilePrimary: true, match: exactWithQuery("/admin/platform", "section", "access") },

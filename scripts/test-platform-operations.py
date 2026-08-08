@@ -23,7 +23,7 @@ def main() -> None:
     con.row_factory = sqlite3.Row
     con.executescript(SCHEMA.read_text())
 
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "37"
+    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "38"
     required = {
         "platform_support_grants",
         "platform_support_events",

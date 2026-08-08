@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import WedPlannedApp from "./WedPlannedApp";
+import { WedPlannedPublicThemeProvider } from "./publicTheme";
 import "./wedplanned.css";
 
 const rootElement = document.getElementById("root");
@@ -13,7 +14,9 @@ if (!rootElement) {
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <HelmetProvider>
-      <WedPlannedApp />
+      <WedPlannedPublicThemeProvider>
+        <WedPlannedApp />
+      </WedPlannedPublicThemeProvider>
     </HelmetProvider>
   </React.StrictMode>,
 );

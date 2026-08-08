@@ -1,3 +1,4 @@
+import { useWedPlannedPublicTheme } from "./publicTheme";
 import {
   ArrowRight,
   BriefcaseBusiness,
@@ -48,12 +49,41 @@ function ProductWordmark({
   product: WedPlannedProduct;
   compact?: boolean;
 }) {
+  const { theme } =
+    useWedPlannedPublicTheme();
+
+  const appearance =
+    theme.products[product.slug];
+
+  const source = compact
+    ? appearance.compactWordmarkUrl
+      || appearance.wordmarkUrl
+    : appearance.wordmarkUrl;
+
   return (
     <span
       className={`wp-product-wordmark wp-product-wordmark--${product.slug}`}
       aria-label={product.name}
     >
-      {compact ? product.compactName : product.name}
+      {source ? (
+        <img
+          src={source}
+          alt=""
+          aria-hidden="true"
+          className="wp-product-wordmark__asset"
+          style={{
+            width: `${
+              compact
+                ? appearance.compactLogoWidthPx
+                : appearance.logoWidthPx
+            }px`,
+          }}
+        />
+      ) : (
+        compact
+          ? product.compactName
+          : product.name
+      )}
     </span>
   );
 }
@@ -94,11 +124,109 @@ function ScrollToTop() {
   return null;
 }
 
-function Brand() {
+function BrandVisual({
+  surface = "header",
+  compact = false,
+}: {
+  surface?: "header" | "footer";
+  compact?: boolean;
+}) {
+  const { theme } =
+    useWedPlannedPublicTheme();
+
+  const desktopSource =
+    surface === "footer"
+      ? theme.branding.darkWordmarkUrl
+        || theme.branding.lightWordmarkUrl
+        || theme.branding.mobileWordmarkUrl
+      : theme.branding.lightWordmarkUrl
+        || theme.branding.mobileWordmarkUrl;
+
+  const mobileSource =
+    theme.branding.mobileWordmarkUrl
+    || desktopSource;
+
+  if (compact && mobileSource) {
+    return (
+      <span className="wp-brand__visual">
+        <img
+          src={mobileSource}
+          alt=""
+          aria-hidden="true"
+          className="wp-brand__asset wp-brand__asset--compact"
+          style={{
+            width:
+              `${theme.branding.mobileLogoWidthPx}px`,
+          }}
+        />
+      </span>
+    );
+  }
+
+  if (desktopSource || mobileSource) {
+    return (
+      <span className="wp-brand__visual">
+        {desktopSource ? (
+          <img
+            src={desktopSource}
+            alt=""
+            aria-hidden="true"
+            className={
+              surface === "footer"
+                ? "wp-brand__asset wp-brand__asset--footer"
+                : "wp-brand__asset wp-brand__asset--desktop"
+            }
+            style={{
+              width:
+                `${
+                  surface === "footer"
+                    ? theme.branding.footerLogoWidthPx
+                    : theme.branding.desktopLogoWidthPx
+                }px`,
+            }}
+          />
+        ) : null}
+
+        {surface === "header" && mobileSource ? (
+          <img
+            src={mobileSource}
+            alt=""
+            aria-hidden="true"
+            className="wp-brand__asset wp-brand__asset--mobile"
+            style={{
+              width:
+                `${theme.branding.mobileLogoWidthPx}px`,
+            }}
+          />
+        ) : null}
+      </span>
+    );
+  }
+
   return (
-    <Link to="/" className="wp-brand" aria-label="WedPlanned home">
-      <span className="wp-brand__wed">Wed</span>
-      <span className="wp-brand__planned">Planned</span>
+    <>
+      <span className="wp-brand__wed">
+        Wed
+      </span>
+      <span className="wp-brand__planned">
+        Planned
+      </span>
+    </>
+  );
+}
+
+function Brand({
+  surface = "header",
+}: {
+  surface?: "header" | "footer";
+}) {
+  return (
+    <Link
+      to="/"
+      className={`wp-brand wp-brand--${surface}`}
+      aria-label="WedPlanned home"
+    >
+      <BrandVisual surface={surface} />
     </Link>
   );
 }
@@ -163,7 +291,7 @@ function MarketingLayout({ children }: { children: ReactNode }) {
       <footer className="wp-footer">
         <div className="wp-shell wp-footer__grid">
           <div>
-            <Brand />
+            <Brand surface="footer" />
             <p>
               One connected operating platform for wedding professionals.
             </p>
@@ -278,8 +406,7 @@ function HomePage() {
 
           <div className="wp-platform-map" aria-label="WedPlanned product suite">
             <div className="wp-platform-map__centre">
-              <span className="wp-brand__wed">Wed</span>
-              <span className="wp-brand__planned">Planned</span>
+              <BrandVisual compact />
               <small>One connected business</small>
             </div>
 

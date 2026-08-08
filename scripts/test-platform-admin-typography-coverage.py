@@ -73,18 +73,42 @@ def absolute_value(value: str) -> bool:
 uncovered = []
 absolute_count = 0
 scaled_count = 0
+isolated_preview_absolute_count = 0
+
+PREVIEW_ISOLATION_START = (
+    "PUBLIC_APPEARANCE_PREVIEW_TYPOGRAPHY_ISOLATION_START"
+)
+
+PREVIEW_ISOLATION_END = (
+    "PUBLIC_APPEARANCE_PREVIEW_TYPOGRAPHY_ISOLATION_END"
+)
 
 for path in FILES:
     text = path.read_text(encoding="utf-8")
+
+    preview_isolated = False
 
     for line_no, line in enumerate(
         text.splitlines(),
         start=1,
     ):
+        if PREVIEW_ISOLATION_START in line:
+            assert not preview_isolated
+            preview_isolated = True
+            continue
+
+        if PREVIEW_ISOLATION_END in line:
+            assert preview_isolated
+            preview_isolated = False
+            continue
         for match in FONT_PATTERN.finditer(line):
             value = match.group(1).strip()
 
             if not absolute_value(value):
+                continue
+
+            if preview_isolated:
+                isolated_preview_absolute_count += 1
                 continue
 
             absolute_count += 1
@@ -100,6 +124,11 @@ for path in FILES:
                     value,
                 )
             )
+
+    assert not preview_isolated, (
+        f"Unclosed public appearance preview typography "
+        f"isolation marker in {path}"
+    )
 
 if uncovered:
     for path, line_no, value in uncovered:
@@ -153,6 +182,20 @@ assert (
 assert absolute_count > 100
 assert scaled_count == absolute_count
 
+# The public-site preview intentionally renders the controlled
+# WedPlanned public typography rather than inheriting the Admin
+# user's global typography scale. Its exclusion is explicit and
+# bounded by markers in admin-theme.css.
+assert isolated_preview_absolute_count > 0
+assert (
+    PREVIEW_ISOLATION_START
+    in css
+)
+assert (
+    PREVIEW_ISOLATION_END
+    in css
+)
+
 print(
     "PASS v1.10.1a hotfix3 global Admin typography coverage"
 )
@@ -161,6 +204,10 @@ print(
 )
 print(
     f"  declarations covered by Admin scale variables: {scaled_count}"
+)
+print(
+    "  public website preview typography isolated: "
+    f"{isolated_preview_absolute_count}"
 )
 print(
     "  relative em/% typography avoids double scaling: verified"
