@@ -231,10 +231,9 @@ function ProductCard({ product }: { product: WedPlannedProduct }) {
         <span className="wp-product-card__icon">
           <Icon />
         </span>
-        <ProductWordmark product={product} compact />
+        <ProductWordmark product={product} />
       </div>
       <p className="wp-product-card__purpose">{product.purpose}</p>
-      <h3>{product.name}</h3>
       <span>{product.summary}</span>
       <strong>
         Explore {product.name}
@@ -290,7 +289,7 @@ function HomePage() {
                 to={`/products/${product.slug}`}
                 className={`wp-platform-node wp-platform-node--${product.slug}`}
               >
-                <ProductWordmark product={product} compact />
+                <ProductWordmark product={product} />
                 <small>{product.purpose}</small>
               </Link>
             ))}

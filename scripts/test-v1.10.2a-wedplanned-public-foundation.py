@@ -48,6 +48,12 @@ def main() -> None:
         assert f'compactName: "{compact}"' in products
         assert f'slug: "{slug}"' in products
 
+    # Public homepage uses the full product names; compact identities remain
+    # available for genuinely constrained product surfaces.
+    assert app.count("<ProductWordmark product={product} />") == 2
+    assert app.count("<ProductWordmark product={product} compact />") == 2
+    assert "<h3>{product.name}</h3>" not in app
+
     assert "Your business command centre" in products
     assert "Supplier master database" in products
 
