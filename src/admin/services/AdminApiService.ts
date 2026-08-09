@@ -1213,6 +1213,21 @@ export class AdminApiService {
     return result.platformAdmin;
   }
 
+  static async provisionBusinessWorkspace(input: {
+    businessName: string;
+    slug: string;
+    ownerEmail: string;
+    ownerDisplayName: string;
+    defaultCountry: string;
+    timezone: string;
+    currency: string;
+  }) {
+    return this.mutatePlatformAdministration({
+      action: "provisionBusinessWorkspace",
+      ...input,
+    });
+  }
+
   static async savePlatformSupplierTaxonomy(taxonomy: PlatformSupplierTaxonomy) {
     return this.mutatePlatformAdministration({ action: "saveSupplierTaxonomy", ...taxonomy });
   }

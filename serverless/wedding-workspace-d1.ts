@@ -112,7 +112,7 @@ async function resolveWeddingAssets(db: D1Db, workspaceId: string, weddingSlug: 
   }));
 }
 
-export async function getWeddingWorkspace(db: D1Db, weddingSlug: string, workspaceId = "workspace_mkb_weddings") {
+export async function getWeddingWorkspace(db: D1Db, weddingSlug: string, workspaceId: string) {
   const wedding = await requireWedding(db, weddingSlug, workspaceId);
 
   const [assets, previewSet, momentsResult, galleriesResult, clientGalleriesResult, venueRow, workspaceSettings, linkedJobRow] = await Promise.all([
@@ -216,7 +216,7 @@ export async function getWeddingWorkspace(db: D1Db, weddingSlug: string, workspa
   };
 }
 
-export async function saveWeddingPreviewSet(db: D1Db, weddingSlug: string, assetIds: string[], workspaceId = "workspace_mkb_weddings") {
+export async function saveWeddingPreviewSet(db: D1Db, weddingSlug: string, assetIds: string[], workspaceId: string) {
   await requireWedding(db, weddingSlug, workspaceId);
   const cleanIds = unique((assetIds || []).map(text));
 
@@ -303,7 +303,7 @@ async function ensureCompatibilityImage(db: D1Db, weddingSlug: string, assetId: 
   return { assetKey, imageId, filename, webSrc, thumbSrc: text(asset.thumb_src || webSrc) };
 }
 
-export async function publishWeddingPreviewAssignments(db: D1Db, weddingSlug: string, input: any, workspaceId = "workspace_mkb_weddings") {
+export async function publishWeddingPreviewAssignments(db: D1Db, weddingSlug: string, input: any, workspaceId: string) {
   const wedding = await requireWedding(db, weddingSlug, workspaceId);
   const assetIds = unique((input?.assetIds || []).map(text));
   if (!assetIds.length) throw httpError("Select at least one preview image.", 400);

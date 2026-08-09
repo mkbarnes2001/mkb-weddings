@@ -9,6 +9,7 @@ import {
 } from "../../serverless/platform-auth-d1";
 import {
   getPlatformAdministration,
+  provisionBusinessWorkspace,
   updatePlatformBrandingAndModules,
   updatePlatformModuleConfiguration,
   updatePlatformSupplierTaxonomy,
@@ -103,7 +104,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const action = String(body?.action || "");
     let platformAdmin;
 
-    if (action === "saveModuleConfiguration") {
+    if (action === "provisionBusinessWorkspace") {
+      platformAdmin = await provisionBusinessWorkspace(
+        context.env.MKB_DB,
+        actor,
+        body,
+      );
+    } else if (action === "saveModuleConfiguration") {
       platformAdmin = await updatePlatformModuleConfiguration(
         context.env.MKB_DB,
         actor,

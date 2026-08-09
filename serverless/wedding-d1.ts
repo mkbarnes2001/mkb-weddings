@@ -262,7 +262,7 @@ async function replaceSuppliers(db: D1Db, slug: string, suppliers: any[], worksp
   return cleanRows;
 }
 
-export async function listAdminWeddings(db: D1Db, workspaceId = "workspace_mkb_weddings") {
+export async function listAdminWeddings(db: D1Db, workspaceId: string) {
   const result = await db.prepare(`
     SELECT *
     FROM weddings
@@ -273,12 +273,12 @@ export async function listAdminWeddings(db: D1Db, workspaceId = "workspace_mkb_w
   return (result.results || []).map(hydrateWedding);
 }
 
-export async function getAdminWedding(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+export async function getAdminWedding(db: D1Db, slug: string, workspaceId: string) {
   const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   return row ? hydrateWedding(row) : null;
 }
 
-export async function createAdminWedding(db: D1Db, incoming: any, workspaceId = "workspace_mkb_weddings") {
+export async function createAdminWedding(db: D1Db, incoming: any, workspaceId: string) {
   const wedding = cleanWedding(incoming);
   const exists = await db.prepare(`SELECT slug FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(wedding.slug, workspaceId).first();
   if (exists) throw httpError("A wedding with this slug already exists.", 409);
@@ -310,7 +310,7 @@ export async function createAdminWedding(db: D1Db, incoming: any, workspaceId = 
   return getAdminWedding(db, wedding.slug, workspaceId);
 }
 
-export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: any, workspaceId = "workspace_mkb_weddings") {
+export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: any, workspaceId: string) {
   const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(routeSlug, workspaceId).first();
   if (!row) throw httpError("Wedding not found.", 404);
 
@@ -382,7 +382,7 @@ export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: 
   return getAdminWedding(db, wedding.slug, workspaceId);
 }
 
-export async function archiveAdminWedding(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+export async function archiveAdminWedding(db: D1Db, slug: string, workspaceId: string) {
   const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!row) throw httpError("Wedding not found.", 404);
 
@@ -406,7 +406,7 @@ export async function archiveAdminWedding(db: D1Db, slug: string, workspaceId = 
   return getAdminWedding(db, slug, workspaceId);
 }
 
-export async function deleteAdminWeddingPermanently(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+export async function deleteAdminWeddingPermanently(db: D1Db, slug: string, workspaceId: string) {
   const row = await db.prepare(`SELECT slug, title, couple FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!row) throw httpError("Wedding not found.", 404);
 
@@ -463,7 +463,7 @@ export async function deleteAdminWeddingPermanently(db: D1Db, slug: string, work
   };
 }
 
-export async function getWeddingImages(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+export async function getWeddingImages(db: D1Db, slug: string, workspaceId: string) {
   const result = await db.prepare(`
     SELECT
       i.asset_key,
@@ -527,7 +527,7 @@ export async function getWeddingImages(db: D1Db, slug: string, workspaceId = "wo
   };
 }
 
-export async function saveWeddingImages(db: D1Db, slug: string, document: any, workspaceId = "workspace_mkb_weddings") {
+export async function saveWeddingImages(db: D1Db, slug: string, document: any, workspaceId: string) {
   const wedding = await db.prepare(`SELECT slug FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!wedding) throw httpError("Wedding not found.", 404);
 
@@ -654,7 +654,7 @@ export async function saveWeddingImages(db: D1Db, slug: string, document: any, w
   };
 }
 
-export async function getWeddingSuppliers(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+export async function getWeddingSuppliers(db: D1Db, slug: string, workspaceId: string) {
   const result = await db.prepare(`
     SELECT l.wedding_slug, l.sort_order, l.role, l.supplier_id,
            s.name, s.website, s.instagram, s.email, s.phone, s.location, s.county, s.category
@@ -695,7 +695,7 @@ export async function getWeddingSuppliers(db: D1Db, slug: string, workspaceId = 
   }));
 }
 
-export async function listAdminSuppliers(db: D1Db, workspaceId = "workspace_mkb_weddings") {
+export async function listAdminSuppliers(db: D1Db, workspaceId: string) {
   const result = await db.prepare(`
     SELECT l.wedding_slug, l.sort_order, l.role, l.supplier_id,
            s.name, s.website, s.instagram, s.email, s.phone, s.location, s.county, s.category
@@ -713,7 +713,7 @@ export async function listAdminSuppliers(db: D1Db, workspaceId = "workspace_mkb_
   }));
 }
 
-export async function saveWeddingSuppliers(db: D1Db, slug: string, rows: any[], workspaceId = "workspace_mkb_weddings") {
+export async function saveWeddingSuppliers(db: D1Db, slug: string, rows: any[], workspaceId: string) {
   const weddingRow = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!weddingRow) throw httpError("Wedding not found.", 404);
 
@@ -755,7 +755,7 @@ export async function saveWeddingSuppliers(db: D1Db, slug: string, rows: any[], 
   };
 }
 
-export async function getWeddingStory(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+export async function getWeddingStory(db: D1Db, slug: string, workspaceId: string) {
   const wedding = await getAdminWedding(db, slug, workspaceId);
   if (!wedding) return null;
 
@@ -770,7 +770,7 @@ export async function getWeddingStory(db: D1Db, slug: string, workspaceId = "wor
   };
 }
 
-export async function saveWeddingStory(db: D1Db, slug: string, story: any, workspaceId = "workspace_mkb_weddings") {
+export async function saveWeddingStory(db: D1Db, slug: string, story: any, workspaceId: string) {
   const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!row) throw httpError("Wedding not found.", 404);
 
@@ -823,7 +823,7 @@ export async function saveWeddingStory(db: D1Db, slug: string, story: any, works
   };
 }
 
-async function publicImages(db: D1Db, slug: string, published = true, workspaceId = "workspace_mkb_weddings") {
+async function publicImages(db: D1Db, slug: string, published = true, workspaceId: string) {
   const table = published ? "published_story_images" : "story_images";
   const result = await db.prepare(`
     SELECT
@@ -948,7 +948,7 @@ function publishChecks(wedding: any, images: any[]) {
   return { checks, cover };
 }
 
-export async function getWeddingPublishPreview(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+export async function getWeddingPublishPreview(db: D1Db, slug: string, workspaceId: string) {
   const wedding = await getAdminWedding(db, slug, workspaceId);
   if (!wedding) throw httpError("Wedding not found.", 404);
 
@@ -982,7 +982,7 @@ export async function getWeddingPublishPreview(db: D1Db, slug: string, workspace
   };
 }
 
-export async function publishAdminWedding(db: D1Db, slug: string, storyEnabled: boolean, workspaceId = "workspace_mkb_weddings") {
+export async function publishAdminWedding(db: D1Db, slug: string, storyEnabled: boolean, workspaceId: string) {
   const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!row) throw httpError("Wedding not found.", 404);
 
@@ -1099,7 +1099,7 @@ export async function publishAdminWedding(db: D1Db, slug: string, storyEnabled: 
   };
 }
 
-export async function saveWeddingListSettings(db: D1Db, items: any[], workspaceId = "workspace_mkb_weddings") {
+export async function saveWeddingListSettings(db: D1Db, items: any[], workspaceId: string) {
   const rows = Array.isArray(items) ? items : [];
   const statements: any[] = [];
   for (const item of rows) {
@@ -1148,7 +1148,7 @@ function weddingDateHasArrived(value: unknown) {
     && new Date(parsed).toISOString().slice(0, 10) <= today;
 }
 
-export async function listPublicWeddings(db: D1Db, workspaceId = "workspace_mkb_weddings") {
+export async function listPublicWeddings(db: D1Db, workspaceId: string) {
   const [allResult, publishedResult] = await Promise.all([
     db.prepare(`SELECT slug FROM weddings WHERE workspace_id = ? ORDER BY slug ASC`).bind(workspaceId).all(),
     db.prepare(`
@@ -1206,7 +1206,7 @@ export async function listPublicWeddings(db: D1Db, workspaceId = "workspace_mkb_
   };
 }
 
-export async function getPublicWedding(db: D1Db, slug: string, workspaceId = "workspace_mkb_weddings") {
+export async function getPublicWedding(db: D1Db, slug: string, workspaceId: string) {
   const row = await db.prepare(`
     SELECT slug, published_json, published_at, wedding_date
     FROM weddings

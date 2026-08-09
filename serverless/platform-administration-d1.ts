@@ -21,6 +21,10 @@ function text(value: unknown) {
   return String(value ?? "").trim();
 }
 
+function lower(value: unknown) {
+  return text(value).toLowerCase();
+}
+
 function httpError(message: string, statusCode = 400) {
   const error = new Error(message) as Error & { statusCode?: number };
   error.statusCode = statusCode;
@@ -227,6 +231,418 @@ export async function getPlatformAdministration(db: D1Db, actor: any) {
       createdAt: row.created_at,
     })),
   };
+}
+
+export async function provisionBusinessWorkspace(
+  db: D1Db,
+  actor: any,
+  input: any,
+) {
+  requirePlatformAdmin(actor);
+
+  const businessName = text(
+    input?.businessName || input?.name,
+  ).slice(0, 120);
+
+  const slug = lower(input?.slug);
+
+  const ownerEmail = lower(
+    input?.ownerEmail,
+  );
+
+  const ownerDisplayName = text(
+    input?.ownerDisplayName,
+  ).slice(0, 120)
+    || ownerEmail.split("@")[0]
+    || "Business owner";
+
+  const defaultCountry = text(
+    input?.defaultCountry || "GB",
+  ).toUpperCase();
+
+  const timezone = text(
+    input?.timezone || "Europe/London",
+  );
+
+  const currency = text(
+    input?.currency || "GBP",
+  ).toUpperCase();
+
+  if (!businessName) {
+    throw httpError(
+      "Business name is required.",
+    );
+  }
+
+  if (
+    slug.length < 3
+    || slug.length > 60
+    || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)
+  ) {
+    throw httpError(
+      "Workspace slug must use 3–60 lowercase letters, numbers or single hyphens.",
+    );
+  }
+
+  if (!/^\S+@\S+\.\S+$/.test(ownerEmail)) {
+    throw httpError(
+      "Enter a valid owner email address.",
+    );
+  }
+
+  if (!/^[A-Z]{2}$/.test(defaultCountry)) {
+    throw httpError(
+      "Country must use a two-letter code.",
+    );
+  }
+
+  if (!/^[A-Z]{3}$/.test(currency)) {
+    throw httpError(
+      "Currency must use a three-letter code.",
+    );
+  }
+
+  if (
+    !timezone
+    || timezone.length > 80
+    || !/^[A-Za-z0-9_+\-/]+$/.test(timezone)
+  ) {
+    throw httpError(
+      "Enter a valid timezone.",
+    );
+  }
+
+  const workspaceId =
+    `workspace_${slug.replace(/-/g, "_")}`;
+
+  const duplicate = await db.prepare(`
+    SELECT id, slug
+    FROM workspaces
+    WHERE id = ? OR slug = ?
+    LIMIT 1
+  `).bind(
+    workspaceId,
+    slug,
+  ).first();
+
+  if (duplicate) {
+    throw httpError(
+      "A business workspace already uses that slug.",
+      409,
+    );
+  }
+
+  const marketplaceDuplicate =
+    await db.prepare(`
+      SELECT workspace_id
+      FROM business_profiles
+      WHERE marketplace_slug = ?
+      LIMIT 1
+    `).bind(slug).first();
+
+  if (marketplaceDuplicate) {
+    throw httpError(
+      "That marketplace slug is already in use.",
+      409,
+    );
+  }
+
+  const existingUser = await db.prepare(`
+    SELECT id, status
+    FROM platform_users
+    WHERE email_normalized = ?
+    LIMIT 1
+  `).bind(ownerEmail).first();
+
+  if (
+    existingUser
+    && text(existingUser.status) === "disabled"
+  ) {
+    throw httpError(
+      "The intended owner account is disabled.",
+      409,
+    );
+  }
+
+  const ownerUserId =
+    text(existingUser?.id)
+    || `user_${crypto.randomUUID()}`;
+
+  const membershipId =
+    `membership_${crypto.randomUUID()}`;
+
+  const legacyMembershipId =
+    `workspace_membership_${crypto.randomUUID()}`;
+
+  const auditId =
+    `audit_${crypto.randomUUID()}`;
+
+  const entitlementMetadata = JSON.stringify({
+    provisionedBy: "platform_admin",
+    release: "v1.10.4a",
+  });
+
+  const statements: any[] = [
+    db.prepare(`
+      INSERT INTO workspaces (
+        id,
+        slug,
+        name,
+        status,
+        plan,
+        created_at,
+        updated_at
+      ) VALUES (
+        ?,
+        ?,
+        ?,
+        'active',
+        'foundation',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+    `).bind(
+      workspaceId,
+      slug,
+      businessName,
+    ),
+
+    db.prepare(`
+      INSERT INTO workspace_settings (
+        workspace_id,
+        business_name,
+        contact_email,
+        accent_color,
+        default_country,
+        timezone,
+        currency,
+        document_json,
+        updated_at
+      ) VALUES (
+        ?,
+        ?,
+        ?,
+        '#111111',
+        ?,
+        ?,
+        ?,
+        '{}',
+        CURRENT_TIMESTAMP
+      )
+    `).bind(
+      workspaceId,
+      businessName,
+      ownerEmail,
+      defaultCountry,
+      timezone,
+      currency,
+    ),
+
+    db.prepare(`
+      INSERT INTO business_profiles (
+        workspace_id,
+        public_name,
+        legal_name,
+        marketplace_slug,
+        business_type,
+        summary,
+        registration_country,
+        onboarding_status,
+        marketplace_status,
+        created_at,
+        updated_at
+      ) VALUES (
+        ?,
+        ?,
+        ?,
+        ?,
+        'sole_trader',
+        '',
+        ?,
+        'foundation',
+        'private',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+    `).bind(
+      workspaceId,
+      businessName,
+      businessName,
+      slug,
+      defaultCountry,
+    ),
+
+    db.prepare(`
+      INSERT INTO platform_users (
+        id,
+        email_normalized,
+        email,
+        display_name,
+        platform_role,
+        status,
+        created_at,
+        updated_at
+      ) VALUES (
+        ?,
+        ?,
+        ?,
+        ?,
+        'member',
+        'invited',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+      ON CONFLICT(email_normalized) DO UPDATE SET
+        email = excluded.email,
+        display_name = CASE
+          WHEN trim(excluded.display_name) <> ''
+            THEN excluded.display_name
+          ELSE platform_users.display_name
+        END,
+        updated_at = CURRENT_TIMESTAMP
+    `).bind(
+      ownerUserId,
+      ownerEmail,
+      ownerEmail,
+      ownerDisplayName,
+    ),
+
+    db.prepare(`
+      INSERT INTO business_memberships (
+        id,
+        workspace_id,
+        user_id,
+        email_normalized,
+        email,
+        display_name,
+        job_title,
+        role,
+        status,
+        permissions_json,
+        invited_at,
+        created_at,
+        updated_at
+      ) VALUES (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        'Owner',
+        'owner',
+        'invited',
+        '{}',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+    `).bind(
+      membershipId,
+      workspaceId,
+      ownerUserId,
+      ownerEmail,
+      ownerEmail,
+      ownerDisplayName,
+    ),
+
+    db.prepare(`
+      INSERT INTO workspace_memberships (
+        id,
+        workspace_id,
+        user_email,
+        role,
+        status,
+        created_at,
+        updated_at
+      ) VALUES (
+        ?,
+        ?,
+        ?,
+        'owner',
+        'invited',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+    `).bind(
+      legacyMembershipId,
+      workspaceId,
+      ownerEmail,
+    ),
+
+    db.prepare(`
+      INSERT INTO workspace_entitlements (
+        workspace_id,
+        feature_key,
+        source,
+        enabled,
+        limit_value,
+        metadata_json,
+        created_at,
+        updated_at
+      )
+      SELECT
+        ?,
+        feature_key,
+        'manual',
+        1,
+        NULL,
+        ?,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      FROM platform_features
+      WHERE status = 'active'
+    `).bind(
+      workspaceId,
+      entitlementMetadata,
+    ),
+
+    db.prepare(`
+      INSERT INTO platform_audit_events (
+        id,
+        workspace_id,
+        actor_user_id,
+        actor_email,
+        event_type,
+        entity_type,
+        entity_id,
+        summary,
+        metadata_json,
+        created_at
+      ) VALUES (
+        ?,
+        ?,
+        ?,
+        ?,
+        'platform.business_workspace.provisioned',
+        'workspace',
+        ?,
+        ?,
+        ?,
+        CURRENT_TIMESTAMP
+      )
+    `).bind(
+      auditId,
+      workspaceId,
+      text(actor?.userId) || null,
+      lower(actor?.email),
+      workspaceId,
+      `Provisioned business workspace ${businessName}.`,
+      JSON.stringify({
+        slug,
+        ownerEmail,
+        ownerInvitation: "staged",
+        emailSent: false,
+      }),
+    ),
+  ];
+
+  await db.batch(statements);
+
+  return getPlatformAdministration(
+    db,
+    actor,
+  );
 }
 
 export async function updatePlatformModuleConfiguration(

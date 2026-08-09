@@ -395,6 +395,15 @@ export function PlatformAdmin() {
   const [assetFile, setAssetFile] = useState<File | null>(null);
   const [assetInputKey, setAssetInputKey] = useState(0);
   const [assetUploading, setAssetUploading] = useState(false);
+  const [businessDraft, setBusinessDraft] = useState({
+    businessName: "",
+    slug: "",
+    ownerEmail: "",
+    ownerDisplayName: "",
+    defaultCountry: "GB",
+    timezone: "Europe/London",
+    currency: "GBP",
+  });
 
   const changedModuleCount = useMemo(
     () => modules.filter((module) => {
@@ -542,6 +551,53 @@ export function PlatformAdmin() {
     setSupplierRoles((current) => { const next = [...current]; [next[index], next[target]] = [next[target], next[index]]; return next; });
   }
 
+  async function provisionWorkspace() {
+    const businessName = businessDraft.businessName.trim();
+    const slug = businessDraft.slug.trim().toLowerCase();
+    const ownerEmail = businessDraft.ownerEmail.trim().toLowerCase();
+
+    if (!businessName) {
+      setError("Enter the business name.");
+      return;
+    }
+
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+      setError("Use a lowercase workspace slug with letters, numbers and hyphens only.");
+      return;
+    }
+
+    if (!/^\S+@\S+\.\S+$/.test(ownerEmail)) {
+      setError("Enter a valid owner email address.");
+      return;
+    }
+
+    const saved = await runAdmin(
+      () => AdminApiService.provisionBusinessWorkspace({
+        ...businessDraft,
+        businessName,
+        slug,
+        ownerEmail,
+        ownerDisplayName: businessDraft.ownerDisplayName.trim(),
+        defaultCountry: businessDraft.defaultCountry.trim().toUpperCase(),
+        timezone: businessDraft.timezone.trim(),
+        currency: businessDraft.currency.trim().toUpperCase(),
+      }),
+      `${businessName} workspace created. Owner access is staged; no invitation email has been sent.`,
+    );
+
+    if (saved) {
+      setBusinessDraft({
+        businessName: "",
+        slug: "",
+        ownerEmail: "",
+        ownerDisplayName: "",
+        defaultCountry: "GB",
+        timezone: "Europe/London",
+        currency: "GBP",
+      });
+    }
+  }
+
   async function saveSupplierTaxonomy() {
     const categoryError = duplicateTaxonomyName(supplierCategories);
     const roleError = duplicateTaxonomyName(supplierRoles.map((role) => role.name));
@@ -669,9 +725,127 @@ export function PlatformAdmin() {
       </AdminPanel>
     </> : null}
 
-    {section === "businesses" ? <AdminPanel title="Businesses and workspaces" description="Read-only platform view of tenant boundaries. Open workspace operations only after selecting the intended business." icon={Building2}>
-      <div className="platform-admin-workspace-grid">{platformAdmin.workspaces.map((workspace) => <article key={workspace.id} className="platform-admin-workspace-card"><header><div><strong>{workspace.name}</strong><span>{workspace.slug}</span></div><AdminStatus tone={workspace.status === "active" ? "success" : "warning"}>{workspace.status}</AdminStatus></header><dl><div><dt>Plan</dt><dd>{workspace.plan}</dd></div><div><dt>Members</dt><dd>{workspace.activeMemberCount} active / {workspace.memberCount}</dd></div><div><dt>Domains</dt><dd>{workspace.verifiedDomainCount} verified / {workspace.domainCount}</dd></div><div><dt>Marketplace</dt><dd>{workspace.marketplaceSlug || "Not configured"}</dd></div></dl><Link to={`/admin/platform?section=operations&workspaceId=${encodeURIComponent(workspace.id)}`} onClick={() => setSelectedWorkspaceId(workspace.id)} className="admin-button admin-button--secondary admin-button--sm"><ShieldCheck className="admin-button__icon" />Open operations</Link></article>)}</div>
-    </AdminPanel> : null}
+    {section === "businesses" ? <div className="space-y-5">
+      <AdminPanel
+        title="Create business workspace" data-owner-invitation="staged"
+        description="Provision an isolated WedPlanned business using the existing tenant boundary. Owner access is staged only; this action does not send an invitation email."
+        icon={Plus}
+      >
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <AdminField label="Business name">
+            <FieldInput
+              value={businessDraft.businessName}
+              onChange={(value) => setBusinessDraft((current) => ({ ...current, businessName: value }))}
+              placeholder="Example Wedding Studio"
+            />
+          </AdminField>
+
+          <AdminField label="Workspace slug">
+            <FieldInput
+              value={businessDraft.slug}
+              onChange={(value) => setBusinessDraft((current) => ({ ...current, slug: value.toLowerCase().replace(/[^a-z0-9-]/g, "") }))}
+              placeholder="example-wedding-studio"
+            />
+          </AdminField>
+
+          <AdminField label="Owner email">
+            <FieldInput
+              value={businessDraft.ownerEmail}
+              onChange={(value) => setBusinessDraft((current) => ({ ...current, ownerEmail: value }))}
+              placeholder="owner@example.com"
+            />
+          </AdminField>
+
+          <AdminField label="Owner name">
+            <FieldInput
+              value={businessDraft.ownerDisplayName}
+              onChange={(value) => setBusinessDraft((current) => ({ ...current, ownerDisplayName: value }))}
+              placeholder="Optional"
+            />
+          </AdminField>
+
+          <AdminField label="Country code">
+            <FieldInput
+              value={businessDraft.defaultCountry}
+              onChange={(value) => setBusinessDraft((current) => ({ ...current, defaultCountry: value.toUpperCase().slice(0, 2) }))}
+              placeholder="GB"
+            />
+          </AdminField>
+
+          <AdminField label="Timezone">
+            <FieldInput
+              value={businessDraft.timezone}
+              onChange={(value) => setBusinessDraft((current) => ({ ...current, timezone: value }))}
+              placeholder="Europe/London"
+            />
+          </AdminField>
+
+          <AdminField label="Currency">
+            <FieldInput
+              value={businessDraft.currency}
+              onChange={(value) => setBusinessDraft((current) => ({ ...current, currency: value.toUpperCase().slice(0, 3) }))}
+              placeholder="GBP"
+            />
+          </AdminField>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#f5f3ef] px-4 py-3">
+          <div className="text-xs text-neutral-600">
+            <strong className="block text-neutral-900">Safe provisioning boundary</strong>
+            <span>Creates the workspace, settings, private business profile, staged owner memberships and active feature entitlements. CRM, workflow and questionnaire starter records remain idempotent and initialise inside their owning workspace when first used.</span>
+          </div>
+          <AdminButton
+            variant="primary"
+            icon={Plus}
+            disabled={
+              saving
+              || !businessDraft.businessName.trim()
+              || !businessDraft.slug.trim()
+              || !businessDraft.ownerEmail.trim()
+            }
+            onClick={() => void provisionWorkspace()}
+          >
+            Create workspace
+          </AdminButton>
+        </div>
+      </AdminPanel>
+
+      <AdminPanel
+        title="Businesses and workspaces"
+        description="Platform view of tenant boundaries. Newly provisioned owners remain invited until a later controlled invitation is sent and accepted."
+        icon={Building2}
+      >
+        <div className="platform-admin-workspace-grid">
+          {platformAdmin.workspaces.map((workspace) => (
+            <article key={workspace.id} className="platform-admin-workspace-card">
+              <header>
+                <div>
+                  <strong>{workspace.name}</strong>
+                  <span>{workspace.slug}</span>
+                </div>
+                <AdminStatus tone={workspace.status === "active" ? "success" : "warning"}>
+                  {workspace.status}
+                </AdminStatus>
+              </header>
+              <dl>
+                <div><dt>Plan</dt><dd>{workspace.plan}</dd></div>
+                <div><dt>Members</dt><dd>{workspace.activeMemberCount} active / {workspace.memberCount}</dd></div>
+                <div><dt>Domains</dt><dd>{workspace.verifiedDomainCount} verified / {workspace.domainCount}</dd></div>
+                <div><dt>Marketplace</dt><dd>{workspace.marketplaceSlug || "Not configured"}</dd></div>
+              </dl>
+              <Link
+                to={`/admin/platform?section=operations&workspaceId=${encodeURIComponent(workspace.id)}`}
+                onClick={() => setSelectedWorkspaceId(workspace.id)}
+                className="admin-button admin-button--secondary admin-button--sm"
+              >
+                <ShieldCheck className="admin-button__icon" />
+                Open operations
+              </Link>
+            </article>
+          ))}
+        </div>
+      </AdminPanel>
+    </div> : null}
 
     {section === "taxonomy" ? <section className="supplier-taxonomy-manager">
       <header className="supplier-taxonomy-manager__header"><div><p className="admin-eyebrow">Platform-owned canonical options</p><h2>Supplier categories & Wedding roles</h2><p>Business workspaces may select these options but cannot add, rename, reorder or remove them.</p></div><div className="flex flex-wrap gap-2"><button type="button" onClick={() => { setSupplierCategories([...SUPPLIER_CATEGORY_OPTIONS]); setSupplierRoles([...DEFAULT_SUPPLIER_ROLE_DEFINITIONS]); }} className="admin-button admin-button--secondary admin-button--sm"><RotateCcw className="admin-button__icon" />Restore defaults</button><button type="button" disabled={saving} onClick={saveSupplierTaxonomy} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : "Save platform taxonomy"}</button></div></header>

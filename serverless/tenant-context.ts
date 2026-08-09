@@ -26,8 +26,10 @@ function hostnameFromRequest(request: Request) {
  */
 export async function resolveAdminWorkspaceId(context: any) {
   const authenticated = text(context?.data?.professionalContext?.workspaceId);
-  if (authenticated) return authenticated;
-  return getDefaultWorkspaceId(context.env.MKB_DB as D1Db);
+  if (!authenticated) {
+    throw new Error("Authenticated workspace context is required.");
+  }
+  return authenticated;
 }
 
 /**

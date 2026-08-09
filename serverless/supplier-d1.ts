@@ -92,7 +92,7 @@ function hydrate(row: any, weddings: any[] = []) {
   };
 }
 
-export async function listMasterSuppliers(db: D1Db, includeArchived = true, workspaceId = "workspace_mkb_weddings") {
+export async function listMasterSuppliers(db: D1Db, includeArchived = true, workspaceId: string) {
   const supplierResult = await db.prepare(`
     SELECT * FROM suppliers
     WHERE workspace_id = ? ${includeArchived ? "" : "AND status <> 'archived'"}
@@ -112,7 +112,7 @@ export async function listMasterSuppliers(db: D1Db, includeArchived = true, work
   );
 }
 
-export async function getMasterSupplier(db: D1Db, id: string, workspaceId = "workspace_mkb_weddings") {
+export async function getMasterSupplier(db: D1Db, id: string, workspaceId: string) {
   const row = await db.prepare(`SELECT * FROM suppliers WHERE id = ? AND workspace_id = ?`).bind(id, workspaceId).first();
   if (!row) return null;
   const links = await db.prepare(`
@@ -126,7 +126,7 @@ export async function getMasterSupplier(db: D1Db, id: string, workspaceId = "wor
   return hydrate(row, links.results || []);
 }
 
-export async function findMasterSupplierByName(db: D1Db, name: string, workspaceId = "workspace_mkb_weddings") {
+export async function findMasterSupplierByName(db: D1Db, name: string, workspaceId: string) {
   const key = normalise(name);
   if (!key) return null;
   const result = await db.prepare(`SELECT * FROM suppliers WHERE workspace_id = ?`).bind(workspaceId).all();
@@ -134,7 +134,7 @@ export async function findMasterSupplierByName(db: D1Db, name: string, workspace
   return row ? hydrate(row) : null;
 }
 
-export async function createMasterSupplier(db: D1Db, incoming: MasterSupplierInput, workspaceId = "workspace_mkb_weddings") {
+export async function createMasterSupplier(db: D1Db, incoming: MasterSupplierInput, workspaceId: string) {
   const supplier = cleanSupplier(incoming);
   const duplicate = await findMasterSupplierByName(db, supplier.name, workspaceId);
   if (duplicate) {
@@ -153,7 +153,7 @@ export async function createMasterSupplier(db: D1Db, incoming: MasterSupplierInp
   return getMasterSupplier(db, supplier.id, workspaceId);
 }
 
-export async function updateMasterSupplier(db: D1Db, incoming: MasterSupplierInput, workspaceId = "workspace_mkb_weddings") {
+export async function updateMasterSupplier(db: D1Db, incoming: MasterSupplierInput, workspaceId: string) {
   const supplier = cleanSupplier(incoming);
   if (!text(incoming?.id)) throw httpError("Supplier ID is required.", 400);
   const existing = await db.prepare(`SELECT * FROM suppliers WHERE id = ? AND workspace_id = ?`).bind(supplier.id, workspaceId).first();
@@ -218,14 +218,14 @@ export async function updateMasterSupplier(db: D1Db, incoming: MasterSupplierInp
   return getMasterSupplier(db, supplier.id, workspaceId);
 }
 
-export async function archiveMasterSupplier(db: D1Db, id: string, workspaceId = "workspace_mkb_weddings") {
+export async function archiveMasterSupplier(db: D1Db, id: string, workspaceId: string) {
   const existing = await getMasterSupplier(db, id, workspaceId);
   if (!existing) throw httpError("Supplier not found.", 404);
   await db.prepare(`UPDATE suppliers SET status = 'archived', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(id, workspaceId).run();
   return getMasterSupplier(db, id, workspaceId);
 }
 
-export async function ensureMasterSupplier(db: D1Db, incoming: MasterSupplierInput, workspaceId = "workspace_mkb_weddings") {
+export async function ensureMasterSupplier(db: D1Db, incoming: MasterSupplierInput, workspaceId: string) {
   const requestedId = text(incoming?.id);
   if (requestedId) {
     const existing = await getMasterSupplier(db, requestedId, workspaceId);

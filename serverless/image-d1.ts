@@ -112,7 +112,7 @@ export async function registerUploadedImage(
     width: number;
     height: number;
   },
-  workspaceId = "workspace_mkb_weddings",
+  workspaceId: string,
 ) {
   const venueSlug = text(input.venueSlug);
   const weddingSlug = text(input.weddingSlug);
@@ -362,7 +362,7 @@ export async function createR2Upload(
     width: number;
     height: number;
   },
-  workspaceId = "workspace_mkb_weddings",
+  workspaceId: string,
 ) {
   if (!bucket) throw httpError("R2 image binding is not configured.", 500);
 
@@ -455,7 +455,7 @@ export async function deleteManagedImage(
     imageId: string;
     venueSlug?: string;
   },
-  workspaceId = "workspace_mkb_weddings",
+  workspaceId: string,
 ) {
   const weddingSlug = text(input.weddingSlug);
   const imageId = text(input.imageId);
