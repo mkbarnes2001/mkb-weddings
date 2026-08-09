@@ -1345,6 +1345,15 @@ body {
     var(--wp-card-shadow, none);
 }
 
+/*
+ * Keep each product identity accent on the card edge after the
+ * runtime theme applies the configurable generic card border.
+ */
+.wp-product-card--wednav { border-top-color: var(--wp-nav); }
+.wp-product-card--wedcrm { border-top-color: var(--wp-crm); }
+.wp-product-card--wedstudio { border-top-color: var(--wp-studio); }
+.wp-product-card--wedstore { border-top-color: var(--wp-store); }
+
 .wp-product-card:hover {
   transform:
     var(

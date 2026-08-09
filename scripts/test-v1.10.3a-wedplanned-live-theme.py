@@ -169,6 +169,34 @@ def main() -> None:
     ):
         require(RUNTIME, token)
 
+    # Runtime card theming must not overwrite product identity
+    # accent borders. The product-specific rules must appear after
+    # the generic runtime card-border rule in the CSS cascade.
+    runtime_card_rule = CSS.rfind(
+        ".wp-product-card {"
+    )
+
+    assert runtime_card_rule >= 0
+
+    for slug, variable in (
+        ("wednav", "--wp-nav"),
+        ("wedcrm", "--wp-crm"),
+        ("wedstudio", "--wp-studio"),
+        ("wedstore", "--wp-store"),
+    ):
+        selector = (
+            f".wp-product-card--{slug} "
+            f"{{ border-top-color: var({variable}); }}"
+        )
+
+        accent_rule = CSS.rfind(selector)
+
+        assert accent_rule >= 0, selector
+        assert accent_rule > runtime_card_rule, (
+            f"{selector} must follow the runtime "
+            "card-border override"
+        )
+
     # Behaviour controls reach actual public interactions.
     for token in (
         "--wp-header-position",
