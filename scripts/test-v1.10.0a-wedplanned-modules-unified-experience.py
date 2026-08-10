@@ -120,7 +120,21 @@ def main() -> None:
     assert "accessToken" not in gallery_helper
 
     # The authenticated portal uses the existing single-segment gallery route.
-    assert 'type PortalView = "home" | "quotes" | "questionnaires" | "galleries";' in portal_ui
+    portal_view = portal_ui.split(
+        "type PortalView =",
+        1,
+    )[1].split(
+        ";",
+        1,
+    )[0]
+
+    for required_view in (
+        '"home"',
+        '"quotes"',
+        '"questionnaires"',
+        '"galleries"',
+    ):
+        assert required_view in portal_view, required_view
     assert 'setView("galleries")' in portal_ui
     assert "portalGalleryPath" in portal_ui
     assert "`/client-gallery/${encodeURIComponent(gallery.slug)}`" in portal_ui

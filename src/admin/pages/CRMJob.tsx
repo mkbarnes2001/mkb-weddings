@@ -1,3 +1,4 @@
+import { CrmInvoicePaymentForm } from "../components/CrmInvoicePaymentForm";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -257,6 +258,13 @@ export function CRMJob() {
   const nextTask = workspace.tasks.find((task) => task.status === "pending");
   const portal = portalState(workspace);
   const lifecycle = workspace.lifecycle;
+  const commercial = workspace.commercial;
+  const commercialInvoice = commercial.invoice;
+  const commercialContract = commercial.contract;
+  const commercialQuote = commercial.quote;
+  const bookingQuestionnaire = workspace.questionnaires.find((item) => item.status !== "completed")
+    || workspace.questionnaires[0]
+    || null;
   const primaryGallery = lifecycle.primaryClientGallery;
   const completedQuestionnaires = workspace.questionnaires.filter((item) => item.status === "completed").length;
   const storyLabel = lifecycle.story.state === "not_started" ? "not started" : lifecycle.story.state;
@@ -292,6 +300,130 @@ export function CRMJob() {
           </div>
         </div>
       </AdminPanel>
+
+      <AdminPanel
+        title="Booking and payments"
+        description="Commercial booking documents generated from the accepted quote, with the questionnaire kept alongside the client actions it supports."
+        icon={BriefcaseBusiness}
+        className="crm-commercial-panel"
+      >
+        <div className="crm-commercial-grid">
+          <article className="crm-commercial-card">
+            <span className="crm-commercial-card__icon"><FileText /></span>
+            <div className="crm-commercial-card__body">
+              <div className="crm-commercial-card__heading">
+                <p>Invoice</p>
+                {commercialInvoice
+                  ? <AdminStatus tone={commercialInvoice.status === "paid" ? "success" : commercialInvoice.status === "void" ? "danger" : commercialInvoice.status === "part_paid" ? "info" : "warning"}>{commercialInvoice.status.replace(/_/g, " ")}</AdminStatus>
+                  : <AdminStatus tone="neutral">not generated</AdminStatus>}
+              </div>
+              <strong>{commercialInvoice?.reference || "No invoice yet"}</strong>
+              {commercialInvoice ? <>
+                <dl className="crm-commercial-card__metrics">
+                  <div><dt>Total</dt><dd>{money(commercialInvoice.totalAmount, commercialInvoice.currency)}</dd></div>
+                  <div><dt>Paid</dt><dd>{money(commercialInvoice.paidAmount, commercialInvoice.currency)}</dd></div>
+                  <div><dt>Balance</dt><dd>{money(commercialInvoice.balanceAmount, commercialInvoice.currency)}</dd></div>
+                </dl>
+                {commercialInvoice.nextPayment ? <div className="crm-commercial-card__next">
+                  <span>Next payment</span>
+                  <strong>{commercialInvoice.nextPayment.label} · {money(commercialInvoice.nextPayment.balanceAmount, commercialInvoice.currency)}</strong>
+                  <small>{commercialInvoice.nextPayment.dueDate ? `Due ${dateLabel(commercialInvoice.nextPayment.dueDate)}` : "No due date set"}</small>
+                  <AdminStatus tone={commercialInvoice.nextPayment.status === "overdue" ? "danger" : commercialInvoice.nextPayment.status === "part_paid" ? "info" : "warning"}>{commercialInvoice.nextPayment.status.replace(/_/g, " ")}</AdminStatus>
+                </div> : <small className="crm-commercial-card__note">{commercialInvoice.balanceAmount > 0 ? "No payment schedule item is currently due." : "Invoice balance settled."}</small>}
+              </> : <small className="crm-commercial-card__note">An accepted quote can generate the booking invoice automatically from its immutable commercial snapshot.</small>}
+            </div>
+          </article>
+
+          <article className="crm-commercial-card">
+            <span className="crm-commercial-card__icon"><BookOpen /></span>
+            <div className="crm-commercial-card__body">
+              <div className="crm-commercial-card__heading">
+                <p>Contract</p>
+                {commercialContract
+                  ? <AdminStatus tone={commercialContract.status === "signed" ? "success" : commercialContract.status === "void" ? "danger" : commercialContract.status === "sent" || commercialContract.status === "viewed" ? "info" : "warning"}>{commercialContract.status.replace(/_/g, " ")}</AdminStatus>
+                  : <AdminStatus tone="neutral">not generated</AdminStatus>}
+              </div>
+              <strong>{commercialContract?.reference || "No contract yet"}</strong>
+              {commercialContract ? <>
+                <small className="crm-commercial-card__note">{commercialContract.title}</small>
+                <dl className="crm-commercial-card__metrics crm-commercial-card__metrics--two">
+                  <div><dt>Signatures</dt><dd>{commercialContract.signatureCount} / {commercialContract.requiredSignatures}</dd></div>
+                  <div><dt>Version</dt><dd>{commercialContract.versionNumber || "—"}</dd></div>
+                </dl>
+                <small className="crm-commercial-card__note">{commercialContract.signedAt ? `Signed ${dateLabel(commercialContract.signedAt)}` : commercialContract.sentAt ? `Sent ${dateLabel(commercialContract.sentAt)}` : "Draft document"}</small>
+              </> : <small className="crm-commercial-card__note">A contract is generated only when this workspace has an active default contract template configured.</small>}
+            </div>
+          </article>
+
+          <article className="crm-commercial-card">
+            <span className="crm-commercial-card__icon"><ClipboardList /></span>
+            <div className="crm-commercial-card__body">
+              <div className="crm-commercial-card__heading">
+                <p>Questionnaire</p>
+                {bookingQuestionnaire
+                  ? <AdminStatus tone={statusTone(bookingQuestionnaire.status)}>{bookingQuestionnaire.status.replace(/_/g, " ")}</AdminStatus>
+                  : <AdminStatus tone="neutral">not assigned</AdminStatus>}
+              </div>
+              <strong>{bookingQuestionnaire?.title || "No booking questionnaire"}</strong>
+              <small className="crm-commercial-card__note">{bookingQuestionnaire
+                ? bookingQuestionnaire.dueAt
+                  ? `Due ${dateLabel(bookingQuestionnaire.dueAt)}`
+                  : "Assigned with no due date"
+                : "Automatic assignment remains off until a default questionnaire is configured and enabled."}</small>
+            </div>
+            <a className="admin-button admin-button--secondary admin-button--sm" href="#job-questionnaires">Manage</a>
+          </article>
+
+          <article className="crm-commercial-card">
+            <span className="crm-commercial-card__icon"><PackageCheck /></span>
+            <div className="crm-commercial-card__body">
+              <div className="crm-commercial-card__heading">
+                <p>Accepted quote</p>
+                {commercialQuote
+                  ? <AdminStatus tone="success">accepted</AdminStatus>
+                  : <AdminStatus tone="neutral">not linked</AdminStatus>}
+              </div>
+              <strong>{commercialQuote?.reference || job.quoteReference || "No accepted quote"}</strong>
+              {commercialQuote ? <>
+                <small className="crm-commercial-card__note">{commercialQuote.packageName || job.packageName || "Booked package"}</small>
+                <dl className="crm-commercial-card__metrics crm-commercial-card__metrics--two">
+                  <div><dt>Total</dt><dd>{money(commercialQuote.totalAmount, commercialQuote.currency)}</dd></div>
+                  <div><dt>Accepted</dt><dd>{commercialQuote.acceptedAt ? dateLabel(commercialQuote.acceptedAt) : "—"}</dd></div>
+                </dl>
+              </> : <small className="crm-commercial-card__note">This Job does not currently have an accepted quote snapshot attached.</small>}
+            </div>
+            {commercialQuote ? <Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/crm/quotes/${commercialQuote.id}`}>Open quote</Link> : null}
+          </article>
+        </div>
+      </AdminPanel>
+          {commercialInvoice && canManage ? (
+            <CrmInvoicePaymentForm
+              jobId={workspace.job.id}
+              invoice={commercialInvoice}
+              canManage={canManage}
+              onSaved={(
+                nextWorkspace,
+                successMessage,
+              ) => {
+                setWorkspace(
+                  nextWorkspace,
+                );
+                setError("");
+                setMessage(
+                  successMessage,
+                );
+              }}
+              onError={(
+                nextError,
+              ) => {
+                setMessage("");
+                setError(
+                  nextError,
+                );
+              }}
+            />
+          ) : null}
+
 
       <AdminPanel
         title="Wedding delivery and content"

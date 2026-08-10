@@ -35,12 +35,15 @@ def column_names(
     }
 
 
-def verify_schema(con: sqlite3.Connection):
+def verify_schema(
+    con: sqlite3.Connection,
+    expected_version: str,
+):
     assert one(
         con,
         "SELECT value FROM schema_meta "
         "WHERE key='schema_version'",
-    )[0] == "38"
+    )[0] == expected_version
 
     appearance_columns = column_names(
         con,
@@ -163,7 +166,7 @@ def main() -> None:
     fresh = sqlite3.connect(":memory:")
     fresh.execute("PRAGMA foreign_keys = ON")
     fresh.executescript(schema)
-    verify_schema(fresh)
+    verify_schema(fresh, "39")
 
     # Upgrade path from the exact schema-37 prefix.
     prefix = schema.split(MARKER, 1)[0]
@@ -186,7 +189,7 @@ def main() -> None:
         "WHERE key='schema_version'",
     )[0] == "38"
 
-    verify_schema(upgrade)
+    verify_schema(upgrade, "38")
 
     print(
         "PASS v1.10.3a public appearance schema foundation"

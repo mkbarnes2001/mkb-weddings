@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
+import { ClientPortalCommercialDocument } from "./ClientPortalCommercialDocument";
 import { ArrowLeft, CalendarDays, CheckCircle2, Download, FileText, Home, Images, LogOut, Mail, PackageCheck, Paperclip, Plus, Save, Search, Send, Trash2, XCircle } from "lucide-react";
 
 type SupplierDirectoryOption = {
@@ -51,6 +52,52 @@ type PortalQuestionnaire = {
   completedAt?: string;
 };
 
+type PortalCommercialScheduleSummary = {
+  id: string;
+  scheduleType: string;
+  label: string;
+  amount: number;
+  dueDate: string;
+  displayOrder: number;
+  paidAmount: number;
+  balanceAmount: number;
+  status: string;
+};
+
+type PortalCommercialContractSummary = {
+  id: string;
+  reference: string;
+  title: string;
+  status: string;
+  versionId: string;
+  requiredSignatures: number;
+  signatureCount: number;
+  sentAt: string;
+  viewedAt: string;
+  signedAt: string;
+};
+
+type PortalCommercialInvoiceSummary = {
+  id: string;
+  reference: string;
+  status: string;
+  currency: string;
+  issueDate: string;
+  dueDate: string;
+  totalAmount: number;
+  paidAmount: number;
+  balanceAmount: number;
+  nextPayment: PortalCommercialScheduleSummary | null;
+  issuedAt: string;
+  sentAt: string;
+  paidAt: string;
+};
+
+type PortalCommercialSummary = {
+  contracts: PortalCommercialContractSummary[];
+  invoices: PortalCommercialInvoiceSummary[];
+};
+
 type PortalJob = {
   id: string;
   reference: string;
@@ -62,6 +109,7 @@ type PortalJob = {
   weddingSlug: string;
   contactName: string;
   questionnaires: PortalQuestionnaire[];
+  commercial: PortalCommercialSummary;
 };
 
 
@@ -231,7 +279,7 @@ function SupplierQuestion({
   );
 }
 
-type PortalView = "home" | "quotes" | "questionnaires" | "galleries";
+type PortalView = "home" | "quotes" | "contracts" | "invoices" | "questionnaires" | "galleries";
 
 function contrastColour(hex: string) {
   const value = /^#[0-9a-f]{6}$/i.test(hex) ? hex.slice(1) : "111111";
@@ -244,10 +292,24 @@ function contrastColour(hex: string) {
 export function ClientPortal() {
   const initialQuestionnaire = new URLSearchParams(window.location.search).get("questionnaire") || "";
   const initialQuote = new URLSearchParams(window.location.search).get("quote") || "";
+  const initialContract = new URLSearchParams(window.location.search).get("contract") || "";
+  const initialInvoice = new URLSearchParams(window.location.search).get("invoice") || "";
   const [portal, setPortal] = useState<PortalPayload | null>(null);
-  const [view, setView] = useState<PortalView>(initialQuote ? "quotes" : initialQuestionnaire ? "questionnaires" : "home");
+  const [view, setView] = useState<PortalView>(
+    initialInvoice
+      ? "invoices"
+      : initialContract
+        ? "contracts"
+        : initialQuote
+          ? "quotes"
+          : initialQuestionnaire
+            ? "questionnaires"
+            : "home",
+  );
   const [selectedId, setSelectedId] = useState(initialQuestionnaire);
   const [selectedQuoteId, setSelectedQuoteId] = useState(initialQuote);
+  const [selectedContractId, setSelectedContractId] = useState(initialContract);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState(initialInvoice);
   const [quote, setQuote] = useState<PortalQuote | null>(null);
   const [selectedOptionId, setSelectedOptionId] = useState("");
   const [addonQuantities, setAddonQuantities] = useState<Record<string, number>>({});
@@ -404,8 +466,13 @@ export function ClientPortal() {
   async function signOut() {
     await fetch("/api/public/client-auth/sign-out", { method: "POST", credentials: "include" }).catch(() => {});
     setPortal({ authenticated: false, identity: null, jobs: [], quotes: [], galleries: [] });
-    setView("home"); setSelectedId(""); setSelectedQuoteId("");
-    setQuestionnaire(null); setQuote(null);
+    setView("home");
+    setSelectedId("");
+    setSelectedQuoteId("");
+    setSelectedContractId("");
+    setSelectedInvoiceId("");
+    setQuestionnaire(null);
+    setQuote(null);
   }
 
   const accent = portal?.business?.accentColor || "#111111";
@@ -419,10 +486,23 @@ export function ClientPortal() {
   } as CSSProperties;
   const allQuestionnaires = portal?.jobs.flatMap((job) => job.questionnaires.map((item) => ({ ...item, job }))) || [];
   const galleries = portal?.galleries || [];
+  const allContracts = portal?.jobs.flatMap((job) => (job.commercial?.contracts || []).map((item) => ({ ...item, job }))) || [];
+  const allInvoices = portal?.jobs.flatMap((job) => (job.commercial?.invoices || []).map((item) => ({ ...item, job }))) || [];
   const completedQuestionnaires = allQuestionnaires.filter((item) => item.status === "completed").length;
   const pendingQuestionnaires = allQuestionnaires.length - completedQuestionnaires;
   const primaryJob = portal?.jobs[0] || null;
   const acceptedQuotes = portal?.quotes.filter((item) => item.status === "accepted").length || 0;
+  const signedContracts = allContracts.filter((item) => item.status === "signed").length;
+  const unpaidInvoices = allInvoices.filter((item) => item.balanceAmount > 0).length;
+  const primaryContract = primaryJob?.commercial?.contracts?.[0] || null;
+  const primaryInvoice = primaryJob?.commercial?.invoices?.find((item) => item.balanceAmount > 0)
+    || primaryJob?.commercial?.invoices?.[0]
+    || null;
+  const primaryPendingQuestionnaire = primaryJob?.questionnaires.find((item) => item.status !== "completed") || null;
+  const primaryQuoteAccepted = Boolean(
+    primaryJob
+    && portal?.quotes.some((item) => item.status === "accepted" && item.acceptedJobId === primaryJob.id),
+  );
   const clientFirstName = (portal?.identity?.displayName || portal?.identity?.email || "there").split(/[ @]/)[0];
   const selectedQuoteOption = quote?.currentVersion.options.find((option) => option.id === selectedOptionId);
   const selectedQuoteTotals = quoteTotals(selectedQuoteOption, quote, addonQuantities);
@@ -471,6 +551,8 @@ export function ClientPortal() {
       <nav className="client-portal-nav" aria-label="Client portal sections">
         <button className={view === "home" ? "active" : ""} onClick={() => { setView("home"); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><Home />Home</button>
         {portal.quotes.length ? <button className={view === "quotes" ? "active" : ""} onClick={() => { setView("quotes"); setSelectedId(""); setQuestionnaire(null); }}><PackageCheck />Quotes</button> : null}
+        {allContracts.length ? <button className={view === "contracts" ? "active" : ""} onClick={() => { setView("contracts"); setSelectedContractId((current) => current || allContracts[0]?.id || ""); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><FileText />Contracts</button> : null}
+        {allInvoices.length ? <button className={view === "invoices" ? "active" : ""} onClick={() => { setView("invoices"); setSelectedInvoiceId((current) => current || allInvoices[0]?.id || ""); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><PackageCheck />Invoices</button> : null}
         {allQuestionnaires.length ? <button className={view === "questionnaires" ? "active" : ""} onClick={() => { setView("questionnaires"); setSelectedQuoteId(""); setQuote(null); }}><FileText />Questionnaires</button> : null}
         {galleries.length ? <button className={view === "galleries" ? "active" : ""} onClick={() => { setView("galleries"); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><Images />Galleries</button> : null}
       </nav>
@@ -486,8 +568,43 @@ export function ClientPortal() {
           <div><small>Your booking</small><h2>{primaryJob.title}</h2><p><CalendarDays />{formatDate(primaryJob.eventDate)}{primaryJob.venueText ? ` · ${primaryJob.venueText}` : ""}</p></div>
           <span>{primaryJob.status.replace(/_/g, " ")}</span>
         </section> : null}
+
+        {primaryJob ? <section className="client-portal-booking-checklist">
+          <header>
+            <div><small>Booking progress</small><h2>Your booking checklist</h2></div>
+            <p>Key commercial and planning steps for this booking.</p>
+          </header>
+          <div className="client-portal-booking-checklist__items">
+            <article className={`client-portal-checklist-item ${primaryQuoteAccepted ? "complete" : ""}`}>
+              <span>{primaryQuoteAccepted ? <CheckCircle2 /> : <XCircle />}</span>
+              <div><strong>Quote accepted</strong><small>{primaryQuoteAccepted ? "Your package and selected extras are confirmed." : "Review the available quote before the booking can progress."}</small></div>
+              {!primaryQuoteAccepted && portal.quotes.length ? <button type="button" onClick={() => setView("quotes")}>Review</button> : <em>Complete</em>}
+            </article>
+
+            <article className={`client-portal-checklist-item ${primaryContract?.status === "signed" ? "complete" : ""}`}>
+              <span>{primaryContract?.status === "signed" ? <CheckCircle2 /> : <XCircle />}</span>
+              <div><strong>Contract signature</strong><small>{primaryContract ? primaryContract.status === "signed" ? "The required contract signature has been recorded." : `${primaryContract.signatureCount} of ${primaryContract.requiredSignatures} signatures recorded.` : "No client-visible contract has been issued yet."}</small></div>
+              {primaryContract ? <button type="button" onClick={() => { setSelectedContractId(primaryContract.id); setView("contracts"); }}>View</button> : <em>Pending</em>}
+            </article>
+
+            <article className={`client-portal-checklist-item ${primaryInvoice && primaryInvoice.balanceAmount <= 0 ? "complete" : ""}`}>
+              <span>{primaryInvoice && primaryInvoice.balanceAmount <= 0 ? <CheckCircle2 /> : <XCircle />}</span>
+              <div><strong>Payment schedule</strong><small>{primaryInvoice ? primaryInvoice.balanceAmount <= 0 ? "The invoice balance is paid." : primaryInvoice.nextPayment ? `${primaryInvoice.nextPayment.label}: ${money(primaryInvoice.nextPayment.balanceAmount, primaryInvoice.currency)} remaining${primaryInvoice.nextPayment.dueDate ? ` · due ${formatDate(primaryInvoice.nextPayment.dueDate)}` : ""}.` : `${money(primaryInvoice.balanceAmount, primaryInvoice.currency)} remains due.` : "No client-visible invoice has been issued yet."}</small></div>
+              {primaryInvoice ? <button type="button" onClick={() => { setSelectedInvoiceId(primaryInvoice.id); setView("invoices"); }}>View</button> : <em>Pending</em>}
+            </article>
+
+            <article className={`client-portal-checklist-item ${primaryJob.questionnaires.length > 0 && !primaryPendingQuestionnaire ? "complete" : ""}`}>
+              <span>{primaryJob.questionnaires.length > 0 && !primaryPendingQuestionnaire ? <CheckCircle2 /> : <XCircle />}</span>
+              <div><strong>Questionnaire</strong><small>{primaryJob.questionnaires.length ? primaryPendingQuestionnaire ? `${primaryPendingQuestionnaire.title} is waiting to be completed.` : "Your assigned questionnaire is complete." : "No questionnaire has been assigned yet."}</small></div>
+              {primaryPendingQuestionnaire ? <button type="button" onClick={() => { setSelectedId(primaryPendingQuestionnaire.id); setView("questionnaires"); }}>Complete</button> : <em>{primaryJob.questionnaires.length ? "Complete" : "Pending"}</em>}
+            </article>
+          </div>
+        </section> : null}
+
         <section className="client-portal-home-grid">
           {portal.quotes.length ? <button onClick={() => setView("quotes")}><PackageCheck /><span><small>Quotes</small><strong>{acceptedQuotes ? `${acceptedQuotes} accepted` : `${portal.quotes.length} available`}</strong><em>Review package options and booking details</em></span></button> : null}
+          {allContracts.length ? <button onClick={() => { setSelectedContractId((current) => current || allContracts[0]?.id || ""); setView("contracts"); }}><FileText /><span><small>Contracts</small><strong>{signedContracts === allContracts.length ? "Signed" : `${signedContracts} of ${allContracts.length} signed`}</strong><em>Review the contract attached to your booking</em></span></button> : null}
+          {allInvoices.length ? <button onClick={() => { setSelectedInvoiceId((current) => current || allInvoices[0]?.id || ""); setView("invoices"); }}><PackageCheck /><span><small>Invoices</small><strong>{unpaidInvoices ? `${unpaidInvoices} with balance due` : "Paid"}</strong><em>View totals, instalments and payment history</em></span></button> : null}
           {allQuestionnaires.length ? <button onClick={() => setView("questionnaires")}><FileText /><span><small>Questionnaires</small><strong>{pendingQuestionnaires ? `${pendingQuestionnaires} to complete` : "Complete"}</strong><em>{completedQuestionnaires} of {allQuestionnaires.length} completed</em></span></button> : null}
           {galleries.length ? <button onClick={() => setView("galleries")}><Images /><span><small>Galleries</small><strong>{galleries.length === 1 ? "1 gallery ready" : `${galleries.length} galleries ready`}</strong><em>View photographs, favourites, selections and downloads</em></span></button> : null}
         </section>
@@ -495,6 +612,8 @@ export function ClientPortal() {
       </main> : <div className="client-portal-layout">
         <aside className="client-portal-sidebar">
           {view === "quotes" ? <><p className="client-portal-eyebrow">Your quotes</p><div className="client-portal-quote-links">{portal.quotes.map((item) => <button key={item.id} className={selectedQuoteId === item.id ? "active" : ""} onClick={() => { setSelectedQuoteId(item.id); setSelectedId(""); setQuestionnaire(null); }}><PackageCheck /><span><strong>{item.reference}</strong><small>{item.status.replace(/_/g, " ")} · {formatDate(item.eventDate)}</small></span>{item.status === "accepted" ? <CheckCircle2 /> : null}</button>)}</div></> : null}
+          {view === "contracts" ? <><p className="client-portal-eyebrow">Your contracts</p><div className="client-portal-quote-links">{portal.jobs.flatMap((job) => (job.commercial?.contracts || []).map((item) => ({ ...item, job }))).map((item) => <button key={item.id} className={selectedContractId === item.id ? "active" : ""} onClick={() => { setSelectedContractId(item.id); setSelectedInvoiceId(""); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><FileText /><span><strong>{item.title || item.reference}</strong><small>{item.status.replace(/_/g, " ")} · {item.job.title}</small></span>{item.status === "signed" ? <CheckCircle2 /> : null}</button>)}</div></> : null}
+          {view === "invoices" ? <><p className="client-portal-eyebrow">Your invoices</p><div className="client-portal-quote-links">{portal.jobs.flatMap((job) => (job.commercial?.invoices || []).map((item) => ({ ...item, job }))).map((item) => <button key={item.id} className={selectedInvoiceId === item.id ? "active" : ""} onClick={() => { setSelectedInvoiceId(item.id); setSelectedContractId(""); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><PackageCheck /><span><strong>{item.reference}</strong><small>{item.balanceAmount > 0 ? `${money(item.balanceAmount, item.currency)} due` : "paid"} · {item.job.title}</small></span>{item.balanceAmount <= 0 ? <CheckCircle2 /> : null}</button>)}</div></> : null}
           {view === "questionnaires" ? <><p className="client-portal-eyebrow">Your questionnaires</p>{portal.jobs.map((job) => <section key={job.id} className="client-portal-job"><h2>{job.title}</h2><p><CalendarDays />{formatDate(job.eventDate)}</p><p>{job.venueText || "Venue TBC"}</p><div>{job.questionnaires.map((item) => <button key={item.id} className={selectedId === item.id ? "active" : ""} onClick={() => { setSelectedId(item.id); setSelectedQuoteId(""); setQuote(null); }}><FileText /><span>{item.title}<small>{item.status.replace(/_/g, " ")}</small></span>{item.status === "completed" ? <CheckCircle2 /> : null}</button>)}</div></section>)}</> : null}
           {view === "galleries" ? <><p className="client-portal-eyebrow">Your galleries</p><div className="client-portal-gallery-links">{galleries.map((gallery) => <a key={gallery.id} href={portalGalleryPath(gallery)}><Images /><span><strong>{gallery.title}</strong><small>{gallery.weddingDate ? formatDate(gallery.weddingDate) : "Gallery ready"}</small></span></a>)}</div></> : null}
         </aside>
@@ -530,7 +649,7 @@ export function ClientPortal() {
                 </div>
               </a>)}
             </div>
-          </section> : quote ? <article className="portal-quote-card">
+          </section> : view === "contracts" ? <ClientPortalCommercialDocument kind="contract" id={selectedContractId} /> : view === "invoices" ? <ClientPortalCommercialDocument kind="invoice" id={selectedInvoiceId} /> : quote ? <article className="portal-quote-card">
             <div className="portal-quote-heading"><button className="client-portal-back" onClick={() => setSelectedQuoteId("")}><ArrowLeft />Back</button><span>{portal.business?.name || "WedPlanned"}</span><h1>Your quote</h1><p className="portal-quote-client">Prepared for {quote.clientName}{quote.partnerName ? ` and ${quote.partnerName}` : ""}</p><div className="portal-quote-meta"><strong>{quote.reference}</strong><span>Version {quote.currentVersion.versionNumber}</span><span>{formatDate(quote.eventDate)}</span><span>{quote.venueText || "Venue TBC"}</span>{quote.currentVersion.expiresAt ? <span>Expires {formatDate(quote.currentVersion.expiresAt)}</span> : null}</div>{quote.currentVersion.clientNotes ? <p>{quote.currentVersion.clientNotes}</p> : null}</div>
             <div className="portal-package-grid">{quote.currentVersion.options.map((option) => <button type="button" key={option.id} className={`portal-package-card ${selectedOptionId === option.id ? "selected" : ""}`} disabled={["accepted", "declined", "expired"].includes(quote.currentVersion.status)} onClick={() => chooseQuoteOption(option)}>{option.recommended ? <em>Recommended</em> : null}<span className="portal-package-check">{selectedOptionId === option.id ? <CheckCircle2 /> : null}</span><h2>{option.name}</h2>{option.description ? <p>{option.description}</p> : null}<strong>{money(option.basePriceAmount, option.currency)}</strong>{option.coverageMinutes ? <small>{Math.round(option.coverageMinutes / 60)} hours coverage</small> : null}<ul>{option.includedItems.map((item) => <li key={item}>{item}</li>)}</ul>{option.deliverables.length ? <div className="portal-package-deliverables"><b>Deliverables</b>{option.deliverables.map((item) => <span key={item}>{item}</span>)}</div> : null}</button>)}</div>
             {displayedQuoteAddons.length ? <section className="portal-quote-addons"><h2>{acceptedQuote ? "Selected extras" : "Optional extras"}</h2><p>{acceptedQuote ? "Extras included in your accepted booking." : "Select permitted extras for your chosen package."}</p>{displayedQuoteAddons.map((addon) => { const quantity = addonQuantities[addon.id] ?? addon.defaultQuantity; const mandatory = addon.requirement === "mandatory"; return <div key={addon.id} className="portal-quote-addon"><div><strong>{addon.name}{mandatory ? <small>Required</small> : addon.requirement === "recommended" ? <small>Recommended</small> : null}</strong><p>{addon.description}</p></div><span>{money(addon.unitPriceAmount, addon.currency)}</span>{acceptedQuote ? <strong className="portal-quote-addon-accepted">× {quantity}</strong> : <label><span>Quantity</span><input type="number" min={mandatory ? Math.max(1, addon.minimumQuantity) : 0} max={addon.maximumQuantity} value={quantity} onChange={(event) => { const raw = Math.max(0, Math.min(addon.maximumQuantity, Number(event.target.value) || 0)); const next = mandatory ? Math.max(1, addon.minimumQuantity, raw) : raw > 0 ? Math.max(addon.minimumQuantity, raw) : 0; setAddonQuantities((current) => ({ ...current, [addon.id]: next })); }} /></label>}</div>; })}</section> : null}

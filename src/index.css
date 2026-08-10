@@ -4069,3 +4069,745 @@ footer .logo-mkb, footer .logo-weddings {
     grid-template-columns: 1fr;
   }
 }
+
+/* v1.10.5a Client Portal commercial documents */
+.client-portal-booking-checklist {
+  margin-top: 22px;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 22px;
+  background: #fff;
+  padding: 22px;
+}
+
+.client-portal-booking-checklist > header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.client-portal-booking-checklist > header small,
+.client-portal-document__header span {
+  display: block;
+  color: #737373;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.client-portal-booking-checklist > header h2 {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -.02em;
+}
+
+.client-portal-booking-checklist > header p {
+  max-width: 380px;
+  margin: 0;
+  color: #737373;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.client-portal-booking-checklist__items {
+  display: grid;
+  gap: 8px;
+}
+
+.client-portal-checklist-item {
+  display: grid;
+  grid-template-columns: 30px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  border-radius: 14px;
+  background: rgba(0,0,0,.025);
+  padding: 12px 14px;
+}
+
+.client-portal-checklist-item > span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(0,0,0,.06);
+  color: #8a8a8a;
+}
+
+.client-portal-checklist-item.complete > span {
+  background: color-mix(in srgb, var(--portal-accent) 12%, white);
+  color: var(--portal-accent);
+}
+
+.client-portal-checklist-item > span svg {
+  width: 15px;
+  height: 15px;
+}
+
+.client-portal-checklist-item > div {
+  min-width: 0;
+}
+
+.client-portal-checklist-item strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.client-portal-checklist-item small {
+  display: block;
+  margin-top: 2px;
+  color: #737373;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.client-portal-checklist-item button,
+.client-portal-checklist-item em {
+  border: 0;
+  border-radius: 9px;
+  padding: 7px 10px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.client-portal-checklist-item button {
+  cursor: pointer;
+  background: var(--portal-accent);
+  color: var(--portal-on-accent);
+}
+
+.client-portal-checklist-item em {
+  background: rgba(0,0,0,.05);
+  color: #737373;
+}
+
+.client-portal-document {
+  width: min(100%, 940px);
+  margin: 0 auto;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 20px;
+  background: #fff;
+  padding: clamp(20px, 4vw, 44px);
+  box-shadow: 0 18px 45px rgba(0,0,0,.04);
+}
+
+.client-portal-document__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 18px;
+}
+
+.client-portal-document__actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(0,0,0,.1);
+  border-radius: 10px;
+  background: #fff;
+  padding: 8px 11px;
+  color: #333;
+  font-size: 10px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.client-portal-document__actions svg {
+  width: 14px;
+  height: 14px;
+}
+
+.client-portal-document__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  padding-bottom: 22px;
+}
+
+.client-portal-document__header h1 {
+  margin: 7px 0 5px;
+  font-size: clamp(27px, 4vw, 42px);
+  font-weight: 650;
+  letter-spacing: -.035em;
+}
+
+.client-portal-document__header p {
+  margin: 0;
+  color: #737373;
+  font-size: 11px;
+}
+
+.client-portal-document__status {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: rgba(0,0,0,.055);
+  padding: 7px 10px;
+  color: #555;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.client-portal-document__status.complete {
+  background: color-mix(in srgb, var(--portal-accent) 12%, white);
+  color: var(--portal-accent);
+}
+
+.client-portal-document__meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.client-portal-document__snapshot {
+  border-radius: 13px;
+  background: rgba(0,0,0,.025);
+  padding: 14px;
+}
+
+.client-portal-document__snapshot h3,
+.client-portal-document__notes h3 {
+  margin: 0 0 10px;
+  color: #666;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.client-portal-document__snapshot dl {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.client-portal-document__snapshot dl > div {
+  min-width: 0;
+}
+
+.client-portal-document__snapshot dt {
+  color: #929292;
+  font-size: 8px;
+}
+
+.client-portal-document__snapshot dd {
+  margin: 1px 0 0;
+  overflow-wrap: anywhere;
+  color: #222;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.client-portal-contract-content {
+  display: grid;
+  gap: 24px;
+  padding: 12px 0 24px;
+}
+
+.client-portal-contract-content h2,
+.client-portal-document__section h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.client-portal-contract-content p,
+.client-portal-document__notes p {
+  margin: 0 0 10px;
+  white-space: pre-line;
+  color: #444;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.client-portal-document__signatures {
+  margin-top: 22px;
+  border-top: 1px solid rgba(0,0,0,.08);
+  padding-top: 20px;
+}
+
+.client-portal-document__signatures > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.client-portal-document__signatures > div:first-child span {
+  color: #777;
+  font-size: 10px;
+}
+
+.client-portal-document__signatures > div:first-child strong {
+  font-size: 11px;
+}
+
+.client-portal-document__signature-list {
+  display: grid;
+  gap: 8px;
+}
+
+.client-portal-document__signature-list article {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-radius: 12px;
+  background: rgba(0,0,0,.025);
+  padding: 12px;
+}
+
+.client-portal-document__signature-list svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  color: var(--portal-accent);
+}
+
+.client-portal-document__signature-list strong,
+.client-portal-document__signature-list span,
+.client-portal-document__signature-list small {
+  display: block;
+}
+
+.client-portal-document__signature-list strong {
+  font-size: 11px;
+}
+
+.client-portal-document__signature-list span,
+.client-portal-document__signature-list small,
+.client-portal-document__notice {
+  color: #737373;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.client-portal-document__section {
+  margin-top: 26px;
+}
+
+.client-portal-invoice-table {
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+}
+
+.client-portal-invoice-table__head,
+.client-portal-invoice-table__row {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 60px 105px 105px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+}
+
+.client-portal-invoice-table__head {
+  background: rgba(0,0,0,.035);
+  color: #737373;
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.client-portal-invoice-table__row {
+  border-top: 1px solid rgba(0,0,0,.065);
+  font-size: 10px;
+}
+
+.client-portal-invoice-table__row > span:not(:first-child),
+.client-portal-invoice-table__head > span:not(:first-child) {
+  text-align: right;
+}
+
+.client-portal-invoice-table__row strong,
+.client-portal-invoice-table__row small {
+  display: block;
+}
+
+.client-portal-invoice-table__row small {
+  margin-top: 2px;
+  color: #8a8a8a;
+  font-size: 8px;
+}
+
+.client-portal-invoice-totals {
+  width: min(100%, 360px);
+  margin: 18px 0 0 auto;
+}
+
+.client-portal-invoice-totals > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 5px 0;
+  color: #666;
+  font-size: 10px;
+}
+
+.client-portal-invoice-totals dd {
+  margin: 0;
+  color: #222;
+  font-weight: 600;
+}
+
+.client-portal-invoice-totals .total {
+  margin-top: 5px;
+  border-top: 1px solid rgba(0,0,0,.1);
+  padding-top: 10px;
+  color: #222;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.client-portal-invoice-totals .balance {
+  margin-top: 4px;
+  border-radius: 9px;
+  background: rgba(0,0,0,.035);
+  padding: 9px 10px;
+  color: #222;
+  font-weight: 650;
+}
+
+.client-portal-payment-schedule,
+.client-portal-payment-history {
+  display: grid;
+  gap: 7px;
+}
+
+.client-portal-payment-schedule__item,
+.client-portal-payment-history article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-radius: 11px;
+  background: rgba(0,0,0,.028);
+  padding: 11px 12px;
+}
+
+.client-portal-payment-schedule__item > div:last-child,
+.client-portal-payment-history article > div:last-child {
+  text-align: right;
+}
+
+.client-portal-payment-schedule__item strong,
+.client-portal-payment-schedule__item span,
+.client-portal-payment-history strong,
+.client-portal-payment-history span {
+  display: block;
+}
+
+.client-portal-payment-schedule__item strong,
+.client-portal-payment-history strong {
+  font-size: 10px;
+}
+
+.client-portal-payment-schedule__item span,
+.client-portal-payment-history span {
+  margin-top: 2px;
+  color: #7a7a7a;
+  font-size: 8px;
+}
+
+.client-portal-payment-schedule__item--paid {
+  background: color-mix(in srgb, var(--portal-accent) 7%, white);
+}
+
+.client-portal-payment-schedule__item--overdue {
+  background: #fff4f2;
+}
+
+.client-portal-document__notes {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 18px;
+  margin-top: 26px;
+  border-top: 1px solid rgba(0,0,0,.08);
+  padding-top: 20px;
+}
+
+.client-portal-document-empty {
+  display: grid;
+  min-height: 320px;
+  place-items: center;
+  align-content: center;
+  border: 1px dashed rgba(0,0,0,.12);
+  border-radius: 18px;
+  background: rgba(255,255,255,.7);
+  padding: 32px;
+  text-align: center;
+}
+
+.client-portal-document-empty svg {
+  width: 28px;
+  height: 28px;
+  color: #aaa;
+}
+
+.client-portal-document-empty h1 {
+  margin: 10px 0 4px;
+  font-size: 20px;
+}
+
+.client-portal-document-empty p {
+  margin: 0;
+  color: #777;
+  font-size: 11px;
+}
+
+@media (max-width: 760px) {
+  .client-portal-booking-checklist {
+    padding: 16px;
+  }
+
+  .client-portal-booking-checklist > header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .client-portal-checklist-item {
+    grid-template-columns: 28px minmax(0,1fr);
+  }
+
+  .client-portal-checklist-item > button,
+  .client-portal-checklist-item > em {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .client-portal-document {
+    border-radius: 15px;
+    padding: 18px;
+  }
+
+  .client-portal-document__header {
+    flex-direction: column;
+  }
+
+  .client-portal-document__meta-grid,
+  .client-portal-document__notes {
+    grid-template-columns: 1fr;
+  }
+
+  .client-portal-invoice-table {
+    overflow-x: auto;
+  }
+
+  .client-portal-invoice-table__head,
+  .client-portal-invoice-table__row {
+    min-width: 610px;
+  }
+
+  .client-portal-payment-schedule__item,
+  .client-portal-payment-history article {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .client-portal-payment-schedule__item > div:last-child,
+  .client-portal-payment-history article > div:last-child {
+    text-align: left;
+  }
+}
+
+@media print {
+  body {
+    background: #fff !important;
+  }
+
+  .client-portal-hero,
+  .client-portal-nav,
+  .client-portal-sidebar,
+  .client-portal-document__actions,
+  .client-portal-footer {
+    display: none !important;
+  }
+
+  .client-portal-shell,
+  .client-portal-layout,
+  .client-portal-main {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  .client-portal-document {
+    width: 100% !important;
+    max-width: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .client-portal-document__section,
+  .client-portal-document__snapshot,
+  .client-portal-payment-schedule__item,
+  .client-portal-payment-history article {
+    break-inside: avoid;
+  }
+}
+
+
+/* v1.10.5a — Client Portal contract signature */
+.client-portal-signature-form {
+  margin-top: 20px;
+  border: 1px solid rgba(17,17,17,.11);
+  border-radius: 14px;
+  background: #fff;
+  padding: 18px;
+}
+
+.client-portal-signature-form > header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.client-portal-signature-form > header > svg {
+  width: 18px;
+  height: 18px;
+}
+
+.client-portal-signature-form > header span {
+  display: block;
+  color: #777;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.client-portal-signature-form > header h3 {
+  margin: 3px 0 0;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.client-portal-signature-form__fields {
+  display: grid;
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.client-portal-signature-form__fields label {
+  display: grid;
+  gap: 5px;
+}
+
+.client-portal-signature-form__fields label > span {
+  color: #666;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.client-portal-signature-form__fields input {
+  min-height: 40px;
+  border: 1px solid rgba(17,17,17,.14);
+  border-radius: 9px;
+  background: #fff;
+  padding: 0 11px;
+  font: inherit;
+  font-size: 11px;
+}
+
+.client-portal-signature-form__consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 14px;
+  color: #555;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.client-portal-signature-form__consent input {
+  margin-top: 2px;
+}
+
+.client-portal-signature-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 15px;
+}
+
+.client-portal-signature-form__actions button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 9px;
+  background: #111;
+  padding: 0 15px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.client-portal-signature-form__actions button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.client-portal-signature-form__error {
+  margin-top: 12px;
+  border-radius: 9px;
+  background: #fff1f1;
+  padding: 9px 10px;
+  color: #8a2020;
+  font-size: 10px;
+}
+
+.client-portal-signature-form--complete {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #f5faf7;
+}
+
+.client-portal-signature-form--complete > svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: #197447;
+}
+
+.client-portal-signature-form--complete strong {
+  display: block;
+  font-size: 11px;
+}
+
+.client-portal-signature-form--complete p {
+  margin: 3px 0 0;
+  color: #667069;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .client-portal-signature-form__fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .client-portal-signature-form {
+    display: none !important;
+  }
+}

@@ -1,3 +1,4 @@
+import { ensureBookingPackForAcceptedQuote } from "./crm-booking-pack-d1";
 import { getAuthenticatedClientIdentity } from "./client-auth-d1";
 import { acceptEnquiry } from "./crm-d1";
 import { DEFAULT_CLIENT_PORTAL_ORIGIN } from "./tenant-context";
@@ -609,7 +610,19 @@ async function acceptQuoteCore(db: D1Db, actor: QuoteActor, quoteId: string, inp
   if (!row) throw httpError("Quote not found.", 404);
   if (text(row.accepted_job_id)) {
     const existing = await db.prepare(`SELECT id, reference FROM crm_jobs WHERE id = ? AND workspace_id = ? LIMIT 1`).bind(row.accepted_job_id, actor.workspaceId).first();
-    if (existing) return { quoteId, jobId: text(existing.id), jobReference: text(existing.reference), idempotent: true };
+    if (existing) {
+      const bookingPack = await ensureBookingPackForAcceptedQuote(db, actor, {
+        quoteId,
+        jobId: text(existing.id),
+      });
+      return {
+        quoteId,
+        jobId: text(existing.id),
+        jobReference: text(existing.reference),
+        idempotent: true,
+        bookingPack,
+      };
+    }
   }
   const version = await fullVersion(db, actor.workspaceId, text(row.current_version_id));
   if (!version) throw httpError("Current quote version not found.", 409);
@@ -647,7 +660,21 @@ async function acceptQuoteCore(db: D1Db, actor: QuoteActor, quoteId: string, inp
   const conversionQuoteId = text(conversion.job?.quoteId);
   if (conversionQuoteId && conversionQuoteId !== quoteId) throw httpError("The enquiry is already linked to a Job created from another quote.", 409);
   const recordedAcceptance = await db.prepare(`SELECT id, total_amount, currency FROM crm_quote_acceptances WHERE workspace_id = ? AND quote_id = ? LIMIT 1`).bind(actor.workspaceId, quoteId).first();
-  if (recordedAcceptance) return { quoteId, jobId, jobReference: text(conversion.job?.reference), idempotent: true, totalAmount: Number(recordedAcceptance.total_amount || 0), currency: text(recordedAcceptance.currency || version.currency) };
+  if (recordedAcceptance) {
+    const bookingPack = await ensureBookingPackForAcceptedQuote(db, actor, {
+      quoteId,
+      jobId,
+    });
+    return {
+      quoteId,
+      jobId,
+      jobReference: text(conversion.job?.reference),
+      idempotent: true,
+      totalAmount: Number(recordedAcceptance.total_amount || 0),
+      currency: text(recordedAcceptance.currency || version.currency),
+      bookingPack,
+    };
+  }
   const statements: any[] = [
     db.prepare(`UPDATE crm_jobs SET status = 'booked', service_name = ?, package_name = ?, value_amount = ?, currency = ?, quote_id = ?, quote_version_id = ?, quote_reference = ?, quote_version_number = ?, accepted_quote_at = ?, booking_subtotal = ?, booking_discount = ?, booking_tax = ?, package_snapshot_json = ?, addons_snapshot_json = ?, quote_snapshot_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ? AND enquiry_id = ? AND (quote_id IS NULL OR quote_id = ?)` ).bind(
       option.serviceType || text(row.service_interest), option.name, calculated.total, version.currency, quoteId, version.id, text(row.reference), version.versionNumber, acceptedAt,
@@ -671,10 +698,22 @@ async function acceptQuoteCore(db: D1Db, actor: QuoteActor, quoteId: string, inp
     statements.push(db.prepare(`UPDATE crm_jobs SET client_portal_status = 'active', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(jobId, actor.workspaceId));
   }
   await db.batch(statements);
+  const bookingPack = await ensureBookingPackForAcceptedQuote(db, actor, {
+    quoteId,
+    jobId,
+  });
   await recordActivity(db, actor, actor.workspaceId, "enquiry", text(row.enquiry_id), "quote.accepted", `${identity ? "Client" : "Admin"} accepted quote ${text(row.reference)} version ${version.versionNumber}.`, { quoteId, versionId: version.id, jobId, totalAmount: calculated.total, optionId: option.id });
   await recordActivity(db, actor, actor.workspaceId, "job", jobId, "quote.accepted", `Booking created from accepted quote ${text(row.reference)} version ${version.versionNumber}.`, { quoteId, versionId: version.id, totalAmount: calculated.total });
   await audit(db, actor, "crm.quote.accepted", "crm_quote", quoteId, `Accepted quote ${text(row.reference)} and created ${text(conversion.job?.reference)}.`, { jobId, versionId: version.id, totalAmount: calculated.total, actorType: identity ? "client" : "admin" });
-  return { quoteId, jobId, jobReference: text(conversion.job?.reference), idempotent: Boolean(conversion.idempotent), totalAmount: calculated.total, currency: version.currency };
+  return {
+    quoteId,
+    jobId,
+    jobReference: text(conversion.job?.reference),
+    idempotent: Boolean(conversion.idempotent),
+    totalAmount: calculated.total,
+    currency: version.currency,
+    bookingPack,
+  };
 }
 
 export async function acceptQuoteAsAdmin(db: D1Db, actor: QuoteActor, quoteId: string, input: any) {

@@ -421,6 +421,63 @@ export type CrmWeddingLifecycle = {
   publicAssignments: { venue: number; moments: number; galleries: number; total: number };
 };
 
+export type CrmJobCommercialScheduleItem = {
+  id: string;
+  label: string;
+  scheduleType: string;
+  amount: number;
+  dueDate: string;
+  status: "pending" | "part_paid" | "paid" | "overdue";
+  paidAmount: number;
+  balanceAmount: number;
+};
+
+export type CrmJobCommercialInvoice = {
+  id: string;
+  reference: string;
+  status: string;
+  currency: string;
+  issueDate: string;
+  dueDate: string;
+  subtotalAmount: number;
+  discountAmount: number;
+  taxAmount: number;
+  totalAmount: number;
+  paidAmount: number;
+  balanceAmount: number;
+  nextPayment: CrmJobCommercialScheduleItem | null;
+  schedule: CrmJobCommercialScheduleItem[];
+};
+
+export type CrmJobCommercialContract = {
+  id: string;
+  reference: string;
+  title: string;
+  status: string;
+  currentVersionId: string;
+  versionNumber: number;
+  versionStatus: string;
+  sentAt: string;
+  requiredSignatures: number;
+  signatureCount: number;
+  signedAt: string;
+};
+
+export type CrmJobCommercialQuote = {
+  id: string;
+  reference: string;
+  acceptedAt: string;
+  totalAmount: number;
+  currency: string;
+  packageName: string;
+};
+
+export type CrmJobCommercialWorkspace = {
+  quote: CrmJobCommercialQuote | null;
+  invoice: CrmJobCommercialInvoice | null;
+  contract: CrmJobCommercialContract | null;
+};
+
 export type CrmJobWorkspace = {
   job: CrmJob;
   contacts: Array<{ id: string; displayName: string; email: string; phone: string; role: string }>;
@@ -433,6 +490,7 @@ export type CrmJobWorkspace = {
   supplierDirectory: SupplierDirectoryOption[];
   activities: CrmActivity[];
   lifecycle: CrmWeddingLifecycle;
+  commercial: CrmJobCommercialWorkspace;
   workflow: CrmJobWorkflow | null;
   tasks: CrmTask[];
   taskStats: { total: number; pending: number; completed: number; overdue: number };

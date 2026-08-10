@@ -1,9 +1,11 @@
+import { getJobCommercialWorkspace } from "./crm-booking-pack-d1";
 import { getAuthenticatedClientIdentity } from "./client-auth-d1";
 import { DEFAULT_CLIENT_PORTAL_ORIGIN } from "./tenant-context";
 import { createMasterSupplier, getMasterSupplier, listMasterSuppliers } from "./supplier-d1";
 import { getJobWorkflowWorkspace } from "./crm-workflow-d1";
 import { createClientGallery, listClientGalleries } from "./client-gallery-d1";
 import { getPublicQuotesForIdentity, requestQuotePortalMagicLink, verifyQuotePortalMagicLink } from "./crm-quotes-d1";
+import { getPublicJobCommercialSummary } from "./client-portal-commercial-d1";
 
 export type PortalActor = {
   userId?: string;
@@ -702,9 +704,10 @@ export async function getCrmJobWorkspace(db: D1Db, actor: PortalActor, jobId: st
     `).bind(jobId, actor.workspaceId).all(),
     listMasterSuppliers(db, false, actor.workspaceId),
   ]);
-  const [workflowWorkspace, lifecycle] = await Promise.all([
+  const [workflowWorkspace, lifecycle, commercial] = await Promise.all([
     getJobWorkflowWorkspace(db, actor, jobId),
     getJobWeddingLifecycle(db, actor.workspaceId, job),
+    getJobCommercialWorkspace(db, actor, jobId),
   ]);
   const instances = [];
   for (const row of instanceRows.results || []) {
@@ -755,6 +758,7 @@ export async function getCrmJobWorkspace(db: D1Db, actor: PortalActor, jobId: st
       createdAt: row.created_at,
     })),
     lifecycle,
+    commercial,
     ...workflowWorkspace,
   };
 }
@@ -1267,10 +1271,17 @@ export async function getPublicPortal(db: D1Db, request: Request, workspaceId: s
         AND (qi.assigned_contact_id IS NULL OR qi.assigned_contact_id = ?)
       ORDER BY qi.completed_at IS NOT NULL, qi.due_at, qi.created_at
     `).bind(workspaceId, access.job_id, access.contact_id).all();
+    const commercial = await getPublicJobCommercialSummary(
+      db,
+      workspaceId,
+      identity.id,
+      text(access.job_id),
+    );
     jobs.push({
       ...hydrateJob(access),
       contactName: text(access.contact_name),
       questionnaires: (questionnaireRows.results || []).map((row: any) => hydrateInstance(row)),
+      commercial,
     });
   }
   return {

@@ -1394,6 +1394,61 @@ export class AdminApiService {
     return result.crm;
   }
 
+  static async recordCrmInvoicePayment(
+    jobId: string,
+    invoiceId: string,
+    input: {
+      paymentType:
+        | "payment"
+        | "refund";
+      amount: number;
+      method:
+        | "manual"
+        | "bank_transfer"
+        | "cash"
+        | "card"
+        | "other";
+      reference?: string;
+      notes?: string;
+      paidAt?: string;
+    },
+  ) {
+    return request<{
+      ok: true;
+      payment: {
+        id: string;
+        invoiceId: string;
+        scheduleItemId: string;
+        paymentType:
+          | "payment"
+          | "refund";
+        amount: number;
+        currency: string;
+        method: string;
+        reference: string;
+        notes: string;
+        paidAt: string;
+        netPaidBefore: number;
+        netPaidAfter: number;
+        balanceAfter: number;
+        invoiceStatusAfter: string;
+      };
+      workspace: CrmJobWorkspace;
+    }>(
+      `/api/crm/jobs/${encodeURIComponent(
+        jobId,
+      )}/invoices/${encodeURIComponent(
+        invoiceId,
+      )}/payments`,
+      {
+        method: "POST",
+        body: JSON.stringify(
+          input,
+        ),
+      },
+    );
+  }
+
   static async getCrmJobWorkspace(id: string) {
     const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(id)}`);
     return result.workspace;

@@ -1,3 +1,4 @@
+import { recordManualInvoicePayment } from "../../../serverless/crm-commercial-actions-d1";
 import { requireProfessionalContext } from "../../../serverless/platform-auth-d1";
 import {
   createAdminEnquiry,
@@ -193,6 +194,40 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (parts[0] === "questionnaires" && parts[1] === "templates" && parts[2] && parts[3] === "archive") {
       return Response.json({ ok: true, template: await archiveQuestionnaireTemplate(context.env.MKB_DB, actor, parts[2]) });
     }
+    if (
+      parts[0] === "jobs"
+      && parts[1]
+      && parts[2] === "invoices"
+      && parts[3]
+      && parts[4] === "payments"
+      && parts.length === 5
+    ) {
+      const payment =
+        await recordManualInvoicePayment(
+          context.env.MKB_DB,
+          actor,
+          parts[1],
+          parts[3],
+          body,
+        );
+
+      return Response.json(
+        {
+          ok: true,
+          payment,
+          workspace:
+            await getCrmJobWorkspace(
+              context.env.MKB_DB,
+              actor,
+              parts[1],
+            ),
+        },
+        {
+          status: 201,
+        },
+      );
+    }
+
     if (parts[0] === "jobs" && parts[1] && parts[2] === "client-gallery" && parts.length === 3) {
       const result = await createJobClientGallery(context.env.MKB_DB, actor, parts[1]);
       return Response.json({ ok: true, ...result }, { status: result.idempotent ? 200 : 201 });
