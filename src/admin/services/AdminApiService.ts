@@ -10,7 +10,7 @@ import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, Client
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
 import type { PlatformAdministrationPayload, PlatformBrandAsset, PlatformBrandingIdentity, PlatformModuleConfiguration, PlatformSupplierTaxonomy, ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
-import type { CrmAddon, CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmPackage, CrmQuote, CrmQuoteOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate } from "../types/crm";
+import type { CrmAddon, CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmPackage, CrmQuote, CrmQuoteOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate, CrmCommercialSettingsInput, CrmCommercialSettingsPayload, CrmContractTemplate } from "../types/crm";
 import type {
   WedPlannedPublicAppearanceAdministration,
   WedPlannedPublicTheme,
@@ -1449,6 +1449,47 @@ export class AdminApiService {
     );
   }
 
+  static async repairCrmBookingPack(
+    jobId: string,
+  ) {
+    const result = await request<{
+      ok: true;
+      workspace: CrmJobWorkspace;
+    }>(
+      `/api/crm/jobs/${
+        encodeURIComponent(jobId)
+      }/booking-pack`,
+      {
+        method: "POST",
+        body: JSON.stringify({}),
+      },
+    );
+
+    return result.workspace;
+  }
+
+  static async sendCrmContractToPortal(
+    jobId: string,
+    contractId: string,
+  ) {
+    const result = await request<{
+      ok: true;
+      workspace: CrmJobWorkspace;
+    }>(
+      `/api/crm/jobs/${
+        encodeURIComponent(jobId)
+      }/contracts/${
+        encodeURIComponent(contractId)
+      }/send`,
+      {
+        method: "POST",
+        body: JSON.stringify({}),
+      },
+    );
+
+    return result.workspace;
+  }
+
   static async getCrmJobWorkspace(id: string) {
     const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(id)}`);
     return result.workspace;
@@ -1516,6 +1557,122 @@ export class AdminApiService {
   static async getQuestionnaireOverview() {
     const result = await request<{ ok: true; questionnaires: QuestionnaireOverview }>("/api/crm/questionnaires");
     return result.questionnaires;
+  }
+
+  static async getCrmCommercialSettings() {
+    const result = await request<{
+      ok: true;
+      commercial:
+        CrmCommercialSettingsPayload;
+    }>(
+      "/api/crm/commercial/settings",
+    );
+
+    return result.commercial;
+  }
+
+  static async saveCrmCommercialSettings(
+    input: CrmCommercialSettingsInput,
+  ) {
+    const result = await request<{
+      ok: true;
+      commercial:
+        CrmCommercialSettingsPayload;
+    }>(
+      "/api/crm/commercial/settings",
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
+
+    return result.commercial;
+  }
+
+  static async listCrmContractTemplates() {
+    const result = await request<{
+      ok: true;
+      templates:
+        CrmContractTemplate[];
+    }>(
+      "/api/crm/contracts/templates",
+    );
+
+    return result.templates;
+  }
+
+  static async getCrmContractTemplate(
+    id: string,
+  ) {
+    const result = await request<{
+      ok: true;
+      template:
+        CrmContractTemplate;
+    }>(
+      `/api/crm/contracts/templates/${encodeURIComponent(id)}`,
+    );
+
+    return result.template;
+  }
+
+  static async createCrmContractTemplate(
+    input:
+      Partial<CrmContractTemplate>,
+  ) {
+    const result = await request<{
+      ok: true;
+      template:
+        CrmContractTemplate;
+    }>(
+      "/api/crm/contracts/templates",
+      {
+        method: "POST",
+        body:
+          JSON.stringify(input),
+      },
+    );
+
+    return result.template;
+  }
+
+  static async saveCrmContractTemplate(
+    id: string,
+    input:
+      Partial<CrmContractTemplate>,
+  ) {
+    const result = await request<{
+      ok: true;
+      template:
+        CrmContractTemplate;
+    }>(
+      `/api/crm/contracts/templates/${encodeURIComponent(id)}`,
+      {
+        method: "PUT",
+        body:
+          JSON.stringify(input),
+      },
+    );
+
+    return result.template;
+  }
+
+  static async archiveCrmContractTemplate(
+    id: string,
+  ) {
+    const result = await request<{
+      ok: true;
+      template:
+        CrmContractTemplate;
+    }>(
+      `/api/crm/contracts/templates/${encodeURIComponent(id)}/archive`,
+      {
+        method: "POST",
+        body:
+          JSON.stringify({}),
+      },
+    );
+
+    return result.template;
   }
 
   static async getQuestionnaireTemplate(id: string) {

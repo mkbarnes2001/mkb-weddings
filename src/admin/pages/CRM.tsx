@@ -33,11 +33,11 @@ import {
 } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
-import type { CrmEnquiry, CrmEnquiryInput, CrmJob, CrmLeadFormSettings, CrmOverview, CrmWorkflowOverview, QuestionnaireOverview } from "../types/crm";
+import type { CrmCommercialSettingsInput, CrmCommercialSettingsPayload, CrmEnquiry, CrmEnquiryInput, CrmJob, CrmLeadFormSettings, CrmOverview, CrmWorkflowOverview, QuestionnaireOverview, CrmContractTemplate } from "../types/crm";
 
-type View = "pipeline" | "contacts" | "jobs" | "schedule" | "questionnaires" | "workflows" | "lead-form" | "overview";
+type View = "pipeline" | "contacts" | "jobs" | "schedule" | "questionnaires" | "workflows" | "commercial-settings" | "lead-form" | "overview";
 
-const validViews: View[] = ["overview", "pipeline", "contacts", "jobs", "schedule", "questionnaires", "workflows", "lead-form"];
+const validViews: View[] = ["overview", "pipeline", "contacts", "jobs", "schedule", "questionnaires", "workflows", "commercial-settings", "lead-form"];
 
 const emptyEnquiry: CrmEnquiryInput = {
   source: "manual",
@@ -241,6 +241,7 @@ export function CRM() {
     schedule: "Schedule",
     questionnaires: "Questionnaires",
     workflows: "Workflows",
+    "commercial-settings": "Commercial settings",
     "lead-form": "Lead form",
   };
 
@@ -328,8 +329,785 @@ export function CRM() {
 
       {view === "questionnaires" ? <QuestionnaireLibrary workspaceId={auth.workspaceId} canManage={canManage} /> : null}
       {view === "workflows" ? <WorkflowLibrary workspaceId={auth.workspaceId} canManage={canManage} /> : null}
+      {view === "commercial-settings" ? <CommercialSettings workspaceId={auth.workspaceId} canManage={canManage && auth.accessMode !== "support"} /> : null}
       {view === "lead-form" && crm ? <LeadFormSettings settings={crm.leadForm} saving={saving} canManage={canManage} onSave={saveLeadForm} /> : null}
     </AdminPage>
+  );
+}
+
+function CommercialSettings({
+  workspaceId,
+  canManage,
+}: {
+  workspaceId: string;
+  canManage: boolean;
+}) {
+  const navigate = useNavigate();
+
+  const [payload, setPayload] =
+    useState<CrmCommercialSettingsPayload | null>(null);
+
+  const [
+    contractTemplates,
+    setContractTemplates,
+  ] = useState<CrmContractTemplate[]>([]);
+
+  const [
+    contractTemplatesLoading,
+    setContractTemplatesLoading,
+  ] = useState(true);
+
+  const [
+    creatingContractTemplate,
+    setCreatingContractTemplate,
+  ] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+
+    AdminApiService.getCrmCommercialSettings()
+      .then((next) => {
+        if (active) setPayload(next);
+      })
+      .catch((loadError) => {
+        if (active) {
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : "Unable to load commercial settings.",
+          );
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [workspaceId]);
+
+  useEffect(() => {
+    let active = true;
+
+    setContractTemplatesLoading(true);
+
+    AdminApiService
+      .listCrmContractTemplates()
+      .then((templates) => {
+        if (active) {
+          setContractTemplates(
+            templates,
+          );
+        }
+      })
+      .catch((loadError) => {
+        if (active) {
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : "Unable to load contract templates.",
+          );
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setContractTemplatesLoading(
+            false,
+          );
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [workspaceId]);
+
+  function patchSettings(
+    patch: Partial<CrmCommercialSettingsPayload["settings"]>,
+  ) {
+    setPayload((current) =>
+      current
+        ? {
+            ...current,
+            settings: {
+              ...current.settings,
+              ...patch,
+            },
+          }
+        : current,
+    );
+    setMessage("");
+    setError("");
+  }
+
+  function patchInvoiceSequence(
+    patch: Partial<CrmCommercialSettingsPayload["invoiceSequence"]>,
+  ) {
+    setPayload((current) =>
+      current
+        ? {
+            ...current,
+            invoiceSequence: {
+              ...current.invoiceSequence,
+              ...patch,
+            },
+          }
+        : current,
+    );
+    setMessage("");
+    setError("");
+  }
+
+  async function createContractTemplate() {
+    if (!canManage) {
+      return;
+    }
+
+    setCreatingContractTemplate(
+      true,
+    );
+    setError("");
+    setMessage("");
+
+    try {
+      const template =
+        await AdminApiService
+          .createCrmContractTemplate({
+            name:
+              "New contract template",
+            description: "",
+            status: "archived",
+            sections: [],
+          });
+
+      navigate(
+        `/admin/crm/contracts/templates/${template.id}`,
+      );
+    } catch (createError) {
+      setError(
+        createError instanceof Error
+          ? createError.message
+          : "Unable to create contract template.",
+      );
+    } finally {
+      setCreatingContractTemplate(
+        false,
+      );
+    }
+  }
+
+  async function save() {
+    if (!payload || !canManage) return;
+
+    const input: CrmCommercialSettingsInput = {
+      autoCreateContract:
+        payload.settings.autoCreateContract,
+      autoCreateInvoice:
+        payload.settings.autoCreateInvoice,
+      autoAssignQuestionnaire:
+        payload.settings.autoAssignQuestionnaire,
+      defaultContractTemplateId:
+        payload.settings.defaultContractTemplateId,
+      defaultQuestionnaireTemplateId:
+        payload.settings.defaultQuestionnaireTemplateId,
+      depositType:
+        payload.settings.depositType,
+      depositValue:
+        payload.settings.depositValue,
+      depositDueDaysAfterAcceptance:
+        payload.settings.depositDueDaysAfterAcceptance,
+      finalBalanceDueDaysBeforeEvent:
+        payload.settings.finalBalanceDueDaysBeforeEvent,
+      questionnaireDueDaysBeforeEvent:
+        payload.settings.questionnaireDueDaysBeforeEvent,
+      invoiceNotes:
+        payload.settings.invoiceNotes,
+      invoiceTerms:
+        payload.settings.invoiceTerms,
+      invoicePrefix:
+        payload.invoiceSequence.prefix,
+      invoicePadding:
+        payload.invoiceSequence.padding,
+    };
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const saved =
+        await AdminApiService.saveCrmCommercialSettings(input);
+      setPayload(saved);
+      setMessage("Commercial settings saved.");
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Unable to save commercial settings.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading && !payload) {
+    return (
+      <AdminPanel
+        title="Commercial settings"
+        description="Loading workspace booking and invoice defaults."
+        icon={Settings2}
+      >
+        <p className="text-[10px] text-neutral-500">
+          Loading commercial settings…
+        </p>
+      </AdminPanel>
+    );
+  }
+
+  if (!payload) {
+    return (
+      <AdminPanel
+        title="Commercial settings"
+        description="Workspace booking and invoice defaults are unavailable."
+        icon={Settings2}
+      >
+        <p className="text-[10px] text-red-700">
+          {error || "Unable to load commercial settings."}
+        </p>
+      </AdminPanel>
+    );
+  }
+
+  const depositValue =
+    payload.settings.depositType === "none"
+      ? 0
+      : payload.settings.depositValue / 100;
+
+  return (
+    <div className="grid gap-4">
+      {error ? (
+        <div className="rounded-xl bg-red-50 p-3 text-[10px] text-red-800">
+          {error}
+        </div>
+      ) : null}
+
+      {message ? (
+        <div className="rounded-xl bg-emerald-50 p-3 text-[10px] text-emerald-800">
+          {message}
+        </div>
+      ) : null}
+
+      {!canManage ? (
+        <div className="rounded-xl bg-neutral-100 p-3 text-[10px] text-neutral-600">
+          Commercial settings are read-only in this session.
+        </div>
+      ) : null}
+
+      <AdminPanel
+        title="Booking automation"
+        description="Choose what WedCRM prepares automatically after a quote is accepted."
+        icon={Settings2}
+      >
+        <div className="grid gap-3 lg:grid-cols-2">
+          <label className="admin-choice-row">
+            <div>
+              <strong>Create contract automatically</strong>
+              <p>
+                Generate the booking contract from the active
+                workspace default template.
+              </p>
+            </div>
+            <input
+              type="checkbox"
+              checked={payload.settings.autoCreateContract}
+              disabled={!canManage || saving}
+              onChange={(event) =>
+                patchSettings({
+                  autoCreateContract: event.target.checked,
+                })
+              }
+            />
+          </label>
+
+          <AdminField
+            label="Default contract template"
+            help="Only active workspace templates can be selected."
+          >
+            <select
+              className="admin-select"
+              value={
+                payload.settings.defaultContractTemplateId || ""
+              }
+              disabled={!canManage || saving}
+              onChange={(event) =>
+                patchSettings({
+                  defaultContractTemplateId:
+                    event.target.value || null,
+                })
+              }
+            >
+              <option value="">
+                No default contract template
+              </option>
+              {payload.contractTemplates.map((template) => (
+                <option
+                  key={template.id}
+                  value={template.id}
+                >
+                  {template.name}
+                </option>
+              ))}
+            </select>
+          </AdminField>
+
+          <label className="admin-choice-row">
+            <div>
+              <strong>Create invoice automatically</strong>
+              <p>
+                Build the first invoice and payment schedule from
+                the accepted quote snapshot.
+              </p>
+            </div>
+            <input
+              type="checkbox"
+              checked={payload.settings.autoCreateInvoice}
+              disabled={!canManage || saving}
+              onChange={(event) =>
+                patchSettings({
+                  autoCreateInvoice: event.target.checked,
+                })
+              }
+            />
+          </label>
+
+          <label className="admin-choice-row">
+            <div>
+              <strong>Assign questionnaire automatically</strong>
+              <p>
+                Add the selected questionnaire to the booking pack
+                when the quote becomes a Job.
+              </p>
+            </div>
+            <input
+              type="checkbox"
+              checked={payload.settings.autoAssignQuestionnaire}
+              disabled={!canManage || saving}
+              onChange={(event) =>
+                patchSettings({
+                  autoAssignQuestionnaire: event.target.checked,
+                })
+              }
+            />
+          </label>
+
+          <AdminField
+            label="Default questionnaire"
+            help="Only active workspace templates can be selected."
+          >
+            <select
+              className="admin-select"
+              value={
+                payload.settings.defaultQuestionnaireTemplateId || ""
+              }
+              disabled={!canManage || saving}
+              onChange={(event) =>
+                patchSettings({
+                  defaultQuestionnaireTemplateId:
+                    event.target.value || null,
+                })
+              }
+            >
+              <option value="">
+                No default questionnaire
+              </option>
+              {payload.questionnaireTemplates.map((template) => (
+                <option
+                  key={template.id}
+                  value={template.id}
+                >
+                  {template.name}
+                </option>
+              ))}
+            </select>
+          </AdminField>
+        </div>
+      </AdminPanel>
+
+      <AdminPanel
+        title="Contract templates"
+        description="Build reusable contract wording. Existing generated contracts keep their saved snapshots when templates are changed later."
+        icon={FileQuestion}
+        actions={
+          canManage ? (
+            <AdminButton
+              variant="primary"
+              size="sm"
+              icon={Plus}
+              disabled={
+                creatingContractTemplate
+              }
+              onClick={() =>
+                void createContractTemplate()
+              }
+            >
+              {creatingContractTemplate
+                ? "Creating…"
+                : "New template"}
+            </AdminButton>
+          ) : undefined
+        }
+      >
+        {contractTemplatesLoading ? (
+          <p className="text-[10px] text-neutral-500">
+            Loading contract templates…
+          </p>
+        ) : !contractTemplates.length ? (
+          <AdminEmptyState
+            icon={FileQuestion}
+            title="No contract templates"
+            description="Create an inactive template, enter your own contract wording, then activate it when ready."
+          />
+        ) : (
+          <div className="questionnaire-template-grid">
+            {contractTemplates.map(
+              (template) => (
+                <Link
+                  key={template.id}
+                  to={
+                    `/admin/crm/contracts/templates/${template.id}`
+                  }
+                  className="questionnaire-template-card"
+                >
+                  <div>
+                    <strong>
+                      {template.name}
+                    </strong>
+
+                    <p>
+                      {template.description
+                        || "No description"}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <AdminStatus
+                      tone={
+                        template.status
+                          === "active"
+                          ? "success"
+                          : "neutral"
+                      }
+                    >
+                      {template.status
+                        === "active"
+                        ? "active"
+                        : "inactive"}
+                    </AdminStatus>
+
+                    {payload.settings
+                      .defaultContractTemplateId
+                      === template.id ? (
+                      <AdminStatus tone="success">
+                        default
+                      </AdminStatus>
+                    ) : null}
+
+                    <AdminStatus tone="info">
+                      {template.sections.length}
+                      {" "}
+                      section
+                      {template.sections.length
+                        === 1
+                        ? ""
+                        : "s"}
+                    </AdminStatus>
+                  </div>
+                </Link>
+              ),
+            )}
+          </div>
+        )}
+      </AdminPanel>
+
+      <AdminPanel
+        title="Payment schedule"
+        description="Set the default deposit and deadline rules used when a booking invoice is generated."
+        icon={Settings2}
+      >
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <AdminField label="Deposit type">
+            <select
+              className="admin-select"
+              value={payload.settings.depositType}
+              disabled={!canManage || saving}
+              onChange={(event) => {
+                const depositType =
+                  event.target.value as
+                    CrmCommercialSettingsPayload["settings"]["depositType"];
+
+                patchSettings({
+                  depositType,
+                  depositValue: 0,
+                });
+              }}
+            >
+              <option value="none">
+                No automatic deposit
+              </option>
+              <option value="fixed">
+                Fixed amount
+              </option>
+              <option value="percentage">
+                Percentage
+              </option>
+            </select>
+          </AdminField>
+
+          <AdminField
+            label={
+              payload.settings.depositType === "percentage"
+                ? "Deposit (%)"
+                : "Deposit (£)"
+            }
+            help={
+              payload.settings.depositType === "percentage"
+                ? "Percentage of the accepted booking total."
+                : "Fixed deposit amount in the workspace currency."
+            }
+          >
+            <input
+              className="admin-input"
+              type="number"
+              min="0"
+              max={
+                payload.settings.depositType === "percentage"
+                  ? 100
+                  : undefined
+              }
+              step="0.01"
+              value={depositValue}
+              disabled={
+                !canManage
+                || saving
+                || payload.settings.depositType === "none"
+              }
+              onChange={(event) => {
+                const raw =
+                  Math.max(
+                    0,
+                    Number(event.target.value || 0),
+                  );
+
+                const bounded =
+                  payload.settings.depositType === "percentage"
+                    ? Math.min(raw, 100)
+                    : raw;
+
+                patchSettings({
+                  depositValue:
+                    Math.round(bounded * 100),
+                });
+              }}
+            />
+          </AdminField>
+
+          <AdminField
+            label="Deposit due after acceptance"
+            help="Number of days after quote acceptance."
+          >
+            <input
+              className="admin-input"
+              type="number"
+              min="0"
+              value={
+                payload.settings.depositDueDaysAfterAcceptance
+              }
+              disabled={!canManage || saving}
+              onChange={(event) =>
+                patchSettings({
+                  depositDueDaysAfterAcceptance:
+                    Math.max(
+                      0,
+                      Number(event.target.value || 0),
+                    ),
+                })
+              }
+            />
+          </AdminField>
+
+          <AdminField
+            label="Final balance before event"
+            help="Number of days before the wedding or event."
+          >
+            <input
+              className="admin-input"
+              type="number"
+              min="0"
+              value={
+                payload.settings.finalBalanceDueDaysBeforeEvent
+              }
+              disabled={!canManage || saving}
+              onChange={(event) =>
+                patchSettings({
+                  finalBalanceDueDaysBeforeEvent:
+                    Math.max(
+                      0,
+                      Number(event.target.value || 0),
+                    ),
+                })
+              }
+            />
+          </AdminField>
+
+          <AdminField
+            label="Questionnaire due before event"
+            help="Default questionnaire deadline in days before the event."
+          >
+            <input
+              className="admin-input"
+              type="number"
+              min="0"
+              value={
+                payload.settings.questionnaireDueDaysBeforeEvent
+              }
+              disabled={!canManage || saving}
+              onChange={(event) =>
+                patchSettings({
+                  questionnaireDueDaysBeforeEvent:
+                    Math.max(
+                      0,
+                      Number(event.target.value || 0),
+                    ),
+                })
+              }
+            />
+          </AdminField>
+        </div>
+      </AdminPanel>
+
+      <AdminPanel
+        title="Invoice numbering"
+        description="Control the workspace invoice prefix and display width without resetting the live sequence."
+        icon={Settings2}
+      >
+        <div className="grid gap-3 md:grid-cols-3">
+          <AdminField
+            label="Invoice prefix"
+            help="For example INV."
+          >
+            <input
+              className="admin-input"
+              value={payload.invoiceSequence.prefix}
+              maxLength={20}
+              disabled={!canManage || saving}
+              onChange={(event) =>
+                patchInvoiceSequence({
+                  prefix:
+                    event.target.value
+                      .toUpperCase()
+                      .slice(0, 20),
+                })
+              }
+            />
+          </AdminField>
+
+          <AdminField
+            label="Number padding"
+            help="4 displays invoice 27 as 0027."
+          >
+            <input
+              className="admin-input"
+              type="number"
+              min="1"
+              max="12"
+              value={payload.invoiceSequence.padding}
+              disabled={!canManage || saving}
+              onChange={(event) =>
+                patchInvoiceSequence({
+                  padding:
+                    Math.max(
+                      1,
+                      Math.min(
+                        12,
+                        Number(event.target.value || 1),
+                      ),
+                    ),
+                })
+              }
+            />
+          </AdminField>
+
+          <AdminField
+            label="Next invoice number"
+            help="Operational sequence state. Saving settings never resets this number."
+          >
+            <input
+              className="admin-input"
+              type="number"
+              value={payload.invoiceSequence.nextNumber}
+              disabled
+              readOnly
+            />
+          </AdminField>
+        </div>
+      </AdminPanel>
+
+      <AdminPanel
+        title="Invoice wording"
+        description="Default client-facing notes and payment terms copied into newly generated invoices."
+        icon={Settings2}
+      >
+        <div className="grid gap-3 lg:grid-cols-2">
+          <AdminField label="Invoice notes">
+            <textarea
+              className="admin-textarea min-h-28"
+              value={payload.settings.invoiceNotes}
+              disabled={!canManage || saving}
+              onChange={(event) =>
+                patchSettings({
+                  invoiceNotes: event.target.value,
+                })
+              }
+            />
+          </AdminField>
+
+          <AdminField label="Invoice terms">
+            <textarea
+              className="admin-textarea min-h-28"
+              value={payload.settings.invoiceTerms}
+              disabled={!canManage || saving}
+              onChange={(event) =>
+                patchSettings({
+                  invoiceTerms: event.target.value,
+                })
+              }
+            />
+          </AdminField>
+        </div>
+      </AdminPanel>
+
+      <div className="flex flex-wrap items-center justify-end gap-3">
+        <AdminButton
+          variant="primary"
+          icon={Save}
+          disabled={!canManage || saving}
+          onClick={() => void save()}
+        >
+          {saving
+            ? "Saving…"
+            : "Save commercial settings"}
+        </AdminButton>
+      </div>
+    </div>
   );
 }
 

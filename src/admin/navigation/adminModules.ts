@@ -75,6 +75,7 @@ const crmItems: AdminNavigationItem[] = [
   { key: "quotes", label: "Quotes", to: "/admin/crm/quotes", icon: FileQuestion, match: pathPrefix("/admin/crm/quotes") },
   { key: "questionnaires", label: "Questionnaires", to: "/admin/crm?view=questionnaires", icon: ClipboardList, match: (pathname, params) => pathname.startsWith("/admin/crm/questionnaires/") || exactWithQuery("/admin/crm", "view", "questionnaires")(pathname, params) },
   { key: "workflows", label: "Workflows", to: "/admin/crm?view=workflows", icon: Workflow, match: (pathname, params) => pathname.startsWith("/admin/crm/workflows/") || exactWithQuery("/admin/crm", "view", "workflows")(pathname, params) },
+  { key: "commercial-settings", label: "Commercial settings", to: "/admin/crm?view=commercial-settings", icon: Settings, match: (pathname, params) => pathname.startsWith("/admin/crm/contracts/templates/") || exactWithQuery("/admin/crm", "view", "commercial-settings")(pathname, params) },
   { key: "lead-form", label: "Lead form", to: "/admin/crm?view=lead-form", icon: ClipboardList, match: exactWithQuery("/admin/crm", "view", "lead-form") },
   { key: "client-portal", label: "Client portal", to: "/admin/settings/client-portal", icon: Palette, mobilePrimary: true, match: pathPrefix("/admin/settings/client-portal") },
 ];

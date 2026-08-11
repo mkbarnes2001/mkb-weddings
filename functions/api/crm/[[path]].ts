@@ -1,4 +1,16 @@
-import { recordManualInvoicePayment } from "../../../serverless/crm-commercial-actions-d1";
+import {
+  archiveCrmContractTemplate,
+  createCrmContractTemplate,
+  getCrmContractTemplate,
+  listCrmContractTemplates,
+  saveCrmContractTemplate,
+} from "../../../serverless/crm-contract-templates-d1";
+import { getCrmCommercialSettings, saveCrmCommercialSettings } from "../../../serverless/crm-commercial-settings-d1";
+import {
+  recordManualInvoicePayment,
+  repairJobBookingPack,
+  sendDraftContractToPortal,
+} from "../../../serverless/crm-commercial-actions-d1";
 import { requireProfessionalContext } from "../../../serverless/platform-auth-d1";
 import {
   createAdminEnquiry,
@@ -89,6 +101,26 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         headers: { "Cache-Control": "private, no-store" },
       });
     }
+    if (
+      parts[0] === "commercial"
+      && parts[1] === "settings"
+      && parts.length === 2
+    ) {
+      return Response.json({
+        ok: true,
+        commercial:
+          await getCrmCommercialSettings(
+            context.env.MKB_DB,
+            actor,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
     if (parts[0] === "enquiries" && parts[1] && parts.length === 2) {
       return Response.json({ ok: true, detail: await getCrmEnquiry(context.env.MKB_DB, actor, parts[1]) }, {
         headers: { "Cache-Control": "private, no-store" },
@@ -109,6 +141,48 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         headers: { "Cache-Control": "private, no-store" },
       });
     }
+    if (
+      parts[0] === "contracts"
+      && parts[1] === "templates"
+      && parts.length === 2
+    ) {
+      return Response.json({
+        ok: true,
+        templates:
+          await listCrmContractTemplates(
+            context.env.MKB_DB,
+            actor,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
+    if (
+      parts[0] === "contracts"
+      && parts[1] === "templates"
+      && parts[2]
+      && parts.length === 3
+    ) {
+      return Response.json({
+        ok: true,
+        template:
+          await getCrmContractTemplate(
+            context.env.MKB_DB,
+            actor,
+            parts[2],
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
     if (parts[0] === "questionnaires" && parts[1] === "templates" && parts[2] && parts.length === 3) {
       return Response.json({ ok: true, template: await getQuestionnaireTemplate(context.env.MKB_DB, actor, parts[2]) }, {
         headers: { "Cache-Control": "private, no-store" },
@@ -158,6 +232,90 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (!parts.length || (parts[0] === "enquiries" && parts.length === 1)) {
       return Response.json({ ok: true, detail: await createAdminEnquiry(context.env.MKB_DB, actor, body) }, { status: 201 });
     }
+    if (
+      parts[0] === "commercial"
+      && parts[1] === "settings"
+      && parts.length === 2
+    ) {
+      return Response.json({
+        ok: true,
+        commercial:
+          await saveCrmCommercialSettings(
+            context.env.MKB_DB,
+            actor,
+            body,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
+    if (
+      parts[0] === "jobs"
+      && parts[1]
+      && parts[2] === "booking-pack"
+      && parts.length === 3
+    ) {
+      const bookingPack =
+        await repairJobBookingPack(
+          context.env.MKB_DB,
+          actor,
+          parts[1],
+        );
+
+      return Response.json({
+        ok: true,
+        bookingPack,
+        workspace:
+          await getCrmJobWorkspace(
+            context.env.MKB_DB,
+            actor,
+            parts[1],
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
+    if (
+      parts[0] === "jobs"
+      && parts[1]
+      && parts[2] === "contracts"
+      && parts[3]
+      && parts[4] === "send"
+      && parts.length === 5
+    ) {
+      const contract =
+        await sendDraftContractToPortal(
+          context.env.MKB_DB,
+          actor,
+          parts[1],
+          parts[3],
+        );
+
+      return Response.json({
+        ok: true,
+        contract,
+        workspace:
+          await getCrmJobWorkspace(
+            context.env.MKB_DB,
+            actor,
+            parts[1],
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
     if (parts[0] === "lead-form") {
       return Response.json({ ok: true, crm: await saveLeadFormSettings(context.env.MKB_DB, actor, body) });
     }
@@ -188,6 +346,51 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (parts[0] === "quotes" && parts[1] && parts[2] === "accept") {
       return Response.json({ ok: true, conversion: await acceptQuoteAsAdmin(context.env.MKB_DB, actor, parts[1], body) });
     }
+    if (
+      parts[0] === "contracts"
+      && parts[1] === "templates"
+      && parts.length === 2
+    ) {
+      return Response.json({
+        ok: true,
+        template:
+          await createCrmContractTemplate(
+            context.env.MKB_DB,
+            actor,
+            body,
+          ),
+      }, {
+        status: 201,
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
+    if (
+      parts[0] === "contracts"
+      && parts[1] === "templates"
+      && parts[2]
+      && parts[3] === "archive"
+      && parts.length === 4
+    ) {
+      return Response.json({
+        ok: true,
+        template:
+          await archiveCrmContractTemplate(
+            context.env.MKB_DB,
+            actor,
+            parts[2],
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
     if (parts[0] === "questionnaires" && parts[1] === "templates" && parts.length === 2) {
       return Response.json({ ok: true, template: await createQuestionnaireTemplate(context.env.MKB_DB, actor, body) }, { status: 201 });
     }
@@ -295,6 +498,29 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     if (parts[0] === "quotes" && parts[1] && parts.length === 2) {
       return Response.json({ ok: true, quote: await saveQuoteDraft(context.env.MKB_DB, actor, parts[1], body) });
     }
+    if (
+      parts[0] === "contracts"
+      && parts[1] === "templates"
+      && parts[2]
+      && parts.length === 3
+    ) {
+      return Response.json({
+        ok: true,
+        template:
+          await saveCrmContractTemplate(
+            context.env.MKB_DB,
+            actor,
+            parts[2],
+            body,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
     if (parts[0] === "questionnaires" && parts[1] === "templates" && parts[2] && parts.length === 3) {
       return Response.json({ ok: true, template: await saveQuestionnaireTemplate(context.env.MKB_DB, actor, parts[2], body) });
     }

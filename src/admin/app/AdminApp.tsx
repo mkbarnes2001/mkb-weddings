@@ -10,6 +10,7 @@ import { CRMCatalogue } from "../pages/CRMCatalogue";
 import { CRMQuotes } from "../pages/CRMQuotes";
 import { CRMQuote } from "../pages/CRMQuote";
 import { CRMQuestionnaireTemplate } from "../pages/CRMQuestionnaireTemplate";
+import { CRMContractTemplate } from "../pages/CRMContractTemplate";
 import { CRMWorkflowTemplate } from "../pages/CRMWorkflowTemplate";
 import { Weddings } from "../pages/Weddings";
 import { NewWeddingWizard } from "../pages/NewWeddingWizard";
@@ -70,6 +71,7 @@ export function AdminApp() {
         <Route path="crm/quotes" element={<CRMQuotes />} />
         <Route path="crm/quotes/:id" element={<CRMQuote />} />
         <Route path="crm/questionnaires/:id" element={<CRMQuestionnaireTemplate />} />
+        <Route path="crm/contracts/templates/:id" element={<CRMContractTemplate />} />
         <Route path="crm/workflows/:id" element={<CRMWorkflowTemplate />} />
         <Route path="weddings" element={<Weddings />} />
         <Route path="weddings/new" element={<NewWeddingWizard />} />

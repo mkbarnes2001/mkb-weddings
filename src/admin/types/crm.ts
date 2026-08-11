@@ -638,3 +638,91 @@ export type CrmQuoteOverview = {
   packages: CrmPackage[];
   addons: CrmAddon[];
 };
+
+// v1.10.6a — commercial workflow settings
+
+export type CrmCommercialTemplateOption = {
+  id: string;
+  name: string;
+  status: string;
+};
+
+export type CrmCommercialBookingSettings = {
+  autoCreateContract: boolean;
+  autoCreateInvoice: boolean;
+  autoAssignQuestionnaire: boolean;
+  defaultContractTemplateId: string;
+  defaultQuestionnaireTemplateId: string;
+  depositType:
+    | "none"
+    | "fixed"
+    | "percentage";
+  depositValue: number;
+  depositDueDaysAfterAcceptance: number;
+  finalBalanceDueDaysBeforeEvent: number;
+  questionnaireDueDaysBeforeEvent: number;
+  invoiceNotes: string;
+  invoiceTerms: string;
+  updatedAt: string;
+};
+
+export type CrmInvoiceSequenceSettings = {
+  prefix: string;
+  nextNumber: number;
+  padding: number;
+  updatedAt: string;
+};
+
+export type CrmCommercialSettingsPayload = {
+  settings: CrmCommercialBookingSettings;
+  invoiceSequence:
+    CrmInvoiceSequenceSettings;
+  contractTemplates:
+    CrmCommercialTemplateOption[];
+  questionnaireTemplates:
+    CrmCommercialTemplateOption[];
+};
+
+export type CrmCommercialSettingsInput = {
+  autoCreateContract?: boolean;
+  autoCreateInvoice?: boolean;
+  autoAssignQuestionnaire?: boolean;
+  defaultContractTemplateId?:
+    string;
+  defaultQuestionnaireTemplateId?:
+    string;
+  depositType?:
+    | "none"
+    | "fixed"
+    | "percentage";
+  depositValue?: number;
+  depositDueDaysAfterAcceptance?:
+    number;
+  finalBalanceDueDaysBeforeEvent?:
+    number;
+  questionnaireDueDaysBeforeEvent?:
+    number;
+  invoiceNotes?: string;
+  invoiceTerms?: string;
+  invoicePrefix?: string;
+  invoicePadding?: number;
+};
+
+// v1.10.6a — contract-template management
+
+export type CrmContractTemplateSection = {
+  id: string;
+  heading: string;
+  body: string;
+};
+
+export type CrmContractTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  status: "active" | "archived";
+  sections:
+    CrmContractTemplateSection[];
+  createdAt: string;
+  updatedAt: string;
+};

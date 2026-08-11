@@ -105,6 +105,7 @@ export function CRMJob() {
   const [taskDraft, setTaskDraft] = useState({ title: "", description: "", taskType: "task", priority: "normal", dueAt: "" });
   const [communicationDraft, setCommunicationDraft] = useState({ channel: "note", direction: "internal", contactId: "", subject: "", body: "" });
   const canManage = auth.permissions.includes("crm:manage");
+  const canManageCommercial = canManage && auth.accessMode !== "support";
 
   async function load() {
     setLoading(true);
@@ -133,6 +134,74 @@ export function CRMJob() {
   const activeAccessByContact = useMemo(() => new Map((workspace?.portalAccess || []).filter((item) => item.status === "active").map((item) => [item.contactId, item])), [workspace?.portalAccess]);
   const allFiles = useMemo(() => (workspace?.questionnaires || []).flatMap((item) => item.files.map((file) => ({ ...file, questionnaireId: item.id, questionnaireTitle: item.title }))), [workspace?.questionnaires]);
   const pendingSubmissions = useMemo(() => (workspace?.supplierSubmissions || []).filter((item) => item.status === "pending"), [workspace?.supplierSubmissions]);
+
+  async function repairBookingPack() {
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      setWorkspace(
+        await AdminApiService
+          .repairCrmBookingPack(id),
+      );
+
+      setMessage(
+        "Booking pack checked and repaired from "
+        + "the accepted quote.",
+      );
+    } catch (repairError) {
+      setError(
+        repairError instanceof Error
+          ? repairError.message
+          : "Unable to repair the booking pack.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function sendContractToPortal(
+    contractId: string,
+  ) {
+    if (
+      !window.confirm(
+        "Send this draft contract to the Client Portal? "
+        + "The current contract version will become "
+        + "client-visible and cannot be edited in place.",
+      )
+    ) {
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      setWorkspace(
+        await AdminApiService
+          .sendCrmContractToPortal(
+            id,
+            contractId,
+          ),
+      );
+
+      setMessage(
+        "Contract is now visible in the Client Portal. "
+        + "No email was sent.",
+      );
+    } catch (sendError) {
+      setError(
+        sendError instanceof Error
+          ? sendError.message
+          : "Unable to send the contract "
+            + "to the Client Portal.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function assign() {
     if (!templateId || !contactId) { setError("Choose the client who should complete this questionnaire."); return; }
@@ -307,6 +376,21 @@ export function CRMJob() {
         icon={BriefcaseBusiness}
         className="crm-commercial-panel"
       >
+        {commercialQuote && canManageCommercial ? (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-black/[0.06] bg-neutral-50 px-4 py-3">
+            <small className="max-w-2xl text-[10px] leading-5 text-neutral-500">
+              Re-run the idempotent booking-pack checks to create any configured invoice, contract or questionnaire that is missing. Existing commercial snapshots are preserved.
+            </small>
+            <AdminButton
+              variant="secondary"
+              size="sm"
+              disabled={saving}
+              onClick={() => void repairBookingPack()}
+            >
+              Generate / repair booking pack
+            </AdminButton>
+          </div>
+        ) : null}
         <div className="crm-commercial-grid">
           <article className="crm-commercial-card">
             <span className="crm-commercial-card__icon"><FileText /></span>
@@ -353,6 +437,20 @@ export function CRMJob() {
                 <small className="crm-commercial-card__note">{commercialContract.signedAt ? `Signed ${dateLabel(commercialContract.signedAt)}` : commercialContract.sentAt ? `Sent ${dateLabel(commercialContract.sentAt)}` : "Draft document"}</small>
               </> : <small className="crm-commercial-card__note">A contract is generated only when this workspace has an active default contract template configured.</small>}
             </div>
+            {commercialContract?.status === "draft" ? (
+              portal.status === "not_invited"
+                ? <small className="crm-commercial-card__note">Invite a client to the Client Portal before sending this draft contract.</small>
+                : canManageCommercial
+                  ? <AdminButton
+                      variant="primary"
+                      size="sm"
+                      disabled={saving}
+                      onClick={() => void sendContractToPortal(commercialContract.id)}
+                    >
+                      Send to Client Portal
+                    </AdminButton>
+                  : <small className="crm-commercial-card__note">This draft is read-only in the current session.</small>
+            ) : null}
           </article>
 
           <article className="crm-commercial-card">
