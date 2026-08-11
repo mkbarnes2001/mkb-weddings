@@ -134,7 +134,12 @@ def main() -> None:
     # Commercial placeholders do not invent pricing or signup behaviour.
     assert "placeholder prices" in app
     normalized_app = " ".join(app.split())
-    assert "Account creation, plan selection and billing" in normalized_app
+    assert (
+        "Account creation, plan selection and billing"
+        in normalized_app
+        or "Create your WedPlanned workspace."
+        in app
+    )
 
     # Source-only foundation: schema remains unchanged.
     assert "'schema_version', '37'" in schema or "VALUES ('schema_version', '37')" in schema

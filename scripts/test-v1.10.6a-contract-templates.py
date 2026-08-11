@@ -54,7 +54,7 @@ def main() -> None:
         """
     ).fetchone()[0]
 
-    assert version == "39"
+    assert version == "40"
 
     columns = [
         row[1]

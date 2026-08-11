@@ -40,10 +40,9 @@ def main() -> None:
         "WHERE key='schema_version'"
     ).fetchone()[0]
 
-    assert str(version) == "39"
-    assert not list(
-        (ROOT / "d1/migrations").glob("040*")
-    )
+    assert str(version) == "40"
+    # v1.10.6a itself introduced no migration. Later releases
+    # may legitimately add migration 040 and beyond.
 
     # Booking-pack repair uses the existing shared,
     # idempotent generator rather than duplicating

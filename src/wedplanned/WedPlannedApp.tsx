@@ -29,6 +29,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  type FormEvent,
   type ReactNode,
 } from "react";
 
@@ -731,39 +732,324 @@ function SignInPage() {
 }
 
 function GetStartedPage() {
+  const [
+    businessName,
+    setBusinessName,
+  ] = useState("");
+
+  const [
+    ownerDisplayName,
+    setOwnerDisplayName,
+  ] = useState("");
+
+  const [
+    email,
+    setEmail,
+  ] = useState("");
+
+  const [
+    submitting,
+    setSubmitting,
+  ] = useState(false);
+
+  const [
+    error,
+    setError,
+  ] = useState("");
+
+  const [
+    submittedEmail,
+    setSubmittedEmail,
+  ] = useState("");
+
+  const [
+    existingAccount,
+    setExistingAccount,
+  ] = useState(false);
+
+  async function submit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault();
+
+    if (submitting) {
+      return;
+    }
+
+    setSubmitting(true);
+    setError("");
+    setExistingAccount(false);
+
+    try {
+      const response =
+        await fetch(
+          "/api/signup/request",
+          {
+            method: "POST",
+            headers: {
+              Accept:
+                "application/json",
+              "Content-Type":
+                "application/json",
+            },
+            cache: "no-store",
+            body: JSON.stringify({
+              businessName,
+              ownerDisplayName,
+              email,
+            }),
+          },
+        );
+
+      const payload: any =
+        await response
+          .json()
+          .catch(
+            () => ({}),
+          );
+
+      if (!response.ok) {
+        if (
+          payload?.code
+          === "existing_account"
+        ) {
+          setExistingAccount(true);
+        }
+
+        throw new Error(
+          String(
+            payload?.error
+            || "Unable to start signup. Please try again.",
+          ),
+        );
+      }
+
+      setSubmittedEmail(
+        email.trim(),
+      );
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Unable to start signup. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <>
       <PageMeta
         title="Get Started | WedPlanned"
-        description="The WedPlanned onboarding route is ready for the future professional signup experience."
+        description="Create your WedPlanned professional workspace using secure email verification."
         path="/get-started"
       />
 
       <section className="wp-access-page">
         <div className="wp-access-card wp-access-card--wide">
           <p className="wp-eyebrow">Get started</p>
-          <h1>Your route into WedPlanned.</h1>
-          <p>
-            The public onboarding boundary is now established. Account
-            creation, plan selection and billing will be connected here in a
-            later commercial release rather than being simulated before those
-            contracts are ready.
-          </p>
 
-          <div className="wp-get-started-products">
-            {WEDPLANNED_PRODUCTS.map((product) => (
-              <ProductWordmark
-                key={product.slug}
-                product={product}
-                compact
-              />
-            ))}
-          </div>
+          {submittedEmail ? (
+            <div
+              className="wp-signup-success"
+              aria-live="polite"
+            >
+              <div
+                className="wp-signup-success__mark"
+                aria-hidden="true"
+              >
+                <Check />
+              </div>
 
-          <Link to="/products" className="wp-button wp-button--dark">
-            Explore the products
-            <ArrowRight />
-          </Link>
+              <h1>Check your email.</h1>
+
+              <p>
+                We sent a secure verification link to{" "}
+                <strong>{submittedEmail}</strong>.
+              </p>
+
+              <p>
+                Your WedPlanned workspace will only be created after
+                you confirm that email address.
+              </p>
+
+              <div className="wp-signup-success__steps">
+                <span>1. Open the email</span>
+                <span>2. Verify your address</span>
+                <span>3. Continue into WedNav</span>
+              </div>
+
+              <p className="wp-signup-footnote">
+                The link expires after 30 minutes.
+              </p>
+            </div>
+          ) : (
+            <>
+              <h1>Create your WedPlanned workspace.</h1>
+
+              <p>
+                Start with your business details. We will verify your
+                email before creating your professional account or
+                workspace.
+              </p>
+
+              <form
+                className="wp-signup-form"
+                onSubmit={submit}
+              >
+                <div className="wp-signup-grid">
+                  <label className="wp-signup-field">
+                    <span>Business name</span>
+
+                    <input
+                      name="businessName"
+                      type="text"
+                      required
+                      minLength={2}
+                      maxLength={120}
+                      autoComplete="organization"
+                      value={businessName}
+                      disabled={submitting}
+                      onChange={(event) => {
+                        setBusinessName(
+                          event.target.value,
+                        );
+
+                        setError("");
+                      }}
+                      placeholder="Your business name"
+                    />
+                  </label>
+
+                  <label className="wp-signup-field">
+                    <span>Your name</span>
+
+                    <input
+                      name="ownerDisplayName"
+                      type="text"
+                      required
+                      minLength={2}
+                      maxLength={120}
+                      autoComplete="name"
+                      value={ownerDisplayName}
+                      disabled={submitting}
+                      onChange={(event) => {
+                        setOwnerDisplayName(
+                          event.target.value,
+                        );
+
+                        setError("");
+                      }}
+                      placeholder="Your full name"
+                    />
+                  </label>
+                </div>
+
+                <label className="wp-signup-field">
+                  <span>Business email</span>
+
+                  <input
+                    name="email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    inputMode="email"
+                    value={email}
+                    disabled={submitting}
+                    onChange={(event) => {
+                      setEmail(
+                        event.target.value,
+                      );
+
+                      setError("");
+                      setExistingAccount(false);
+                    }}
+                    placeholder="you@business.com"
+                  />
+
+                  <small>
+                    We will send the verification link here.
+                  </small>
+                </label>
+
+                {error ? (
+                  <div
+                    className="wp-signup-alert wp-signup-alert--error"
+                    role="alert"
+                  >
+                    <strong>
+                      {existingAccount
+                        ? "Account already exists"
+                        : "Signup could not be started"}
+                    </strong>
+
+                    <span>{error}</span>
+
+                    {existingAccount ? (
+                      <a
+                        href={PROFESSIONAL_APP_URL}
+                        className="wp-inline-link"
+                      >
+                        Sign in to your existing workspace
+                        <ArrowRight />
+                      </a>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                <div className="wp-signup-actions">
+                  <button
+                    type="submit"
+                    className="wp-button wp-button--dark"
+                    disabled={submitting}
+                  >
+                    {submitting
+                      ? "Sending verification link…"
+                      : "Send verification link"}
+
+                    {!submitting ? (
+                      <ArrowRight />
+                    ) : null}
+                  </button>
+
+                  <span>
+                    Already use WedPlanned?{" "}
+                    <Link
+                      to="/sign-in"
+                      className="wp-inline-link"
+                    >
+                      Sign in
+                    </Link>
+                  </span>
+                </div>
+
+                <p className="wp-signup-footnote">
+                  No workspace is created until your email has been
+                  verified. Billing and paid-plan selection are not
+                  part of this foundation signup.
+                </p>
+              </form>
+
+              <div className="wp-signup-products">
+                <span>
+                  Your workspace connects
+                </span>
+
+                <div className="wp-get-started-products">
+                  {WEDPLANNED_PRODUCTS.map(
+                    (product) => (
+                      <ProductWordmark
+                        key={product.slug}
+                        product={product}
+                        compact
+                      />
+                    ),
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </section>
     </>

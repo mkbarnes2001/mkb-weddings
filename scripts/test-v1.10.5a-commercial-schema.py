@@ -95,7 +95,7 @@ def main() -> None:
         con,
         "SELECT value FROM schema_meta "
         "WHERE key='schema_version'",
-    )[0] == "39"
+    )[0] == "40"
 
     required = {
         "crm_booking_settings",

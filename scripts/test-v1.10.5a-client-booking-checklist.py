@@ -25,7 +25,7 @@ def main() -> None:
     version = con.execute(
         "SELECT value FROM schema_meta WHERE key='schema_version'"
     ).fetchone()[0]
-    assert version == "39"
+    assert version == "40"
 
     # All commercial reads use the authenticated client identity and
     # an active Job portal-access relationship as their authority.

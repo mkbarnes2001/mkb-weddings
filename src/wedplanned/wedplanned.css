@@ -1615,3 +1615,320 @@ body {
     max-height: 26px;
   }
 }
+
+
+/* v1.10.7a — external professional signup */
+
+.wp-signup-form {
+  display: grid;
+  gap: 19px;
+  margin-top: 31px;
+}
+
+.wp-signup-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  gap: 14px;
+}
+
+.wp-signup-field {
+  display: grid;
+  gap: 8px;
+}
+
+.wp-signup-field > span {
+  color:
+    var(
+      --wp-theme-card-text,
+      #161616
+    );
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.wp-signup-field > small {
+  color:
+    var(
+      --wp-theme-card-muted,
+      #77736c
+    );
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.wp-signup-field input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid
+    var(
+      --wp-theme-card-border,
+      #d8d4cd
+    );
+  border-radius: 10px;
+  background:
+    var(
+      --wp-theme-card-bg,
+      #fff
+    );
+  color:
+    var(
+      --wp-theme-card-text,
+      #161616
+    );
+  padding: 13px 14px;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  transition:
+    border-color .15s ease,
+    box-shadow .15s ease;
+}
+
+.wp-signup-field input::placeholder {
+  color: #9a9690;
+}
+
+.wp-signup-field input:focus {
+  border-color:
+    var(
+      --wp-theme-text,
+      #161616
+    );
+  box-shadow:
+    0 0 0 3px
+    color-mix(
+      in srgb,
+      var(
+        --wp-theme-text,
+        #161616
+      ) 9%,
+      transparent
+    );
+}
+
+.wp-signup-field input:disabled {
+  cursor: wait;
+  opacity: .62;
+}
+
+.wp-signup-alert {
+  display: grid;
+  gap: 5px;
+  border-radius: 10px;
+  padding: 13px 14px;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.wp-signup-alert strong {
+  font-size: 11px;
+}
+
+.wp-signup-alert--error {
+  border: 1px solid #e8c7c4;
+  background: #fff5f4;
+  color: #852d27;
+}
+
+.wp-signup-alert .wp-inline-link {
+  width: fit-content;
+  margin-top: 3px;
+  color: inherit;
+  font-weight: 700;
+}
+
+.wp-signup-alert
+.wp-inline-link svg {
+  width: 13px;
+  height: 13px;
+}
+
+.wp-signup-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.wp-signup-actions
+.wp-button {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.wp-signup-actions
+.wp-button:disabled {
+  cursor: wait;
+  opacity: .55;
+}
+
+.wp-signup-actions > span {
+  color:
+    var(
+      --wp-theme-muted,
+      #66645f
+    );
+  font-size: 11px;
+}
+
+.wp-signup-actions
+.wp-inline-link {
+  font-weight: 700;
+}
+
+.wp-signup-footnote {
+  margin: 0;
+  color:
+    var(
+      --wp-theme-card-muted,
+      #77736c
+    );
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.wp-signup-products {
+  margin-top: 34px;
+  border-top: 1px solid
+    var(
+      --wp-theme-card-border,
+      #e0ddd7
+    );
+  padding-top: 22px;
+}
+
+.wp-signup-products > span {
+  color:
+    var(
+      --wp-theme-card-muted,
+      #77736c
+    );
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.wp-signup-products
+.wp-get-started-products {
+  margin: 14px 0 0;
+}
+
+.wp-signup-success {
+  display: grid;
+  justify-items: start;
+}
+
+.wp-signup-success__mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  margin: 18px 0 25px;
+  border-radius: 50%;
+  background: #e8f3ec;
+  color: #28643c;
+}
+
+.wp-signup-success__mark svg {
+  width: 20px;
+  height: 20px;
+}
+
+.wp-signup-success h1 {
+  margin: 0;
+}
+
+.wp-signup-success > p {
+  max-width: 570px;
+  margin: 18px 0 0;
+  color:
+    var(
+      --wp-theme-muted,
+      #66645f
+    );
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.wp-signup-success
+> p strong {
+  color:
+    var(
+      --wp-theme-text,
+      #161616
+    );
+}
+
+.wp-signup-success__steps {
+  display: flex;
+  width: 100%;
+  gap: 8px;
+  margin-top: 27px;
+}
+
+.wp-signup-success__steps span {
+  flex: 1;
+  border: 1px solid
+    var(
+      --wp-theme-card-border,
+      #dedad3
+    );
+  border-radius: 9px;
+  background:
+    color-mix(
+      in srgb,
+      var(
+        --wp-theme-soft,
+        #f5f3ef
+      ) 62%,
+      transparent
+    );
+  padding: 12px;
+  color:
+    var(
+      --wp-theme-card-text,
+      #161616
+    );
+  font-size: 10px;
+  font-weight: 650;
+  text-align: center;
+}
+
+.wp-signup-success
+.wp-signup-footnote {
+  margin-top: 20px;
+}
+
+@media (max-width: 760px) {
+  .wp-signup-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wp-signup-actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .wp-signup-actions
+  .wp-button {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .wp-signup-success__steps {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .wp-signup-success__steps span {
+    text-align: left;
+  }
+}

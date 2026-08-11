@@ -166,7 +166,7 @@ def main() -> None:
     fresh = sqlite3.connect(":memory:")
     fresh.execute("PRAGMA foreign_keys = ON")
     fresh.executescript(schema)
-    verify_schema(fresh, "39")
+    verify_schema(fresh, "40")
 
     # Upgrade path from the exact schema-37 prefix.
     prefix = schema.split(MARKER, 1)[0]

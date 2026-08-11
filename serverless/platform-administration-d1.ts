@@ -233,12 +233,16 @@ export async function getPlatformAdministration(db: D1Db, actor: any) {
   };
 }
 
-export async function provisionBusinessWorkspace(
+async function provisionBusinessWorkspaceFoundation(
   db: D1Db,
   actor: any,
   input: any,
+  provisioningSource: "platform_admin" | "verified_signup",
 ) {
-  requirePlatformAdmin(actor);
+  const ownerStatus =
+    provisioningSource === "verified_signup"
+      ? "active"
+      : "invited";
 
   const businessName = text(
     input?.businessName || input?.name,
@@ -364,6 +368,16 @@ export async function provisionBusinessWorkspace(
     );
   }
 
+  if (
+    provisioningSource === "verified_signup"
+    && existingUser
+  ) {
+    throw httpError(
+      "A WedPlanned account already exists for this email.",
+      409,
+    );
+  }
+
   const ownerUserId =
     text(existingUser?.id)
     || `user_${crypto.randomUUID()}`;
@@ -378,8 +392,11 @@ export async function provisionBusinessWorkspace(
     `audit_${crypto.randomUUID()}`;
 
   const entitlementMetadata = JSON.stringify({
-    provisionedBy: "platform_admin",
-    release: "v1.10.4a",
+    provisionedBy: provisioningSource,
+    release:
+      provisioningSource === "verified_signup"
+        ? "v1.10.7a"
+        : "v1.10.4a",
   });
 
   const statements: any[] = [
@@ -488,7 +505,7 @@ export async function provisionBusinessWorkspace(
         ?,
         ?,
         'member',
-        'invited',
+        ?,
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
       )
@@ -505,6 +522,7 @@ export async function provisionBusinessWorkspace(
       ownerEmail,
       ownerEmail,
       ownerDisplayName,
+      ownerStatus,
     ),
 
     db.prepare(`
@@ -531,7 +549,7 @@ export async function provisionBusinessWorkspace(
         ?,
         'Owner',
         'owner',
-        'invited',
+        ?,
         '{}',
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP,
@@ -544,6 +562,7 @@ export async function provisionBusinessWorkspace(
       ownerEmail,
       ownerEmail,
       ownerDisplayName,
+      ownerStatus,
     ),
 
     db.prepare(`
@@ -560,7 +579,7 @@ export async function provisionBusinessWorkspace(
         ?,
         ?,
         'owner',
-        'invited',
+        ?,
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
       )
@@ -568,6 +587,7 @@ export async function provisionBusinessWorkspace(
       legacyMembershipId,
       workspaceId,
       ownerEmail,
+      ownerStatus,
     ),
 
     db.prepare(`
@@ -631,18 +651,114 @@ export async function provisionBusinessWorkspace(
       JSON.stringify({
         slug,
         ownerEmail,
-        ownerInvitation: "staged",
+        ownerInvitation:
+          provisioningSource === "verified_signup"
+            ? "verified"
+            : "staged",
         emailSent: false,
+        provisioningSource,
       }),
     ),
   ];
 
   await db.batch(statements);
 
+  return {
+    workspaceId,
+    slug,
+    businessName,
+    ownerEmail,
+    ownerDisplayName,
+    ownerUserId,
+    membershipId,
+    legacyMembershipId,
+  };
+}
+
+export async function provisionBusinessWorkspace(
+  db: D1Db,
+  actor: any,
+  input: any,
+) {
+  requirePlatformAdmin(actor);
+
+  await provisionBusinessWorkspaceFoundation(
+    db,
+    actor,
+    input,
+    "platform_admin",
+  );
+
   return getPlatformAdministration(
     db,
     actor,
   );
+}
+
+export async function provisionVerifiedSignupWorkspace(
+  db: D1Db,
+  input: any,
+) {
+  const ownerEmail =
+    lower(input?.ownerEmail);
+
+  if (
+    !/^\S+@\S+\.\S+$/.test(ownerEmail)
+  ) {
+    throw httpError(
+      "Enter a valid owner email address.",
+      400,
+    );
+  }
+
+  const result =
+    await provisionBusinessWorkspaceFoundation(
+      db,
+      {
+        userId: "",
+        email: ownerEmail,
+      },
+      input,
+      "verified_signup",
+    );
+
+  await db.batch([
+    db.prepare(`
+      UPDATE platform_users
+      SET
+        verified_at = COALESCE(
+          verified_at,
+          CURRENT_TIMESTAMP
+        ),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+        AND email_normalized = ?
+        AND status = 'active'
+    `).bind(
+      result.ownerUserId,
+      ownerEmail,
+    ),
+
+    db.prepare(`
+      UPDATE business_memberships
+      SET
+        accepted_at = COALESCE(
+          accepted_at,
+          CURRENT_TIMESTAMP
+        ),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+        AND workspace_id = ?
+        AND user_id = ?
+        AND status = 'active'
+    `).bind(
+      result.membershipId,
+      result.workspaceId,
+      result.ownerUserId,
+    ),
+  ]);
+
+  return result;
 }
 
 export async function updatePlatformModuleConfiguration(

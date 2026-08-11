@@ -484,6 +484,100 @@ async function markLinkDelivery(db: D1Db, linkId: string, status: "sent" | "manu
   `).bind(status, text(error).slice(0, 500), linkId).run();
 }
 
+export async function createProfessionalSignupHandoff(
+  db: D1Db,
+  input: {
+    userId: string;
+    workspaceId: string;
+    email: string;
+    returnPath?: string;
+  },
+) {
+  const userId = text(input.userId);
+  const workspaceId = text(input.workspaceId);
+  const email = lower(input.email);
+
+  if (
+    !userId
+    || !workspaceId
+    || !validEmail(email)
+  ) {
+    throw httpError(
+      "Verified signup authentication context is invalid.",
+      400,
+    );
+  }
+
+  const eligible =
+    await db.prepare(`
+      SELECT
+        pu.id AS user_id,
+        bm.id AS membership_id
+      FROM platform_users pu
+      JOIN business_memberships bm
+        ON bm.user_id = pu.id
+       AND bm.workspace_id = ?
+       AND bm.email_normalized = ?
+       AND bm.status = 'active'
+      JOIN workspaces w
+        ON w.id = bm.workspace_id
+       AND w.status = 'active'
+      WHERE pu.id = ?
+        AND pu.email_normalized = ?
+        AND pu.status = 'active'
+      LIMIT 1
+    `).bind(
+      workspaceId,
+      email,
+      userId,
+      email,
+    ).first();
+
+  if (!eligible) {
+    throw httpError(
+      "Verified signup owner access is not active.",
+      409,
+    );
+  }
+
+  await db.prepare(`
+    UPDATE platform_auth_links
+    SET revoked_at = CURRENT_TIMESTAMP
+    WHERE user_id = ?
+      AND email_normalized = ?
+      AND purpose = 'login'
+      AND consumed_at IS NULL
+      AND revoked_at IS NULL
+  `).bind(
+    userId,
+    email,
+  ).run();
+
+  const link =
+    await createAuthLink(
+      db,
+      {
+        userId,
+        email,
+        purpose: "login",
+        returnPath:
+          input.returnPath
+          || "/admin",
+      },
+    );
+
+  await markLinkDelivery(
+    db,
+    link.linkId,
+    "manual",
+  );
+
+  return {
+    rawToken: link.rawToken,
+    expiresAt: link.expiresAt,
+  };
+}
+
 export async function requestProfessionalLoginLink(db: D1Db, env: PlatformAuthEnv, request: Request, input: { email?: string; returnPath?: string }) {
   const email = lower(input.email);
   if (!validEmail(email)) throw httpError("Enter a valid email address.", 400);

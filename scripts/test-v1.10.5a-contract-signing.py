@@ -43,7 +43,7 @@ def main() -> None:
         "WHERE key='schema_version'"
     ).fetchone()[0]
 
-    assert version == "39"
+    assert version == "40"
 
     # Schema foundation already guarantees append-only
     # contract signatures.
