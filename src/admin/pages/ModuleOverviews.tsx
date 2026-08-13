@@ -96,6 +96,10 @@ export function BusinessOverview() {
   const selectedCategories = platform?.categories.filter((category) => category.selected) || [];
   const activeMembers = platform?.members.filter((member) => member.status === "active") || [];
   const verifiedDomains = workspace?.domains.filter((domain) => domain.verified) || [];
+  const onboarding = platform?.onboarding;
+  const onboardingProgress = onboarding?.totalCount
+    ? Math.round((onboarding.completedCount / onboarding.totalCount) * 100)
+    : 0;
 
   return <AdminPage>
     <AdminPageHeader
@@ -106,6 +110,85 @@ export function BusinessOverview() {
       meta={<div className="flex flex-wrap gap-2"><AdminStatus tone={workspace?.status === "active" ? "success" : "warning"}>{workspace?.status || "loading"}</AdminStatus><AdminStatus tone="info">{workspace?.plan || "workspace"}</AdminStatus></div>}
     />
     {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
+
+    {onboarding?.applicable && onboarding.state !== "complete" ? (
+      <AdminPanel
+        title="Set up your business"
+        description={
+          onboarding.state === "deferred"
+            ? "Your first-run setup is paused. Resume when you are ready; your progress has been saved."
+            : "Complete the essential business details so WedPlanned can tailor this workspace to how you operate."
+        }
+        actions={
+          <Link
+            to="/admin/onboarding"
+            className="admin-button admin-button--primary admin-button--md"
+          >
+            <CheckCircle2 className="admin-button__icon" />
+            {onboarding.state === "deferred" ? "Resume setup" : "Continue setup"}
+          </Link>
+        }
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <strong className="text-sm">
+              {onboarding.completedCount} of {onboarding.totalCount} setup steps resolved
+            </strong>
+            <p className="mt-1 text-xs text-neutral-500">
+              Required: business identity, services and service area. Contact and brand details can be deferred.
+            </p>
+          </div>
+
+          <AdminStatus
+            tone={onboarding.state === "deferred" ? "warning" : "info"}
+          >
+            {onboardingProgress}% complete
+          </AdminStatus>
+        </div>
+
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-black/10">
+          <div
+            className="h-full rounded-full bg-black transition-all"
+            style={{ width: `${onboardingProgress}%` }}
+          />
+        </div>
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+          {onboarding.steps.map((step) => (
+            <div
+              key={step.key}
+              className="rounded-xl bg-[#f7f5f1] p-3"
+            >
+              <div className="flex items-center gap-2">
+                <CheckCircle2
+                  size={14}
+                  className={
+                    step.complete || step.deferred
+                      ? "text-emerald-600"
+                      : "text-neutral-300"
+                  }
+                />
+
+                <span className="text-xs font-semibold">
+                  {step.label}
+                </span>
+              </div>
+
+              <small className="mt-1 block text-[10px] text-neutral-500">
+                {step.complete
+                  ? "Complete"
+                  : step.deferred
+                    ? "Do later"
+                    : step.required
+                      ? "Required"
+                      : "Optional"}
+              </small>
+            </div>
+          ))}
+        </div>
+      </AdminPanel>
+    ) : null}
+
     <section className="admin-module-metrics">
       <Metric value={activeMembers.length} label="Active team members" detail={`${platform?.members.length || 0} total memberships`} />
       <Metric value={selectedCategories.length} label="Business services" detail={`${platform?.serviceAreas.length || 0} service areas`} />

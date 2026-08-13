@@ -1149,6 +1149,19 @@ export class AdminApiService {
     return (await this.mutateWedPlannedPlatform({ action: "saveBusiness", business })).platform;
   }
 
+  static async saveWedPlannedOnboarding(
+    operation: "confirm" | "defer-step" | "pause" | "resume" | "complete",
+    step = "",
+  ) {
+    return (
+      await this.mutateWedPlannedPlatform({
+        action: "saveOnboarding",
+        operation,
+        step,
+      })
+    ).platform;
+  }
+
   static async saveWedPlannedCategories(categoryKeys: string[], primaryCategoryKey: string) {
     return (await this.mutateWedPlannedPlatform({ action: "saveCategories", categoryKeys, primaryCategoryKey })).platform;
   }

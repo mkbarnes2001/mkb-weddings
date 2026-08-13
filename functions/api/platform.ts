@@ -7,6 +7,7 @@ import {
   archiveBusinessServiceArea,
   getPlatformFoundation,
   saveBusinessCategories,
+  saveBusinessOnboarding,
   saveBusinessServiceArea,
   savePlatformSupplierTaxonomy,
   updateBusinessMember,
@@ -41,7 +42,7 @@ function platformError(message: string, statusCode = 400) {
 }
 
 function permissionForAction(action: string) {
-  if (action === "saveBusiness") return "business:update";
+  if (["saveBusiness", "saveOnboarding"].includes(action)) return "business:update";
   if (["saveCategories", "saveServiceArea", "archiveServiceArea"].includes(action)) return "services:update";
   if (["inviteMember", "updateMember"].includes(action)) return "members:manage";
   if (action === "saveSupplierTaxonomy") return "platform:admin";
@@ -81,6 +82,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     let platform;
     let invitation: Record<string, unknown> | undefined;
     if (action === "saveBusiness") platform = await updateBusinessProfile(context.env.MKB_DB, { ...(body.business || body), workspaceId: auth.workspaceId, actorEmail: auth.email });
+    else if (action === "saveOnboarding") platform = await saveBusinessOnboarding(context.env.MKB_DB, { ...body, workspaceId: auth.workspaceId, actorEmail: auth.email });
     else if (action === "saveSupplierTaxonomy") {
       if (auth.platformRole !== "platform_admin") throw platformError("Only a WedPlanned platform administrator can manage the supplier taxonomy.", 403);
       platform = await savePlatformSupplierTaxonomy(context.env.MKB_DB, { ...body, workspaceId: auth.workspaceId, actorEmail: auth.email });

@@ -29,6 +29,29 @@ export type WedPlannedBusiness = {
   currency: string;
 };
 
+export type WedPlannedOnboardingStep = {
+  key: "identity" | "services" | "service-area" | "contact" | "brand";
+  label: string;
+  required: boolean;
+  complete: boolean;
+  deferred: boolean;
+};
+
+export type WedPlannedOnboarding = {
+  applicable: boolean;
+  version: number;
+  source: string;
+  state: "none" | "active" | "deferred" | "complete";
+  confirmedSteps: string[];
+  deferredSteps: string[];
+  startedAt: string;
+  completedAt: string;
+  completedCount: number;
+  totalCount: number;
+  requiredComplete: boolean;
+  steps: WedPlannedOnboardingStep[];
+};
+
 export type WedPlannedCategory = {
   key: string;
   name: string;
@@ -214,6 +237,7 @@ export type WedPlannedPlatformPayload = {
   };
   platformIdentity: PlatformBrandingIdentity;
   business: WedPlannedBusiness;
+  onboarding: WedPlannedOnboarding;
   categories: WedPlannedCategory[];
   serviceAreas: WedPlannedServiceArea[];
   members: WedPlannedMember[];

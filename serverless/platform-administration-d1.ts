@@ -399,6 +399,20 @@ async function provisionBusinessWorkspaceFoundation(
         : "v1.10.4a",
   });
 
+  const workspaceDocument = provisioningSource === "verified_signup"
+    ? JSON.stringify({
+        onboarding: {
+          version: 1,
+          source: "verified_signup",
+          state: "active",
+          confirmedSteps: [],
+          deferredSteps: [],
+          startedAt: new Date().toISOString(),
+          completedAt: "",
+        },
+      })
+    : "{}";
+
   const statements: any[] = [
     db.prepare(`
       INSERT INTO workspaces (
@@ -443,7 +457,7 @@ async function provisionBusinessWorkspaceFoundation(
         ?,
         ?,
         ?,
-        '{}',
+        ?,
         CURRENT_TIMESTAMP
       )
     `).bind(
@@ -453,6 +467,7 @@ async function provisionBusinessWorkspaceFoundation(
       defaultCountry,
       timezone,
       currency,
+      workspaceDocument,
     ),
 
     db.prepare(`

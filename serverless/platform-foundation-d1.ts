@@ -17,6 +17,9 @@ const BUSINESS_TYPES = new Set(["sole_trader", "partnership", "limited_company",
 const MEMBER_ROLES = new Set(["owner", "admin", "manager", "content", "finance", "staff", "viewer"]);
 const MEMBER_STATUSES = new Set(["active", "invited", "disabled"]);
 const AREA_TYPES = new Set(["local", "city", "county", "region", "country", "destination", "remote", "custom"]);
+const ONBOARDING_STEP_KEYS = new Set(["identity", "services", "service-area", "contact", "brand"]);
+const ONBOARDING_OPTIONAL_STEP_KEYS = new Set(["contact", "brand"]);
+const ONBOARDING_STATES = new Set(["active", "deferred", "complete"]);
 
 function text(value: unknown) {
   return String(value ?? "").trim();
@@ -214,6 +217,116 @@ function hydrateEntitlement(row: any) {
   };
 }
 
+function cleanStepKeys(value: unknown) {
+  const items = Array.isArray(value) ? value : [];
+  return Array.from(new Set(items.map(text).filter((key) => ONBOARDING_STEP_KEYS.has(key))));
+}
+
+function hydrateOnboarding(document: any, workspace: any, categories: any[], serviceAreas: any[]) {
+  const stored = document?.onboarding && typeof document.onboarding === "object" && !Array.isArray(document.onboarding)
+    ? document.onboarding
+    : null;
+
+  const applicable =
+    Number(stored?.version || 0) === 1
+    && text(stored?.source) === "verified_signup";
+
+  const confirmedSteps =
+    applicable
+      ? cleanStepKeys(stored?.confirmedSteps)
+      : [];
+
+  const deferredSteps =
+    applicable
+      ? cleanStepKeys(stored?.deferredSteps)
+          .filter((key) => ONBOARDING_OPTIONAL_STEP_KEYS.has(key))
+      : [];
+
+  const selectedCategoryCount =
+    categories.filter(
+      (row: any) => Number(row.selected || 0) === 1,
+    ).length;
+
+  const activeServiceAreaCount =
+    serviceAreas.length;
+
+  const logoConfigured =
+    Boolean(text(workspace?.settings?.logoUrl));
+
+  const stepRows = [
+    {
+      key: "identity",
+      label: "Business identity",
+      required: true,
+      complete: confirmedSteps.includes("identity"),
+      deferred: false,
+    },
+    {
+      key: "services",
+      label: "Services",
+      required: true,
+      complete: selectedCategoryCount > 0,
+      deferred: false,
+    },
+    {
+      key: "service-area",
+      label: "Service area",
+      required: true,
+      complete: activeServiceAreaCount > 0,
+      deferred: false,
+    },
+    {
+      key: "contact",
+      label: "Contact & online presence",
+      required: false,
+      complete: confirmedSteps.includes("contact"),
+      deferred: deferredSteps.includes("contact"),
+    },
+    {
+      key: "brand",
+      label: "Brand identity",
+      required: false,
+      complete:
+        logoConfigured
+        || confirmedSteps.includes("brand"),
+      deferred: deferredSteps.includes("brand"),
+    },
+  ];
+
+  const resolvedCount =
+    stepRows.filter(
+      (step) => step.complete || step.deferred,
+    ).length;
+
+  return {
+    applicable,
+    version: applicable ? 1 : 0,
+    source: applicable ? "verified_signup" : "",
+    state:
+      applicable
+      && ONBOARDING_STATES.has(text(stored?.state))
+        ? text(stored.state)
+        : "none",
+    confirmedSteps,
+    deferredSteps,
+    startedAt:
+      applicable
+        ? text(stored?.startedAt)
+        : "",
+    completedAt:
+      applicable
+        ? text(stored?.completedAt)
+        : "",
+    completedCount: resolvedCount,
+    totalCount: stepRows.length,
+    requiredComplete:
+      stepRows
+        .filter((step) => step.required)
+        .every((step) => step.complete),
+    steps: stepRows,
+  };
+}
+
 async function audit(db: D1Db, workspaceId: string, input: AuditInput) {
   await db.prepare(`
     INSERT INTO platform_audit_events (
@@ -237,8 +350,9 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
   const workspace = await getWorkspace(db, workspaceId);
   if (!workspace) throw httpError("Business workspace not found.", 404);
 
-  const [profile, categories, serviceAreas, members, entitlements, auditRows, supplierTaxonomy, moduleConfigurations, platformIdentity, schemaRow] = await Promise.all([
+  const [profile, settingsRow, categories, serviceAreas, members, entitlements, auditRows, supplierTaxonomy, moduleConfigurations, platformIdentity, schemaRow] = await Promise.all([
     db.prepare(`SELECT * FROM business_profiles WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first(),
+    db.prepare(`SELECT document_json FROM workspace_settings WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first(),
     db.prepare(`
       SELECT pc.*,
              CASE WHEN bcl.workspace_id IS NULL THEN 0 ELSE 1 END AS selected,
@@ -310,6 +424,12 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
       ukDomain: "wedplanned.co.uk",
     },
     business: hydrateBusiness(workspace, profile || {}),
+    onboarding: hydrateOnboarding(
+      parseJson(settingsRow?.document_json),
+      workspace,
+      categories.results || [],
+      serviceAreas.results || [],
+    ),
     categories: (categories.results || []).map(hydrateCategory),
     serviceAreas: (serviceAreas.results || []).map(hydrateServiceArea),
     members: (members.results || []).map(hydrateMember),
@@ -478,6 +598,310 @@ export async function updateBusinessProfile(db: D1Db, input: any) {
   return getPlatformFoundation(db, workspaceId);
 }
 
+export async function saveBusinessOnboarding(db: D1Db, input: any) {
+  const workspaceId =
+    text(input?.workspaceId)
+    || (await getDefaultWorkspaceId(db));
+
+  const operation =
+    text(input?.operation);
+
+  const step =
+    text(input?.step);
+
+  const settingsRow =
+    await db.prepare(`
+      SELECT
+        document_json,
+        logo_url
+      FROM workspace_settings
+      WHERE workspace_id = ?
+      LIMIT 1
+    `).bind(
+      workspaceId,
+    ).first();
+
+  if (!settingsRow) {
+    throw httpError(
+      "Business workspace settings not found.",
+      404,
+    );
+  }
+
+  const document =
+    parseJson(settingsRow.document_json);
+
+  const stored =
+    document?.onboarding
+    && typeof document.onboarding === "object"
+    && !Array.isArray(document.onboarding)
+      ? document.onboarding as any
+      : null;
+
+  if (
+    Number(stored?.version || 0) !== 1
+    || text(stored?.source) !== "verified_signup"
+  ) {
+    throw httpError(
+      "First-run onboarding is not enabled for this workspace.",
+      409,
+    );
+  }
+
+  if (text(stored?.state) === "complete") {
+    if (operation === "complete") {
+      return getPlatformFoundation(
+        db,
+        workspaceId,
+      );
+    }
+
+    throw httpError(
+      "First-run onboarding is already complete.",
+      409,
+    );
+  }
+
+  const confirmedSteps =
+    cleanStepKeys(
+      stored.confirmedSteps,
+    );
+
+  const deferredSteps =
+    cleanStepKeys(
+      stored.deferredSteps,
+    ).filter(
+      (key) =>
+        ONBOARDING_OPTIONAL_STEP_KEYS.has(key),
+    );
+
+  let state =
+    ONBOARDING_STATES.has(
+      text(stored.state),
+    )
+      ? text(stored.state)
+      : "active";
+
+  let completedAt =
+    text(stored.completedAt);
+
+  if (operation === "confirm") {
+    if (!ONBOARDING_STEP_KEYS.has(step)) {
+      throw httpError(
+        "Choose a valid onboarding step.",
+      );
+    }
+
+    if (!confirmedSteps.includes(step)) {
+      confirmedSteps.push(step);
+    }
+
+    const deferredIndex =
+      deferredSteps.indexOf(step);
+
+    if (deferredIndex >= 0) {
+      deferredSteps.splice(
+        deferredIndex,
+        1,
+      );
+    }
+
+    state = "active";
+  } else if (operation === "defer-step") {
+    if (
+      !ONBOARDING_OPTIONAL_STEP_KEYS.has(step)
+    ) {
+      throw httpError(
+        "Only optional onboarding steps can be deferred.",
+      );
+    }
+
+    if (!deferredSteps.includes(step)) {
+      deferredSteps.push(step);
+    }
+
+    const confirmedIndex =
+      confirmedSteps.indexOf(step);
+
+    if (confirmedIndex >= 0) {
+      confirmedSteps.splice(
+        confirmedIndex,
+        1,
+      );
+    }
+
+    state = "active";
+  } else if (operation === "pause") {
+    state = "deferred";
+  } else if (operation === "resume") {
+    state = "active";
+  } else if (operation === "complete") {
+    const [selected, serviceAreas] =
+      await Promise.all([
+        db.prepare(`
+          SELECT COUNT(*) AS total
+          FROM business_category_links bcl
+          INNER JOIN platform_categories pc
+            ON pc.category_key =
+               bcl.category_key
+          WHERE bcl.workspace_id = ?
+            AND bcl.status = 'active'
+            AND pc.status = 'active'
+            AND pc.group_name NOT IN (
+              'Supplier taxonomy',
+              'Supplier role'
+            )
+        `).bind(
+          workspaceId,
+        ).first(),
+
+        db.prepare(`
+          SELECT COUNT(*) AS total
+          FROM business_service_areas
+          WHERE workspace_id = ?
+            AND status = 'active'
+        `).bind(
+          workspaceId,
+        ).first(),
+      ]);
+
+    const missing: string[] = [];
+
+    if (
+      !confirmedSteps.includes("identity")
+    ) {
+      missing.push(
+        "Confirm your business identity.",
+      );
+    }
+
+    if (
+      Number(selected?.total || 0) < 1
+    ) {
+      missing.push(
+        "Select at least one business service.",
+      );
+    }
+
+    if (
+      Number(serviceAreas?.total || 0) < 1
+    ) {
+      missing.push(
+        "Add at least one service area.",
+      );
+    }
+
+    if (missing.length) {
+      throw httpError(
+        "Complete the required setup steps before finishing onboarding.",
+        400,
+        missing,
+      );
+    }
+
+    if (
+      !confirmedSteps.includes("contact")
+      && !deferredSteps.includes("contact")
+    ) {
+      deferredSteps.push("contact");
+    }
+
+    if (
+      !text(settingsRow.logo_url)
+      && !confirmedSteps.includes("brand")
+      && !deferredSteps.includes("brand")
+    ) {
+      deferredSteps.push("brand");
+    }
+
+    state = "complete";
+    completedAt =
+      new Date().toISOString();
+  } else {
+    throw httpError(
+      "Choose a valid onboarding operation.",
+    );
+  }
+
+  const nextOnboarding = {
+    ...stored,
+    version: 1,
+    source: "verified_signup",
+    state,
+    confirmedSteps,
+    deferredSteps,
+    startedAt:
+      text(stored.startedAt)
+      || new Date().toISOString(),
+    completedAt,
+  };
+
+  const nextDocument = {
+    ...document,
+    onboarding: nextOnboarding,
+  };
+
+  const nextProfileStatus =
+    state === "complete"
+      ? "ready"
+      : "profile";
+
+  await db.batch([
+    db.prepare(`
+      UPDATE workspace_settings
+      SET
+        document_json = ?,
+        updated_at =
+          CURRENT_TIMESTAMP
+      WHERE workspace_id = ?
+    `).bind(
+      JSON.stringify(nextDocument),
+      workspaceId,
+    ),
+
+    db.prepare(`
+      UPDATE business_profiles
+      SET
+        onboarding_status = ?,
+        updated_at =
+          CURRENT_TIMESTAMP
+      WHERE workspace_id = ?
+    `).bind(
+      nextProfileStatus,
+      workspaceId,
+    ),
+  ]);
+
+  await audit(
+    db,
+    workspaceId,
+    {
+      eventType:
+        "business.onboarding.updated",
+      entityType:
+        "business",
+      entityId:
+        workspaceId,
+      summary:
+        state === "complete"
+          ? "Completed first-run business onboarding."
+          : "Updated first-run business onboarding.",
+      metadata: {
+        operation,
+        step,
+        state,
+      },
+      actorEmail:
+        input?.actorEmail,
+    },
+  );
+
+  return getPlatformFoundation(
+    db,
+    workspaceId,
+  );
+}
+
 export async function saveBusinessCategories(db: D1Db, input: any) {
   const workspaceId = text(input?.workspaceId) || (await getDefaultWorkspaceId(db));
   const keys: string[] = Array.from(new Set<string>((Array.isArray(input?.categoryKeys) ? input.categoryKeys : []).map(text).filter(Boolean)));
@@ -487,7 +911,9 @@ export async function saveBusinessCategories(db: D1Db, input: any) {
 
   const valid = await db.prepare(`
     SELECT category_key FROM platform_categories
-    WHERE status = 'active' AND category_key IN (${keys.map(() => "?").join(",")})
+    WHERE status = 'active'
+      AND group_name NOT IN ('Supplier taxonomy', 'Supplier role')
+      AND category_key IN (${keys.map(() => "?").join(",")})
   `).bind(...keys).all();
   const validKeys = new Set((valid.results || []).map((row: any) => text(row.category_key)));
   const invalid = keys.filter((key) => !validKeys.has(key));

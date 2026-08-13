@@ -30,6 +30,7 @@ import { SEOCentre } from "../pages/SEOCentre";
 import { Settings } from "../pages/Settings";
 import { ClientPortalSettings } from "../pages/ClientPortalSettings";
 import { WedPlannedPlatform } from "../pages/WedPlannedPlatform";
+import { BusinessOnboarding } from "../pages/BusinessOnboarding";
 import { PlatformAdmin } from "../pages/PlatformAdmin";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AssetLibrary } from "../pages/AssetLibrary";
@@ -61,6 +62,7 @@ export function AdminApp() {
         <Route path="studio" element={<Dashboard />} />
         <Route path="website" element={<WebsiteOverview />} />
         <Route path="business" element={<BusinessOverview />} />
+        <Route path="onboarding" element={<BusinessOnboarding />} />
         <Route path="wedplanned" element={<WedPlannedPlatform />} />
         <Route path="platform" element={<PlatformAdminRoute />} />
         <Route path="crm" element={<CRM />} />
