@@ -16,6 +16,7 @@ import {
   Images,
   Layers3,
   LockKeyhole,
+  Mail,
   MapPinned,
   Package,
   Palette,

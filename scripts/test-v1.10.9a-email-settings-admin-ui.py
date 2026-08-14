@@ -91,6 +91,24 @@ assert (
     in nav
 )
 
+# The navigation item uses the Mail icon at module initialisation,
+# so its Lucide import must exist or the whole Admin app fails
+# before React can mount.
+nav_lucide_start = nav.index(
+    "import {"
+)
+nav_lucide_end = nav.index(
+    '} from "lucide-react";',
+    nav_lucide_start,
+)
+nav_lucide_import = nav[
+    nav_lucide_start:
+    nav_lucide_end
+]
+assert (
+    "Mail," in nav_lucide_import
+), "Mail icon import is present"
+
 # Three provider modes are visible and provider readiness gates
 # prevent selecting unconfigured Google/SMTP delivery.
 for token in [
