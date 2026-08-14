@@ -391,6 +391,12 @@ async function provisionBusinessWorkspaceFoundation(
   const auditId =
     `audit_${crypto.randomUUID()}`;
 
+  const starterQuoteTemplateId =
+    `crm_quote_template_${crypto.randomUUID()}`;
+
+  const starterQuoteEmailTemplateId =
+    `crm_email_template_${crypto.randomUUID()}`;
+
   const entitlementMetadata = JSON.stringify({
     provisionedBy: provisioningSource,
     release:
@@ -630,6 +636,150 @@ async function provisionBusinessWorkspaceFoundation(
     `).bind(
       workspaceId,
       entitlementMetadata,
+    ),
+
+    // Generic WedCRM commercial foundation for a new business.
+    // Catalogue-specific packages/add-ons are intentionally not copied
+    // from another workspace.
+    db.prepare(`
+      INSERT INTO crm_quote_templates (
+        id,
+        workspace_id,
+        name,
+        description,
+        client_introduction,
+        client_notes,
+        status,
+        version,
+        is_default,
+        expiry_days,
+        discount_type,
+        discount_value,
+        tax_treatment,
+        tax_rate_basis_points,
+        contract_template_id,
+        questionnaire_template_id,
+        payment_schedule_json,
+        auto_create_invoice,
+        created_at,
+        updated_at
+      ) VALUES (
+        ?,
+        ?,
+        'Starter Quote',
+        'A reusable starting point for client quotes. Add your own packages and optional extras in WedCRM Templates.',
+        'Thank you for considering us for your wedding. Review the options below and choose what suits you best.',
+        '',
+        'active',
+        1,
+        1,
+        14,
+        'none',
+        0,
+        'none',
+        0,
+        NULL,
+        NULL,
+        '{}',
+        1,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+    `).bind(
+      starterQuoteTemplateId,
+      workspaceId,
+    ),
+
+    db.prepare(`
+      INSERT INTO crm_email_templates (
+        id,
+        workspace_id,
+        name,
+        description,
+        purpose,
+        subject_template,
+        body_html,
+        body_text,
+        attachments_json,
+        append_signature,
+        status,
+        version,
+        is_default,
+        created_at,
+        updated_at
+      ) VALUES (
+        ?,
+        ?,
+        'Quote ready',
+        'Default email used when sending a client quote.',
+        'quote',
+        'Your wedding quote is ready',
+        '',
+        ?,
+        '[]',
+        1,
+        'active',
+        1,
+        1,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+    `).bind(
+      starterQuoteEmailTemplateId,
+      workspaceId,
+      [
+        'Hi {{first_name}},',
+        '',
+        'Your wedding quote is ready. You can review it securely using the link below:',
+        '',
+        '{{quote_link}}',
+        '',
+        'If you have any questions, just reply to this email.',
+      ].join("\n"),
+    ),
+
+    db.prepare(`
+      INSERT INTO crm_email_settings (
+        workspace_id,
+        delivery_mode,
+        sender_name,
+        sender_email,
+        reply_to_email,
+        signature_enabled,
+        signature_json,
+        google_email,
+        smtp_host,
+        smtp_port,
+        smtp_security,
+        smtp_username,
+        credential_id,
+        last_tested_at,
+        last_test_status,
+        created_at,
+        updated_at
+      ) VALUES (
+        ?,
+        'managed',
+        ?,
+        '',
+        ?,
+        1,
+        '{}',
+        '',
+        '',
+        587,
+        'starttls',
+        '',
+        NULL,
+        NULL,
+        '',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+    `).bind(
+      workspaceId,
+      businessName,
+      ownerEmail,
     ),
 
     db.prepare(`

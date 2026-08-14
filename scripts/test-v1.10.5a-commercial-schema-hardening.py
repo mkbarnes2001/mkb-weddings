@@ -59,7 +59,7 @@ def main():
         con,
         "SELECT value FROM schema_meta "
         "WHERE key='schema_version'",
-    )[0] == "40"
+    )[0] == "41"
 
     con.execute(
         """

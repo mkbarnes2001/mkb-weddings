@@ -44,6 +44,7 @@ import {
   getQuote,
   getQuoteCatalogue,
   getQuoteOverview,
+  getQuoteSendPreview,
   reviseQuote,
   saveAddon,
   savePackage,
@@ -63,6 +64,32 @@ import {
   updateJobTask,
 } from "../../../serverless/crm-workflow-d1";
 
+import {
+  disconnectCrmEmailProvider,
+  getCrmEmailSettings,
+  saveCrmEmailSettings,
+} from "../../../serverless/crm-email-settings-d1";
+
+import {
+  beginGoogleEmailOAuth,
+  completeGoogleEmailOAuth,
+} from "../../../serverless/crm-google-oauth-d1";
+
+
+import {
+  archiveEmailTemplate,
+  archiveQuoteTemplate,
+  createEmailTemplate,
+  createQuoteFromTemplate,
+  createQuoteTemplate,
+  getEmailTemplate,
+  getQuoteTemplate,
+  listEmailTemplates,
+  listQuoteTemplates,
+  saveEmailTemplate,
+  saveQuoteTemplate,
+} from "../../../serverless/crm-commercial-templates-d1";
+
 type Env = {
   MKB_DB: D1Database;
   WEDPLANNED_AUTH_ENFORCED?: string;
@@ -73,6 +100,10 @@ type Env = {
   CLIENT_AUTH_FROM_NAME?: string;
   WEDPLANNED_AUTH_FROM_EMAIL?: string;
   WEDPLANNED_AUTH_FROM_NAME?: string;
+  CRM_EMAIL_CREDENTIAL_KEY?: string;
+  CRM_GOOGLE_CLIENT_ID?: string;
+  CRM_GOOGLE_CLIENT_SECRET?: string;
+  CRM_GOOGLE_REDIRECT_ORIGIN?: string;
 };
 
 function errorResponse(error: any) {
@@ -96,6 +127,53 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const actor = await actorFor(context);
     const parts = routeParts(context.params.path);
+
+    if (
+      parts[0] === "email"
+      && parts[1] === "providers"
+      && parts[2] === "google"
+      && parts[3] === "callback"
+      && parts.length === 4
+    ) {
+      const destination =
+        new URL(
+          "/admin/crm/email-settings",
+          context.request.url,
+        );
+
+      try {
+        await completeGoogleEmailOAuth(
+          context.env.MKB_DB,
+          context.env,
+          actor,
+          context.request.url,
+        );
+
+        destination.searchParams.set(
+          "google",
+          "connected",
+        );
+      } catch {
+        destination.searchParams.set(
+          "google",
+          "error",
+        );
+      }
+
+      return new Response(
+        null,
+        {
+          status: 302,
+          headers: {
+            Location:
+              destination.toString(),
+            "Cache-Control":
+              "private, no-store",
+          },
+        },
+      );
+    }
+
     if (!parts.length) {
       return Response.json({ ok: true, crm: await getCrmOverview(context.env.MKB_DB, actor) }, {
         headers: { "Cache-Control": "private, no-store" },
@@ -218,6 +296,139 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         headers: { "Cache-Control": "private, no-store" },
       });
     }
+    if (
+      parts[0] === "templates"
+      && parts[1] === "quotes"
+      && parts.length === 2
+    ) {
+      return Response.json({
+        ok: true,
+        templates:
+          await listQuoteTemplates(
+            context.env.MKB_DB,
+            actor,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+    if (
+      parts[0] === "templates"
+      && parts[1] === "quotes"
+      && parts[2]
+      && parts.length === 3
+    ) {
+      return Response.json({
+        ok: true,
+        template:
+          await getQuoteTemplate(
+            context.env.MKB_DB,
+            actor,
+            parts[2],
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+    if (
+      parts[0] === "templates"
+      && parts[1] === "emails"
+      && parts.length === 2
+    ) {
+      return Response.json({
+        ok: true,
+        templates:
+          await listEmailTemplates(
+            context.env.MKB_DB,
+            actor,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+    if (
+      parts[0] === "templates"
+      && parts[1] === "emails"
+      && parts[2]
+      && parts.length === 3
+    ) {
+      return Response.json({
+        ok: true,
+        template:
+          await getEmailTemplate(
+            context.env.MKB_DB,
+            actor,
+            parts[2],
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
+    if (
+      parts[0] === "email"
+      && parts[1] === "settings"
+      && parts.length === 2
+    ) {
+      return Response.json({
+        ok: true,
+        email:
+          await getCrmEmailSettings(
+            context.env.MKB_DB,
+            actor,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
+    if (
+      parts[0] === "quotes"
+      && parts[1]
+      && parts[2] === "send-preview"
+      && parts.length === 3
+    ) {
+      const url =
+        new URL(
+          context.request.url,
+        );
+
+      return Response.json({
+        ok: true,
+        preview:
+          await getQuoteSendPreview(
+            context.env.MKB_DB,
+            context.env,
+            actor,
+            parts[1],
+            url.searchParams.get(
+              "templateId",
+            )
+            || "",
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
     return Response.json({ error: "CRM route not found." }, { status: 404 });
   } catch (error: any) {
     return errorResponse(error);
@@ -335,13 +546,38 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json({ ok: true, addon: await saveAddon(context.env.MKB_DB, actor, "", body) }, { status: 201 });
     }
     if (parts[0] === "quotes" && parts.length === 1) {
-      return Response.json({ ok: true, quote: await createQuote(context.env.MKB_DB, actor, body) }, { status: 201 });
+      const quote = body?.templateId
+        ? await createQuoteFromTemplate(
+            context.env.MKB_DB,
+            actor,
+            body,
+          )
+        : await createQuote(
+            context.env.MKB_DB,
+            actor,
+            body,
+          );
+
+      return Response.json(
+        { ok: true, quote },
+        { status: 201 },
+      );
     }
     if (parts[0] === "quotes" && parts[1] && parts[2] === "revise") {
       return Response.json({ ok: true, quote: await reviseQuote(context.env.MKB_DB, actor, parts[1]) }, { status: 201 });
     }
     if (parts[0] === "quotes" && parts[1] && parts[2] === "send") {
-      return Response.json({ ok: true, quote: await sendQuote(context.env.MKB_DB, context.env, actor, parts[1]) });
+      return Response.json({
+        ok: true,
+        quote:
+          await sendQuote(
+            context.env.MKB_DB,
+            context.env,
+            actor,
+            parts[1],
+            body,
+          ),
+      });
     }
     if (parts[0] === "quotes" && parts[1] && parts[2] === "accept") {
       return Response.json({ ok: true, conversion: await acceptQuoteAsAdmin(context.env.MKB_DB, actor, parts[1], body) });
@@ -472,6 +708,161 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       await logJobCommunication(context.env.MKB_DB, actor, parts[1], body);
       return Response.json({ ok: true, workspace: await getCrmJobWorkspace(context.env.MKB_DB, actor, parts[1]) }, { status: 201 });
     }
+    if (
+      parts[0] === "templates"
+      && parts[1] === "quotes"
+      && parts.length === 2
+    ) {
+      return Response.json({
+        ok: true,
+        template:
+          await createQuoteTemplate(
+            context.env.MKB_DB,
+            actor,
+            body,
+          ),
+      }, {
+        status: 201,
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+    if (
+      parts[0] === "templates"
+      && parts[1] === "quotes"
+      && parts[2]
+      && parts[3] === "archive"
+      && parts.length === 4
+    ) {
+      return Response.json({
+        ok: true,
+        template:
+          await archiveQuoteTemplate(
+            context.env.MKB_DB,
+            actor,
+            parts[2],
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+    if (
+      parts[0] === "templates"
+      && parts[1] === "emails"
+      && parts.length === 2
+    ) {
+      return Response.json({
+        ok: true,
+        template:
+          await createEmailTemplate(
+            context.env.MKB_DB,
+            actor,
+            body,
+          ),
+      }, {
+        status: 201,
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+    if (
+      parts[0] === "templates"
+      && parts[1] === "emails"
+      && parts[2]
+      && parts[3] === "archive"
+      && parts.length === 4
+    ) {
+      return Response.json({
+        ok: true,
+        template:
+          await archiveEmailTemplate(
+            context.env.MKB_DB,
+            actor,
+            parts[2],
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
+    if (
+      parts[0] === "email"
+      && parts[1] === "settings"
+      && parts.length === 2
+    ) {
+      return Response.json({
+        ok: true,
+        email:
+          await saveCrmEmailSettings(
+            context.env.MKB_DB,
+            context.env,
+            actor,
+            body,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
+    if (
+      parts[0] === "email"
+      && parts[1] === "providers"
+      && parts[2] === "google"
+      && parts[3] === "connect"
+      && parts.length === 4
+    ) {
+      return Response.json({
+        ok: true,
+        connection:
+          await beginGoogleEmailOAuth(
+            context.env,
+            actor,
+            context.request.url,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
+    if (
+      parts[0] === "email"
+      && parts[1] === "providers"
+      && parts[2]
+      && parts[3] === "disconnect"
+      && parts.length === 4
+    ) {
+      return Response.json({
+        ok: true,
+        email:
+          await disconnectCrmEmailProvider(
+            context.env.MKB_DB,
+            actor,
+            parts[2],
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
     return Response.json({ error: "CRM route not found." }, { status: 404 });
   } catch (error: any) {
     return errorResponse(error);
@@ -531,6 +922,51 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       await updateJobTask(context.env.MKB_DB, actor, parts[1], parts[3], body);
       return Response.json({ ok: true, workspace: await getCrmJobWorkspace(context.env.MKB_DB, actor, parts[1]) });
     }
+    if (
+      parts[0] === "templates"
+      && parts[1] === "quotes"
+      && parts[2]
+      && parts.length === 3
+    ) {
+      return Response.json({
+        ok: true,
+        template:
+          await saveQuoteTemplate(
+            context.env.MKB_DB,
+            actor,
+            parts[2],
+            body,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+    if (
+      parts[0] === "templates"
+      && parts[1] === "emails"
+      && parts[2]
+      && parts.length === 3
+    ) {
+      return Response.json({
+        ok: true,
+        template:
+          await saveEmailTemplate(
+            context.env.MKB_DB,
+            actor,
+            parts[2],
+            body,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
     return Response.json({ error: "CRM route not found." }, { status: 404 });
   } catch (error: any) {
     return errorResponse(error);

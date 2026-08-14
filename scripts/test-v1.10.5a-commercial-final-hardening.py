@@ -82,7 +82,7 @@ def main() -> None:
         "WHERE key='schema_version'"
     ).fetchone()[0]
 
-    assert version == "40"
+    assert version == "41"
 
     indexes = provider_unique_indexes(con)
 

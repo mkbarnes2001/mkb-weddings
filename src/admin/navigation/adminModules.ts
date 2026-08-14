@@ -73,6 +73,8 @@ const crmItems: AdminNavigationItem[] = [
   { key: "schedule", label: "Schedule", to: "/admin/crm?view=schedule", icon: CalendarDays, match: exactWithQuery("/admin/crm", "view", "schedule") },
   { key: "packages", label: "Packages", to: "/admin/crm/catalogue", icon: Package, match: pathPrefix("/admin/crm/catalogue") },
   { key: "quotes", label: "Quotes", to: "/admin/crm/quotes", icon: FileQuestion, match: pathPrefix("/admin/crm/quotes") },
+  { key: "templates", label: "Templates", to: "/admin/crm/templates", icon: FileText, match: pathPrefix("/admin/crm/templates") },
+  { key: "email-settings", label: "Email settings", to: "/admin/crm/email-settings", icon: Mail, match: pathPrefix("/admin/crm/email-settings") },
   { key: "questionnaires", label: "Questionnaires", to: "/admin/crm?view=questionnaires", icon: ClipboardList, match: (pathname, params) => pathname.startsWith("/admin/crm/questionnaires/") || exactWithQuery("/admin/crm", "view", "questionnaires")(pathname, params) },
   { key: "workflows", label: "Workflows", to: "/admin/crm?view=workflows", icon: Workflow, match: (pathname, params) => pathname.startsWith("/admin/crm/workflows/") || exactWithQuery("/admin/crm", "view", "workflows")(pathname, params) },
   { key: "commercial-settings", label: "Commercial settings", to: "/admin/crm?view=commercial-settings", icon: Settings, match: (pathname, params) => pathname.startsWith("/admin/crm/contracts/templates/") || exactWithQuery("/admin/crm", "view", "commercial-settings")(pathname, params) },

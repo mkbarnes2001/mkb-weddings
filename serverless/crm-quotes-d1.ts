@@ -2,6 +2,12 @@ import { ensureBookingPackForAcceptedQuote } from "./crm-booking-pack-d1";
 import { getAuthenticatedClientIdentity } from "./client-auth-d1";
 import { acceptEnquiry } from "./crm-d1";
 import { DEFAULT_CLIENT_PORTAL_ORIGIN } from "./tenant-context";
+import { getCrmEmailSettings } from "./crm-email-settings-d1";
+import {
+  crmEmailDeliveryReadiness,
+  sendCrmEmail,
+} from "./crm-email-delivery-d1";
+
 
 type D1Db = any;
 
@@ -19,6 +25,9 @@ export type QuoteEmailEnv = {
   WEDPLANNED_AUTH_FROM_NAME?: string;
   CLIENT_AUTH_FROM_EMAIL?: string;
   CLIENT_AUTH_FROM_NAME?: string;
+  CRM_EMAIL_CREDENTIAL_KEY?: string;
+  CRM_GOOGLE_CLIENT_ID?: string;
+  CRM_GOOGLE_CLIENT_SECRET?: string;
 };
 
 const CLIENT_SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
@@ -400,7 +409,7 @@ export async function saveQuoteDraft(db: D1Db, actor: QuoteActor, quoteId: strin
     snapshotOptions.push({ ...optionSnapshot, id: optionId, items: snapshotItems, addons: snapshotAddons, subtotalAmount: optionSubtotal });
   }
   const representative = totals(lowestSubtotal || 0, discountType, discountValue, taxTreatment, taxRate);
-  const versionSnapshot = { quoteId, versionId: text(version.id), versionNumber: Number(version.version_number || 1), options: snapshotOptions, discountType, discountValue, taxTreatment, taxRateBasisPoints: taxRate, currency: quoteCurrency, clientNotes: text(input?.clientNotes), expiresAt: dateOnly(input?.expiresAt) || null };
+  const versionSnapshot = { quoteId, versionId: text(version.id), versionNumber: Number(version.version_number || 1), options: snapshotOptions, discountType, discountValue, taxTreatment, taxRateBasisPoints: taxRate, currency: quoteCurrency, clientNotes: text(input?.clientNotes), expiresAt: dateOnly(input?.expiresAt) || null, template: input?.templateSnapshot && typeof input.templateSnapshot === "object" ? input.templateSnapshot : null };
   statements.push(db.prepare(`UPDATE crm_quote_versions SET client_notes = ?, internal_notes = ?, expires_at = ?, discount_type = ?, discount_value = ?, tax_treatment = ?, tax_rate_basis_points = ?, subtotal_amount = ?, discount_amount = ?, tax_amount = ?, total_amount = ?, currency = ?, snapshot_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ? AND status = 'draft'`).bind(
     text(input?.clientNotes), text(input?.internalNotes), dateOnly(input?.expiresAt) || null, discountType, discountValue, taxTreatment, taxRate, representative.subtotal, representative.discount, representative.tax, representative.total, quoteCurrency, JSON.stringify(versionSnapshot), version.id, actor.workspaceId,
   ));
@@ -498,48 +507,918 @@ async function sendQuoteEmail(env: QuoteEmailEnv, input: { to: string; businessN
   return { provider: "resend", providerMessageId: text(body?.id) };
 }
 
-export async function sendQuote(db: D1Db, env: QuoteEmailEnv, actor: QuoteActor, quoteId: string) {
-  requirePermission(actor, "crm:manage");
-  const quote = await db.prepare(`${QUOTE_SELECT} WHERE q.workspace_id = ? AND q.id = ? LIMIT 1`).bind(actor.workspaceId, quoteId).first();
-  if (!quote) throw httpError("Quote not found.", 404);
-  const version = await fullVersion(db, actor.workspaceId, text(quote.current_version_id));
-  if (!version) throw httpError("Current quote version not found.", 409);
-  if (!["draft", "sent", "viewed"].includes(version.status)) throw httpError("This quote version cannot be sent.", 409);
-  if (!version.options.length) throw httpError("Add at least one package option before sending the quote.", 409);
-  if (quoteExpired(version.expiresAt)) throw httpError("Choose a future quote expiry date before sending.", 409);
-  const contact = await db.prepare(`SELECT * FROM crm_contacts WHERE id = ? AND workspace_id = ? LIMIT 1`).bind(quote.primary_contact_id, actor.workspaceId).first();
-  if (!contact) throw httpError("Primary client not found.", 409);
-  const identity = await ensureIdentity(db, actor.workspaceId, contact);
-  const invitation = await createInvitation(db, actor.workspaceId, quote, version, contact, identity);
-  const origin = await portalOrigin(db, actor.workspaceId);
-  const loginUrl = `${origin}/api/public/client-portal/verify?token=${encodeURIComponent(invitation.rawToken)}`;
-  const business = text(actor.businessName) || text((await db.prepare(`SELECT COALESCE(NULLIF(business_name,''), 'WedPlanned') AS business_name FROM workspace_settings WHERE workspace_id = ? LIMIT 1`).bind(actor.workspaceId).first())?.business_name || "WedPlanned");
-  let delivery: any;
-  try {
-    delivery = await sendQuoteEmail(env, { to: lower(contact.email), businessName: business, clientName: text(contact.display_name), reference: text(quote.reference), loginUrl, eventDate: text(quote.event_date), expiresAt: invitation.expiresAt });
-  } catch (error: any) {
-    await db.batch([
-      db.prepare(`UPDATE crm_quote_invitations SET consumed_at = COALESCE(consumed_at, CURRENT_TIMESTAMP) WHERE id = ? AND workspace_id = ?`).bind(invitation.invitationId, actor.workspaceId),
-      db.prepare(`INSERT INTO crm_communications (id, workspace_id, contact_id, enquiry_id, quote_id, quote_version_id, channel, direction, subject, body, status, provider, provider_message_id, failure_reason, occurred_at, actor_user_id, actor_email, metadata_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'email', 'outbound', ?, ?, 'failed', 'resend', '', ?, CURRENT_TIMESTAMP, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
-        `crm_communication_${crypto.randomUUID()}`, actor.workspaceId, contact.id, quote.enquiry_id, quote.id, version.id, `Quote ${text(quote.reference)}`, `Quote invitation to ${lower(contact.email)}.`, text(error?.message), text(actor.userId) || null, lower(actor.email), JSON.stringify({ quoteId, versionId: version.id }),
-      ),
-    ]);
-    throw error;
-  }
-  await db.batch([
-    db.prepare(`UPDATE crm_quote_versions SET status = CASE WHEN status = 'draft' THEN 'sent' ELSE status END, sent_at = COALESCE(sent_at, CURRENT_TIMESTAMP), provider = ?, provider_message_id = ?, failure_reason = '', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(delivery.provider, delivery.providerMessageId, version.id, actor.workspaceId),
-    db.prepare(`UPDATE crm_quotes SET status = CASE WHEN status = 'draft' THEN 'sent' ELSE status END, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(quote.id, actor.workspaceId),
-    db.prepare(`INSERT INTO crm_communications (id, workspace_id, contact_id, enquiry_id, quote_id, quote_version_id, channel, direction, subject, body, status, provider, provider_message_id, failure_reason, occurred_at, actor_user_id, actor_email, metadata_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'email', 'outbound', ?, ?, 'sent', ?, ?, '', CURRENT_TIMESTAMP, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
-      `crm_communication_${crypto.randomUUID()}`, actor.workspaceId, contact.id, quote.enquiry_id, quote.id, version.id, `Quote ${text(quote.reference)}`, `Sent secure quote invitation to ${lower(contact.email)}.`, delivery.provider, delivery.providerMessageId, text(actor.userId) || null, lower(actor.email), JSON.stringify({ quoteId, versionId: version.id, expiresAt: version.expiresAt || null }),
-    ),
-  ]);
-  await recordActivity(db, actor, actor.workspaceId, "enquiry", text(quote.enquiry_id), "quote.sent", `Sent quote ${text(quote.reference)} version ${version.versionNumber} to ${lower(contact.email)}.`, { quoteId, versionId: version.id, providerMessageId: delivery.providerMessageId });
-  await audit(db, actor, "crm.quote.sent", "crm_quote", quote.id, `Sent quote ${text(quote.reference)} version ${version.versionNumber}.`, { providerMessageId: delivery.providerMessageId });
-  return getQuote(db, { ...actor, permissions: [...new Set([...(actor.permissions || []), "crm:read"])] }, quoteId);
+function escapeEmailHtml(
+  value: unknown,
+) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
-async function quoteAccessForIdentity(db: D1Db, workspaceId: string, identityId: string) {
-  return db.prepare(`${QUOTE_SELECT} JOIN crm_quote_client_access access ON access.quote_id = q.id AND access.workspace_id = q.workspace_id WHERE q.workspace_id = ? AND access.identity_id = ? AND access.status = 'active' AND q.status IN ('sent','viewed','accepted','declined','expired') ORDER BY q.updated_at DESC`).bind(workspaceId, identityId).all();
+function mergeQuoteEmailVariables(
+  value: unknown,
+  variables:
+    Record<string, string>,
+) {
+  return String(value ?? "").replace(
+    /\{\{\s*([a-z_]+)\s*\}\}/gi,
+    (
+      match,
+      key,
+    ) => {
+      const normalised =
+        lower(key);
+
+      return Object.prototype
+        .hasOwnProperty.call(
+          variables,
+          normalised,
+        )
+        ? variables[normalised]
+        : match;
+    },
+  );
+}
+
+function emailSignatureText(
+  settings: any,
+) {
+  if (
+    !settings?.signatureEnabled
+  ) {
+    return "";
+  }
+
+  const signature =
+    settings?.signature
+    && typeof settings.signature
+      === "object"
+      ? settings.signature
+      : {};
+
+  const identity = [
+    text(signature.name),
+    text(signature.jobTitle),
+    text(signature.businessName),
+  ].filter(Boolean);
+
+  const contact = [
+    text(signature.phone),
+    text(signature.website),
+  ].filter(Boolean);
+
+  return [
+    identity.join(" · "),
+    contact.join(" · "),
+    text(signature.text),
+  ].filter(Boolean).join("\n");
+}
+
+function appendEmailSignature(
+  body: string,
+  signature: string,
+) {
+  if (!signature) {
+    return body;
+  }
+
+  return [
+    body.trim(),
+    signature.trim(),
+  ].filter(Boolean).join(
+    "\n\n",
+  );
+}
+
+function finalQuoteEmailBody(
+  body: string,
+  loginUrl: string,
+) {
+  const token =
+    /\{\{\s*quote_link\s*\}\}/gi;
+
+  if (token.test(body)) {
+    return body.replace(
+      /\{\{\s*quote_link\s*\}\}/gi,
+      loginUrl,
+    );
+  }
+
+  return `${body.trim()}\n\nReview your quote securely:\n${loginUrl}`;
+}
+
+function loggedQuoteEmailBody(
+  body: string,
+) {
+  const token =
+    /\{\{\s*quote_link\s*\}\}/gi;
+
+  if (token.test(body)) {
+    return body.replace(
+      /\{\{\s*quote_link\s*\}\}/gi,
+      "[secure quote link]",
+    );
+  }
+
+  return `${body.trim()}\n\n[secure quote link]`;
+}
+
+async function quoteSendEmailContext(
+  db: D1Db,
+  env: QuoteEmailEnv,
+  actor: QuoteActor,
+  quoteIdInput: unknown,
+  templateIdInput: unknown = "",
+) {
+  const quoteId =
+    text(quoteIdInput);
+
+  const quote =
+    await db.prepare(
+      `${QUOTE_SELECT}
+       WHERE q.workspace_id = ?
+         AND q.id = ?
+       LIMIT 1`,
+    ).bind(
+      actor.workspaceId,
+      quoteId,
+    ).first();
+
+  if (!quote) {
+    throw httpError(
+      "Quote not found.",
+      404,
+    );
+  }
+
+  const version =
+    await fullVersion(
+      db,
+      actor.workspaceId,
+      text(
+        quote.current_version_id,
+      ),
+    );
+
+  if (!version) {
+    throw httpError(
+      "Current quote version not found.",
+      409,
+    );
+  }
+
+  const [
+    workspace,
+    templateRows,
+    settings,
+  ] = await Promise.all([
+    db.prepare(`
+      SELECT
+        COALESCE(
+          settings.business_name,
+          workspace.name,
+          ?
+        ) AS business_name
+      FROM workspaces workspace
+      LEFT JOIN workspace_settings settings
+        ON settings.workspace_id =
+          workspace.id
+      WHERE workspace.id = ?
+      LIMIT 1
+    `).bind(
+      text(
+        actor.businessName
+        || "WedPlanned",
+      ),
+      actor.workspaceId,
+    ).first(),
+
+    db.prepare(`
+      SELECT
+        id,
+        name,
+        subject_template,
+        body_text,
+        attachments_json,
+        append_signature,
+        is_default
+      FROM crm_email_templates
+      WHERE workspace_id = ?
+        AND purpose = 'quote'
+        AND status = 'active'
+      ORDER BY
+        is_default DESC,
+        name COLLATE NOCASE
+    `).bind(
+      actor.workspaceId,
+    ).all(),
+
+    getCrmEmailSettings(
+      db,
+      {
+        ...actor,
+        permissions: [
+          ...new Set([
+            ...(actor.permissions || []),
+            "crm:read",
+          ]),
+        ],
+      },
+    ),
+  ]);
+
+  const templates =
+    templateRows.results || [];
+
+  const requestedTemplateId =
+    text(templateIdInput);
+
+  let selectedTemplate:
+    any = null;
+
+  if (requestedTemplateId) {
+    selectedTemplate =
+      templates.find(
+        (row: any) =>
+          text(row.id)
+          === requestedTemplateId,
+      );
+
+    if (!selectedTemplate) {
+      throw httpError(
+        "Choose an active quote email template from this workspace.",
+        409,
+      );
+    }
+  } else {
+    selectedTemplate =
+      templates[0] || null;
+  }
+
+  const businessName =
+    text(
+      workspace?.business_name
+      || actor.businessName
+      || "WedPlanned",
+    );
+
+  const clientName =
+    text(
+      quote.client_name,
+    );
+
+  const firstName =
+    clientName
+      .split(/\s+/)
+      .filter(Boolean)[0]
+    || clientName;
+
+  const variables = {
+    client_name:
+      clientName,
+    first_name:
+      firstName,
+    business_name:
+      businessName,
+    quote_reference:
+      text(quote.reference),
+    event_date:
+      text(quote.event_date),
+    venue:
+      text(quote.venue_text),
+    expiry_date:
+      text(version.expiresAt),
+    quote_link:
+      "{{quote_link}}",
+  };
+
+  const fallbackSubject =
+    "Your wedding quote is ready";
+
+  const fallbackBody = [
+    "Hi {{first_name}},",
+    "",
+    "Your wedding quote is ready. You can review your package options and additional extras securely using the link below:",
+    "",
+    "{{quote_link}}",
+    "",
+    "If you have any questions, just reply to this email.",
+  ].join("\n");
+
+  let subject =
+    mergeQuoteEmailVariables(
+      text(
+        selectedTemplate
+          ?.subject_template
+        || fallbackSubject,
+      ),
+      variables,
+    );
+
+  let body =
+    mergeQuoteEmailVariables(
+      text(
+        selectedTemplate
+          ?.body_text
+        || fallbackBody,
+      ),
+      variables,
+    );
+
+  const appendSignature =
+    selectedTemplate
+      ? Boolean(
+          selectedTemplate
+            .append_signature,
+        )
+      : true;
+
+  if (appendSignature) {
+    body =
+      appendEmailSignature(
+        body,
+        emailSignatureText(
+          settings,
+        ),
+      );
+  }
+
+  const attachments =
+    selectedTemplate
+      ? safeJson(
+          selectedTemplate
+            .attachments_json,
+          [],
+        )
+      : [];
+
+  const readiness =
+    crmEmailDeliveryReadiness(
+      settings,
+      env,
+      businessName,
+    );
+
+  const deliveryMode =
+    readiness.deliveryMode;
+
+  const fromName =
+    readiness.fromName;
+
+  const fromEmail =
+    readiness.fromEmail;
+
+  const replyToEmail =
+    readiness.replyToEmail;
+
+  let deliveryReady =
+    readiness.deliveryReady;
+
+  let deliveryIssue =
+    readiness.deliveryIssue;
+
+  if (
+    Array.isArray(attachments)
+    && attachments.length
+  ) {
+    deliveryReady = false;
+    deliveryIssue =
+      "This template contains attachments. Attachment delivery is not enabled yet.";
+  }
+
+  return {
+    quote,
+    version,
+    settings,
+    selectedTemplate,
+    preview: {
+      quoteId:
+        text(quote.id),
+      reference:
+        text(quote.reference),
+      to:
+        lower(
+          quote.client_email,
+        ),
+      clientName,
+      businessName,
+      templateId:
+        text(
+          selectedTemplate?.id,
+        ),
+      templateName:
+        text(
+          selectedTemplate?.name
+          || "Standard quote email",
+        ),
+      templates:
+        templates.map(
+          (row: any) => ({
+            id:
+              text(row.id),
+            name:
+              text(row.name),
+            default:
+              Boolean(
+                row.is_default,
+              ),
+          }),
+        ),
+      subject,
+      body,
+      fromName,
+      fromEmail,
+      replyToEmail,
+      deliveryMode,
+      providerLabel:
+        readiness.providerLabel,
+      deliveryReady,
+      deliveryIssue,
+      secureLinkMergeField:
+        "{{quote_link}}",
+      attachments:
+        Array.isArray(
+          attachments,
+        )
+          ? attachments
+          : [],
+      attachmentDeliveryReady:
+        false,
+    },
+  };
+}
+
+export async function getQuoteSendPreview(
+  db: D1Db,
+  env: QuoteEmailEnv,
+  actor: QuoteActor,
+  quoteIdInput: unknown,
+  templateIdInput: unknown = "",
+) {
+  requirePermission(
+    actor,
+    "crm:read",
+  );
+
+  const context =
+    await quoteSendEmailContext(
+      db,
+      env,
+      actor,
+      quoteIdInput,
+      templateIdInput,
+    );
+
+  return context.preview;
+}
+
+export async function sendQuote(
+  db: D1Db,
+  env: QuoteEmailEnv,
+  actor: QuoteActor,
+  quoteIdInput: unknown,
+  input: any = {},
+) {
+  requirePermission(
+    actor,
+    "crm:manage",
+  );
+
+  const quoteId =
+    text(quoteIdInput);
+
+  const context =
+    await quoteSendEmailContext(
+      db,
+      env,
+      actor,
+      quoteId,
+      input?.templateId,
+    );
+
+  const quote =
+    context.quote;
+
+  const version =
+    context.version;
+
+  const preview =
+    context.preview;
+
+  if (
+    !version.options.length
+  ) {
+    throw httpError(
+      "Add at least one package option before sending the quote.",
+      409,
+    );
+  }
+
+  if (
+    quoteExpired(
+      version.expiresAt,
+    )
+  ) {
+    throw httpError(
+      "Choose a future quote expiry date before sending.",
+      409,
+    );
+  }
+
+  if (
+    !preview.deliveryReady
+  ) {
+    throw httpError(
+      preview.deliveryIssue
+      || "CRM email delivery is not ready.",
+      409,
+    );
+  }
+
+  const subject =
+    text(
+      input?.subject
+      || preview.subject,
+    );
+
+  const body =
+    text(
+      input?.body
+      || preview.body,
+    );
+
+  if (!subject) {
+    throw httpError(
+      "Enter an email subject.",
+    );
+  }
+
+  if (!body) {
+    throw httpError(
+      "Enter an email message.",
+    );
+  }
+
+  const contact =
+    await primaryContactForEnquiry(
+      db,
+      actor.workspaceId,
+      text(quote.enquiry_id),
+    );
+
+  if (!contact) {
+    throw httpError(
+      "The quote primary client could not be found.",
+      409,
+    );
+  }
+
+  if (
+    !validEmail(
+      contact.email,
+    )
+  ) {
+    throw httpError(
+      "The primary client needs a valid email address before the quote can be sent.",
+      409,
+    );
+  }
+
+  const identity =
+    await ensureQuoteIdentity(
+      db,
+      actor.workspaceId,
+      contact,
+    );
+
+  const invitation =
+    await createInvitation(
+      db,
+      actor.workspaceId,
+      quote,
+      version,
+      contact,
+      identity,
+    );
+
+  const origin =
+    DEFAULT_CLIENT_PORTAL_ORIGIN;
+
+  const loginUrl =
+    `${origin}/api/public/client-portal/verify?token=${encodeURIComponent(invitation.rawToken)}`;
+
+  const finalBody =
+    finalQuoteEmailBody(
+      body,
+      loginUrl,
+    );
+
+  const communicationBody =
+    loggedQuoteEmailBody(
+      body,
+    );
+
+  const attemptedProvider =
+    preview.deliveryMode
+      === "google"
+      ? "gmail"
+      : preview.deliveryMode
+        === "smtp"
+        ? "smtp"
+        : "resend";
+
+  let delivery:
+    {
+      provider: string;
+      providerMessageId: string;
+    };
+
+  try {
+    delivery =
+      await sendCrmEmail(
+        db,
+        env,
+        actor,
+        {
+          to:
+            lower(
+              contact.email,
+            ),
+          subject,
+          body:
+            finalBody,
+          businessName:
+            preview.businessName,
+        },
+      );
+  } catch (error: any) {
+    await db.batch([
+      db.prepare(`
+        UPDATE crm_quote_invitations
+        SET consumed_at =
+          COALESCE(
+            consumed_at,
+            CURRENT_TIMESTAMP
+          )
+        WHERE id = ?
+          AND workspace_id = ?
+      `).bind(
+        invitation.invitationId,
+        actor.workspaceId,
+      ),
+
+      db.prepare(`
+        INSERT INTO crm_communications (
+          id,
+          workspace_id,
+          contact_id,
+          enquiry_id,
+          quote_id,
+          quote_version_id,
+          channel,
+          direction,
+          subject,
+          body,
+          status,
+          provider,
+          provider_message_id,
+          failure_reason,
+          occurred_at,
+          actor_user_id,
+          actor_email,
+          metadata_json,
+          created_at,
+          updated_at
+        ) VALUES (
+          ?, ?, ?, ?, ?, ?,
+          'email',
+          'outbound',
+          ?, ?,
+          'failed',
+          ?,
+          '',
+          ?,
+          CURRENT_TIMESTAMP,
+          ?, ?, ?,
+          CURRENT_TIMESTAMP,
+          CURRENT_TIMESTAMP
+        )
+      `).bind(
+        `crm_communication_${crypto.randomUUID()}`,
+        actor.workspaceId,
+        contact.id,
+        quote.enquiry_id,
+        quote.id,
+        version.id,
+        subject,
+        communicationBody,
+        attemptedProvider,
+        text(error?.message),
+        text(actor.userId) || null,
+        lower(actor.email),
+        JSON.stringify({
+          quoteId,
+          versionId:
+            version.id,
+          templateId:
+            preview.templateId
+            || null,
+          deliveryMode:
+            preview.deliveryMode,
+          to:
+            lower(
+              contact.email,
+            ),
+          replyTo:
+            preview.replyToEmail
+            || null,
+        }),
+      ),
+    ]);
+
+    throw error;
+  }
+
+  await db.batch([
+    db.prepare(`
+      UPDATE crm_quote_versions
+      SET
+        status =
+          CASE
+            WHEN status = 'draft'
+              THEN 'sent'
+            ELSE status
+          END,
+        sent_at =
+          COALESCE(
+            sent_at,
+            CURRENT_TIMESTAMP
+          ),
+        provider = ?,
+        provider_message_id = ?,
+        failure_reason = '',
+        updated_at =
+          CURRENT_TIMESTAMP
+      WHERE id = ?
+        AND workspace_id = ?
+    `).bind(
+      delivery.provider,
+      delivery.providerMessageId,
+      version.id,
+      actor.workspaceId,
+    ),
+
+    db.prepare(`
+      UPDATE crm_quotes
+      SET
+        status =
+          CASE
+            WHEN status = 'draft'
+              THEN 'sent'
+            ELSE status
+          END,
+        updated_at =
+          CURRENT_TIMESTAMP
+      WHERE id = ?
+        AND workspace_id = ?
+    `).bind(
+      quote.id,
+      actor.workspaceId,
+    ),
+
+    db.prepare(`
+      INSERT INTO crm_communications (
+        id,
+        workspace_id,
+        contact_id,
+        enquiry_id,
+        quote_id,
+        quote_version_id,
+        channel,
+        direction,
+        subject,
+        body,
+        status,
+        provider,
+        provider_message_id,
+        failure_reason,
+        occurred_at,
+        actor_user_id,
+        actor_email,
+        metadata_json,
+        created_at,
+        updated_at
+      ) VALUES (
+        ?, ?, ?, ?, ?, ?,
+        'email',
+        'outbound',
+        ?, ?,
+        'sent',
+        ?, ?,
+        '',
+        CURRENT_TIMESTAMP,
+        ?, ?, ?,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+    `).bind(
+      `crm_communication_${crypto.randomUUID()}`,
+      actor.workspaceId,
+      contact.id,
+      quote.enquiry_id,
+      quote.id,
+      version.id,
+      subject,
+      communicationBody,
+      delivery.provider,
+      delivery.providerMessageId,
+      text(actor.userId) || null,
+      lower(actor.email),
+      JSON.stringify({
+        quoteId,
+        versionId:
+          version.id,
+        templateId:
+          preview.templateId
+          || null,
+        templateName:
+          preview.templateName,
+        deliveryMode:
+          preview.deliveryMode,
+        to:
+          lower(
+            contact.email,
+          ),
+        replyTo:
+          preview.replyToEmail
+          || null,
+        expiresAt:
+          version.expiresAt
+          || null,
+      }),
+    ),
+  ]);
+
+  await recordActivity(
+    db,
+    actor,
+    actor.workspaceId,
+    "enquiry",
+    text(quote.enquiry_id),
+    "quote.sent",
+    `Sent quote ${text(quote.reference)} version ${version.versionNumber} to ${lower(contact.email)}.`,
+    {
+      quoteId,
+      versionId:
+        version.id,
+      templateId:
+        preview.templateId
+        || null,
+      deliveryMode:
+        preview.deliveryMode,
+      providerMessageId:
+        delivery.providerMessageId,
+    },
+  );
+
+  await audit(
+    db,
+    actor,
+    "crm.quote.sent",
+    "crm_quote",
+    quoteId,
+    `Sent quote ${text(quote.reference)} version ${version.versionNumber}.`,
+    {
+      versionId:
+        version.id,
+      templateId:
+        preview.templateId
+        || null,
+      deliveryMode:
+        preview.deliveryMode,
+      provider:
+        delivery.provider,
+      providerMessageId:
+        delivery.providerMessageId,
+    },
+  );
+
+  return getQuote(
+    db,
+    {
+      ...actor,
+      permissions: [
+        ...new Set([
+          ...(actor.permissions || []),
+          "crm:read",
+        ]),
+      ],
+    },
+    quoteId,
+  );
 }
 
 export async function getPublicQuotesForIdentity(db: D1Db, workspaceId: string, identityId: string) {

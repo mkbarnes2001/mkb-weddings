@@ -40,7 +40,7 @@ def main() -> None:
         "WHERE key='schema_version'"
     ).fetchone()[0]
 
-    assert str(version) == "40"
+    assert str(version) == "41"
     # v1.10.6a itself introduced no migration. Later releases
     # may legitimately add migration 040 and beyond.
 

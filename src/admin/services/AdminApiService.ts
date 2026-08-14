@@ -10,7 +10,7 @@ import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, Client
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
 import type { PlatformAdministrationPayload, PlatformBrandAsset, PlatformBrandingIdentity, PlatformModuleConfiguration, PlatformSupplierTaxonomy, ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
-import type { CrmAddon, CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmPackage, CrmQuote, CrmQuoteOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate, CrmCommercialSettingsInput, CrmCommercialSettingsPayload, CrmContractTemplate } from "../types/crm";
+import type { CrmAddon, CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmPackage, CrmQuote, CrmQuoteOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate, CrmCommercialSettingsInput, CrmCommercialSettingsPayload, CrmContractTemplate, CrmQuoteTemplate, CrmQuoteTemplateInput, CrmEmailTemplate, CrmEmailTemplateInput, CrmEmailSettings, CrmEmailSettingsInput, CrmQuoteSendPreview, CrmQuoteSendInput } from "../types/crm";
 import type {
   WedPlannedPublicAppearanceAdministration,
   WedPlannedPublicTheme,
@@ -1537,8 +1537,220 @@ export class AdminApiService {
     return result.addon;
   }
 
-  static async createCrmQuote(enquiryId: string) {
-    const result = await request<{ ok: true; quote: CrmQuote }>("/api/crm/quotes", { method: "POST", body: JSON.stringify({ enquiryId }) });
+  static async getCrmQuoteTemplates() {
+    const result = await request<{
+      ok: true;
+      templates: CrmQuoteTemplate[];
+    }>("/api/crm/templates/quotes");
+
+    return result.templates;
+  }
+
+  static async getCrmQuoteTemplate(id: string) {
+    const result = await request<{
+      ok: true;
+      template: CrmQuoteTemplate;
+    }>(
+      `/api/crm/templates/quotes/${encodeURIComponent(id)}`,
+    );
+
+    return result.template;
+  }
+
+  static async createCrmQuoteTemplate(
+    input: CrmQuoteTemplateInput,
+  ) {
+    const result = await request<{
+      ok: true;
+      template: CrmQuoteTemplate;
+    }>("/api/crm/templates/quotes", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+
+    return result.template;
+  }
+
+  static async saveCrmQuoteTemplate(
+    id: string,
+    input: CrmQuoteTemplateInput,
+  ) {
+    const result = await request<{
+      ok: true;
+      template: CrmQuoteTemplate;
+    }>(
+      `/api/crm/templates/quotes/${encodeURIComponent(id)}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(input),
+      },
+    );
+
+    return result.template;
+  }
+
+  static async archiveCrmQuoteTemplate(
+    id: string,
+  ) {
+    const result = await request<{
+      ok: true;
+      template: CrmQuoteTemplate;
+    }>(
+      `/api/crm/templates/quotes/${encodeURIComponent(id)}/archive`,
+      {
+        method: "POST",
+        body: "{}",
+      },
+    );
+
+    return result.template;
+  }
+
+  static async getCrmEmailSettings() {
+    const result = await request<{
+      ok: true;
+      email: CrmEmailSettings;
+    }>("/api/crm/email/settings");
+
+    return result.email;
+  }
+
+  static async saveCrmEmailSettings(
+    input: CrmEmailSettingsInput,
+  ) {
+    const result = await request<{
+      ok: true;
+      email: CrmEmailSettings;
+    }>("/api/crm/email/settings", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+
+    return result.email;
+  }
+
+  static async startCrmGoogleEmailConnection() {
+    const result =
+      await request<{
+        ok: true;
+        connection: {
+          authorizationUrl: string;
+          redirectUri: string;
+        };
+      }>(
+        "/api/crm/email/providers/google/connect",
+        {
+          method: "POST",
+          body: "{}",
+        },
+      );
+
+    return result.connection;
+  }
+
+  static async disconnectCrmEmailProvider(
+    provider: "google" | "smtp",
+  ) {
+    const result = await request<{
+      ok: true;
+      email: CrmEmailSettings;
+    }>(
+      `/api/crm/email/providers/${encodeURIComponent(provider)}/disconnect`,
+      {
+        method: "POST",
+        body: "{}",
+      },
+    );
+
+    return result.email;
+  }
+
+  static async getCrmEmailTemplates() {
+    const result = await request<{
+      ok: true;
+      templates: CrmEmailTemplate[];
+    }>("/api/crm/templates/emails");
+
+    return result.templates;
+  }
+
+  static async getCrmEmailTemplate(id: string) {
+    const result = await request<{
+      ok: true;
+      template: CrmEmailTemplate;
+    }>(
+      `/api/crm/templates/emails/${encodeURIComponent(id)}`,
+    );
+
+    return result.template;
+  }
+
+  static async createCrmEmailTemplate(
+    input: CrmEmailTemplateInput,
+  ) {
+    const result = await request<{
+      ok: true;
+      template: CrmEmailTemplate;
+    }>("/api/crm/templates/emails", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+
+    return result.template;
+  }
+
+  static async saveCrmEmailTemplate(
+    id: string,
+    input: CrmEmailTemplateInput,
+  ) {
+    const result = await request<{
+      ok: true;
+      template: CrmEmailTemplate;
+    }>(
+      `/api/crm/templates/emails/${encodeURIComponent(id)}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(input),
+      },
+    );
+
+    return result.template;
+  }
+
+  static async archiveCrmEmailTemplate(
+    id: string,
+  ) {
+    const result = await request<{
+      ok: true;
+      template: CrmEmailTemplate;
+    }>(
+      `/api/crm/templates/emails/${encodeURIComponent(id)}/archive`,
+      {
+        method: "POST",
+        body: "{}",
+      },
+    );
+
+    return result.template;
+  }
+
+  static async createCrmQuote(
+    enquiryId: string,
+    templateId = "",
+  ) {
+    const result = await request<{
+      ok: true;
+      quote: CrmQuote;
+    }>("/api/crm/quotes", {
+      method: "POST",
+      body: JSON.stringify({
+        enquiryId,
+        ...(templateId
+          ? { templateId }
+          : {}),
+      }),
+    });
+
     return result.quote;
   }
 
@@ -1557,8 +1769,45 @@ export class AdminApiService {
     return result.quote;
   }
 
-  static async sendCrmQuote(id: string) {
-    const result = await request<{ ok: true; quote: CrmQuote }>(`/api/crm/quotes/${encodeURIComponent(id)}/send`, { method: "POST", body: "{}" });
+  static async getCrmQuoteSendPreview(
+    id: string,
+    templateId = "",
+  ) {
+    const query =
+      templateId
+        ? `?templateId=${encodeURIComponent(templateId)}`
+        : "";
+
+    const result =
+      await request<{
+        ok: true;
+        preview:
+          CrmQuoteSendPreview;
+      }>(
+        `/api/crm/quotes/${encodeURIComponent(id)}/send-preview${query}`,
+      );
+
+    return result.preview;
+  }
+
+  static async sendCrmQuote(
+    id: string,
+    input?: CrmQuoteSendInput,
+  ) {
+    const result =
+      await request<{
+        ok: true;
+        quote: CrmQuote;
+      }>(
+        `/api/crm/quotes/${encodeURIComponent(id)}/send`,
+        {
+          method: "POST",
+          body: JSON.stringify(
+            input || {},
+          ),
+        },
+      );
+
     return result.quote;
   }
 

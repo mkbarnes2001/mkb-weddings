@@ -52,7 +52,7 @@ def main() -> None:
         "WHERE key='schema_version'"
     ).fetchone()[0]
 
-    assert version == "40", version
+    assert version == "41", version
 
     # Core business-data services must never silently
     # select the MKB workspace.

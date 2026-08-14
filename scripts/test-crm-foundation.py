@@ -29,7 +29,7 @@ def main() -> None:
     con = sqlite3.connect(":memory:")
     con.row_factory = sqlite3.Row
     con.executescript(schema_text)
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "40"
+    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "41"
 
     required = {
         "crm_pipeline_stages",

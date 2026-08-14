@@ -39,7 +39,7 @@ def main() -> None:
         "SELECT value "
         "FROM schema_meta "
         "WHERE key='schema_version'"
-    ).fetchone()[0] == "40"
+    ).fetchone()[0] == "41"
 
     # Dedicated service has no default-tenant fallback and
     # deliberately avoids importing Client Portal, which

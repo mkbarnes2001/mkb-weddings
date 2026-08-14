@@ -9,6 +9,8 @@ import { CRMJob } from "../pages/CRMJob";
 import { CRMCatalogue } from "../pages/CRMCatalogue";
 import { CRMQuotes } from "../pages/CRMQuotes";
 import { CRMQuote } from "../pages/CRMQuote";
+import { CRMCommercialTemplates } from "../pages/CRMCommercialTemplates";
+import { CRMEmailSettings } from "../pages/CRMEmailSettings";
 import { CRMQuestionnaireTemplate } from "../pages/CRMQuestionnaireTemplate";
 import { CRMContractTemplate } from "../pages/CRMContractTemplate";
 import { CRMWorkflowTemplate } from "../pages/CRMWorkflowTemplate";
@@ -72,6 +74,8 @@ export function AdminApp() {
         <Route path="crm/catalogue" element={<CRMCatalogue />} />
         <Route path="crm/quotes" element={<CRMQuotes />} />
         <Route path="crm/quotes/:id" element={<CRMQuote />} />
+        <Route path="crm/templates" element={<CRMCommercialTemplates />} />
+        <Route path="crm/email-settings" element={<CRMEmailSettings />} />
         <Route path="crm/questionnaires/:id" element={<CRMQuestionnaireTemplate />} />
         <Route path="crm/contracts/templates/:id" element={<CRMContractTemplate />} />
         <Route path="crm/workflows/:id" element={<CRMWorkflowTemplate />} />

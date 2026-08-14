@@ -38,7 +38,7 @@ version = con.execute(
 ).fetchone()
 
 assert version, "schema_version row missing"
-assert version[0] == "40", version
+assert version[0] == "41", version
 
 table_sql_row = con.execute(
     """

@@ -639,6 +639,135 @@ export type CrmQuoteOverview = {
   addons: CrmAddon[];
 };
 
+// v1.10.9a — reusable commercial templates
+
+export type CrmQuoteTemplatePackageOverride = {
+  name?: string;
+  description?: string;
+  basePriceAmount?: number;
+  coverageMinutes?: number | null;
+  deliverables?: string[];
+  includedItems?: string[];
+  clientNotes?: string;
+};
+
+export type CrmQuoteTemplatePackage = {
+  id: string;
+  packageId: string;
+  displayOrder: number;
+  recommended: boolean;
+  override: CrmQuoteTemplatePackageOverride;
+  package: CrmPackage;
+};
+
+export type CrmQuoteTemplateAddon = {
+  id: string;
+  addonId: string;
+  displayOrder: number;
+  defaultSelected: boolean;
+  override: Record<string, unknown>;
+  addon: CrmAddon;
+};
+
+export type CrmQuoteTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  clientIntroduction: string;
+  clientNotes: string;
+  status: "draft" | "active" | "archived";
+  version: number;
+  default: boolean;
+  expiryDays: number;
+  discountType: "none" | "fixed" | "percentage";
+  discountValue: number;
+  taxTreatment: "none" | "inclusive" | "exclusive";
+  taxRateBasisPoints: number;
+  contractTemplateId: string;
+  questionnaireTemplateId: string;
+  paymentSchedule: Record<string, unknown>;
+  autoCreateInvoice: boolean;
+  packages: CrmQuoteTemplatePackage[];
+  addons: CrmQuoteTemplateAddon[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CrmQuoteTemplateInput = {
+  name?: string;
+  description?: string;
+  clientIntroduction?: string;
+  clientNotes?: string;
+  status?: "draft" | "active" | "archived";
+  default?: boolean;
+  expiryDays?: number;
+  discountType?: "none" | "fixed" | "percentage";
+  discountValue?: number;
+  taxTreatment?: "none" | "inclusive" | "exclusive";
+  taxRateBasisPoints?: number;
+  contractTemplateId?: string;
+  questionnaireTemplateId?: string;
+  paymentSchedule?: Record<string, unknown>;
+  autoCreateInvoice?: boolean;
+  packages?: Array<{
+    id?: string;
+    packageId: string;
+    displayOrder?: number;
+    recommended?: boolean;
+    override?: CrmQuoteTemplatePackageOverride;
+  }>;
+  addons?: Array<{
+    id?: string;
+    addonId: string;
+    displayOrder?: number;
+    defaultSelected?: boolean;
+    override?: Record<string, unknown>;
+  }>;
+};
+
+export type CrmEmailTemplatePurpose =
+  | "general"
+  | "quote"
+  | "booking"
+  | "questionnaire"
+  | "invoice"
+  | "autoresponder";
+
+export type CrmEmailTemplateAttachment = {
+  [key: string]: unknown;
+};
+
+export type CrmEmailTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  purpose: CrmEmailTemplatePurpose;
+  subjectTemplate: string;
+  bodyHtml: string;
+  bodyText: string;
+  attachments: CrmEmailTemplateAttachment[];
+  appendSignature: boolean;
+  status: "draft" | "active" | "archived";
+  version: number;
+  default: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CrmEmailTemplateInput = {
+  name?: string;
+  description?: string;
+  purpose?: CrmEmailTemplatePurpose;
+  subjectTemplate?: string;
+  bodyHtml?: string;
+  bodyText?: string;
+  attachments?: CrmEmailTemplateAttachment[];
+  appendSignature?: boolean;
+  status?: "draft" | "active" | "archived";
+  default?: boolean;
+};
+
+
 // v1.10.6a — commercial workflow settings
 
 export type CrmCommercialTemplateOption = {
@@ -725,4 +854,95 @@ export type CrmContractTemplate = {
     CrmContractTemplateSection[];
   createdAt: string;
   updatedAt: string;
+};
+
+export type CrmEmailDeliveryMode =
+  | "managed"
+  | "google"
+  | "smtp";
+
+export type CrmEmailSmtpSecurity =
+  | "tls"
+  | "starttls";
+
+export type CrmEmailSignature = {
+  name?: string;
+  jobTitle?: string;
+  businessName?: string;
+  phone?: string;
+  website?: string;
+  text?: string;
+};
+
+export type CrmEmailSettings = {
+  deliveryMode: CrmEmailDeliveryMode;
+  senderName: string;
+  senderEmail: string;
+  replyToEmail: string;
+  signatureEnabled: boolean;
+  signature: CrmEmailSignature;
+  googleEmail: string;
+  googleConnected: boolean;
+  smtpHost: string;
+  smtpPort: number;
+  smtpSecurity: CrmEmailSmtpSecurity;
+  smtpUsername: string;
+  smtpCredentialConfigured: boolean;
+  lastTestedAt?: string;
+  lastTestStatus: "" | "passed" | "failed";
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type CrmEmailSettingsInput = {
+  deliveryMode?: CrmEmailDeliveryMode;
+  senderName?: string;
+  senderEmail?: string;
+  replyToEmail?: string;
+  signatureEnabled?: boolean;
+  signature?: CrmEmailSignature;
+  googleEmail?: string;
+  smtpHost?: string;
+  smtpPort?: number;
+  smtpSecurity?: CrmEmailSmtpSecurity;
+  smtpUsername?: string;
+  smtpPassword?: string;
+};
+
+export type CrmQuoteEmailTemplateChoice = {
+  id: string;
+  name: string;
+  default: boolean;
+};
+
+export type CrmQuoteSendPreview = {
+  quoteId: string;
+  reference: string;
+  to: string;
+  clientName: string;
+  businessName: string;
+  templateId: string;
+  templateName: string;
+  templates:
+    CrmQuoteEmailTemplateChoice[];
+  subject: string;
+  body: string;
+  fromName: string;
+  fromEmail: string;
+  replyToEmail: string;
+  deliveryMode:
+    CrmEmailDeliveryMode;
+  providerLabel: string;
+  deliveryReady: boolean;
+  deliveryIssue: string;
+  secureLinkMergeField: string;
+  attachments:
+    Array<Record<string, unknown>>;
+  attachmentDeliveryReady: boolean;
+};
+
+export type CrmQuoteSendInput = {
+  templateId?: string;
+  subject: string;
+  body: string;
 };

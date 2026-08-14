@@ -139,18 +139,8 @@ export function CRMEnquiry() {
     }
   }
 
-  async function createQuote() {
-    setSaving(true);
-    setError("");
-    setMessage("");
-    try {
-      const quote = await AdminApiService.createCrmQuote(id);
-      navigate(`/admin/crm/quotes/${quote.id}`);
-    } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : "Unable to create the quote.");
-    } finally {
-      setSaving(false);
-    }
+  function createQuote() {
+    navigate(`/admin/crm/quotes?enquiryId=${encodeURIComponent(id)}`);
   }
 
   if (loading && !detail) return <AdminPage><p className="text-sm text-neutral-500">Loading enquiry…</p></AdminPage>;

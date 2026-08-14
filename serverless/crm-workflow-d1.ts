@@ -1,3 +1,12 @@
+import {
+  sendCrmEmail,
+  type CrmEmailDeliveryActor,
+  type CrmEmailDeliveryEnv,
+} from "./crm-email-delivery-d1";
+import {
+  getCrmEmailSettings,
+} from "./crm-email-settings-d1";
+
 type D1Db = any;
 
 export type WorkflowActor = {
@@ -8,11 +17,7 @@ export type WorkflowActor = {
   permissions?: string[];
 };
 
-export type WorkflowEmailEnv = {
-  RESEND_API_KEY?: string;
-  WEDPLANNED_AUTH_FROM_EMAIL?: string;
-  WEDPLANNED_AUTH_FROM_NAME?: string;
-};
+type WorkflowEmailEnv = CrmEmailDeliveryEnv;
 
 function text(value: unknown) {
   return String(value ?? "").trim();
@@ -445,72 +450,334 @@ export async function logJobCommunication(db: D1Db, actor: WorkflowActor, jobIdI
   return getJobWorkflowWorkspace(db, actor, jobId);
 }
 
-async function sendResend(env: WorkflowEmailEnv, input: { to: string; subject: string; body: string; businessName: string }) {
-  const apiKey = text(env.RESEND_API_KEY);
-  const fromEmail = text(env.WEDPLANNED_AUTH_FROM_EMAIL);
-  if (!apiKey || !fromEmail) throw httpError("Email delivery is not configured. Add RESEND_API_KEY and WEDPLANNED_AUTH_FROM_EMAIL to the relevant Pages project.", 500);
-  const fromName = text(env.WEDPLANNED_AUTH_FROM_NAME || input.businessName || "WedPlanned");
-  const paragraphs = input.body.split(/\n{2,}/).map((part) => `<p>${escapeHtml(part).replace(/\n/g, "<br>")}</p>`).join("");
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from: `${fromName} <${fromEmail}>`,
-      to: [input.to],
-      subject: input.subject,
-      html: `<div style="font-family:Arial,sans-serif;line-height:1.65;color:#181818;max-width:620px;margin:auto">${paragraphs}</div>`,
-      text: input.body,
-    }),
-  });
-  const payload: any = await response.json().catch(() => ({}));
-  if (!response.ok) throw httpError(text(payload?.message || payload?.error || `Email provider returned ${response.status}.`), 502);
-  return text(payload?.id);
+async function workflowAttemptedProvider(
+  db: D1Db,
+  actor: CrmEmailDeliveryActor,
+): Promise<"resend" | "gmail" | "smtp"> {
+  try {
+    const settings =
+      await getCrmEmailSettings(
+        db,
+        {
+          ...actor,
+          permissions: [
+            ...new Set([
+              ...(actor.permissions || []),
+              "crm:read",
+            ]),
+          ],
+        },
+      );
+
+    if (
+      settings.deliveryMode
+      === "google"
+    ) {
+      return "gmail";
+    }
+
+    if (
+      settings.deliveryMode
+      === "smtp"
+    ) {
+      return "smtp";
+    }
+
+    return "resend";
+  } catch {
+    return "resend";
+  }
 }
 
-export async function sendJobEmail(db: D1Db, env: WorkflowEmailEnv, actor: WorkflowActor, jobIdInput: unknown, input: any) {
-  requirePermission(actor, "crm:manage");
-  const jobId = text(jobIdInput);
-  const contactId = text(input?.contactId);
-  const subject = text(input?.subject);
-  const body = text(input?.body);
-  if (!contactId) throw httpError("Choose a client for this email.");
-  if (!subject) throw httpError("Enter an email subject.");
-  if (!body) throw httpError("Enter an email message.");
-  const row = await db.prepare(`
-    SELECT job.id AS job_id, job.enquiry_id, contact.id AS contact_id, contact.email, contact.display_name,
-      COALESCE(settings.business_name, ?) AS business_name
-    FROM crm_jobs job
-    JOIN crm_job_contacts relation ON relation.job_id = job.id AND relation.workspace_id = job.workspace_id
-    JOIN crm_contacts contact ON contact.id = relation.contact_id AND contact.workspace_id = job.workspace_id
-    LEFT JOIN workspace_settings settings ON settings.workspace_id = job.workspace_id
-    WHERE job.workspace_id = ? AND job.id = ? AND contact.id = ?
-    LIMIT 1
-  `).bind(text(actor.businessName || "WedPlanned"), actor.workspaceId, jobId, contactId).first();
-  if (!row) throw httpError("The selected client is not linked to this Job.", 404);
-  if (!validEmail(row.email)) throw httpError("The selected client does not have a valid email address.", 409);
-  const communicationId = `crm_communication_${crypto.randomUUID()}`;
+export async function sendJobEmail(
+  db: D1Db,
+  env: WorkflowEmailEnv,
+  actor: WorkflowActor,
+  jobIdInput: unknown,
+  input: any,
+) {
+  requirePermission(
+    actor,
+    "crm:manage",
+  );
+
+  const jobId =
+    text(jobIdInput);
+
+  const contactId =
+    text(input?.contactId);
+
+  const subject =
+    text(input?.subject);
+
+  const body =
+    text(input?.body);
+
+  if (!contactId) {
+    throw httpError(
+      "Choose a client for this email.",
+    );
+  }
+
+  if (!subject) {
+    throw httpError(
+      "Enter an email subject.",
+    );
+  }
+
+  if (!body) {
+    throw httpError(
+      "Enter an email message.",
+    );
+  }
+
+  const row =
+    await db.prepare(`
+      SELECT
+        job.id AS job_id,
+        job.enquiry_id,
+        contact.id AS contact_id,
+        contact.email,
+        contact.display_name,
+        COALESCE(
+          settings.business_name,
+          ?
+        ) AS business_name
+      FROM crm_jobs job
+      JOIN crm_job_contacts relation
+        ON relation.job_id = job.id
+        AND relation.workspace_id =
+          job.workspace_id
+      JOIN crm_contacts contact
+        ON contact.id =
+          relation.contact_id
+        AND contact.workspace_id =
+          job.workspace_id
+      LEFT JOIN workspace_settings settings
+        ON settings.workspace_id =
+          job.workspace_id
+      WHERE job.workspace_id = ?
+        AND job.id = ?
+        AND contact.id = ?
+      LIMIT 1
+    `).bind(
+      text(
+        actor.businessName
+        || "WedPlanned",
+      ),
+      actor.workspaceId,
+      jobId,
+      contactId,
+    ).first();
+
+  if (!row) {
+    throw httpError(
+      "The selected client is not linked to this Job.",
+      404,
+    );
+  }
+
+  if (!validEmail(row.email)) {
+    throw httpError(
+      "The selected client does not have a valid email address.",
+      409,
+    );
+  }
+
+  const deliveryActor:
+    CrmEmailDeliveryActor = {
+      ...actor,
+      businessName:
+        text(
+          row.business_name
+          || actor.businessName
+          || "WedPlanned",
+        ),
+    };
+
+  let attemptedProvider =
+    await workflowAttemptedProvider(
+      db,
+      deliveryActor,
+    );
+
+  const communicationId =
+    `crm_communication_${crypto.randomUUID()}`;
+
   try {
-    const providerMessageId = await sendResend(env, { to: text(row.email), subject, body, businessName: text(row.business_name) });
+    const delivery =
+      await sendCrmEmail(
+        db,
+        env,
+        deliveryActor,
+        {
+          to:
+            text(row.email),
+          subject,
+          body,
+          businessName:
+            text(row.business_name),
+        },
+      );
+
+    attemptedProvider =
+      delivery.provider;
+
     await db.prepare(`
       INSERT INTO crm_communications (
-        id, workspace_id, contact_id, enquiry_id, job_id, channel, direction,
-        subject, body, status, provider, provider_message_id, occurred_at,
-        actor_user_id, actor_email, metadata_json, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, 'email', 'outbound', ?, ?, 'sent', 'resend', ?, CURRENT_TIMESTAMP, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    `).bind(communicationId, actor.workspaceId, contactId, text(row.enquiry_id) || null, jobId, subject, body, providerMessageId, text(actor.userId) || null, lower(actor.email), JSON.stringify({ to: text(row.email) })).run();
-    await recordActivity(db, actor, { workspaceId: actor.workspaceId, jobId, eventType: "communication.email_sent", summary: `Sent email to ${text(row.display_name) || text(row.email)}: ${subject}.`, metadata: { communicationId, providerMessageId } });
+        id,
+        workspace_id,
+        contact_id,
+        enquiry_id,
+        job_id,
+        channel,
+        direction,
+        subject,
+        body,
+        status,
+        provider,
+        provider_message_id,
+        occurred_at,
+        actor_user_id,
+        actor_email,
+        metadata_json,
+        created_at,
+        updated_at
+      ) VALUES (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        'email',
+        'outbound',
+        ?,
+        ?,
+        'sent',
+        ?,
+        ?,
+        CURRENT_TIMESTAMP,
+        ?,
+        ?,
+        ?,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+    `).bind(
+      communicationId,
+      actor.workspaceId,
+      contactId,
+      text(row.enquiry_id) || null,
+      jobId,
+      subject,
+      body,
+      delivery.provider,
+      delivery.providerMessageId,
+      text(actor.userId) || null,
+      lower(actor.email),
+      JSON.stringify({
+        to:
+          text(row.email),
+        provider:
+          delivery.provider,
+        deliveryMode:
+          delivery.deliveryMode,
+      }),
+    ).run();
+
+    await recordActivity(
+      db,
+      actor,
+      {
+        workspaceId:
+          actor.workspaceId,
+        jobId,
+        eventType:
+          "communication.email_sent",
+        summary:
+          `Sent email to ${
+            text(row.display_name)
+            || text(row.email)
+          }: ${subject}.`,
+        metadata: {
+          communicationId,
+          provider:
+            delivery.provider,
+          providerMessageId:
+            delivery.providerMessageId,
+        },
+      },
+    );
   } catch (error: any) {
     await db.prepare(`
       INSERT INTO crm_communications (
-        id, workspace_id, contact_id, enquiry_id, job_id, channel, direction,
-        subject, body, status, provider, occurred_at, actor_user_id, actor_email,
-        metadata_json, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, 'email', 'outbound', ?, ?, 'failed', 'resend', CURRENT_TIMESTAMP, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    `).bind(communicationId, actor.workspaceId, contactId, text(row.enquiry_id) || null, jobId, subject, body, text(actor.userId) || null, lower(actor.email), JSON.stringify({ to: text(row.email), error: text(error?.message) })).run();
+        id,
+        workspace_id,
+        contact_id,
+        enquiry_id,
+        job_id,
+        channel,
+        direction,
+        subject,
+        body,
+        status,
+        provider,
+        occurred_at,
+        actor_user_id,
+        actor_email,
+        metadata_json,
+        created_at,
+        updated_at
+      ) VALUES (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        'email',
+        'outbound',
+        ?,
+        ?,
+        'failed',
+        ?,
+        CURRENT_TIMESTAMP,
+        ?,
+        ?,
+        ?,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+    `).bind(
+      communicationId,
+      actor.workspaceId,
+      contactId,
+      text(row.enquiry_id) || null,
+      jobId,
+      subject,
+      body,
+      attemptedProvider,
+      text(actor.userId) || null,
+      lower(actor.email),
+      JSON.stringify({
+        to:
+          text(row.email),
+        provider:
+          attemptedProvider,
+        error:
+          text(error?.message),
+      }),
+    ).run();
+
     throw error;
   }
-  return getJobWorkflowWorkspace(db, actor, jobId);
+
+  return getJobWorkflowWorkspace(
+    db,
+    actor,
+    jobId,
+  );
 }
+
 
 export async function getJobWorkflowWorkspace(db: D1Db, actor: WorkflowActor, jobIdInput: unknown) {
   requirePermission(actor, "crm:read");
@@ -578,24 +845,66 @@ export async function sendLeadAutoresponder(db: D1Db, env: WorkflowEmailEnv, wor
   };
   const subject = mergeVariables(text(row.autoresponder_subject || "We have received your enquiry"), variables);
   const body = mergeVariables(text(row.autoresponder_message || "Thank you for getting in touch."), variables);
-  const communicationId = `crm_communication_${crypto.randomUUID()}`;
+  const deliveryActor:
+    CrmEmailDeliveryActor = {
+      workspaceId,
+      businessName:
+        text(
+          row.business_name
+          || "WedPlanned",
+        ),
+      accessMode:
+        "system",
+      permissions: [
+        "crm:read",
+        "crm:manage",
+      ],
+    };
+
+  let attemptedProvider =
+    await workflowAttemptedProvider(
+      db,
+      deliveryActor,
+    );
+
+  const communicationId =
+    `crm_communication_${crypto.randomUUID()}`;
   try {
-    const providerMessageId = await sendResend(env, { to: recipient, subject, body, businessName: text(row.business_name) });
+    const delivery =
+      await sendCrmEmail(
+        db,
+        env,
+        deliveryActor,
+        {
+          to:
+            recipient,
+          subject,
+          body,
+          businessName:
+            text(row.business_name),
+        },
+      );
+
+    attemptedProvider =
+      delivery.provider;
+
+    const providerMessageId =
+      delivery.providerMessageId;
     await db.prepare(`
       INSERT INTO crm_communications (
         id, workspace_id, contact_id, enquiry_id, channel, direction, subject, body,
         status, provider, provider_message_id, occurred_at, actor_email, metadata_json,
         created_at, updated_at
-      ) VALUES (?, ?, ?, ?, 'email', 'outbound', ?, ?, 'sent', 'resend', ?, CURRENT_TIMESTAMP, '', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    `).bind(communicationId, workspaceId, text(row.contact_id) || null, text(row.enquiry_id) || null, subject, body, providerMessageId, JSON.stringify({ to: recipient, automated: true, kind: "lead_autoresponder" })).run();
-    return { sent: true, providerMessageId };
+      ) VALUES (?, ?, ?, ?, 'email', 'outbound', ?, ?, 'sent', ?, ?, CURRENT_TIMESTAMP, '', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).bind(communicationId, workspaceId, text(row.contact_id) || null, text(row.enquiry_id) || null, subject, body, delivery.provider, providerMessageId, JSON.stringify({ to: recipient, automated: true, kind: "lead_autoresponder", provider: delivery.provider, deliveryMode: delivery.deliveryMode })).run();
+    return { sent: true, provider: delivery.provider, providerMessageId };
   } catch (error: any) {
     await db.prepare(`
       INSERT INTO crm_communications (
         id, workspace_id, contact_id, enquiry_id, channel, direction, subject, body,
         status, provider, occurred_at, actor_email, metadata_json, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, 'email', 'outbound', ?, ?, 'failed', 'resend', CURRENT_TIMESTAMP, '', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    `).bind(communicationId, workspaceId, text(row.contact_id) || null, text(row.enquiry_id) || null, subject, body, JSON.stringify({ to: recipient, automated: true, kind: "lead_autoresponder", error: text(error?.message) })).run();
-    return { sent: false, error: text(error?.message) };
+      ) VALUES (?, ?, ?, ?, 'email', 'outbound', ?, ?, 'failed', ?, CURRENT_TIMESTAMP, '', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).bind(communicationId, workspaceId, text(row.contact_id) || null, text(row.enquiry_id) || null, subject, body, attemptedProvider, JSON.stringify({ to: recipient, automated: true, kind: "lead_autoresponder", provider: attemptedProvider, error: text(error?.message) })).run();
+    return { sent: false, provider: attemptedProvider, error: text(error?.message) };
   }
 }

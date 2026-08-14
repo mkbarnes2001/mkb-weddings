@@ -40,7 +40,7 @@ def main() -> None:
         con,
         "SELECT value FROM schema_meta "
         "WHERE key='schema_version'",
-    )[0] == "40"
+    )[0] == "41"
 
     # Simulate the exact durable records created by the
     # source-only provisioner.
@@ -396,7 +396,7 @@ def main() -> None:
         "  CRM/workflow/questionnaire setup: existing tenant-scoped lazy initialisers retained"
     )
     print(
-        "  current canonical schema: 39"
+        "  current canonical schema: 41"
     )
 
 
