@@ -242,6 +242,13 @@ export type QuestionnaireInstance = {
   openedAt?: string;
   completedAt?: string;
   lastSavedAt?: string;
+  lastSavedByType?:
+    | ""
+    | "client"
+    | "professional";
+  lastSavedByUserId?: string;
+  lastSavedByIdentityId?: string;
+  lastSavedByLabel?: string;
   responses: Record<string, unknown>;
   files: QuestionnaireFile[];
   jobTitle?: string;
@@ -953,6 +960,45 @@ export type CrmQuoteEmailTemplateChoice = {
   default: boolean;
 };
 
+export type CrmQuoteBookingTemplateChoice = {
+  id: string;
+  name: string;
+  version: number;
+};
+
+export type CrmQuoteBookingPackPreview = {
+  frozen: boolean;
+  legacyFallback: boolean;
+  contractTemplateId: string;
+  questionnaireTemplateId: string;
+  autoCreateInvoice: boolean;
+  contractTemplates:
+    CrmQuoteBookingTemplateChoice[];
+  questionnaireTemplates:
+    CrmQuoteBookingTemplateChoice[];
+  invoice: {
+    depositType:
+      | "none"
+      | "fixed"
+      | "percentage"
+      | string;
+    depositValue: number;
+    depositDueDaysAfterAcceptance: number;
+    finalBalanceDueDaysBeforeEvent: number;
+    questionnaireDueDaysBeforeEvent: number;
+    invoiceNotes: string;
+    invoiceTerms: string;
+    paymentSchedule:
+      Record<string, unknown>;
+  };
+};
+
+export type CrmQuoteBookingPackInput = {
+  contractTemplateId?: string;
+  questionnaireTemplateId?: string;
+  autoCreateInvoice?: boolean;
+};
+
 export type CrmQuoteSendPreview = {
   quoteId: string;
   reference: string;
@@ -977,10 +1023,14 @@ export type CrmQuoteSendPreview = {
   attachments:
     Array<Record<string, unknown>>;
   attachmentDeliveryReady: boolean;
+  bookingPack: CrmQuoteBookingPackPreview;
+
 };
 
 export type CrmQuoteSendInput = {
   templateId?: string;
   subject: string;
   body: string;
+  bookingPack?: CrmQuoteBookingPackInput;
+
 };

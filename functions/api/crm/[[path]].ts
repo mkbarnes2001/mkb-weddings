@@ -36,6 +36,7 @@ import {
   inviteJobClient,
   rejectSupplierSubmission,
   revokeJobClientAccess,
+  saveQuestionnaireInstanceAdmin,
   saveQuestionnaireTemplate,
 } from "../../../serverless/client-portal-d1";
 import {
@@ -914,6 +915,29 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 
     if (parts[0] === "questionnaires" && parts[1] === "templates" && parts[2] && parts.length === 3) {
       return Response.json({ ok: true, template: await saveQuestionnaireTemplate(context.env.MKB_DB, actor, parts[2], body) });
+    }
+
+    if (
+      parts[0] === "questionnaires"
+      && parts[1] === "instances"
+      && parts[2]
+      && parts.length === 3
+    ) {
+      return Response.json({
+        ok: true,
+        questionnaire:
+          await saveQuestionnaireInstanceAdmin(
+            context.env.MKB_DB,
+            actor,
+            parts[2],
+            body,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
     }
     if (parts[0] === "workflows" && parts[1] === "templates" && parts[2] && parts.length === 3) {
       return Response.json({ ok: true, template: await saveWorkflowTemplate(context.env.MKB_DB, actor, parts[2], body) });

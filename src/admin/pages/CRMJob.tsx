@@ -37,7 +37,12 @@ import {
 import { AdminAccordion, AdminButton, AdminEmptyState, AdminField, AdminPage, AdminPageHeader, AdminPanel, AdminStatus } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
-import type { CrmJobWorkspace, CrmSupplierSubmission, QuestionnaireField } from "../types/crm";
+import type {
+  CrmJobWorkspace,
+  CrmSupplierSubmission,
+  QuestionnaireField,
+  QuestionnaireInstance,
+} from "../types/crm";
 
 function dateLabel(value?: string) {
   if (!value) return "Date TBC";
@@ -89,6 +94,667 @@ function workflowState(workspace: CrmJobWorkspace) {
   ];
 }
 
+
+type ProfessionalSupplierAnswer = {
+  mode:
+    | "existing"
+    | "unlisted";
+  supplierId: string;
+  name: string;
+  role: string;
+  website: string;
+  instagram: string;
+  email: string;
+  phone: string;
+  location: string;
+  county: string;
+};
+
+function emptyProfessionalSupplier(
+  field: QuestionnaireField,
+  mode:
+    | "existing"
+    | "unlisted" = "existing",
+): ProfessionalSupplierAnswer {
+  return {
+    mode,
+    supplierId: "",
+    name: "",
+    role:
+      field.supplierRole
+      || field.supplierCategory
+      || "Supplier",
+    website: "",
+    instagram: "",
+    email: "",
+    phone: "",
+    location: "",
+    county: "",
+  };
+}
+
+function professionalSupplierAnswers(
+  value: unknown,
+  field: QuestionnaireField,
+): ProfessionalSupplierAnswer[] {
+  if (Array.isArray(value)) {
+    return value
+      .filter(
+        (item) =>
+          item
+          && typeof item
+            === "object",
+      )
+      .map(
+        (item) =>
+          Object.assign(
+            emptyProfessionalSupplier(
+              field,
+            ),
+            item,
+          ),
+      );
+  }
+
+  if (
+    value
+    && typeof value === "object"
+  ) {
+    return [
+      Object.assign(
+        emptyProfessionalSupplier(
+          field,
+        ),
+        value,
+      ),
+    ];
+  }
+
+  return [];
+}
+
+function ProfessionalQuestionnaireField({
+  field,
+  value,
+  suppliers,
+  fileCount,
+  disabled,
+  onChange,
+}: {
+  field: QuestionnaireField;
+  value: unknown;
+  suppliers:
+    CrmJobWorkspace["supplierDirectory"];
+  fileCount: number;
+  disabled: boolean;
+  onChange:
+    (value: unknown) => void;
+}) {
+  if (field.type === "heading") {
+    return (
+      <div className="crm-questionnaire-editor__heading">
+        {field.label}
+      </div>
+    );
+  }
+
+  if (field.type === "description") {
+    return (
+      <p className="crm-questionnaire-editor__description">
+        {field.label}
+      </p>
+    );
+  }
+
+  if (field.type === "file") {
+    return (
+      <div className="crm-questionnaire-editor__field">
+        <span>
+          {field.label}
+          {field.required ? (
+            <b> *</b>
+          ) : null}
+        </span>
+
+        {field.help ? (
+          <small>
+            {field.help}
+          </small>
+        ) : null}
+
+        <div className="crm-questionnaire-editor__file-note">
+          {fileCount
+            ? `${fileCount} file${
+                fileCount === 1
+                  ? ""
+                  : "s"
+              } currently attached.`
+            : "No file currently attached."}
+          {" "}
+          Questionnaire attachments remain managed through the shared Files area and Client Portal.
+        </div>
+      </div>
+    );
+  }
+
+  if (field.type === "supplier") {
+    const answers =
+      professionalSupplierAnswers(
+        value,
+        field,
+      );
+
+    const availableSuppliers =
+      suppliers.filter(
+        (supplier) =>
+          !field.supplierCategory
+          || supplier.category
+            .toLowerCase()
+            .includes(
+              field.supplierCategory
+                .toLowerCase(),
+            ),
+      );
+
+    function updateSupplier(
+      index: number,
+      next:
+        ProfessionalSupplierAnswer,
+    ) {
+      onChange(
+        answers.map(
+          (answer, itemIndex) =>
+            itemIndex === index
+              ? next
+              : answer,
+        ),
+      );
+    }
+
+    function removeSupplier(
+      index: number,
+    ) {
+      onChange(
+        answers.filter(
+          (_, itemIndex) =>
+            itemIndex !== index,
+        ),
+      );
+    }
+
+    function addSupplier(
+      mode:
+        | "existing"
+        | "unlisted",
+    ) {
+      if (
+        !field.multiple
+        && answers.length
+      ) {
+        return;
+      }
+
+      onChange([
+        ...answers,
+        emptyProfessionalSupplier(
+          field,
+          mode,
+        ),
+      ]);
+    }
+
+    return (
+      <div className="crm-questionnaire-editor__field">
+        <span>
+          {field.label}
+          {field.required ? (
+            <b> *</b>
+          ) : null}
+        </span>
+
+        {field.help ? (
+          <small>
+            {field.help}
+          </small>
+        ) : null}
+
+        <div className="crm-questionnaire-editor__suppliers">
+          {answers.map(
+            (answer, index) => (
+              <div
+                key={`${index}_${answer.mode}_${answer.supplierId}_${answer.name}`}
+                className="crm-questionnaire-editor__supplier"
+              >
+                <div className="crm-questionnaire-editor__supplier-head">
+                  <select
+                    className="admin-select"
+                    value={answer.mode}
+                    disabled={disabled}
+                    onChange={(event) => {
+                      const mode =
+                        event.target.value
+                        as
+                          | "existing"
+                          | "unlisted";
+
+                      updateSupplier(
+                        index,
+                        emptyProfessionalSupplier(
+                          field,
+                          mode,
+                        ),
+                      );
+                    }}
+                  >
+                    <option value="existing">
+                      Supplier Master
+                    </option>
+
+                    {field.allowUnlisted ? (
+                      <option value="unlisted">
+                        Supplier not listed
+                      </option>
+                    ) : null}
+                  </select>
+
+                  <button
+                    type="button"
+                    className="admin-button admin-button--ghost admin-button--sm"
+                    disabled={disabled}
+                    onClick={() =>
+                      removeSupplier(
+                        index,
+                      )
+                    }
+                  >
+                    Remove
+                  </button>
+                </div>
+
+                {answer.mode === "existing" ? (
+                  <select
+                    className="admin-select"
+                    value={
+                      answer.supplierId
+                    }
+                    disabled={disabled}
+                    onChange={(event) => {
+                      const supplier =
+                        availableSuppliers
+                          .find(
+                            (item) =>
+                              item.id
+                              === event
+                                .target
+                                .value,
+                          );
+
+                      if (!supplier) {
+                        updateSupplier(
+                          index,
+                          emptyProfessionalSupplier(
+                            field,
+                            "existing",
+                          ),
+                        );
+
+                        return;
+                      }
+
+                      updateSupplier(
+                        index,
+                        {
+                          mode:
+                            "existing",
+                          supplierId:
+                            supplier.id,
+                          name:
+                            supplier.name,
+                          role:
+                            answer.role
+                            || field
+                              .supplierRole
+                            || field
+                              .supplierCategory
+                            || "Supplier",
+                          website:
+                            supplier.website
+                            || "",
+                          instagram:
+                            supplier.instagram
+                            || "",
+                          email:
+                            supplier.email
+                            || "",
+                          phone:
+                            supplier.phone
+                            || "",
+                          location:
+                            supplier.location
+                            || "",
+                          county:
+                            supplier.county
+                            || "",
+                        },
+                      );
+                    }}
+                  >
+                    <option value="">
+                      Choose supplier…
+                    </option>
+
+                    {availableSuppliers.map(
+                      (supplier) => (
+                        <option
+                          key={
+                            supplier.id
+                          }
+                          value={
+                            supplier.id
+                          }
+                        >
+                          {supplier.name}
+                          {supplier.category
+                            ? ` · ${supplier.category}`
+                            : ""}
+                          {supplier.location
+                            ? ` · ${supplier.location}`
+                            : supplier.county
+                              ? ` · ${supplier.county}`
+                              : ""}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                ) : (
+                  <div className="crm-questionnaire-editor__unlisted">
+                    <input
+                      className="admin-input"
+                      value={answer.name}
+                      disabled={disabled}
+                      placeholder="Supplier business name"
+                      onChange={(event) =>
+                        updateSupplier(
+                          index,
+                          {
+                            ...answer,
+                            name:
+                              event.target
+                                .value,
+                          },
+                        )
+                      }
+                    />
+
+                    <input
+                      className="admin-input"
+                      value={
+                        answer.website
+                      }
+                      disabled={disabled}
+                      placeholder="Website"
+                      onChange={(event) =>
+                        updateSupplier(
+                          index,
+                          {
+                            ...answer,
+                            website:
+                              event.target
+                                .value,
+                          },
+                        )
+                      }
+                    />
+
+                    <input
+                      className="admin-input"
+                      value={
+                        answer.instagram
+                      }
+                      disabled={disabled}
+                      placeholder="Instagram"
+                      onChange={(event) =>
+                        updateSupplier(
+                          index,
+                          {
+                            ...answer,
+                            instagram:
+                              event.target
+                                .value,
+                          },
+                        )
+                      }
+                    />
+
+                    <input
+                      className="admin-input"
+                      value={answer.email}
+                      disabled={disabled}
+                      placeholder="Email"
+                      onChange={(event) =>
+                        updateSupplier(
+                          index,
+                          {
+                            ...answer,
+                            email:
+                              event.target
+                                .value,
+                          },
+                        )
+                      }
+                    />
+
+                    <input
+                      className="admin-input"
+                      value={
+                        answer.location
+                      }
+                      disabled={disabled}
+                      placeholder="Location"
+                      onChange={(event) =>
+                        updateSupplier(
+                          index,
+                          {
+                            ...answer,
+                            location:
+                              event.target
+                                .value,
+                          },
+                        )
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            ),
+          )}
+
+          {(
+            field.multiple
+            || !answers.length
+          ) ? (
+            <div className="crm-questionnaire-editor__supplier-actions">
+              <button
+                type="button"
+                className="admin-button admin-button--secondary admin-button--sm"
+                disabled={disabled}
+                onClick={() =>
+                  addSupplier(
+                    "existing",
+                  )
+                }
+              >
+                Add supplier
+              </button>
+
+              {field.allowUnlisted ? (
+                <button
+                  type="button"
+                  className="admin-button admin-button--ghost admin-button--sm"
+                  disabled={disabled}
+                  onClick={() =>
+                    addSupplier(
+                      "unlisted",
+                    )
+                  }
+                >
+                  Add unlisted supplier
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  const selected =
+    Array.isArray(value)
+      ? value as string[]
+      : [];
+
+  return (
+    <div className="crm-questionnaire-editor__field">
+      <span>
+        {field.label}
+        {field.required ? (
+          <b> *</b>
+        ) : null}
+      </span>
+
+      {field.help ? (
+        <small>
+          {field.help}
+        </small>
+      ) : null}
+
+      {field.type === "short_text" ? (
+        <input
+          className="admin-input"
+          value={String(
+            value ?? "",
+          )}
+          disabled={disabled}
+          onChange={(event) =>
+            onChange(
+              event.target.value,
+            )
+          }
+        />
+      ) : null}
+
+      {field.type === "long_text" ? (
+        <textarea
+          className="admin-textarea"
+          value={String(
+            value ?? "",
+          )}
+          disabled={disabled}
+          onChange={(event) =>
+            onChange(
+              event.target.value,
+            )
+          }
+        />
+      ) : null}
+
+      {field.type === "select" ? (
+        <select
+          className="admin-select"
+          value={String(
+            value ?? "",
+          )}
+          disabled={disabled}
+          onChange={(event) =>
+            onChange(
+              event.target.value,
+            )
+          }
+        >
+          <option value="">
+            Choose an option
+          </option>
+
+          {field.options.map(
+            (option) => (
+              <option
+                key={option}
+                value={option}
+              >
+                {option}
+              </option>
+            ),
+          )}
+        </select>
+      ) : null}
+
+      {field.type === "radio" ? (
+        <div className="crm-questionnaire-editor__choices">
+          {field.options.map(
+            (option) => (
+              <label key={option}>
+                <input
+                  type="radio"
+                  name={`professional_${field.id}`}
+                  checked={
+                    value === option
+                  }
+                  disabled={disabled}
+                  onChange={() =>
+                    onChange(option)
+                  }
+                />
+                <span>
+                  {option}
+                </span>
+              </label>
+            ),
+          )}
+        </div>
+      ) : null}
+
+      {field.type === "checkbox" ? (
+        <div className="crm-questionnaire-editor__choices">
+          {field.options.map(
+            (option) => (
+              <label key={option}>
+                <input
+                  type="checkbox"
+                  checked={
+                    selected.includes(
+                      option,
+                    )
+                  }
+                  disabled={disabled}
+                  onChange={(event) =>
+                    onChange(
+                      event.target.checked
+                        ? [
+                            ...selected,
+                            option,
+                          ]
+                        : selected
+                            .filter(
+                              (item) =>
+                                item
+                                !== option,
+                            ),
+                    )
+                  }
+                />
+                <span>
+                  {option}
+                </span>
+              </label>
+            ),
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+
 export function CRMJob() {
   const { id = "" } = useParams();
   const { auth } = useProfessionalAuth();
@@ -104,8 +770,24 @@ export function CRMJob() {
   const [workflowTemplateId, setWorkflowTemplateId] = useState("");
   const [taskDraft, setTaskDraft] = useState({ title: "", description: "", taskType: "task", priority: "normal", dueAt: "" });
   const [communicationDraft, setCommunicationDraft] = useState({ channel: "note", direction: "internal", contactId: "", subject: "", body: "" });
+
+  const [
+    questionnaireEditorId,
+    setQuestionnaireEditorId,
+  ] = useState("");
+
+  const [
+    questionnaireDraft,
+    setQuestionnaireDraft,
+  ] = useState<
+    Record<string, unknown>
+  >({});
+
   const canManage = auth.permissions.includes("crm:manage");
   const canManageCommercial = canManage && auth.accessMode !== "support";
+  const canEditQuestionnaires =
+    canManage
+    && auth.accessMode !== "support";
 
   async function load() {
     setLoading(true);
@@ -215,6 +897,122 @@ export function CRMJob() {
           ? sendError.message
           : "Unable to send the contract "
             + "to the Client Portal.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function beginQuestionnaireEdit(
+    questionnaire:
+      QuestionnaireInstance,
+  ) {
+    if (!canEditQuestionnaires) {
+      return;
+    }
+
+    setQuestionnaireEditorId(
+      questionnaire.id,
+    );
+
+    setQuestionnaireDraft(
+      JSON.parse(
+        JSON.stringify(
+          questionnaire.responses
+          || {},
+        ),
+      ),
+    );
+
+    setError("");
+    setMessage("");
+  }
+
+  function cancelQuestionnaireEdit() {
+    setQuestionnaireEditorId("");
+    setQuestionnaireDraft({});
+  }
+
+  function updateQuestionnaireAnswer(
+    fieldId: string,
+    value: unknown,
+  ) {
+    setQuestionnaireDraft(
+      (current) => ({
+        ...current,
+        [fieldId]:
+          value,
+      }),
+    );
+  }
+
+  async function saveQuestionnaireAnswers(
+    questionnaire:
+      QuestionnaireInstance,
+    complete = false,
+  ) {
+    if (!canEditQuestionnaires) {
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const saved =
+        await AdminApiService
+          .saveQuestionnaireInstance(
+            questionnaire.id,
+            {
+              responses:
+                questionnaireDraft,
+              complete,
+            },
+          );
+
+      setWorkspace(
+        (current) =>
+          current
+            ? {
+                ...current,
+                questionnaires:
+                  current.questionnaires
+                    .map(
+                      (item) =>
+                        item.id
+                        === saved.id
+                          ? saved
+                          : item,
+                    ),
+              }
+            : current,
+      );
+
+      setQuestionnaireDraft(
+        JSON.parse(
+          JSON.stringify(
+            saved.responses
+            || {},
+          ),
+        ),
+      );
+
+      setMessage(
+        complete
+          && questionnaire.status
+            !== "completed"
+          ? "Questionnaire marked complete. It remains editable by the client and WedCRM."
+          : saved.status
+            === "completed"
+            ? "Questionnaire changes saved. It remains marked complete."
+            : "Questionnaire changes saved.",
+      );
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Unable to save questionnaire answers.",
       );
     } finally {
       setSaving(false);
@@ -692,10 +1490,382 @@ export function CRMJob() {
             <div className="crm-job-clients">{workspace.contacts.map((contact) => { const access = activeAccessByContact.get(contact.id); return <article key={contact.id}><div><strong>{contact.displayName}</strong><p>{contact.role}</p><a href={contact.email ? `mailto:${contact.email}` : undefined}>{contact.email || "Email required"}</a>{contact.phone ? <span>{contact.phone}</span> : null}</div><div className="crm-job-client-actions"><Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/crm/contacts/${contact.id}`}><Pencil className="admin-button__icon" />Edit client</Link>{access ? <AdminStatus tone={access.acceptedAt ? "success" : "warning"}>{access.acceptedAt ? "portal active" : "invited"}</AdminStatus> : null}<AdminButton variant="primary" size="sm" icon={Mail} disabled={saving || !canManage || !contact.email} onClick={() => void invite(contact.id)}>{access ? "Send new link" : "Invite client"}</AdminButton>{access ? <AdminButton variant="danger" size="sm" icon={ShieldX} disabled={saving || !canManage} onClick={() => void revoke(access.identityId)}>Revoke</AdminButton> : null}</div></article>; })}</div>
           </AdminAccordion></div>
 
-          <div id="job-questionnaires" className="scroll-mt-5"><AdminAccordion title="Questionnaires" description="Assign forms and review responses." icon={ClipboardList} summary={<AdminStatus tone="neutral">{workspace.questionnaires.length}</AdminStatus>}>
-            {canManage ? <div className="crm-questionnaire-assign"><AdminField label="Template"><select className="admin-select" value={templateId} disabled={!canManage} onChange={(event) => setTemplateId(event.target.value)}>{workspace.templates.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}</select></AdminField><AdminField label="Client"><select className="admin-select" value={contactId} disabled={!canManage} onChange={(event) => setContactId(event.target.value)}>{workspace.contacts.map((contact) => <option key={contact.id} value={contact.id}>{contact.displayName} ({contact.role})</option>)}</select></AdminField><AdminField label="Due date"><input className="admin-input" type="date" value={dueAt} disabled={!canManage} onChange={(event) => setDueAt(event.target.value)} /></AdminField><AdminButton variant="primary" icon={Plus} disabled={saving || !canManage || !templateId || !contactId} onClick={() => void assign()}>Assign questionnaire</AdminButton></div> : null}
-            {!workspace.questionnaires.length ? <AdminEmptyState icon={FileText} title="No questionnaires assigned" description="Assign a template above when client information is needed." /> : <div className="grid gap-3">{workspace.questionnaires.map((item) => <article key={item.id} className="questionnaire-instance-card"><div className="flex flex-wrap items-start justify-between gap-3"><div><h3>{item.title}</h3><p>{item.assignedContactName || "Client not assigned"}{item.dueAt ? ` · due ${dateLabel(item.dueAt)}` : ""}</p></div><AdminStatus tone={statusTone(item.status)}>{item.status.replace(/_/g, " ")}</AdminStatus></div>{item.introduction ? <p className="mt-3 text-[10px] leading-5 text-neutral-500">{item.introduction}</p> : null}<div className="mt-3 grid gap-2">{item.fields.filter((field) => !["heading", "description", "file"].includes(field.type)).map((field) => <div key={field.id} className="questionnaire-response-row"><span>{field.label}</span><strong>{answerLabel(item.responses[field.id], field)}</strong></div>)}</div></article>)}</div>}
-          </AdminAccordion></div>
+          <div
+            id="job-questionnaires"
+            className="scroll-mt-5"
+          >
+            <AdminAccordion
+              title="Questionnaires"
+              description="Assign, review and update the same living planning forms your clients use."
+              icon={ClipboardList}
+              summary={
+                <AdminStatus tone="neutral">
+                  {workspace.questionnaires.length}
+                </AdminStatus>
+              }
+            >
+              {canManage ? (
+                <div className="crm-questionnaire-assign">
+                  <AdminField label="Template">
+                    <select
+                      className="admin-select"
+                      value={templateId}
+                      disabled={!canManage}
+                      onChange={(event) =>
+                        setTemplateId(
+                          event.target.value,
+                        )
+                      }
+                    >
+                      {workspace.templates.map(
+                        (template) => (
+                          <option
+                            key={template.id}
+                            value={template.id}
+                          >
+                            {template.name}
+                          </option>
+                        ),
+                      )}
+                    </select>
+                  </AdminField>
+
+                  <AdminField label="Client">
+                    <select
+                      className="admin-select"
+                      value={contactId}
+                      disabled={!canManage}
+                      onChange={(event) =>
+                        setContactId(
+                          event.target.value,
+                        )
+                      }
+                    >
+                      {workspace.contacts.map(
+                        (contact) => (
+                          <option
+                            key={contact.id}
+                            value={contact.id}
+                          >
+                            {contact.displayName}
+                            {" "}
+                            ({contact.role})
+                          </option>
+                        ),
+                      )}
+                    </select>
+                  </AdminField>
+
+                  <AdminField
+                    label="Planning target"
+                    help="Advisory only. The questionnaire remains editable after this date."
+                  >
+                    <input
+                      className="admin-input"
+                      type="date"
+                      value={dueAt}
+                      disabled={!canManage}
+                      onChange={(event) =>
+                        setDueAt(
+                          event.target.value,
+                        )
+                      }
+                    />
+                  </AdminField>
+
+                  <AdminButton
+                    variant="primary"
+                    icon={Plus}
+                    disabled={
+                      saving
+                      || !canManage
+                      || !templateId
+                      || !contactId
+                    }
+                    onClick={() =>
+                      void assign()
+                    }
+                  >
+                    Assign questionnaire
+                  </AdminButton>
+                </div>
+              ) : null}
+
+              {!workspace.questionnaires.length ? (
+                <AdminEmptyState
+                  icon={FileText}
+                  title="No questionnaires assigned"
+                  description="Assign a template above when client information is needed."
+                />
+              ) : (
+                <div className="crm-questionnaire-instance-list">
+                  {workspace.questionnaires.map(
+                    (item) => {
+                      const editing =
+                        questionnaireEditorId
+                        === item.id;
+
+                      const lastEditor =
+                        item.lastSavedByLabel
+                        || (
+                          item.lastSavedByType
+                          === "client"
+                            ? item.assignedContactName
+                              || "Client"
+                            : item.lastSavedByType
+                              === "professional"
+                              ? "WedCRM user"
+                              : ""
+                        );
+
+                      return (
+                        <article
+                          key={item.id}
+                          className={`questionnaire-instance-card${
+                            editing
+                              ? " is-editing"
+                              : ""
+                          }`}
+                        >
+                          <header className="crm-questionnaire-instance__header">
+                            <div>
+                              <h3>
+                                {item.title}
+                              </h3>
+
+                              <p>
+                                {item.assignedContactName
+                                  || "Client not assigned"}
+
+                                {item.dueAt
+                                  ? ` · planning target ${dateLabel(item.dueAt)}`
+                                  : ""}
+                              </p>
+
+                              {item.lastSavedAt ? (
+                                <small>
+                                  Last updated{" "}
+                                  {new Date(
+                                    item.lastSavedAt,
+                                  ).toLocaleString(
+                                    "en-GB",
+                                  )}
+                                  {lastEditor
+                                    ? ` by ${lastEditor}`
+                                    : ""}
+                                  {item.lastSavedByType
+                                    ? ` · ${item.lastSavedByType === "professional" ? "WedCRM" : "client"}`
+                                    : ""}
+                                </small>
+                              ) : (
+                                <small>
+                                  No answers saved yet.
+                                </small>
+                              )}
+                            </div>
+
+                            <div className="crm-questionnaire-instance__actions">
+                              <AdminStatus
+                                tone={
+                                  statusTone(
+                                    item.status,
+                                  )
+                                }
+                              >
+                                {item.status.replace(
+                                  /_/g,
+                                  " ",
+                                )}
+                              </AdminStatus>
+
+                              {canEditQuestionnaires ? (
+                                editing ? (
+                                  <AdminButton
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={saving}
+                                    onClick={() =>
+                                      cancelQuestionnaireEdit()
+                                    }
+                                  >
+                                    Close editor
+                                  </AdminButton>
+                                ) : (
+                                  <AdminButton
+                                    variant="secondary"
+                                    size="sm"
+                                    disabled={saving}
+                                    onClick={() =>
+                                      beginQuestionnaireEdit(
+                                        item,
+                                      )
+                                    }
+                                  >
+                                    Edit answers
+                                  </AdminButton>
+                                )
+                              ) : null}
+                            </div>
+                          </header>
+
+                          {item.introduction ? (
+                            <p className="crm-questionnaire-instance__intro">
+                              {item.introduction}
+                            </p>
+                          ) : null}
+
+                          {editing ? (
+                            <div className="crm-questionnaire-editor">
+                              <div className="crm-questionnaire-editor__notice">
+                                You are editing the same questionnaire answers visible to the client. Saving here updates their Client Portal; it does not create a separate professional copy.
+                              </div>
+
+                              <div className="crm-questionnaire-editor__fields">
+                                {item.fields.map(
+                                  (field) => (
+                                    <ProfessionalQuestionnaireField
+                                      key={
+                                        field.id
+                                      }
+                                      field={
+                                        field
+                                      }
+                                      value={
+                                        questionnaireDraft[
+                                          field.id
+                                        ]
+                                      }
+                                      suppliers={
+                                        workspace.supplierDirectory
+                                      }
+                                      fileCount={
+                                        item.files.filter(
+                                          (file) =>
+                                            file.fieldKey
+                                            === field.id,
+                                        ).length
+                                      }
+                                      disabled={
+                                        saving
+                                        || !canEditQuestionnaires
+                                      }
+                                      onChange={(
+                                        value,
+                                      ) =>
+                                        updateQuestionnaireAnswer(
+                                          field.id,
+                                          value,
+                                        )
+                                      }
+                                    />
+                                  ),
+                                )}
+                              </div>
+
+                              <footer className="crm-questionnaire-editor__footer">
+                                <div>
+                                  {item.status === "completed" ? (
+                                    <>
+                                      <AdminStatus tone="success">
+                                        Complete
+                                      </AdminStatus>
+                                      <span>
+                                        This milestone stays complete when later details are updated.
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <span>
+                                      Save work at any time, or mark the planning questionnaire complete when the required details are ready.
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div>
+                                  <AdminButton
+                                    variant="secondary"
+                                    disabled={
+                                      saving
+                                      || !canEditQuestionnaires
+                                    }
+                                    onClick={() =>
+                                      void saveQuestionnaireAnswers(
+                                        item,
+                                        false,
+                                      )
+                                    }
+                                  >
+                                    {saving
+                                      ? "Saving…"
+                                      : "Save changes"}
+                                  </AdminButton>
+
+                                  {item.status !== "completed" ? (
+                                    <AdminButton
+                                      variant="primary"
+                                      icon={CheckCircle2}
+                                      disabled={
+                                        saving
+                                        || !canEditQuestionnaires
+                                      }
+                                      onClick={() =>
+                                        void saveQuestionnaireAnswers(
+                                          item,
+                                          true,
+                                        )
+                                      }
+                                    >
+                                      Mark as complete
+                                    </AdminButton>
+                                  ) : null}
+                                </div>
+                              </footer>
+                            </div>
+                          ) : (
+                            <div className="crm-questionnaire-instance__responses">
+                              {item.fields
+                                .filter(
+                                  (field) =>
+                                    ![
+                                      "heading",
+                                      "description",
+                                      "file",
+                                    ].includes(
+                                      field.type,
+                                    ),
+                                )
+                                .map(
+                                  (field) => (
+                                    <div
+                                      key={
+                                        field.id
+                                      }
+                                      className="questionnaire-response-row"
+                                    >
+                                      <span>
+                                        {field.label}
+                                      </span>
+
+                                      <strong>
+                                        {answerLabel(
+                                          item.responses[
+                                            field.id
+                                          ],
+                                          field,
+                                        )}
+                                      </strong>
+                                    </div>
+                                  ),
+                                )}
+                            </div>
+                          )}
+                        </article>
+                      );
+                    },
+                  )}
+                </div>
+              )}
+            </AdminAccordion>
+          </div>
 
           <AdminAccordion title="Supplier team" description="Approved Wedding suppliers and client suggestions." icon={Store} summary={pendingSubmissions.length ? <AdminStatus tone="warning">{pendingSubmissions.length} review</AdminStatus> : <AdminStatus tone="neutral">{workspace.linkedSuppliers.length} linked</AdminStatus>}>
             {pendingSubmissions.length ? <div className="crm-supplier-review"><div className="crm-supplier-review__heading"><AdminStatus tone="warning">{pendingSubmissions.length} needs review</AdminStatus></div>{pendingSubmissions.map((submission) => { const review = supplierReview[submission.id] || { supplierId: "", role: submission.role, notes: "" }; return <article key={submission.id}><div className="flex items-start justify-between gap-2"><div><strong>{submission.name || "Unnamed supplier"}</strong><p>{submission.website || submission.instagram || submission.email || submission.location || "No contact details supplied"}</p></div><AdminStatus tone="warning">pending</AdminStatus></div><AdminField label="Wedding role"><input className="admin-input" value={review.role} disabled={!canManage} onChange={(event) => setSupplierReview((current) => ({ ...current, [submission.id]: { ...review, role: event.target.value } }))} /></AdminField><AdminField label="Approval action"><select className="admin-select" value={review.supplierId} disabled={!canManage} onChange={(event) => setSupplierReview((current) => ({ ...current, [submission.id]: { ...review, supplierId: event.target.value } }))}><option value="">Create new Supplier Master record</option>{workspace.supplierDirectory.map((supplier) => <option key={supplier.id} value={supplier.id}>Merge into {supplier.name}{supplier.category ? ` · ${supplier.category}` : ""}</option>)}</select></AdminField><AdminField label="Review note"><input className="admin-input" value={review.notes} disabled={!canManage} onChange={(event) => setSupplierReview((current) => ({ ...current, [submission.id]: { ...review, notes: event.target.value } }))} /></AdminField><div className="flex flex-wrap gap-2"><AdminButton variant="primary" size="sm" icon={CheckCircle2} disabled={saving || !canManage} onClick={() => void approveSupplier(submission)}>Approve</AdminButton><AdminButton variant="danger" size="sm" icon={X} disabled={saving || !canManage} onClick={() => void rejectSupplier(submission)}>Reject</AdminButton></div></article>; })}</div> : null}

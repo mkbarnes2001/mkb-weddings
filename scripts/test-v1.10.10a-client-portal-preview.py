@@ -107,16 +107,11 @@ for token in [
     assert token in css, token
 
 
-# Source-only change: no schema 43 migration.
-migration_dir = (
-    ROOT
-    / "d1"
-    / "migrations"
-)
-
-assert not list(
-    migration_dir.glob("043*")
-)
+# v1.10.10a's Client Portal preview was a source-only feature.
+# Later releases may legitimately advance the repository schema.
+# Its enduring regression boundary is the read-only Admin behaviour
+# asserted above: no client impersonation, public auth or mutation
+# surface is used by the professional preview.
 
 
 print(
@@ -141,7 +136,7 @@ print(
     "  responsive portal preview: verified"
 )
 print(
-    "  schema remains 42: verified"
+    "  historical source-only preview boundary: verified"
 )
 
 # v1.10.10a runtime import and intermediate-width regression

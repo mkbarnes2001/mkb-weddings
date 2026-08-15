@@ -2030,6 +2030,31 @@ export class AdminApiService {
     return result.questionnaire;
   }
 
+  static async saveQuestionnaireInstance(
+    instanceId: string,
+    input: {
+      responses:
+        Record<string, unknown>;
+      complete?: boolean;
+    },
+  ) {
+    const result =
+      await request<{
+        ok: true;
+        questionnaire:
+          QuestionnaireInstance;
+      }>(
+        `/api/crm/questionnaires/instances/${encodeURIComponent(instanceId)}`,
+        {
+          method: "PUT",
+          body:
+            JSON.stringify(input),
+        },
+      );
+
+    return result.questionnaire;
+  }
+
   static async inviteCrmClient(jobId: string, contactId: string) {
     const result = await request<{ ok: true; invitation: { ok: true; message: string; expiresAt: string } }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/invite`, {
       method: "POST",

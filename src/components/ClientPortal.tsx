@@ -410,7 +410,13 @@ export function ClientPortal() {
       const result = await jsonRequest<{ ok: true; questionnaire: PortalQuestionnaire }>(portalApiPath(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}`), { method: "PUT", body: JSON.stringify({ responses, submit }) });
       setQuestionnaire(result.questionnaire);
       setResponses(result.questionnaire.responses || {});
-      setMessage(submit ? "Questionnaire submitted. Thank you." : "Progress saved. You can safely return later.");
+      setMessage(
+        submit
+          ? "Planning details marked complete. You can continue updating them at any time."
+          : result.questionnaire.status === "completed"
+            ? "Changes saved. Your planning details remain marked complete."
+            : "Changes saved. You can safely return later.",
+      );
       await loadPortal();
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Unable to save questionnaire.");
@@ -906,18 +912,55 @@ export function ClientPortal() {
             <footer className="portal-quote-actions">{quote.currentVersion.status === "accepted" ? <div className="client-portal-complete"><CheckCircle2 /><span>Quote accepted. Your booking is active.</span></div> : quote.currentVersion.status === "declined" ? <div className="client-portal-complete muted"><XCircle /><span>This quote was declined.</span></div> : quote.currentVersion.status === "expired" ? <div className="client-portal-complete muted"><XCircle /><span>This quote has expired.</span></div> : <><button className="secondary" disabled={saving} onClick={() => void declineQuote()}><XCircle />Decline quote</button><button disabled={saving || (quote.quoteType !== "fixed" && !selectedOptionId)} onClick={() => void acceptQuote()}><CheckCircle2 />Accept quote</button></>}</footer>
           </article> : !questionnaire ? <div className="client-portal-empty"><FileText /><h2>Select a quote or questionnaire</h2><p>Choose an item from the sidebar to continue.</p></div> : (
             <article className="portal-questionnaire-card">
-              <div className="portal-questionnaire-heading"><button className="client-portal-back" onClick={() => setSelectedId("")}><ArrowLeft />Back</button><span>{selectedJob?.title}</span><h1>{questionnaire.title}</h1>{questionnaire.introduction ? <p>{questionnaire.introduction}</p> : null}<div className="portal-questionnaire-meta"><span>{questionnaire.status.replace(/_/g, " ")}</span>{questionnaire.dueAt ? <span>Due {formatDate(questionnaire.dueAt)}</span> : null}{questionnaire.lastSavedAt ? <span>Saved {new Date(questionnaire.lastSavedAt).toLocaleString("en-GB")}</span> : null}</div></div>
+              <div className="portal-questionnaire-heading"><button className="client-portal-back" onClick={() => setSelectedId("")}><ArrowLeft />Back</button><span>{selectedJob?.title}</span><h1>{questionnaire.title}</h1>{questionnaire.introduction ? <p>{questionnaire.introduction}</p> : null}<div className="portal-questionnaire-meta"><span>{questionnaire.status.replace(/_/g, " ")}</span>{questionnaire.dueAt ? <span>Planning target {formatDate(questionnaire.dueAt)}</span> : null}{questionnaire.lastSavedAt ? <span>Saved {new Date(questionnaire.lastSavedAt).toLocaleString("en-GB")}</span> : null}</div></div>
               <div className="portal-questionnaire-fields">
                 {questionnaire.fields.map((field) => {
                   if (field.type === "heading") return <h2 key={field.id}>{field.label}</h2>;
                   if (field.type === "description") return <p key={field.id} className="portal-question-description">{field.label}</p>;
                   const value = responses[field.id];
                   const files = questionnaire.files.filter((file) => file.fieldKey === field.id);
-                  if (field.type === "supplier") return <div key={field.id} className="portal-question-field"><span>{field.label}{field.required ? <b> *</b> : null}</span>{field.help ? <small>{field.help}</small> : null}<SupplierQuestion field={field} value={value} suppliers={supplierDirectory} disabled={questionnaire.status === "completed"} onChange={(next) => setResponses((current) => ({ ...current, [field.id]: next }))} /></div>;
-                  return <label key={field.id} className="portal-question-field"><span>{field.label}{field.required ? <b> *</b> : null}</span>{field.help ? <small>{field.help}</small> : null}{field.type === "short_text" ? <input value={String(value ?? "")} disabled={questionnaire.status === "completed"} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))} /> : null}{field.type === "long_text" ? <textarea value={String(value ?? "")} disabled={questionnaire.status === "completed"} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))} /> : null}{field.type === "select" ? <select value={String(value ?? "")} disabled={questionnaire.status === "completed"} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))}><option value="">Choose an option</option>{field.options.map((option) => <option key={option}>{option}</option>)}</select> : null}{field.type === "radio" ? <div className="portal-choice-list">{field.options.map((option) => <label key={option}><input type="radio" name={field.id} checked={value === option} disabled={questionnaire.status === "completed"} onChange={() => setResponses((current) => ({ ...current, [field.id]: option }))} />{option}</label>)}</div> : null}{field.type === "checkbox" ? <div className="portal-choice-list">{field.options.map((option) => { const selected = Array.isArray(value) ? value as string[] : []; return <label key={option}><input type="checkbox" checked={selected.includes(option)} disabled={questionnaire.status === "completed"} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.checked ? [...selected, option] : selected.filter((item) => item !== option) }))} />{option}</label>; })}</div> : null}{field.type === "file" ? <div className="portal-file-field"><input type="file" disabled={saving || questionnaire.status === "completed"} onChange={(event) => { const file = event.target.files?.[0]; void upload(field.id, file); event.currentTarget.value = ""; }} /><div className="portal-file-list">{files.map((file) => <div key={file.id}><Paperclip /><a href={portalApiPath(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}/files/${encodeURIComponent(file.id)}`)} target="_blank" rel="noreferrer"><span>{file.filename}</span><small>{formatBytes(file.fileSize)}</small></a>{questionnaire.status !== "completed" ? <button type="button" onClick={() => void removeFile(file.id)}><Trash2 /></button> : <Download />}</div>)}</div></div> : null}</label>;
+                  if (field.type === "supplier") return <div key={field.id} className="portal-question-field"><span>{field.label}{field.required ? <b> *</b> : null}</span>{field.help ? <small>{field.help}</small> : null}<SupplierQuestion field={field} value={value} suppliers={supplierDirectory} disabled={saving} onChange={(next) => setResponses((current) => ({ ...current, [field.id]: next }))} /></div>;
+                  return <label key={field.id} className="portal-question-field"><span>{field.label}{field.required ? <b> *</b> : null}</span>{field.help ? <small>{field.help}</small> : null}{field.type === "short_text" ? <input value={String(value ?? "")} disabled={saving} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))} /> : null}{field.type === "long_text" ? <textarea value={String(value ?? "")} disabled={saving} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))} /> : null}{field.type === "select" ? <select value={String(value ?? "")} disabled={saving} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))}><option value="">Choose an option</option>{field.options.map((option) => <option key={option}>{option}</option>)}</select> : null}{field.type === "radio" ? <div className="portal-choice-list">{field.options.map((option) => <label key={option}><input type="radio" name={field.id} checked={value === option} disabled={saving} onChange={() => setResponses((current) => ({ ...current, [field.id]: option }))} />{option}</label>)}</div> : null}{field.type === "checkbox" ? <div className="portal-choice-list">{field.options.map((option) => { const selected = Array.isArray(value) ? value as string[] : []; return <label key={option}><input type="checkbox" checked={selected.includes(option)} disabled={saving} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.checked ? [...selected, option] : selected.filter((item) => item !== option) }))} />{option}</label>; })}</div> : null}{field.type === "file" ? <div className="portal-file-field"><input type="file" disabled={saving} onChange={(event) => { const file = event.target.files?.[0]; void upload(field.id, file); event.currentTarget.value = ""; }} /><div className="portal-file-list">{files.map((file) => <div key={file.id}><Paperclip /><a href={portalApiPath(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}/files/${encodeURIComponent(file.id)}`)} target="_blank" rel="noreferrer"><span>{file.filename}</span><small>{formatBytes(file.fileSize)}</small></a><button type="button" disabled={saving} onClick={() => void removeFile(file.id)}><Trash2 /></button></div>)}</div></div> : null}</label>;
                 })}
               </div>
-              <footer className="portal-questionnaire-actions">{questionnaire.status === "completed" ? <div className="client-portal-complete"><CheckCircle2 /><span>Submitted {questionnaire.completedAt ? new Date(questionnaire.completedAt).toLocaleString("en-GB") : ""}</span></div> : <><button className="secondary" disabled={saving} onClick={() => void save(false)}><Save />Save progress</button><button disabled={saving} onClick={() => void save(true)}><Send />Submit questionnaire</button></>}</footer>
+              <footer className="portal-questionnaire-actions">
+                {questionnaire.status === "completed" ? (
+                  <div className="client-portal-complete">
+                    <CheckCircle2 />
+                    <span>
+                      Planning details marked complete
+                      {questionnaire.completedAt
+                        ? ` ${new Date(questionnaire.completedAt).toLocaleString("en-GB")}`
+                        : ""}.
+                      {" "}
+                      You can continue updating them at any time.
+                    </span>
+                  </div>
+                ) : null}
+
+                <button
+                  className="secondary"
+                  disabled={saving}
+                  onClick={() =>
+                    void save(false)
+                  }
+                >
+                  <Save />
+                  Save changes
+                </button>
+
+                {questionnaire.status !== "completed" ? (
+                  <button
+                    disabled={saving}
+                    onClick={() =>
+                      void save(true)
+                    }
+                  >
+                    <CheckCircle2 />
+                    Mark as complete
+                  </button>
+                ) : null}
+              </footer>
             </article>
           )}
         </main>

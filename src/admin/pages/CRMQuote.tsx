@@ -290,6 +290,21 @@ export function CRMQuote() {
   ] = useState("");
 
   const [
+    sendContractTemplateId,
+    setSendContractTemplateId,
+  ] = useState("");
+
+  const [
+    sendQuestionnaireTemplateId,
+    setSendQuestionnaireTemplateId,
+  ] = useState("");
+
+  const [
+    sendAutoCreateInvoice,
+    setSendAutoCreateInvoice,
+  ] = useState(false);
+
+  const [
     sendPreviewLoading,
     setSendPreviewLoading,
   ] = useState(false);
@@ -1010,6 +1025,7 @@ export function CRMQuote() {
 
   function applySendPreview(
     preview: CrmQuoteSendPreview,
+    preserveBookingPack = false,
   ) {
     setSendPreview(preview);
     setSendTemplateId(
@@ -1021,6 +1037,27 @@ export function CRMQuote() {
     setSendBody(
       preview.body,
     );
+
+    if (
+      !preserveBookingPack
+      || preview.bookingPack.frozen
+      || preview.bookingPack.legacyFallback
+    ) {
+      setSendContractTemplateId(
+        preview.bookingPack
+          .contractTemplateId,
+      );
+
+      setSendQuestionnaireTemplateId(
+        preview.bookingPack
+          .questionnaireTemplateId,
+      );
+
+      setSendAutoCreateInvoice(
+        preview.bookingPack
+          .autoCreateInvoice,
+      );
+    }
   }
 
   async function refreshSendPreview(
@@ -1039,6 +1076,7 @@ export function CRMQuote() {
 
       applySendPreview(
         preview,
+        true,
       );
     } catch (previewError) {
       setError(
@@ -1115,6 +1153,14 @@ export function CRMQuote() {
                 sendSubject,
               body:
                 sendBody,
+              bookingPack: {
+                contractTemplateId:
+                  sendContractTemplateId,
+                questionnaireTemplateId:
+                  sendQuestionnaireTemplateId,
+                autoCreateInvoice:
+                  sendAutoCreateInvoice,
+              },
             },
           );
 
@@ -3169,6 +3215,216 @@ export function CRMQuote() {
                     }
                   />
                 </AdminField>
+
+                <section className="crm-quote-send-booking-pack">
+                  <header className="crm-quote-send-booking-pack__header">
+                    <div>
+                      <span>
+                        Booking pack
+                      </span>
+                      <strong>
+                        What happens after acceptance
+                      </strong>
+                      <p>
+                        Choose the contract and questionnaire that will be created when the client accepts this quote.
+                      </p>
+                    </div>
+
+                    {sendPreview.bookingPack.frozen ? (
+                      <AdminStatus tone="success">
+                        Sent version locked
+                      </AdminStatus>
+                    ) : sendPreview.bookingPack.legacyFallback ? (
+                      <AdminStatus tone="neutral">
+                        Legacy sent version
+                      </AdminStatus>
+                    ) : (
+                      <AdminStatus tone="info">
+                        Configurable
+                      </AdminStatus>
+                    )}
+                  </header>
+
+                  {sendPreview.bookingPack.legacyFallback ? (
+                    <div className="crm-quote-send-booking-pack__notice">
+                      This quote was sent before booking-pack snapshots were introduced. Its existing workspace booking settings remain authoritative.
+                    </div>
+                  ) : null}
+
+                  <div className="crm-quote-send-booking-pack__grid">
+                    <AdminField
+                      label="Contract"
+                      help="Created from this exact template after quote acceptance."
+                    >
+                      <select
+                        className="admin-select"
+                        value={
+                          sendContractTemplateId
+                        }
+                        disabled={
+                          saving
+                          || sendPreviewLoading
+                          || sendPreview.bookingPack.frozen
+                          || sendPreview.bookingPack.legacyFallback
+                        }
+                        onChange={(event) =>
+                          setSendContractTemplateId(
+                            event.target.value,
+                          )
+                        }
+                      >
+                        <option value="">
+                          None
+                        </option>
+
+                        {sendPreview.bookingPack.contractTemplates.map(
+                          (template) => (
+                            <option
+                              key={template.id}
+                              value={template.id}
+                            >
+                              {template.name}
+                            </option>
+                          ),
+                        )}
+                      </select>
+                    </AdminField>
+
+                    <AdminField
+                      label="Questionnaire"
+                      help="Assigned to the booking after the quote is accepted."
+                    >
+                      <select
+                        className="admin-select"
+                        value={
+                          sendQuestionnaireTemplateId
+                        }
+                        disabled={
+                          saving
+                          || sendPreviewLoading
+                          || sendPreview.bookingPack.frozen
+                          || sendPreview.bookingPack.legacyFallback
+                        }
+                        onChange={(event) =>
+                          setSendQuestionnaireTemplateId(
+                            event.target.value,
+                          )
+                        }
+                      >
+                        <option value="">
+                          None
+                        </option>
+
+                        {sendPreview.bookingPack.questionnaireTemplates.map(
+                          (template) => (
+                            <option
+                              key={template.id}
+                              value={template.id}
+                            >
+                              {template.name}
+                            </option>
+                          ),
+                        )}
+                      </select>
+                    </AdminField>
+                  </div>
+
+                  <label className="crm-quote-send-booking-pack__invoice">
+                    <input
+                      type="checkbox"
+                      checked={
+                        sendAutoCreateInvoice
+                      }
+                      disabled={
+                        saving
+                        || sendPreviewLoading
+                        || sendPreview.bookingPack.frozen
+                        || sendPreview.bookingPack.legacyFallback
+                      }
+                      onChange={(event) =>
+                        setSendAutoCreateInvoice(
+                          event.target.checked,
+                        )
+                      }
+                    />
+
+                    <span>
+                      <strong>
+                        Create invoice when quote is accepted
+                      </strong>
+                      <small>
+                        The invoice and payment schedule use the commercial settings shown below.
+                      </small>
+                    </span>
+                  </label>
+
+                  <div className="crm-quote-send-booking-pack__summary">
+                    <div>
+                      <span>Deposit</span>
+
+                      <strong>
+                        {!sendAutoCreateInvoice
+                          ? "Not created"
+                          : sendPreview.bookingPack.invoice.depositType
+                            === "fixed"
+                            ? money(
+                                sendPreview.bookingPack.invoice.depositValue,
+                                quote?.currency
+                                  || draft.currency,
+                              )
+                            : sendPreview.bookingPack.invoice.depositType
+                              === "percentage"
+                              ? `${
+                                  sendPreview.bookingPack.invoice.depositValue
+                                  / 100
+                                }%`
+                              : "No deposit"}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>Deposit due</span>
+
+                      <strong>
+                        {!sendAutoCreateInvoice
+                          ? "—"
+                          : `${
+                              sendPreview.bookingPack.invoice
+                                .depositDueDaysAfterAcceptance
+                            } day${
+                              sendPreview.bookingPack.invoice
+                                .depositDueDaysAfterAcceptance
+                              === 1
+                                ? ""
+                                : "s"
+                            } after acceptance`}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>Final balance</span>
+
+                      <strong>
+                        {!sendAutoCreateInvoice
+                          ? "—"
+                          : `${
+                              sendPreview.bookingPack.invoice
+                                .finalBalanceDueDaysBeforeEvent
+                            } day${
+                              sendPreview.bookingPack.invoice
+                                .finalBalanceDueDaysBeforeEvent
+                              === 1
+                                ? ""
+                                : "s"
+                            } before event`}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <p className="crm-quote-send-booking-pack__footnote">
+                    These choices are frozen into this quote version only after the email is sent successfully. A failed send leaves the draft editable.
+                  </p>
+                </section>
 
                 <div className="crm-quote-send-link-note">
                   <ShieldCheck />

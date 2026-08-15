@@ -192,6 +192,14 @@ function hydrateInstance(row: any, responses: Record<string, unknown> = {}, file
     openedAt: row.opened_at || undefined,
     completedAt: row.completed_at || undefined,
     lastSavedAt: row.last_saved_at || undefined,
+    lastSavedByType:
+      text(row.last_saved_by_type),
+    lastSavedByUserId:
+      text(row.last_saved_by_user_id),
+    lastSavedByIdentityId:
+      text(row.last_saved_by_identity_id),
+    lastSavedByLabel:
+      text(row.last_saved_by_label),
     responses,
     files,
     createdAt: row.created_at,
@@ -1370,7 +1378,6 @@ function validateSubmission(fields: QuestionnaireField[], responses: Record<stri
 
 export async function savePublicQuestionnaire(db: D1Db, request: Request, workspaceId: string, instanceId: string, input: any) {
   const { identity, row } = await authorisedPublicInstance(db, request, workspaceId, instanceId);
-  if (text(row.status) === "completed" && !input?.submit) throw httpError("This questionnaire has already been submitted.", 409);
   const fields = sanitiseSchema(row.schema_json);
   const allowed = new Set(fields.filter((field) => !["heading", "description", "file"].includes(field.type)).map((field) => field.id));
   const responses = input?.responses && typeof input.responses === "object" ? input.responses : {};
@@ -1379,13 +1386,33 @@ export async function savePublicQuestionnaire(db: D1Db, request: Request, worksp
     if (!allowed.has(fieldKey)) continue;
     statements.push(db.prepare(`
       INSERT INTO crm_questionnaire_responses (
-        instance_id, workspace_id, field_key, value_json, updated_by_identity_id, updated_at
-      ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        instance_id,
+        workspace_id,
+        field_key,
+        value_json,
+        updated_by_identity_id,
+        updated_by_user_id,
+        updated_at
+      ) VALUES (
+        ?, ?, ?, ?, ?, NULL,
+        CURRENT_TIMESTAMP
+      )
       ON CONFLICT(instance_id, field_key) DO UPDATE SET
-        value_json = excluded.value_json,
-        updated_by_identity_id = excluded.updated_by_identity_id,
-        updated_at = CURRENT_TIMESTAMP
-    `).bind(instanceId, workspaceId, fieldKey, JSON.stringify(value), identity.id));
+        value_json =
+          excluded.value_json,
+        updated_by_identity_id =
+          excluded.updated_by_identity_id,
+        updated_by_user_id =
+          NULL,
+        updated_at =
+          CURRENT_TIMESTAMP
+    `).bind(
+      instanceId,
+      workspaceId,
+      fieldKey,
+      JSON.stringify(value),
+      identity.id,
+    ));
   }
   const merged = { ...(await instanceResponses(db, workspaceId, instanceId)), ...responses };
   const submit = Boolean(input?.submit);
@@ -1394,17 +1421,119 @@ export async function savePublicQuestionnaire(db: D1Db, request: Request, worksp
   if (missing.length) throw httpError("Complete the required questions before submitting.", 400, missing);
   statements.push(db.prepare(`
     UPDATE crm_questionnaire_instances SET
-      status = CASE WHEN ? = 1 THEN 'completed' WHEN status IN ('sent','opened') THEN 'in_progress' ELSE status END,
-      opened_at = COALESCE(opened_at, CURRENT_TIMESTAMP),
-      completed_at = CASE WHEN ? = 1 THEN COALESCE(completed_at, CURRENT_TIMESTAMP) ELSE completed_at END,
-      last_saved_at = CURRENT_TIMESTAMP,
-      updated_at = CURRENT_TIMESTAMP
-    WHERE id = ? AND workspace_id = ?
-  `).bind(submit ? 1 : 0, submit ? 1 : 0, instanceId, workspaceId));
+      status =
+        CASE
+          WHEN ? = 1
+            THEN 'completed'
+          WHEN status IN (
+            'sent',
+            'opened'
+          )
+            THEN 'in_progress'
+          ELSE status
+        END,
+      opened_at =
+        COALESCE(
+          opened_at,
+          CURRENT_TIMESTAMP
+        ),
+      completed_at =
+        CASE
+          WHEN ? = 1
+            THEN COALESCE(
+              completed_at,
+              CURRENT_TIMESTAMP
+            )
+          ELSE completed_at
+        END,
+      last_saved_at =
+        CURRENT_TIMESTAMP,
+      last_saved_by_type =
+        'client',
+      last_saved_by_user_id =
+        NULL,
+      last_saved_by_identity_id =
+        ?,
+      last_saved_by_label =
+        ?,
+      updated_at =
+        CURRENT_TIMESTAMP
+    WHERE id = ?
+      AND workspace_id = ?
+  `).bind(
+    submit ? 1 : 0,
+    submit ? 1 : 0,
+    identity.id,
+    text(
+      identity.displayName
+      || identity.email,
+    ),
+    instanceId,
+    workspaceId,
+  ));
   await db.batch(statements);
-  if (submit) await syncSupplierAnswers(db, workspaceId, row, fields, merged);
-  if (submit) await recordJobActivity(db, { email: identity.email }, workspaceId, text(row.job_id), "questionnaire.completed", `Completed ${text(row.title)}.`, { questionnaireId: instanceId, identityId: identity.id });
-  else await recordJobActivity(db, { email: identity.email }, workspaceId, text(row.job_id), "questionnaire.saved", `Saved progress on ${text(row.title)}.`, { questionnaireId: instanceId, identityId: identity.id });
+  if (
+    submit
+    || text(row.status)
+      === "completed"
+  ) {
+    await syncSupplierAnswers(
+      db,
+      workspaceId,
+      row,
+      fields,
+      merged,
+    );
+  }
+
+  if (
+    submit
+    && text(row.status)
+      !== "completed"
+  ) {
+    await recordJobActivity(
+      db,
+      {
+        email:
+          identity.email,
+      },
+      workspaceId,
+      text(row.job_id),
+      "questionnaire.completed",
+      `Marked ${text(row.title)} complete.`,
+      {
+        questionnaireId:
+          instanceId,
+        identityId:
+          identity.id,
+        actorType:
+          "client",
+      },
+    );
+  } else {
+    await recordJobActivity(
+      db,
+      {
+        email:
+          identity.email,
+      },
+      workspaceId,
+      text(row.job_id),
+      "questionnaire.saved",
+      `Updated ${text(row.title)}.`,
+      {
+        questionnaireId:
+          instanceId,
+        identityId:
+          identity.id,
+        actorType:
+          "client",
+        remainedComplete:
+          text(row.status)
+          === "completed",
+      },
+    );
+  }
   const refreshed = await instanceRow(db, workspaceId, instanceId);
   return hydrateInstance(refreshed, await instanceResponses(db, workspaceId, instanceId), await instanceFiles(db, workspaceId, instanceId));
 }
@@ -2268,6 +2397,291 @@ export async function deleteJobFileForClient(
 }
 
 
+export async function saveQuestionnaireInstanceAdmin(
+  db: D1Db,
+  actor: PortalActor,
+  instanceIdInput: string,
+  input: any,
+) {
+  requirePermission(
+    actor,
+    "crm:manage",
+  );
+
+  if (
+    actor.accessMode === "support"
+  ) {
+    throw httpError(
+      "Support sessions cannot edit client questionnaire responses.",
+      403,
+    );
+  }
+
+  const instanceId =
+    text(instanceIdInput);
+
+  const row =
+    await db.prepare(`
+      SELECT *
+      FROM crm_questionnaire_instances
+      WHERE id = ?
+        AND workspace_id = ?
+        AND status <> 'archived'
+      LIMIT 1
+    `).bind(
+      instanceId,
+      actor.workspaceId,
+    ).first();
+
+  if (!row) {
+    throw httpError(
+      "Questionnaire not found.",
+      404,
+    );
+  }
+
+  const fields =
+    sanitiseSchema(
+      row.schema_json,
+    );
+
+  const allowed =
+    new Set(
+      fields
+        .filter(
+          (field) =>
+            ![
+              "heading",
+              "description",
+              "file",
+            ].includes(
+              field.type,
+            ),
+        )
+        .map(
+          (field) => field.id,
+        ),
+    );
+
+  const responses =
+    input?.responses
+    && typeof input.responses
+      === "object"
+      ? input.responses
+      : {};
+
+  const statements: any[] = [];
+
+  for (
+    const [fieldKey, value]
+    of Object.entries(responses)
+  ) {
+    if (!allowed.has(fieldKey)) {
+      continue;
+    }
+
+    statements.push(
+      db.prepare(`
+        INSERT INTO
+          crm_questionnaire_responses (
+            instance_id,
+            workspace_id,
+            field_key,
+            value_json,
+            updated_by_identity_id,
+            updated_by_user_id,
+            updated_at
+          )
+        VALUES (
+          ?, ?, ?, ?,
+          NULL, ?,
+          CURRENT_TIMESTAMP
+        )
+        ON CONFLICT(
+          instance_id,
+          field_key
+        )
+        DO UPDATE SET
+          value_json =
+            excluded.value_json,
+          updated_by_identity_id =
+            NULL,
+          updated_by_user_id =
+            excluded.updated_by_user_id,
+          updated_at =
+            CURRENT_TIMESTAMP
+      `).bind(
+        instanceId,
+        actor.workspaceId,
+        fieldKey,
+        JSON.stringify(value),
+        text(actor.userId)
+          || null,
+      ),
+    );
+  }
+
+  const merged = {
+    ...(
+      await instanceResponses(
+        db,
+        actor.workspaceId,
+        instanceId,
+      )
+    ),
+    ...responses,
+  };
+
+  const complete =
+    Boolean(
+      input?.complete,
+    );
+
+  const files =
+    complete
+      ? await instanceFiles(
+          db,
+          actor.workspaceId,
+          instanceId,
+        )
+      : [];
+
+  const missing =
+    complete
+      ? validateSubmission(
+          fields,
+          merged,
+          files,
+        )
+      : [];
+
+  if (missing.length) {
+    throw httpError(
+      "Complete the required questions before marking the questionnaire complete.",
+      400,
+      missing,
+    );
+  }
+
+  statements.push(
+    db.prepare(`
+      UPDATE crm_questionnaire_instances
+      SET
+        status =
+          CASE
+            WHEN ? = 1
+              THEN 'completed'
+            WHEN status IN (
+              'sent',
+              'opened'
+            )
+              THEN 'in_progress'
+            ELSE status
+          END,
+        opened_at =
+          COALESCE(
+            opened_at,
+            CURRENT_TIMESTAMP
+          ),
+        completed_at =
+          CASE
+            WHEN ? = 1
+              THEN COALESCE(
+                completed_at,
+                CURRENT_TIMESTAMP
+              )
+            ELSE completed_at
+          END,
+        last_saved_at =
+          CURRENT_TIMESTAMP,
+        last_saved_by_type =
+          'professional',
+        last_saved_by_user_id =
+          ?,
+        last_saved_by_identity_id =
+          NULL,
+        last_saved_by_label =
+          ?,
+        updated_at =
+          CURRENT_TIMESTAMP
+      WHERE id = ?
+        AND workspace_id = ?
+    `).bind(
+      complete ? 1 : 0,
+      complete ? 1 : 0,
+      text(actor.userId)
+        || null,
+      lower(actor.email),
+      instanceId,
+      actor.workspaceId,
+    ),
+  );
+
+  await db.batch(
+    statements,
+  );
+
+  if (
+    complete
+    || text(row.status)
+      === "completed"
+  ) {
+    await syncSupplierAnswers(
+      db,
+      actor.workspaceId,
+      row,
+      fields,
+      merged,
+    );
+  }
+
+  const newlyCompleted =
+    complete
+    && text(row.status)
+      !== "completed";
+
+  await recordJobActivity(
+    db,
+    actor,
+    actor.workspaceId,
+    text(row.job_id),
+    newlyCompleted
+      ? "questionnaire.completed"
+      : "questionnaire.saved",
+    newlyCompleted
+      ? `Marked ${text(row.title)} complete.`
+      : `Updated ${text(row.title)}.`,
+    {
+      questionnaireId:
+        instanceId,
+      actorType:
+        "professional",
+      actorUserId:
+        text(actor.userId)
+        || null,
+      remainedComplete:
+        !newlyCompleted
+        && text(row.status)
+          === "completed",
+    },
+  );
+
+  return getQuestionnaireInstanceAdmin(
+    db,
+    {
+      ...actor,
+      permissions: [
+        ...new Set([
+          ...(actor.permissions || []),
+          "crm:read",
+        ]),
+      ],
+    },
+    instanceId,
+  );
+}
+
+
 export async function uploadQuestionnaireFile(db: D1Db, bucket: R2BucketLike, request: Request, workspaceId: string, instanceId: string, fieldKeyInput: string, file: File) {
   if (!bucket) throw httpError("Private file storage is not configured.", 500);
   const { identity, row } = await authorisedPublicInstance(db, request, workspaceId, instanceId);
@@ -2293,7 +2707,46 @@ export async function uploadQuestionnaireFile(db: D1Db, bucket: R2BucketLike, re
         original_filename, mime_type, file_size, status, uploaded_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', CURRENT_TIMESTAMP)
     `).bind(fileId, workspaceId, instanceId, fieldKey, identity.id, storageKey, text(file.name).slice(0, 500), text(file.type || "application/octet-stream"), file.size).run();
-    await db.prepare(`UPDATE crm_questionnaire_instances SET status = CASE WHEN status IN ('sent','opened') THEN 'in_progress' ELSE status END, opened_at = COALESCE(opened_at, CURRENT_TIMESTAMP), last_saved_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(instanceId, workspaceId).run();
+    await db.prepare(`
+      UPDATE crm_questionnaire_instances
+      SET
+        status =
+          CASE
+            WHEN status IN (
+              'sent',
+              'opened'
+            )
+              THEN 'in_progress'
+            ELSE status
+          END,
+        opened_at =
+          COALESCE(
+            opened_at,
+            CURRENT_TIMESTAMP
+          ),
+        last_saved_at =
+          CURRENT_TIMESTAMP,
+        last_saved_by_type =
+          'client',
+        last_saved_by_user_id =
+          NULL,
+        last_saved_by_identity_id =
+          ?,
+        last_saved_by_label =
+          ?,
+        updated_at =
+          CURRENT_TIMESTAMP
+      WHERE id = ?
+        AND workspace_id = ?
+    `).bind(
+      identity.id,
+      text(
+        identity.displayName
+        || identity.email,
+      ),
+      instanceId,
+      workspaceId,
+    ).run();
   } catch (error) {
     await bucket.delete(storageKey).catch(() => {});
     throw error;
@@ -2325,6 +2778,45 @@ export async function deleteQuestionnaireFile(db: D1Db, bucket: R2BucketLike, re
   if (!row) throw httpError("File not found.", 404);
   if (text(row.identity_id) && text(row.identity_id) !== identity.id) throw httpError("You cannot remove this file.", 403);
   await bucket.delete(text(row.storage_key)).catch(() => {});
-  await db.prepare(`UPDATE crm_questionnaire_files SET status = 'deleted', deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(fileId, workspaceId).run();
+  await db.prepare(`
+    UPDATE crm_questionnaire_files
+    SET
+      status = 'deleted',
+      deleted_at =
+        CURRENT_TIMESTAMP
+    WHERE id = ?
+      AND workspace_id = ?
+  `).bind(
+    fileId,
+    workspaceId,
+  ).run();
+
+  await db.prepare(`
+    UPDATE crm_questionnaire_instances
+    SET
+      last_saved_at =
+        CURRENT_TIMESTAMP,
+      last_saved_by_type =
+        'client',
+      last_saved_by_user_id =
+        NULL,
+      last_saved_by_identity_id =
+        ?,
+      last_saved_by_label =
+        ?,
+      updated_at =
+        CURRENT_TIMESTAMP
+    WHERE id = ?
+      AND workspace_id = ?
+  `).bind(
+    identity.id,
+    text(
+      identity.displayName
+      || identity.email,
+    ),
+    instanceId,
+    workspaceId,
+  ).run();
+
   return { ok: true };
 }

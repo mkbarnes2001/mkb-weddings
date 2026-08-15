@@ -132,19 +132,25 @@ def main() -> None:
         in migration
     )
 
-    # Full canonical schema creates a clean schema-42 database.
+    # The current canonical schema must contain the complete
+    # v1.10.10a foundation. Later additive releases may advance
+    # schema_meta beyond 42.
     database = fresh_database(
         schema
     )
 
-    assert value(
-        database,
-        """
-        SELECT value
-        FROM schema_meta
-        WHERE key = 'schema_version'
-        """,
-    ) == "42"
+    current_schema_version = int(
+        value(
+            database,
+            """
+            SELECT value
+            FROM schema_meta
+            WHERE key = 'schema_version'
+            """,
+        )
+    )
+
+    assert current_schema_version >= 42
 
     quote_template_columns = columns(
         database,

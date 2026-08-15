@@ -467,7 +467,7 @@ export async function reviseQuote(db: D1Db, actor: QuoteActor, quoteId: string) 
   await db.batch([
     db.prepare(`UPDATE crm_quote_versions SET status = 'superseded', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ? AND status IN ('sent','viewed','declined','expired')`).bind(current.id, actor.workspaceId),
     db.prepare(`INSERT INTO crm_quote_versions (id, workspace_id, quote_id, version_number, previous_version_id, status, client_notes, internal_notes, expires_at, discount_type, discount_value, tax_treatment, tax_rate_basis_points, subtotal_amount, discount_amount, tax_amount, total_amount, currency, snapshot_json, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
-      newVersionId, actor.workspaceId, quoteId, nextNumber, current.id, current.clientNotes, current.internalNotes, current.expiresAt || null, current.discountType, current.discountValue, current.taxTreatment, current.taxRateBasisPoints, current.subtotalAmount, current.discountAmount, current.taxAmount, current.totalAmount, current.currency, JSON.stringify({ ...current.snapshot, versionId: newVersionId, versionNumber: nextNumber, previousVersionId: current.id }), text(actor.userId) || null,
+      newVersionId, actor.workspaceId, quoteId, nextNumber, current.id, current.clientNotes, current.internalNotes, current.expiresAt || null, current.discountType, current.discountValue, current.taxTreatment, current.taxRateBasisPoints, current.subtotalAmount, current.discountAmount, current.taxAmount, current.totalAmount, current.currency, JSON.stringify(quoteRevisionSnapshot(current.snapshot, newVersionId, nextNumber, current.id)), text(actor.userId) || null,
     ),
     db.prepare(`UPDATE crm_quotes SET current_version_id = ?, status = 'draft', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(newVersionId, quoteId, actor.workspaceId),
   ]);
@@ -986,6 +986,675 @@ async function quoteSendEmailContext(
   };
 }
 
+
+function quoteBookingPackObject(
+  value: unknown,
+): Record<string, any> {
+  if (
+    value
+    && typeof value === "object"
+    && !Array.isArray(value)
+  ) {
+    return value as Record<string, any>;
+  }
+
+  try {
+    const parsed =
+      JSON.parse(
+        text(value) || "{}",
+      );
+
+    return (
+      parsed
+      && typeof parsed === "object"
+      && !Array.isArray(parsed)
+    )
+      ? parsed
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function quoteRevisionSnapshot(
+  snapshotInput: unknown,
+  versionId: string,
+  versionNumber: number,
+  previousVersionId: string,
+) {
+  const snapshot = {
+    ...quoteBookingPackObject(
+      snapshotInput,
+    ),
+  };
+
+  // A revision starts a fresh commercial decision.
+  // Never carry the previous sent booking pack forward
+  // as an immutable selection.
+  delete snapshot.bookingPack;
+
+  return {
+    ...snapshot,
+    versionId,
+    versionNumber,
+    previousVersionId,
+  };
+}
+
+async function quoteBookingPackPreview(
+  db: D1Db,
+  workspaceId: string,
+  version: any,
+) {
+  const snapshot =
+    quoteBookingPackObject(
+      version?.snapshot,
+    );
+
+  const existing =
+    quoteBookingPackObject(
+      snapshot.bookingPack,
+    );
+
+  const template =
+    quoteBookingPackObject(
+      snapshot.template,
+    );
+
+  const [
+    settings,
+    contractResult,
+    questionnaireResult,
+  ] = await Promise.all([
+    db.prepare(`
+      SELECT *
+      FROM crm_booking_settings
+      WHERE workspace_id = ?
+      LIMIT 1
+    `).bind(
+      workspaceId,
+    ).first(),
+
+    db.prepare(`
+      SELECT
+        id,
+        name,
+        version
+      FROM crm_contract_templates
+      WHERE workspace_id = ?
+        AND status = 'active'
+      ORDER BY
+        name COLLATE NOCASE,
+        updated_at DESC
+    `).bind(
+      workspaceId,
+    ).all(),
+
+    db.prepare(`
+      SELECT
+        id,
+        name,
+        version
+      FROM crm_questionnaire_templates
+      WHERE workspace_id = ?
+        AND status = 'active'
+      ORDER BY
+        name COLLATE NOCASE,
+        updated_at DESC
+    `).bind(
+      workspaceId,
+    ).all(),
+  ]);
+
+  const contracts =
+    (contractResult.results || []).map(
+      (row: any) => ({
+        id:
+          text(row.id),
+        name:
+          text(row.name),
+        version:
+          Math.max(
+            1,
+            Number(
+              row.version || 1,
+            ),
+          ),
+      }),
+    );
+
+  const questionnaires =
+    (
+      questionnaireResult.results
+      || []
+    ).map(
+      (row: any) => ({
+        id:
+          text(row.id),
+        name:
+          text(row.name),
+        version:
+          Math.max(
+            1,
+            Number(
+              row.version || 1,
+            ),
+          ),
+      }),
+    );
+
+  const frozen =
+    Boolean(
+      text(existing.frozenAt),
+    );
+
+  const frozenContract =
+    quoteBookingPackObject(
+      existing.contract,
+    );
+
+  const frozenQuestionnaire =
+    quoteBookingPackObject(
+      existing.questionnaire,
+    );
+
+  const frozenInvoice =
+    quoteBookingPackObject(
+      existing.invoice,
+    );
+
+  const templateContractId =
+    text(
+      template.contractTemplateId,
+    );
+
+  const templateQuestionnaireId =
+    text(
+      template.questionnaireTemplateId,
+    );
+
+  const liveContractId =
+    Number(
+      settings?.auto_create_contract
+      || 0,
+    ) === 1
+      ? text(
+          settings
+            ?.default_contract_template_id,
+        )
+      : "";
+
+  const liveQuestionnaireId =
+    Number(
+      settings
+        ?.auto_assign_questionnaire
+      || 0,
+    ) === 1
+      ? text(
+          settings
+            ?.default_questionnaire_template_id,
+        )
+      : "";
+
+  const validContractIds =
+    new Set(
+      contracts.map(
+        (item: any) => item.id,
+      ),
+    );
+
+  const validQuestionnaireIds =
+    new Set(
+      questionnaires.map(
+        (item: any) => item.id,
+      ),
+    );
+
+  const requestedContractId =
+    frozen
+      ? text(
+          frozenContract.templateId,
+        )
+      : (
+          templateContractId
+          || liveContractId
+        );
+
+  const requestedQuestionnaireId =
+    frozen
+      ? text(
+          frozenQuestionnaire
+            .templateId,
+        )
+      : (
+          templateQuestionnaireId
+          || liveQuestionnaireId
+        );
+
+  const contractTemplateId =
+    frozen
+      ? requestedContractId
+      : (
+          validContractIds.has(
+            requestedContractId,
+          )
+            ? requestedContractId
+            : ""
+        );
+
+  const questionnaireTemplateId =
+    frozen
+      ? requestedQuestionnaireId
+      : (
+          validQuestionnaireIds.has(
+            requestedQuestionnaireId,
+          )
+            ? requestedQuestionnaireId
+            : ""
+        );
+
+  const templateInvoiceSetting =
+    typeof template
+      .autoCreateInvoice
+      === "boolean"
+      ? template.autoCreateInvoice
+      : null;
+
+  const autoCreateInvoice =
+    frozen
+      ? Boolean(
+          frozenInvoice.enabled,
+        )
+      : templateInvoiceSetting
+        ?? (
+          Number(
+            settings
+              ?.auto_create_invoice
+            || 0,
+          ) === 1
+        );
+
+  const paymentSchedule =
+    quoteBookingPackObject(
+      frozen
+        ? frozenInvoice
+            .paymentSchedule
+        : template.paymentSchedule,
+    );
+
+  return {
+    frozen,
+    legacyFallback:
+      !frozen
+      && text(version?.status)
+        !== "draft",
+
+    contractTemplateId,
+
+    questionnaireTemplateId,
+
+    autoCreateInvoice,
+
+    contractTemplates:
+      contracts,
+
+    questionnaireTemplates:
+      questionnaires,
+
+    invoice: {
+      depositType:
+        text(
+          frozen
+            ? frozenInvoice
+                .depositType
+            : settings
+                ?.deposit_type,
+        ) || "none",
+
+      depositValue:
+        Math.max(
+          0,
+          Number(
+            frozen
+              ? frozenInvoice
+                  .depositValue
+              : settings
+                  ?.deposit_value
+              || 0,
+          ),
+        ),
+
+      depositDueDaysAfterAcceptance:
+        Math.max(
+          0,
+          Number(
+            frozen
+              ? frozenInvoice
+                  .depositDueDaysAfterAcceptance
+              : settings
+                  ?.deposit_due_days_after_acceptance
+              || 0,
+          ),
+        ),
+
+      finalBalanceDueDaysBeforeEvent:
+        Math.max(
+          0,
+          Number(
+            frozen
+              ? frozenInvoice
+                  .finalBalanceDueDaysBeforeEvent
+              : settings
+                  ?.final_balance_due_days_before_event
+              || 30,
+          ),
+        ),
+
+      questionnaireDueDaysBeforeEvent:
+        Math.max(
+          0,
+          Number(
+            frozen
+              ? frozenQuestionnaire
+                  .dueDaysBeforeEvent
+              : settings
+                  ?.questionnaire_due_days_before_event
+              || 60,
+          ),
+        ),
+
+      invoiceNotes:
+        text(
+          frozen
+            ? frozenInvoice.notes
+            : settings
+                ?.invoice_notes,
+        ),
+
+      invoiceTerms:
+        text(
+          frozen
+            ? frozenInvoice.terms
+            : settings
+                ?.invoice_terms,
+        ),
+
+      paymentSchedule,
+    },
+  };
+}
+
+async function buildQuoteBookingPackSnapshot(
+  db: D1Db,
+  workspaceId: string,
+  version: any,
+  input: any,
+) {
+  if (
+    text(version?.status)
+    !== "draft"
+  ) {
+    const snapshot =
+      quoteBookingPackObject(
+        version?.snapshot,
+      );
+
+    const existing =
+      quoteBookingPackObject(
+        snapshot.bookingPack,
+      );
+
+    return text(existing.frozenAt)
+      ? existing
+      : null;
+  }
+
+  const preview =
+    await quoteBookingPackPreview(
+      db,
+      workspaceId,
+      version,
+    );
+
+  const incoming =
+    quoteBookingPackObject(
+      input,
+    );
+
+  const hasContractOverride =
+    Object.prototype.hasOwnProperty.call(
+      incoming,
+      "contractTemplateId",
+    );
+
+  const hasQuestionnaireOverride =
+    Object.prototype.hasOwnProperty.call(
+      incoming,
+      "questionnaireTemplateId",
+    );
+
+  const hasInvoiceOverride =
+    Object.prototype.hasOwnProperty.call(
+      incoming,
+      "autoCreateInvoice",
+    );
+
+  const contractTemplateId =
+    hasContractOverride
+      ? text(
+          incoming.contractTemplateId,
+        )
+      : preview.contractTemplateId;
+
+  const questionnaireTemplateId =
+    hasQuestionnaireOverride
+      ? text(
+          incoming
+            .questionnaireTemplateId,
+        )
+      : preview
+          .questionnaireTemplateId;
+
+  const autoCreateInvoice =
+    hasInvoiceOverride
+      ? Boolean(
+          incoming.autoCreateInvoice,
+        )
+      : preview.autoCreateInvoice;
+
+  const [
+    contractTemplate,
+    questionnaireTemplate,
+  ] = await Promise.all([
+    contractTemplateId
+      ? db.prepare(`
+          SELECT *
+          FROM crm_contract_templates
+          WHERE workspace_id = ?
+            AND id = ?
+            AND status = 'active'
+          LIMIT 1
+        `).bind(
+          workspaceId,
+          contractTemplateId,
+        ).first()
+      : Promise.resolve(null),
+
+    questionnaireTemplateId
+      ? db.prepare(`
+          SELECT *
+          FROM crm_questionnaire_templates
+          WHERE workspace_id = ?
+            AND id = ?
+            AND status = 'active'
+          LIMIT 1
+        `).bind(
+          workspaceId,
+          questionnaireTemplateId,
+        ).first()
+      : Promise.resolve(null),
+  ]);
+
+  if (
+    contractTemplateId
+    && !contractTemplate
+  ) {
+    throw httpError(
+      "Choose an active contract template from this workspace.",
+      409,
+    );
+  }
+
+  if (
+    questionnaireTemplateId
+    && !questionnaireTemplate
+  ) {
+    throw httpError(
+      "Choose an active questionnaire template from this workspace.",
+      409,
+    );
+  }
+
+  const template =
+    quoteBookingPackObject(
+      version?.snapshot?.template,
+    );
+
+  return {
+    schemaVersion: 1,
+
+    frozenAt:
+      new Date().toISOString(),
+
+    source:
+      "quote_send",
+
+    quoteTemplate: {
+      id:
+        text(template.id),
+      name:
+        text(template.name),
+      version:
+        Math.max(
+          0,
+          Number(
+            template.version || 0,
+          ),
+        ),
+    },
+
+    contract:
+      contractTemplate
+        ? {
+            templateId:
+              text(
+                contractTemplate.id,
+              ),
+
+            name:
+              text(
+                contractTemplate.name,
+              ),
+
+            version:
+              Math.max(
+                1,
+                Number(
+                  contractTemplate
+                    .version || 1,
+                ),
+              ),
+
+            contentJson:
+              text(
+                contractTemplate
+                  .content_json
+                || "[]",
+              ),
+
+            requiredSignatures:
+              1,
+          }
+        : null,
+
+    questionnaire:
+      questionnaireTemplate
+        ? {
+            templateId:
+              text(
+                questionnaireTemplate
+                  .id,
+              ),
+
+            name:
+              text(
+                questionnaireTemplate
+                  .name,
+              ),
+
+            description:
+              text(
+                questionnaireTemplate
+                  .description,
+              ),
+
+            version:
+              Math.max(
+                1,
+                Number(
+                  questionnaireTemplate
+                    .version || 1,
+                ),
+              ),
+
+            schemaJson:
+              text(
+                questionnaireTemplate
+                  .schema_json
+                || "[]",
+              ),
+
+            dueDaysBeforeEvent:
+              preview.invoice
+                .questionnaireDueDaysBeforeEvent,
+          }
+        : null,
+
+    invoice: {
+      enabled:
+        autoCreateInvoice,
+
+      depositType:
+        preview.invoice
+          .depositType,
+
+      depositValue:
+        preview.invoice
+          .depositValue,
+
+      depositDueDaysAfterAcceptance:
+        preview.invoice
+          .depositDueDaysAfterAcceptance,
+
+      finalBalanceDueDaysBeforeEvent:
+        preview.invoice
+          .finalBalanceDueDaysBeforeEvent,
+
+      notes:
+        preview.invoice
+          .invoiceNotes,
+
+      terms:
+        preview.invoice
+          .invoiceTerms,
+
+      paymentSchedule:
+        preview.invoice
+          .paymentSchedule,
+    },
+  };
+}
+
 export async function getQuoteSendPreview(
   db: D1Db,
   env: QuoteEmailEnv,
@@ -1007,7 +1676,15 @@ export async function getQuoteSendPreview(
       templateIdInput,
     );
 
-  return context.preview;
+  return {
+    ...context.preview,
+    bookingPack:
+      await quoteBookingPackPreview(
+        db,
+        actor.workspaceId,
+        context.version,
+      ),
+  };
 }
 
 export async function sendQuote(
@@ -1042,6 +1719,28 @@ export async function sendQuote(
 
   const preview =
     context.preview;
+
+  const bookingPack =
+    await buildQuoteBookingPackSnapshot(
+      db,
+      actor.workspaceId,
+      version,
+      input?.bookingPack,
+    );
+
+  // Prepare the immutable sent-version snapshot in memory.
+  // It is persisted only after external email delivery succeeds.
+  // A failed send therefore leaves the draft fully editable.
+  const successfulSendSnapshot =
+    text(version.status) === "draft"
+    && bookingPack
+      ? JSON.stringify({
+          ...quoteBookingPackObject(
+            version.snapshot,
+          ),
+          bookingPack,
+        })
+      : "";
 
   if (
     !version.options.length
@@ -1303,6 +2002,13 @@ export async function sendQuote(
     db.prepare(`
       UPDATE crm_quote_versions
       SET
+        snapshot_json =
+          CASE
+            WHEN status = 'draft'
+              AND ? <> ''
+              THEN ?
+            ELSE snapshot_json
+          END,
         status =
           CASE
             WHEN status = 'draft'
@@ -1322,6 +2028,8 @@ export async function sendQuote(
       WHERE id = ?
         AND workspace_id = ?
     `).bind(
+      successfulSendSnapshot,
+      successfulSendSnapshot,
       delivery.provider,
       delivery.providerMessageId,
       version.id,

@@ -1144,18 +1144,55 @@ async function ensureContract(
     };
   }
 
+  const frozenContract =
+    source?.bookingPack
+      ?.contract
+    && typeof source
+      .bookingPack
+      .contract === "object"
+      ? source
+          .bookingPack
+          .contract
+      : null;
+
   const template =
-    await db.prepare(`
-      SELECT *
-      FROM crm_contract_templates
-      WHERE workspace_id = ?
-        AND id = ?
-        AND status = 'active'
-      LIMIT 1
-    `).bind(
-      workspaceId,
-      templateId,
-    ).first();
+    frozenContract
+    && text(
+      frozenContract.templateId,
+    ) === templateId
+      ? {
+          id:
+            templateId,
+          name:
+            text(
+              frozenContract.name,
+            ),
+          version:
+            Math.max(
+              1,
+              integer(
+                frozenContract.version,
+                1,
+              ),
+            ),
+          content_json:
+            text(
+              frozenContract
+                .contentJson
+              || "[]",
+            ),
+        }
+      : await db.prepare(`
+          SELECT *
+          FROM crm_contract_templates
+          WHERE workspace_id = ?
+            AND id = ?
+            AND status = 'active'
+          LIMIT 1
+        `).bind(
+          workspaceId,
+          templateId,
+        ).first();
 
   if (!template) {
     return null;
@@ -1435,18 +1472,64 @@ async function ensureQuestionnaire(
     };
   }
 
+  const frozenQuestionnaire =
+    source?.bookingPack
+      ?.questionnaire
+    && typeof source
+      .bookingPack
+      .questionnaire
+      === "object"
+      ? source
+          .bookingPack
+          .questionnaire
+      : null;
+
   const template =
-    await db.prepare(`
-      SELECT *
-      FROM crm_questionnaire_templates
-      WHERE workspace_id = ?
-        AND id = ?
-        AND status = 'active'
-      LIMIT 1
-    `).bind(
-      workspaceId,
-      templateId,
-    ).first();
+    frozenQuestionnaire
+    && text(
+      frozenQuestionnaire
+        .templateId,
+    ) === templateId
+      ? {
+          id:
+            templateId,
+          name:
+            text(
+              frozenQuestionnaire
+                .name,
+            ),
+          description:
+            text(
+              frozenQuestionnaire
+                .description,
+            ),
+          version:
+            Math.max(
+              1,
+              integer(
+                frozenQuestionnaire
+                  .version,
+                1,
+              ),
+            ),
+          schema_json:
+            text(
+              frozenQuestionnaire
+                .schemaJson
+              || "[]",
+            ),
+        }
+      : await db.prepare(`
+          SELECT *
+          FROM crm_questionnaire_templates
+          WHERE workspace_id = ?
+            AND id = ?
+            AND status = 'active'
+          LIMIT 1
+        `).bind(
+          workspaceId,
+          templateId,
+        ).first();
 
   if (!template) {
     return null;
@@ -1659,6 +1742,173 @@ async function recordBookingPackActivity(
   ).run();
 }
 
+
+async function frozenBookingPackForAcceptedQuote(
+  db: D1Db,
+  workspaceId: string,
+  source: any,
+) {
+  const versionId =
+    text(
+      source?.acceptance
+        ?.version_id,
+    );
+
+  const quoteId =
+    text(
+      source?.quote?.id,
+    );
+
+  if (
+    !versionId
+    || !quoteId
+  ) {
+    return null;
+  }
+
+  const row =
+    await db.prepare(`
+      SELECT
+        snapshot_json
+      FROM crm_quote_versions
+      WHERE workspace_id = ?
+        AND id = ?
+        AND quote_id = ?
+      LIMIT 1
+    `).bind(
+      workspaceId,
+      versionId,
+      quoteId,
+    ).first();
+
+  if (!row) {
+    return null;
+  }
+
+  const snapshot =
+    json<any>(
+      row.snapshot_json,
+      {},
+    );
+
+  const pack =
+    snapshot?.bookingPack;
+
+  if (
+    !pack
+    || typeof pack !== "object"
+    || !text(pack.frozenAt)
+  ) {
+    return null;
+  }
+
+  return pack;
+}
+
+function settingsWithFrozenBookingPack(
+  liveSettings: any,
+  pack: any,
+) {
+  const contract =
+    pack?.contract
+    && typeof pack.contract
+      === "object"
+      ? pack.contract
+      : null;
+
+  const questionnaire =
+    pack?.questionnaire
+    && typeof pack.questionnaire
+      === "object"
+      ? pack.questionnaire
+      : null;
+
+  const invoice =
+    pack?.invoice
+    && typeof pack.invoice
+      === "object"
+      ? pack.invoice
+      : {};
+
+  return {
+    ...liveSettings,
+
+    auto_create_contract:
+      contract ? 1 : 0,
+
+    default_contract_template_id:
+      contract
+        ? text(
+            contract.templateId,
+          )
+        : null,
+
+    auto_assign_questionnaire:
+      questionnaire ? 1 : 0,
+
+    default_questionnaire_template_id:
+      questionnaire
+        ? text(
+            questionnaire
+              .templateId,
+          )
+        : null,
+
+    auto_create_invoice:
+      invoice.enabled
+        ? 1
+        : 0,
+
+    deposit_type:
+      text(
+        invoice.depositType,
+      ) || "none",
+
+    deposit_value:
+      Math.max(
+        0,
+        integer(
+          invoice.depositValue,
+        ),
+      ),
+
+    deposit_due_days_after_acceptance:
+      Math.max(
+        0,
+        integer(
+          invoice
+            .depositDueDaysAfterAcceptance,
+        ),
+      ),
+
+    final_balance_due_days_before_event:
+      Math.max(
+        0,
+        integer(
+          invoice
+            .finalBalanceDueDaysBeforeEvent,
+          30,
+        ),
+      ),
+
+    questionnaire_due_days_before_event:
+      Math.max(
+        0,
+        integer(
+          questionnaire
+            ?.dueDaysBeforeEvent,
+          60,
+        ),
+      ),
+
+    invoice_notes:
+      text(invoice.notes),
+
+    invoice_terms:
+      text(invoice.terms),
+  };
+}
+
 export async function ensureBookingPackForAcceptedQuote(
   db: D1Db,
   actor: BookingPackActor,
@@ -1703,17 +1953,35 @@ export async function ensureBookingPackForAcceptedQuote(
     return null;
   }
 
-  const settings =
+  const liveSettings =
     await bookingSettings(
       db,
       workspaceId,
     );
 
-  if (!settings) {
+  if (!liveSettings) {
     throw new Error(
       "Commercial booking settings are unavailable.",
     );
   }
+
+  const frozenBookingPack =
+    await frozenBookingPackForAcceptedQuote(
+      db,
+      workspaceId,
+      source,
+    );
+
+  source.bookingPack =
+    frozenBookingPack;
+
+  const settings =
+    frozenBookingPack
+      ? settingsWithFrozenBookingPack(
+          liveSettings,
+          frozenBookingPack,
+        )
+      : liveSettings;
 
   const portalAccess =
     await activePortalAccess(
