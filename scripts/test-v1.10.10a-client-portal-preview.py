@@ -223,3 +223,63 @@ print(
 print(
     "LEADS_INTERMEDIATE_RESPONSIVE_REGRESSION=PASS"
 )
+
+# v1.10.10a WedPlanned Client Portal typography regression
+_typography_css = (
+    _regression_root
+    / "src/admin/admin-theme.css"
+).read_text(encoding="utf-8")
+
+_preview_start = _typography_css.index(
+    ".crm-client-portal-preview {"
+)
+
+_preview_end = _typography_css.index(
+    "@media (max-width: 760px)",
+    _preview_start,
+)
+
+_preview_css = _typography_css[
+    _preview_start:_preview_end
+]
+
+assert (
+    'Georgia, "Times New Roman", serif'
+    not in _preview_css
+), "Professional Client Portal preview must not use editorial serif typography"
+
+assert (
+    '"Montserrat", "Avenir Next", Avenir, '
+    '"Helvetica Neue", Arial, sans-serif'
+    in _preview_css
+), "Professional Client Portal preview must use canonical WedPlanned typography"
+
+_branding_selector = ".portal-branding-preview {"
+
+_branding_start = _typography_css.index(
+    _branding_selector
+)
+
+_branding_end = _typography_css.index(
+    "}",
+    _branding_start,
+)
+
+_branding_css = _typography_css[
+    _branding_start:_branding_end
+]
+
+assert (
+    '"Montserrat", "Avenir Next", Avenir, '
+    '"Helvetica Neue", Arial, sans-serif'
+    in _branding_css
+), "Client Portal settings preview must use canonical WedPlanned typography"
+
+assert (
+    "font-family: Inter, ui-sans-serif"
+    not in _branding_css
+), "Legacy Inter-only Client Portal preview typography must be removed"
+
+print(
+    "CLIENT_PORTAL_WEDPLANNED_TYPOGRAPHY=PASS"
+)
