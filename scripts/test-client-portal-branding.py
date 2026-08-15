@@ -61,7 +61,7 @@ def main() -> None:
         assert field in portal_service, field
         assert field in portal_ui, field
     assert "WHERE workspace_id = ? LIMIT 1" in portal_service
-    assert 'type PortalView = "home" | "quotes" | "contracts" | "invoices" | "questionnaires" | "galleries"' in portal_ui
+    assert 'type PortalView = "home" | "quotes" | "contracts" | "invoices" | "questionnaires" | "files" | "galleries"' in portal_ui
     assert "client-portal-hero" in portal_ui
     assert "client-portal-nav" in portal_ui
     assert "client-portal-home-grid" in portal_ui

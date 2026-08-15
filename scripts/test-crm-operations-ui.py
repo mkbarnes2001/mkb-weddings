@@ -19,7 +19,9 @@ def main() -> None:
     assert 'type View = "pipeline" | "contacts" | "jobs" | "schedule"' in crm
     assert 'placeholder="Search lead name, venue or reference"' in crm
     assert '<option value="open">Open leads</option>' in crm
-    assert 'className="crm-operation-record"' in crm
+    assert 'className="crm-lead-row"' in crm
+    assert 'className="crm-lead-row__main"' in crm
+    assert 'className="crm-lead-list"' in crm
     assert 'className="crm-operation-record crm-operation-record--job"' in crm
     assert 'nextLeadAction(enquiry)' in crm
     assert 'job.nextTaskTitle || "No pending task"' in crm

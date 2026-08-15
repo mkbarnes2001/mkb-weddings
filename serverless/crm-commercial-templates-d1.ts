@@ -236,6 +236,11 @@ function quoteTemplateRow(
 ) {
   return {
     id: text(row?.id),
+    quoteType:
+      text(
+        row?.quote_type
+        || "pick_and_choose",
+      ),
     name: text(row?.name),
     description:
       text(row?.description),
@@ -393,6 +398,8 @@ function quoteTemplateAddonRow(
         text(row?.addon_service_type),
       status:
         text(row?.addon_status),
+      imageUrl:
+        text(row?.addon_image_url),
       availabilityScope:
         text(
           row
@@ -499,6 +506,8 @@ async function quoteTemplateAddons(
           AS addon_service_type,
         addon.status
           AS addon_status,
+        addon.image_url
+          AS addon_image_url,
         addon.availability_scope
           AS addon_availability_scope,
         addon.minimum_quantity
@@ -1039,6 +1048,31 @@ async function normaliseQuoteTemplate(
     ),
   ]);
 
+  const quoteTypeInput =
+    text(
+      input?.quoteType
+      ?? current?.quoteType
+      ?? "pick_and_choose",
+    );
+
+  const quoteType =
+    [
+      "pick_and_choose",
+      "fixed",
+    ].includes(quoteTypeInput)
+      ? quoteTypeInput
+      : "pick_and_choose";
+
+  if (
+    quoteType === "fixed"
+    && packages.length !== 1
+  ) {
+    throw httpError(
+      "A fixed quote template must contain exactly one package.",
+      409,
+    );
+  }
+
   const discountTypeInput =
     text(
       input?.discountType
@@ -1073,6 +1107,7 @@ async function normaliseQuoteTemplate(
 
   return {
     name,
+    quoteType,
     description:
       text(
         input?.description
@@ -1178,6 +1213,7 @@ async function writeQuoteTemplate(
         INSERT INTO crm_quote_templates (
           id,
           workspace_id,
+          quote_type,
           name,
           description,
           client_introduction,
@@ -1199,7 +1235,7 @@ async function writeQuoteTemplate(
           created_at,
           updated_at
         ) VALUES (
-          ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?,
           1, ?, ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?,
           CURRENT_TIMESTAMP,
@@ -1208,6 +1244,7 @@ async function writeQuoteTemplate(
       `).bind(
         templateId,
         actor.workspaceId,
+        value.quoteType,
         value.name,
         value.description,
         value.clientIntroduction,
@@ -1242,6 +1279,7 @@ async function writeQuoteTemplate(
         UPDATE crm_quote_templates
         SET
           name = ?,
+          quote_type = ?,
           description = ?,
           client_introduction = ?,
           client_notes = ?,
@@ -1264,6 +1302,7 @@ async function writeQuoteTemplate(
           AND id = ?
       `).bind(
         value.name,
+        value.quoteType,
         value.description,
         value.clientIntroduction,
         value.clientNotes,
@@ -2342,6 +2381,8 @@ export async function createQuoteFromTemplate(
           input?.enquiryId,
         currency:
           input?.currency,
+        quoteType:
+          template.quoteType,
       },
     );
 

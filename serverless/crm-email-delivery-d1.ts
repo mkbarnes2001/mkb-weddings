@@ -27,6 +27,7 @@ export type CrmEmailDeliveryInput = {
   subject: string;
   body: string;
   businessName?: string;
+  trackingPixelUrl?: string;
 };
 
 export type CrmEmailDeliveryResult = {
@@ -178,6 +179,21 @@ function htmlFromText(
     .join("");
 }
 
+function trackingPixelHtml(
+  value: unknown,
+) {
+  const url =
+    text(value);
+
+  if (
+    !/^https:\/\//i.test(url)
+  ) {
+    return "";
+  }
+
+  return `<img src="${escapeHtml(url)}" width="1" height="1" alt="" aria-hidden="true" style="display:block;width:1px;height:1px;border:0;opacity:0" />`;
+}
+
 function mimeMessage(
   input: {
     to: string;
@@ -186,6 +202,7 @@ function mimeMessage(
     replyToEmail: string;
     subject: string;
     body: string;
+    trackingPixelUrl?: string;
   },
 ) {
   const to =
@@ -230,7 +247,7 @@ function mimeMessage(
     );
 
   const html =
-    `<div style="font-family:Arial,sans-serif;line-height:1.65;color:#181818;max-width:620px;margin:auto">${htmlFromText(input.body)}</div>`;
+    `<div style="font-family:Arial,sans-serif;line-height:1.65;color:#181818;max-width:620px;margin:auto">${htmlFromText(input.body)}</div>${trackingPixelHtml(input.trackingPixelUrl)}`;
 
   const htmlPart =
     wrapBase64(
@@ -556,6 +573,7 @@ async function sendManagedEmail(
     replyToEmail: string;
     subject: string;
     body: string;
+    trackingPixelUrl?: string;
   },
 ) {
   const apiKey =
@@ -598,7 +616,7 @@ async function sendManagedEmail(
                 input.subject,
               ),
             html:
-              `<div style="font-family:Arial,sans-serif;line-height:1.65;color:#181818;max-width:620px;margin:auto">${htmlFromText(input.body)}</div>`,
+              `<div style="font-family:Arial,sans-serif;line-height:1.65;color:#181818;max-width:620px;margin:auto">${htmlFromText(input.body)}</div>${trackingPixelHtml(input.trackingPixelUrl)}`,
             text:
               input.body,
             ...(input.replyToEmail
@@ -735,6 +753,7 @@ async function sendGoogleEmail(
     replyToEmail: string;
     subject: string;
     body: string;
+    trackingPixelUrl?: string;
   },
 ) {
   const credential =
@@ -1240,6 +1259,7 @@ async function sendSmtpEmail(
     replyToEmail: string;
     subject: string;
     body: string;
+    trackingPixelUrl?: string;
     smtpHost: string;
     smtpPort: number;
     smtpSecurity:
@@ -1456,6 +1476,8 @@ async function sendSmtpEmail(
           input.subject,
         body:
           input.body,
+        trackingPixelUrl:
+          input.trackingPixelUrl,
       });
 
     await session.write(
@@ -1621,6 +1643,8 @@ export async function sendCrmEmail(
             readiness.replyToEmail,
           subject,
           body,
+          trackingPixelUrl:
+            input.trackingPixelUrl,
         },
       );
 
@@ -1657,6 +1681,8 @@ export async function sendCrmEmail(
             readiness.replyToEmail,
           subject,
           body,
+          trackingPixelUrl:
+            input.trackingPixelUrl,
           smtpHost:
             readiness.smtpHost,
           smtpPort:
@@ -1705,6 +1731,8 @@ export async function sendCrmEmail(
           readiness.replyToEmail,
         subject,
         body,
+        trackingPixelUrl:
+          input.trackingPixelUrl,
       },
     );
 

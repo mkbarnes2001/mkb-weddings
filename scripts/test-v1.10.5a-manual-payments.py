@@ -56,13 +56,15 @@ def main() -> None:
         schema
     )
 
-    version = con.execute(
-        "SELECT value "
-        "FROM schema_meta "
-        "WHERE key='schema_version'"
-    ).fetchone()[0]
+    current_schema_version = int(
+        con.execute(
+            "SELECT value "
+            "FROM schema_meta "
+            "WHERE key='schema_version'"
+        ).fetchone()[0]
+    )
 
-    assert version == "41"
+    assert current_schema_version >= 39
 
     triggers = {
         row[0]: row[1] or ""

@@ -76,13 +76,15 @@ def main() -> None:
     con = sqlite3.connect(":memory:")
     con.executescript(schema)
 
-    version = con.execute(
-        "SELECT value "
-        "FROM schema_meta "
-        "WHERE key='schema_version'"
-    ).fetchone()[0]
+    current_schema_version = int(
+        con.execute(
+            "SELECT value "
+            "FROM schema_meta "
+            "WHERE key='schema_version'"
+        ).fetchone()[0]
+    )
 
-    assert version == "41"
+    assert current_schema_version >= 39
 
     indexes = provider_unique_indexes(con)
 

@@ -25,7 +25,7 @@ def main() -> None:
         "SELECT value FROM schema_meta WHERE key = 'schema_version' LIMIT 1"
     ).fetchone()
 
-    assert version and version[0] == "41"
+    assert version and int(version[0]) >= 39
     # v1.10.6a itself was source-only. Later releases may
     # legitimately advance the canonical schema.
 

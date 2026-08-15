@@ -1,5 +1,8 @@
 import { clientSessionCookie } from "../../../../serverless/client-auth-d1";
 import { verifyPortalMagicLink } from "../../../../serverless/client-portal-d1";
+import {
+  recordCrmEmailClick,
+} from "../../../../serverless/crm-email-engagement-d1";
 
 type Env = { MKB_DB: D1Database };
 
@@ -18,6 +21,26 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "private, no-store" },
       });
     }
+
+    const engagementToken =
+      String(
+        url.searchParams
+          .get("engagement")
+        || "",
+      );
+
+    if (engagementToken) {
+      try {
+        await recordCrmEmailClick(
+          context.env.MKB_DB,
+          engagementToken,
+        );
+      } catch {
+        // Engagement telemetry must never block
+        // successful client authentication.
+      }
+    }
+
     return new Response(null, {
       status: 302,
       headers: {

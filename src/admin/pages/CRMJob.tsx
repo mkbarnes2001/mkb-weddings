@@ -132,7 +132,25 @@ export function CRMJob() {
   useEffect(() => { void load(); }, [id, auth.workspaceId]);
 
   const activeAccessByContact = useMemo(() => new Map((workspace?.portalAccess || []).filter((item) => item.status === "active").map((item) => [item.contactId, item])), [workspace?.portalAccess]);
-  const allFiles = useMemo(() => (workspace?.questionnaires || []).flatMap((item) => item.files.map((file) => ({ ...file, questionnaireId: item.id, questionnaireTitle: item.title }))), [workspace?.questionnaires]);
+  const questionnaireFiles = useMemo(
+    () =>
+      (workspace?.questionnaires || [])
+        .flatMap((item) =>
+          item.files.map((file) => ({
+            ...file,
+            questionnaireId: item.id,
+            questionnaireTitle: item.title,
+          })),
+        ),
+    [workspace?.questionnaires],
+  );
+
+  const jobFiles =
+    workspace?.files || [];
+
+  const allFileCount =
+    questionnaireFiles.length
+    + jobFiles.length;
   const pendingSubmissions = useMemo(() => (workspace?.supplierSubmissions || []).filter((item) => item.status === "pending"), [workspace?.supplierSubmissions]);
 
   async function repairBookingPack() {
@@ -316,6 +334,83 @@ export function CRMJob() {
       setError(galleryError instanceof Error ? galleryError.message : "Unable to create the client gallery.");
     } finally { setSaving(false); }
   }
+
+  async function uploadPlanningFile(
+    file: File | undefined,
+  ) {
+    if (!file || !canManage) return;
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const result =
+        await AdminApiService.uploadCrmJobFile(
+            id,
+            file,
+          );
+
+      setWorkspace(
+        result.workspace,
+      );
+
+      setMessage(
+        `${file.name} uploaded to Files.`,
+      );
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Unable to upload the planning file.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removePlanningFile(
+    fileId: string,
+    filename: string,
+  ) {
+    if (
+      !canManage
+      || !window.confirm(
+        `Remove ${filename}?`,
+      )
+    ) {
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const result =
+        await AdminApiService.deleteCrmJobFile(
+            id,
+            fileId,
+          );
+
+      setWorkspace(
+        result.workspace,
+      );
+
+      setMessage(
+        `${filename} removed.`,
+      );
+    } catch (removeError) {
+      setError(
+        removeError instanceof Error
+          ? removeError.message
+          : "Unable to remove the planning file.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
 
   if (loading && !workspace) return <AdminPage><p className="text-sm text-neutral-500">Loading Job workspace…</p></AdminPage>;
   if (!workspace) return <AdminPage><div className="admin-alert admin-alert--error">{error || "Job not found."}</div></AdminPage>;
@@ -607,8 +702,192 @@ export function CRMJob() {
             {!workspace.linkedSuppliers.length ? <AdminEmptyState icon={Store} title="No suppliers linked" description="Approved supplier selections will appear here." /> : <div className="crm-linked-suppliers">{workspace.linkedSuppliers.map((supplier) => <article key={`${supplier.id}_${supplier.role}`}><div><strong>{supplier.name}</strong><p>{supplier.role}{supplier.location ? ` · ${supplier.location}` : ""}</p></div><AdminStatus tone="success">linked</AdminStatus></article>)}</div>}
           </AdminAccordion>
 
-          <AdminAccordion title="Files" description="Files uploaded through client questionnaires." icon={FolderOpen} summary={<AdminStatus tone="neutral">{allFiles.length}</AdminStatus>}>
-            {!allFiles.length ? <AdminEmptyState icon={FolderOpen} title="No files uploaded" description="Client questionnaire uploads will appear here." /> : <div className="crm-job-files">{allFiles.map((file) => <a key={file.id} href={AdminApiService.questionnaireFileUrl(file.questionnaireId, file.id)} target="_blank" rel="noreferrer"><FileText /><span><strong>{file.filename}</strong><small>{file.questionnaireTitle} · {Math.max(1, Math.round(file.fileSize / 1024))} KB</small></span><ExternalLink /></a>)}</div>}
+          <AdminAccordion
+            title="Files"
+            description="Private planning files shared between this business and the client, plus questionnaire attachments."
+            icon={FolderOpen}
+            summary={
+              <AdminStatus tone="neutral">
+                {allFileCount}
+              </AdminStatus>
+            }
+          >
+            {canManage ? (
+              <div className="crm-job-files-upload">
+                <div>
+                  <strong>Add planning file</strong>
+                  <p>
+                    Inspiration images, schedules, venue documents,
+                    planning PDFs and other client references.
+                    Maximum 10 MB.
+                  </p>
+                </div>
+
+                <label className="admin-button admin-button--primary admin-button--sm">
+                  <Plus className="admin-button__icon" />
+                  {saving ? "Working…" : "Upload file"}
+                  <input
+                    type="file"
+                    disabled={saving}
+                    onChange={(event) => {
+                      const file =
+                        event.target.files?.[0];
+
+                      void uploadPlanningFile(
+                        file,
+                      );
+
+                      event.currentTarget.value =
+                        "";
+                    }}
+                  />
+                </label>
+              </div>
+            ) : null}
+
+            {jobFiles.length ? (
+              <section className="crm-job-files-section">
+                <header>
+                  <div>
+                    <strong>Planning files</strong>
+                    <span>
+                      Shared through the secure Client Portal
+                    </span>
+                  </div>
+
+                  <AdminStatus tone="info">
+                    {jobFiles.length}
+                  </AdminStatus>
+                </header>
+
+                <div className="crm-job-files">
+                  {jobFiles.map((file) => (
+                    <article
+                      key={file.id}
+                      className="crm-job-file-record"
+                    >
+                      <a
+                        href={
+                          AdminApiService.jobFileUrl(
+                              job.id,
+                              file.id,
+                            )
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <FileText />
+
+                        <span>
+                          <strong>
+                            {file.filename}
+                          </strong>
+
+                          <small>
+                            {file.source === "client"
+                              ? "Client upload"
+                              : "Business upload"}
+                            {" · "}
+                            {Math.max(
+                              1,
+                              Math.round(
+                                file.fileSize / 1024,
+                              ),
+                            )}
+                            {" KB"}
+                          </small>
+                        </span>
+
+                        <ExternalLink />
+                      </a>
+
+                      {canManage ? (
+                        <button
+                          type="button"
+                          className="crm-job-file-record__remove"
+                          aria-label={`Remove ${file.filename}`}
+                          title={`Remove ${file.filename}`}
+                          disabled={saving}
+                          onClick={() =>
+                            void removePlanningFile(
+                              file.id,
+                              file.filename,
+                            )
+                          }
+                        >
+                          <Trash2 />
+                        </button>
+                      ) : null}
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {questionnaireFiles.length ? (
+              <section className="crm-job-files-section">
+                <header>
+                  <div>
+                    <strong>Questionnaire attachments</strong>
+                    <span>
+                      Files submitted through questionnaire fields
+                    </span>
+                  </div>
+
+                  <AdminStatus tone="neutral">
+                    {questionnaireFiles.length}
+                  </AdminStatus>
+                </header>
+
+                <div className="crm-job-files">
+                  {questionnaireFiles.map((file) => (
+                    <a
+                      key={file.id}
+                      href={
+                        AdminApiService
+                          .questionnaireFileUrl(
+                            file.questionnaireId,
+                            file.id,
+                          )
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <FileText />
+
+                      <span>
+                        <strong>
+                          {file.filename}
+                        </strong>
+
+                        <small>
+                          {file.questionnaireTitle}
+                          {" · "}
+                          {Math.max(
+                            1,
+                            Math.round(
+                              file.fileSize / 1024,
+                            ),
+                          )}
+                          {" KB"}
+                        </small>
+                      </span>
+
+                      <ExternalLink />
+                    </a>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {!jobFiles.length
+            && !questionnaireFiles.length ? (
+              <AdminEmptyState
+                icon={FolderOpen}
+                title="No files uploaded"
+                description="Planning files and questionnaire attachments will appear here."
+              />
+            ) : null}
           </AdminAccordion>
 
           <AdminAccordion title="Notes and activity" description="Original enquiry notes and the latest operational changes." icon={MessageSquareText} summary={<AdminStatus tone="neutral">{workspace.activities.length} events</AdminStatus>}>

@@ -21,6 +21,7 @@ import {
   Send,
   Settings2,
   ShieldCheck,
+  Sparkles,
   Trash2,
 } from "lucide-react";
 import {
@@ -50,6 +51,7 @@ import type {
   CrmQuoteItem,
   CrmQuoteOption,
   CrmQuoteSendPreview,
+  CrmQuoteTemplate,
 } from "../types/crm";
 
 type DraftOption =
@@ -143,6 +145,7 @@ function emptyBespoke(
     deliverables: [],
     includedItems: [],
     clientNotes: "",
+    imageUrl: "",
     recommended: false,
     displayOrder: 10,
     addonIds: [],
@@ -192,7 +195,8 @@ export function CRMQuote() {
   const canManage =
     auth.permissions.includes(
       "crm:manage",
-    );
+    )
+    && auth.accessMode !== "support";
 
   const [
     quote,
@@ -214,6 +218,18 @@ export function CRMQuote() {
   ] = useState<CrmAddon[]>(
     [],
   );
+
+  const [
+    templates,
+    setTemplates,
+  ] = useState<CrmQuoteTemplate[]>(
+    [],
+  );
+
+  const [
+    applyTemplateId,
+    setApplyTemplateId,
+  ] = useState("");
 
   const [
     draft,
@@ -382,11 +398,14 @@ export function CRMQuote() {
       const [
         current,
         catalogue,
+        quoteTemplates,
       ] = await Promise.all([
         AdminApiService
           .getCrmQuote(id),
         AdminApiService
           .getCrmQuoteCatalogue(),
+        AdminApiService
+          .getCrmQuoteTemplates(),
       ]);
 
       setQuote(current);
@@ -396,6 +415,26 @@ export function CRMQuote() {
       setAddons(
         catalogue.addons,
       );
+
+      setTemplates(
+        quoteTemplates,
+      );
+
+      setApplyTemplateId(
+        (currentTemplateId) =>
+          quoteTemplates.some(
+            (template) =>
+              template.id
+                === currentTemplateId
+              && template.status
+                === "active"
+              && template.quoteType
+                === current.quoteType,
+          )
+            ? currentTemplateId
+            : "",
+      );
+
       hydrateDraft(current);
     } catch (loadError) {
       setError(
@@ -459,6 +498,8 @@ export function CRMQuote() {
               item.includedItems,
             clientNotes:
               item.clientNotes,
+            imageUrl:
+              item.imageUrl,
             recommended:
               item.recommended,
             displayOrder:
@@ -842,6 +883,81 @@ export function CRMQuote() {
       };
     }, [draft]);
 
+  async function applyTemplate() {
+    if (
+      !quote
+      || !applyTemplateId
+    ) {
+      return;
+    }
+
+    const template =
+      templates.find(
+        (item) =>
+          item.id
+            === applyTemplateId,
+      );
+
+    if (!template) {
+      setError(
+        "Choose an active quote template.",
+      );
+      return;
+    }
+
+    if (
+      template.quoteType
+      !== quote.quoteType
+    ) {
+      setError(
+        "Choose a template that matches this quote type.",
+      );
+      return;
+    }
+
+    if (
+      draft.options.length
+      && !window.confirm(
+        "Apply this template and replace the current draft package choices and commercial settings? The source template will not be changed.",
+      )
+    ) {
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const applied =
+        await AdminApiService
+          .createCrmQuote(
+            quote.enquiryId,
+            applyTemplateId,
+          );
+
+      setQuote(
+        applied,
+      );
+
+      hydrateDraft(
+        applied,
+      );
+
+      setMessage(
+        `Applied ${template.name}. The quote is now an independent editable snapshot.`,
+      );
+    } catch (applyError) {
+      setError(
+        applyError instanceof Error
+          ? applyError.message
+          : "Unable to apply quote template.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function payloadForSave() {
     const addonIds = [
       ...new Set([
@@ -1149,6 +1265,68 @@ export function CRMQuote() {
         actions={
           <div className="flex flex-wrap gap-2">
             {editable ? (
+              <div className="crm-quote-template-apply">
+                <select
+                  className="admin-select"
+                  aria-label="Apply quote template"
+                  disabled={
+                    saving
+                    || !canManage
+                  }
+                  value={
+                    applyTemplateId
+                  }
+                  onChange={(event) =>
+                    setApplyTemplateId(
+                      event.target.value,
+                    )
+                  }
+                >
+                  <option value="">
+                    Apply template…
+                  </option>
+
+                  {templates
+                    .filter(
+                      (template) =>
+                        template.status
+                          === "active"
+                        && template.quoteType
+                          === quote.quoteType,
+                    )
+                    .map(
+                      (template) => (
+                        <option
+                          key={template.id}
+                          value={template.id}
+                        >
+                          {template.name}
+                          {template.default
+                            ? " · default"
+                            : ""}
+                        </option>
+                      ),
+                    )}
+                </select>
+
+                <AdminButton
+                  variant="secondary"
+                  icon={Sparkles}
+                  disabled={
+                    saving
+                    || !canManage
+                    || !applyTemplateId
+                  }
+                  onClick={() =>
+                    void applyTemplate()
+                  }
+                >
+                  Apply Template
+                </AdminButton>
+              </div>
+            ) : null}
+
+            {editable ? (
               <AdminButton
                 variant="primary"
                 icon={Save}
@@ -1213,6 +1391,20 @@ export function CRMQuote() {
               {quote.status}
             </AdminStatus>
 
+            <AdminStatus
+              tone={
+                quote.quoteType
+                  === "fixed"
+                  ? "neutral"
+                  : "info"
+              }
+            >
+              {quote.quoteType
+                === "fixed"
+                ? "Fixed"
+                : "Pick & Choose"}
+            </AdminStatus>
+
             <AdminStatus tone="neutral">
               v
               {version
@@ -1273,12 +1465,20 @@ export function CRMQuote() {
             {draft.options.length}
           </strong>
           <small>
-            Client chooses one
+            {quote.quoteType
+              === "fixed"
+              ? "One fixed option"
+              : "Client chooses one"}
           </small>
         </div>
 
         <div>
-          <span>Starting from</span>
+          <span>
+            {quote.quoteType
+              === "fixed"
+              ? "Quoted total"
+              : "Starting from"}
+          </span>
           <strong>
             {money(
               representative.total,
@@ -1286,7 +1486,10 @@ export function CRMQuote() {
             )}
           </strong>
           <small>
-            Before optional extras
+            {quote.quoteType
+              === "fixed"
+              ? "Exact quoted scope"
+              : "Before optional extras"}
           </small>
         </div>
       </section>
@@ -1294,11 +1497,26 @@ export function CRMQuote() {
       <div className="crm-quote-workspace">
         <main className="crm-quote-workspace__main">
           <AdminPanel
-            title="Package choices"
-            description="Present the client with clear package choices. Detailed editing stays tucked away until you need it."
+            title={
+              quote.quoteType
+                === "fixed"
+                ? "Fixed package"
+                : "Package choices"
+            }
+            description={
+              quote.quoteType
+                === "fixed"
+                ? "Build one exact package. Add quote-specific line items inside the package when the scope needs itemised quantities or charges."
+                : "Present the client with clear package choices. Detailed editing stays tucked away until you need it."
+            }
             icon={PackageCheck}
             actions={
-              editable ? (
+              editable
+              && (
+                quote.quoteType
+                  !== "fixed"
+                || !draft.options.length
+              ) ? (
                 <div className="crm-quote-package-actions">
                   <select
                     className="admin-select"
@@ -1402,8 +1620,18 @@ export function CRMQuote() {
             {!draft.options.length ? (
               <AdminEmptyState
                 icon={PackagePlus}
-                title="No package choices"
-                description="Add catalogue packages or create a bespoke option."
+                title={
+                  quote.quoteType
+                    === "fixed"
+                    ? "No fixed package"
+                    : "No package choices"
+                }
+                description={
+                  quote.quoteType
+                    === "fixed"
+                    ? "Choose one catalogue package or create one bespoke fixed option."
+                    : "Add catalogue packages or create a bespoke option."
+                }
               />
             ) : (
               <div className="crm-quote-package-grid">
@@ -1422,6 +1650,24 @@ export function CRMQuote() {
                           : "crm-quote-package-card"
                       }
                     >
+                      <div
+                        className={
+                          option.imageUrl
+                            ? "crm-quote-package-card__image"
+                            : "crm-quote-package-card__image crm-quote-package-card__image--empty"
+                        }
+                      >
+                        {option.imageUrl ? (
+                          <img
+                            src={option.imageUrl}
+                            alt=""
+                            loading="lazy"
+                          />
+                        ) : (
+                          <PackageCheck />
+                        )}
+                      </div>
+
                       <header className="crm-quote-package-card__header">
                         <div>
                           <span className="crm-quote-package-card__eyebrow">
@@ -2075,6 +2321,24 @@ export function CRMQuote() {
                               )
                           }
                         />
+
+                        <span
+                          className={
+                            addon.imageUrl
+                              ? "crm-quote-addon-grid__image"
+                              : "crm-quote-addon-grid__image crm-quote-addon-grid__image--empty"
+                          }
+                        >
+                          {addon.imageUrl ? (
+                            <img
+                              src={addon.imageUrl}
+                              alt=""
+                              loading="lazy"
+                            />
+                          ) : (
+                            <PackageCheck />
+                          )}
+                        </span>
 
                         <span className="crm-quote-addon-grid__body">
                           <strong>

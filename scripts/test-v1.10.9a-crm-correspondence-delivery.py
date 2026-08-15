@@ -317,15 +317,10 @@ assert (
     in schema
 )
 
-assert not list(
-    (
-        ROOT
-        / "d1"
-        / "migrations"
-    ).glob(
-        "042*"
-    )
-)
+# v1.10.9a itself required no schema transition beyond its
+# release baseline. Later releases are allowed to add higher
+# numbered migrations, so this historical regression test must
+# not prohibit them.
 
 
 print(

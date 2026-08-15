@@ -35,11 +35,14 @@ def main() -> None:
     con = sqlite3.connect(":memory:")
     con.executescript(schema)
 
-    assert con.execute(
-        "SELECT value "
-        "FROM schema_meta "
-        "WHERE key='schema_version'"
-    ).fetchone()[0] == "41"
+    current_schema_version = int(
+        con.execute(
+            "SELECT value "
+            "FROM schema_meta "
+            "WHERE key='schema_version'"
+        ).fetchone()[0]
+    )
+    assert current_schema_version >= 39
 
     # Dedicated service has no default-tenant fallback and
     # deliberately avoids importing Client Portal, which

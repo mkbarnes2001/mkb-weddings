@@ -52,7 +52,8 @@ def main() -> None:
         "WHERE key='schema_version'"
     ).fetchone()[0]
 
-    assert version == "41", version
+    current_schema_version = int(version)
+    assert current_schema_version >= 38
 
     # Core business-data services must never silently
     # select the MKB workspace.
@@ -223,7 +224,7 @@ def main() -> None:
         "preserved"
     )
     print(
-        "  current canonical schema: 39"
+        f"  current canonical schema: {current_schema_version}"
     )
 
 

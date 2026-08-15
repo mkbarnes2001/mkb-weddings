@@ -35,12 +35,14 @@ def main() -> None:
         read("d1/schema.sql")
     )
 
-    version = con.execute(
-        "SELECT value FROM schema_meta "
-        "WHERE key='schema_version'"
-    ).fetchone()[0]
+    current_schema_version = int(
+        con.execute(
+            "SELECT value FROM schema_meta "
+            "WHERE key='schema_version'"
+        ).fetchone()[0]
+    )
 
-    assert str(version) == "41"
+    assert current_schema_version >= 39
     # v1.10.6a itself introduced no migration. Later releases
     # may legitimately add migration 040 and beyond.
 

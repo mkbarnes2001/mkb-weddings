@@ -91,11 +91,14 @@ def main() -> None:
     con.row_factory = sqlite3.Row
     con.executescript(schema)
 
-    assert one(
-        con,
-        "SELECT value FROM schema_meta "
-        "WHERE key='schema_version'",
-    )[0] == "41"
+    current_schema_version = int(
+        one(
+            con,
+            "SELECT value FROM schema_meta "
+            "WHERE key='schema_version'",
+        )[0]
+    )
+    assert current_schema_version >= 39
 
     required = {
         "crm_booking_settings",

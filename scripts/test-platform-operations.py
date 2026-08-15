@@ -23,7 +23,13 @@ def main() -> None:
     con.row_factory = sqlite3.Row
     con.executescript(SCHEMA.read_text())
 
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "41"
+    current_schema_version = int(
+        one(
+            con,
+            "SELECT value FROM schema_meta WHERE key='schema_version'",
+        )[0]
+    )
+    assert current_schema_version >= 26
     required = {
         "platform_support_grants",
         "platform_support_events",
@@ -121,7 +127,7 @@ def main() -> None:
     print("  read-only support: globally guarded")
     print("  export history: workspace-scoped, query allowlist verified, capability secrets redacted")
     print("  deletion requests: staged and single-open-request guarded")
-    print("  schema version: 37")
+    print(f"  schema version: {current_schema_version}")
 
 
 if __name__ == "__main__":

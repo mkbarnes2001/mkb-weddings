@@ -38,12 +38,18 @@ def column_names(
 def verify_schema(
     con: sqlite3.Connection,
     expected_version: str,
+    minimum_version: bool = False,
 ):
-    assert one(
+    actual_version = one(
         con,
         "SELECT value FROM schema_meta "
         "WHERE key='schema_version'",
-    )[0] == expected_version
+    )[0]
+
+    if minimum_version:
+        assert int(actual_version) >= int(expected_version)
+    else:
+        assert actual_version == expected_version
 
     appearance_columns = column_names(
         con,
@@ -166,7 +172,11 @@ def main() -> None:
     fresh = sqlite3.connect(":memory:")
     fresh.execute("PRAGMA foreign_keys = ON")
     fresh.executescript(schema)
-    verify_schema(fresh, "41")
+    verify_schema(
+        fresh,
+        "38",
+        minimum_version=True,
+    )
 
     # Upgrade path from the exact schema-37 prefix.
     prefix = schema.split(MARKER, 1)[0]

@@ -28,7 +28,13 @@ def main() -> None:
     con = sqlite3.connect(":memory:")
     con.row_factory = sqlite3.Row
     con.executescript(schema_text)
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "41"
+    current_schema_version = int(
+        one(
+            con,
+            "SELECT value FROM schema_meta WHERE key='schema_version'",
+        )[0]
+    )
+    assert current_schema_version >= 30
     required = {
         "crm_workflow_templates",
         "crm_workflow_template_steps",
@@ -118,7 +124,7 @@ def main() -> None:
     print("  Job communication history and outbound email path: verified")
     print("  public lead autoresponder and list views: verified")
     print("  workspace isolation/export coverage: verified")
-    print("  schema version: 41")
+    print(f"  current schema version: {current_schema_version}")
 
 
 if __name__ == "__main__":

@@ -28,7 +28,13 @@ def main() -> None:
     con = sqlite3.connect(":memory:")
     con.row_factory = sqlite3.Row
     con.executescript(schema_text)
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "41"
+    schema_version = int(
+        one(
+            con,
+            "SELECT value FROM schema_meta WHERE key='schema_version'",
+        )[0]
+    )
+    assert schema_version >= 41
 
     required = {
         "crm_questionnaire_templates",

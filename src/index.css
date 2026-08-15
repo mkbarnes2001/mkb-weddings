@@ -4811,3 +4811,221 @@ footer .logo-mkb, footer .logo-weddings {
     display: none !important;
   }
 }
+
+
+/* v1.10.10a Client Portal shared planning files */
+.client-portal-file-job-summary {
+  display: grid;
+  grid-template-columns: 28px minmax(0,1fr);
+  align-items: center;
+  gap: 9px;
+  margin-top: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.72);
+  padding: 9px;
+}
+
+.client-portal-file-job-summary > svg {
+  width: 15px;
+  height: 15px;
+  margin: 0 auto;
+  color: var(--portal-accent);
+}
+
+.client-portal-file-job-summary strong,
+.client-portal-file-job-summary small {
+  display: block;
+}
+
+.client-portal-file-job-summary strong {
+  font-size: 9.5px;
+}
+
+.client-portal-file-job-summary small {
+  margin-top: 2px;
+  color: #777;
+  font-size: 8px;
+}
+
+.client-portal-files-view {
+  padding: 32px;
+}
+
+.client-portal-files-jobs {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.client-portal-files-job {
+  overflow: hidden;
+  border: 1px solid rgba(17,17,17,.09);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 12px 34px rgba(17,17,17,.045);
+}
+
+.client-portal-files-job > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid rgba(17,17,17,.07);
+  padding: 18px 20px;
+}
+
+.client-portal-files-job > header small {
+  color: #888;
+  font-size: 8.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.client-portal-files-job > header h2 {
+  margin: 5px 0 0;
+  font-size: 18px;
+}
+
+.client-portal-files-job > header p {
+  margin: 4px 0 0;
+  color: #777;
+  font-size: 10px;
+}
+
+.client-portal-files-job > header > span {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--portal-secondary);
+  padding: 6px 9px;
+  color: #555;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.client-portal-files-upload {
+  display: grid;
+  grid-template-columns: 36px minmax(0,1fr);
+  align-items: center;
+  gap: 11px;
+  margin: 16px 20px;
+  border: 1px dashed color-mix(in srgb, var(--portal-accent) 30%, rgba(17,17,17,.12));
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--portal-accent) 4%, white);
+  padding: 13px;
+  cursor: pointer;
+}
+
+.client-portal-files-upload > svg {
+  width: 17px;
+  height: 17px;
+  margin: 0 auto;
+  color: var(--portal-accent);
+}
+
+.client-portal-files-upload strong,
+.client-portal-files-upload small {
+  display: block;
+}
+
+.client-portal-files-upload strong {
+  font-size: 11px;
+}
+
+.client-portal-files-upload small {
+  margin-top: 3px;
+  color: #777;
+  font-size: 9px;
+}
+
+.client-portal-files-upload input {
+  display: none;
+}
+
+.client-portal-files-list {
+  display: grid;
+  gap: 7px;
+  padding: 0 20px 20px;
+}
+
+.client-portal-files-list > a {
+  display: grid;
+  grid-template-columns: 30px minmax(0,1fr) 20px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(17,17,17,.08);
+  border-radius: 11px;
+  background: #fff;
+  padding: 11px;
+  color: #171717;
+  text-decoration: none;
+}
+
+.client-portal-files-list > a:hover {
+  border-color: color-mix(in srgb, var(--portal-accent) 32%, transparent);
+}
+
+.client-portal-files-list > a > svg {
+  width: 15px;
+  height: 15px;
+  margin: 0 auto;
+  color: var(--portal-accent);
+}
+
+.client-portal-files-list strong,
+.client-portal-files-list small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.client-portal-files-list strong {
+  font-size: 10px;
+}
+
+.client-portal-files-list small {
+  margin-top: 3px;
+  color: #777;
+  font-size: 8.5px;
+}
+
+.client-portal-files-empty {
+  display: grid;
+  place-items: center;
+  padding: 16px 20px 24px;
+  color: #777;
+  text-align: center;
+}
+
+.client-portal-files-empty > svg {
+  width: 22px;
+  height: 22px;
+  color: var(--portal-accent);
+}
+
+.client-portal-files-empty strong {
+  margin-top: 7px;
+  color: #333;
+  font-size: 10px;
+}
+
+.client-portal-files-empty p {
+  margin: 3px 0 0;
+  font-size: 9px;
+}
+
+@media (max-width: 760px) {
+  .client-portal-files-view {
+    padding: 22px 16px;
+  }
+
+  .client-portal-files-job > header {
+    padding: 16px;
+  }
+
+  .client-portal-files-upload {
+    margin: 14px 16px;
+  }
+
+  .client-portal-files-list {
+    padding: 0 16px 16px;
+  }
+}

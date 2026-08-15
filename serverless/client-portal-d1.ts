@@ -713,6 +713,14 @@ export async function getCrmJobWorkspace(db: D1Db, actor: PortalActor, jobId: st
   for (const row of instanceRows.results || []) {
     instances.push(hydrateInstance(row, await instanceResponses(db, actor.workspaceId, text(row.id)), await instanceFiles(db, actor.workspaceId, text(row.id))));
   }
+
+  const jobFiles =
+    await activeJobFiles(
+      db,
+      actor.workspaceId,
+      jobId,
+    );
+
   return {
     job: hydrateJob(job),
     contacts: (contactRows.results || []).map((row: any) => ({
@@ -735,6 +743,7 @@ export async function getCrmJobWorkspace(db: D1Db, actor: PortalActor, jobId: st
       revokedAt: row.revoked_at || undefined,
     })),
     questionnaires: instances,
+    files: jobFiles,
     templates: (templateRows.results || []).map(hydrateTemplate),
     enquiry: enquiryRow ? {
       reference: text(enquiryRow.reference), source: text(enquiryRow.source), campaign: text(enquiryRow.campaign),
@@ -1277,10 +1286,20 @@ export async function getPublicPortal(db: D1Db, request: Request, workspaceId: s
       identity.id,
       text(access.job_id),
     );
+
+    const files =
+      await filesForPortalIdentity(
+        db,
+        workspaceId,
+        identity.id,
+        text(access.job_id),
+      );
+
     jobs.push({
       ...hydrateJob(access),
       contactName: text(access.contact_name),
       questionnaires: (questionnaireRows.results || []).map((row: any) => hydrateInstance(row)),
+      files,
       commercial,
     });
   }
@@ -1389,6 +1408,865 @@ export async function savePublicQuestionnaire(db: D1Db, request: Request, worksp
   const refreshed = await instanceRow(db, workspaceId, instanceId);
   return hydrateInstance(refreshed, await instanceResponses(db, workspaceId, instanceId), await instanceFiles(db, workspaceId, instanceId));
 }
+
+
+function hydrateJobFile(row: any) {
+  return {
+    id: text(row?.id),
+    jobId: text(row?.job_id),
+    identityId: text(row?.identity_id),
+    actorUserId: text(row?.actor_user_id),
+    source:
+      text(row?.source)
+      === "workspace"
+        ? "workspace"
+        : "client",
+    filename:
+      text(row?.original_filename),
+    mimeType:
+      text(
+        row?.mime_type
+        || "application/octet-stream",
+      ),
+    fileSize:
+      Number(
+        row?.file_size
+        || 0,
+      ),
+    status:
+      text(
+        row?.status
+        || "active",
+      ),
+    uploadedAt:
+      row?.uploaded_at,
+    deletedAt:
+      row?.deleted_at
+      || undefined,
+  };
+}
+
+
+function hydratePublicJobFile(
+  file: any,
+) {
+  return {
+    id:
+      text(
+        file?.id,
+      ),
+    jobId:
+      text(
+        file?.jobId,
+      ),
+    source:
+      text(
+        file?.source,
+      )
+      === "workspace"
+        ? "workspace"
+        : "client",
+    filename:
+      text(
+        file?.filename,
+      ),
+    mimeType:
+      text(
+        file?.mimeType
+        || "application/octet-stream",
+      ),
+    fileSize:
+      Number(
+        file?.fileSize
+        || 0,
+      ),
+    status:
+      text(
+        file?.status
+        || "active",
+      ),
+    uploadedAt:
+      file?.uploadedAt,
+    deletedAt:
+      file?.deletedAt
+      || undefined,
+  };
+}
+
+
+async function activeJobFiles(
+  db: D1Db,
+  workspaceId: string,
+  jobId: string,
+) {
+  const result =
+    await db.prepare(`
+      SELECT *
+      FROM crm_job_files
+      WHERE workspace_id = ?
+        AND job_id = ?
+        AND status = 'active'
+      ORDER BY uploaded_at DESC, id DESC
+    `).bind(
+      workspaceId,
+      jobId,
+    ).all();
+
+  return (
+    result.results || []
+  ).map(
+    hydrateJobFile,
+  );
+}
+
+
+function requireJobFileMutation(
+  actor: PortalActor,
+) {
+  requirePermission(
+    actor,
+    "crm:manage",
+  );
+
+  if (
+    (actor as any)
+      ?.accessMode
+    === "support"
+  ) {
+    throw httpError(
+      "Support sessions cannot manage Job files.",
+      403,
+    );
+  }
+}
+
+
+function validateJobFile(
+  file: File,
+) {
+  if (
+    !(file instanceof File)
+    || file.size <= 0
+    || file.size > MAX_FILE_SIZE
+  ) {
+    throw httpError(
+      "Choose a file between 1 byte and 10 MB.",
+      400,
+    );
+  }
+}
+
+
+async function authorisedPublicJob(
+  db: D1Db,
+  request: Request,
+  workspaceId: string,
+  jobId: string,
+) {
+  const identity =
+    await publicIdentity(
+      db,
+      request,
+      workspaceId,
+    );
+
+  if (!identity) {
+    throw httpError(
+      "Client sign-in required.",
+      401,
+    );
+  }
+
+  const row =
+    await db.prepare(`
+      SELECT
+        job.id,
+        job.status,
+        access.contact_id
+      FROM crm_jobs job
+      JOIN crm_job_client_access access
+        ON access.job_id = job.id
+       AND access.workspace_id = job.workspace_id
+       AND access.identity_id = ?
+       AND access.status = 'active'
+      WHERE job.id = ?
+        AND job.workspace_id = ?
+        AND job.status <> 'archived'
+      LIMIT 1
+    `).bind(
+      identity.id,
+      jobId,
+      workspaceId,
+    ).first();
+
+  if (!row) {
+    throw httpError(
+      "Booking not found.",
+      404,
+    );
+  }
+
+  return {
+    identity,
+    row,
+  };
+}
+
+
+async function filesForPortalIdentity(
+  db: D1Db,
+  workspaceId: string,
+  identityId: string,
+  jobId: string,
+) {
+  const access =
+    await db.prepare(`
+      SELECT 1 AS allowed
+      FROM crm_job_client_access
+      WHERE workspace_id = ?
+        AND job_id = ?
+        AND identity_id = ?
+        AND status = 'active'
+      LIMIT 1
+    `).bind(
+      workspaceId,
+      jobId,
+      identityId,
+    ).first();
+
+  if (!access) {
+    return [];
+  }
+
+  const files =
+    await activeJobFiles(
+      db,
+      workspaceId,
+      jobId,
+    );
+
+  return files.map(
+    hydratePublicJobFile,
+  );
+}
+
+
+async function putJobFile(
+  db: D1Db,
+  bucket: R2BucketLike,
+  input: {
+    workspaceId: string;
+    jobId: string;
+    identityId?: string;
+    actorUserId?: string;
+    source: "client" | "workspace";
+    file: File;
+  },
+) {
+  if (!bucket) {
+    throw httpError(
+      "Private file storage is not configured.",
+      500,
+    );
+  }
+
+  validateJobFile(
+    input.file,
+  );
+
+  const filename =
+    safeFilename(
+      input.file.name,
+    );
+
+  const fileId =
+    `crm_job_file_${crypto.randomUUID()}`;
+
+  const storageKey =
+    `workspaces/${input.workspaceId}/crm/jobs/${input.jobId}/files/${fileId}/${filename}`;
+
+  await bucket.put(
+    storageKey,
+    input.file,
+    {
+      httpMetadata: {
+        contentType:
+          text(
+            input.file.type
+            || "application/octet-stream",
+          ),
+        contentDisposition:
+          `attachment; filename="${filename.replace(/"/g, "")}"`,
+        cacheControl:
+          "private, no-store",
+      },
+      customMetadata: {
+        workspaceId:
+          input.workspaceId,
+        jobId:
+          input.jobId,
+        fileId,
+        source:
+          input.source,
+        identityId:
+          text(
+            input.identityId,
+          ),
+        actorUserId:
+          text(
+            input.actorUserId,
+          ),
+      },
+    },
+  );
+
+  try {
+    await db.prepare(`
+      INSERT INTO crm_job_files (
+        id,
+        workspace_id,
+        job_id,
+        identity_id,
+        actor_user_id,
+        source,
+        storage_key,
+        original_filename,
+        mime_type,
+        file_size,
+        status,
+        uploaded_at,
+        updated_at
+      ) VALUES (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        'active',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+      )
+    `).bind(
+      fileId,
+      input.workspaceId,
+      input.jobId,
+      text(
+        input.identityId,
+      ) || null,
+      text(
+        input.actorUserId,
+      ) || null,
+      input.source,
+      storageKey,
+      text(
+        input.file.name,
+      ).slice(
+        0,
+        500,
+      ),
+      text(
+        input.file.type
+        || "application/octet-stream",
+      ),
+      input.file.size,
+    ).run();
+  } catch (error) {
+    await bucket
+      .delete(
+        storageKey,
+      )
+      .catch(
+        () => {},
+      );
+
+    throw error;
+  }
+
+  const row =
+    await db.prepare(`
+      SELECT *
+      FROM crm_job_files
+      WHERE id = ?
+        AND workspace_id = ?
+      LIMIT 1
+    `).bind(
+      fileId,
+      input.workspaceId,
+    ).first();
+
+  return hydrateJobFile(
+    row,
+  );
+}
+
+
+export async function uploadJobFileForAdmin(
+  db: D1Db,
+  bucket: R2BucketLike,
+  actor: PortalActor,
+  jobId: string,
+  file: File,
+) {
+  requireJobFileMutation(
+    actor,
+  );
+
+  const job =
+    await jobRow(
+      db,
+      actor.workspaceId,
+      jobId,
+    );
+
+  if (!job) {
+    throw httpError(
+      "Job not found.",
+      404,
+    );
+  }
+
+  if (
+    [
+      "cancelled",
+      "archived",
+    ].includes(
+      text(job.status),
+    )
+  ) {
+    throw httpError(
+      "Files cannot be added to this Job.",
+      409,
+    );
+  }
+
+  const uploaded =
+    await putJobFile(
+      db,
+      bucket,
+      {
+        workspaceId:
+          actor.workspaceId,
+        jobId,
+        actorUserId:
+          text(
+            actor.userId,
+          ),
+        source:
+          "workspace",
+        file,
+      },
+    );
+
+  await recordJobActivity(
+    db,
+    actor,
+    actor.workspaceId,
+    jobId,
+    "job.file_uploaded",
+    `Uploaded ${uploaded.filename}.`,
+    {
+      fileId:
+        uploaded.id,
+      source:
+        "workspace",
+      fileSize:
+        uploaded.fileSize,
+    },
+  );
+
+  return uploaded;
+}
+
+
+export async function uploadJobFileForClient(
+  db: D1Db,
+  bucket: R2BucketLike,
+  request: Request,
+  workspaceId: string,
+  jobId: string,
+  file: File,
+) {
+  const {
+    identity,
+    row,
+  } =
+    await authorisedPublicJob(
+      db,
+      request,
+      workspaceId,
+      jobId,
+    );
+
+  if (
+    [
+      "cancelled",
+      "archived",
+    ].includes(
+      text(row.status),
+    )
+  ) {
+    throw httpError(
+      "Files cannot be added to this booking.",
+      409,
+    );
+  }
+
+  const uploaded =
+    await putJobFile(
+      db,
+      bucket,
+      {
+        workspaceId,
+        jobId,
+        identityId:
+          identity.id,
+        source:
+          "client",
+        file,
+      },
+    );
+
+  await recordJobActivity(
+    db,
+    {
+      email:
+        identity.email,
+    },
+    workspaceId,
+    jobId,
+    "job.file_uploaded",
+    `Client uploaded ${uploaded.filename}.`,
+    {
+      fileId:
+        uploaded.id,
+      source:
+        "client",
+      identityId:
+        identity.id,
+      fileSize:
+        uploaded.fileSize,
+    },
+  );
+
+  return hydratePublicJobFile(
+    uploaded,
+  );
+}
+
+
+export async function getJobFileForAdmin(
+  db: D1Db,
+  bucket: R2BucketLike,
+  actor: PortalActor,
+  jobId: string,
+  fileId: string,
+) {
+  requirePermission(
+    actor,
+    "crm:read",
+  );
+
+  if (!bucket) {
+    throw httpError(
+      "Private file storage is not configured.",
+      500,
+    );
+  }
+
+  const row =
+    await db.prepare(`
+      SELECT *
+      FROM crm_job_files
+      WHERE id = ?
+        AND job_id = ?
+        AND workspace_id = ?
+        AND status = 'active'
+      LIMIT 1
+    `).bind(
+      fileId,
+      jobId,
+      actor.workspaceId,
+    ).first();
+
+  if (!row) {
+    throw httpError(
+      "File not found.",
+      404,
+    );
+  }
+
+  const object =
+    await bucket.get(
+      text(
+        row.storage_key,
+      ),
+    );
+
+  if (!object) {
+    throw httpError(
+      "File not found.",
+      404,
+    );
+  }
+
+  return {
+    object,
+    row,
+  };
+}
+
+
+export async function getJobFileForClient(
+  db: D1Db,
+  bucket: R2BucketLike,
+  request: Request,
+  workspaceId: string,
+  jobId: string,
+  fileId: string,
+) {
+  await authorisedPublicJob(
+    db,
+    request,
+    workspaceId,
+    jobId,
+  );
+
+  if (!bucket) {
+    throw httpError(
+      "Private file storage is not configured.",
+      500,
+    );
+  }
+
+  const row =
+    await db.prepare(`
+      SELECT *
+      FROM crm_job_files
+      WHERE id = ?
+        AND job_id = ?
+        AND workspace_id = ?
+        AND status = 'active'
+      LIMIT 1
+    `).bind(
+      fileId,
+      jobId,
+      workspaceId,
+    ).first();
+
+  if (!row) {
+    throw httpError(
+      "File not found.",
+      404,
+    );
+  }
+
+  const object =
+    await bucket.get(
+      text(
+        row.storage_key,
+      ),
+    );
+
+  if (!object) {
+    throw httpError(
+      "File not found.",
+      404,
+    );
+  }
+
+  return {
+    object,
+    row,
+  };
+}
+
+
+export async function deleteJobFileForAdmin(
+  db: D1Db,
+  bucket: R2BucketLike,
+  actor: PortalActor,
+  jobId: string,
+  fileId: string,
+) {
+  requireJobFileMutation(
+    actor,
+  );
+
+  const row =
+    await db.prepare(`
+      SELECT *
+      FROM crm_job_files
+      WHERE id = ?
+        AND job_id = ?
+        AND workspace_id = ?
+        AND status = 'active'
+      LIMIT 1
+    `).bind(
+      fileId,
+      jobId,
+      actor.workspaceId,
+    ).first();
+
+  if (!row) {
+    throw httpError(
+      "File not found.",
+      404,
+    );
+  }
+
+  if (bucket) {
+    await bucket
+      .delete(
+        text(
+          row.storage_key,
+        ),
+      )
+      .catch(
+        () => {},
+      );
+  }
+
+  await db.prepare(`
+    UPDATE crm_job_files
+    SET
+      status = 'deleted',
+      deleted_at = CURRENT_TIMESTAMP,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+      AND job_id = ?
+      AND workspace_id = ?
+  `).bind(
+    fileId,
+    jobId,
+    actor.workspaceId,
+  ).run();
+
+  await recordJobActivity(
+    db,
+    actor,
+    actor.workspaceId,
+    jobId,
+    "job.file_deleted",
+    `Removed ${text(row.original_filename)}.`,
+    {
+      fileId,
+      source:
+        text(row.source),
+    },
+  );
+
+  return {
+    ok: true,
+  };
+}
+
+
+export async function deleteJobFileForClient(
+  db: D1Db,
+  bucket: R2BucketLike,
+  request: Request,
+  workspaceId: string,
+  jobId: string,
+  fileId: string,
+) {
+  const {
+    identity,
+  } =
+    await authorisedPublicJob(
+      db,
+      request,
+      workspaceId,
+      jobId,
+    );
+
+  const row =
+    await db.prepare(`
+      SELECT *
+      FROM crm_job_files
+      WHERE id = ?
+        AND job_id = ?
+        AND workspace_id = ?
+        AND status = 'active'
+      LIMIT 1
+    `).bind(
+      fileId,
+      jobId,
+      workspaceId,
+    ).first();
+
+  if (!row) {
+    throw httpError(
+      "File not found.",
+      404,
+    );
+  }
+
+  if (
+    text(row.source)
+      !== "client"
+    || text(row.identity_id)
+      !== identity.id
+  ) {
+    throw httpError(
+      "You cannot remove this file.",
+      403,
+    );
+  }
+
+  if (bucket) {
+    await bucket
+      .delete(
+        text(
+          row.storage_key,
+        ),
+      )
+      .catch(
+        () => {},
+      );
+  }
+
+  await db.prepare(`
+    UPDATE crm_job_files
+    SET
+      status = 'deleted',
+      deleted_at = CURRENT_TIMESTAMP,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+      AND job_id = ?
+      AND workspace_id = ?
+  `).bind(
+    fileId,
+    jobId,
+    workspaceId,
+  ).run();
+
+  await recordJobActivity(
+    db,
+    {
+      email:
+        identity.email,
+    },
+    workspaceId,
+    jobId,
+    "job.file_deleted",
+    `Client removed ${text(row.original_filename)}.`,
+    {
+      fileId,
+      identityId:
+        identity.id,
+    },
+  );
+
+  return {
+    ok: true,
+  };
+}
+
 
 export async function uploadQuestionnaireFile(db: D1Db, bucket: R2BucketLike, request: Request, workspaceId: string, instanceId: string, fieldKeyInput: string, file: File) {
   if (!bucket) throw httpError("Private file storage is not configured.", 500);

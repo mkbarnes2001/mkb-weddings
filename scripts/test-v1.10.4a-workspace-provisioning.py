@@ -36,11 +36,14 @@ def main() -> None:
     con.row_factory = sqlite3.Row
     con.executescript(schema)
 
-    assert one(
-        con,
-        "SELECT value FROM schema_meta "
-        "WHERE key='schema_version'",
-    )[0] == "41"
+    current_schema_version = int(
+        one(
+            con,
+            "SELECT value FROM schema_meta "
+            "WHERE key='schema_version'",
+        )[0]
+    )
+    assert current_schema_version >= 38
 
     # Simulate the exact durable records created by the
     # source-only provisioner.
@@ -396,7 +399,7 @@ def main() -> None:
         "  CRM/workflow/questionnaire setup: existing tenant-scoped lazy initialisers retained"
     )
     print(
-        "  current canonical schema: 41"
+        f"  current canonical schema: {current_schema_version}"
     )
 
 

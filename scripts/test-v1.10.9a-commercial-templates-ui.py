@@ -130,17 +130,30 @@ assert (
 )
 
 # Enquiry Create quote no longer bypasses template choice.
-assert (
-    'navigate(`/admin/crm/quotes?enquiryId=${encodeURIComponent(id)}`)'
-    in enquiry
+# Check the behaviour inside createQuote rather than requiring
+# one historical whitespace/source formatting shape.
+create_quote_start = enquiry.index(
+    "function createQuote()"
 )
+
+create_quote = enquiry[
+    create_quote_start:
+    create_quote_start + 420
+]
+
+assert (
+    "/admin/crm/quotes?enquiryId="
+    in create_quote
+)
+
+assert (
+    "encodeURIComponent(id)"
+    in create_quote
+)
+
 assert (
     "AdminApiService.createCrmQuote"
-    not in enquiry[
-        enquiry.index("function createQuote()"):
-        enquiry.index("function createQuote()")
-        + 220
-    ]
+    not in create_quote
 )
 
 # Admin API supports optional template selection.

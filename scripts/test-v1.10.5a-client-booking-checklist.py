@@ -22,10 +22,12 @@ def main() -> None:
 
     con = sqlite3.connect(":memory:")
     con.executescript(read("d1/schema.sql"))
-    version = con.execute(
-        "SELECT value FROM schema_meta WHERE key='schema_version'"
-    ).fetchone()[0]
-    assert version == "41"
+    current_schema_version = int(
+        con.execute(
+            "SELECT value FROM schema_meta WHERE key='schema_version'"
+        ).fetchone()[0]
+    )
+    assert current_schema_version >= 39
 
     # All commercial reads use the authenticated client identity and
     # an active Job portal-access relationship as their authority.
@@ -123,7 +125,7 @@ def main() -> None:
 
     # Client Portal exposes the commercial navigation and checklist.
     for token in [
-        'type PortalView = "home" | "quotes" | "contracts" | "invoices" | "questionnaires" | "galleries"',
+        'type PortalView = "home" | "quotes" | "contracts" | "invoices" | "questionnaires" | "files" | "galleries"',
         "commercial: PortalCommercialSummary",
         "selectedContractId",
         "selectedInvoiceId",

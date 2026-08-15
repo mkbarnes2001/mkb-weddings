@@ -98,6 +98,19 @@ type PortalCommercialSummary = {
   invoices: PortalCommercialInvoiceSummary[];
 };
 
+type PortalJobFile = {
+  id: string;
+  jobId: string;
+  identityId: string;
+  actorUserId: string;
+  source: "client" | "workspace";
+  filename: string;
+  mimeType: string;
+  fileSize: number;
+  status: "active" | "deleted";
+  uploadedAt: string;
+};
+
 type PortalJob = {
   id: string;
   reference: string;
@@ -108,6 +121,7 @@ type PortalJob = {
   venueText: string;
   weddingSlug: string;
   contactName: string;
+  files: PortalJobFile[];
   questionnaires: PortalQuestionnaire[];
   commercial: PortalCommercialSummary;
 };
@@ -116,7 +130,7 @@ type PortalJob = {
 type PortalQuoteAddon = { id: string; addonId: string; name: string; description: string; unitPriceAmount: number; currency: string; minimumQuantity: number; maximumQuantity: number; defaultQuantity: number; requirement: "optional" | "recommended" | "mandatory"; displayOrder: number };
 type PortalQuoteOption = { id: string; name: string; description: string; serviceType: string; basePriceAmount: number; currency: string; coverageMinutes: number | null; deliverables: string[]; includedItems: string[]; clientNotes: string; recommended: boolean; items: Array<{ id: string; name: string; quantity: number; unitPriceAmount: number }>; addons: PortalQuoteAddon[] };
 type PortalQuoteAcceptance = { optionId: string; acceptedAt: string; subtotalAmount: number; discountAmount: number; taxAmount: number; totalAmount: number; currency: string; selectedPackage: Record<string, unknown>; selectedAddons: Array<PortalQuoteAddon & { quantity: number; lineTotalAmount: number }> };
-type PortalQuote = { id: string; reference: string; status: string; clientName: string; partnerName: string; eventDate: string; venueText: string; acceptedJobId: string; acceptance?: PortalQuoteAcceptance | null; currentVersion: { id: string; versionNumber: number; status: string; expiresAt: string; clientNotes: string; discountType: "none" | "fixed" | "percentage"; discountValue: number; taxTreatment: "none" | "inclusive" | "exclusive"; taxRateBasisPoints: number; currency: string; options: PortalQuoteOption[] } };
+type PortalQuote = { id: string; reference: string; status: string; quoteType: "pick_and_choose" | "fixed"; clientName: string; partnerName: string; eventDate: string; venueText: string; acceptedJobId: string; acceptance?: PortalQuoteAcceptance | null; currentVersion: { id: string; versionNumber: number; status: string; expiresAt: string; clientNotes: string; discountType: "none" | "fixed" | "percentage"; discountValue: number; taxTreatment: "none" | "inclusive" | "exclusive"; taxRateBasisPoints: number; currency: string; options: PortalQuoteOption[] } };
 type PortalQuoteSummary = { id: string; reference: string; status: string; eventDate: string; venueText: string; acceptedJobId: string; updatedAt: string };
 
 type PortalGallery = {
@@ -279,7 +293,7 @@ function SupplierQuestion({
   );
 }
 
-type PortalView = "home" | "quotes" | "contracts" | "invoices" | "questionnaires" | "galleries";
+type PortalView = "home" | "quotes" | "contracts" | "invoices" | "questionnaires" | "files" | "galleries";
 
 function contrastColour(hex: string) {
   const value = /^#[0-9a-f]{6}$/i.test(hex) ? hex.slice(1) : "111111";
@@ -432,6 +446,66 @@ export function ClientPortal() {
     } finally { setSaving(false); }
   }
 
+  async function uploadJobFile(
+    jobId: string,
+    file: File | undefined,
+  ) {
+    if (!file) return;
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const form =
+        new FormData();
+
+      form.set(
+        "file",
+        file,
+      );
+
+      const response =
+        await fetch(
+          portalApiPath(
+            `/api/public/client-portal/jobs/${encodeURIComponent(jobId)}/files`,
+          ),
+          {
+            method: "POST",
+            credentials: "include",
+            body: form,
+          },
+        );
+
+      const body: any =
+        await response
+          .json()
+          .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          body?.error
+          || "Unable to upload file.",
+        );
+      }
+
+      await loadPortal();
+
+      setMessage(
+        `${file.name} uploaded.`,
+      );
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Unable to upload file.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+
   function chooseQuoteOption(option: PortalQuoteOption) {
     setSelectedOptionId(option.id);
     const quantities: Record<string, number> = {};
@@ -440,11 +514,42 @@ export function ClientPortal() {
   }
 
   async function acceptQuote() {
-    if (!quote || !selectedOptionId || !window.confirm("Accept this quote and confirm your selected package and extras?")) return;
+    const optionId =
+      quote?.quoteType === "fixed"
+        ? quote.currentVersion.options[0]?.id || ""
+        : selectedOptionId;
+
+    const confirmation =
+      quote?.quoteType === "fixed"
+        ? "Accept this fixed quote as presented?"
+        : "Accept this quote and confirm your selected package and extras?";
+
+    if (
+      !quote
+      || !optionId
+      || !window.confirm(
+        confirmation,
+      )
+    ) {
+      return;
+    }
+
     setSaving(true); setError(""); setMessage("");
+
     try {
-      const addons = Object.entries(addonQuantities).map(([id, quantity]) => ({ id, quantity }));
-      const result = await jsonRequest<{ ok: true; conversion: { jobReference: string } }>(portalApiPath(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}/accept`), { method: "POST", body: JSON.stringify({ optionId: selectedOptionId, addons, confirmed: true }) });
+      const addons =
+        quote.quoteType === "fixed"
+          ? []
+          : Object.entries(
+              addonQuantities,
+            ).map(
+              ([id, quantity]) => ({
+                id,
+                quantity,
+              }),
+            );
+
+      const result = await jsonRequest<{ ok: true; conversion: { jobReference: string } }>(portalApiPath(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}/accept`), { method: "POST", body: JSON.stringify({ optionId, addons, confirmed: true }) });
       setMessage(`Quote accepted. Your booking ${result.conversion.jobReference} is now active.`);
       setSelectedQuoteId(quote.id);
       await loadPortal();
@@ -485,6 +590,18 @@ export function ClientPortal() {
     "--portal-on-accent": contrastColour(accent),
   } as CSSProperties;
   const allQuestionnaires = portal?.jobs.flatMap((job) => job.questionnaires.map((item) => ({ ...item, job }))) || [];
+  const allJobFiles =
+    portal?.jobs.flatMap(
+      (job) =>
+        (job.files || []).map(
+          (file) => ({
+            ...file,
+            job,
+          }),
+        ),
+    )
+    || [];
+
   const galleries = portal?.galleries || [];
   const allContracts = portal?.jobs.flatMap((job) => (job.commercial?.contracts || []).map((item) => ({ ...item, job }))) || [];
   const allInvoices = portal?.jobs.flatMap((job) => (job.commercial?.invoices || []).map((item) => ({ ...item, job }))) || [];
@@ -504,16 +621,93 @@ export function ClientPortal() {
     && portal?.quotes.some((item) => item.status === "accepted" && item.acceptedJobId === primaryJob.id),
   );
   const clientFirstName = (portal?.identity?.displayName || portal?.identity?.email || "there").split(/[ @]/)[0];
-  const selectedQuoteOption = quote?.currentVersion.options.find((option) => option.id === selectedOptionId);
-  const selectedQuoteTotals = quoteTotals(selectedQuoteOption, quote, addonQuantities);
-  const acceptedQuote = quote?.currentVersion.status === "accepted" ? quote.acceptance : null;
-  const displayedQuoteTotals = acceptedQuote ? {
-    subtotal: acceptedQuote.subtotalAmount,
-    discount: acceptedQuote.discountAmount,
-    tax: acceptedQuote.taxAmount,
-    total: acceptedQuote.totalAmount,
-  } : selectedQuoteTotals;
-  const displayedQuoteAddons = selectedQuoteOption?.addons.filter((addon) => !acceptedQuote || (addonQuantities[addon.id] ?? 0) > 0) || [];
+  const selectedQuoteOption =
+    quote?.quoteType === "fixed"
+      ? quote.currentVersion.options[0]
+      : quote?.currentVersion.options.find(
+          (option) =>
+            option.id
+            === selectedOptionId,
+        );
+
+  const fixedAddonQuantities:
+    Record<string, number> =
+    Object.fromEntries(
+      (
+        selectedQuoteOption?.addons
+        || []
+      ).map(
+        (addon) => [
+          addon.id,
+          addon.requirement
+          === "mandatory"
+            ? Math.max(
+                1,
+                addon.minimumQuantity,
+                addon.defaultQuantity,
+              )
+            : addon.defaultQuantity,
+        ],
+      ),
+    );
+
+  const displayedAddonQuantities =
+    quote?.quoteType === "fixed"
+      ? fixedAddonQuantities
+      : addonQuantities;
+
+  const selectedQuoteTotals =
+    quoteTotals(
+      selectedQuoteOption,
+      quote,
+      displayedAddonQuantities,
+    );
+
+  const acceptedQuote =
+    quote?.currentVersion.status
+      === "accepted"
+      ? quote.acceptance
+      : null;
+
+  const displayedQuoteTotals =
+    acceptedQuote
+      ? {
+          subtotal:
+            acceptedQuote
+              .subtotalAmount,
+          discount:
+            acceptedQuote
+              .discountAmount,
+          tax:
+            acceptedQuote
+              .taxAmount,
+          total:
+            acceptedQuote
+              .totalAmount,
+        }
+      : selectedQuoteTotals;
+
+  const displayedQuoteAddons =
+    selectedQuoteOption
+      ?.addons.filter(
+        (addon) =>
+          quote?.quoteType
+            === "fixed"
+            ? (
+                displayedAddonQuantities[
+                  addon.id
+                ]
+                ?? 0
+              ) > 0
+            : !acceptedQuote
+              || (
+                addonQuantities[
+                  addon.id
+                ]
+                ?? 0
+              ) > 0,
+      )
+    || [];
 
   if (loading && !portal) return <div className="client-portal-shell"><div className="client-portal-loading">Loading client portal…</div></div>;
 
@@ -554,6 +748,7 @@ export function ClientPortal() {
         {allContracts.length ? <button className={view === "contracts" ? "active" : ""} onClick={() => { setView("contracts"); setSelectedContractId((current) => current || allContracts[0]?.id || ""); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><FileText />Contracts</button> : null}
         {allInvoices.length ? <button className={view === "invoices" ? "active" : ""} onClick={() => { setView("invoices"); setSelectedInvoiceId((current) => current || allInvoices[0]?.id || ""); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><PackageCheck />Invoices</button> : null}
         {allQuestionnaires.length ? <button className={view === "questionnaires" ? "active" : ""} onClick={() => { setView("questionnaires"); setSelectedQuoteId(""); setQuote(null); }}><FileText />Questionnaires</button> : null}
+        {portal.jobs.length ? <button className={view === "files" ? "active" : ""} onClick={() => { setView("files"); setSelectedId(""); setSelectedQuoteId(""); setSelectedContractId(""); setSelectedInvoiceId(""); setQuestionnaire(null); setQuote(null); }}><Paperclip />Files</button> : null}
         {galleries.length ? <button className={view === "galleries" ? "active" : ""} onClick={() => { setView("galleries"); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><Images />Galleries</button> : null}
       </nav>
       {view === "home" ? <main className="client-portal-home">
@@ -606,6 +801,7 @@ export function ClientPortal() {
           {allContracts.length ? <button onClick={() => { setSelectedContractId((current) => current || allContracts[0]?.id || ""); setView("contracts"); }}><FileText /><span><small>Contracts</small><strong>{signedContracts === allContracts.length ? "Signed" : `${signedContracts} of ${allContracts.length} signed`}</strong><em>Review the contract attached to your booking</em></span></button> : null}
           {allInvoices.length ? <button onClick={() => { setSelectedInvoiceId((current) => current || allInvoices[0]?.id || ""); setView("invoices"); }}><PackageCheck /><span><small>Invoices</small><strong>{unpaidInvoices ? `${unpaidInvoices} with balance due` : "Paid"}</strong><em>View totals, instalments and payment history</em></span></button> : null}
           {allQuestionnaires.length ? <button onClick={() => setView("questionnaires")}><FileText /><span><small>Questionnaires</small><strong>{pendingQuestionnaires ? `${pendingQuestionnaires} to complete` : "Complete"}</strong><em>{completedQuestionnaires} of {allQuestionnaires.length} completed</em></span></button> : null}
+          {portal.jobs.length ? <button onClick={() => setView("files")}><Paperclip /><span><small>Files</small><strong>{allJobFiles.length ? `${allJobFiles.length} shared` : "Ready for uploads"}</strong><em>Share planning images, schedules, documents and other references</em></span></button> : null}
           {galleries.length ? <button onClick={() => setView("galleries")}><Images /><span><small>Galleries</small><strong>{galleries.length === 1 ? "1 gallery ready" : `${galleries.length} galleries ready`}</strong><em>View photographs, favourites, selections and downloads</em></span></button> : null}
         </section>
         {!portal.jobs.length && !portal.quotes.length && !galleries.length ? <div className="client-portal-empty"><FileText /><h2>Nothing is waiting for you</h2><p>No active quotes, bookings or galleries are linked to this email.</p></div> : null}
@@ -615,12 +811,65 @@ export function ClientPortal() {
           {view === "contracts" ? <><p className="client-portal-eyebrow">Your contracts</p><div className="client-portal-quote-links">{portal.jobs.flatMap((job) => (job.commercial?.contracts || []).map((item) => ({ ...item, job }))).map((item) => <button key={item.id} className={selectedContractId === item.id ? "active" : ""} onClick={() => { setSelectedContractId(item.id); setSelectedInvoiceId(""); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><FileText /><span><strong>{item.title || item.reference}</strong><small>{item.status.replace(/_/g, " ")} · {item.job.title}</small></span>{item.status === "signed" ? <CheckCircle2 /> : null}</button>)}</div></> : null}
           {view === "invoices" ? <><p className="client-portal-eyebrow">Your invoices</p><div className="client-portal-quote-links">{portal.jobs.flatMap((job) => (job.commercial?.invoices || []).map((item) => ({ ...item, job }))).map((item) => <button key={item.id} className={selectedInvoiceId === item.id ? "active" : ""} onClick={() => { setSelectedInvoiceId(item.id); setSelectedContractId(""); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><PackageCheck /><span><strong>{item.reference}</strong><small>{item.balanceAmount > 0 ? `${money(item.balanceAmount, item.currency)} due` : "paid"} · {item.job.title}</small></span>{item.balanceAmount <= 0 ? <CheckCircle2 /> : null}</button>)}</div></> : null}
           {view === "questionnaires" ? <><p className="client-portal-eyebrow">Your questionnaires</p>{portal.jobs.map((job) => <section key={job.id} className="client-portal-job"><h2>{job.title}</h2><p><CalendarDays />{formatDate(job.eventDate)}</p><p>{job.venueText || "Venue TBC"}</p><div>{job.questionnaires.map((item) => <button key={item.id} className={selectedId === item.id ? "active" : ""} onClick={() => { setSelectedId(item.id); setSelectedQuoteId(""); setQuote(null); }}><FileText /><span>{item.title}<small>{item.status.replace(/_/g, " ")}</small></span>{item.status === "completed" ? <CheckCircle2 /> : null}</button>)}</div></section>)}</> : null}
+          {view === "files" ? <><p className="client-portal-eyebrow">Planning files</p>{portal.jobs.map((job) => <section key={job.id} className="client-portal-job"><h2>{job.title}</h2><p><CalendarDays />{formatDate(job.eventDate)}</p><p>{job.venueText || "Venue TBC"}</p><div className="client-portal-file-job-summary"><Paperclip /><span><strong>{job.files?.length || 0} file{job.files?.length === 1 ? "" : "s"}</strong><small>Secure planning workspace</small></span></div></section>)}</> : null}
           {view === "galleries" ? <><p className="client-portal-eyebrow">Your galleries</p><div className="client-portal-gallery-links">{galleries.map((gallery) => <a key={gallery.id} href={portalGalleryPath(gallery)}><Images /><span><strong>{gallery.title}</strong><small>{gallery.weddingDate ? formatDate(gallery.weddingDate) : "Gallery ready"}</small></span></a>)}</div></> : null}
         </aside>
         <main className="client-portal-main">
           {error ? <div className="client-portal-alert client-portal-alert--error">{error}</div> : null}
           {message ? <div className="client-portal-alert client-portal-alert--success">{message}</div> : null}
-          {view === "galleries" ? <section className="client-portal-gallery-view">
+          {view === "files" ? <section className="client-portal-files-view">
+            <div className="client-portal-section-heading">
+              <span>Planning workspace</span>
+              <h1>Your files</h1>
+              <p>Share inspiration images, schedules, venue documents, planning PDFs and other references securely with the business.</p>
+            </div>
+
+            <div className="client-portal-files-jobs">
+              {portal.jobs.map((job) => <article key={job.id} className="client-portal-files-job">
+                <header>
+                  <div>
+                    <small>{formatDate(job.eventDate)}</small>
+                    <h2>{job.title}</h2>
+                    <p>{job.venueText || "Venue TBC"}</p>
+                  </div>
+                  <span>{job.files?.length || 0} file{job.files?.length === 1 ? "" : "s"}</span>
+                </header>
+
+                <label className="client-portal-files-upload">
+                  <Paperclip />
+                  <span>
+                    <strong>{saving ? "Working…" : "Upload a planning file"}</strong>
+                    <small>Maximum file size 10 MB</small>
+                  </span>
+                  <input
+                    type="file"
+                    disabled={saving}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      void uploadJobFile(job.id, file);
+                      event.currentTarget.value = "";
+                    }}
+                  />
+                </label>
+
+                {job.files?.length ? <div className="client-portal-files-list">
+                  {job.files.map((file) => <a
+                    key={file.id}
+                    href={portalApiPath(`/api/public/client-portal/jobs/${encodeURIComponent(job.id)}/files/${encodeURIComponent(file.id)}`)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Paperclip />
+                    <span>
+                      <strong>{file.filename}</strong>
+                      <small>{file.source === "client" ? "Client upload" : "Business upload"} · {formatBytes(file.fileSize)}</small>
+                    </span>
+                    <Download />
+                  </a>)}
+                </div> : <div className="client-portal-files-empty"><Paperclip /><strong>No planning files yet</strong><p>Use the upload area above when you have something to share.</p></div>}
+              </article>)}
+            </div>
+          </section> : view === "galleries" ? <section className="client-portal-gallery-view">
             <div className="client-portal-section-heading">
               <span>Gallery delivery</span>
               <h1>Your galleries</h1>
@@ -650,11 +899,11 @@ export function ClientPortal() {
               </a>)}
             </div>
           </section> : view === "contracts" ? <ClientPortalCommercialDocument kind="contract" id={selectedContractId} /> : view === "invoices" ? <ClientPortalCommercialDocument kind="invoice" id={selectedInvoiceId} /> : quote ? <article className="portal-quote-card">
-            <div className="portal-quote-heading"><button className="client-portal-back" onClick={() => setSelectedQuoteId("")}><ArrowLeft />Back</button><span>{portal.business?.name || "WedPlanned"}</span><h1>Your quote</h1><p className="portal-quote-client">Prepared for {quote.clientName}{quote.partnerName ? ` and ${quote.partnerName}` : ""}</p><div className="portal-quote-meta"><strong>{quote.reference}</strong><span>Version {quote.currentVersion.versionNumber}</span><span>{formatDate(quote.eventDate)}</span><span>{quote.venueText || "Venue TBC"}</span>{quote.currentVersion.expiresAt ? <span>Expires {formatDate(quote.currentVersion.expiresAt)}</span> : null}</div>{quote.currentVersion.clientNotes ? <p>{quote.currentVersion.clientNotes}</p> : null}</div>
-            <div className="portal-package-grid">{quote.currentVersion.options.map((option) => <button type="button" key={option.id} className={`portal-package-card ${selectedOptionId === option.id ? "selected" : ""}`} disabled={["accepted", "declined", "expired"].includes(quote.currentVersion.status)} onClick={() => chooseQuoteOption(option)}>{option.recommended ? <em>Recommended</em> : null}<span className="portal-package-check">{selectedOptionId === option.id ? <CheckCircle2 /> : null}</span><h2>{option.name}</h2>{option.description ? <p>{option.description}</p> : null}<strong>{money(option.basePriceAmount, option.currency)}</strong>{option.coverageMinutes ? <small>{Math.round(option.coverageMinutes / 60)} hours coverage</small> : null}<ul>{option.includedItems.map((item) => <li key={item}>{item}</li>)}</ul>{option.deliverables.length ? <div className="portal-package-deliverables"><b>Deliverables</b>{option.deliverables.map((item) => <span key={item}>{item}</span>)}</div> : null}</button>)}</div>
-            {displayedQuoteAddons.length ? <section className="portal-quote-addons"><h2>{acceptedQuote ? "Selected extras" : "Optional extras"}</h2><p>{acceptedQuote ? "Extras included in your accepted booking." : "Select permitted extras for your chosen package."}</p>{displayedQuoteAddons.map((addon) => { const quantity = addonQuantities[addon.id] ?? addon.defaultQuantity; const mandatory = addon.requirement === "mandatory"; return <div key={addon.id} className="portal-quote-addon"><div><strong>{addon.name}{mandatory ? <small>Required</small> : addon.requirement === "recommended" ? <small>Recommended</small> : null}</strong><p>{addon.description}</p></div><span>{money(addon.unitPriceAmount, addon.currency)}</span>{acceptedQuote ? <strong className="portal-quote-addon-accepted">× {quantity}</strong> : <label><span>Quantity</span><input type="number" min={mandatory ? Math.max(1, addon.minimumQuantity) : 0} max={addon.maximumQuantity} value={quantity} onChange={(event) => { const raw = Math.max(0, Math.min(addon.maximumQuantity, Number(event.target.value) || 0)); const next = mandatory ? Math.max(1, addon.minimumQuantity, raw) : raw > 0 ? Math.max(addon.minimumQuantity, raw) : 0; setAddonQuantities((current) => ({ ...current, [addon.id]: next })); }} /></label>}</div>; })}</section> : null}
+            <div className="portal-quote-heading"><button className="client-portal-back" onClick={() => setSelectedQuoteId("")}><ArrowLeft />Back</button><span>{portal.business?.name || "WedPlanned"}</span><h1>Your quote</h1><p className="portal-quote-client">Prepared for {quote.clientName}{quote.partnerName ? ` and ${quote.partnerName}` : ""}</p><div className="portal-quote-meta"><strong>{quote.reference}</strong><span>{quote.quoteType === "fixed" ? "Fixed quote" : "Pick & Choose"}</span><span>Version {quote.currentVersion.versionNumber}</span><span>{formatDate(quote.eventDate)}</span><span>{quote.venueText || "Venue TBC"}</span>{quote.currentVersion.expiresAt ? <span>Expires {formatDate(quote.currentVersion.expiresAt)}</span> : null}</div>{quote.currentVersion.clientNotes ? <p>{quote.currentVersion.clientNotes}</p> : null}</div>
+            <div className="portal-package-grid">{quote.currentVersion.options.map((option) => <button type="button" key={option.id} className={`portal-package-card ${(quote.quoteType === "fixed" || selectedOptionId === option.id) ? "selected" : ""}`} disabled={quote.quoteType === "fixed" || ["accepted", "declined", "expired"].includes(quote.currentVersion.status)} onClick={() => { if (quote.quoteType !== "fixed") chooseQuoteOption(option); }}>{option.recommended ? <em>Recommended</em> : null}<span className="portal-package-check">{selectedOptionId === option.id ? <CheckCircle2 /> : null}</span><h2>{option.name}</h2>{option.description ? <p>{option.description}</p> : null}<strong>{money(option.basePriceAmount, option.currency)}</strong>{option.coverageMinutes ? <small>{Math.round(option.coverageMinutes / 60)} hours coverage</small> : null}<ul>{option.includedItems.map((item) => <li key={item}>{item}</li>)}</ul>{option.deliverables.length ? <div className="portal-package-deliverables"><b>Deliverables</b>{option.deliverables.map((item) => <span key={item}>{item}</span>)}</div> : null}</button>)}</div>
+            {displayedQuoteAddons.length ? <section className="portal-quote-addons"><h2>{quote.quoteType === "fixed" ? "Included extras" : acceptedQuote ? "Selected extras" : "Optional extras"}</h2><p>{quote.quoteType === "fixed" ? "These required extras are already included in the fixed quote total." : acceptedQuote ? "Extras included in your accepted booking." : "Select permitted extras for your chosen package."}</p>{displayedQuoteAddons.map((addon) => { const quantity = addonQuantities[addon.id] ?? addon.defaultQuantity; const mandatory = addon.requirement === "mandatory"; return <div key={addon.id} className="portal-quote-addon"><div><strong>{addon.name}{mandatory ? <small>Required</small> : addon.requirement === "recommended" ? <small>Recommended</small> : null}</strong><p>{addon.description}</p></div><span>{money(addon.unitPriceAmount, addon.currency)}</span>{acceptedQuote || quote.quoteType === "fixed" ? <strong className="portal-quote-addon-accepted">× {quantity}</strong> : <label><span>Quantity</span><input type="number" min={mandatory ? Math.max(1, addon.minimumQuantity) : 0} max={addon.maximumQuantity} value={quantity} onChange={(event) => { const raw = Math.max(0, Math.min(addon.maximumQuantity, Number(event.target.value) || 0)); const next = mandatory ? Math.max(1, addon.minimumQuantity, raw) : raw > 0 ? Math.max(addon.minimumQuantity, raw) : 0; setAddonQuantities((current) => ({ ...current, [addon.id]: next })); }} /></label>}</div>; })}</section> : null}
             <section className="portal-quote-summary"><h2>Price summary</h2><dl><div><dt>Subtotal</dt><dd>{money(displayedQuoteTotals.subtotal, acceptedQuote?.currency || quote.currentVersion.currency)}</dd></div>{displayedQuoteTotals.discount ? <div><dt>Discount</dt><dd>−{money(displayedQuoteTotals.discount, acceptedQuote?.currency || quote.currentVersion.currency)}</dd></div> : null}{quote.currentVersion.taxTreatment !== "none" ? <div><dt>Tax {quote.currentVersion.taxTreatment === "inclusive" ? "included" : ""}</dt><dd>{money(displayedQuoteTotals.tax, acceptedQuote?.currency || quote.currentVersion.currency)}</dd></div> : null}<div className="total"><dt>Total</dt><dd>{money(displayedQuoteTotals.total, acceptedQuote?.currency || quote.currentVersion.currency)}</dd></div></dl></section>
-            <footer className="portal-quote-actions">{quote.currentVersion.status === "accepted" ? <div className="client-portal-complete"><CheckCircle2 /><span>Quote accepted. Your booking is active.</span></div> : quote.currentVersion.status === "declined" ? <div className="client-portal-complete muted"><XCircle /><span>This quote was declined.</span></div> : quote.currentVersion.status === "expired" ? <div className="client-portal-complete muted"><XCircle /><span>This quote has expired.</span></div> : <><button className="secondary" disabled={saving} onClick={() => void declineQuote()}><XCircle />Decline quote</button><button disabled={saving || !selectedOptionId} onClick={() => void acceptQuote()}><CheckCircle2 />Accept quote</button></>}</footer>
+            <footer className="portal-quote-actions">{quote.currentVersion.status === "accepted" ? <div className="client-portal-complete"><CheckCircle2 /><span>Quote accepted. Your booking is active.</span></div> : quote.currentVersion.status === "declined" ? <div className="client-portal-complete muted"><XCircle /><span>This quote was declined.</span></div> : quote.currentVersion.status === "expired" ? <div className="client-portal-complete muted"><XCircle /><span>This quote has expired.</span></div> : <><button className="secondary" disabled={saving} onClick={() => void declineQuote()}><XCircle />Decline quote</button><button disabled={saving || (quote.quoteType !== "fixed" && !selectedOptionId)} onClick={() => void acceptQuote()}><CheckCircle2 />Accept quote</button></>}</footer>
           </article> : !questionnaire ? <div className="client-portal-empty"><FileText /><h2>Select a quote or questionnaire</h2><p>Choose an item from the sidebar to continue.</p></div> : (
             <article className="portal-questionnaire-card">
               <div className="portal-questionnaire-heading"><button className="client-portal-back" onClick={() => setSelectedId("")}><ArrowLeft />Back</button><span>{selectedJob?.title}</span><h1>{questionnaire.title}</h1>{questionnaire.introduction ? <p>{questionnaire.introduction}</p> : null}<div className="portal-questionnaire-meta"><span>{questionnaire.status.replace(/_/g, " ")}</span>{questionnaire.dueAt ? <span>Due {formatDate(questionnaire.dueAt)}</span> : null}{questionnaire.lastSavedAt ? <span>Saved {new Date(questionnaire.lastSavedAt).toLocaleString("en-GB")}</span> : null}</div></div>

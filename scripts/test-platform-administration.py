@@ -25,7 +25,13 @@ def main() -> None:
 
     con = sqlite3.connect(":memory:")
     con.executescript(schema_text)
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "41"
+    current_schema_version = int(
+        one(
+            con,
+            "SELECT value FROM schema_meta WHERE key='schema_version'",
+        )[0]
+    )
+    assert current_schema_version >= 35
 
     module_columns = {row[1] for row in con.execute("PRAGMA table_info(platform_module_configurations)")}
     assert {

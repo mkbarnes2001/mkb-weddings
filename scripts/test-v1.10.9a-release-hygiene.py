@@ -43,11 +43,13 @@ con = sqlite3.connect(":memory:")
 con.executescript(schema)
 
 assert (
-    con.execute(
-        "SELECT value FROM schema_meta "
-        "WHERE key='schema_version'"
-    ).fetchone()[0]
-    == "41"
+    int(
+        con.execute(
+            "SELECT value FROM schema_meta "
+            "WHERE key='schema_version'"
+        ).fetchone()[0]
+    )
+    >= 41
 )
 
 assert not con.execute(
@@ -109,14 +111,16 @@ for forbidden in [
 
 
 # Workspace switch cannot retain a template from the previous tenant.
-assert (
-    "activeTemplates.some((template) => template.id === current)"
-    in quotes
+assert re.search(
+    r"activeTemplates\.some\(\s*"
+    r"\(template\)\s*=>\s*"
+    r"template\.id\s*===\s*current",
+    quotes,
 )
 
-assert (
-    "current || activeTemplates.find"
-    not in quotes
+assert not re.search(
+    r"current\s*\|\|\s*activeTemplates\.find",
+    quotes,
 )
 
 

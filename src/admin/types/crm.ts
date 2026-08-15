@@ -53,6 +53,15 @@ export type CrmEnquiry = {
   wonAt?: string;
   lostAt?: string;
   lostReason: string;
+  mailStatus:
+    | "none"
+    | "sent"
+    | "delivered"
+    | "opened"
+    | "clicked"
+    | "failed";
+  mailStatusAt: string;
+  mailSubject: string;
   acceptedJobId: string;
   convertedAt?: string;
   lastCommunicationAt?: string;
@@ -373,6 +382,10 @@ export type CrmCommunication = {
   status: "draft" | "logged" | "sent" | "failed" | string;
   provider?: string;
   providerMessageId?: string;
+  failureReason?: string;
+  deliveredAt?: string;
+  openedAt?: string;
+  clickedAt?: string;
   occurredAt: string;
   actorEmail: string;
   metadata?: Record<string, unknown>;
@@ -478,11 +491,26 @@ export type CrmJobCommercialWorkspace = {
   contract: CrmJobCommercialContract | null;
 };
 
+export type CrmJobFile = {
+  id: string;
+  jobId: string;
+  identityId: string;
+  actorUserId: string;
+  source: "client" | "workspace";
+  filename: string;
+  mimeType: string;
+  fileSize: number;
+  status: "active" | "deleted";
+  uploadedAt: string;
+  deletedAt?: string;
+};
+
 export type CrmJobWorkspace = {
   job: CrmJob;
   contacts: Array<{ id: string; displayName: string; email: string; phone: string; role: string }>;
   portalAccess: CrmPortalAccess[];
   questionnaires: QuestionnaireInstance[];
+  files: CrmJobFile[];
   templates: QuestionnaireTemplate[];
   enquiry: { reference: string; source: string; campaign: string; notes: string; createdAt: string } | null;
   linkedSuppliers: Array<SupplierDirectoryOption & { role: string; sortOrder: number }>;
@@ -497,6 +525,10 @@ export type CrmJobWorkspace = {
   communications: CrmCommunication[];
   workflowTemplates: CrmWorkflowTemplate[];
 };
+
+export type CrmQuoteType =
+  | "pick_and_choose"
+  | "fixed";
 
 export type CrmPackage = {
   id: string;
@@ -532,6 +564,7 @@ export type CrmAddon = {
   minimumQuantity: number;
   maximumQuantity: number;
   requirement: "optional" | "recommended" | "mandatory";
+  imageUrl: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -558,6 +591,7 @@ export type CrmQuoteAddonOption = {
   defaultQuantity: number;
   requirement: "optional" | "recommended" | "mandatory";
   displayOrder: number;
+  imageUrl: string;
 };
 
 export type CrmQuoteOption = {
@@ -574,6 +608,7 @@ export type CrmQuoteOption = {
   deliverables: string[];
   includedItems: string[];
   clientNotes: string;
+  imageUrl: string;
   recommended: boolean;
   displayOrder: number;
   items: CrmQuoteItem[];
@@ -616,6 +651,7 @@ export type CrmQuote = {
   primaryContactId: string;
   reference: string;
   status: CrmQuoteVersion["status"];
+  quoteType: CrmQuoteType;
   currentVersionId: string;
   acceptedVersionId: string;
   acceptedJobId: string;
@@ -672,6 +708,7 @@ export type CrmQuoteTemplateAddon = {
 export type CrmQuoteTemplate = {
   id: string;
   name: string;
+  quoteType: CrmQuoteType;
   description: string;
   clientIntroduction: string;
   clientNotes: string;
@@ -695,6 +732,7 @@ export type CrmQuoteTemplate = {
 
 export type CrmQuoteTemplateInput = {
   name?: string;
+  quoteType?: CrmQuoteType;
   description?: string;
   clientIntroduction?: string;
   clientNotes?: string;

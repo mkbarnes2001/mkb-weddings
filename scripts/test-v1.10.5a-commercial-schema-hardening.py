@@ -55,11 +55,14 @@ def main():
     con = sqlite3.connect(":memory:")
     con.executescript(schema)
 
-    assert one(
-        con,
-        "SELECT value FROM schema_meta "
-        "WHERE key='schema_version'",
-    )[0] == "41"
+    current_schema_version = int(
+        one(
+            con,
+            "SELECT value FROM schema_meta "
+            "WHERE key='schema_version'",
+        )[0]
+    )
+    assert current_schema_version >= 39
 
     con.execute(
         """

@@ -7,6 +7,9 @@ import {
   crmEmailDeliveryReadiness,
   sendCrmEmail,
 } from "./crm-email-delivery-d1";
+import {
+  hashCrmEmailEngagementToken,
+} from "./crm-email-engagement-d1";
 
 
 type D1Db = any;
@@ -77,6 +80,11 @@ function currency(value: unknown, fallback = "GBP") {
   const next = text(value || fallback).toUpperCase();
   return /^[A-Z]{3}$/.test(next) ? next : fallback;
 }
+function quoteType(value: unknown) {
+  return text(value) === "fixed"
+    ? "fixed"
+    : "pick_and_choose";
+}
 function dateOnly(value: unknown) {
   const raw = text(value);
   if (!raw) return "";
@@ -105,7 +113,8 @@ function hydrateAddon(row: any) {
     currency: text(row.currency || "GBP"), serviceType: text(row.service_type), status: text(row.status),
     displayOrder: Number(row.display_order || 0), availabilityScope: text(row.availability_scope || "all"),
     minimumQuantity: Number(row.minimum_quantity || 0), maximumQuantity: Number(row.maximum_quantity || 1),
-    requirement: text(row.requirement || "optional"), createdAt: row.created_at, updatedAt: row.updated_at,
+    requirement: text(row.requirement || "optional"), imageUrl: text(row.image_url),
+    createdAt: row.created_at, updatedAt: row.updated_at,
   };
 }
 function hydrateOption(row: any, items: any[] = [], addons: any[] = []) {
@@ -115,7 +124,8 @@ function hydrateOption(row: any, items: any[] = [], addons: any[] = []) {
     basePriceAmount: Number(row.base_price_amount || 0), currency: text(row.currency || "GBP"),
     coverageMinutes: row.coverage_minutes == null ? null : Number(row.coverage_minutes), deliverables: safeJson(row.deliverables_json, []),
     includedItems: safeJson(row.included_items_json, []), clientNotes: text(row.client_notes), recommended: Boolean(row.recommended),
-    displayOrder: Number(row.display_order || 0), packageSnapshot: safeJson(row.package_snapshot_json, {}),
+    displayOrder: Number(row.display_order || 0), imageUrl: text(row.image_url),
+    packageSnapshot: safeJson(row.package_snapshot_json, {}),
     items, addons,
   };
 }
@@ -136,7 +146,8 @@ function hydrateVersion(row: any, options: any[] = []) {
 function hydrateQuote(row: any, currentVersion: any = null, versions: any[] = []) {
   return {
     id: text(row.id), enquiryId: text(row.enquiry_id), primaryContactId: text(row.primary_contact_id),
-    reference: text(row.reference), status: text(row.status), currentVersionId: text(row.current_version_id),
+    reference: text(row.reference), status: text(row.status), quoteType: quoteType(row.quote_type),
+    currentVersionId: text(row.current_version_id),
     acceptedVersionId: text(row.accepted_version_id), acceptedJobId: text(row.accepted_job_id), currency: text(row.currency || "GBP"),
     clientName: text(row.client_name), partnerName: text(row.partner_name), clientEmail: text(row.client_email), eventDate: text(row.event_date), venueText: text(row.venue_text),
     enquiryReference: text(row.enquiry_reference), serviceInterest: text(row.service_interest), createdAt: row.created_at, updatedAt: row.updated_at,
@@ -211,12 +222,12 @@ export async function saveAddon(db: D1Db, actor: QuoteActor, addonIdInput: unkno
   const scope = text(input?.availabilityScope) === "selected" ? "selected" : "all";
   const row = await db.prepare(`SELECT id FROM crm_addons WHERE id = ? AND workspace_id = ?`).bind(addonId, actor.workspaceId).first();
   if (row) {
-    await db.prepare(`UPDATE crm_addons SET name = ?, description = ?, price_amount = ?, currency = ?, service_type = ?, status = ?, display_order = ?, availability_scope = ?, minimum_quantity = ?, maximum_quantity = ?, requirement = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(
-      name, text(input?.description), Math.max(0, integer(input?.priceAmount)), currency(input?.currency), text(input?.serviceType || "wedding"), status, integer(input?.displayOrder), scope, minimum, maximum, requirement, addonId, actor.workspaceId,
+    await db.prepare(`UPDATE crm_addons SET name = ?, description = ?, price_amount = ?, currency = ?, service_type = ?, status = ?, display_order = ?, availability_scope = ?, minimum_quantity = ?, maximum_quantity = ?, requirement = ?, image_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(
+      name, text(input?.description), Math.max(0, integer(input?.priceAmount)), currency(input?.currency), text(input?.serviceType || "wedding"), status, integer(input?.displayOrder), scope, minimum, maximum, requirement, text(input?.imageUrl), addonId, actor.workspaceId,
     ).run();
   } else {
-    await db.prepare(`INSERT INTO crm_addons (id, workspace_id, name, description, price_amount, currency, service_type, status, display_order, availability_scope, minimum_quantity, maximum_quantity, requirement, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
-      addonId, actor.workspaceId, name, text(input?.description), Math.max(0, integer(input?.priceAmount)), currency(input?.currency), text(input?.serviceType || "wedding"), status, integer(input?.displayOrder), scope, minimum, maximum, requirement,
+    await db.prepare(`INSERT INTO crm_addons (id, workspace_id, name, description, price_amount, currency, service_type, status, display_order, availability_scope, minimum_quantity, maximum_quantity, requirement, image_url, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+      addonId, actor.workspaceId, name, text(input?.description), Math.max(0, integer(input?.priceAmount)), currency(input?.currency), text(input?.serviceType || "wedding"), status, integer(input?.displayOrder), scope, minimum, maximum, requirement, text(input?.imageUrl),
     ).run();
   }
   await audit(db, actor, row ? "crm.addon.updated" : "crm.addon.created", "crm_addon", addonId, `${row ? "Updated" : "Created"} add-on ${name}.`, { status, requirement });
@@ -238,7 +249,7 @@ async function fullVersion(db: D1Db, workspaceId: string, versionId: string) {
   }]);
   const addonsByOption = new Map<string, any[]>();
   for (const addon of addonRows.results || []) addonsByOption.set(text(addon.option_id), [...(addonsByOption.get(text(addon.option_id)) || []), {
-    id: text(addon.id), addonId: text(addon.addon_id), name: text(addon.name), description: text(addon.description), unitPriceAmount: Number(addon.unit_price_amount || 0), currency: text(addon.currency || "GBP"), minimumQuantity: Number(addon.minimum_quantity || 0), maximumQuantity: Number(addon.maximum_quantity || 1), defaultQuantity: Number(addon.default_quantity || 0), requirement: text(addon.requirement || "optional"), displayOrder: Number(addon.display_order || 0), addonSnapshot: safeJson(addon.addon_snapshot_json, {}),
+    id: text(addon.id), addonId: text(addon.addon_id), name: text(addon.name), description: text(addon.description), unitPriceAmount: Number(addon.unit_price_amount || 0), currency: text(addon.currency || "GBP"), minimumQuantity: Number(addon.minimum_quantity || 0), maximumQuantity: Number(addon.maximum_quantity || 1), defaultQuantity: Number(addon.default_quantity || 0), requirement: text(addon.requirement || "optional"), displayOrder: Number(addon.display_order || 0), imageUrl: text(addon.image_url), addonSnapshot: safeJson(addon.addon_snapshot_json, {}),
   }]);
   return hydrateVersion(row, (optionRows.results || []).map((option: any) => hydrateOption(option, itemsByOption.get(text(option.id)) || [], addonsByOption.get(text(option.id)) || [])));
 }
@@ -293,8 +304,9 @@ export async function createQuote(db: D1Db, actor: QuoteActor, input: any) {
   const versionId = `crm_quote_version_${crypto.randomUUID()}`;
   const reference = quoteReference();
   const quoteCurrency = currency(input?.currency || enquiry.currency || "GBP");
+  const quoteTypeValue = quoteType(input?.quoteType);
   await db.batch([
-    db.prepare(`INSERT INTO crm_quotes (id, workspace_id, enquiry_id, primary_contact_id, reference, status, currency, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'draft', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(quoteId, actor.workspaceId, enquiryId, contact.id, reference, quoteCurrency, text(actor.userId) || null),
+    db.prepare(`INSERT INTO crm_quotes (id, workspace_id, enquiry_id, primary_contact_id, reference, status, quote_type, currency, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'draft', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(quoteId, actor.workspaceId, enquiryId, contact.id, reference, quoteTypeValue, quoteCurrency, text(actor.userId) || null),
     db.prepare(`INSERT INTO crm_quote_versions (id, workspace_id, quote_id, version_number, status, currency, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, 1, 'draft', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(versionId, actor.workspaceId, quoteId, quoteCurrency, text(actor.userId) || null),
     db.prepare(`UPDATE crm_quotes SET current_version_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(versionId, quoteId, actor.workspaceId),
   ]);
@@ -340,8 +352,12 @@ export async function saveQuoteDraft(db: D1Db, actor: QuoteActor, quoteId: strin
   if (!version) throw httpError("Current quote version not found.", 409);
   if (text(version.status) !== "draft") throw httpError("A sent quote cannot be edited. Create a new revision first.", 409);
   const quoteCurrency = currency(input?.currency || quote.currency || "GBP");
+  const quoteTypeValue = quoteType(quote.quote_type);
   const options = Array.isArray(input?.options) ? input.options : [];
   if (!options.length) throw httpError("Add at least one package option to the quote.");
+  if (quoteTypeValue === "fixed" && options.length !== 1) {
+    throw httpError("A fixed quote must contain exactly one package option.");
+  }
   const discountType = ["fixed", "percentage"].includes(text(input?.discountType)) ? text(input.discountType) : "none";
   const discountValue = Math.max(0, integer(input?.discountValue));
   const taxTreatment = ["inclusive", "exclusive"].includes(text(input?.taxTreatment)) ? text(input.taxTreatment) : "none";
@@ -373,10 +389,12 @@ export async function saveQuoteDraft(db: D1Db, actor: QuoteActor, quoteId: strin
       serviceType: text(inputOption.serviceType ?? catalogue?.service_type ?? "wedding"), internalCode: text(inputOption.internalCode ?? catalogue?.internal_code),
       basePriceAmount: basePrice, currency: quoteCurrency, coverageMinutes: inputOption.coverageMinutes ?? catalogue?.coverage_minutes ?? null,
       deliverables: list(inputOption.deliverables ?? safeJson(catalogue?.deliverables_json, [])), includedItems: list(inputOption.includedItems ?? safeJson(catalogue?.included_items_json, [])),
-      clientNotes: text(inputOption.clientNotes ?? catalogue?.client_notes), recommended: Boolean(inputOption.recommended ?? catalogue?.recommended), displayOrder: integer(inputOption.displayOrder, (index + 1) * 10),
+      clientNotes: text(inputOption.clientNotes ?? catalogue?.client_notes),
+      imageUrl: text(inputOption.imageUrl ?? catalogue?.image_url),
+      recommended: Boolean(inputOption.recommended ?? catalogue?.recommended), displayOrder: integer(inputOption.displayOrder, (index + 1) * 10),
     };
-    statements.push(db.prepare(`INSERT INTO crm_quote_options (id, workspace_id, version_id, package_id, option_type, name, description, service_type, internal_code, base_price_amount, currency, coverage_minutes, deliverables_json, included_items_json, client_notes, recommended, display_order, package_snapshot_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(
-      optionId, actor.workspaceId, version.id, catalogue ? catalogue.id : null, optionType, optionSnapshot.name, optionSnapshot.description, optionSnapshot.serviceType, optionSnapshot.internalCode, basePrice, quoteCurrency, optionSnapshot.coverageMinutes, JSON.stringify(optionSnapshot.deliverables), JSON.stringify(optionSnapshot.includedItems), optionSnapshot.clientNotes, optionSnapshot.recommended ? 1 : 0, optionSnapshot.displayOrder, JSON.stringify(optionSnapshot),
+    statements.push(db.prepare(`INSERT INTO crm_quote_options (id, workspace_id, version_id, package_id, option_type, name, description, service_type, internal_code, base_price_amount, currency, coverage_minutes, deliverables_json, included_items_json, client_notes, image_url, recommended, display_order, package_snapshot_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(
+      optionId, actor.workspaceId, version.id, catalogue ? catalogue.id : null, optionType, optionSnapshot.name, optionSnapshot.description, optionSnapshot.serviceType, optionSnapshot.internalCode, basePrice, quoteCurrency, optionSnapshot.coverageMinutes, JSON.stringify(optionSnapshot.deliverables), JSON.stringify(optionSnapshot.includedItems), optionSnapshot.clientNotes, optionSnapshot.imageUrl, optionSnapshot.recommended ? 1 : 0, optionSnapshot.displayOrder, JSON.stringify(optionSnapshot),
     ));
     let optionSubtotal = basePrice;
     const snapshotItems: any[] = [];
@@ -392,24 +410,41 @@ export async function saveQuoteDraft(db: D1Db, actor: QuoteActor, quoteId: strin
         `crm_quote_item_${crypto.randomUUID()}`, actor.workspaceId, version.id, optionId, itemSnapshot.name, itemSnapshot.description, quantity, unitPrice, itemSnapshot.displayOrder, JSON.stringify(itemSnapshot),
       ));
     }
-    const selectedAddonRows = await addonRowsForOption(db, actor.workspaceId, catalogue ? text(catalogue.id) : "", Array.isArray(inputOption.addonIds) ? inputOption.addonIds.map(text) : [], text(inputOption.id), text(version.id));
+    const requestedAddonIds =
+      quoteTypeValue === "fixed"
+        ? []
+        : Array.isArray(inputOption.addonIds)
+          ? inputOption.addonIds.map(text)
+          : [];
+
+    const selectedAddonRows =
+      await addonRowsForOption(
+        db,
+        actor.workspaceId,
+        catalogue
+          ? text(catalogue.id)
+          : "",
+        requestedAddonIds,
+        text(inputOption.id),
+        text(version.id),
+      );
     const snapshotAddons: any[] = [];
     for (const addon of selectedAddonRows) {
       const minimum = Number(addon.minimum_quantity || 0);
       const maximum = Number(addon.maximum_quantity || 1);
       const defaultQuantity = text(addon.requirement) === "mandatory" ? Math.max(1, minimum) : 0;
-      const addonSnapshot = { addonId: text(addon.id), name: text(addon.name), description: text(addon.description), unitPriceAmount: Number(addon.price_amount || 0), currency: quoteCurrency, minimumQuantity: minimum, maximumQuantity: maximum, defaultQuantity, requirement: text(addon.requirement), displayOrder: Number(addon.display_order || 0) };
+      const addonSnapshot = { addonId: text(addon.id), name: text(addon.name), description: text(addon.description), unitPriceAmount: Number(addon.price_amount || 0), currency: quoteCurrency, minimumQuantity: minimum, maximumQuantity: maximum, defaultQuantity, requirement: text(addon.requirement), displayOrder: Number(addon.display_order || 0), imageUrl: text(addon.image_url) };
       snapshotAddons.push(addonSnapshot);
       if (text(addon.requirement) === "mandatory") optionSubtotal += addonSnapshot.unitPriceAmount * defaultQuantity;
-      statements.push(db.prepare(`INSERT INTO crm_quote_option_addons (id, workspace_id, version_id, option_id, addon_id, name, description, unit_price_amount, currency, minimum_quantity, maximum_quantity, default_quantity, requirement, display_order, addon_snapshot_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(
-        `crm_quote_addon_${crypto.randomUUID()}`, actor.workspaceId, version.id, optionId, addon.id, addonSnapshot.name, addonSnapshot.description, addonSnapshot.unitPriceAmount, quoteCurrency, minimum, maximum, defaultQuantity, addonSnapshot.requirement, addonSnapshot.displayOrder, JSON.stringify(addonSnapshot),
+      statements.push(db.prepare(`INSERT INTO crm_quote_option_addons (id, workspace_id, version_id, option_id, addon_id, name, description, unit_price_amount, currency, minimum_quantity, maximum_quantity, default_quantity, requirement, display_order, image_url, addon_snapshot_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(
+        `crm_quote_addon_${crypto.randomUUID()}`, actor.workspaceId, version.id, optionId, addon.id, addonSnapshot.name, addonSnapshot.description, addonSnapshot.unitPriceAmount, quoteCurrency, minimum, maximum, defaultQuantity, addonSnapshot.requirement, addonSnapshot.displayOrder, addonSnapshot.imageUrl, JSON.stringify(addonSnapshot),
       ));
     }
     lowestSubtotal = lowestSubtotal == null ? optionSubtotal : Math.min(lowestSubtotal, optionSubtotal);
     snapshotOptions.push({ ...optionSnapshot, id: optionId, items: snapshotItems, addons: snapshotAddons, subtotalAmount: optionSubtotal });
   }
   const representative = totals(lowestSubtotal || 0, discountType, discountValue, taxTreatment, taxRate);
-  const versionSnapshot = { quoteId, versionId: text(version.id), versionNumber: Number(version.version_number || 1), options: snapshotOptions, discountType, discountValue, taxTreatment, taxRateBasisPoints: taxRate, currency: quoteCurrency, clientNotes: text(input?.clientNotes), expiresAt: dateOnly(input?.expiresAt) || null, template: input?.templateSnapshot && typeof input.templateSnapshot === "object" ? input.templateSnapshot : null };
+  const versionSnapshot = { quoteId, versionId: text(version.id), versionNumber: Number(version.version_number || 1), quoteType: quoteTypeValue, options: snapshotOptions, discountType, discountValue, taxTreatment, taxRateBasisPoints: taxRate, currency: quoteCurrency, clientNotes: text(input?.clientNotes), expiresAt: dateOnly(input?.expiresAt) || null, template: input?.templateSnapshot && typeof input.templateSnapshot === "object" ? input.templateSnapshot : null };
   statements.push(db.prepare(`UPDATE crm_quote_versions SET client_notes = ?, internal_notes = ?, expires_at = ?, discount_type = ?, discount_value = ?, tax_treatment = ?, tax_rate_basis_points = ?, subtotal_amount = ?, discount_amount = ?, tax_amount = ?, total_amount = ?, currency = ?, snapshot_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ? AND status = 'draft'`).bind(
     text(input?.clientNotes), text(input?.internalNotes), dateOnly(input?.expiresAt) || null, discountType, discountValue, taxTreatment, taxRate, representative.subtotal, representative.discount, representative.tax, representative.total, quoteCurrency, JSON.stringify(versionSnapshot), version.id, actor.workspaceId,
   ));
@@ -1110,10 +1145,30 @@ export async function sendQuote(
   const loginUrl =
     `${origin}/api/public/client-portal/verify?token=${encodeURIComponent(invitation.rawToken)}`;
 
+  const engagementToken =
+    (
+      crypto.randomUUID()
+      + crypto.randomUUID()
+    ).replace(
+      /-/g,
+      "",
+    );
+
+  const engagementTokenHash =
+    await hashCrmEmailEngagementToken(
+      engagementToken,
+    );
+
+  const trackedLoginUrl =
+    `${loginUrl}&engagement=${encodeURIComponent(engagementToken)}`;
+
+  const trackingPixelUrl =
+    `${origin}/api/public/crm/email-open?token=${encodeURIComponent(engagementToken)}`;
+
   const finalBody =
     finalQuoteEmailBody(
       body,
-      loginUrl,
+      trackedLoginUrl,
     );
 
   const communicationBody =
@@ -1150,6 +1205,8 @@ export async function sendQuote(
           subject,
           body:
             finalBody,
+          trackingPixelUrl:
+            trackingPixelUrl,
           businessName:
             preview.businessName,
         },
@@ -1304,6 +1361,7 @@ export async function sendQuote(
         status,
         provider,
         provider_message_id,
+        open_tracking_token_hash,
         failure_reason,
         occurred_at,
         actor_user_id,
@@ -1317,7 +1375,7 @@ export async function sendQuote(
         'outbound',
         ?, ?,
         'sent',
-        ?, ?,
+        ?, ?, ?,
         '',
         CURRENT_TIMESTAMP,
         ?, ?, ?,
@@ -1335,6 +1393,7 @@ export async function sendQuote(
       communicationBody,
       delivery.provider,
       delivery.providerMessageId,
+      engagementTokenHash,
       text(actor.userId) || null,
       lower(actor.email),
       JSON.stringify({
@@ -1513,9 +1572,44 @@ async function acceptQuoteCore(db: D1Db, actor: QuoteActor, quoteId: string, inp
     ]);
     throw httpError("This quote has expired.", 409);
   }
-  const option = version.options.find((item: any) => item.id === text(input?.optionId));
-  if (!option) throw httpError("Choose a valid package option.", 409);
-  const selectedAddons = selectionFor(option, input?.addons);
+  const quoteTypeValue =
+    quoteType(
+      row.quote_type,
+    );
+
+  if (
+    quoteTypeValue === "fixed"
+    && version.options.length !== 1
+  ) {
+    throw httpError(
+      "A fixed quote must contain exactly one package option.",
+      409,
+    );
+  }
+
+  const option =
+    quoteTypeValue === "fixed"
+      ? version.options[0]
+      : version.options.find(
+          (item: any) =>
+            item.id
+            === text(input?.optionId),
+        );
+
+  if (!option) {
+    throw httpError(
+      "Choose a valid package option.",
+      409,
+    );
+  }
+
+  const selectedAddons =
+    selectionFor(
+      option,
+      quoteTypeValue === "fixed"
+        ? []
+        : input?.addons,
+    );
   const baseAndItems = option.basePriceAmount + option.items.reduce((sum: number, item: any) => sum + item.quantity * item.unitPriceAmount, 0);
   const subtotal = baseAndItems + selectedAddons.reduce((sum: number, item: any) => sum + item.lineTotalAmount, 0);
   const calculated = totals(subtotal, version.discountType, version.discountValue, version.taxTreatment, version.taxRateBasisPoints);

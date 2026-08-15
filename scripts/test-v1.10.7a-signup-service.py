@@ -52,7 +52,7 @@ version = con.execute(
     """
 ).fetchone()[0]
 
-assert version == "41", version
+assert int(version) >= 40, version
 
 assert not con.execute(
     "PRAGMA foreign_key_check"

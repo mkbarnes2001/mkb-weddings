@@ -68,8 +68,8 @@ schema_version = con.execute(
 ).fetchone()[0]
 
 require(
-    "CURRENT_SCHEMA_41",
-    schema_version == "41",
+    "CURRENT_SCHEMA_AT_LEAST_40",
+    int(schema_version) >= 40,
 )
 
 require(

@@ -206,6 +206,85 @@ function hydrateEnquiry(row: any) {
   };
 }
 
+function hydrateLeadMail(
+  row: any,
+) {
+  if (!row) {
+    return {
+      mailStatus: "none",
+      mailStatusAt: "",
+      mailSubject: "",
+    };
+  }
+
+  const status =
+    text(row.status);
+
+  const clickedAt =
+    text(row.clicked_at);
+
+  const openedAt =
+    text(row.opened_at);
+
+  const deliveredAt =
+    text(row.delivered_at);
+
+  const occurredAt =
+    text(row.occurred_at);
+
+  if (status === "failed") {
+    return {
+      mailStatus: "failed",
+      mailStatusAt: occurredAt,
+      mailSubject:
+        text(row.subject),
+    };
+  }
+
+  if (clickedAt) {
+    return {
+      mailStatus: "clicked",
+      mailStatusAt: clickedAt,
+      mailSubject:
+        text(row.subject),
+    };
+  }
+
+  if (openedAt) {
+    return {
+      mailStatus: "opened",
+      mailStatusAt: openedAt,
+      mailSubject:
+        text(row.subject),
+    };
+  }
+
+  if (deliveredAt) {
+    return {
+      mailStatus: "delivered",
+      mailStatusAt: deliveredAt,
+      mailSubject:
+        text(row.subject),
+    };
+  }
+
+  if (status === "sent") {
+    return {
+      mailStatus: "sent",
+      mailStatusAt: occurredAt,
+      mailSubject:
+        text(row.subject),
+    };
+  }
+
+  return {
+    mailStatus: "none",
+    mailStatusAt: "",
+    mailSubject:
+      text(row.subject),
+  };
+}
+
 function hydrateJob(row: any) {
   return {
     id: text(row.id),
@@ -445,7 +524,60 @@ export async function getCrmOverview(db: D1Db, actor: CrmActor) {
       WHERE lead.workspace_id = ? LIMIT 1
     `).bind(actor.workspaceId).first(),
   ]);
-  const enquiries = (enquiryResult.results || []).map(hydrateEnquiry);
+  const mailResult =
+    await db.prepare(`
+      SELECT communication.*
+      FROM crm_communications
+        AS communication
+      WHERE communication.workspace_id = ?
+        AND communication.enquiry_id IS NOT NULL
+        AND trim(communication.enquiry_id) <> ''
+        AND communication.channel = 'email'
+        AND communication.direction = 'outbound'
+        AND communication.id = (
+          SELECT candidate.id
+          FROM crm_communications
+            AS candidate
+          WHERE candidate.workspace_id =
+              communication.workspace_id
+            AND candidate.enquiry_id =
+              communication.enquiry_id
+            AND candidate.channel = 'email'
+            AND candidate.direction = 'outbound'
+          ORDER BY
+            candidate.occurred_at DESC,
+            candidate.created_at DESC
+          LIMIT 1
+        )
+    `).bind(
+      actor.workspaceId,
+    ).all();
+
+  const latestMailByEnquiry =
+    new Map<string, any>();
+
+  for (
+    const row
+    of mailResult.results || []
+  ) {
+    latestMailByEnquiry.set(
+      text(row.enquiry_id),
+      row,
+    );
+  }
+
+  const enquiries =
+    (enquiryResult.results || [])
+      .map(
+        (row: any) => ({
+          ...hydrateEnquiry(row),
+          ...hydrateLeadMail(
+            latestMailByEnquiry.get(
+              text(row.id),
+            ),
+          ),
+        }),
+      );
   return {
     schemaVersion: 30,
     workspace: { id: actor.workspaceId, name: text(actor.businessName), currency: text(settings?.workspace_currency || "GBP") },
@@ -482,14 +614,18 @@ export async function getCrmEnquiry(db: D1Db, actor: CrmActor, enquiryId: string
   requirePermission(actor, "crm:read");
   const row = await db.prepare(`${ENQUIRY_SELECT} WHERE e.workspace_id = ? AND e.id = ? LIMIT 1`).bind(actor.workspaceId, enquiryId).first();
   if (!row) throw httpError("Enquiry not found.", 404);
-  const [contacts, activityResult, job, communications] = await Promise.all([
+  const [contacts, activityResult, job, communications, latestMail] = await Promise.all([
     getContactsForEnquiry(db, actor.workspaceId, enquiryId),
     db.prepare(`SELECT * FROM crm_activities WHERE workspace_id = ? AND entity_type = 'enquiry' AND entity_id = ? ORDER BY created_at DESC LIMIT 100`).bind(actor.workspaceId, enquiryId).all(),
     db.prepare(`SELECT * FROM crm_jobs WHERE workspace_id = ? AND enquiry_id = ? LIMIT 1`).bind(actor.workspaceId, enquiryId).first(),
     db.prepare(`SELECT * FROM crm_communications WHERE workspace_id = ? AND enquiry_id = ? ORDER BY occurred_at DESC, created_at DESC LIMIT 100`).bind(actor.workspaceId, enquiryId).all(),
+    db.prepare(`SELECT * FROM crm_communications WHERE workspace_id = ? AND enquiry_id = ? AND channel = 'email' AND direction = 'outbound' ORDER BY occurred_at DESC, created_at DESC LIMIT 1`).bind(actor.workspaceId, enquiryId).first(),
   ]);
   return {
-    enquiry: hydrateEnquiry(row),
+    enquiry: {
+      ...hydrateEnquiry(row),
+      ...hydrateLeadMail(latestMail),
+    },
     contacts,
     activities: (activityResult.results || []).map((item: any) => ({
       id: text(item.id), eventType: text(item.event_type), summary: text(item.summary),
@@ -499,7 +635,17 @@ export async function getCrmEnquiry(db: D1Db, actor: CrmActor, enquiryId: string
     communications: (communications.results || []).map((item: any) => ({
       id: text(item.id), contactId: text(item.contact_id), enquiryId: text(item.enquiry_id), jobId: text(item.job_id),
       channel: text(item.channel), direction: text(item.direction), subject: text(item.subject), body: text(item.body),
-      status: text(item.status), occurredAt: item.occurred_at, actorEmail: text(item.actor_email), createdAt: item.created_at,
+      status: text(item.status),
+      provider: text(item.provider),
+      providerMessageId: text(item.provider_message_id),
+      failureReason: text(item.failure_reason),
+      deliveredAt: item.delivered_at || undefined,
+      openedAt: item.opened_at || undefined,
+      clickedAt: item.clicked_at || undefined,
+      occurredAt: item.occurred_at,
+      actorEmail: text(item.actor_email),
+      metadata: safeJson(item.metadata_json, {}),
+      createdAt: item.created_at,
     })),
   };
 }

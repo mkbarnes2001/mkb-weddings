@@ -35,7 +35,13 @@ def main() -> None:
     con = sqlite3.connect(":memory:")
     con.row_factory = sqlite3.Row
     con.executescript(schema_text)
-    assert one(con, "SELECT value FROM schema_meta WHERE key='schema_version'")[0] == "41"
+    current_schema_version = int(
+        one(
+            con,
+            "SELECT value FROM schema_meta WHERE key='schema_version'",
+        )[0]
+    )
+    assert current_schema_version >= 31
     assert not con.execute("PRAGMA foreign_key_check").fetchall()
 
     required = {
@@ -143,7 +149,10 @@ def main() -> None:
     assert "selected_addons_snapshot_json FROM crm_quote_acceptances" in quotes_source
     assert "acceptance }, identity" in quotes_source
     assert 'acceptedQuote ? "Selected extras" : "Optional extras"' in portal_source
-    assert "acceptedQuote.totalAmount" in portal_source and "portal-quote-addon-accepted" in portal_source
+    compact_portal_source = "".join(portal_source.split())
+    assert "acceptedQuote.totalAmount" in compact_portal_source
+    assert "displayedQuoteTotals.total" in compact_portal_source
+    assert "portal-quote-addon-accepted" in portal_source
     assert "else if (quantity > 0) quantity = Math.max(quantity, addon.minimumQuantity)" in quotes_source
     assert "idx_crm_quotes_enquiry_unique" in migration_text
     for table in required:

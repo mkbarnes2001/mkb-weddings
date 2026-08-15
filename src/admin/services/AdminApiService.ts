@@ -1508,6 +1508,56 @@ export class AdminApiService {
     return result.workspace;
   }
 
+  static jobFileUrl(
+    jobId: string,
+    fileId: string,
+  ) {
+    return `${API_BASE}/api/crm/job-files/${encodeURIComponent(fileId)}?jobId=${encodeURIComponent(jobId)}`;
+  }
+
+  static async uploadCrmJobFile(
+    jobId: string,
+    file: File,
+  ) {
+    const form =
+      new FormData();
+
+    form.set(
+      "file",
+      file,
+    );
+
+    return request<{
+      ok: true;
+      file:
+        CrmJobWorkspace["files"][number];
+      workspace:
+        CrmJobWorkspace;
+    }>(
+      `/api/crm/jobs/${encodeURIComponent(jobId)}/files`,
+      {
+        method: "POST",
+        body: form,
+      },
+    );
+  }
+
+  static async deleteCrmJobFile(
+    jobId: string,
+    fileId: string,
+  ) {
+    return request<{
+      ok: true;
+      workspace:
+        CrmJobWorkspace;
+    }>(
+      `/api/crm/job-files/${encodeURIComponent(fileId)}?jobId=${encodeURIComponent(jobId)}`,
+      {
+        method: "DELETE",
+      },
+    );
+  }
+
   static async createCrmJobClientGallery(id: string) {
     return request<{ ok: true; gallery: ClientGalleryRecord; idempotent: boolean; workspace: CrmJobWorkspace }>(
       `/api/crm/jobs/${encodeURIComponent(id)}/client-gallery`,
@@ -1737,19 +1787,25 @@ export class AdminApiService {
   static async createCrmQuote(
     enquiryId: string,
     templateId = "",
+    quoteType:
+      CrmQuote["quoteType"] =
+      "pick_and_choose",
   ) {
-    const result = await request<{
-      ok: true;
-      quote: CrmQuote;
-    }>("/api/crm/quotes", {
-      method: "POST",
-      body: JSON.stringify({
-        enquiryId,
-        ...(templateId
-          ? { templateId }
-          : {}),
-      }),
-    });
+    const result =
+      await request<{
+        ok: true;
+        quote: CrmQuote;
+      }>(
+        "/api/crm/quotes",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            enquiryId,
+            quoteType,
+            ...(templateId ? { templateId } : {}),
+          }),
+        },
+      );
 
     return result.quote;
   }
