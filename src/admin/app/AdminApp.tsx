@@ -4,6 +4,7 @@ import { Dashboard, PublishingOverview, WebsiteOverview } from "../pages/Dashboa
 import { BusinessOverview, ClientGalleriesOverview } from "../pages/ModuleOverviews";
 import { CRM } from "../pages/CRM";
 import { CRMEnquiry } from "../pages/CRMEnquiry";
+import { CRMClientPortalPreview } from "../pages/CRMClientPortalPreview";
 import { CRMContact } from "../pages/CRMContact";
 import { CRMJob } from "../pages/CRMJob";
 import { CRMCatalogue } from "../pages/CRMCatalogue";
@@ -59,6 +60,11 @@ import { VenueGalleryMigration } from "../pages/VenueGalleryMigration";
 export function AdminApp() {
   return (
     <Routes>
+      <Route
+        path="crm/enquiries/:id/client-portal"
+        element={<CRMClientPortalPreview />}
+      />
+
       <Route element={<AdminLayout />}>
         <Route index element={<BusinessOverview />} />
         <Route path="studio" element={<Dashboard />} />

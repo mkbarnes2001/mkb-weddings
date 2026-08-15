@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  ExternalLink, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -799,6 +800,16 @@ export function CRMEnquiry() {
                 Create quote
               </AdminButton>
             ) : null}
+
+            <Link
+              to={`/admin/crm/enquiries/${id}/client-portal`}
+              target="_blank"
+              rel="noreferrer"
+              className="admin-button admin-button--secondary"
+            >
+              <ExternalLink className="admin-button__icon" />
+              View Client Portal
+            </Link>
 
             {detail.job ? (
               <Link
