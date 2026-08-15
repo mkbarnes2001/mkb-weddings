@@ -2372,6 +2372,80 @@
   .crm-job-operations-grid { grid-template-columns: 1fr; }
 }
 
+/* v1.10.10a intermediate-width leads layout */
+@media (max-width: 1050px) {
+  .crm-lead-list {
+    border-radius: 11px;
+  }
+
+  .crm-lead-list__header {
+    display: none;
+  }
+
+  .crm-lead-row {
+    grid-template-columns: minmax(0,1fr) 36px;
+    padding: 3px 0;
+  }
+
+  .crm-lead-row__main {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding: 7px 0;
+  }
+
+  .crm-lead-cell {
+    display: grid;
+    grid-template-columns: 88px minmax(0,1fr);
+    align-items: center;
+    gap: 8px;
+    min-height: 30px;
+    padding: 4px 11px;
+  }
+
+  .crm-lead-cell::before {
+    color: #999;
+    content: attr(data-label);
+    font-size: calc((7px) * var(--admin-font-scale-effective, 1));
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .crm-lead-cell--identity {
+    align-items: start;
+    padding-top: 7px;
+    padding-bottom: 7px;
+  }
+
+  .crm-lead-cell--identity strong,
+  .crm-lead-cell--identity small,
+  .crm-lead-cell--mail > * {
+    grid-column: 2;
+  }
+
+  .crm-lead-cell--identity::before {
+    grid-row: 1 / span 2;
+    padding-top: 2px;
+  }
+
+  .crm-lead-cell--mail {
+    grid-template-columns: 88px minmax(0,1fr);
+  }
+
+  .crm-lead-cell--mail::before {
+    grid-row: 1 / span 2;
+  }
+
+  .crm-lead-cell--mail small {
+    margin-top: 0;
+  }
+
+  .crm-lead-row__menu {
+    align-items: start;
+    padding-top: 9px;
+  }
+}
+
 @media (max-width: 900px) {
   .crm-operation-record__main,
   .crm-operation-record--job .crm-operation-record__main { grid-template-columns: minmax(0,1fr) minmax(0,1.35fr); }

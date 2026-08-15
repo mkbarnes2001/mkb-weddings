@@ -143,3 +143,83 @@ print(
 print(
     "  schema remains 42: verified"
 )
+
+# v1.10.10a runtime import and intermediate-width regression
+from pathlib import Path as _RegressionPath
+
+_regression_root = _RegressionPath(__file__).resolve().parents[1]
+
+_regression_enquiry = (
+    _regression_root
+    / "src/admin/pages/CRMEnquiry.tsx"
+).read_text(encoding="utf-8")
+
+_regression_css = (
+    _regression_root
+    / "src/admin/admin-theme.css"
+).read_text(encoding="utf-8")
+
+assert (
+    'ExternalLink, useEffect'
+    not in _regression_enquiry
+), "ExternalLink must not be imported from React"
+
+assert (
+    'import { useEffect, useMemo, useState } from "react";'
+    in _regression_enquiry
+), "React hooks import is malformed"
+
+_lucide_start = _regression_enquiry.index(
+    'from "react-router-dom";'
+)
+
+_lucide_end = _regression_enquiry.index(
+    '} from "lucide-react";'
+)
+
+_lucide_block = _regression_enquiry[
+    _lucide_start:_lucide_end
+]
+
+assert (
+    "ExternalLink," in _lucide_block
+), "ExternalLink must come from lucide-react"
+
+assert (
+    "/* v1.10.10a intermediate-width leads layout */"
+    in _regression_css
+), "Intermediate-width Leads layout is missing"
+
+_intermediate_start = _regression_css.index(
+    "/* v1.10.10a intermediate-width leads layout */"
+)
+
+_intermediate_end = _regression_css.index(
+    "@media (max-width: 900px)",
+    _intermediate_start,
+)
+
+_intermediate_block = _regression_css[
+    _intermediate_start:_intermediate_end
+]
+
+assert (
+    "@media (max-width: 1050px)" in _intermediate_block
+), "Leads responsive breakpoint must activate before mobile navigation"
+
+assert (
+    ".crm-lead-list__header" in _intermediate_block
+    and "display: none;" in _intermediate_block
+), "Intermediate Leads layout must hide the desktop header"
+
+assert (
+    ".crm-lead-row__main" in _intermediate_block
+    and "grid-template-columns: 1fr;" in _intermediate_block
+), "Intermediate Leads rows must stack cleanly"
+
+print(
+    "CLIENT_PORTAL_RUNTIME_IMPORT_REGRESSION=PASS"
+)
+print(
+    "LEADS_INTERMEDIATE_RESPONSIVE_REGRESSION=PASS"
+)
