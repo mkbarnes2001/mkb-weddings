@@ -1119,7 +1119,9 @@ export function ClientPortal() {
                   }
                 >
                   <Save />
-                  Save changes
+                  {questionnaire.status === "completed"
+                    ? "Submit updates"
+                    : "Save changes"}
                 </button>
 
                 {questionnaire.status !== "completed" ? (

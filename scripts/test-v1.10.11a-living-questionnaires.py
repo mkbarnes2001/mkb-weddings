@@ -147,11 +147,35 @@ assert (
 
 for token in (
     "Save changes",
+    "Submit updates",
     "Mark as complete",
     "You can continue updating them at any time.",
     "Planning target",
 ):
     assert token in client, token
+
+# Completed questionnaires retain the same editable save path,
+# but present an explicit update-submission action to the client.
+completed_action = client[
+    client.index(
+        '<footer className="portal-questionnaire-actions">'
+    ):
+    client.index(
+        "</footer>",
+        client.index(
+            '<footer className="portal-questionnaire-actions">'
+        ),
+    )
+]
+
+assert (
+    'questionnaire.status === "completed"'
+    in completed_action
+)
+assert '"Submit updates"' in completed_action
+assert '"Save changes"' in completed_action
+assert "void save(false)" in completed_action
+assert "void save(true)" in completed_action
 
 # Completion remains a milestone rather than resetting on edit.
 assert (
