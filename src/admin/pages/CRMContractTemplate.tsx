@@ -599,7 +599,7 @@ export function CRMContractTemplate() {
                     key={
                       section.id
                     }
-                    className="questionnaire-builder-field"
+                    className="questionnaire-builder-field questionnaire-builder-field--no-handle"
                   >
                     <div className="questionnaire-builder-field__body">
                       <div className="grid gap-3">

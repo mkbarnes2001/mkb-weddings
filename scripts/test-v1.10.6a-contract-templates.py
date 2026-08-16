@@ -33,6 +33,9 @@ def main() -> None:
     editor = read(
         "src/admin/pages/CRMContractTemplate.tsx"
     )
+    admin_css = read(
+        "src/admin/admin-theme.css"
+    )
     app = read(
         "src/admin/app/AdminApp.tsx"
     )
@@ -245,6 +248,21 @@ def main() -> None:
         "Inactive / archived",
     ]:
         assert token in editor, token
+
+    # Contract sections deliberately omit the questionnaire
+    # drag handle and therefore use the full available card width.
+    assert (
+        "questionnaire-builder-field--no-handle"
+        in editor
+    )
+    assert (
+        ".questionnaire-builder-field--no-handle"
+        in admin_css
+    )
+    assert (
+        "grid-template-columns: minmax(0, 1fr)"
+        in admin_css
+    )
 
     assert (
         'path="crm/contracts/templates/:id"'

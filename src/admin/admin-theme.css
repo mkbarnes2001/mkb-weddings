@@ -1873,6 +1873,7 @@
 .questionnaire-field-palette .admin-button { width: 100%; justify-content: flex-start; }
 .questionnaire-builder-fields { display: grid; gap: 10px; }
 .questionnaire-builder-field { display: grid; grid-template-columns: 34px minmax(0, 1fr); overflow: hidden; border: 1px solid var(--admin-border); border-radius: 11px; background: #fff; }
+.questionnaire-builder-field--no-handle { grid-template-columns: minmax(0, 1fr); }
 .questionnaire-builder-field__handle { display: grid; place-items: center; cursor: grab; border-right: 1px solid var(--admin-border); background: #f7f6f3; color: #8a8a8a; }
 .questionnaire-builder-field__handle svg { width: 15px; height: 15px; }
 .questionnaire-builder-field__body { display: grid; gap: 10px; padding: 12px; }
