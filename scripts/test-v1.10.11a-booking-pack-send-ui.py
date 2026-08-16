@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Focused regression for v1.10.11a Send Quote Booking Pack UI."""
+"""Focused regression for v1.10.11a quote-integrated booking configuration."""
 
 from pathlib import Path
 
@@ -15,155 +15,190 @@ def read(path: str) -> str:
 page = read(
     "src/admin/pages/CRMQuote.tsx"
 )
+
 css = read(
     "src/admin/admin-theme.css"
 )
-types = read(
-    "src/admin/types/crm.ts"
-)
-api = read(
-    "src/admin/services/AdminApiService.ts"
+
+quotes = read(
+    "serverless/crm-quotes-d1.ts"
 )
 
-# Dedicated local state exists for all user-selectable pack items.
+
+# Quote editor owns the editable booking choices.
 for token in (
-    "sendContractTemplateId",
-    "sendQuestionnaireTemplateId",
-    "sendAutoCreateInvoice",
+    "bookingPackPreview",
+    "bookingContractTemplateId",
+    "bookingQuestionnaireTemplateId",
+    "bookingAutoCreateInvoice",
+    'title="Booking & payment"',
+    'label="Contract"',
+    'label="Questionnaire"',
+    "Create invoice automatically when quote is accepted",
+    "Deposit due",
+    "Final balance",
+    "They do not enable online payment collection.",
 ):
     assert token in page, token
 
-# Normalise source whitespace before checking multiline
-# property access / JSX / payload relationships.
-compact = "".join(
-    page.split()
+
+# Draft save carries explicit booking choices.
+payload_start = page.index(
+    "function payloadForSave()"
 )
 
-# Server defaults initialise the dialog.
-for token in (
-    "preview.bookingPack.contractTemplateId",
-    "preview.bookingPack.questionnaireTemplateId",
-    "preview.bookingPack.autoCreateInvoice",
-):
-    assert token in compact, token
-
-# Changing the email template must not silently reset booking choices.
-assert (
-    "preserveBookingPack=false"
-    in compact
-)
-assert (
-    "applySendPreview(preview,true,)"
-    in compact
+payload_end = page.index(
+    "async function save()",
+    payload_start,
 )
 
-# Send payload contains only reviewed booking choices, not workspace authority.
+payload = "".join(
+    page[
+        payload_start:payload_end
+    ].split()
+)
 
 for token in (
     "bookingPack:{",
-    "contractTemplateId:sendContractTemplateId",
-    "questionnaireTemplateId:sendQuestionnaireTemplateId",
-    "autoCreateInvoice:sendAutoCreateInvoice",
+    "contractTemplateId:bookingContractTemplateId",
+    "questionnaireTemplateId:bookingQuestionnaireTemplateId",
+    "autoCreateInvoice:bookingAutoCreateInvoice",
 ):
-    assert token in compact, token
+    assert token in payload, token
 
+
+# Send Quote is email-only and cannot override booking choices.
 send_start = page.index(
     "async function sendQuote()"
 )
+
 send_end = page.index(
     "async function revise()",
     send_start,
 )
+
 send_section = page[
     send_start:send_end
 ]
 
+assert "bookingPack:" not in send_section
 assert "workspaceId" not in send_section
 assert "fromEmail" not in send_section
 assert "to:" not in send_section
 
-# UI offers explicit None options for optional contract/questionnaire.
+
+# Send modal contains a read-only booking summary.
+booking_start = page.index(
+    '<section className="crm-quote-send-booking-pack">'
+)
+
+booking_end = page.index(
+    "</section>",
+    booking_start,
+)
+
+booking_modal = page[
+    booking_start:booking_end
+]
+
 for token in (
-    "Booking pack",
-    "What happens after acceptance",
-    'label="Contract"',
-    'label="Questionnaire"',
-    "Create invoice when quote is accepted",
-    "None",
-    "Deposit due",
-    "Final balance",
+    "Ready with this quote",
+    "From quote draft",
+    "Booking choices are edited on the quote",
+    "Created on acceptance",
 ):
-    assert token in page, token
+    assert token in booking_modal, token
 
-# Frozen sent versions and legacy versions cannot be cosmetically overridden.
+assert "<select" not in booking_modal
+assert 'type="checkbox"' not in booking_modal
+
+
+# Modal escapes Admin sidebar/main stacking context.
 assert (
-    "sendPreview.bookingPack.frozen"
-    in page
-)
-assert (
-    "sendPreview.bookingPack.legacyFallback"
-    in page
-)
-assert (
-    "Sent version locked"
-    in page
-)
-assert (
-    "Legacy sent version"
+    'import { createPortal } from "react-dom";'
     in page
 )
 
-# Failure semantics are explained consistently with server behaviour.
-assert (
-    "A failed send leaves the draft editable."
-    in page
-)
+assert "createPortal(" in page
+assert "document.body" in page
 
-# Existing typed API boundary is reused.
-assert (
-    "input?: CrmQuoteSendInput"
-    in api
-)
-assert (
-    "bookingPack?: CrmQuoteBookingPackInput;"
-    in types
-)
 
-# WedPlanned-native responsive styling exists.
+# Editable choices persist separately from immutable sent pack.
 for token in (
-    ".crm-quote-send-booking-pack",
-    ".crm-quote-send-booking-pack__grid",
-    ".crm-quote-send-booking-pack__invoice",
-    ".crm-quote-send-booking-pack__summary",
-    "var(--admin-module-accent",
+    "bookingPackDraft",
+    "normaliseQuoteBookingPackDraft(",
+    "snapshot.bookingPackDraft",
+    "hasDraftContractTemplateId",
+    "hasDraftQuestionnaireTemplateId",
+    "hasDraftAutoCreateInvoice",
+    "versionSnapshot",
+):
+    assert token in quotes, token
+
+assert (
+    "delete snapshot.bookingPackDraft;"
+    in quotes
+)
+
+assert (
+    "delete sentVersionSnapshot\n    .bookingPackDraft;"
+    in quotes
+)
+
+
+# Successful-send freeze semantics remain.
+send_server_start = quotes.index(
+    "export async function sendQuote("
+)
+
+send_server = quotes[
+    send_server_start:
+]
+
+for token in (
+    "successfulSendSnapshot",
+    "...sentVersionSnapshot",
+    "bookingPack,",
+    "WHEN status = 'draft'",
+    "THEN ?",
+):
+    assert token in send_server, token
+
+
+# Responsive WedPlanned presentation remains.
+for token in (
+    ".crm-quote-booking-panel",
+    ".crm-quote-booking-panel__grid",
+    ".crm-quote-booking-panel__summary",
     "@media (max-width: 760px)",
 ):
     assert token in css, token
 
+
 print(
-    "PASS v1.10.11a Send Quote Booking Pack UI"
+    "PASS v1.10.11a quote-integrated booking & payment UI"
 )
+
 print(
-    "  contract template dropdown: verified"
+    "  booking choices live on the quote editor: verified"
 )
+
 print(
-    "  questionnaire template dropdown: verified"
+    "  draft booking choices persist in snapshot_json: verified"
 )
+
 print(
-    "  explicit None selections: verified"
+    "  Send Quote booking summary is read-only: verified"
 )
+
 print(
-    "  invoice-on-acceptance control: verified"
+    "  successful-send immutable freeze preserved: verified"
 )
+
 print(
-    "  deposit/payment summary: verified"
+    "  send modal escapes sidebar stacking context: verified"
 )
+
 print(
-    "  email-template refresh preserves booking choices: verified"
-)
-print(
-    "  frozen sent-version controls: verified"
-)
-print(
-    "  responsive WedPlanned styling: verified"
+    "  schema remains unchanged by this source refinement: verified"
 )

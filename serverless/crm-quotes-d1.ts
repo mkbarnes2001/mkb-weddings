@@ -444,7 +444,22 @@ export async function saveQuoteDraft(db: D1Db, actor: QuoteActor, quoteId: strin
     snapshotOptions.push({ ...optionSnapshot, id: optionId, items: snapshotItems, addons: snapshotAddons, subtotalAmount: optionSubtotal });
   }
   const representative = totals(lowestSubtotal || 0, discountType, discountValue, taxTreatment, taxRate);
-  const versionSnapshot = { quoteId, versionId: text(version.id), versionNumber: Number(version.version_number || 1), quoteType: quoteTypeValue, options: snapshotOptions, discountType, discountValue, taxTreatment, taxRateBasisPoints: taxRate, currency: quoteCurrency, clientNotes: text(input?.clientNotes), expiresAt: dateOnly(input?.expiresAt) || null, template: input?.templateSnapshot && typeof input.templateSnapshot === "object" ? input.templateSnapshot : null };
+  const existingVersionSnapshot =
+    safeJson(
+      version.snapshot_json,
+      {},
+    );
+
+  const bookingPackDraft =
+    await normaliseQuoteBookingPackDraft(
+      db,
+      actor.workspaceId,
+      input?.bookingPack,
+      existingVersionSnapshot
+        ?.bookingPackDraft,
+    );
+
+  const versionSnapshot = { quoteId, versionId: text(version.id), versionNumber: Number(version.version_number || 1), quoteType: quoteTypeValue, options: snapshotOptions, discountType, discountValue, taxTreatment, taxRateBasisPoints: taxRate, currency: quoteCurrency, clientNotes: text(input?.clientNotes), expiresAt: dateOnly(input?.expiresAt) || null, template: input?.templateSnapshot && typeof input.templateSnapshot === "object" ? input.templateSnapshot : null, ...(bookingPackDraft ? { bookingPackDraft } : {}) };
   statements.push(db.prepare(`UPDATE crm_quote_versions SET client_notes = ?, internal_notes = ?, expires_at = ?, discount_type = ?, discount_value = ?, tax_treatment = ?, tax_rate_basis_points = ?, subtotal_amount = ?, discount_amount = ?, tax_amount = ?, total_amount = ?, currency = ?, snapshot_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ? AND status = 'draft'`).bind(
     text(input?.clientNotes), text(input?.internalNotes), dateOnly(input?.expiresAt) || null, discountType, discountValue, taxTreatment, taxRate, representative.subtotal, representative.discount, representative.tax, representative.total, quoteCurrency, JSON.stringify(versionSnapshot), version.id, actor.workspaceId,
   ));
@@ -1032,12 +1047,160 @@ function quoteRevisionSnapshot(
   // Never carry the previous sent booking pack forward
   // as an immutable selection.
   delete snapshot.bookingPack;
+  delete snapshot.bookingPackDraft;
 
   return {
     ...snapshot,
     versionId,
     versionNumber,
     previousVersionId,
+  };
+}
+
+
+async function normaliseQuoteBookingPackDraft(
+  db: D1Db,
+  workspaceId: string,
+  input: unknown,
+  fallbackInput: unknown,
+) {
+  const incoming =
+    quoteBookingPackObject(input);
+
+  const fallback =
+    quoteBookingPackObject(
+      fallbackInput,
+    );
+
+  const owns = (
+    source: Record<string, any>,
+    key: string,
+  ) =>
+    Object.prototype
+      .hasOwnProperty.call(
+        source,
+        key,
+      );
+
+  const keys = [
+    "contractTemplateId",
+    "questionnaireTemplateId",
+    "autoCreateInvoice",
+  ];
+
+  const supplied =
+    keys.some(
+      (key) =>
+        owns(incoming, key)
+        || owns(fallback, key),
+    );
+
+  if (!supplied) {
+    return null;
+  }
+
+  const incomingContract =
+    owns(
+      incoming,
+      "contractTemplateId",
+    );
+
+  const incomingQuestionnaire =
+    owns(
+      incoming,
+      "questionnaireTemplateId",
+    );
+
+  let contractTemplateId =
+    text(
+      incomingContract
+        ? incoming.contractTemplateId
+        : fallback.contractTemplateId,
+    );
+
+  let questionnaireTemplateId =
+    text(
+      incomingQuestionnaire
+        ? incoming.questionnaireTemplateId
+        : fallback
+            .questionnaireTemplateId,
+    );
+
+  const autoCreateInvoice =
+    Boolean(
+      owns(
+        incoming,
+        "autoCreateInvoice",
+      )
+        ? incoming.autoCreateInvoice
+        : fallback.autoCreateInvoice,
+    );
+
+  const [
+    contractTemplate,
+    questionnaireTemplate,
+  ] = await Promise.all([
+    contractTemplateId
+      ? db.prepare(`
+          SELECT id
+          FROM crm_contract_templates
+          WHERE workspace_id = ?
+            AND id = ?
+            AND status = 'active'
+          LIMIT 1
+        `).bind(
+          workspaceId,
+          contractTemplateId,
+        ).first()
+      : Promise.resolve(null),
+
+    questionnaireTemplateId
+      ? db.prepare(`
+          SELECT id
+          FROM crm_questionnaire_templates
+          WHERE workspace_id = ?
+            AND id = ?
+            AND status = 'active'
+          LIMIT 1
+        `).bind(
+          workspaceId,
+          questionnaireTemplateId,
+        ).first()
+      : Promise.resolve(null),
+  ]);
+
+  if (
+    contractTemplateId
+    && !contractTemplate
+  ) {
+    if (incomingContract) {
+      throw httpError(
+        "Choose an active contract template from this workspace.",
+        409,
+      );
+    }
+
+    contractTemplateId = "";
+  }
+
+  if (
+    questionnaireTemplateId
+    && !questionnaireTemplate
+  ) {
+    if (incomingQuestionnaire) {
+      throw httpError(
+        "Choose an active questionnaire template from this workspace.",
+        409,
+      );
+    }
+
+    questionnaireTemplateId = "";
+  }
+
+  return {
+    contractTemplateId,
+    questionnaireTemplateId,
+    autoCreateInvoice,
   };
 }
 
@@ -1054,6 +1217,29 @@ async function quoteBookingPackPreview(
   const existing =
     quoteBookingPackObject(
       snapshot.bookingPack,
+    );
+
+  const draftSelection =
+    quoteBookingPackObject(
+      snapshot.bookingPackDraft,
+    );
+
+  const hasDraftContractTemplateId =
+    Object.prototype.hasOwnProperty.call(
+      draftSelection,
+      "contractTemplateId",
+    );
+
+  const hasDraftQuestionnaireTemplateId =
+    Object.prototype.hasOwnProperty.call(
+      draftSelection,
+      "questionnaireTemplateId",
+    );
+
+  const hasDraftAutoCreateInvoice =
+    Object.prototype.hasOwnProperty.call(
+      draftSelection,
+      "autoCreateInvoice",
     );
 
   const template =
@@ -1214,10 +1400,15 @@ async function quoteBookingPackPreview(
       ? text(
           frozenContract.templateId,
         )
-      : (
-          templateContractId
-          || liveContractId
-        );
+      : hasDraftContractTemplateId
+        ? text(
+            draftSelection
+              .contractTemplateId,
+          )
+        : (
+            templateContractId
+            || liveContractId
+          );
 
   const requestedQuestionnaireId =
     frozen
@@ -1225,10 +1416,15 @@ async function quoteBookingPackPreview(
           frozenQuestionnaire
             .templateId,
         )
-      : (
-          templateQuestionnaireId
-          || liveQuestionnaireId
-        );
+      : hasDraftQuestionnaireTemplateId
+        ? text(
+            draftSelection
+              .questionnaireTemplateId,
+          )
+        : (
+            templateQuestionnaireId
+            || liveQuestionnaireId
+          );
 
   const contractTemplateId =
     frozen
@@ -1252,6 +1448,14 @@ async function quoteBookingPackPreview(
             : ""
         );
 
+  const draftInvoiceSetting =
+    hasDraftAutoCreateInvoice
+      ? Boolean(
+          draftSelection
+            .autoCreateInvoice,
+        )
+      : null;
+
   const templateInvoiceSetting =
     typeof template
       .autoCreateInvoice
@@ -1264,7 +1468,8 @@ async function quoteBookingPackPreview(
       ? Boolean(
           frozenInvoice.enabled,
         )
-      : templateInvoiceSetting
+      : draftInvoiceSetting
+        ?? templateInvoiceSetting
         ?? (
           Number(
             settings
@@ -1727,6 +1932,14 @@ export async function sendQuote(
       input?.bookingPack,
     );
 
+  const sentVersionSnapshot =
+    quoteBookingPackObject(
+      version.snapshot,
+    );
+
+  delete sentVersionSnapshot
+    .bookingPackDraft;
+
   // Prepare the immutable sent-version snapshot in memory.
   // It is persisted only after external email delivery succeeds.
   // A failed send therefore leaves the draft fully editable.
@@ -1734,9 +1947,7 @@ export async function sendQuote(
     text(version.status) === "draft"
     && bookingPack
       ? JSON.stringify({
-          ...quoteBookingPackObject(
-            version.snapshot,
-          ),
+          ...sentVersionSnapshot,
           bookingPack,
         })
       : "";

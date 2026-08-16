@@ -8702,6 +8702,125 @@
 }
 
 
+
+/* v1.10.11a — quote-integrated booking & payment configuration */
+
+.crm-quote-booking-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.crm-quote-booking-panel__grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.crm-quote-booking-panel__invoice {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: rgba(255,255,255,.72);
+  padding: 11px 12px;
+}
+
+.crm-quote-booking-panel__invoice input {
+  margin-top: 2px;
+}
+
+.crm-quote-booking-panel__invoice span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.crm-quote-booking-panel__invoice strong {
+  color: var(--admin-text);
+  font-size: calc(
+    (9px)
+    * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 680;
+}
+
+.crm-quote-booking-panel__invoice small,
+.crm-quote-booking-panel__footnote,
+.crm-quote-booking-panel__unavailable {
+  color: var(--admin-muted);
+  font-size: calc(
+    (8px)
+    * var(--admin-font-scale-effective, 1)
+  );
+  line-height: 1.5;
+}
+
+.crm-quote-booking-panel__summary {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: rgba(255,255,255,.72);
+}
+
+.crm-quote-booking-panel__summary > div {
+  min-width: 0;
+  padding: 10px 11px;
+}
+
+.crm-quote-booking-panel__summary > div + div {
+  border-left: 1px solid rgba(0,0,0,.07);
+}
+
+.crm-quote-booking-panel__summary span,
+.crm-quote-booking-panel__summary strong {
+  display: block;
+}
+
+.crm-quote-booking-panel__summary span {
+  color: var(--admin-muted);
+  font-size: calc(
+    (7px)
+    * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.crm-quote-booking-panel__summary strong {
+  margin-top: 4px;
+  color: var(--admin-text);
+  font-size: calc(
+    (9px)
+    * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 680;
+  line-height: 1.35;
+}
+
+.crm-quote-send-booking-pack__summary--booking {
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 760px) {
+  .crm-quote-booking-panel__grid,
+  .crm-quote-booking-panel__summary,
+  .crm-quote-send-booking-pack__summary--booking {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-quote-booking-panel__summary > div + div {
+    border-top: 1px solid rgba(0,0,0,.07);
+    border-left: 0;
+  }
+}
+
 /* v1.10.10a persistent Lead Workspace */
 .crm-lead-workspace-overview-panel .admin-panel__body {
   padding: 0;
