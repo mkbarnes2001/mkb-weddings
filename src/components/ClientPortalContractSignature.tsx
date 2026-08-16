@@ -188,6 +188,17 @@ export function ClientPortalContractSignature({
         );
       }
 
+      window.sessionStorage.setItem(
+        "wedplanned:booking-next",
+        JSON.stringify({
+          jobId:
+            String(
+              contract?.jobId
+              || "",
+            ),
+        }),
+      );
+
       window.location.reload();
     } catch (signError) {
       setError(

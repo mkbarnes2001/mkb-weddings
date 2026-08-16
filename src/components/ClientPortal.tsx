@@ -385,6 +385,156 @@ export function ClientPortal() {
 
   const selectedJob = useMemo(() => portal?.jobs.find((job) => job.questionnaires.some((item) => item.id === selectedId)) || null, [portal?.jobs, selectedId]);
 
+
+  function openNextBookingStep(
+    nextPortal: any,
+    jobId: string,
+  ) {
+    const jobs =
+      Array.isArray(nextPortal?.jobs)
+        ? nextPortal.jobs
+        : [];
+
+    const job =
+      jobs.find(
+        (item: any) =>
+          String(item?.id || "")
+          === String(jobId || ""),
+      )
+      || jobs[0]
+      || null;
+
+    if (!job) {
+      setSelectedId("");
+      setSelectedQuoteId("");
+      setSelectedContractId("");
+      setSelectedInvoiceId("");
+      setQuestionnaire(null);
+      setQuote(null);
+      setView("home");
+      return;
+    }
+
+    const pendingQuestionnaire =
+      (job.questionnaires || []).find(
+        (item: any) =>
+          String(item?.status || "")
+          !== "completed",
+      );
+
+    if (pendingQuestionnaire) {
+      setSelectedId(
+        String(
+          pendingQuestionnaire.id
+          || "",
+        ),
+      );
+      setSelectedQuoteId("");
+      setSelectedContractId("");
+      setSelectedInvoiceId("");
+      setQuestionnaire(null);
+      setQuote(null);
+      setView("questionnaires");
+      return;
+    }
+
+    const pendingContract =
+      (
+        job.commercial?.contracts
+        || []
+      ).find(
+        (item: any) =>
+          String(item?.status || "")
+          !== "signed",
+      );
+
+    if (pendingContract) {
+      setSelectedId("");
+      setSelectedQuoteId("");
+      setSelectedContractId(
+        String(
+          pendingContract.id
+          || "",
+        ),
+      );
+      setSelectedInvoiceId("");
+      setQuestionnaire(null);
+      setQuote(null);
+      setView("contracts");
+      return;
+    }
+
+    const unpaidInvoice =
+      (
+        job.commercial?.invoices
+        || []
+      ).find(
+        (item: any) =>
+          Number(
+            item?.balanceAmount
+            || 0,
+          ) > 0,
+      );
+
+    if (unpaidInvoice) {
+      setSelectedId("");
+      setSelectedQuoteId("");
+      setSelectedContractId("");
+      setSelectedInvoiceId(
+        String(
+          unpaidInvoice.id
+          || "",
+        ),
+      );
+      setQuestionnaire(null);
+      setQuote(null);
+      setView("invoices");
+      return;
+    }
+
+    setSelectedId("");
+    setSelectedQuoteId("");
+    setSelectedContractId("");
+    setSelectedInvoiceId("");
+    setQuestionnaire(null);
+    setQuote(null);
+    setView("home");
+  }
+
+  useEffect(() => {
+    if (!portal?.authenticated) {
+      return;
+    }
+
+    const stored =
+      window.sessionStorage.getItem(
+        "wedplanned:booking-next",
+      );
+
+    if (!stored) {
+      return;
+    }
+
+    window.sessionStorage.removeItem(
+      "wedplanned:booking-next",
+    );
+
+    try {
+      const continuation =
+        JSON.parse(stored);
+
+      openNextBookingStep(
+        portal,
+        String(
+          continuation?.jobId
+          || "",
+        ),
+      );
+    } catch {
+      // Ignore malformed or stale continuation state.
+    }
+  }, [portal]);
+
   async function refreshQuestionnaire() {
     if (!questionnaire) return;
     const refreshed = await jsonRequest<{ ok: true; questionnaire: PortalQuestionnaire; suppliers?: SupplierDirectoryOption[] }>(portalApiPath(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}`));
@@ -417,6 +567,22 @@ export function ClientPortal() {
             ? "Changes saved. Your planning details remain marked complete."
             : "Changes saved. You can safely return later.",
       );
+      if (submit) {
+        window.sessionStorage.setItem(
+          "wedplanned:booking-next",
+          JSON.stringify({
+            jobId:
+              String(
+                selectedJob?.id
+                || "",
+              ),
+          }),
+        );
+
+        window.location.reload();
+        return;
+      }
+
       await loadPortal();
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Unable to save questionnaire.");
@@ -555,12 +721,19 @@ export function ClientPortal() {
               }),
             );
 
-      const result = await jsonRequest<{ ok: true; conversion: { jobReference: string } }>(portalApiPath(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}/accept`), { method: "POST", body: JSON.stringify({ optionId, addons, confirmed: true }) });
-      setMessage(`Quote accepted. Your booking ${result.conversion.jobReference} is now active.`);
-      setSelectedQuoteId(quote.id);
-      await loadPortal();
-      const refreshed = await jsonRequest<{ ok: true; quote: PortalQuote }>(portalApiPath(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}`));
-      setQuote(refreshed.quote);
+      const result = await jsonRequest<{ ok: true; conversion: { jobId: string; jobReference: string } }>(portalApiPath(`/api/public/client-portal/quotes/${encodeURIComponent(quote.id)}/accept`), { method: "POST", body: JSON.stringify({ optionId, addons, confirmed: true }) });
+      window.sessionStorage.setItem(
+        "wedplanned:booking-next",
+        JSON.stringify({
+          jobId:
+            String(
+              result.conversion.jobId
+              || "",
+            ),
+        }),
+      );
+
+      window.location.reload();
     } catch (acceptError) { setError(acceptError instanceof Error ? acceptError.message : "Unable to accept quote."); }
     finally { setSaving(false); }
   }
@@ -751,9 +924,9 @@ export function ClientPortal() {
       <nav className="client-portal-nav" aria-label="Client portal sections">
         <button className={view === "home" ? "active" : ""} onClick={() => { setView("home"); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><Home />Home</button>
         {portal.quotes.length ? <button className={view === "quotes" ? "active" : ""} onClick={() => { setView("quotes"); setSelectedId(""); setQuestionnaire(null); }}><PackageCheck />Quotes</button> : null}
+        {allQuestionnaires.length ? <button className={view === "questionnaires" ? "active" : ""} onClick={() => { setView("questionnaires"); setSelectedQuoteId(""); setQuote(null); }}><FileText />Questionnaires</button> : null}
         {allContracts.length ? <button className={view === "contracts" ? "active" : ""} onClick={() => { setView("contracts"); setSelectedContractId((current) => current || allContracts[0]?.id || ""); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><FileText />Contracts</button> : null}
         {allInvoices.length ? <button className={view === "invoices" ? "active" : ""} onClick={() => { setView("invoices"); setSelectedInvoiceId((current) => current || allInvoices[0]?.id || ""); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><PackageCheck />Invoices</button> : null}
-        {allQuestionnaires.length ? <button className={view === "questionnaires" ? "active" : ""} onClick={() => { setView("questionnaires"); setSelectedQuoteId(""); setQuote(null); }}><FileText />Questionnaires</button> : null}
         {portal.jobs.length ? <button className={view === "files" ? "active" : ""} onClick={() => { setView("files"); setSelectedId(""); setSelectedQuoteId(""); setSelectedContractId(""); setSelectedInvoiceId(""); setQuestionnaire(null); setQuote(null); }}><Paperclip />Files</button> : null}
         {galleries.length ? <button className={view === "galleries" ? "active" : ""} onClick={() => { setView("galleries"); setSelectedId(""); setSelectedQuoteId(""); setQuestionnaire(null); setQuote(null); }}><Images />Galleries</button> : null}
       </nav>
@@ -782,6 +955,12 @@ export function ClientPortal() {
               {!primaryQuoteAccepted && portal.quotes.length ? <button type="button" onClick={() => setView("quotes")}>Review</button> : <em>Complete</em>}
             </article>
 
+            <article className={`client-portal-checklist-item ${primaryJob.questionnaires.length > 0 && !primaryPendingQuestionnaire ? "complete" : ""}`}>
+              <span>{primaryJob.questionnaires.length > 0 && !primaryPendingQuestionnaire ? <CheckCircle2 /> : <XCircle />}</span>
+              <div><strong>Questionnaire</strong><small>{primaryJob.questionnaires.length ? primaryPendingQuestionnaire ? `${primaryPendingQuestionnaire.title} is waiting to be completed.` : "Your assigned questionnaire is complete." : "No questionnaire has been assigned yet."}</small></div>
+              {primaryPendingQuestionnaire ? <button type="button" onClick={() => { setSelectedId(primaryPendingQuestionnaire.id); setView("questionnaires"); }}>Complete</button> : <em>{primaryJob.questionnaires.length ? "Complete" : "Pending"}</em>}
+            </article>
+
             <article className={`client-portal-checklist-item ${primaryContract?.status === "signed" ? "complete" : ""}`}>
               <span>{primaryContract?.status === "signed" ? <CheckCircle2 /> : <XCircle />}</span>
               <div><strong>Contract signature</strong><small>{primaryContract ? primaryContract.status === "signed" ? "The required contract signature has been recorded." : `${primaryContract.signatureCount} of ${primaryContract.requiredSignatures} signatures recorded.` : "No client-visible contract has been issued yet."}</small></div>
@@ -793,20 +972,14 @@ export function ClientPortal() {
               <div><strong>Payment schedule</strong><small>{primaryInvoice ? primaryInvoice.balanceAmount <= 0 ? "The invoice balance is paid." : primaryInvoice.nextPayment ? `${primaryInvoice.nextPayment.label}: ${money(primaryInvoice.nextPayment.balanceAmount, primaryInvoice.currency)} remaining${primaryInvoice.nextPayment.dueDate ? ` · due ${formatDate(primaryInvoice.nextPayment.dueDate)}` : ""}.` : `${money(primaryInvoice.balanceAmount, primaryInvoice.currency)} remains due.` : "No client-visible invoice has been issued yet."}</small></div>
               {primaryInvoice ? <button type="button" onClick={() => { setSelectedInvoiceId(primaryInvoice.id); setView("invoices"); }}>View</button> : <em>Pending</em>}
             </article>
-
-            <article className={`client-portal-checklist-item ${primaryJob.questionnaires.length > 0 && !primaryPendingQuestionnaire ? "complete" : ""}`}>
-              <span>{primaryJob.questionnaires.length > 0 && !primaryPendingQuestionnaire ? <CheckCircle2 /> : <XCircle />}</span>
-              <div><strong>Questionnaire</strong><small>{primaryJob.questionnaires.length ? primaryPendingQuestionnaire ? `${primaryPendingQuestionnaire.title} is waiting to be completed.` : "Your assigned questionnaire is complete." : "No questionnaire has been assigned yet."}</small></div>
-              {primaryPendingQuestionnaire ? <button type="button" onClick={() => { setSelectedId(primaryPendingQuestionnaire.id); setView("questionnaires"); }}>Complete</button> : <em>{primaryJob.questionnaires.length ? "Complete" : "Pending"}</em>}
-            </article>
           </div>
         </section> : null}
 
         <section className="client-portal-home-grid">
           {portal.quotes.length ? <button onClick={() => setView("quotes")}><PackageCheck /><span><small>Quotes</small><strong>{acceptedQuotes ? `${acceptedQuotes} accepted` : `${portal.quotes.length} available`}</strong><em>Review package options and booking details</em></span></button> : null}
+          {allQuestionnaires.length ? <button onClick={() => setView("questionnaires")}><FileText /><span><small>Questionnaires</small><strong>{pendingQuestionnaires ? `${pendingQuestionnaires} to complete` : "Complete"}</strong><em>{completedQuestionnaires} of {allQuestionnaires.length} completed</em></span></button> : null}
           {allContracts.length ? <button onClick={() => { setSelectedContractId((current) => current || allContracts[0]?.id || ""); setView("contracts"); }}><FileText /><span><small>Contracts</small><strong>{signedContracts === allContracts.length ? "Signed" : `${signedContracts} of ${allContracts.length} signed`}</strong><em>Review the contract attached to your booking</em></span></button> : null}
           {allInvoices.length ? <button onClick={() => { setSelectedInvoiceId((current) => current || allInvoices[0]?.id || ""); setView("invoices"); }}><PackageCheck /><span><small>Invoices</small><strong>{unpaidInvoices ? `${unpaidInvoices} with balance due` : "Paid"}</strong><em>View totals, instalments and payment history</em></span></button> : null}
-          {allQuestionnaires.length ? <button onClick={() => setView("questionnaires")}><FileText /><span><small>Questionnaires</small><strong>{pendingQuestionnaires ? `${pendingQuestionnaires} to complete` : "Complete"}</strong><em>{completedQuestionnaires} of {allQuestionnaires.length} completed</em></span></button> : null}
           {portal.jobs.length ? <button onClick={() => setView("files")}><Paperclip /><span><small>Files</small><strong>{allJobFiles.length ? `${allJobFiles.length} shared` : "Ready for uploads"}</strong><em>Share planning images, schedules, documents and other references</em></span></button> : null}
           {galleries.length ? <button onClick={() => setView("galleries")}><Images /><span><small>Galleries</small><strong>{galleries.length === 1 ? "1 gallery ready" : `${galleries.length} galleries ready`}</strong><em>View photographs, favourites, selections and downloads</em></span></button> : null}
         </section>
