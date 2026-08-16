@@ -97,6 +97,13 @@ assert "createInvitation(" in send_section
 assert "invitation.rawToken" in send_section
 assert "finalQuoteEmailBody(" in send_section
 
+# Quote send must use the established client-identity helper.
+# A mistaken ensureQuoteIdentity reference previously survived
+# source/build checks and failed only when Send quote was used.
+assert "async function ensureIdentity(" in quotes
+assert "await ensureIdentity(" in send_section
+assert "ensureQuoteIdentity(" not in quotes
+
 # Raw secure URLs are not written into CRM communication history.
 assert "loggedQuoteEmailBody(" in quotes
 assert '"[secure quote link]"' in quotes

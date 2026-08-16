@@ -2348,7 +2348,7 @@ export async function sendQuote(
   }
 
   const identity =
-    await ensureQuoteIdentity(
+    await ensureIdentity(
       db,
       actor.workspaceId,
       contact,
