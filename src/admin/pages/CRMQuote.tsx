@@ -2685,7 +2685,6 @@ export function CRMQuote() {
             <div className="crm-quote-booking-panel__grid">
               <AdminField
                 label="Payment schedule"
-                help="Choose the deposit and final-balance schedule for this quote."
               >
                 <select
                   className="admin-select"
@@ -2727,7 +2726,6 @@ export function CRMQuote() {
 
               <AdminField
                 label="Contract"
-                help="The selected contract template will be frozen into this quote version when it is sent successfully."
               >
                 <select
                   className="admin-select"
@@ -2766,7 +2764,6 @@ export function CRMQuote() {
 
               <AdminField
                 label="Questionnaire"
-                help="The selected questionnaire will be assigned to the booking after the quote is accepted."
               >
                 <select
                   className="admin-select"
