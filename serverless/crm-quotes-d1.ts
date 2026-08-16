@@ -1904,11 +1904,85 @@ async function quoteBookingPackPreview(
   };
 }
 
+function mergeContractTemplateContent(
+  value: unknown,
+  variables: Record<string, string>,
+) {
+  const raw =
+    String(value ?? "").trim()
+    || "[]";
+
+  let parsed: any;
+
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    // Preserve malformed legacy content rather than
+    // silently replacing or discarding it.
+    return raw;
+  }
+
+  function mergeValue(
+    input: any,
+  ): any {
+    if (
+      typeof input === "string"
+    ) {
+      return input.replace(
+        /%([a-z_]+)%/gi,
+        (
+          match,
+          key,
+        ) => {
+          const normalised =
+            lower(key);
+
+          return Object.prototype
+            .hasOwnProperty.call(
+              variables,
+              normalised,
+            )
+            ? variables[normalised]
+            : match;
+        },
+      );
+    }
+
+    if (Array.isArray(input)) {
+      return input.map(
+        (item) =>
+          mergeValue(item),
+      );
+    }
+
+    if (
+      input
+      && typeof input === "object"
+    ) {
+      return Object.fromEntries(
+        Object.entries(input).map(
+          ([key, item]) => [
+            key,
+            mergeValue(item),
+          ],
+        ),
+      );
+    }
+
+    return input;
+  }
+
+  return JSON.stringify(
+    mergeValue(parsed),
+  );
+}
+
 async function buildQuoteBookingPackSnapshot(
   db: D1Db,
   workspaceId: string,
   version: any,
   input: any,
+  businessName: string,
 ) {
   if (
     text(version?.status)
@@ -2086,10 +2160,16 @@ async function buildQuoteBookingPackSnapshot(
               ),
 
             contentJson:
-              text(
+              mergeContractTemplateContent(
                 contractTemplate
                   .content_json
                 || "[]",
+                {
+                  business_name:
+                    text(
+                      businessName,
+                    ),
+                },
               ),
 
             requiredSignatures:
@@ -2246,6 +2326,7 @@ export async function sendQuote(
       actor.workspaceId,
       version,
       input?.bookingPack,
+      preview.businessName,
     );
 
   const sentVersionSnapshot =

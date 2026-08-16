@@ -87,6 +87,77 @@ for token in (
 ):
     assert token in quotes, token
 
+# Contract merge fields are resolved before the immutable
+# quote-version booking pack is frozen.
+for token in (
+    "function mergeContractTemplateContent(",
+    "businessName: string",
+    "JSON.parse(raw)",
+    "JSON.stringify(",
+    "/%([a-z_]+)%/gi",
+    "business_name:",
+    "preview.businessName",
+):
+    assert token in quotes, token
+
+merge_start = quotes.index(
+    "function mergeContractTemplateContent("
+)
+merge_end = quotes.index(
+    "\nasync function buildQuoteBookingPackSnapshot(",
+    merge_start,
+)
+merge_section = quotes[
+    merge_start:merge_end
+]
+
+assert "variables[normalised]" in merge_section
+assert ": match;" in merge_section
+assert "Array.isArray(input)" in merge_section
+assert "Object.entries(input)" in merge_section
+
+builder_start = quotes.index(
+    "async function buildQuoteBookingPackSnapshot("
+)
+builder_end = quotes.index(
+    "\nasync function ",
+    builder_start + 20,
+)
+builder_section = quotes[
+    builder_start:builder_end
+]
+
+assert "businessName: string" in builder_section
+assert "mergeContractTemplateContent(" in builder_section
+assert "contractTemplate" in builder_section
+assert ".content_json" in builder_section
+assert "business_name:" in builder_section
+
+send_start_for_contract_merge = quotes.index(
+    "export async function sendQuote("
+)
+send_end_for_contract_merge = quotes.find(
+    "\nexport async function ",
+    send_start_for_contract_merge + 10,
+)
+
+if send_end_for_contract_merge < 0:
+    send_end_for_contract_merge = len(quotes)
+
+send_contract_merge = quotes[
+    send_start_for_contract_merge:
+    send_end_for_contract_merge
+]
+
+assert (
+    "buildQuoteBookingPackSnapshot("
+    in send_contract_merge
+)
+assert (
+    "preview.businessName"
+    in send_contract_merge
+)
+
 # Booking-pack content is prepared before delivery but frozen only
 # after sendCrmEmail succeeds. Failed delivery must not mutate the
 # quote-version snapshot.
