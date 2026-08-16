@@ -140,6 +140,15 @@ def main() -> None:
     assert "addons_snapshot_json = ?, quote_snapshot_json = ?" in quotes_source
     assert "purpose = 'public' AND verified = 1" in quotes_source
     assert "status = 'verified'" not in quotes_source and "is_primary DESC" not in quotes_source
+
+    # Quote portal access depends on the shared identity-scoped access helper.
+    # Losing this helper previously left valid callers in place and caused
+    # the secure quote portal to fail only at runtime.
+    assert "async function quoteAccessForIdentity(" in quotes_source
+    assert quotes_source.count("quoteAccessForIdentity(") == 3
+    assert "access.identity_id = ? AND access.status = 'active'" in quotes_source
+    assert "q.status IN ('sent','viewed','accepted','declined','expired')" in quotes_source
+
     assert "UPDATE crm_quote_invitations SET consumed_at = COALESCE(consumed_at, CURRENT_TIMESTAMP)" in quotes_source
     assert "identity_id <> ? AND status = 'active'" in quotes_source
     assert "invitation.invitationId" in quotes_source

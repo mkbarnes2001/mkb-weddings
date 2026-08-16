@@ -2714,6 +2714,10 @@ export async function sendQuote(
   );
 }
 
+async function quoteAccessForIdentity(db: D1Db, workspaceId: string, identityId: string) {
+  return db.prepare(`${QUOTE_SELECT} JOIN crm_quote_client_access access ON access.quote_id = q.id AND access.workspace_id = q.workspace_id WHERE q.workspace_id = ? AND access.identity_id = ? AND access.status = 'active' AND q.status IN ('sent','viewed','accepted','declined','expired') ORDER BY q.updated_at DESC`).bind(workspaceId, identityId).all();
+}
+
 export async function getPublicQuotesForIdentity(db: D1Db, workspaceId: string, identityId: string) {
   const rows = await quoteAccessForIdentity(db, workspaceId, identityId);
   return (rows.results || []).map((row: any) => ({ id: text(row.id), reference: text(row.reference), status: text(row.status), eventDate: text(row.event_date), venueText: text(row.venue_text), currentVersionId: text(row.current_version_id), acceptedJobId: text(row.accepted_job_id), updatedAt: row.updated_at }));
