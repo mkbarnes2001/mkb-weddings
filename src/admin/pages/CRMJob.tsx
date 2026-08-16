@@ -173,7 +173,7 @@ function professionalSupplierAnswers(
   return [];
 }
 
-function ProfessionalQuestionnaireField({
+export function ProfessionalQuestionnaireField({
   field,
   value,
   suppliers,

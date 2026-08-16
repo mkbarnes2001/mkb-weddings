@@ -21,6 +21,8 @@ import {
   AdminApiService,
   type WorkspaceRecord,
 } from "../services/AdminApiService";
+import { useProfessionalAuth } from "../auth/ProfessionalAuth";
+import { ProfessionalQuestionnaireField } from "./CRMJob";
 import type {
   CrmEnquiryDetail,
   CrmJobWorkspace,
@@ -113,6 +115,43 @@ function portalAccessLabel(
 export function CRMClientPortalPreview() {
   const { id = "" } =
     useParams();
+
+  const { auth } =
+    useProfessionalAuth();
+
+  const canEditQuestionnaires =
+    auth.permissions.includes(
+      "crm:manage",
+    )
+    && auth.accessMode
+      !== "support";
+
+  const [
+    questionnaireEditorId,
+    setQuestionnaireEditorId,
+  ] = useState("");
+
+  const [
+    questionnaireDraft,
+    setQuestionnaireDraft,
+  ] = useState<
+    Record<string, unknown>
+  >({});
+
+  const [
+    questionnaireSaving,
+    setQuestionnaireSaving,
+  ] = useState(false);
+
+  const [
+    questionnaireError,
+    setQuestionnaireError,
+  ] = useState("");
+
+  const [
+    questionnaireMessage,
+    setQuestionnaireMessage,
+  ] = useState("");
 
   const [detail, setDetail] =
     useState<CrmEnquiryDetail | null>(
@@ -236,6 +275,219 @@ export function CRMClientPortalPreview() {
     },
     [],
   );
+
+  function professionalPortalAnswer(
+    value: unknown,
+  ) {
+    if (
+      value === null
+      || value === undefined
+      || value === ""
+    ) {
+      return "Not answered";
+    }
+
+    if (
+      typeof value
+      === "boolean"
+    ) {
+      return value
+        ? "Yes"
+        : "No";
+    }
+
+    if (
+      Array.isArray(value)
+    ) {
+      if (!value.length) {
+        return "Not answered";
+      }
+
+      return value
+        .map(
+          (item) => {
+            if (
+              item
+              && typeof item
+                === "object"
+            ) {
+              const record =
+                item as
+                  Record<
+                    string,
+                    unknown
+                  >;
+
+              return String(
+                record.name
+                || record.label
+                || record.role
+                || "",
+              ).trim()
+              || "Supplier";
+            }
+
+            return String(item);
+          },
+        )
+        .filter(Boolean)
+        .join(", ");
+    }
+
+    if (
+      typeof value
+      === "object"
+    ) {
+      const record =
+        value as
+          Record<
+            string,
+            unknown
+          >;
+
+      return String(
+        record.name
+        || record.label
+        || record.value
+        || "",
+      ).trim()
+      || "Answered";
+    }
+
+    return String(value);
+  }
+
+  function beginQuestionnaireEdit(
+    questionnaire:
+      CrmJobWorkspace[
+        "questionnaires"
+      ][number],
+  ) {
+    if (
+      !canEditQuestionnaires
+    ) {
+      return;
+    }
+
+    setQuestionnaireEditorId(
+      questionnaire.id,
+    );
+
+    setQuestionnaireDraft(
+      JSON.parse(
+        JSON.stringify(
+          questionnaire.responses
+          || {},
+        ),
+      ),
+    );
+
+    setQuestionnaireError("");
+    setQuestionnaireMessage("");
+  }
+
+  function closeQuestionnaireEditor() {
+    setQuestionnaireEditorId("");
+    setQuestionnaireDraft({});
+    setQuestionnaireError("");
+    setQuestionnaireMessage("");
+  }
+
+  function updateQuestionnaireAnswer(
+    fieldId: string,
+    value: unknown,
+  ) {
+    setQuestionnaireDraft(
+      (current) => ({
+        ...current,
+        [fieldId]:
+          value,
+      }),
+    );
+  }
+
+  async function saveQuestionnaireAnswers(
+    questionnaire:
+      CrmJobWorkspace[
+        "questionnaires"
+      ][number],
+    complete = false,
+  ) {
+    if (
+      !canEditQuestionnaires
+    ) {
+      return;
+    }
+
+    setQuestionnaireSaving(true);
+    setQuestionnaireError("");
+    setQuestionnaireMessage("");
+
+    try {
+      const saved =
+        await AdminApiService
+          .saveQuestionnaireInstance(
+            questionnaire.id,
+            {
+              responses:
+                questionnaireDraft,
+              complete,
+            },
+          );
+
+      setJobWorkspace(
+        (current) =>
+          current
+            ? {
+                ...current,
+                questionnaires:
+                  current
+                    .questionnaires
+                    .map(
+                      (item) =>
+                        item.id
+                        === saved.id
+                          ? saved
+                          : item,
+                    ),
+              }
+            : current,
+      );
+
+      setQuestionnaireDraft(
+        JSON.parse(
+          JSON.stringify(
+            saved.responses
+            || {},
+          ),
+        ),
+      );
+
+      setQuestionnaireMessage(
+        complete
+          ? (
+              saved.status
+              === "completed"
+                ? "Questionnaire submitted. It remains editable for later updates."
+                : "Questionnaire submitted."
+            )
+          : (
+              saved.status
+              === "completed"
+                ? "Changes saved. The questionnaire remains marked complete."
+                : "Changes saved."
+            ),
+      );
+    } catch (saveError) {
+      setQuestionnaireError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Unable to save questionnaire answers.",
+      );
+    } finally {
+      setQuestionnaireSaving(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -470,7 +722,7 @@ export function CRMClientPortalPreview() {
         <div>
           <LockKeyhole />
           <span>
-            Read-only professional preview
+            Professional portal view
           </span>
           <strong>
             {portalAccessLabel(
@@ -616,16 +868,17 @@ export function CRMClientPortalPreview() {
 
         <div>
           <strong>
-            Preview only
+            Professional controls
           </strong>
 
           <p>
-            This uses your professional Admin access.
-            It does not sign in as the client,
-            create a client session, mark a quote
-            or questionnaire as viewed, or allow
-            acceptance, signing, payment,
-            submission or file changes.
+            This uses your professional Admin access
+            and does not sign in as the client or
+            create a client session. Questionnaire
+            answers can be updated below with
+            professional attribution. Quote acceptance,
+            contract signing, payments and client file
+            actions remain client-only.
           </p>
         </div>
       </aside>
@@ -812,7 +1065,7 @@ export function CRMClientPortalPreview() {
       ) : null}
 
       {view === "questionnaires" ? (
-        <section className="crm-client-portal-preview__section">
+        <section className="crm-client-portal-preview__section crm-client-portal-preview__questionnaires">
           <header>
             <FileText />
 
@@ -826,10 +1079,34 @@ export function CRMClientPortalPreview() {
               </h1>
 
               <p>
-                Planning questionnaires currently available to the client.
+                Review the same planning answers visible to the client. Professionals with CRM management access can update and submit answers here.
               </p>
             </div>
           </header>
+
+          {questionnaireError ? (
+            <div className="admin-alert admin-alert--error">
+              {questionnaireError}
+            </div>
+          ) : null}
+
+          {questionnaireMessage ? (
+            <div className="admin-alert admin-alert--success">
+              {questionnaireMessage}
+            </div>
+          ) : null}
+
+          {!canEditQuestionnaires ? (
+            <div className="crm-client-portal-preview__professional-note">
+              <strong>
+                Questionnaire editing is read-only for this session.
+              </strong>
+
+              <span>
+                CRM management permission is required. Support-mode access cannot change client questionnaire responses.
+              </span>
+            </div>
+          ) : null}
 
           {!questionnaires.length ? (
             <div className="crm-client-portal-preview__empty">
@@ -842,32 +1119,294 @@ export function CRMClientPortalPreview() {
               </p>
             </div>
           ) : (
-            <div className="crm-client-portal-preview__list">
+            <div className="crm-client-portal-preview__questionnaire-list">
               {questionnaires.map(
-                (questionnaire) => (
-                  <article
-                    key={questionnaire.id}
-                  >
-                    <div>
-                      <strong>
-                        {questionnaire.title}
-                      </strong>
+                (questionnaire) => {
+                  const editing =
+                    questionnaireEditorId
+                    === questionnaire.id;
 
-                      <p>
-                        Due{" "}
-                        {formatDate(
-                          questionnaire.dueAt,
-                        )}
-                      </p>
-                    </div>
+                  const lastEditor =
+                    questionnaire.lastSavedByLabel
+                    || (
+                      questionnaire.lastSavedByType
+                      === "client"
+                        ? (
+                            questionnaire
+                              .assignedContactName
+                            || "Client"
+                          )
+                        : questionnaire.lastSavedByType
+                          === "professional"
+                          ? "WedCRM user"
+                          : ""
+                    );
 
-                    <span>
-                      {displayStatus(
-                        questionnaire.status,
+                  return (
+                    <article
+                      key={
+                        questionnaire.id
+                      }
+                      className={
+                        `crm-client-portal-preview__questionnaire ${
+                          editing
+                            ? "is-editing"
+                            : ""
+                        }`
+                      }
+                    >
+                      <header className="crm-client-portal-preview__questionnaire-head">
+                        <div>
+                          <strong>
+                            {questionnaire.title}
+                          </strong>
+
+                          <small>
+                            {questionnaire.assignedContactName
+                              || "Client"}
+                            {questionnaire.dueAt
+                              ? ` · planning target ${formatDate(
+                                  questionnaire.dueAt,
+                                )}`
+                              : ""}
+                          </small>
+                        </div>
+
+                        <div className="crm-client-portal-preview__questionnaire-actions">
+                          <span className={`admin-status admin-status--${
+                            questionnaire.status
+                            === "completed"
+                              ? "success"
+                              : "neutral"
+                          }`}>
+                            {displayStatus(
+                              questionnaire.status,
+                            )}
+                          </span>
+
+                          {canEditQuestionnaires ? (
+                            editing ? (
+                              <button
+                                type="button"
+                                className="admin-button admin-button--ghost admin-button--sm"
+                                disabled={
+                                  questionnaireSaving
+                                }
+                                onClick={
+                                  closeQuestionnaireEditor
+                                }
+                              >
+                                Close editor
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                className="admin-button admin-button--secondary admin-button--sm"
+                                disabled={
+                                  questionnaireSaving
+                                }
+                                onClick={() =>
+                                  beginQuestionnaireEdit(
+                                    questionnaire,
+                                  )
+                                }
+                              >
+                                Edit answers
+                              </button>
+                            )
+                          ) : null}
+                        </div>
+                      </header>
+
+                      {questionnaire.introduction ? (
+                        <p className="crm-client-portal-preview__questionnaire-intro">
+                          {questionnaire.introduction}
+                        </p>
+                      ) : null}
+
+                      {lastEditor
+                        || questionnaire.lastSavedAt ? (
+                        <p className="crm-client-portal-preview__questionnaire-updated">
+                          Last updated
+                          {questionnaire.lastSavedAt
+                            ? ` ${formatDate(
+                                questionnaire.lastSavedAt,
+                              )}`
+                            : ""}
+                          {lastEditor
+                            ? ` by ${lastEditor}`
+                            : ""}
+                          .
+                        </p>
+                      ) : null}
+
+                      {editing ? (
+                        <div className="crm-questionnaire-editor crm-client-portal-preview__questionnaire-editor">
+                          <div className="crm-client-portal-preview__professional-note">
+                            <strong>
+                              Editing the shared questionnaire
+                            </strong>
+
+                            <span>
+                              Changes update the same answers visible to the client. They are recorded as a professional edit; no client session is created.
+                            </span>
+                          </div>
+
+                          <div className="crm-questionnaire-editor__fields">
+                            {questionnaire.fields.map(
+                              (field) => (
+                                <ProfessionalQuestionnaireField
+                                  key={
+                                    field.id
+                                  }
+                                  field={
+                                    field
+                                  }
+                                  value={
+                                    questionnaireDraft[
+                                      field.id
+                                    ]
+                                  }
+                                  suppliers={
+                                    jobWorkspace
+                                      ?.supplierDirectory
+                                    || []
+                                  }
+                                  fileCount={
+                                    questionnaire.files.filter(
+                                      (file) =>
+                                        file.fieldKey
+                                        === field.id,
+                                    ).length
+                                  }
+                                  disabled={
+                                    questionnaireSaving
+                                    || !canEditQuestionnaires
+                                  }
+                                  onChange={(
+                                    value,
+                                  ) =>
+                                    updateQuestionnaireAnswer(
+                                      field.id,
+                                      value,
+                                    )
+                                  }
+                                />
+                              ),
+                            )}
+                          </div>
+
+                          <footer className="crm-questionnaire-editor__footer crm-client-portal-preview__questionnaire-footer">
+                            <div>
+                              {questionnaire.status
+                                === "completed" ? (
+                                <span>
+                                  This questionnaire is complete, but answers can still be updated and submitted again.
+                                </span>
+                              ) : (
+                                <span>
+                                  Save work without completing the questionnaire, or submit when the planning details are ready.
+                                </span>
+                              )}
+                            </div>
+
+                            <div>
+                              <button
+                                type="button"
+                                className="admin-button admin-button--secondary"
+                                disabled={
+                                  questionnaireSaving
+                                  || !canEditQuestionnaires
+                                }
+                                onClick={() =>
+                                  void saveQuestionnaireAnswers(
+                                    questionnaire,
+                                    false,
+                                  )
+                                }
+                              >
+                                {questionnaireSaving
+                                  ? "Saving…"
+                                  : "Save changes"}
+                              </button>
+
+                              <button
+                                type="button"
+                                className="admin-button admin-button--primary"
+                                disabled={
+                                  questionnaireSaving
+                                  || !canEditQuestionnaires
+                                }
+                                onClick={() =>
+                                  void saveQuestionnaireAnswers(
+                                    questionnaire,
+                                    true,
+                                  )
+                                }
+                              >
+                                {questionnaireSaving
+                                  ? "Submitting…"
+                                  : questionnaire.status
+                                    === "completed"
+                                    ? "Submit updates"
+                                    : "Submit"}
+                              </button>
+                            </div>
+                          </footer>
+                        </div>
+                      ) : (
+                        <div className="crm-client-portal-preview__questionnaire-responses">
+                          {questionnaire.fields
+                            .filter(
+                              (field) =>
+                                field.type
+                                !== "heading"
+                                && field.type
+                                  !== "description",
+                            )
+                            .map(
+                              (field) => (
+                                <div
+                                  key={
+                                    field.id
+                                  }
+                                >
+                                  <span>
+                                    {field.label}
+                                  </span>
+
+                                  <strong>
+                                    {field.type
+                                      === "file"
+                                      ? (
+                                          questionnaire.files.filter(
+                                            (file) =>
+                                              file.fieldKey
+                                              === field.id,
+                                          ).length
+                                            ? `${
+                                                questionnaire.files.filter(
+                                                  (file) =>
+                                                    file.fieldKey
+                                                    === field.id,
+                                                ).length
+                                              } file(s) attached`
+                                            : "No file attached"
+                                        )
+                                      : professionalPortalAnswer(
+                                          questionnaire.responses[
+                                            field.id
+                                          ],
+                                        )}
+                                  </strong>
+                                </div>
+                              ),
+                            )}
+                        </div>
                       )}
-                    </span>
-                  </article>
-                ),
+                    </article>
+                  );
+                },
               )}
             </div>
           )}

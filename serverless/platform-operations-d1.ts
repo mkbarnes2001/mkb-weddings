@@ -394,6 +394,7 @@ const DIRECT_EXPORT_TABLES = [
   "crm_quote_acceptances",
   "crm_quote_acceptance_addons",
   "crm_booking_settings",
+  "crm_payment_schedule_presets",
   "crm_contract_templates",
   "crm_contracts",
   "crm_contract_versions",

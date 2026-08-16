@@ -8713,7 +8713,7 @@
 .crm-quote-booking-panel__grid {
   display: grid;
   grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+    repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -8805,7 +8805,7 @@
 
 .crm-quote-send-booking-pack__summary--booking {
   grid-template-columns:
-    repeat(3, minmax(0, 1fr));
+    repeat(4, minmax(0, 1fr));
 }
 
 @media (max-width: 760px) {
@@ -10175,5 +10175,474 @@
   .admin-select {
     width: 100%;
     min-width: 0;
+  }
+}
+
+
+/* v1.10.11a — reusable payment schedule presets */
+
+.crm-payment-presets {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, .8fr)
+    minmax(0, 1.2fr);
+  gap: 14px;
+}
+
+.crm-payment-presets__list {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.crm-payment-preset-row {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px 11px;
+  text-align: left;
+}
+
+.crm-payment-preset-row:hover,
+.crm-payment-preset-row.is-active {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111) 35%,
+      var(--admin-border)
+    );
+  background:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111) 4%,
+      #fff
+    );
+}
+
+.crm-payment-preset-row__main {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.crm-payment-preset-row__main strong {
+  overflow: hidden;
+  color: var(--admin-text);
+  font-size:
+    calc(
+      9px
+      * var(--admin-font-scale-effective, 1)
+    );
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-payment-preset-row__main small {
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      7.5px
+      * var(--admin-font-scale-effective, 1)
+    );
+  line-height: 1.4;
+}
+
+.crm-payment-preset-row__status {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+}
+
+.crm-payment-presets__empty {
+  border: 1px dashed var(--admin-border);
+  border-radius: 10px;
+  padding: 18px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8.5px
+      * var(--admin-font-scale-effective, 1)
+    );
+  text-align: center;
+}
+
+.crm-payment-preset-editor {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: rgba(255,255,255,.72);
+  padding: 13px;
+}
+
+.crm-payment-preset-editor__grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.crm-payment-preset-editor__days {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.crm-payment-preset-editor__days span {
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(--admin-font-scale-effective, 1)
+    );
+}
+
+.crm-payment-preset-editor__default {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--admin-text);
+  font-size:
+    calc(
+      8.5px
+      * var(--admin-font-scale-effective, 1)
+    );
+}
+
+.crm-payment-preset-editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+@media (max-width: 980px) {
+  .crm-payment-presets {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .crm-payment-preset-editor__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* v1.10.11a final manual-gate refinement — editable professional portal + quote polish */
+
+.crm-client-portal-preview__questionnaire-list {
+  display: grid;
+  gap: 12px;
+}
+
+.crm-client-portal-preview__questionnaire {
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,.09);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow:
+    0 8px 28px rgba(0,0,0,.035);
+}
+
+.crm-client-portal-preview__questionnaire.is-editing {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--portal-preview-accent, #111) 28%,
+      rgba(0,0,0,.09)
+    );
+}
+
+.crm-client-portal-preview__questionnaire-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 15px 16px 12px;
+}
+
+.crm-client-portal-preview__questionnaire-head > div:first-child {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.crm-client-portal-preview__questionnaire-head strong {
+  color: #171717;
+  font-size:
+    calc(
+      13px
+      * var(--admin-font-scale-effective, 1)
+    );
+  font-weight: 700;
+}
+
+.crm-client-portal-preview__questionnaire-head small,
+.crm-client-portal-preview__questionnaire-intro,
+.crm-client-portal-preview__questionnaire-updated {
+  color: #777;
+  font-size:
+    calc(
+      10px
+      * var(--admin-font-scale-effective, 1)
+    );
+  line-height: 1.55;
+}
+
+.crm-client-portal-preview__questionnaire-intro,
+.crm-client-portal-preview__questionnaire-updated {
+  margin: 0;
+  padding: 0 16px 10px;
+}
+
+.crm-client-portal-preview__questionnaire-updated {
+  color: #999;
+  font-size:
+    calc(
+      9px
+      * var(--admin-font-scale-effective, 1)
+    );
+}
+
+.crm-client-portal-preview__questionnaire-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.crm-client-portal-preview__professional-note {
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(0,0,0,.07);
+  border-radius: 10px;
+  background:
+    color-mix(
+      in srgb,
+      var(--portal-preview-secondary, #f1efe9) 52%,
+      #fff
+    );
+  padding: 10px 12px;
+  color: #555;
+  font-size:
+    calc(
+      9.5px
+      * var(--admin-font-scale-effective, 1)
+    );
+  line-height: 1.5;
+}
+
+.crm-client-portal-preview__professional-note strong {
+  color: #222;
+  font-size:
+    calc(
+      10px
+      * var(--admin-font-scale-effective, 1)
+    );
+}
+
+.crm-client-portal-preview__questionnaire-editor {
+  display: grid;
+  gap: 13px;
+  border-top: 1px solid rgba(0,0,0,.07);
+  background: #fbfbfa;
+  padding: 14px 16px 16px;
+}
+
+.crm-client-portal-preview__questionnaire-responses {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  border-top: 1px solid rgba(0,0,0,.06);
+}
+
+.crm-client-portal-preview__questionnaire-responses > div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+.crm-client-portal-preview__questionnaire-responses > div:nth-child(odd) {
+  border-right: 1px solid rgba(0,0,0,.06);
+}
+
+.crm-client-portal-preview__questionnaire-responses span {
+  color: #8a8a8a;
+  font-size:
+    calc(
+      8px
+      * var(--admin-font-scale-effective, 1)
+    );
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.crm-client-portal-preview__questionnaire-responses strong {
+  overflow-wrap: anywhere;
+  color: #242424;
+  font-size:
+    calc(
+      10px
+      * var(--admin-font-scale-effective, 1)
+    );
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.crm-client-portal-preview__questionnaire-footer {
+  gap: 12px;
+}
+
+.crm-client-portal-preview__questionnaire-footer > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+/*
+ * Quote page: keep the dedicated action row but make it
+ * visually lighter and more compact.
+ */
+.crm-quote-page-header .crm-quote-header-actions {
+  gap: 4px;
+}
+
+.crm-quote-page-header
+.crm-quote-header-actions
+.admin-button {
+  min-height: 28px;
+  padding-right: 9px;
+  padding-left: 9px;
+  font-size:
+    calc(
+      9px
+      * var(--admin-button-scale-effective, 1)
+    ) !important;
+}
+
+.crm-quote-page-header
+.crm-quote-header-actions
+.admin-button__icon {
+  width: 12px;
+  height: 12px;
+}
+
+.crm-quote-page-header
+.crm-quote-template-apply {
+  min-width: 0;
+  flex:
+    0 1 330px;
+  gap: 4px;
+}
+
+.crm-quote-page-header
+.crm-quote-template-apply
+.admin-select {
+  width: min(215px, 100%);
+  min-width: 155px;
+  height: 28px;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size:
+    calc(
+      9px
+      * var(--admin-font-scale-effective, 1)
+    );
+}
+
+.crm-quote-settings-grid {
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 8px 10px;
+}
+
+.crm-quote-settings-grid .admin-field,
+.crm-quote-booking-panel__grid .admin-field {
+  gap: 4px;
+}
+
+.crm-quote-booking-panel {
+  gap: 9px;
+}
+
+.crm-quote-booking-panel__grid {
+  gap: 8px 10px;
+}
+
+.crm-quote-booking-panel__invoice {
+  padding: 9px 10px;
+}
+
+.crm-quote-booking-panel__summary > div {
+  padding: 8px 10px;
+}
+
+.crm-quote-message-grid {
+  gap: 10px;
+}
+
+@media (max-width: 1180px) {
+  .crm-quote-settings-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .crm-quote-page-header
+  .crm-quote-header-actions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 760px) {
+  .crm-client-portal-preview__questionnaire-responses {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-client-portal-preview__questionnaire-responses > div:nth-child(odd) {
+    border-right: 0;
+  }
+
+  .crm-client-portal-preview__questionnaire-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .crm-client-portal-preview__questionnaire-actions,
+  .crm-client-portal-preview__questionnaire-footer > div:last-child {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .crm-quote-settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-quote-page-header
+  .crm-quote-template-apply {
+    flex-basis: 100%;
+  }
+
+  .crm-quote-page-header
+  .crm-quote-template-apply
+  .admin-select {
+    width: 100%;
   }
 }

@@ -821,6 +821,47 @@ export type CrmCommercialTemplateOption = {
   status: string;
 };
 
+export type CrmPaymentSchedulePreset = {
+  id: string;
+  name: string;
+  description: string;
+  status:
+    | "active"
+    | "archived";
+  default: boolean;
+  depositType:
+    | "none"
+    | "fixed"
+    | "percentage";
+  depositValue: number;
+  depositDueDaysAfterAcceptance:
+    number;
+  finalBalanceDueDaysBeforeEvent:
+    number;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CrmPaymentSchedulePresetInput = {
+  name?: string;
+  description?: string;
+  status?:
+    | "active"
+    | "archived";
+  default?: boolean;
+  depositType?:
+    | "none"
+    | "fixed"
+    | "percentage";
+  depositValue?: number;
+  depositDueDaysAfterAcceptance?:
+    number;
+  finalBalanceDueDaysBeforeEvent?:
+    number;
+  sortOrder?: number;
+};
+
 export type CrmCommercialBookingSettings = {
   autoCreateContract: boolean;
   autoCreateInvoice: boolean;
@@ -991,12 +1032,17 @@ export type CrmQuoteBookingPackPreview = {
     paymentSchedule:
       Record<string, unknown>;
   };
+  paymentScheduleId: string;
+  paymentSchedules: CrmPaymentSchedulePreset[];
+
 };
 
 export type CrmQuoteBookingPackInput = {
   contractTemplateId?: string;
   questionnaireTemplateId?: string;
   autoCreateInvoice?: boolean;
+  paymentScheduleId?: string;
+
 };
 
 export type CrmQuoteSendPreview = {

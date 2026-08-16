@@ -313,6 +313,11 @@ export function CRMQuote() {
   ] = useState(false);
 
   const [
+    bookingPaymentScheduleId,
+    setBookingPaymentScheduleId,
+  ] = useState("");
+
+  const [
     sendPreviewLoading,
     setSendPreviewLoading,
   ] = useState(false);
@@ -1016,6 +1021,8 @@ export function CRMQuote() {
                 bookingQuestionnaireTemplateId,
               autoCreateInvoice:
                 bookingAutoCreateInvoice,
+              paymentScheduleId:
+                bookingPaymentScheduleId,
             },
           }
         : {}),
@@ -1077,6 +1084,10 @@ export function CRMQuote() {
 
     setBookingAutoCreateInvoice(
       preview.autoCreateInvoice,
+    );
+
+    setBookingPaymentScheduleId(
+      preview.paymentScheduleId,
     );
   }
 
@@ -1592,12 +1603,6 @@ export function CRMQuote() {
                 === "fixed"
                 ? "Fixed package"
                 : "Package choices"
-            }
-            description={
-              quote.quoteType
-                === "fixed"
-                ? "Build one exact package. Add quote-specific line items inside the package when the scope needs itemised quantities or charges."
-                : "Present the client with clear package choices. Detailed editing stays tucked away until you need it."
             }
             icon={PackageCheck}
             actions={
@@ -2478,7 +2483,6 @@ export function CRMQuote() {
 
           <AdminPanel
             title="Commercial settings"
-            description="Control expiry, discount and tax without mixing commercial terms into the package content."
             icon={Settings2}
           >
             <div className="crm-quote-settings-grid">
@@ -2674,12 +2678,53 @@ export function CRMQuote() {
 
       <AdminPanel
         title="Booking & payment"
-        description="Set what happens after the client accepts this quote. Draft choices are saved with the quote and frozen only after a successful send."
         icon={ShieldCheck}
       >
         {bookingPackPreview ? (
           <div className="crm-quote-booking-panel">
             <div className="crm-quote-booking-panel__grid">
+              <AdminField
+                label="Payment schedule"
+                help="Choose the deposit and final-balance schedule for this quote."
+              >
+                <select
+                  className="admin-select"
+                  value={
+                    bookingPaymentScheduleId
+                  }
+                  disabled={
+                    !editable
+                    || !canManage
+                    || saving
+                    || bookingPackPreview.frozen
+                    || bookingPackPreview.legacyFallback
+                  }
+                  onChange={(event) =>
+                    setBookingPaymentScheduleId(
+                      event.target.value,
+                    )
+                  }
+                >
+                  <option value="">
+                    Workspace fallback
+                  </option>
+
+                  {bookingPackPreview.paymentSchedules.map(
+                    (schedule) => (
+                      <option
+                        key={schedule.id}
+                        value={schedule.id}
+                      >
+                        {schedule.name}
+                        {schedule.default
+                          ? " · default"
+                          : ""}
+                      </option>
+                    ),
+                  )}
+                </select>
+              </AdminField>
+
               <AdminField
                 label="Contract"
                 help="The selected contract template will be frozen into this quote version when it is sent successfully."
@@ -2796,17 +2841,45 @@ export function CRMQuote() {
                 <strong>
                   {!bookingAutoCreateInvoice
                     ? "Not created"
-                    : bookingPackPreview.invoice.depositType
+                    : (
+                        bookingPackPreview.paymentSchedules.find(
+                          (schedule) =>
+                            schedule.id
+                            === bookingPaymentScheduleId,
+                        )?.depositType
+                        || bookingPackPreview.invoice.depositType
+                      )
                       === "fixed"
                       ? money(
-                          bookingPackPreview.invoice.depositValue,
+                          (
+                            bookingPackPreview.paymentSchedules.find(
+                              (schedule) =>
+                                schedule.id
+                                === bookingPaymentScheduleId,
+                            )?.depositValue
+                            ?? bookingPackPreview.invoice.depositValue
+                          ),
                           quote?.currency
                             || draft.currency,
                         )
-                      : bookingPackPreview.invoice.depositType
+                      : (
+                        bookingPackPreview.paymentSchedules.find(
+                          (schedule) =>
+                            schedule.id
+                            === bookingPaymentScheduleId,
+                        )?.depositType
+                        || bookingPackPreview.invoice.depositType
+                      )
                         === "percentage"
                         ? `${
-                            bookingPackPreview.invoice.depositValue
+                            (
+                            bookingPackPreview.paymentSchedules.find(
+                              (schedule) =>
+                                schedule.id
+                                === bookingPaymentScheduleId,
+                            )?.depositValue
+                            ?? bookingPackPreview.invoice.depositValue
+                          )
                             / 100
                           }%`
                         : "No deposit"}
@@ -2819,11 +2892,25 @@ export function CRMQuote() {
                   {!bookingAutoCreateInvoice
                     ? "—"
                     : `${
-                        bookingPackPreview.invoice
+                        (
+                        bookingPackPreview.paymentSchedules.find(
+                          (schedule) =>
+                            schedule.id
+                            === bookingPaymentScheduleId,
+                        )?.depositDueDaysAfterAcceptance
+                        ?? bookingPackPreview.invoice
                           .depositDueDaysAfterAcceptance
+                      )
                       } day${
-                        bookingPackPreview.invoice
+                        (
+                        bookingPackPreview.paymentSchedules.find(
+                          (schedule) =>
+                            schedule.id
+                            === bookingPaymentScheduleId,
+                        )?.depositDueDaysAfterAcceptance
+                        ?? bookingPackPreview.invoice
                           .depositDueDaysAfterAcceptance
+                      )
                         === 1
                           ? ""
                           : "s"
@@ -2837,11 +2924,25 @@ export function CRMQuote() {
                   {!bookingAutoCreateInvoice
                     ? "—"
                     : `${
-                        bookingPackPreview.invoice
+                        (
+                        bookingPackPreview.paymentSchedules.find(
+                          (schedule) =>
+                            schedule.id
+                            === bookingPaymentScheduleId,
+                        )?.finalBalanceDueDaysBeforeEvent
+                        ?? bookingPackPreview.invoice
                           .finalBalanceDueDaysBeforeEvent
+                      )
                       } day${
-                        bookingPackPreview.invoice
+                        (
+                        bookingPackPreview.paymentSchedules.find(
+                          (schedule) =>
+                            schedule.id
+                            === bookingPaymentScheduleId,
+                        )?.finalBalanceDueDaysBeforeEvent
+                        ?? bookingPackPreview.invoice
                           .finalBalanceDueDaysBeforeEvent
+                      )
                         === 1
                           ? ""
                           : "s"
@@ -2864,7 +2965,6 @@ export function CRMQuote() {
 
           <AdminPanel
             title="Client message"
-            description="Keep the client-facing introduction separate from internal team notes."
             icon={MessageSquareText}
           >
             <div className="crm-quote-message-grid">
@@ -3484,6 +3584,20 @@ export function CRMQuote() {
                   </header>
 
                   <div className="crm-quote-send-booking-pack__summary crm-quote-send-booking-pack__summary--booking">
+                    <div>
+                      <span>Payment schedule</span>
+                      <strong>
+                        {sendPreview.bookingPack.paymentScheduleId
+                          ? sendPreview.bookingPack.paymentSchedules.find(
+                              (schedule) =>
+                                schedule.id
+                                === sendPreview.bookingPack.paymentScheduleId,
+                            )?.name
+                            || "Selected schedule"
+                          : "Workspace fallback"}
+                      </strong>
+                    </div>
+
                     <div>
                       <span>Contract</span>
                       <strong>

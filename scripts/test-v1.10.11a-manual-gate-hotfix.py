@@ -45,7 +45,7 @@ schema_version = con.execute(
 ).fetchone()
 
 assert schema_version
-assert str(schema_version[0]) == "43"
+assert str(schema_version[0]) == "44"
 
 contract_columns = {
     row[1]
@@ -170,5 +170,5 @@ print(
 )
 
 print(
-    "  schema remains 43: verified"
+    "  schema 44 preserves manual-gate fix: verified"
 )

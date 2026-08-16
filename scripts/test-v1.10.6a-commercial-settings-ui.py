@@ -71,7 +71,7 @@ def main() -> None:
     # Payment defaults use user-facing pounds/percent values while preserving
     # stored minor-units/basis-points representation.
     for token in [
-        'title="Payment schedule"',
+        'title="Legacy payment fallback"',
         "Deposit type",
         "Deposit (£)",
         "Deposit (%)",

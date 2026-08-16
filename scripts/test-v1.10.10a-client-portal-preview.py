@@ -46,22 +46,23 @@ assert (
 assert "CRMClientPortalPreview" in app
 
 
-# Preview reads existing professional/Admin models only.
+# Preview uses professional/Admin models only. Questionnaire edits are the one deliberate professional mutation surface.
 for token in [
     "AdminApiService",
     ".getCrmEnquiry(id)",
     ".getCrmQuoteOverview()",
     ".getWorkspace()",
     ".getCrmJobWorkspace(",
-    "Read-only professional preview",
-    "Preview only",
+    "Professional portal view",
+    "Professional controls",
     "does not sign in as the client",
 ]:
     assert token in preview, token
 
 
 # Preview must never impersonate the client or use the public
-# mutation/authentication surface.
+# authentication/mutation surface. Questionnaire changes use
+# the authenticated professional CRM API instead.
 for forbidden in [
     "/api/public/client-portal",
     "request-link",
@@ -77,6 +78,32 @@ for forbidden in [
     "sessionToken",
 ]:
     assert forbidden not in preview, forbidden
+
+
+# Questionnaire editing is the deliberate authenticated
+# professional mutation available from this preview.
+for token in [
+    "useProfessionalAuth",
+    "canEditQuestionnaires",
+    'auth.permissions.includes(',
+    '"crm:manage"',
+    "auth.accessMode",
+    ".saveQuestionnaireInstance(",
+    "questionnaireDraft",
+    "Save changes",
+    "Submit updates",
+]:
+    assert token in preview, token
+
+assert (
+    'from "./CRMJob";'
+    in preview
+)
+
+assert (
+    "ProfessionalQuestionnaireField"
+    in preview
+)
 
 
 # The portal action is independent of Job conversion and remains
@@ -109,9 +136,7 @@ for token in [
 
 # v1.10.10a's Client Portal preview was a source-only feature.
 # Later releases may legitimately advance the repository schema.
-# Its enduring regression boundary is the read-only Admin behaviour
-# asserted above: no client impersonation, public auth or mutation
-# surface is used by the professional preview.
+# Its enduring regression boundary is professional authentication: no client impersonation or public client mutation surface is used. Questionnaire edits are attributed through the professional CRM API.
 
 
 print(
@@ -124,13 +149,13 @@ print(
     "  persists after Job conversion: verified"
 )
 print(
-    "  professional Admin reads only: verified"
+    "  professional Admin data boundary: verified"
 )
 print(
     "  no client session impersonation: verified"
 )
 print(
-    "  no client mutations: verified"
+    "  no public client mutations: verified"
 )
 print(
     "  responsive portal preview: verified"

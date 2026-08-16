@@ -7,6 +7,12 @@ import {
 } from "../../../serverless/crm-contract-templates-d1";
 import { getCrmCommercialSettings, saveCrmCommercialSettings } from "../../../serverless/crm-commercial-settings-d1";
 import {
+  archiveCrmPaymentSchedulePreset,
+  createCrmPaymentSchedulePreset,
+  listCrmPaymentSchedulePresets,
+  saveCrmPaymentSchedulePreset,
+} from "../../../serverless/crm-payment-schedules-d1";
+import {
   recordManualInvoicePayment,
   repairJobBookingPack,
   sendDraftContractToPortal,
@@ -180,6 +186,34 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         headers: { "Cache-Control": "private, no-store" },
       });
     }
+    if (
+      parts[0] === "commercial"
+      && parts[1] === "payment-schedules"
+      && parts.length === 2
+    ) {
+      const includeArchived =
+        new URL(
+          context.request.url,
+        ).searchParams.get(
+          "includeArchived",
+        ) === "1";
+
+      return Response.json({
+        ok: true,
+        paymentSchedules:
+          await listCrmPaymentSchedulePresets(
+            context.env.MKB_DB,
+            actor,
+            includeArchived,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
     if (
       parts[0] === "commercial"
       && parts[1] === "settings"
@@ -441,6 +475,51 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const actor = await actorFor(context);
     const parts = routeParts(context.params.path);
     const body: any = await context.request.json().catch(() => ({}));
+    if (
+      parts[0] === "commercial"
+      && parts[1] === "payment-schedules"
+      && parts.length === 2
+    ) {
+      return Response.json({
+        ok: true,
+        paymentSchedule:
+          await createCrmPaymentSchedulePreset(
+            context.env.MKB_DB,
+            actor,
+            body,
+          ),
+      }, {
+        status: 201,
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
+    if (
+      parts[0] === "commercial"
+      && parts[1] === "payment-schedules"
+      && parts[2]
+      && parts[3] === "archive"
+      && parts.length === 4
+    ) {
+      return Response.json({
+        ok: true,
+        paymentSchedule:
+          await archiveCrmPaymentSchedulePreset(
+            context.env.MKB_DB,
+            actor,
+            parts[2],
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
     if (!parts.length || (parts[0] === "enquiries" && parts.length === 1)) {
       return Response.json({ ok: true, detail: await createAdminEnquiry(context.env.MKB_DB, actor, body) }, { status: 201 });
     }
@@ -875,6 +954,29 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     const actor = await actorFor(context);
     const parts = routeParts(context.params.path);
     const body: any = await context.request.json().catch(() => ({}));
+    if (
+      parts[0] === "commercial"
+      && parts[1] === "payment-schedules"
+      && parts[2]
+      && parts.length === 3
+    ) {
+      return Response.json({
+        ok: true,
+        paymentSchedule:
+          await saveCrmPaymentSchedulePreset(
+            context.env.MKB_DB,
+            actor,
+            parts[2],
+            body,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
     if (parts[0] === "enquiries" && parts[1] && parts.length === 2) {
       return Response.json({ ok: true, detail: await updateAdminEnquiry(context.env.MKB_DB, actor, parts[1], body) });
     }

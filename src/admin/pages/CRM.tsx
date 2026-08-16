@@ -33,6 +33,7 @@ import {
 } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
+import { CrmPaymentSchedulePresets } from "../components/CrmPaymentSchedulePresets";
 import type { CrmCommercialSettingsInput, CrmCommercialSettingsPayload, CrmEnquiry, CrmEnquiryInput, CrmJob, CrmLeadFormSettings, CrmOverview, CrmWorkflowOverview, QuestionnaireOverview, CrmContractTemplate } from "../types/crm";
 
 type View = "pipeline" | "contacts" | "jobs" | "schedule" | "questionnaires" | "workflows" | "commercial-settings" | "lead-form" | "overview";
@@ -1033,8 +1034,10 @@ function CommercialSettings({
         )}
       </AdminPanel>
 
+      <CrmPaymentSchedulePresets canManage={canManage} />
+
       <AdminPanel
-        title="Payment schedule"
+        title="Legacy payment fallback"
         description="Set the default deposit and deadline rules used when a booking invoice is generated."
         icon={Settings2}
       >

@@ -10,7 +10,7 @@ import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, Client
 import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
 import type { PlatformAdministrationPayload, PlatformBrandAsset, PlatformBrandingIdentity, PlatformModuleConfiguration, PlatformSupplierTaxonomy, ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
-import type { CrmAddon, CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmPackage, CrmQuote, CrmQuoteOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate, CrmCommercialSettingsInput, CrmCommercialSettingsPayload, CrmContractTemplate, CrmQuoteTemplate, CrmQuoteTemplateInput, CrmEmailTemplate, CrmEmailTemplateInput, CrmEmailSettings, CrmEmailSettingsInput, CrmQuoteSendPreview, CrmQuoteSendInput } from "../types/crm";
+import type { CrmAddon, CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmPackage, CrmQuote, CrmQuoteOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate, CrmCommercialSettingsInput, CrmCommercialSettingsPayload, CrmPaymentSchedulePreset, CrmPaymentSchedulePresetInput, CrmContractTemplate, CrmQuoteTemplate, CrmQuoteTemplateInput, CrmEmailTemplate, CrmEmailTemplateInput, CrmEmailSettings, CrmEmailSettingsInput, CrmQuoteSendPreview, CrmQuoteSendInput } from "../types/crm";
 import type {
   WedPlannedPublicAppearanceAdministration,
   WedPlannedPublicTheme,
@@ -1991,6 +1991,84 @@ export class AdminApiService {
     );
 
     return result.template;
+  }
+
+  static async getCrmPaymentSchedulePresets(
+    includeArchived = false,
+  ) {
+    const query =
+      includeArchived
+        ? "?includeArchived=1"
+        : "";
+
+    const result =
+      await request<{
+        ok: true;
+        paymentSchedules:
+          CrmPaymentSchedulePreset[];
+      }>(
+        `/api/crm/commercial/payment-schedules${query}`,
+      );
+
+    return result.paymentSchedules;
+  }
+
+  static async createCrmPaymentSchedulePreset(
+    input: CrmPaymentSchedulePresetInput,
+  ) {
+    const result =
+      await request<{
+        ok: true;
+        paymentSchedule:
+          CrmPaymentSchedulePreset;
+      }>(
+        "/api/crm/commercial/payment-schedules",
+        {
+          method: "POST",
+          body: JSON.stringify(input),
+        },
+      );
+
+    return result.paymentSchedule;
+  }
+
+  static async saveCrmPaymentSchedulePreset(
+    id: string,
+    input: CrmPaymentSchedulePresetInput,
+  ) {
+    const result =
+      await request<{
+        ok: true;
+        paymentSchedule:
+          CrmPaymentSchedulePreset;
+      }>(
+        `/api/crm/commercial/payment-schedules/${encodeURIComponent(id)}`,
+        {
+          method: "PUT",
+          body: JSON.stringify(input),
+        },
+      );
+
+    return result.paymentSchedule;
+  }
+
+  static async archiveCrmPaymentSchedulePreset(
+    id: string,
+  ) {
+    const result =
+      await request<{
+        ok: true;
+        paymentSchedule:
+          CrmPaymentSchedulePreset;
+      }>(
+        `/api/crm/commercial/payment-schedules/${encodeURIComponent(id)}/archive`,
+        {
+          method: "POST",
+          body: "{}",
+        },
+      );
+
+    return result.paymentSchedule;
   }
 
   static async getQuestionnaireTemplate(id: string) {

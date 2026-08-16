@@ -1086,6 +1086,7 @@ async function normaliseQuoteBookingPackDraft(
     "contractTemplateId",
     "questionnaireTemplateId",
     "autoCreateInvoice",
+    "paymentScheduleId",
   ];
 
   const supplied =
@@ -1111,6 +1112,12 @@ async function normaliseQuoteBookingPackDraft(
       "questionnaireTemplateId",
     );
 
+  const incomingPaymentSchedule =
+    owns(
+      incoming,
+      "paymentScheduleId",
+    );
+
   let contractTemplateId =
     text(
       incomingContract
@@ -1124,6 +1131,13 @@ async function normaliseQuoteBookingPackDraft(
         ? incoming.questionnaireTemplateId
         : fallback
             .questionnaireTemplateId,
+    );
+
+  let paymentScheduleId =
+    text(
+      incomingPaymentSchedule
+        ? incoming.paymentScheduleId
+        : fallback.paymentScheduleId,
     );
 
   const autoCreateInvoice =
@@ -1169,6 +1183,21 @@ async function normaliseQuoteBookingPackDraft(
       : Promise.resolve(null),
   ]);
 
+  const paymentSchedulePreset =
+    paymentScheduleId
+      ? await db.prepare(`
+          SELECT id
+          FROM crm_payment_schedule_presets
+          WHERE workspace_id = ?
+            AND id = ?
+            AND status = 'active'
+          LIMIT 1
+        `).bind(
+          workspaceId,
+          paymentScheduleId,
+        ).first()
+      : null;
+
   if (
     contractTemplateId
     && !contractTemplate
@@ -1197,10 +1226,27 @@ async function normaliseQuoteBookingPackDraft(
     questionnaireTemplateId = "";
   }
 
+  if (
+    paymentScheduleId
+    && !paymentSchedulePreset
+  ) {
+    if (
+      incomingPaymentSchedule
+    ) {
+      throw httpError(
+        "Choose an active payment schedule from this workspace.",
+        409,
+      );
+    }
+
+    paymentScheduleId = "";
+  }
+
   return {
     contractTemplateId,
     questionnaireTemplateId,
     autoCreateInvoice,
+    paymentScheduleId,
   };
 }
 
@@ -1240,6 +1286,12 @@ async function quoteBookingPackPreview(
     Object.prototype.hasOwnProperty.call(
       draftSelection,
       "autoCreateInvoice",
+    );
+
+  const hasDraftPaymentScheduleId =
+    Object.prototype.hasOwnProperty.call(
+      draftSelection,
+      "paymentScheduleId",
     );
 
   const template =
@@ -1290,6 +1342,103 @@ async function quoteBookingPackPreview(
       workspaceId,
     ).all(),
   ]);
+
+  const paymentScheduleResult =
+    await db.prepare(`
+      SELECT
+        id,
+        name,
+        description,
+        status,
+        is_default,
+        deposit_type,
+        deposit_value,
+        deposit_due_days_after_acceptance,
+        final_balance_due_days_before_event,
+        sort_order,
+        created_at,
+        updated_at
+      FROM crm_payment_schedule_presets
+      WHERE workspace_id = ?
+        AND status = 'active'
+      ORDER BY
+        is_default DESC,
+        sort_order,
+        name COLLATE NOCASE
+    `).bind(
+      workspaceId,
+    ).all();
+
+  const paymentSchedules =
+    (
+      paymentScheduleResult.results
+      || []
+    ).map(
+      (row: any) => ({
+        id:
+          text(row.id),
+
+        name:
+          text(row.name),
+
+        description:
+          text(row.description),
+
+        status:
+          "active" as const,
+
+        default:
+          Boolean(
+            row.is_default,
+          ),
+
+        depositType:
+          text(
+            row.deposit_type,
+          ) || "none",
+
+        depositValue:
+          Math.max(
+            0,
+            Number(
+              row.deposit_value
+              || 0,
+            ),
+          ),
+
+        depositDueDaysAfterAcceptance:
+          Math.max(
+            0,
+            Number(
+              row
+                .deposit_due_days_after_acceptance
+              || 0,
+            ),
+          ),
+
+        finalBalanceDueDaysBeforeEvent:
+          Math.max(
+            0,
+            Number(
+              row
+                .final_balance_due_days_before_event
+              || 0,
+            ),
+          ),
+
+        sortOrder:
+          Number(
+            row.sort_order
+            || 0,
+          ),
+
+        createdAt:
+          text(row.created_at),
+
+        updatedAt:
+          text(row.updated_at),
+      }),
+    );
 
   const contracts =
     (contractResult.results || []).map(
@@ -1346,6 +1495,11 @@ async function quoteBookingPackPreview(
   const frozenInvoice =
     quoteBookingPackObject(
       existing.invoice,
+    );
+
+  const frozenPaymentSchedule =
+    quoteBookingPackObject(
+      frozenInvoice.paymentSchedule,
     );
 
   const templateContractId =
@@ -1426,6 +1580,50 @@ async function quoteBookingPackPreview(
             || liveQuestionnaireId
           );
 
+  const defaultPaymentSchedule =
+    paymentSchedules.find(
+      (item: any) =>
+        item.default,
+    )
+    || paymentSchedules[0]
+    || null;
+
+  const requestedPaymentScheduleId =
+    frozen
+      ? text(
+          frozenPaymentSchedule
+            .presetId,
+        )
+      : hasDraftPaymentScheduleId
+        ? text(
+            draftSelection
+              .paymentScheduleId,
+          )
+        : text(
+            defaultPaymentSchedule
+              ?.id,
+          );
+
+  const selectedPaymentSchedule =
+    frozen
+      ? null
+      : (
+          paymentSchedules.find(
+            (item: any) =>
+              item.id
+              === requestedPaymentScheduleId,
+          )
+          || null
+        );
+
+  const paymentScheduleId =
+    frozen
+      ? requestedPaymentScheduleId
+      : text(
+          selectedPaymentSchedule
+            ?.id,
+        );
+
   const contractTemplateId =
     frozen
       ? requestedContractId
@@ -1483,8 +1681,107 @@ async function quoteBookingPackPreview(
       frozen
         ? frozenInvoice
             .paymentSchedule
-        : template.paymentSchedule,
+        : selectedPaymentSchedule
+          ? {
+              presetId:
+                selectedPaymentSchedule.id,
+
+              name:
+                selectedPaymentSchedule.name,
+
+              depositType:
+                selectedPaymentSchedule.depositType,
+
+              depositValue:
+                selectedPaymentSchedule.depositValue,
+
+              depositDueDaysAfterAcceptance:
+                selectedPaymentSchedule
+                  .depositDueDaysAfterAcceptance,
+
+              finalBalanceDueDaysBeforeEvent:
+                selectedPaymentSchedule
+                  .finalBalanceDueDaysBeforeEvent,
+            }
+          : template.paymentSchedule,
     );
+
+  const paymentScheduleChoices =
+    [...paymentSchedules];
+
+  if (
+    frozen
+    && paymentScheduleId
+    && !paymentScheduleChoices.some(
+      (item: any) =>
+        item.id
+        === paymentScheduleId,
+    )
+  ) {
+    paymentScheduleChoices.unshift({
+      id:
+        paymentScheduleId,
+
+      name:
+        text(
+          frozenPaymentSchedule.name,
+        )
+        || "Sent payment schedule",
+
+      description:
+        "Frozen with this quote version.",
+
+      status:
+        "active",
+
+      default:
+        false,
+
+      depositType:
+        text(
+          frozenInvoice.depositType,
+        )
+        || "none",
+
+      depositValue:
+        Math.max(
+          0,
+          Number(
+            frozenInvoice.depositValue
+            || 0,
+          ),
+        ),
+
+      depositDueDaysAfterAcceptance:
+        Math.max(
+          0,
+          Number(
+            frozenInvoice
+              .depositDueDaysAfterAcceptance
+            || 0,
+          ),
+        ),
+
+      finalBalanceDueDaysBeforeEvent:
+        Math.max(
+          0,
+          Number(
+            frozenInvoice
+              .finalBalanceDueDaysBeforeEvent
+            || 0,
+          ),
+        ),
+
+      sortOrder:
+        0,
+
+      createdAt:
+        "",
+
+      updatedAt:
+        "",
+    });
+  }
 
   return {
     frozen,
@@ -1499,6 +1796,11 @@ async function quoteBookingPackPreview(
 
     autoCreateInvoice,
 
+    paymentScheduleId,
+
+    paymentSchedules:
+      paymentScheduleChoices,
+
     contractTemplates:
       contracts,
 
@@ -1511,7 +1813,9 @@ async function quoteBookingPackPreview(
           frozen
             ? frozenInvoice
                 .depositType
-            : settings
+            : selectedPaymentSchedule
+                ?.depositType
+              || settings
                 ?.deposit_type,
         ) || "none",
 
@@ -1522,9 +1826,13 @@ async function quoteBookingPackPreview(
             frozen
               ? frozenInvoice
                   .depositValue
-              : settings
-                  ?.deposit_value
-              || 0,
+              : (
+                  selectedPaymentSchedule
+                    ?.depositValue
+                  ?? settings
+                    ?.deposit_value
+                  ?? 0
+                ),
           ),
         ),
 
@@ -1535,9 +1843,13 @@ async function quoteBookingPackPreview(
             frozen
               ? frozenInvoice
                   .depositDueDaysAfterAcceptance
-              : settings
-                  ?.deposit_due_days_after_acceptance
-              || 0,
+              : (
+                  selectedPaymentSchedule
+                    ?.depositDueDaysAfterAcceptance
+                  ?? settings
+                    ?.deposit_due_days_after_acceptance
+                  ?? 0
+                ),
           ),
         ),
 
@@ -1548,9 +1860,13 @@ async function quoteBookingPackPreview(
             frozen
               ? frozenInvoice
                   .finalBalanceDueDaysBeforeEvent
-              : settings
-                  ?.final_balance_due_days_before_event
-              || 30,
+              : (
+                  selectedPaymentSchedule
+                    ?.finalBalanceDueDaysBeforeEvent
+                  ?? settings
+                    ?.final_balance_due_days_before_event
+                  ?? 30
+                ),
           ),
         ),
 
