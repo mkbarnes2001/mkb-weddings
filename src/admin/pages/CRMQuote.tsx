@@ -1297,6 +1297,7 @@ export function CRMQuote() {
   return (
     <AdminPage>
       <AdminPageHeader
+        className="crm-quote-page-header"
         eyebrow={
           <Link
             to="/admin/crm/quotes"
@@ -1309,7 +1310,7 @@ export function CRMQuote() {
         title={quote.reference}
         description={`${quote.clientName} · ${quote.enquiryReference} · version ${version?.versionNumber || 1}`}
         actions={
-          <div className="flex flex-wrap gap-2">
+          <div className="crm-quote-header-actions">
             {editable ? (
               <div className="crm-quote-template-apply">
                 <select

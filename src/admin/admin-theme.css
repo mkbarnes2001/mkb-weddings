@@ -9920,3 +9920,141 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* v1.10.11a manual-gate hotfix — quote header action layout */
+.crm-quote-page-header {
+  display: grid;
+  grid-template-columns:
+    158px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "brand content meta"
+    ". actions actions";
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.crm-quote-page-header
+.admin-page-header__brand {
+  grid-area: brand;
+  align-self: stretch;
+}
+
+.crm-quote-page-header
+.admin-page-header__content {
+  grid-area: content;
+  min-width: 0;
+  max-width: none;
+}
+
+.crm-quote-page-header
+.admin-page-summary {
+  grid-area: meta;
+  width: auto;
+  min-width: 0;
+  margin-left: 0;
+  justify-self: end;
+}
+
+.crm-quote-page-header
+.admin-page-actions {
+  grid-area: actions;
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.crm-quote-header-actions {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.crm-quote-page-header
+.crm-quote-template-apply {
+  min-width: 280px;
+  flex: 1 1 340px;
+  justify-content: flex-end;
+}
+
+.crm-quote-page-header
+.crm-quote-template-apply
+.admin-select {
+  width: min(260px, 100%);
+  min-width: 180px;
+}
+
+@media (max-width: 900px) {
+  .crm-quote-page-header {
+    grid-template-columns:
+      124px minmax(0, 1fr);
+    grid-template-areas:
+      "brand content"
+      "meta meta"
+      "actions actions";
+    align-items: center;
+  }
+
+  .crm-quote-page-header
+  .admin-page-summary {
+    width: 100%;
+    margin-left: 0;
+    justify-self: stretch;
+    padding-top: 8px;
+    border-top:
+      1px solid var(--admin-border);
+  }
+
+  .crm-quote-page-header
+  .admin-page-actions,
+  .crm-quote-header-actions {
+    justify-content: flex-start;
+  }
+
+  .crm-quote-page-header
+  .crm-quote-template-apply {
+    min-width: 0;
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .crm-quote-page-header {
+    grid-template-columns:
+      1fr;
+    grid-template-areas:
+      "brand"
+      "content"
+      "meta"
+      "actions";
+  }
+
+  .crm-quote-page-header
+  .admin-page-header__brand {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding-right: 0;
+    padding-bottom: 8px;
+    border-right: 0;
+    border-bottom:
+      1px solid var(--admin-border);
+  }
+
+  .crm-quote-page-header
+  .crm-quote-template-apply {
+    width: 100%;
+  }
+
+  .crm-quote-page-header
+  .crm-quote-template-apply
+  .admin-select {
+    width: 100%;
+    min-width: 0;
+  }
+}

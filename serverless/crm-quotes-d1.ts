@@ -1078,8 +1078,7 @@ async function quoteBookingPackPreview(
     db.prepare(`
       SELECT
         id,
-        name,
-        version
+        name
       FROM crm_contract_templates
       WHERE workspace_id = ?
         AND status = 'active'
