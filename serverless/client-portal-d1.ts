@@ -112,6 +112,34 @@ function safeFilename(value: unknown) {
   return `${base}${extension}`;
 }
 
+async function supplierCategoryOptions(
+  db: D1Db,
+) {
+  const rows =
+    await db.prepare(`
+      SELECT name
+      FROM platform_categories
+      WHERE status = 'active'
+        AND group_name = 'Supplier taxonomy'
+      ORDER BY sort_order, name COLLATE NOCASE
+    `).all();
+
+  return Array.from(
+    new Set(
+      (
+        rows.results
+        || []
+      )
+        .map(
+          (row: any) =>
+            text(row.name),
+        )
+        .filter(Boolean),
+    ),
+  );
+}
+
+
 export type QuestionnaireField = {
   id: string;
   type: "heading" | "description" | "short_text" | "long_text" | "select" | "radio" | "checkbox" | "file" | "supplier";
@@ -767,6 +795,10 @@ export async function getCrmJobWorkspace(db: D1Db, actor: PortalActor, jobId: st
       sortOrder: Number(row.sort_order || 0),
     })),
     supplierSubmissions: (submissionRows.results || []).map(hydrateSupplierSubmission),
+    supplierCategories:
+      await supplierCategoryOptions(
+        db,
+      ),
     supplierDirectory: masterSuppliers.map((supplier: any) => ({
       id: supplier.id, name: supplier.name, category: supplier.category, website: supplier.website, instagram: supplier.instagram,
       email: supplier.email, phone: supplier.phone, location: supplier.location, county: supplier.county,
@@ -1357,8 +1389,29 @@ export async function getPublicQuestionnaire(db: D1Db, request: Request, workspa
     identity: { email: identity.email, displayName: identity.displayName },
     questionnaire: hydrateInstance(row, await instanceResponses(db, workspaceId, instanceId), await instanceFiles(db, workspaceId, instanceId)),
     suppliers: (await listMasterSuppliers(db, false, workspaceId)).map((supplier: any) => ({
-      id: supplier.id, name: supplier.name, category: supplier.category, location: supplier.location, county: supplier.county,
+      id:
+        supplier.id,
+      name:
+        supplier.name,
+      category:
+        supplier.category,
+      website:
+        supplier.website,
+      instagram:
+        supplier.instagram,
+      email:
+        supplier.email,
+      phone:
+        supplier.phone,
+      location:
+        supplier.location,
+      county:
+        supplier.county,
     })),
+    supplierCategories:
+      await supplierCategoryOptions(
+        db,
+      ),
   };
 }
 

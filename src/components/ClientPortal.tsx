@@ -8,6 +8,10 @@ type SupplierDirectoryOption = {
   id: string;
   name: string;
   category: string;
+  website: string;
+  instagram: string;
+  email: string;
+  phone: string;
   location: string;
   county: string;
 };
@@ -243,52 +247,546 @@ function SupplierQuestion({
   field,
   value,
   suppliers,
+  categories,
   disabled,
   onChange,
 }: {
   field: PortalQuestionField;
   value: unknown;
   suppliers: SupplierDirectoryOption[];
+  categories: string[];
   disabled: boolean;
   onChange: (value: SupplierAnswer[]) => void;
 }) {
-  const [search, setSearch] = useState("");
-  const values = supplierAnswers(value, field);
-  const filtered = suppliers.filter((supplier) => {
-    const categoryMatches = !field.supplierCategory || supplier.category.toLowerCase().includes(field.supplierCategory.toLowerCase());
-    const query = search.trim().toLowerCase();
-    return categoryMatches && (!query || [supplier.name, supplier.category, supplier.location, supplier.county].join(" ").toLowerCase().includes(query));
-  });
+  const [queries, setQueries] =
+    useState<Record<number, string>>({});
 
-  function update(index: number, patch: Partial<SupplierAnswer>) {
-    onChange(values.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item));
+  const values =
+    supplierAnswers(
+      value,
+      field,
+    );
+
+  const categoryOptions =
+    Array.from(
+      new Set(
+        [
+          ...categories,
+          ...suppliers.map(
+            (supplier) =>
+              supplier.category,
+          ),
+          "Other",
+        ]
+          .map(
+            (item) =>
+              String(item || "").trim(),
+          )
+          .filter(Boolean),
+      ),
+    );
+
+  const defaultCategory =
+    categoryOptions.find(
+      (item) =>
+        item.toLowerCase()
+        === "other",
+    )
+    || categoryOptions[0]
+    || "Other";
+
+  function supplierForAnswer(
+    answer: SupplierAnswer,
+  ) {
+    return suppliers.find(
+      (supplier) =>
+        supplier.id
+        === answer.supplierId,
+    );
   }
 
-  function add(mode: SupplierAnswer["mode"] = "existing") {
-    if (!field.multiple && values.length) return;
-    onChange([...values, { ...emptySupplier(field), mode }]);
+  function categoryForAnswer(
+    answer: SupplierAnswer,
+  ) {
+    const selected =
+      supplierForAnswer(
+        answer,
+      );
+
+    if (selected?.category) {
+      return selected.category;
+    }
+
+    if (
+      categoryOptions.includes(
+        answer.role,
+      )
+    ) {
+      return answer.role;
+    }
+
+    if (
+      field.supplierCategory
+      && categoryOptions.includes(
+        field.supplierCategory,
+      )
+    ) {
+      return field.supplierCategory;
+    }
+
+    return defaultCategory;
   }
 
-  function remove(index: number) {
-    onChange(values.filter((_, itemIndex) => itemIndex !== index));
+  function directoryForCategory(
+    category: string,
+  ) {
+    return suppliers.filter(
+      (supplier) =>
+        !category
+        || supplier.category
+          .toLowerCase()
+          === category
+            .toLowerCase(),
+    );
+  }
+
+  function replaceAnswer(
+    index: number,
+    next: SupplierAnswer,
+  ) {
+    onChange(
+      values.map(
+        (item, itemIndex) =>
+          itemIndex === index
+            ? next
+            : item,
+      ),
+    );
+  }
+
+  function chooseSupplier(
+    index: number,
+    supplier:
+      SupplierDirectoryOption,
+  ) {
+    setQueries(
+      (current) => ({
+        ...current,
+        [index]:
+          supplier.name,
+      }),
+    );
+
+    replaceAnswer(
+      index,
+      {
+        mode:
+          "existing",
+        supplierId:
+          supplier.id,
+        name:
+          supplier.name,
+        role:
+          supplier.category
+          || categoryForAnswer(
+            values[index],
+          ),
+        website:
+          supplier.website
+          || "",
+        instagram:
+          supplier.instagram
+          || "",
+        email:
+          supplier.email
+          || "",
+        phone:
+          supplier.phone
+          || "",
+        location:
+          supplier.location
+          || "",
+        county:
+          supplier.county
+          || "",
+      },
+    );
+  }
+
+  function changeCategory(
+    index: number,
+    category: string,
+  ) {
+    const current =
+      values[index];
+
+    if (
+      category
+      === categoryForAnswer(
+        current,
+      )
+    ) {
+      return;
+    }
+
+    setQueries(
+      (queries) => ({
+        ...queries,
+        [index]:
+          "",
+      }),
+    );
+
+    replaceAnswer(
+      index,
+      {
+        ...emptySupplier(
+          field,
+        ),
+        mode:
+          field.allowUnlisted
+          === false
+            ? "existing"
+            : "unlisted",
+        role:
+          category
+          || defaultCategory,
+      },
+    );
+  }
+
+  function changeSupplierText(
+    index: number,
+    input: string,
+  ) {
+    const current =
+      values[index];
+
+    const category =
+      categoryForAnswer(
+        current,
+      );
+
+    setQueries(
+      (queries) => ({
+        ...queries,
+        [index]:
+          input,
+      }),
+    );
+
+    const match =
+      directoryForCategory(
+        category,
+      ).find(
+        (supplier) =>
+          supplier.name
+            .trim()
+            .toLowerCase()
+          === input
+            .trim()
+            .toLowerCase(),
+      );
+
+    if (match) {
+      chooseSupplier(
+        index,
+        match,
+      );
+
+      return;
+    }
+
+    const empty = {
+      ...emptySupplier(
+        field,
+      ),
+      role:
+        category
+        || defaultCategory,
+    };
+
+    if (
+      field.allowUnlisted
+      === false
+    ) {
+      replaceAnswer(
+        index,
+        {
+          ...empty,
+          mode:
+            "existing",
+        },
+      );
+
+      return;
+    }
+
+    replaceAnswer(
+      index,
+      {
+        ...empty,
+        mode:
+          "unlisted",
+        name:
+          input,
+      },
+    );
+  }
+
+  function add() {
+    if (
+      !field.multiple
+      && values.length
+    ) {
+      return;
+    }
+
+    onChange([
+      ...values,
+      {
+        ...emptySupplier(
+          field,
+        ),
+        mode:
+          field.allowUnlisted
+          === false
+            ? "existing"
+            : "unlisted",
+        role:
+          defaultCategory,
+      },
+    ]);
+  }
+
+  function remove(
+    index: number,
+  ) {
+    onChange(
+      values.filter(
+        (_, itemIndex) =>
+          itemIndex !== index,
+      ),
+    );
+
+    setQueries(
+      (current) => {
+        const next = {
+          ...current,
+        };
+
+        delete next[index];
+
+        return next;
+      },
+    );
   }
 
   return (
-    <div className="portal-supplier-field">
-      {!values.length && !disabled ? <div className="portal-supplier-empty"><p>No supplier added yet.</p><div><button type="button" onClick={() => add("existing")}><Search />Choose Supplier Master</button>{field.allowUnlisted !== false ? <button type="button" className="secondary" onClick={() => add("unlisted")}><Plus />Supplier not listed</button> : null}</div></div> : null}
-      {values.map((answer, index) => (
-        <article key={`${field.id}_${index}`} className="portal-supplier-entry">
-          <div className="portal-supplier-entry__header"><strong>{answer.mode === "existing" ? "Supplier Master" : "Supplier not listed"}</strong>{!disabled ? <button type="button" aria-label="Remove supplier" onClick={() => remove(index)}><Trash2 /></button> : null}</div>
-          <div className="portal-supplier-mode">
-            <label><input type="radio" checked={answer.mode === "existing"} disabled={disabled} onChange={() => update(index, { mode: "existing", name: "", website: "", instagram: "", email: "", phone: "", location: "", county: "" })} />Choose existing</label>
-            {field.allowUnlisted !== false ? <label><input type="radio" checked={answer.mode === "unlisted"} disabled={disabled} onChange={() => update(index, { mode: "unlisted", supplierId: "" })} />Add unlisted</label> : null}
-          </div>
-          <label><span>Role</span><input value={answer.role} disabled={disabled} onChange={(event) => update(index, { role: event.target.value })} placeholder={field.supplierRole || "Supplier"} /></label>
-          {answer.mode === "existing" ? <><label><span>Search suppliers</span><input value={search} disabled={disabled} onChange={(event) => setSearch(event.target.value)} placeholder="Name, category or location" /></label><label><span>Supplier</span><select value={answer.supplierId} disabled={disabled} onChange={(event) => { const selected = suppliers.find((supplier) => supplier.id === event.target.value); update(index, { supplierId: event.target.value, name: selected?.name || "" }); }}><option value="">Choose a supplier</option>{filtered.map((supplier) => <option key={supplier.id} value={supplier.id}>{supplier.name}{supplier.category ? ` · ${supplier.category}` : ""}{supplier.location ? ` · ${supplier.location}` : ""}</option>)}</select></label></> : <div className="portal-supplier-details"><label><span>Supplier name</span><input value={answer.name} disabled={disabled} onChange={(event) => update(index, { name: event.target.value })} /></label><label><span>Website</span><input value={answer.website} disabled={disabled} onChange={(event) => update(index, { website: event.target.value })} /></label><label><span>Instagram</span><input value={answer.instagram} disabled={disabled} onChange={(event) => update(index, { instagram: event.target.value })} placeholder="@username" /></label><label><span>Email</span><input type="email" value={answer.email} disabled={disabled} onChange={(event) => update(index, { email: event.target.value })} /></label><label><span>Phone</span><input value={answer.phone} disabled={disabled} onChange={(event) => update(index, { phone: event.target.value })} /></label><label><span>Location</span><input value={answer.location} disabled={disabled} onChange={(event) => update(index, { location: event.target.value })} /></label><label><span>County</span><input value={answer.county} disabled={disabled} onChange={(event) => update(index, { county: event.target.value })} /></label></div>}
-        </article>
-      ))}
-      {field.multiple && values.length && !disabled ? <div className="portal-supplier-add"><button type="button" onClick={() => add("existing")}><Plus />Add another supplier</button>{field.allowUnlisted !== false ? <button type="button" className="secondary" onClick={() => add("unlisted")}><Plus />Add unlisted supplier</button> : null}</div> : null}
-      {disabled && values.some((item) => item.mode === "unlisted") ? <p className="portal-supplier-review-note">Unlisted suppliers are sent to the business for review before they are added to Supplier Master.</p> : null}
+    <div className="portal-supplier-field supplier-questionnaire-table">
+      {values.length ? (
+        <div
+          className="supplier-questionnaire-header"
+          aria-hidden="true"
+        >
+          <span>
+            Category
+          </span>
+          <span>
+            Supplier
+          </span>
+          <span />
+        </div>
+      ) : null}
+
+      {values.map(
+        (answer, index) => {
+          const category =
+            categoryForAnswer(
+              answer,
+            );
+
+          const directory =
+            directoryForCategory(
+              category,
+            );
+
+          const query =
+            queries[index]
+            ?? answer.name
+            ?? "";
+
+          const masterSupplier =
+            supplierForAnswer(
+              answer,
+            );
+
+          const datalistId =
+            `portal_supplier_${field.id}_${index}`;
+
+          return (
+            <div
+              key={`${field.id}_${index}`}
+              className="supplier-questionnaire-row"
+            >
+              <label className="supplier-questionnaire-category">
+                <span>
+                  Category
+                </span>
+
+                <select
+                  value={
+                    category
+                  }
+                  disabled={
+                    disabled
+                  }
+                  onChange={(
+                    event,
+                  ) =>
+                    changeCategory(
+                      index,
+                      event.target
+                        .value,
+                    )
+                  }
+                >
+                  {categoryOptions.map(
+                    (option) => (
+                      <option
+                        key={option}
+                        value={option}
+                      >
+                        {option}
+                      </option>
+                    ),
+                  )}
+                </select>
+              </label>
+
+              <label className="supplier-questionnaire-supplier">
+                <span>
+                  Supplier
+                </span>
+
+                <input
+                  list={
+                    datalistId
+                  }
+                  value={query}
+                  disabled={
+                    disabled
+                  }
+                  placeholder="Start typing a supplier name"
+                  autoComplete="off"
+                  onChange={(
+                    event,
+                  ) =>
+                    changeSupplierText(
+                      index,
+                      event.target
+                        .value,
+                    )
+                  }
+                />
+
+                <datalist
+                  id={
+                    datalistId
+                  }
+                >
+                  {directory.map(
+                    (supplier) => (
+                      <option
+                        key={
+                          supplier.id
+                        }
+                        value={
+                          supplier.name
+                        }
+                        label={
+                          supplier.location
+                          || supplier.county
+                          || supplier.category
+                        }
+                      />
+                    ),
+                  )}
+                </datalist>
+
+                <small className="supplier-questionnaire-state">
+                  {masterSupplier
+                    ? [
+                        "Supplier Master",
+                        masterSupplier
+                          .location
+                          || masterSupplier
+                            .county,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")
+                    : answer.name
+                      ? "Not in Supplier Master — will be sent for review."
+                      : "Search Supplier Master, or type a name if it is not listed."}
+                </small>
+              </label>
+
+              {!disabled ? (
+                <button
+                  type="button"
+                  className="supplier-questionnaire-remove"
+                  aria-label={`Remove supplier row ${index + 1}`}
+                  title="Remove supplier"
+                  onClick={() =>
+                    remove(index)
+                  }
+                >
+                  <Trash2 />
+                </button>
+              ) : (
+                <span />
+              )}
+            </div>
+          );
+        },
+      )}
+
+      {!disabled
+      && (
+        field.multiple
+        || !values.length
+      ) ? (
+        <div className="supplier-questionnaire-add">
+          <button
+            type="button"
+            onClick={add}
+          >
+            <Plus />
+            Add supplier
+          </button>
+
+          {field.allowUnlisted !== false ? (
+            <small>
+              Supplier not listed? Type the business name and it will be sent for review.
+            </small>
+          ) : (
+            <small>
+              Choose a supplier already held in Supplier Master.
+            </small>
+          )}
+        </div>
+      ) : null}
+
+      {disabled
+      && values.some(
+        (item) =>
+          item.mode
+          === "unlisted",
+      ) ? (
+        <p className="portal-supplier-review-note">
+          Supplier names not yet in Supplier Master are awaiting business review.
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -331,6 +829,7 @@ export function ClientPortal() {
   const [addonQuantities, setAddonQuantities] = useState<Record<string, number>>({});
   const [questionnaire, setQuestionnaire] = useState<PortalQuestionnaire | null>(null);
   const [supplierDirectory, setSupplierDirectory] = useState<SupplierDirectoryOption[]>([]);
+  const [supplierCategories, setSupplierCategories] = useState<string[]>([]);
   const [responses, setResponses] = useState<Record<string, unknown>>({});
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
@@ -360,6 +859,7 @@ export function ClientPortal() {
     if (!selectedId || !portal?.authenticated) {
       setQuestionnaire(null);
       setSupplierDirectory([]);
+      setSupplierCategories([]);
       setSaving(false);
       return;
     }
@@ -367,7 +867,12 @@ export function ClientPortal() {
     setSaving(true);
     setError("");
 
-    jsonRequest<{ ok: true; questionnaire: PortalQuestionnaire; suppliers?: SupplierDirectoryOption[] }>(
+    jsonRequest<{
+      ok: true;
+      questionnaire: PortalQuestionnaire;
+      suppliers?: SupplierDirectoryOption[];
+      supplierCategories?: string[];
+    }>(
       portalApiPath(
         `/api/public/client-portal/questionnaires/${encodeURIComponent(selectedId)}`,
       ),
@@ -386,6 +891,11 @@ export function ClientPortal() {
         );
         setSupplierDirectory(
           result.suppliers || [],
+        );
+
+        setSupplierCategories(
+          result.supplierCategories
+          || [],
         );
       })
       .catch((loadError) => {
@@ -1232,7 +1742,7 @@ export function ClientPortal() {
                   if (field.type === "description") return <p key={field.id} className="portal-question-description">{field.label}</p>;
                   const value = responses[field.id];
                   const files = questionnaire.files.filter((file) => file.fieldKey === field.id);
-                  if (field.type === "supplier") return <div key={field.id} className="portal-question-field"><span>{field.label}{field.required ? <b> *</b> : null}</span>{field.help ? <small>{field.help}</small> : null}<SupplierQuestion field={field} value={value} suppliers={supplierDirectory} disabled={saving} onChange={(next) => setResponses((current) => ({ ...current, [field.id]: next }))} /></div>;
+                  if (field.type === "supplier") return <div key={field.id} className="portal-question-field"><span>{field.label}{field.required ? <b> *</b> : null}</span>{field.help ? <small>{field.help}</small> : null}<SupplierQuestion field={field} value={value} suppliers={supplierDirectory} categories={supplierCategories} disabled={saving} onChange={(next) => setResponses((current) => ({ ...current, [field.id]: next }))} /></div>;
                   return <label key={field.id} className="portal-question-field"><span>{field.label}{field.required ? <b> *</b> : null}</span>{field.help ? <small>{field.help}</small> : null}{field.type === "short_text" ? <input value={String(value ?? "")} disabled={saving} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))} /> : null}{field.type === "long_text" ? <textarea value={String(value ?? "")} disabled={saving} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))} /> : null}{field.type === "select" ? <select value={String(value ?? "")} disabled={saving} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))}><option value="">Choose an option</option>{field.options.map((option) => <option key={option}>{option}</option>)}</select> : null}{field.type === "radio" ? <div className="portal-choice-list">{field.options.map((option) => <label key={option}><input type="radio" name={field.id} checked={value === option} disabled={saving} onChange={() => setResponses((current) => ({ ...current, [field.id]: option }))} />{option}</label>)}</div> : null}{field.type === "checkbox" ? <div className="portal-choice-list">{field.options.map((option) => { const selected = Array.isArray(value) ? value as string[] : []; return <label key={option}><input type="checkbox" checked={selected.includes(option)} disabled={saving} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.checked ? [...selected, option] : selected.filter((item) => item !== option) }))} />{option}</label>; })}</div> : null}{field.type === "file" ? <div className="portal-file-field"><input type="file" disabled={saving} onChange={(event) => { const file = event.target.files?.[0]; void upload(field.id, file); event.currentTarget.value = ""; }} /><div className="portal-file-list">{files.map((file) => <div key={file.id}><Paperclip /><a href={portalApiPath(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}/files/${encodeURIComponent(file.id)}`)} target="_blank" rel="noreferrer"><span>{file.filename}</span><small>{formatBytes(file.fileSize)}</small></a><button type="button" disabled={saving} onClick={() => void removeFile(file.id)}><Trash2 /></button></div>)}</div></div> : null}</label>;
                 })}
               </div>

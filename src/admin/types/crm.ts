@@ -522,6 +522,7 @@ export type CrmJobWorkspace = {
   enquiry: { reference: string; source: string; campaign: string; notes: string; createdAt: string } | null;
   linkedSuppliers: Array<SupplierDirectoryOption & { role: string; sortOrder: number }>;
   supplierSubmissions: CrmSupplierSubmission[];
+  supplierCategories: string[];
   supplierDirectory: SupplierDirectoryOption[];
   activities: CrmActivity[];
   lifecycle: CrmWeddingLifecycle;

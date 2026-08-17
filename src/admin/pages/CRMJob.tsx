@@ -172,10 +172,562 @@ function professionalSupplierAnswers(
   return [];
 }
 
+
+function ProfessionalSupplierRows({
+  field,
+  value,
+  suppliers,
+  categories,
+  disabled,
+  onChange,
+}: {
+  field: QuestionnaireField;
+  value: unknown;
+  suppliers:
+    CrmJobWorkspace["supplierDirectory"];
+  categories: string[];
+  disabled: boolean;
+  onChange:
+    (value: unknown) => void;
+}) {
+  const [queries, setQueries] =
+    useState<Record<number, string>>({});
+
+  const answers =
+    professionalSupplierAnswers(
+      value,
+      field,
+    );
+
+  const categoryOptions =
+    Array.from(
+      new Set(
+        [
+          ...categories,
+          ...suppliers.map(
+            (supplier) =>
+              supplier.category,
+          ),
+          "Other",
+        ]
+          .map(
+            (item) =>
+              String(item || "").trim(),
+          )
+          .filter(Boolean),
+      ),
+    );
+
+  const defaultCategory =
+    categoryOptions.find(
+      (item) =>
+        item.toLowerCase()
+        === "other",
+    )
+    || categoryOptions[0]
+    || "Other";
+
+  function masterForAnswer(
+    answer:
+      ProfessionalSupplierAnswer,
+  ) {
+    return suppliers.find(
+      (supplier) =>
+        supplier.id
+        === answer.supplierId,
+    );
+  }
+
+  function categoryForAnswer(
+    answer:
+      ProfessionalSupplierAnswer,
+  ) {
+    const selected =
+      masterForAnswer(
+        answer,
+      );
+
+    if (selected?.category) {
+      return selected.category;
+    }
+
+    if (
+      categoryOptions.includes(
+        answer.role,
+      )
+    ) {
+      return answer.role;
+    }
+
+    if (
+      field.supplierCategory
+      && categoryOptions.includes(
+        field.supplierCategory,
+      )
+    ) {
+      return field.supplierCategory;
+    }
+
+    return defaultCategory;
+  }
+
+  function directoryForCategory(
+    category: string,
+  ) {
+    return suppliers.filter(
+      (supplier) =>
+        !category
+        || supplier.category
+          .toLowerCase()
+          === category
+            .toLowerCase(),
+    );
+  }
+
+  function replaceAnswer(
+    index: number,
+    next:
+      ProfessionalSupplierAnswer,
+  ) {
+    onChange(
+      answers.map(
+        (answer, itemIndex) =>
+          itemIndex === index
+            ? next
+            : answer,
+      ),
+    );
+  }
+
+  function chooseSupplier(
+    index: number,
+    supplier:
+      CrmJobWorkspace[
+        "supplierDirectory"
+      ][number],
+  ) {
+    setQueries(
+      (current) => ({
+        ...current,
+        [index]:
+          supplier.name,
+      }),
+    );
+
+    replaceAnswer(
+      index,
+      {
+        mode:
+          "existing",
+        supplierId:
+          supplier.id,
+        name:
+          supplier.name,
+        role:
+          supplier.category
+          || categoryForAnswer(
+            answers[index],
+          ),
+        website:
+          supplier.website
+          || "",
+        instagram:
+          supplier.instagram
+          || "",
+        email:
+          supplier.email
+          || "",
+        phone:
+          supplier.phone
+          || "",
+        location:
+          supplier.location
+          || "",
+        county:
+          supplier.county
+          || "",
+      },
+    );
+  }
+
+  function changeCategory(
+    index: number,
+    category: string,
+  ) {
+    const current =
+      answers[index];
+
+    if (
+      category
+      === categoryForAnswer(
+        current,
+      )
+    ) {
+      return;
+    }
+
+    setQueries(
+      (queries) => ({
+        ...queries,
+        [index]:
+          "",
+      }),
+    );
+
+    replaceAnswer(
+      index,
+      {
+        ...emptyProfessionalSupplier(
+          field,
+          field.allowUnlisted
+            ? "unlisted"
+            : "existing",
+        ),
+        role:
+          category
+          || defaultCategory,
+      },
+    );
+  }
+
+  function changeSupplierText(
+    index: number,
+    input: string,
+  ) {
+    const current =
+      answers[index];
+
+    const category =
+      categoryForAnswer(
+        current,
+      );
+
+    setQueries(
+      (queries) => ({
+        ...queries,
+        [index]:
+          input,
+      }),
+    );
+
+    const match =
+      directoryForCategory(
+        category,
+      ).find(
+        (supplier) =>
+          supplier.name
+            .trim()
+            .toLowerCase()
+          === input
+            .trim()
+            .toLowerCase(),
+      );
+
+    if (match) {
+      chooseSupplier(
+        index,
+        match,
+      );
+
+      return;
+    }
+
+    const empty = {
+      ...emptyProfessionalSupplier(
+        field,
+        field.allowUnlisted
+          ? "unlisted"
+          : "existing",
+      ),
+      role:
+        category
+        || defaultCategory,
+    };
+
+    replaceAnswer(
+      index,
+      field.allowUnlisted
+        ? {
+            ...empty,
+            mode:
+              "unlisted",
+            name:
+              input,
+          }
+        : {
+            ...empty,
+            mode:
+              "existing",
+          },
+    );
+  }
+
+  function addSupplier() {
+    if (
+      !field.multiple
+      && answers.length
+    ) {
+      return;
+    }
+
+    onChange([
+      ...answers,
+      {
+        ...emptyProfessionalSupplier(
+          field,
+          field.allowUnlisted
+            ? "unlisted"
+            : "existing",
+        ),
+        role:
+          defaultCategory,
+      },
+    ]);
+  }
+
+  function removeSupplier(
+    index: number,
+  ) {
+    onChange(
+      answers.filter(
+        (_, itemIndex) =>
+          itemIndex !== index,
+      ),
+    );
+
+    setQueries(
+      (current) => {
+        const next = {
+          ...current,
+        };
+
+        delete next[index];
+
+        return next;
+      },
+    );
+  }
+
+  return (
+    <div className="crm-questionnaire-editor__field">
+      <span>
+        {field.label}
+        {field.required ? (
+          <b> *</b>
+        ) : null}
+      </span>
+
+      {field.help ? (
+        <small>
+          {field.help}
+        </small>
+      ) : null}
+
+      <div className="supplier-questionnaire-table supplier-questionnaire-table--admin">
+        {answers.length ? (
+          <div
+            className="supplier-questionnaire-header"
+            aria-hidden="true"
+          >
+            <span>
+              Category
+            </span>
+            <span>
+              Supplier
+            </span>
+            <span />
+          </div>
+        ) : null}
+
+        {answers.map(
+          (answer, index) => {
+            const category =
+              categoryForAnswer(
+                answer,
+              );
+
+            const directory =
+              directoryForCategory(
+                category,
+              );
+
+            const query =
+              queries[index]
+              ?? answer.name
+              ?? "";
+
+            const masterSupplier =
+              masterForAnswer(
+                answer,
+              );
+
+            const datalistId =
+              `professional_supplier_${field.id}_${index}`;
+
+            return (
+              <div
+                key={`${field.id}_${index}`}
+                className="supplier-questionnaire-row"
+              >
+                <label className="supplier-questionnaire-category">
+                  <span>
+                    Category
+                  </span>
+
+                  <select
+                    className="admin-select"
+                    value={
+                      category
+                    }
+                    disabled={
+                      disabled
+                    }
+                    onChange={(
+                      event,
+                    ) =>
+                      changeCategory(
+                        index,
+                        event.target
+                          .value,
+                      )
+                    }
+                  >
+                    {categoryOptions.map(
+                      (option) => (
+                        <option
+                          key={option}
+                          value={option}
+                        >
+                          {option}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </label>
+
+                <label className="supplier-questionnaire-supplier">
+                  <span>
+                    Supplier
+                  </span>
+
+                  <input
+                    className="admin-input"
+                    list={
+                      datalistId
+                    }
+                    value={query}
+                    disabled={
+                      disabled
+                    }
+                    placeholder="Start typing a supplier name"
+                    autoComplete="off"
+                    onChange={(
+                      event,
+                    ) =>
+                      changeSupplierText(
+                        index,
+                        event.target
+                          .value,
+                      )
+                    }
+                  />
+
+                  <datalist
+                    id={
+                      datalistId
+                    }
+                  >
+                    {directory.map(
+                      (supplier) => (
+                        <option
+                          key={
+                            supplier.id
+                          }
+                          value={
+                            supplier.name
+                          }
+                          label={
+                            supplier.location
+                            || supplier.county
+                            || supplier.category
+                          }
+                        />
+                      ),
+                    )}
+                  </datalist>
+
+                  <small className="supplier-questionnaire-state">
+                    {masterSupplier
+                      ? [
+                          "Supplier Master",
+                          masterSupplier
+                            .location
+                            || masterSupplier
+                              .county,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")
+                      : answer.name
+                        ? "Not in Supplier Master — will enter the review queue."
+                        : "Search Supplier Master, or type a name if it is not listed."}
+                  </small>
+                </label>
+
+                <button
+                  type="button"
+                  className="supplier-questionnaire-remove"
+                  disabled={
+                    disabled
+                  }
+                  aria-label={`Remove supplier row ${index + 1}`}
+                  title="Remove supplier"
+                  onClick={() =>
+                    removeSupplier(
+                      index,
+                    )
+                  }
+                >
+                  <X />
+                </button>
+              </div>
+            );
+          },
+        )}
+
+        {!disabled
+        && (
+          field.multiple
+          || !answers.length
+        ) ? (
+          <div className="supplier-questionnaire-add">
+            <AdminButton
+              variant="secondary"
+              size="sm"
+              icon={Plus}
+              onClick={
+                addSupplier
+              }
+            >
+              Add supplier
+            </AdminButton>
+
+            <small>
+              {field.allowUnlisted
+                ? "If there is no Supplier Master match, type the business name and review it after saving."
+                : "Choose an existing Supplier Master record."}
+            </small>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export function ProfessionalQuestionnaireField({
   field,
   value,
   suppliers,
+  supplierCategories,
   fileCount,
   disabled,
   onChange,
@@ -184,6 +736,8 @@ export function ProfessionalQuestionnaireField({
   value: unknown;
   suppliers:
     CrmJobWorkspace["supplierDirectory"];
+  supplierCategories:
+    CrmJobWorkspace["supplierCategories"];
   fileCount: number;
   disabled: boolean;
   onChange:
@@ -237,373 +791,17 @@ export function ProfessionalQuestionnaireField({
   }
 
   if (field.type === "supplier") {
-    const answers =
-      professionalSupplierAnswers(
-        value,
-        field,
-      );
-
-    const availableSuppliers =
-      suppliers.filter(
-        (supplier) =>
-          !field.supplierCategory
-          || supplier.category
-            .toLowerCase()
-            .includes(
-              field.supplierCategory
-                .toLowerCase(),
-            ),
-      );
-
-    function updateSupplier(
-      index: number,
-      next:
-        ProfessionalSupplierAnswer,
-    ) {
-      onChange(
-        answers.map(
-          (answer, itemIndex) =>
-            itemIndex === index
-              ? next
-              : answer,
-        ),
-      );
-    }
-
-    function removeSupplier(
-      index: number,
-    ) {
-      onChange(
-        answers.filter(
-          (_, itemIndex) =>
-            itemIndex !== index,
-        ),
-      );
-    }
-
-    function addSupplier(
-      mode:
-        | "existing"
-        | "unlisted",
-    ) {
-      if (
-        !field.multiple
-        && answers.length
-      ) {
-        return;
-      }
-
-      onChange([
-        ...answers,
-        emptyProfessionalSupplier(
-          field,
-          mode,
-        ),
-      ]);
-    }
-
     return (
-      <div className="crm-questionnaire-editor__field">
-        <span>
-          {field.label}
-          {field.required ? (
-            <b> *</b>
-          ) : null}
-        </span>
-
-        {field.help ? (
-          <small>
-            {field.help}
-          </small>
-        ) : null}
-
-        <div className="crm-questionnaire-editor__suppliers">
-          {answers.map(
-            (answer, index) => (
-              <div
-                key={`${index}_${answer.mode}_${answer.supplierId}_${answer.name}`}
-                className="crm-questionnaire-editor__supplier"
-              >
-                <div className="crm-questionnaire-editor__supplier-head">
-                  <select
-                    className="admin-select"
-                    value={answer.mode}
-                    disabled={disabled}
-                    onChange={(event) => {
-                      const mode =
-                        event.target.value
-                        as
-                          | "existing"
-                          | "unlisted";
-
-                      updateSupplier(
-                        index,
-                        emptyProfessionalSupplier(
-                          field,
-                          mode,
-                        ),
-                      );
-                    }}
-                  >
-                    <option value="existing">
-                      Supplier Master
-                    </option>
-
-                    {field.allowUnlisted ? (
-                      <option value="unlisted">
-                        Supplier not listed
-                      </option>
-                    ) : null}
-                  </select>
-
-                  <button
-                    type="button"
-                    className="admin-button admin-button--ghost admin-button--sm"
-                    disabled={disabled}
-                    onClick={() =>
-                      removeSupplier(
-                        index,
-                      )
-                    }
-                  >
-                    Remove
-                  </button>
-                </div>
-
-                {answer.mode === "existing" ? (
-                  <select
-                    className="admin-select"
-                    value={
-                      answer.supplierId
-                    }
-                    disabled={disabled}
-                    onChange={(event) => {
-                      const supplier =
-                        availableSuppliers
-                          .find(
-                            (item) =>
-                              item.id
-                              === event
-                                .target
-                                .value,
-                          );
-
-                      if (!supplier) {
-                        updateSupplier(
-                          index,
-                          emptyProfessionalSupplier(
-                            field,
-                            "existing",
-                          ),
-                        );
-
-                        return;
-                      }
-
-                      updateSupplier(
-                        index,
-                        {
-                          mode:
-                            "existing",
-                          supplierId:
-                            supplier.id,
-                          name:
-                            supplier.name,
-                          role:
-                            answer.role
-                            || field
-                              .supplierRole
-                            || field
-                              .supplierCategory
-                            || "Supplier",
-                          website:
-                            supplier.website
-                            || "",
-                          instagram:
-                            supplier.instagram
-                            || "",
-                          email:
-                            supplier.email
-                            || "",
-                          phone:
-                            supplier.phone
-                            || "",
-                          location:
-                            supplier.location
-                            || "",
-                          county:
-                            supplier.county
-                            || "",
-                        },
-                      );
-                    }}
-                  >
-                    <option value="">
-                      Choose supplier…
-                    </option>
-
-                    {availableSuppliers.map(
-                      (supplier) => (
-                        <option
-                          key={
-                            supplier.id
-                          }
-                          value={
-                            supplier.id
-                          }
-                        >
-                          {supplier.name}
-                          {supplier.category
-                            ? ` · ${supplier.category}`
-                            : ""}
-                          {supplier.location
-                            ? ` · ${supplier.location}`
-                            : supplier.county
-                              ? ` · ${supplier.county}`
-                              : ""}
-                        </option>
-                      ),
-                    )}
-                  </select>
-                ) : (
-                  <div className="crm-questionnaire-editor__unlisted">
-                    <input
-                      className="admin-input"
-                      value={answer.name}
-                      disabled={disabled}
-                      placeholder="Supplier business name"
-                      onChange={(event) =>
-                        updateSupplier(
-                          index,
-                          {
-                            ...answer,
-                            name:
-                              event.target
-                                .value,
-                          },
-                        )
-                      }
-                    />
-
-                    <input
-                      className="admin-input"
-                      value={
-                        answer.website
-                      }
-                      disabled={disabled}
-                      placeholder="Website"
-                      onChange={(event) =>
-                        updateSupplier(
-                          index,
-                          {
-                            ...answer,
-                            website:
-                              event.target
-                                .value,
-                          },
-                        )
-                      }
-                    />
-
-                    <input
-                      className="admin-input"
-                      value={
-                        answer.instagram
-                      }
-                      disabled={disabled}
-                      placeholder="Instagram"
-                      onChange={(event) =>
-                        updateSupplier(
-                          index,
-                          {
-                            ...answer,
-                            instagram:
-                              event.target
-                                .value,
-                          },
-                        )
-                      }
-                    />
-
-                    <input
-                      className="admin-input"
-                      value={answer.email}
-                      disabled={disabled}
-                      placeholder="Email"
-                      onChange={(event) =>
-                        updateSupplier(
-                          index,
-                          {
-                            ...answer,
-                            email:
-                              event.target
-                                .value,
-                          },
-                        )
-                      }
-                    />
-
-                    <input
-                      className="admin-input"
-                      value={
-                        answer.location
-                      }
-                      disabled={disabled}
-                      placeholder="Location"
-                      onChange={(event) =>
-                        updateSupplier(
-                          index,
-                          {
-                            ...answer,
-                            location:
-                              event.target
-                                .value,
-                          },
-                        )
-                      }
-                    />
-                  </div>
-                )}
-              </div>
-            ),
-          )}
-
-          {(
-            field.multiple
-            || !answers.length
-          ) ? (
-            <div className="crm-questionnaire-editor__supplier-actions">
-              <button
-                type="button"
-                className="admin-button admin-button--secondary admin-button--sm"
-                disabled={disabled}
-                onClick={() =>
-                  addSupplier(
-                    "existing",
-                  )
-                }
-              >
-                Add supplier
-              </button>
-
-              {field.allowUnlisted ? (
-                <button
-                  type="button"
-                  className="admin-button admin-button--ghost admin-button--sm"
-                  disabled={disabled}
-                  onClick={() =>
-                    addSupplier(
-                      "unlisted",
-                    )
-                  }
-                >
-                  Add unlisted supplier
-                </button>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-      </div>
+      <ProfessionalSupplierRows
+        field={field}
+        value={value}
+        suppliers={suppliers}
+        categories={
+          supplierCategories
+        }
+        disabled={disabled}
+        onChange={onChange}
+      />
     );
   }
 
@@ -1871,6 +2069,9 @@ export function CRMJob() {
                                       }
                                       suppliers={
                                         workspace.supplierDirectory
+                                      }
+                                      supplierCategories={
+                                        workspace.supplierCategories
                                       }
                                       fileCount={
                                         item.files.filter(
