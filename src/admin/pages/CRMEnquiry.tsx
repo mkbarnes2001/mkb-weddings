@@ -808,7 +808,7 @@ export function CRMEnquiry() {
               className="admin-button admin-button--secondary"
             >
               <ExternalLink className="admin-button__icon" />
-              View Client Portal
+              Client Portal
             </Link>
 
             {detail.job ? (
@@ -819,33 +819,6 @@ export function CRMEnquiry() {
                 <BriefcaseBusiness className="admin-button__icon" />
                 Job operations
               </Link>
-            ) : null}
-          </div>
-        }
-        meta={
-          <div className="flex flex-wrap gap-2">
-            <AdminStatus
-              tone={lifecycleTone}
-            >
-              {lifecycle}
-            </AdminStatus>
-
-            <AdminStatus
-              tone={
-                enquiry.status === "lost"
-                  ? "danger"
-                  : enquiry.status === "won"
-                    ? "success"
-                    : "info"
-              }
-            >
-              {enquiry.stageName}
-            </AdminStatus>
-
-            {detail.job ? (
-              <AdminStatus tone="success">
-                {detail.job.reference}
-              </AdminStatus>
             ) : null}
           </div>
         }
@@ -865,9 +838,10 @@ export function CRMEnquiry() {
 
       <AdminPanel
         title="Client journey"
-        description="A concise view from first enquiry through booking and delivery."
+        description="Lead → quote → questionnaire → contract → invoice"
         icon={Check}
-        className="crm-lead-workspace-overview-panel"
+        className="crm-lead-workspace-overview-panel crm-lead-workspace-overview-panel--compact"
+        compact
       >
         <div className="crm-lead-workspace-overview">
           <div className="crm-lead-workspace-overview__identity">

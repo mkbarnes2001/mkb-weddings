@@ -28,7 +28,8 @@ css = read(
 
 
 # Persistent action on the Lead workspace.
-assert "View Client Portal" in lead
+assert "Client Portal" in lead
+assert "View Client Portal" not in lead
 assert 'target="_blank"' in lead
 assert 'rel="noreferrer"' in lead
 assert "ExternalLink" in lead
@@ -109,7 +110,7 @@ assert (
 # The portal action is independent of Job conversion and remains
 # present before the conditional Job operations action.
 button_position = lead.index(
-    "View Client Portal"
+    'to={`/admin/crm/enquiries/${id}/client-portal`}'
 )
 
 job_operations_position = lead.index(

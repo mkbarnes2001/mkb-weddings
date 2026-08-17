@@ -10647,3 +10647,76 @@
     width: 100%;
   }
 }
+
+
+/* v1.10.11a — compact CRM Lead journey */
+.crm-lead-workspace-overview-panel--compact .admin-panel__body {
+  padding: 9px 11px 11px;
+}
+
+.crm-lead-workspace-overview-panel--compact .crm-lead-workspace-overview {
+  display: block !important;
+}
+
+.crm-lead-workspace-overview-panel--compact .crm-lead-workspace-overview__identity,
+.crm-lead-workspace-overview-panel--compact .crm-lead-workspace-overview__facts {
+  display: none !important;
+}
+
+.crm-lead-workspace-overview-panel--compact .crm-lead-workspace-journey {
+  display: grid;
+  grid-template-columns: repeat(7,minmax(78px,1fr)) !important;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  overflow-x: auto;
+  padding: 1px 1px 3px;
+  scrollbar-width: thin;
+}
+
+.crm-lead-workspace-overview-panel--compact .crm-lead-workspace-journey > div {
+  grid-template-columns: 18px minmax(0,1fr) !important;
+  gap: 5px;
+  min-width: 0;
+  align-items: center;
+}
+
+.crm-lead-workspace-overview-panel--compact .crm-lead-workspace-journey > div > span {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+}
+
+.crm-lead-workspace-overview-panel--compact .crm-lead-workspace-journey svg {
+  width: 9px;
+  height: 9px;
+}
+
+.crm-lead-workspace-overview-panel--compact .crm-lead-workspace-journey strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  font-size: calc((8.5px) * var(--admin-font-scale-effective, 1));
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-lead-workspace-overview-panel--compact .crm-lead-workspace-journey small {
+  display: none;
+}
+
+.crm-lead-workspace-overview-panel--compact .crm-lead-workspace-journey > div:not(:last-child)::after {
+  top: 9px;
+  left: 18px;
+}
+
+@media (max-width: 760px) {
+  .crm-lead-workspace-overview-panel--compact .admin-panel__body {
+    padding: 8px 9px 10px;
+  }
+
+  .crm-lead-workspace-overview-panel--compact .crm-lead-workspace-journey {
+    grid-template-columns: repeat(7,minmax(82px,1fr)) !important;
+  }
+}
