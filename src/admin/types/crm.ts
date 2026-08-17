@@ -20,6 +20,7 @@ export type CrmContact = {
   marketingConsent: boolean;
   privacyConsentAt?: string;
   notes: string;
+  address: CrmLeadAddress;
   role?: string;
   createdAt: string;
   updatedAt: string;
@@ -64,6 +65,8 @@ export type CrmEnquiry = {
   mailSubject: string;
   acceptedJobId: string;
   convertedAt?: string;
+  leadFormSchema: CrmLeadFormField[];
+  leadFormAnswers: Record<string, unknown>;
   lastCommunicationAt?: string;
   primaryContact: { id: string; displayName: string; email: string; phone: string } | null;
   partnerContact: { id: string; displayName: string; email: string; phone: string } | null;
@@ -110,6 +113,45 @@ export type CrmJob = {
   updatedAt: string;
 };
 
+export type CrmLeadFormFieldType =
+  | "short_text"
+  | "long_text"
+  | "email"
+  | "phone"
+  | "date"
+  | "number"
+  | "select"
+  | "radio"
+  | "checkbox"
+  | "address"
+  | "venue";
+
+export type CrmLeadFormField = {
+  id: string;
+  type: CrmLeadFormFieldType;
+  label: string;
+  help: string;
+  placeholder: string;
+  required: boolean;
+  enabled: boolean;
+  options: string[];
+  systemKey: string;
+  locked: boolean;
+};
+
+export type CrmLeadAddress = {
+  line1?: string;
+  line2?: string;
+  city?: string;
+  county?: string;
+  postcode?: string;
+  country?: string;
+  formattedAddress?: string;
+  placeId?: string;
+  lat?: number;
+  lng?: number;
+};
+
 export type CrmLeadFormSettings = {
   enabled: boolean;
   publicPath: string;
@@ -124,6 +166,7 @@ export type CrmLeadFormSettings = {
   autoresponderEnabled: boolean;
   autoresponderSubject: string;
   autoresponderMessage: string;
+  fields: CrmLeadFormField[];
 };
 
 export type CrmOverview = {

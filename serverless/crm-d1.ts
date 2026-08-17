@@ -33,6 +33,525 @@ function safeJson(value: unknown, fallback: any = {}) {
   }
 }
 
+const LEAD_FORM_FIELD_TYPES = new Set([
+  "short_text",
+  "long_text",
+  "email",
+  "phone",
+  "date",
+  "number",
+  "select",
+  "radio",
+  "checkbox",
+  "address",
+  "venue",
+]);
+
+const LEAD_FORM_SYSTEM_KEYS = new Set([
+  "firstName",
+  "lastName",
+  "partnerFirstName",
+  "partnerLastName",
+  "partnerEmail",
+  "partnerPhone",
+  "email",
+  "phone",
+  "address",
+  "eventDate",
+  "dateFlexibility",
+  "venueText",
+  "packageInterest",
+  "budgetMin",
+  "budgetMax",
+  "message",
+]);
+
+const LEAD_FORM_LOCKED_SYSTEM_KEYS = new Set([
+  "firstName",
+  "email",
+]);
+
+const DEFAULT_LEAD_FORM_FIELDS = [
+  {
+    id: "firstName",
+    type: "short_text",
+    label: "Your first name",
+    help: "",
+    placeholder: "",
+    required: true,
+    enabled: true,
+    options: [],
+    systemKey: "firstName",
+    locked: true,
+  },
+  {
+    id: "lastName",
+    type: "short_text",
+    label: "Your last name",
+    help: "",
+    placeholder: "",
+    required: false,
+    enabled: true,
+    options: [],
+    systemKey: "lastName",
+    locked: false,
+  },
+  {
+    id: "partnerFirstName",
+    type: "short_text",
+    label: "Partner first name",
+    help: "",
+    placeholder: "",
+    required: false,
+    enabled: true,
+    options: [],
+    systemKey: "partnerFirstName",
+    locked: false,
+  },
+  {
+    id: "partnerLastName",
+    type: "short_text",
+    label: "Partner last name",
+    help: "",
+    placeholder: "",
+    required: false,
+    enabled: true,
+    options: [],
+    systemKey: "partnerLastName",
+    locked: false,
+  },
+  {
+    id: "email",
+    type: "email",
+    label: "Email address",
+    help: "",
+    placeholder: "",
+    required: true,
+    enabled: true,
+    options: [],
+    systemKey: "email",
+    locked: true,
+  },
+  {
+    id: "phone",
+    type: "phone",
+    label: "Phone",
+    help: "",
+    placeholder: "",
+    required: false,
+    enabled: true,
+    options: [],
+    systemKey: "phone",
+    locked: false,
+  },
+  {
+    id: "address",
+    type: "address",
+    label: "Your address",
+    help: "",
+    placeholder: "Start typing your address…",
+    required: false,
+    enabled: true,
+    options: [],
+    systemKey: "address",
+    locked: false,
+  },
+  {
+    id: "eventDate",
+    type: "date",
+    label: "Wedding date",
+    help: "",
+    placeholder: "",
+    required: false,
+    enabled: true,
+    options: [],
+    systemKey: "eventDate",
+    locked: false,
+  },
+  {
+    id: "dateFlexibility",
+    type: "short_text",
+    label: "Date flexibility",
+    help: "",
+    placeholder: "Fixed date, flexible month, not chosen yet…",
+    required: false,
+    enabled: true,
+    options: [],
+    systemKey: "dateFlexibility",
+    locked: false,
+  },
+  {
+    id: "venueText",
+    type: "venue",
+    label: "Venue",
+    help: "",
+    placeholder: "Venue name or TBC",
+    required: false,
+    enabled: true,
+    options: [],
+    systemKey: "venueText",
+    locked: false,
+  },
+  {
+    id: "packageInterest",
+    type: "short_text",
+    label: "Package interest",
+    help: "",
+    placeholder: "Full day, shorter coverage, not sure…",
+    required: false,
+    enabled: true,
+    options: [],
+    systemKey: "packageInterest",
+    locked: false,
+  },
+  {
+    id: "budgetMax",
+    type: "number",
+    label: "Approximate budget",
+    help: "",
+    placeholder: "",
+    required: false,
+    enabled: true,
+    options: [],
+    systemKey: "budgetMax",
+    locked: false,
+  },
+  {
+    id: "message",
+    type: "long_text",
+    label: "Tell us about your plans",
+    help: "",
+    placeholder: "What matters most to you, timings, questions or anything else we should know…",
+    required: false,
+    enabled: true,
+    options: [],
+    systemKey: "message",
+    locked: false,
+  },
+];
+
+function defaultLeadFormFields() {
+  return DEFAULT_LEAD_FORM_FIELDS.map((field) => ({
+    ...field,
+    options: [...field.options],
+  }));
+}
+
+function normalizeLeadFormFields(value: unknown) {
+  const parsed =
+    typeof value === "string"
+      ? safeJson(value, [])
+      : value;
+
+  const source =
+    Array.isArray(parsed)
+      ? parsed.slice(0, 40)
+      : [];
+
+  if (!source.length) {
+    return defaultLeadFormFields();
+  }
+
+  const fields: any[] = [];
+  const ids = new Set<string>();
+  const systemKeys = new Set<string>();
+
+  for (const raw of source) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+      continue;
+    }
+
+    const id = text((raw as any).id)
+      .replace(/[^A-Za-z0-9_-]/g, "")
+      .slice(0, 64);
+
+    if (!id || ids.has(id)) {
+      continue;
+    }
+
+    const requestedType = text((raw as any).type);
+    const type =
+      LEAD_FORM_FIELD_TYPES.has(requestedType)
+        ? requestedType
+        : "short_text";
+
+    const requestedSystemKey = text((raw as any).systemKey);
+    const systemKey =
+      requestedSystemKey
+      && LEAD_FORM_SYSTEM_KEYS.has(requestedSystemKey)
+      && !systemKeys.has(requestedSystemKey)
+        ? requestedSystemKey
+        : "";
+
+    const locked =
+      Boolean(
+        systemKey
+        && LEAD_FORM_LOCKED_SYSTEM_KEYS.has(systemKey)
+      );
+
+    const options = Array.isArray((raw as any).options)
+      ? (raw as any).options
+          .map((option: unknown) => text(option).slice(0, 200))
+          .filter(Boolean)
+          .slice(0, 50)
+      : [];
+
+    fields.push({
+      id,
+      type,
+      label:
+        text((raw as any).label).slice(0, 200)
+        || id,
+      help:
+        text((raw as any).help).slice(0, 1000),
+      placeholder:
+        text((raw as any).placeholder).slice(0, 500),
+      required:
+        locked
+          ? true
+          : Boolean((raw as any).required),
+      enabled:
+        locked
+          ? true
+          : (raw as any).enabled !== false,
+      options,
+      systemKey,
+      locked,
+    });
+
+    ids.add(id);
+
+    if (systemKey) {
+      systemKeys.add(systemKey);
+    }
+  }
+
+  const defaults = defaultLeadFormFields();
+
+  for (const systemKey of [
+    "firstName",
+    "email",
+  ]) {
+    if (systemKeys.has(systemKey)) {
+      continue;
+    }
+
+    const protectedField = defaults.find(
+      (field) => field.systemKey === systemKey,
+    );
+
+    if (protectedField) {
+      fields.unshift(protectedField);
+      ids.add(protectedField.id);
+      systemKeys.add(systemKey);
+    }
+  }
+
+  return fields.length
+    ? fields
+    : defaultLeadFormFields();
+}
+
+function normalizeLeadAddress(value: unknown) {
+  const source =
+    value
+    && typeof value === "object"
+    && !Array.isArray(value)
+      ? value as any
+      : {};
+
+  const address: any = {};
+
+  for (const key of [
+    "line1",
+    "line2",
+    "city",
+    "county",
+    "postcode",
+    "country",
+    "formattedAddress",
+    "placeId",
+  ]) {
+    const valueText = text(source[key]).slice(0, 500);
+
+    if (valueText) {
+      address[key] = valueText;
+    }
+  }
+
+  const lat = Number(source.lat);
+  const lng = Number(source.lng);
+
+  if (Number.isFinite(lat) && lat >= -90 && lat <= 90) {
+    address.lat = lat;
+  }
+
+  if (Number.isFinite(lng) && lng >= -180 && lng <= 180) {
+    address.lng = lng;
+  }
+
+  return address;
+}
+
+function hasLeadAddress(value: unknown) {
+  return Object.keys(
+    normalizeLeadAddress(value),
+  ).length > 0;
+}
+
+function leadAnswerIsEmpty(value: unknown) {
+  if (
+    value === undefined
+    || value === null
+    || value === ""
+  ) {
+    return true;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  }
+
+  if (
+    typeof value === "object"
+    && !Array.isArray(value)
+  ) {
+    return Object.keys(value as any).length === 0;
+  }
+
+  return false;
+}
+
+function normalizeLeadFormAnswers(
+  fields: any[],
+  input: any,
+) {
+  const supplied =
+    input?.answers
+    && typeof input.answers === "object"
+    && !Array.isArray(input.answers)
+      ? input.answers
+      : {};
+
+  const answers: Record<string, unknown> = {};
+
+  for (const field of fields) {
+    if (!field.enabled) {
+      continue;
+    }
+
+    let raw: unknown;
+
+    if (
+      Object.prototype.hasOwnProperty.call(
+        supplied,
+        field.id,
+      )
+    ) {
+      raw = supplied[field.id];
+    } else if (
+      field.systemKey
+      && Object.prototype.hasOwnProperty.call(
+        input || {},
+        field.systemKey,
+      )
+    ) {
+      raw = input[field.systemKey];
+    }
+
+    let value: unknown;
+
+    if (field.type === "checkbox") {
+      value = Boolean(raw);
+    } else if (field.type === "address") {
+      value = normalizeLeadAddress(raw);
+    } else if (field.type === "number") {
+      if (raw === "" || raw === undefined || raw === null) {
+        value = "";
+      } else {
+        const numberValue = Number(raw);
+
+        if (!Number.isFinite(numberValue)) {
+          throw httpError(
+            `${field.label} must be a number.`,
+            400,
+          );
+        }
+
+        value = numberValue;
+      }
+    } else {
+      const maxLength =
+        field.type === "long_text"
+          ? 10000
+          : 2000;
+
+      value = text(raw).slice(
+        0,
+        maxLength,
+      );
+
+      if (
+        (field.type === "select" || field.type === "radio")
+        && value
+        && field.options.length
+        && !field.options.includes(value)
+      ) {
+        throw httpError(
+          `Choose a valid option for ${field.label}.`,
+          400,
+        );
+      }
+    }
+
+    if (
+      field.required
+      && (
+        field.type === "checkbox"
+          ? value !== true
+          : leadAnswerIsEmpty(value)
+      )
+    ) {
+      throw httpError(
+        `${field.label} is required.`,
+        400,
+      );
+    }
+
+    answers[field.id] = value;
+  }
+
+  return answers;
+}
+
+function leadSystemValue(
+  input: any,
+  fields: any[],
+  answers: Record<string, unknown>,
+  systemKey: string,
+) {
+  const field = fields.find(
+    (item) =>
+      item.enabled
+      && item.systemKey === systemKey,
+  );
+
+  if (!field) {
+    return undefined;
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(
+      input || {},
+      systemKey,
+    )
+  ) {
+    return input[systemKey];
+  }
+
+  return answers[field.id];
+}
+
 function httpError(message: string, statusCode = 400, details: string[] = []) {
   const error = new Error(message) as Error & { statusCode?: number; details?: string[] };
   error.statusCode = statusCode;
@@ -152,6 +671,9 @@ function hydrateContact(row: any) {
     marketingConsent: Boolean(row.marketing_consent),
     privacyConsentAt: row.privacy_consent_at || undefined,
     notes: text(row.notes),
+    address: normalizeLeadAddress(
+      safeJson(row.address_json, {}),
+    ),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -188,6 +710,15 @@ function hydrateEnquiry(row: any) {
     lostReason: text(row.lost_reason),
     acceptedJobId: text(row.accepted_job_id),
     convertedAt: row.converted_at || undefined,
+    leadFormSchema: Array.isArray(
+      safeJson(row.lead_form_schema_json, []),
+    )
+      ? safeJson(row.lead_form_schema_json, [])
+      : [],
+    leadFormAnswers: safeJson(
+      row.lead_form_answers_json,
+      {},
+    ),
     primaryContact: row.primary_contact_id ? {
       id: text(row.primary_contact_id),
       displayName: text(row.primary_contact_name),
@@ -415,6 +946,10 @@ async function upsertContact(db: D1Db, workspaceId: string, input: any, source: 
   const email = lower(input?.email);
   const phone = text(input?.phone);
   const name = displayName(firstName, lastName, input?.displayName || email);
+  const address = normalizeLeadAddress(input?.address);
+  const addressJson = JSON.stringify(address);
+  const addressProvided = hasLeadAddress(address);
+
   if (!name && !email && !phone) return null;
   if (email && !validEmail(email)) throw httpError("Enter a valid email address.", 400);
 
@@ -439,12 +974,15 @@ async function upsertContact(db: D1Db, workspaceId: string, input: any, source: 
         privacy_consent_at = COALESCE(privacy_consent_at, ?),
         marketing_consent = CASE WHEN ? = 1 THEN 1 ELSE marketing_consent END,
         notes = CASE WHEN ? <> '' THEN ? ELSE notes END,
+        address_json = CASE WHEN ? = 1 THEN ? ELSE address_json END,
         status = 'active', updated_at = CURRENT_TIMESTAMP
       WHERE id = ? AND workspace_id = ?
     `).bind(
       firstName, lastName, name, email, email, phone,
       privacyConsentAt || null, input?.marketingConsent ? 1 : 0,
-      text(input?.notes), text(input?.notes), contactId, workspaceId,
+      text(input?.notes), text(input?.notes),
+      addressProvided ? 1 : 0, addressJson,
+      contactId, workspaceId,
     ).run();
     return contactId;
   }
@@ -462,11 +1000,13 @@ async function upsertContact(db: D1Db, workspaceId: string, input: any, source: 
           email_normalized = ?, email = ?, phone = CASE WHEN ? <> '' THEN ? ELSE phone END,
           privacy_consent_at = COALESCE(privacy_consent_at, ?),
           marketing_consent = CASE WHEN ? = 1 THEN 1 ELSE marketing_consent END,
+          address_json = CASE WHEN ? = 1 THEN ? ELSE address_json END,
           status = 'active', updated_at = CURRENT_TIMESTAMP
         WHERE id = ? AND workspace_id = ?
       `).bind(
         firstName, firstName, lastName, lastName, name, name, email, email,
         phone, phone, privacyConsentAt || null, input?.marketingConsent ? 1 : 0,
+        addressProvided ? 1 : 0, addressJson,
         existing.id, workspaceId,
       ).run();
       return text(existing.id);
@@ -478,12 +1018,12 @@ async function upsertContact(db: D1Db, workspaceId: string, input: any, source: 
     INSERT INTO crm_contacts (
       id, workspace_id, first_name, last_name, display_name,
       email_normalized, email, phone, source, marketing_consent,
-      privacy_consent_at, notes, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      privacy_consent_at, notes, address_json, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
   `).bind(
     id, workspaceId, firstName, lastName, name, email, email, phone,
     text(source || "manual"), input?.marketingConsent ? 1 : 0,
-    privacyConsentAt || null, text(input?.notes),
+    privacyConsentAt || null, text(input?.notes), addressJson,
   ).run();
   return id;
 }
@@ -599,6 +1139,7 @@ export async function getCrmOverview(db: D1Db, actor: CrmActor) {
       autoresponderEnabled: Boolean(settings?.autoresponder_enabled),
       autoresponderSubject: text(settings?.autoresponder_subject || "We have received your enquiry"),
       autoresponderMessage: text(settings?.autoresponder_message || "Thank you for getting in touch. We have received your enquiry and will reply as soon as possible."),
+      fields: normalizeLeadFormFields(settings?.fields_json),
     },
     stats: {
       open: enquiries.filter((item: any) => item.status === "open").length,
@@ -957,14 +1498,21 @@ export async function updateCrmContact(db: D1Db, actor: CrmActor, contactId: str
     if (portalAccess) throw httpError("Revoke active client portal access before removing this contact's email address.", 409);
   }
   const status = text(input?.status) === "archived" ? "archived" : "active";
+  const addressSpecified = Object.prototype.hasOwnProperty.call(input || {}, "address");
+  const nextAddress = addressSpecified
+    ? normalizeLeadAddress(input?.address)
+    : normalizeLeadAddress(
+        safeJson(current.address_json, {}),
+      );
   await db.batch([
     db.prepare(`
       UPDATE crm_contacts SET first_name = ?, last_name = ?, display_name = ?, email_normalized = ?, email = ?,
-        phone = ?, notes = ?, status = ?, marketing_consent = ?, updated_at = CURRENT_TIMESTAMP
+        phone = ?, notes = ?, address_json = ?, status = ?, marketing_consent = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ? AND workspace_id = ?
     `).bind(
       firstName, lastName, nextDisplayName, email, email, text(input?.phone ?? current.phone),
-      text(input?.notes ?? current.notes), status, input?.marketingConsent ? 1 : 0, contactId, actor.workspaceId,
+      text(input?.notes ?? current.notes), JSON.stringify(nextAddress), status,
+      input?.marketingConsent ? 1 : 0, contactId, actor.workspaceId,
     ),
     db.prepare(`
       UPDATE client_identities SET email_normalized = ?, email = ?, display_name = ?, updated_at = CURRENT_TIMESTAMP
@@ -995,12 +1543,22 @@ export async function saveLeadFormSettings(db: D1Db, actor: CrmActor, input: any
   // v1.9.0 exposes one stable public route. Custom form paths are deferred until
   // Pages routing can resolve them without colliding with existing website routes.
   const publicPath = "/enquire";
+  const current = await db.prepare(`
+    SELECT fields_json
+    FROM crm_lead_form_settings
+    WHERE workspace_id = ?
+    LIMIT 1
+  `).bind(actor.workspaceId).first();
+  const fieldsJson = Array.isArray(input?.fields)
+    ? JSON.stringify(normalizeLeadFormFields(input.fields))
+    : text(current?.fields_json || "[]") || "[]";
+  const resolvedFields = normalizeLeadFormFields(fieldsJson);
   await db.prepare(`
     INSERT INTO crm_lead_form_settings (
       workspace_id, enabled, public_path, default_service, title, intro, thank_you_title,
       thank_you_message, notification_email, privacy_text, consent_required, autoresponder_enabled,
-      autoresponder_subject, autoresponder_message, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      autoresponder_subject, autoresponder_message, fields_json, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     ON CONFLICT(workspace_id) DO UPDATE SET
       enabled = excluded.enabled, public_path = excluded.public_path,
       default_service = excluded.default_service, title = excluded.title,
@@ -1008,20 +1566,27 @@ export async function saveLeadFormSettings(db: D1Db, actor: CrmActor, input: any
       thank_you_message = excluded.thank_you_message, notification_email = excluded.notification_email,
       privacy_text = excluded.privacy_text, consent_required = excluded.consent_required,
       autoresponder_enabled = excluded.autoresponder_enabled, autoresponder_subject = excluded.autoresponder_subject,
-      autoresponder_message = excluded.autoresponder_message, updated_at = CURRENT_TIMESTAMP
+      autoresponder_message = excluded.autoresponder_message, fields_json = excluded.fields_json,
+      updated_at = CURRENT_TIMESTAMP
   `).bind(
     actor.workspaceId, input?.enabled ? 1 : 0, publicPath, text(input?.defaultService), text(input?.title), text(input?.intro),
     text(input?.thankYouTitle), text(input?.thankYouMessage), notificationEmail,
     text(input?.privacyText), input?.consentRequired === false ? 0 : 1, input?.autoresponderEnabled ? 1 : 0,
     text(input?.autoresponderSubject || "We have received your enquiry"),
     text(input?.autoresponderMessage || "Thank you for getting in touch. We have received your enquiry and will reply as soon as possible."),
+    fieldsJson,
   ).run();
   await platformAudit(db, actor, {
     eventType: "crm.lead_form.updated",
     entityType: "crm_lead_form",
     entityId: actor.workspaceId,
     summary: `${input?.enabled ? "Enabled" : "Disabled"} the public CRM lead form.`,
-    metadata: { publicPath, notificationConfigured: Boolean(notificationEmail), autoresponderEnabled: Boolean(input?.autoresponderEnabled) },
+    metadata: {
+      publicPath,
+      notificationConfigured: Boolean(notificationEmail),
+      autoresponderEnabled: Boolean(input?.autoresponderEnabled),
+      fieldCount: resolvedFields.length,
+    },
   });
   return getCrmOverview(db, actor);
 }
@@ -1029,7 +1594,7 @@ export async function saveLeadFormSettings(db: D1Db, actor: CrmActor, input: any
 export async function getPublicLeadForm(db: D1Db, workspaceId: string) {
   if (!workspaceId) throw httpError("Lead form not found.", 404);
   const row = await db.prepare(`
-    SELECT s.*, w.name AS workspace_name, ws.business_name
+    SELECT s.*, w.name AS workspace_name, ws.business_name, ws.currency
     FROM crm_lead_form_settings s
     JOIN workspaces w ON w.id = s.workspace_id AND w.status = 'active'
     LEFT JOIN workspace_settings ws ON ws.workspace_id = s.workspace_id
@@ -1047,14 +1612,61 @@ export async function getPublicLeadForm(db: D1Db, workspaceId: string) {
     privacyText: text(row.privacy_text),
     consentRequired: Boolean(row.consent_required),
     currency: text(row.currency || "GBP"),
+    fields: normalizeLeadFormFields(row.fields_json),
   };
 }
 
 export async function submitPublicEnquiry(db: D1Db, workspaceId: string, request: Request, input: any) {
   const settings = await getPublicLeadForm(db, workspaceId);
   if (text(input?.website)) return { accepted: true, reference: "" };
-  const firstName = text(input?.firstName);
-  const email = lower(input?.email);
+
+  const fields = normalizeLeadFormFields(settings.fields);
+  const answers = normalizeLeadFormAnswers(
+    fields,
+    input,
+  );
+
+  const firstName = text(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "firstName",
+    ),
+  );
+  const lastName = text(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "lastName",
+    ),
+  );
+  const email = lower(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "email",
+    ),
+  );
+  const phone = text(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "phone",
+    ),
+  );
+  const address = normalizeLeadAddress(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "address",
+    ),
+  );
+
   if (!firstName) throw httpError("Enter your name.");
   if (!validEmail(email)) throw httpError("Enter a valid email address.");
   if (settings.consentRequired && !input?.privacyConsent) throw httpError("Please confirm the privacy consent box.");
@@ -1072,14 +1684,80 @@ export async function submitPublicEnquiry(db: D1Db, workspaceId: string, request
   const stage = await defaultStage(db, workspaceId);
   const privacyConsent = Boolean(input?.privacyConsent);
   const consentAt = privacyConsent ? new Date().toISOString() : undefined;
+
   const primaryId = await upsertContact(db, workspaceId, {
-    firstName, lastName: input?.lastName, email, phone: input?.phone,
+    firstName,
+    lastName,
+    email,
+    phone,
+    address,
     marketingConsent: Boolean(input?.marketingConsent),
   }, "website", consentAt);
+
   const partnerId = await upsertContact(db, workspaceId, {
-    firstName: input?.partnerFirstName, lastName: input?.partnerLastName,
-    email: input?.partnerEmail, phone: input?.partnerPhone,
+    firstName: leadSystemValue(input, fields, answers, "partnerFirstName"),
+    lastName: leadSystemValue(input, fields, answers, "partnerLastName"),
+    email: leadSystemValue(input, fields, answers, "partnerEmail"),
+    phone: leadSystemValue(input, fields, answers, "partnerPhone"),
   }, "website");
+
+  const eventDate = text(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "eventDate",
+    ),
+  );
+  const dateFlexibility = text(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "dateFlexibility",
+    ),
+  );
+  const venueText = text(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "venueText",
+    ),
+  );
+  const packageInterest = text(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "packageInterest",
+    ),
+  );
+  const budgetMin = integer(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "budgetMin",
+    ),
+  );
+  const budgetMax = integer(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "budgetMax",
+    ),
+  );
+  const message = text(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "message",
+    ),
+  );
+
   const enquiryId = `crm_enquiry_${crypto.randomUUID()}`;
   const reference = datedReference("ENQ");
   const consent = {
@@ -1094,19 +1772,48 @@ export async function submitPublicEnquiry(db: D1Db, workspaceId: string, request
         id, workspace_id, reference, stage_id, status, source, campaign, event_type,
         event_date, date_flexibility, venue_text, service_interest, package_interest,
         budget_min, budget_max, currency, notes, consent_json, request_fingerprint,
+        lead_form_schema_json, lead_form_answers_json,
         created_at, updated_at
-      ) VALUES (?, ?, ?, ?, 'open', 'website', ?, 'wedding', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES (?, ?, ?, ?, 'open', 'website', ?, 'wedding', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).bind(
-      enquiryId, workspaceId, reference, stage.id, text(input?.campaign), text(input?.eventDate), text(input?.dateFlexibility),
-      text(input?.venueText), text(input?.serviceInterest || "Wedding photography"), text(input?.packageInterest),
-      integer(input?.budgetMin), integer(input?.budgetMax), text(settings.currency || "GBP"), text(input?.message || input?.notes), JSON.stringify(consent), fingerprint,
+      enquiryId,
+      workspaceId,
+      reference,
+      stage.id,
+      text(input?.campaign),
+      eventDate,
+      dateFlexibility,
+      venueText,
+      text(input?.serviceInterest || settings.defaultService || "Wedding photography"),
+      packageInterest,
+      budgetMin,
+      budgetMax,
+      text(settings.currency || "GBP"),
+      message,
+      JSON.stringify(consent),
+      fingerprint,
+      JSON.stringify(fields),
+      JSON.stringify(answers),
     ),
     db.prepare(`INSERT INTO crm_enquiry_contacts (enquiry_id, workspace_id, contact_id, role) VALUES (?, ?, ?, 'primary')`).bind(enquiryId, workspaceId, primaryId),
     db.prepare(`INSERT INTO crm_activities (id, workspace_id, entity_type, entity_id, event_type, summary, actor_email, metadata_json) VALUES (?, ?, 'enquiry', ?, 'enquiry.web_submitted', 'Submitted through the public lead form.', ?, ?)`).bind(
-      `crm_activity_${crypto.randomUUID()}`, workspaceId, enquiryId, email, JSON.stringify({ source: "website" }),
+      `crm_activity_${crypto.randomUUID()}`,
+      workspaceId,
+      enquiryId,
+      email,
+      JSON.stringify({
+        source: "website",
+        fieldCount: fields.filter((field) => field.enabled).length,
+      }),
     ),
   ];
   if (partnerId) statements.push(db.prepare(`INSERT INTO crm_enquiry_contacts (enquiry_id, workspace_id, contact_id, role) VALUES (?, ?, ?, 'partner')`).bind(enquiryId, workspaceId, partnerId));
   await db.batch(statements);
-  return { accepted: true, reference, businessName: settings.businessName, thankYouTitle: settings.thankYouTitle, thankYouMessage: settings.thankYouMessage };
+  return {
+    accepted: true,
+    reference,
+    businessName: settings.businessName,
+    thankYouTitle: settings.thankYouTitle,
+    thankYouMessage: settings.thankYouMessage,
+  };
 }
