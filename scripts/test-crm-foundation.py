@@ -152,7 +152,7 @@ def main() -> None:
     assert 'path="crm"' in app_source and "CRMEnquiry" in app_source
     assert 'path="/enquire"' in public_app
     assert 'id?: string' in source("src/admin/types/crm.ts")
-    assert 'value="/enquire" disabled' in source("src/admin/pages/CRM.tsx")
+    assert 'value="/enquire" disabled' in " ".join(source("src/admin/pages/CRM.tsx").split())
     assert "defaultService" in source("src/components/LeadEnquiryForm.tsx")
     assert "currencySymbol" in source("src/components/LeadEnquiryForm.tsx")
     for table in required:

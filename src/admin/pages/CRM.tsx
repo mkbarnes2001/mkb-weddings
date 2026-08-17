@@ -35,7 +35,7 @@ import {
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
 import { CrmPaymentSchedulePresets } from "../components/CrmPaymentSchedulePresets";
-import type { CrmCommercialSettingsInput, CrmCommercialSettingsPayload, CrmEnquiry, CrmEnquiryInput, CrmJob, CrmLeadFormSettings, CrmOverview, CrmWorkflowOverview, QuestionnaireOverview, CrmContractTemplate } from "../types/crm";
+import type { CrmCommercialSettingsInput, CrmCommercialSettingsPayload, CrmEnquiry, CrmEnquiryInput, CrmJob, CrmLeadFormSettings, CrmOverview, CrmWorkflowOverview, QuestionnaireOverview, CrmContractTemplate, CrmLeadFormField, CrmLeadFormFieldType } from "../types/crm";
 
 type View = "pipeline" | "contacts" | "jobs" | "schedule" | "questionnaires" | "workflows" | "commercial-settings" | "lead-form" | "overview";
 
@@ -1419,30 +1419,687 @@ function CommercialSettings({
   );
 }
 
-function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: CrmLeadFormSettings; saving: boolean; canManage: boolean; onSave: (settings: CrmLeadFormSettings) => Promise<void> }) {
-  const [draft, setDraft] = useState(settings);
-  useEffect(() => setDraft(settings), [settings]);
-  return (
-    <AdminPanel title="Public lead form" description="The public website form resolves the business from its verified domain; the browser cannot choose a workspace." icon={Settings2} actions={<a href="/enquire" target="_blank" rel="noreferrer" className="admin-button admin-button--secondary admin-button--sm"><ExternalLink className="admin-button__icon" />Preview form</a>}>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <label className="admin-choice-row"><div><strong>Accept public enquiries</strong><p>Disable this to make the endpoint unavailable without deleting pipeline data.</p></div><input type="checkbox" checked={draft.enabled} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, enabled: event.target.checked }))} /></label>
-        <AdminField label="Notification email"><input className="admin-input" type="email" value={draft.notificationEmail} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, notificationEmail: event.target.value }))} /></AdminField>
-        <label className="admin-choice-row"><div><strong>Send acknowledgement email</strong><p>Automatically confirm receipt to the person who submits the public form.</p></div><input type="checkbox" checked={draft.autoresponderEnabled} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, autoresponderEnabled: event.target.checked }))} /></label>
-        <AdminField label="Acknowledgement subject" help="Variables: {{first_name}}, {{reference}}, {{business_name}}, {{event_date}}, {{venue}}"><input className="admin-input" value={draft.autoresponderSubject} disabled={!canManage || !draft.autoresponderEnabled} onChange={(event) => setDraft((current) => ({ ...current, autoresponderSubject: event.target.value }))} /></AdminField>
-        <AdminField label="Acknowledgement message" help="Sent as plain, accessible email content. Variables shown above are supported."><textarea className="admin-textarea min-h-32" value={draft.autoresponderMessage} disabled={!canManage || !draft.autoresponderEnabled} onChange={(event) => setDraft((current) => ({ ...current, autoresponderMessage: event.target.value }))} /></AdminField>
-        <AdminField label="Form title"><input className="admin-input" value={draft.title} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))} /></AdminField>
-        <AdminField label="Default service" help="Copied into new website enquiries; leave blank for a neutral form."><input className="admin-input" value={draft.defaultService} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, defaultService: event.target.value }))} placeholder="Wedding photography" /></AdminField>
-        <AdminField label="Public URL" help="Custom form paths will be added with the hosted-site routing release."><input className="admin-input" value="/enquire" disabled /></AdminField>
-        <AdminField label="Introduction"><textarea className="admin-textarea" value={draft.intro} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, intro: event.target.value }))} /></AdminField>
-        <AdminField label="Privacy consent text"><textarea className="admin-textarea" value={draft.privacyText} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, privacyText: event.target.value }))} /></AdminField>
-        <AdminField label="Thank-you heading"><input className="admin-input" value={draft.thankYouTitle} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, thankYouTitle: event.target.value }))} /></AdminField>
-        <AdminField label="Thank-you message"><textarea className="admin-textarea" value={draft.thankYouMessage} disabled={!canManage} onChange={(event) => setDraft((current) => ({ ...current, thankYouMessage: event.target.value }))} /></AdminField>
-      </div>
-      {canManage ? <div className="mt-4"><AdminButton variant="primary" icon={Save} disabled={saving} onClick={() => void onSave(draft)}>Save lead form</AdminButton></div> : null}
-    </AdminPanel>
-  );
+const LEAD_FORM_FIELD_TYPE_OPTIONS: Array<{
+  value: CrmLeadFormFieldType;
+  label: string;
+}> = [
+  { value: "short_text", label: "Short text" },
+  { value: "long_text", label: "Long text" },
+  { value: "email", label: "Email" },
+  { value: "phone", label: "Phone" },
+  { value: "date", label: "Date" },
+  { value: "number", label: "Number" },
+  { value: "select", label: "Dropdown" },
+  { value: "radio", label: "Multiple choice" },
+  { value: "checkbox", label: "Checkbox" },
+  { value: "address", label: "Address" },
+  { value: "venue", label: "Venue" },
+];
+
+function cloneLeadFormSettings(
+  settings: CrmLeadFormSettings,
+): CrmLeadFormSettings {
+  return {
+    ...settings,
+    fields: (settings.fields || []).map((field) => ({
+      ...field,
+      options: [...(field.options || [])],
+    })),
+  };
 }
 
+function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: CrmLeadFormSettings; saving: boolean; canManage: boolean; onSave: (settings: CrmLeadFormSettings) => Promise<void> }) {
+  const [draft, setDraft] = useState<CrmLeadFormSettings>(
+    () => cloneLeadFormSettings(settings),
+  );
+
+  useEffect(
+    () => setDraft(cloneLeadFormSettings(settings)),
+    [settings],
+  );
+
+  function patchField(
+    index: number,
+    patch: Partial<CrmLeadFormField>,
+  ) {
+    setDraft((current) => ({
+      ...current,
+      fields: current.fields.map(
+        (field, fieldIndex) =>
+          fieldIndex === index
+            ? {
+                ...field,
+                ...patch,
+              }
+            : field,
+      ),
+    }));
+  }
+
+  function moveField(
+    index: number,
+    direction: -1 | 1,
+  ) {
+    const target = index + direction;
+
+    if (
+      target < 0
+      || target >= draft.fields.length
+    ) {
+      return;
+    }
+
+    setDraft((current) => {
+      const fields = [...current.fields];
+
+      [
+        fields[index],
+        fields[target],
+      ] = [
+        fields[target],
+        fields[index],
+      ];
+
+      return {
+        ...current,
+        fields,
+      };
+    });
+  }
+
+  function removeField(
+    index: number,
+  ) {
+    const field = draft.fields[index];
+
+    if (
+      !field
+      || field.systemKey
+      || field.locked
+    ) {
+      return;
+    }
+
+    setDraft((current) => ({
+      ...current,
+      fields: current.fields.filter(
+        (_, fieldIndex) =>
+          fieldIndex !== index,
+      ),
+    }));
+  }
+
+  function addQuestion() {
+    const id = [
+      "custom",
+      Date.now().toString(36),
+      Math.random().toString(36).slice(2, 8),
+    ].join("_");
+
+    const field: CrmLeadFormField = {
+      id,
+      type: "short_text",
+      label: "New question",
+      help: "",
+      placeholder: "",
+      required: false,
+      enabled: true,
+      options: [],
+      systemKey: "",
+      locked: false,
+    };
+
+    setDraft((current) => ({
+      ...current,
+      fields: [
+        ...current.fields,
+        field,
+      ],
+    }));
+  }
+
+  return (
+    <div className="space-y-4">
+      <AdminPanel
+        title="Public lead form"
+        description="Control the enquiry page, confirmation email and the exact questions prospective clients complete."
+        icon={Settings2}
+        actions={
+          <a
+            href="/enquire"
+            target="_blank"
+            rel="noreferrer"
+            className="admin-button admin-button--secondary admin-button--sm"
+          >
+            <ExternalLink className="admin-button__icon" />
+            Preview form
+          </a>
+        }
+      >
+        <div className="grid gap-4 lg:grid-cols-2">
+          <label className="admin-choice-row">
+            <div>
+              <strong>Accept public enquiries</strong>
+              <p>
+                Disable this to make the endpoint unavailable
+                without deleting pipeline data.
+              </p>
+            </div>
+
+            <input
+              type="checkbox"
+              checked={draft.enabled}
+              disabled={!canManage}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  enabled: event.target.checked,
+                }))
+              }
+            />
+          </label>
+
+          <AdminField label="Notification email">
+            <input
+              className="admin-input"
+              type="email"
+              value={draft.notificationEmail}
+              disabled={!canManage}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  notificationEmail:
+                    event.target.value,
+                }))
+              }
+            />
+          </AdminField>
+
+          <label className="admin-choice-row">
+            <div>
+              <strong>Send acknowledgement email</strong>
+              <p>
+                Automatically confirm receipt to the person
+                who submits the public form.
+              </p>
+            </div>
+
+            <input
+              type="checkbox"
+              checked={draft.autoresponderEnabled}
+              disabled={!canManage}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  autoresponderEnabled:
+                    event.target.checked,
+                }))
+              }
+            />
+          </label>
+
+          <AdminField
+            label="Acknowledgement subject"
+            help="Variables: {{first_name}}, {{reference}}, {{business_name}}, {{event_date}}, {{venue}}"
+          >
+            <input
+              className="admin-input"
+              value={draft.autoresponderSubject}
+              disabled={
+                !canManage
+                || !draft.autoresponderEnabled
+              }
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  autoresponderSubject:
+                    event.target.value,
+                }))
+              }
+            />
+          </AdminField>
+
+          <AdminField
+            label="Acknowledgement message"
+            help="Sent as plain, accessible email content. Variables shown above are supported."
+          >
+            <textarea
+              className="admin-textarea min-h-32"
+              value={draft.autoresponderMessage}
+              disabled={
+                !canManage
+                || !draft.autoresponderEnabled
+              }
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  autoresponderMessage:
+                    event.target.value,
+                }))
+              }
+            />
+          </AdminField>
+
+          <AdminField label="Form title">
+            <input
+              className="admin-input"
+              value={draft.title}
+              disabled={!canManage}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  title: event.target.value,
+                }))
+              }
+            />
+          </AdminField>
+
+          <AdminField
+            label="Default service"
+            help="Copied into new website enquiries; leave blank for a neutral form."
+          >
+            <input
+              className="admin-input"
+              value={draft.defaultService}
+              disabled={!canManage}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  defaultService:
+                    event.target.value,
+                }))
+              }
+              placeholder="Wedding photography"
+            />
+          </AdminField>
+
+          <AdminField
+            label="Public URL"
+            help="Custom form paths will be added with the hosted-site routing release."
+          >
+            <input
+              className="admin-input"
+              value="/enquire"
+              disabled
+            />
+          </AdminField>
+
+          <AdminField label="Introduction">
+            <textarea
+              className="admin-textarea"
+              value={draft.intro}
+              disabled={!canManage}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  intro: event.target.value,
+                }))
+              }
+            />
+          </AdminField>
+
+          <AdminField label="Privacy consent text">
+            <textarea
+              className="admin-textarea"
+              value={draft.privacyText}
+              disabled={!canManage}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  privacyText:
+                    event.target.value,
+                }))
+              }
+            />
+          </AdminField>
+
+          <AdminField label="Thank-you heading">
+            <input
+              className="admin-input"
+              value={draft.thankYouTitle}
+              disabled={!canManage}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  thankYouTitle:
+                    event.target.value,
+                }))
+              }
+            />
+          </AdminField>
+
+          <AdminField label="Thank-you message">
+            <textarea
+              className="admin-textarea"
+              value={draft.thankYouMessage}
+              disabled={!canManage}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  thankYouMessage:
+                    event.target.value,
+                }))
+              }
+            />
+          </AdminField>
+        </div>
+      </AdminPanel>
+
+      <AdminPanel
+        title="Form fields"
+        description="Choose which standard CRM fields appear, change their wording and add your own questions. First name and email stay required so every enquiry has a usable client identity."
+        icon={FileQuestion}
+        actions={
+          canManage
+            ? (
+                <AdminButton
+                  size="sm"
+                  variant="secondary"
+                  icon={Plus}
+                  disabled={saving}
+                  onClick={addQuestion}
+                >
+                  Add question
+                </AdminButton>
+              )
+            : undefined
+        }
+      >
+        <div className="space-y-3">
+          {draft.fields.map((field, index) => {
+            const custom = !field.systemKey;
+            const choices =
+              field.type === "select"
+              || field.type === "radio";
+
+            return (
+              <div
+                key={field.id}
+                className="rounded-xl border border-black/10 bg-white p-4"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <strong className="text-sm">
+                        {field.label || "Untitled field"}
+                      </strong>
+
+                      <span className="rounded-full bg-neutral-100 px-2 py-1 text-[10px] uppercase tracking-[.08em] text-neutral-500">
+                        {custom
+                          ? "Custom question"
+                          : `CRM · ${field.systemKey}`}
+                      </span>
+
+                      {field.locked ? (
+                        <span className="rounded-full bg-neutral-900 px-2 py-1 text-[10px] uppercase tracking-[.08em] text-white">
+                          Required identity
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <p className="mt-1 text-xs text-neutral-500">
+                      Field {index + 1} of {draft.fields.length}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="admin-button admin-button--secondary admin-button--sm"
+                      disabled={!canManage || saving || index === 0}
+                      onClick={() => moveField(index, -1)}
+                      aria-label={`Move ${field.label} up`}
+                    >
+                      ↑ Move up
+                    </button>
+
+                    <button
+                      type="button"
+                      className="admin-button admin-button--secondary admin-button--sm"
+                      disabled={
+                        !canManage
+                        || saving
+                        || index === draft.fields.length - 1
+                      }
+                      onClick={() => moveField(index, 1)}
+                      aria-label={`Move ${field.label} down`}
+                    >
+                      ↓ Move down
+                    </button>
+
+                    {custom ? (
+                      <button
+                        type="button"
+                        className="admin-button admin-button--secondary admin-button--sm"
+                        disabled={!canManage || saving}
+                        onClick={() => removeField(index)}
+                      >
+                        Remove
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                  <AdminField label="Question / field label">
+                    <input
+                      className="admin-input"
+                      value={field.label}
+                      disabled={!canManage || saving}
+                      onChange={(event) =>
+                        patchField(
+                          index,
+                          {
+                            label:
+                              event.target.value,
+                          },
+                        )
+                      }
+                    />
+                  </AdminField>
+
+                  <AdminField
+                    label="Field type"
+                    help={
+                      field.systemKey
+                        ? "Standard CRM field types are fixed so submitted values continue mapping correctly."
+                        : "Custom questions are stored with the enquiry response."
+                    }
+                  >
+                    <select
+                      className="admin-select"
+                      value={field.type}
+                      disabled={
+                        !canManage
+                        || saving
+                        || Boolean(field.systemKey)
+                      }
+                      onChange={(event) =>
+                        patchField(
+                          index,
+                          {
+                            type: event.target.value as CrmLeadFormFieldType,
+                          },
+                        )
+                      }
+                    >
+                      {LEAD_FORM_FIELD_TYPE_OPTIONS.map(
+                        (option) => (
+                          <option
+                            key={option.value}
+                            value={option.value}
+                          >
+                            {option.label}
+                          </option>
+                        ),
+                      )}
+                    </select>
+                  </AdminField>
+
+                  <AdminField
+                    label="Help text"
+                    help="Optional guidance shown underneath the field."
+                  >
+                    <input
+                      className="admin-input"
+                      value={field.help}
+                      disabled={!canManage || saving}
+                      onChange={(event) =>
+                        patchField(
+                          index,
+                          {
+                            help:
+                              event.target.value,
+                          },
+                        )
+                      }
+                    />
+                  </AdminField>
+
+                  <AdminField
+                    label="Placeholder"
+                    help="Optional example text shown before the client enters a value."
+                  >
+                    <input
+                      className="admin-input"
+                      value={field.placeholder}
+                      disabled={
+                        !canManage
+                        || saving
+                        || field.type === "checkbox"
+                        || field.type === "radio"
+                      }
+                      onChange={(event) =>
+                        patchField(
+                          index,
+                          {
+                            placeholder:
+                              event.target.value,
+                          },
+                        )
+                      }
+                    />
+                  </AdminField>
+
+                  {choices ? (
+                    <div className="lg:col-span-2">
+                      <AdminField
+                        label="Choices"
+                        help="Enter one option per line. The order here is the order clients see."
+                      >
+                        <textarea
+                          className="admin-textarea min-h-28"
+                          value={field.options.join("\n")}
+                          disabled={!canManage || saving}
+                          onChange={(event) =>
+                            patchField(
+                              index,
+                              {
+                                options:
+                                  event.target.value
+                                    .split("\n")
+                                    .map((value) =>
+                                      value.trim()
+                                    )
+                                    .filter(Boolean),
+                              },
+                            )
+                          }
+                        />
+                      </AdminField>
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  <label className="admin-choice-row">
+                    <div>
+                      <strong>Show this field</strong>
+                      <p>
+                        Hidden fields are not rendered or required
+                        on the public form.
+                      </p>
+                    </div>
+
+                    <input
+                      type="checkbox"
+                      checked={field.enabled}
+                      disabled={
+                        !canManage
+                        || saving
+                        || field.locked
+                      }
+                      onChange={(event) =>
+                        patchField(
+                          index,
+                          {
+                            enabled:
+                              event.target.checked,
+                          },
+                        )
+                      }
+                    />
+                  </label>
+
+                  <label className="admin-choice-row">
+                    <div>
+                      <strong>Required</strong>
+                      <p>
+                        Clients must complete this field before
+                        the enquiry can be submitted.
+                      </p>
+                    </div>
+
+                    <input
+                      type="checkbox"
+                      checked={field.required}
+                      disabled={
+                        !canManage
+                        || saving
+                        || field.locked
+                        || !field.enabled
+                      }
+                      onChange={(event) =>
+                        patchField(
+                          index,
+                          {
+                            required:
+                              event.target.checked,
+                          },
+                        )
+                      }
+                    />
+                  </label>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {!draft.fields.length ? (
+          <div className="rounded-xl border border-dashed border-black/15 p-6 text-sm text-neutral-500">
+            No form fields are configured.
+          </div>
+        ) : null}
+      </AdminPanel>
+
+      {canManage ? (
+        <div className="flex justify-end">
+          <AdminButton
+            variant="primary"
+            icon={Save}
+            disabled={saving}
+            onClick={() => void onSave(draft)}
+          >
+            {saving
+              ? "Saving…"
+              : "Save lead form"}
+          </AdminButton>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 function QuestionnaireLibrary({ workspaceId, canManage }: { workspaceId: string; canManage: boolean }) {
   const navigate = useNavigate();

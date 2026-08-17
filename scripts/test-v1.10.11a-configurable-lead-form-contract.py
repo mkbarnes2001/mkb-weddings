@@ -187,12 +187,18 @@ for token in (
     assert token in server, token
 
 
-# The current flat public form remains accepted during the F1/F2
-# transition. F1 must not require a browser rewrite yet.
+# The F2 public renderer now submits the configurable answers
+# contract while also flattening enabled system fields so existing
+# notification/autoresponder integrations retain their legacy inputs.
 for token in (
-    "...form",
-    "serviceInterest: config?.defaultService || \"\"",
-    "budgetMax: form.budgetMax ? Math.round(Number(form.budgetMax) * 100) : null",
+    "config.fields.filter(",
+    "const systemPayload:",
+    "answers,",
+    "...systemPayload,",
+    "serviceInterest:",
+    "config.defaultService || \"\"",
+    "field.systemKey === \"budgetMin\"",
+    "field.systemKey === \"budgetMax\"",
 ):
     assert token in public_form, token
 
