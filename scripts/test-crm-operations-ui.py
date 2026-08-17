@@ -24,7 +24,10 @@ def main() -> None:
     assert 'className="crm-lead-list"' in crm
     assert 'className="crm-operation-record crm-operation-record--job"' in crm
     assert 'nextLeadAction(enquiry)' in crm
-    assert 'job.nextTaskTitle || "No pending task"' in crm
+    # v1.10.11a reformats the compact Job record across
+    # multiple lines; retain the semantic next-task boundary.
+    assert "job.nextTaskTitle" in crm
+    assert '"No pending task"' in crm
     assert 'crm-schedule-list' in crm and 'nextTaskDueAt' in crm and 'eventDate' in crm
 
     # Job workspace: clear functional accordions only; no future empty financial modules.
@@ -40,8 +43,15 @@ def main() -> None:
         'title="Notes and activity"',
     ]:
         assert section in job, section
-    assert 'crm-job-overview__facts' in job
-    assert 'job.nextTaskTitle' in job
+    assert 'crm-job-progress-strip' in job
+    assert 'crm-job-overview__facts' not in job
+    assert 'CrmInvoicePaymentForm' not in job
+    # v1.10.11a removes the duplicated next-task fact from
+    # the Job overview. Task operations remain authoritative
+    # inside the real Workflow and tasks workspace.
+    assert "workspace.tasks" in job
+    assert "workspace.taskStats" in job
+    assert 'title="Workflow and tasks"' in job
     assert 'function portalState(workspace: CrmJobWorkspace)' in job
     assert 'portal.status === "active"' in job
     assert 'job.clientPortalStatus.replace' not in job

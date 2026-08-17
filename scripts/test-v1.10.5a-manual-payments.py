@@ -43,6 +43,10 @@ def main() -> None:
         "src/admin/pages/CRMJob.tsx"
     )
 
+    invoice_page = read(
+        "src/admin/pages/CRMInvoice.tsx"
+    )
+
     ui = read(
         "src/admin/components/"
         "CrmInvoicePaymentForm.tsx"
@@ -166,19 +170,31 @@ def main() -> None:
     ]:
         assert token in api, token
 
+    # v1.10.11a moves manual payment administration out of
+    # the Job workspace and into the dedicated Invoice workspace.
     assert (
         "CrmInvoicePaymentForm"
-        in page
+        not in page
     )
 
     assert (
-        "commercialInvoice && canManage"
-        in page
+        "CrmInvoicePaymentForm"
+        in invoice_page
+    )
+
+    assert (
+        "canManage={canManage}"
+        in invoice_page
+    )
+
+    assert (
+        'auth.accessMode !== "support"'
+        in invoice_page
     )
 
     assert (
         "setWorkspace("
-        in page
+        in invoice_page
     )
 
     for token in [

@@ -7,6 +7,7 @@ import { CRMEnquiry } from "../pages/CRMEnquiry";
 import { CRMClientPortalPreview } from "../pages/CRMClientPortalPreview";
 import { CRMContact } from "../pages/CRMContact";
 import { CRMJob } from "../pages/CRMJob";
+import { CRMInvoice } from "../pages/CRMInvoice";
 import { CRMCatalogue } from "../pages/CRMCatalogue";
 import { CRMQuotes } from "../pages/CRMQuotes";
 import { CRMQuote } from "../pages/CRMQuote";
@@ -77,6 +78,7 @@ export function AdminApp() {
         <Route path="crm/enquiries/:id" element={<CRMEnquiry />} />
         <Route path="crm/contacts/:id" element={<CRMContact />} />
         <Route path="crm/jobs/:id" element={<CRMJob />} />
+        <Route path="crm/jobs/:jobId/invoices/:invoiceId" element={<CRMInvoice />} />
         <Route path="crm/catalogue" element={<CRMCatalogue />} />
         <Route path="crm/quotes" element={<CRMQuotes />} />
         <Route path="crm/quotes/:id" element={<CRMQuote />} />

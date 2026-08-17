@@ -1,4 +1,3 @@
-import { CrmInvoicePaymentForm } from "../components/CrmInvoicePaymentForm";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -1214,10 +1213,8 @@ export function CRMJob() {
   if (!workspace) return <AdminPage><div className="admin-alert admin-alert--error">{error || "Job not found."}</div></AdminPage>;
   const { job } = workspace;
   const workflow = workflowState(workspace);
-  const primaryContact = workspace.contacts.find((contact) => contact.role === "primary") || workspace.contacts[0];
   const packageSnapshot = (job.packageSnapshot || {}) as any;
   const selectedAddons = Array.isArray(job.addonsSnapshot) ? job.addonsSnapshot as any[] : [];
-  const nextTask = workspace.tasks.find((task) => task.status === "pending");
   const portal = portalState(workspace);
   const lifecycle = workspace.lifecycle;
   const commercial = workspace.commercial;
@@ -1234,34 +1231,88 @@ export function CRMJob() {
   return (
     <AdminPage className="crm-job-operations-page">
       <AdminPageHeader
-        eyebrow={<Link to="/admin/crm?view=jobs" className="admin-inline-link inline-flex items-center gap-1"><ArrowLeft size={13} />Jobs overview</Link>}
+        className="crm-job-page-header"
+        eyebrow={
+          <Link
+            to="/admin/crm?view=jobs"
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            Jobs
+          </Link>
+        }
         title={job.title}
-        description={`${job.reference} · ${job.serviceName || job.jobType || "Wedding service"}`}
-        meta={<div className="flex flex-wrap gap-2"><AdminStatus tone={statusTone(job.status)}>{job.status}</AdminStatus><AdminStatus tone={portal.status === "active" ? "success" : portal.status === "invited" ? "warning" : "neutral"}>portal {portal.label}</AdminStatus><AdminStatus tone="info">{dateLabel(job.eventDate)}</AdminStatus></div>}
-        actions={<div className="flex flex-wrap gap-2">{job.quoteId ? <Link className="admin-button admin-button--secondary admin-button--md" to={`/admin/crm/quotes/${job.quoteId}`}><PackageCheck className="admin-button__icon" />Open quote</Link> : null}{job.weddingSlug ? <Link className="admin-button admin-button--primary admin-button--md" to={`/admin/weddings/${job.weddingSlug}/workspace`}><ExternalLink className="admin-button__icon" />Open Wedding Workspace</Link> : null}</div>}
+        description={[
+          job.reference,
+          job.serviceName
+            || job.jobType
+            || "Wedding service",
+          dateLabel(job.eventDate),
+          job.venueText
+            || "Venue TBC",
+        ].join(" · ")}
+        actions={
+          <div className="crm-job-header-actions">
+            {job.quoteId ? (
+              <Link
+                className="admin-icon-control"
+                to={`/admin/crm/quotes/${job.quoteId}`}
+                aria-label="Open quote"
+                title="Open quote"
+              >
+                <PackageCheck aria-hidden="true" />
+              </Link>
+            ) : null}
+
+            {job.weddingSlug ? (
+              <Link
+                className="admin-icon-control crm-job-header-action--primary"
+                to={`/admin/weddings/${job.weddingSlug}/workspace`}
+                aria-label="Open Wedding Workspace"
+                title="Open Wedding Workspace"
+              >
+                <LayoutDashboard aria-hidden="true" />
+              </Link>
+            ) : null}
+          </div>
+        }
       />
       {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
       {message ? <div className="admin-alert admin-alert--success">{message}</div> : null}
 
-      <AdminPanel className="crm-job-overview-panel">
-        <div className="crm-job-overview">
-          <div className="crm-job-overview__identity">
-            <span className="crm-record-dot" aria-hidden="true"></span>
-            <div><p>Active booking</p><h2>{job.title}</h2><small>{primaryContact?.email || "No primary email"}</small></div>
-          </div>
-          <dl className="crm-job-overview__facts">
-            <div><dt>Wedding day</dt><dd><CalendarDays />{dateLabel(job.eventDate)}</dd></div>
-            <div><dt>Venue</dt><dd><MapPin />{job.venueText || "Venue TBC"}</dd></div>
-            <div><dt>Package</dt><dd><PackageCheck />{job.packageName || "Not set"}</dd></div>
-            <div><dt>Booking value</dt><dd><BriefcaseBusiness />{money(job.valueAmount, job.currency)}</dd></div>
-            <div><dt>Next task</dt><dd><Clock3 />{nextTask?.title || job.nextTaskTitle || "No pending task"}</dd></div>
-            <div><dt>Portal</dt><dd><LockKeyhole />{portal.label}</dd></div>
-          </dl>
-          <div className="crm-job-overview__progress">
-            {workflow.map((step, index) => <div key={step.label} className={step.complete ? "complete" : ""}><span>{step.complete ? <Check /> : index + 1}</span><div><strong>{step.label}</strong><small>{step.detail}</small></div></div>)}
-          </div>
-        </div>
-      </AdminPanel>
+      <section
+        className="crm-job-progress-strip"
+        aria-label="Job progress"
+      >
+        {workflow.map(
+          (step, index) => (
+            <div
+              key={step.label}
+              className={
+                step.complete
+                  ? "complete"
+                  : ""
+              }
+            >
+              <span>
+                {step.complete
+                  ? <Check />
+                  : index + 1}
+              </span>
+
+              <div>
+                <strong>
+                  {step.label}
+                </strong>
+
+                <small>
+                  {step.detail}
+                </small>
+              </div>
+            </div>
+          ),
+        )}
+      </section>
 
       <AdminPanel
         title="Booking and payments"
@@ -1285,32 +1336,144 @@ export function CRMJob() {
           </div>
         ) : null}
         <div className="crm-commercial-grid">
-          <article className="crm-commercial-card">
-            <span className="crm-commercial-card__icon"><FileText /></span>
-            <div className="crm-commercial-card__body">
-              <div className="crm-commercial-card__heading">
-                <p>Invoice</p>
-                {commercialInvoice
-                  ? <AdminStatus tone={commercialInvoice.status === "paid" ? "success" : commercialInvoice.status === "void" ? "danger" : commercialInvoice.status === "part_paid" ? "info" : "warning"}>{commercialInvoice.status.replace(/_/g, " ")}</AdminStatus>
-                  : <AdminStatus tone="neutral">not generated</AdminStatus>}
-              </div>
-              <strong>{commercialInvoice?.reference || "No invoice yet"}</strong>
-              {commercialInvoice ? <>
-                <dl className="crm-commercial-card__metrics">
-                  <div><dt>Total</dt><dd>{money(commercialInvoice.totalAmount, commercialInvoice.currency)}</dd></div>
-                  <div><dt>Paid</dt><dd>{money(commercialInvoice.paidAmount, commercialInvoice.currency)}</dd></div>
-                  <div><dt>Balance</dt><dd>{money(commercialInvoice.balanceAmount, commercialInvoice.currency)}</dd></div>
-                </dl>
-                {commercialInvoice.nextPayment ? <div className="crm-commercial-card__next">
-                  <span>Next payment</span>
-                  <strong>{commercialInvoice.nextPayment.label} · {money(commercialInvoice.nextPayment.balanceAmount, commercialInvoice.currency)}</strong>
-                  <small>{commercialInvoice.nextPayment.dueDate ? `Due ${dateLabel(commercialInvoice.nextPayment.dueDate)}` : "No due date set"}</small>
-                  <AdminStatus tone={commercialInvoice.nextPayment.status === "overdue" ? "danger" : commercialInvoice.nextPayment.status === "part_paid" ? "info" : "warning"}>{commercialInvoice.nextPayment.status.replace(/_/g, " ")}</AdminStatus>
-                </div> : <small className="crm-commercial-card__note">{commercialInvoice.balanceAmount > 0 ? "No payment schedule item is currently due." : "Invoice balance settled."}</small>}
-              </> : <small className="crm-commercial-card__note">An accepted quote can generate the booking invoice automatically from its immutable commercial snapshot.</small>}
-            </div>
-          </article>
+          {commercialInvoice ? (
+            <Link
+              className="crm-commercial-card crm-commercial-card--link"
+              to={`/admin/crm/jobs/${job.id}/invoices/${commercialInvoice.id}`}
+              aria-label={`Open invoice ${commercialInvoice.reference}`}
+            >
+              <span className="crm-commercial-card__icon">
+                <FileText />
+              </span>
 
+              <div className="crm-commercial-card__body">
+                <div className="crm-commercial-card__heading">
+                  <p>Invoice</p>
+
+                  <AdminStatus
+                    tone={
+                      commercialInvoice.status === "paid"
+                        ? "success"
+                        : commercialInvoice.status === "void"
+                          ? "danger"
+                          : commercialInvoice.status === "part_paid"
+                            ? "info"
+                            : "warning"
+                    }
+                  >
+                    {commercialInvoice.status.replace(/_/g, " ")}
+                  </AdminStatus>
+                </div>
+
+                <strong>
+                  {commercialInvoice.reference}
+                </strong>
+
+                <dl className="crm-commercial-card__metrics">
+                  <div>
+                    <dt>Total</dt>
+                    <dd>
+                      {money(
+                        commercialInvoice.totalAmount,
+                        commercialInvoice.currency,
+                      )}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Paid</dt>
+                    <dd>
+                      {money(
+                        commercialInvoice.paidAmount,
+                        commercialInvoice.currency,
+                      )}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Balance</dt>
+                    <dd>
+                      {money(
+                        commercialInvoice.balanceAmount,
+                        commercialInvoice.currency,
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+
+                {commercialInvoice.nextPayment ? (
+                  <div className="crm-commercial-card__next">
+                    <span>Next payment</span>
+
+                    <strong>
+                      {commercialInvoice.nextPayment.label}
+                      {" · "}
+                      {money(
+                        commercialInvoice.nextPayment.balanceAmount,
+                        commercialInvoice.currency,
+                      )}
+                    </strong>
+
+                    <small>
+                      {commercialInvoice.nextPayment.dueDate
+                        ? `Due ${dateLabel(
+                            commercialInvoice.nextPayment.dueDate,
+                          )}`
+                        : "No due date set"}
+                    </small>
+
+                    <AdminStatus
+                      tone={
+                        commercialInvoice.nextPayment.status === "overdue"
+                          ? "danger"
+                          : commercialInvoice.nextPayment.status === "part_paid"
+                            ? "info"
+                            : "warning"
+                      }
+                    >
+                      {commercialInvoice.nextPayment.status.replace(/_/g, " ")}
+                    </AdminStatus>
+                  </div>
+                ) : (
+                  <small className="crm-commercial-card__note">
+                    {commercialInvoice.balanceAmount > 0
+                      ? "No payment schedule item is currently due."
+                      : "Invoice balance settled."}
+                  </small>
+                )}
+              </div>
+
+              <span
+                className="crm-commercial-card__open"
+                aria-hidden="true"
+              >
+                <ExternalLink />
+              </span>
+            </Link>
+          ) : (
+            <article className="crm-commercial-card">
+              <span className="crm-commercial-card__icon">
+                <FileText />
+              </span>
+
+              <div className="crm-commercial-card__body">
+                <div className="crm-commercial-card__heading">
+                  <p>Invoice</p>
+                  <AdminStatus tone="neutral">
+                    not generated
+                  </AdminStatus>
+                </div>
+
+                <strong>
+                  No invoice yet
+                </strong>
+
+                <small className="crm-commercial-card__note">
+                  An accepted quote can generate the booking invoice automatically from its immutable commercial snapshot.
+                </small>
+              </div>
+            </article>
+          )}
           <article className="crm-commercial-card">
             <span className="crm-commercial-card__icon"><BookOpen /></span>
             <div className="crm-commercial-card__body">
@@ -1387,35 +1550,6 @@ export function CRMJob() {
           </article>
         </div>
       </AdminPanel>
-          {commercialInvoice && canManage ? (
-            <CrmInvoicePaymentForm
-              jobId={workspace.job.id}
-              invoice={commercialInvoice}
-              canManage={canManage}
-              onSaved={(
-                nextWorkspace,
-                successMessage,
-              ) => {
-                setWorkspace(
-                  nextWorkspace,
-                );
-                setError("");
-                setMessage(
-                  successMessage,
-                );
-              }}
-              onError={(
-                nextError,
-              ) => {
-                setMessage("");
-                setError(
-                  nextError,
-                );
-              }}
-            />
-          ) : null}
-
-
       <AdminPanel
         title="Wedding delivery and content"
         description="The CRM Job is the booking source. Its linked Wedding Workspace feeds private delivery and Website content without duplicate uploads."

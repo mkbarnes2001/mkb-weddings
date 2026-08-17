@@ -10,6 +10,7 @@ import {
   ExternalLink,
   FileQuestion,
   List,
+  LayoutDashboard,
   Mail,
   MapPin,
   MoreVertical,
@@ -297,34 +298,144 @@ function LeadRecord({
   );
 }
 
-function JobRecord({ job }: { job: CrmJob }) {
-  const progress = job.taskTotal ? Math.round((job.taskCompleted / job.taskTotal) * 100) : 0;
+function JobRecord({
+  job,
+}: {
+  job: CrmJob;
+}) {
+  const progress =
+    job.taskTotal
+      ? Math.round(
+          (
+            job.taskCompleted
+            / job.taskTotal
+          ) * 100,
+        )
+      : 0;
+
   return (
     <article className="crm-operation-record crm-operation-record--job">
-      <Link to={`/admin/crm/jobs/${job.id}`} className="crm-operation-record__main" aria-label={`Open ${job.title}`}>
+      <Link
+        to={`/admin/crm/jobs/${job.id}`}
+        className="crm-operation-record__main"
+        aria-label={`Open ${job.title}`}
+      >
         <div className="crm-operation-record__identity">
-          <div className="crm-operation-record__title-row"><span className="crm-record-dot" aria-hidden="true"></span><h3>{job.title}</h3></div>
-          <p>{job.reference} · {job.packageName || job.serviceName || job.jobType}</p>
+          <div className="crm-operation-record__title-row">
+            <span
+              className="crm-record-dot"
+              aria-hidden="true"
+            />
+
+            <h3>{job.title}</h3>
+          </div>
+
+          <p>
+            {job.reference}
+            {" · "}
+            {job.packageName
+              || job.serviceName
+              || job.jobType}
+          </p>
         </div>
+
         <dl className="crm-operation-record__details">
-          <div><dt>Wedding day</dt><dd><CalendarDays />{dateLabel(job.eventDate)}</dd></div>
-          <div><dt>Venue</dt><dd><MapPin />{job.venueText || "Venue TBC"}</dd></div>
-          <div><dt>Next task</dt><dd><Clock3 />{job.nextTaskTitle || "No pending task"}</dd></div>
+          <div>
+            <dt>Wedding day</dt>
+            <dd>
+              <CalendarDays />
+              {dateLabel(job.eventDate)}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Venue</dt>
+            <dd>
+              <MapPin />
+              {job.venueText || "Venue TBC"}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Next task</dt>
+            <dd>
+              <Clock3 />
+              {job.nextTaskTitle
+                || "No pending task"}
+            </dd>
+          </div>
         </dl>
+
         <div className="crm-operation-record__workflow">
-          <div><span style={{ width: `${progress}%` }}></span></div>
-          <small>{job.taskTotal ? `${job.taskCompleted} of ${job.taskTotal} complete` : "No workflow"}{job.taskOverdue ? ` · ${job.taskOverdue} overdue` : ""}</small>
+          <div>
+            <span
+              style={{
+                width: `${progress}%`,
+              }}
+            />
+          </div>
+
+          <small>
+            {job.taskTotal
+              ? `${job.taskCompleted} of ${job.taskTotal} complete`
+              : "No workflow"}
+            {job.taskOverdue
+              ? ` · ${job.taskOverdue} overdue`
+              : ""}
+          </small>
         </div>
+
         <div className="crm-operation-record__status">
-          <AdminStatus tone={statusTone(job.status)}>{job.status}</AdminStatus>
-          <strong>{money(job.valueAmount, job.currency)}</strong>
-          <small>{job.clientPortalStatus ? `Portal ${job.clientPortalStatus.replace(/_/g, " ")}` : "Portal not active"}</small>
+          <AdminStatus
+            tone={statusTone(job.status)}
+          >
+            {job.status}
+          </AdminStatus>
+
+          <strong>
+            {money(
+              job.valueAmount,
+              job.currency,
+            )}
+          </strong>
         </div>
       </Link>
-      <details className="crm-record-menu">
-        <summary aria-label={`Actions for ${job.title}`}><MoreVertical /></summary>
-        <div><Link to={`/admin/crm/jobs/${job.id}`}>Open Job</Link>{job.weddingSlug ? <Link to={`/admin/weddings/${job.weddingSlug}/workspace`}>Open Wedding</Link> : null}{job.quoteId ? <Link to={`/admin/crm/quotes/${job.quoteId}`}>Open quote</Link> : null}</div>
-      </details>
+
+      <div
+        className="crm-job-record-actions"
+        aria-label={`Actions for ${job.title}`}
+      >
+        <Link
+          className="admin-icon-control"
+          to={`/admin/crm/jobs/${job.id}`}
+          aria-label={`Open Job ${job.title}`}
+          title="Open Job"
+        >
+          <ExternalLink aria-hidden="true" />
+        </Link>
+
+        {job.weddingSlug ? (
+          <Link
+            className="admin-icon-control"
+            to={`/admin/weddings/${job.weddingSlug}/workspace`}
+            aria-label={`Open Wedding Workspace for ${job.title}`}
+            title="Open Wedding Workspace"
+          >
+            <LayoutDashboard aria-hidden="true" />
+          </Link>
+        ) : null}
+
+        {job.quoteId ? (
+          <Link
+            className="admin-icon-control"
+            to={`/admin/crm/quotes/${job.quoteId}`}
+            aria-label={`Open quote for ${job.title}`}
+            title="Open quote"
+          >
+            <FileQuestion aria-hidden="true" />
+          </Link>
+        ) : null}
+      </div>
     </article>
   );
 }

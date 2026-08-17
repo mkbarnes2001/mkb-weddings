@@ -10775,3 +10775,511 @@
     width: min(190px, 100%);
   }
 }
+
+
+/* v1.10.11a — compact Jobs and invoice workspace */
+
+/* Jobs list: direct, compact actions rather than a menu. */
+.crm-operation-record--job {
+  grid-template-columns:
+    minmax(0, 1fr) auto;
+}
+
+.crm-operation-record--job
+.crm-operation-record__main {
+  grid-template-columns:
+    minmax(180px, .9fr)
+    minmax(300px, 1.45fr)
+    minmax(115px, .5fr)
+    minmax(105px, .42fr);
+  gap: 14px;
+  padding:
+    12px 8px
+    12px 14px;
+}
+
+.crm-operation-record--job
+.crm-operation-record__title-row h3 {
+  font-size:
+    calc(
+      11px
+      * var(--admin-font-scale-effective, 1)
+    );
+  font-weight: 650;
+  letter-spacing: -.012em;
+}
+
+.crm-operation-record--job
+.crm-operation-record__identity > p {
+  margin-top: 3px;
+  font-size:
+    calc(
+      8px
+      * var(--admin-font-scale-effective, 1)
+    );
+}
+
+.crm-job-record-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  border-left:
+    1px solid rgba(17,17,17,.07);
+  padding: 6px;
+}
+
+.crm-job-record-actions
+.admin-icon-control {
+  width: 29px;
+  min-width: 29px !important;
+  height: 29px;
+  min-height: 29px !important;
+  color: #555;
+  text-decoration: none;
+}
+
+.crm-job-record-actions
+.admin-icon-control:hover {
+  border-color:
+    rgba(17,17,17,.28) !important;
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    ) !important;
+  color:
+    var(
+      --admin-module-accent,
+      #111
+    );
+}
+
+
+/* Job header: one concise context line and icon actions. */
+.crm-job-page-header
+.admin-page-summary {
+  display: none;
+}
+
+.crm-job-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.crm-job-header-actions
+.admin-icon-control {
+  width: 30px;
+  min-width: 30px !important;
+  height: 30px;
+  min-height: 30px !important;
+  text-decoration: none;
+}
+
+.crm-job-header-action--primary {
+  border-color:
+    var(
+      --admin-module-accent,
+      #111
+    ) !important;
+  color:
+    var(
+      --admin-module-accent,
+      #111
+    );
+}
+
+
+/* Retain journey state without repeating identity/fact cards. */
+.crm-job-progress-strip {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      5,
+      minmax(120px, 1fr)
+    );
+  overflow-x: auto;
+  border:
+    1px solid var(--admin-border);
+  border-radius: 11px;
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  padding: 9px 11px;
+  scrollbar-width: thin;
+}
+
+.crm-job-progress-strip > div {
+  position: relative;
+  display: grid;
+  grid-template-columns:
+    20px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.crm-job-progress-strip
+> div:not(:last-child)::after {
+  position: absolute;
+  top: 10px;
+  right: 5px;
+  left: 25px;
+  height: 1px;
+  background: #ddd;
+  content: "";
+}
+
+.crm-job-progress-strip
+> div.complete:not(:last-child)::after {
+  background: #7fc99a;
+}
+
+.crm-job-progress-strip
+> div > span {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border: 1px solid #bbb;
+  border-radius: 50%;
+  background: #fff;
+  color: #777;
+  font-size:
+    calc(
+      7px
+      * var(--admin-font-scale-effective, 1)
+    );
+}
+
+.crm-job-progress-strip
+> div.complete > span {
+  border-color: #76c792;
+  background: #edf8f1;
+  color: #166534;
+}
+
+.crm-job-progress-strip svg {
+  width: 10px;
+  height: 10px;
+}
+
+.crm-job-progress-strip strong {
+  display: block;
+  overflow: hidden;
+  font-size:
+    calc(
+      8.5px
+      * var(--admin-font-scale-effective, 1)
+    );
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-job-progress-strip small {
+  display: block;
+  overflow: hidden;
+  margin-top: 1px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      7px
+      * var(--admin-font-scale-effective, 1)
+    );
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* Invoice card is now the invoice-workspace entry point. */
+.crm-commercial-card--link {
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color .15s ease,
+    box-shadow .15s ease,
+    transform .15s ease;
+}
+
+.crm-commercial-card--link:hover {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111)
+      38%,
+      transparent
+    );
+  box-shadow:
+    0 7px 20px
+    rgba(17,17,17,.055);
+  transform:
+    translateY(-1px);
+}
+
+.crm-commercial-card__open {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  align-self: center;
+  border:
+    1px solid var(--admin-border);
+  border-radius: 7px;
+  color: #777;
+}
+
+.crm-commercial-card__open svg {
+  width: 11px;
+  height: 11px;
+}
+
+
+/* Dedicated invoice administration. */
+.crm-invoice-page {
+  max-width: 1500px;
+}
+
+.crm-invoice-summary {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+  gap: 8px;
+}
+
+.crm-invoice-summary article {
+  min-width: 0;
+  border:
+    1px solid var(--admin-border);
+  border-radius: 11px;
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  padding: 11px 12px;
+}
+
+.crm-invoice-summary span {
+  display: block;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      7.5px
+      * var(--admin-font-scale-effective, 1)
+    );
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.crm-invoice-summary strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 4px;
+  font-size:
+    calc(
+      13px
+      * var(--admin-font-scale-effective, 1)
+    );
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-invoice-schedule {
+  display: grid;
+  gap: 7px;
+}
+
+.crm-invoice-schedule article {
+  display: grid;
+  grid-template-columns:
+    minmax(190px, 1.5fr)
+    repeat(
+      3,
+      minmax(95px, .55fr)
+    )
+    auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  border:
+    1px solid rgba(17,17,17,.08);
+  border-radius: 10px;
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  padding: 10px 11px;
+}
+
+.crm-invoice-schedule article > div {
+  min-width: 0;
+}
+
+.crm-invoice-schedule article > div > span {
+  display: block;
+  color: #929292;
+  font-size:
+    calc(
+      7px
+      * var(--admin-font-scale-effective, 1)
+    );
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.crm-invoice-schedule article > div > strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 2px;
+  font-size:
+    calc(
+      9.5px
+      * var(--admin-font-scale-effective, 1)
+    );
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-invoice-schedule article > div > small {
+  display: block;
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      7.5px
+      * var(--admin-font-scale-effective, 1)
+    );
+}
+
+
+@media (max-width: 1180px) {
+  .crm-operation-record--job
+  .crm-operation-record__main {
+    grid-template-columns:
+      minmax(175px, .8fr)
+      minmax(270px, 1.25fr)
+      minmax(105px, .45fr)
+      minmax(95px, .4fr);
+    gap: 10px;
+  }
+
+  .crm-invoice-schedule article {
+    grid-template-columns:
+      minmax(180px, 1.4fr)
+      repeat(
+        3,
+        minmax(85px, .5fr)
+      )
+      auto;
+  }
+}
+
+
+@media (max-width: 900px) {
+  .crm-operation-record--job
+  .crm-operation-record__main {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, 1.2fr);
+  }
+
+  .crm-operation-record--job
+  .crm-operation-record__status {
+    grid-column: 1;
+  }
+
+  .crm-operation-record--job
+  .crm-operation-record__workflow {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .crm-invoice-summary {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+  .crm-invoice-schedule article {
+    grid-template-columns:
+      minmax(0, 1fr)
+      repeat(
+        3,
+        minmax(80px, .45fr)
+      );
+  }
+
+  .crm-invoice-schedule
+  article > .admin-status {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+
+@media (max-width: 760px) {
+  .crm-operation-record--job {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+
+  .crm-job-record-actions {
+    justify-content: flex-start;
+    border-top:
+      1px solid rgba(17,17,17,.07);
+    border-left: 0;
+    padding: 7px 10px;
+  }
+
+  .crm-job-header-actions {
+    justify-content: flex-start;
+  }
+
+  .crm-job-progress-strip {
+    grid-template-columns:
+      repeat(
+        5,
+        minmax(110px, 1fr)
+      );
+  }
+
+  .crm-commercial-card--link {
+    grid-template-columns:
+      30px minmax(0, 1fr) 25px;
+  }
+
+  .crm-invoice-summary {
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+  .crm-invoice-schedule article {
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+  .crm-invoice-schedule
+  article > div:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .crm-invoice-schedule
+  article > .admin-status {
+    grid-column: 1 / -1;
+  }
+}
