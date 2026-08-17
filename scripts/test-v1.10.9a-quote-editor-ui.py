@@ -25,16 +25,25 @@ server = read(
 
 # Wide WedPlanned editor structure.
 for token in [
-    "crm-quote-client-strip",
     "crm-quote-workspace",
     "crm-quote-workspace__main",
     "crm-quote-workspace__aside",
     "crm-quote-package-grid",
     "crm-quote-package-card",
-    "crm-quote-summary",
 ]:
     assert token in page, token
     assert f".{token}" in css, token
+
+# v1.10.11a deliberately retires redundant summary UI while
+# retaining the underlying quote/version data and operations.
+for retired in [
+    "crm-quote-client-strip",
+    'title="Quote summary"',
+    'title="Version history"',
+]:
+    assert retired not in page, retired
+
+assert "crm-quote-summary" not in page
 
 # Package cards are summary-first, detailed editing is
 # collapsed instead of exposing all textareas permanently.
@@ -91,7 +100,8 @@ for token in [
     "acceptCrmQuote(",
     "Create revision",
     "Offline acceptance",
-    "Version history",
+    'label="Save draft"',
+    '"Send quote"',
 ]:
     assert token in page, token
 

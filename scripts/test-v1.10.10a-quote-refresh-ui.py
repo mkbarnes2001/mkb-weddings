@@ -160,9 +160,12 @@ assert (
     in editor
 )
 
+# v1.10.11a removes the redundant fixed-option summary copy.
+# The actual one-package guard above remains the enduring
+# behavioural regression boundary.
 assert (
     "One fixed option"
-    in editor
+    not in editor
 )
 
 

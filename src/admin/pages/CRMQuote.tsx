@@ -32,6 +32,7 @@ import {
 } from "react-router-dom";
 import {
   AdminButton,
+  AdminIconButton,
   AdminEmptyState,
   AdminField,
   AdminPage,
@@ -1362,7 +1363,11 @@ export function CRMQuote() {
           </Link>
         }
         title={quote.reference}
-        description={`${quote.clientName} · ${quote.enquiryReference} · version ${version?.versionNumber || 1}`}
+        description={[
+          quote.clientName,
+          quote.eventDate || "Date TBC",
+          quote.venueText || "Venue TBC",
+        ].join(" · ")}
         actions={
           <div className="crm-quote-header-actions">
             {editable ? (
@@ -1410,9 +1415,9 @@ export function CRMQuote() {
                     )}
                 </select>
 
-                <AdminButton
-                  variant="secondary"
+                <AdminIconButton
                   icon={Sparkles}
+                  label="Apply Template"
                   disabled={
                     saving
                     || !canManage
@@ -1421,16 +1426,14 @@ export function CRMQuote() {
                   onClick={() =>
                     void applyTemplate()
                   }
-                >
-                  Apply Template
-                </AdminButton>
+                />
               </div>
             ) : null}
 
             {editable ? (
-              <AdminButton
-                variant="primary"
+              <AdminIconButton
                 icon={Save}
+                label="Save draft"
                 disabled={
                   saving
                   || !canManage
@@ -1438,9 +1441,7 @@ export function CRMQuote() {
                 onClick={() =>
                   void save()
                 }
-              >
-                Save draft
-              </AdminButton>
+              />
             ) : (
               <AdminButton
                 icon={CopyPlus}
@@ -1458,9 +1459,14 @@ export function CRMQuote() {
               </AdminButton>
             )}
 
-            <AdminButton
-              variant="primary"
+            <AdminIconButton
               icon={Send}
+              label={
+                version?.sentAt
+                  ? "Resend quote"
+                  : "Send quote"
+              }
+              className="crm-quote-send-icon"
               disabled={
                 saving
                 || !canManage
@@ -1473,54 +1479,7 @@ export function CRMQuote() {
               onClick={() =>
                 void openSendPreview()
               }
-            >
-              {version?.sentAt
-                ? "Resend link"
-                : "Send quote"}
-            </AdminButton>
-          </div>
-        }
-        meta={
-          <div className="flex flex-wrap gap-2">
-            <AdminStatus
-              tone={
-                tone(
-                  quote.status,
-                ) as any
-              }
-            >
-              {quote.status}
-            </AdminStatus>
-
-            <AdminStatus
-              tone={
-                quote.quoteType
-                  === "fixed"
-                  ? "neutral"
-                  : "info"
-              }
-            >
-              {quote.quoteType
-                === "fixed"
-                ? "Fixed"
-                : "Pick & Choose"}
-            </AdminStatus>
-
-            <AdminStatus tone="neutral">
-              v
-              {version
-                ?.versionNumber
-                || 1}
-            </AdminStatus>
-
-            {version?.expiresAt ? (
-              <AdminStatus tone="warning">
-                expires{" "}
-                {String(
-                  version.expiresAt,
-                ).slice(0, 10)}
-              </AdminStatus>
-            ) : null}
+            />
           </div>
         }
       />
@@ -1536,64 +1495,6 @@ export function CRMQuote() {
           {message}
         </div>
       ) : null}
-
-      <section className="crm-quote-client-strip">
-        <div>
-          <span>Client</span>
-          <strong>
-            {quote.clientName}
-          </strong>
-          <small>
-            {quote.clientEmail}
-          </small>
-        </div>
-
-        <div>
-          <span>Wedding</span>
-          <strong>
-            {quote.eventDate
-              || "Date TBC"}
-          </strong>
-          <small>
-            {quote.venueText
-              || "Venue TBC"}
-          </small>
-        </div>
-
-        <div>
-          <span>Packages</span>
-          <strong>
-            {draft.options.length}
-          </strong>
-          <small>
-            {quote.quoteType
-              === "fixed"
-              ? "One fixed option"
-              : "Client chooses one"}
-          </small>
-        </div>
-
-        <div>
-          <span>
-            {quote.quoteType
-              === "fixed"
-              ? "Quoted total"
-              : "Starting from"}
-          </span>
-          <strong>
-            {money(
-              representative.total,
-              draft.currency,
-            )}
-          </strong>
-          <small>
-            {quote.quoteType
-              === "fixed"
-              ? "Exact quoted scope"
-              : "Before optional extras"}
-          </small>
-        </div>
-      </section>
 
       <div className="crm-quote-workspace">
         <main className="crm-quote-workspace__main">
@@ -3033,99 +2934,7 @@ export function CRMQuote() {
         </main>
 
         <aside className="crm-quote-workspace__aside">
-          <AdminPanel
-            title="Quote summary"
-            icon={FileText}
-            compact
-          >
-            <dl className="crm-quote-summary">
-              <div>
-                <dt>Packages</dt>
-                <dd>
-                  {draft.options.length}
-                </dd>
-              </div>
 
-              <div>
-                <dt>
-                  Additional options
-                </dt>
-                <dd>
-                  {
-                    new Set([
-                      ...draft
-                        .globalAddonIds,
-                      ...mandatoryAddonIds,
-                    ]).size
-                  }
-                </dd>
-              </div>
-
-              <div>
-                <dt>Starting price</dt>
-                <dd>
-                  {money(
-                    representative
-                      .subtotal,
-                    draft.currency,
-                  )}
-                </dd>
-              </div>
-
-              {representative.discount ? (
-                <div>
-                  <dt>Discount</dt>
-                  <dd>
-                    -
-                    {money(
-                      representative
-                        .discount,
-                      draft.currency,
-                    )}
-                  </dd>
-                </div>
-              ) : null}
-
-              {representative.tax ? (
-                <div>
-                  <dt>Tax</dt>
-                  <dd>
-                    {money(
-                      representative
-                        .tax,
-                      draft.currency,
-                    )}
-                  </dd>
-                </div>
-              ) : null}
-
-              <div className="crm-quote-summary__total">
-                <dt>From</dt>
-                <dd>
-                  {money(
-                    representative
-                      .total,
-                    draft.currency,
-                  )}
-                </dd>
-              </div>
-            </dl>
-
-            <p className="crm-quote-summary__note">
-              Optional additional options are chosen by the client after selecting a package and are not included in the starting price.
-            </p>
-
-            {version
-              ?.providerMessageId ? (
-              <div className="crm-quote-provider-id">
-                Resend ID:{" "}
-                {
-                  version
-                    .providerMessageId
-                }
-              </div>
-            ) : null}
-          </AdminPanel>
 
           {version
             && [
@@ -3322,45 +3131,7 @@ export function CRMQuote() {
             </AdminPanel>
           ) : null}
 
-          <AdminPanel
-            title="Version history"
-            icon={CopyPlus}
-            compact
-          >
-            <div className="crm-version-list">
-              {quote.versions.map(
-                (item) => (
-                  <div
-                    key={item.id}
-                  >
-                    <span>
-                      v
-                      {
-                        item
-                          .versionNumber
-                      }
-                    </span>
 
-                    <AdminStatus
-                      tone={
-                        tone(
-                          item.status,
-                        ) as any
-                      }
-                    >
-                      {item.status}
-                    </AdminStatus>
-
-                    <small>
-                      {item.sentAt
-                        ? `Sent ${String(item.sentAt).slice(0, 10)}`
-                        : `Created ${String(item.createdAt).slice(0, 10)}`}
-                    </small>
-                  </div>
-                ),
-              )}
-            </div>
-          </AdminPanel>
 
           {quote.acceptedJobId ? (
             <AdminPanel
