@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import {
   Link,
+  useNavigate,
+  useParams,
 } from "react-router-dom";
 import {
   AdminButton,
@@ -187,6 +189,14 @@ function emailTemplateInput(
 }
 
 export function CRMCommercialTemplates() {
+
+  const {
+    id: quoteTemplateRouteId,
+  } = useParams();
+
+  const navigate =
+    useNavigate();
+
   const { auth } =
     useProfessionalAuth();
 
@@ -300,21 +310,39 @@ export function CRMCommercialTemplates() {
         catalogue.addons,
       );
 
+      const routeQuoteId =
+        quoteTemplateRouteId
+        && quoteTemplateRouteId
+          !== "new"
+          ? quoteTemplateRouteId
+          : "";
+
+      const requestedQuoteId =
+        preferredQuoteId
+        || routeQuoteId
+        || (
+          quoteTemplateRouteId
+            ? ""
+            : quoteId
+        );
+
       const resolvedQuote =
         nextQuoteTemplates.find(
           (item) =>
             item.id
-            === (
-              preferredQuoteId
-              || quoteId
-            ),
+            === requestedQuoteId,
         )
-        || nextQuoteTemplates[0];
+        || (
+          quoteTemplateRouteId
+            ? undefined
+            : nextQuoteTemplates[0]
+        );
 
       if (resolvedQuote) {
         setQuoteId(
           resolvedQuote.id,
         );
+
         setQuoteDraft(
           quoteTemplateInput(
             resolvedQuote,
@@ -322,9 +350,22 @@ export function CRMCommercialTemplates() {
         );
       } else {
         setQuoteId("");
+
         setQuoteDraft({
           ...emptyQuoteTemplate,
+          packages: [],
+          addons: [],
         });
+
+        if (
+          quoteTemplateRouteId
+          && quoteTemplateRouteId
+            !== "new"
+        ) {
+          setError(
+            "Quote template not found.",
+          );
+        }
       }
 
       const resolvedEmail =
@@ -366,31 +407,10 @@ export function CRMCommercialTemplates() {
 
   useEffect(() => {
     void load();
-  }, [auth.workspaceId]);
-
-  function newQuoteTemplate() {
-    setQuoteId("");
-    setQuoteDraft({
-      ...emptyQuoteTemplate,
-      packages: [],
-      addons: [],
-    });
-    setMessage("");
-    setError("");
-  }
-
-  function selectQuoteTemplate(
-    template: CrmQuoteTemplate,
-  ) {
-    setQuoteId(template.id);
-    setQuoteDraft(
-      quoteTemplateInput(
-        template,
-      ),
-    );
-    setMessage("");
-    setError("");
-  }
+  }, [
+    auth.workspaceId,
+    quoteTemplateRouteId,
+  ]);
 
   function newEmailTemplate() {
     setEmailId("");
@@ -582,6 +602,9 @@ export function CRMCommercialTemplates() {
     setMessage("");
 
     try {
+      const creating =
+        !quoteId;
+
       const saved =
         quoteId
           ? await AdminApiService
@@ -604,6 +627,19 @@ export function CRMCommercialTemplates() {
           ? "Quote template saved."
           : "Quote template created.",
       );
+      if (
+        creating
+        && quoteTemplateRouteId
+          === "new"
+      ) {
+        navigate(
+          `/admin/crm/templates/quotes/${saved.id}`,
+          {
+            replace: true,
+          },
+        );
+      }
+
     } catch (saveError) {
       setError(
         saveError instanceof Error
@@ -635,13 +671,15 @@ export function CRMCommercialTemplates() {
           quoteId,
         );
 
-      await load(
-        "",
-        emailId,
-      );
-
       setMessage(
         "Quote template archived.",
+      );
+
+      navigate(
+        "/admin/crm/templates",
+        {
+          replace: true,
+        },
       );
     } catch (archiveError) {
       setError(
@@ -774,213 +812,79 @@ export function CRMCommercialTemplates() {
     );
   }
 
-  return (
-    <AdminPage>
-      <AdminPageHeader
-        eyebrow={
-          <Link
-            to="/admin/crm"
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            WedCRM
-          </Link>
-        }
-        title="Commercial templates"
-        description="Build reusable quote and email templates for this business. Templates remain editable while quotes created from them keep immutable snapshots."
-        actions={
-          <div className="flex flex-wrap gap-2">
+  if (quoteTemplateRouteId) {
+    if (
+      loading
+      && !quoteTemplates.length
+    ) {
+      return (
+        <AdminPage className="crm-quote-template-page">
+          <p className="text-sm text-neutral-500">
+            Loading quote template…
+          </p>
+        </AdminPage>
+      );
+    }
+
+    const missingTemplate =
+      quoteTemplateRouteId
+      !== "new"
+      && !quoteId;
+
+    return (
+      <AdminPage className="crm-quote-template-page">
+        <AdminPageHeader
+          eyebrow={
             <Link
-              to="/admin/crm/catalogue"
-              className="admin-button admin-button--secondary"
+              to="/admin/crm/templates"
+              className="admin-inline-link inline-flex items-center gap-1"
             >
-              <PackageCheck className="admin-button__icon" />
-              Package catalogue
-            </Link>
-
-            <Link
-              to="/admin/crm/quotes"
-              className="admin-button admin-button--primary"
-            >
-              <FileText className="admin-button__icon" />
-              Open quotes
-            </Link>
-          </div>
-        }
-      />
-
-      {error ? (
-        <div className="admin-alert admin-alert--error">
-          {error}
-        </div>
-      ) : null}
-
-      {message ? (
-        <div className="admin-alert admin-alert--success">
-          {message}
-        </div>
-      ) : null}
-
-      <div
-        className="crm-template-type-switcher"
-        aria-label="Commercial template type"
-      >
-        <button
-          type="button"
-          className={
-            view === "quotes"
-              ? "active"
-              : ""
-          }
-          onClick={() =>
-            setView("quotes")
-          }
-        >
-          <Sparkles />
-          <span>
-            <strong>
+              <ArrowLeft size={13} />
               Quote templates
-            </strong>
-            <small>
-              Packages, extras and quote defaults
-            </small>
-          </span>
-        </button>
-
-        <button
-          type="button"
-          className={
-            view === "emails"
-              ? "active"
-              : ""
+            </Link>
           }
-          onClick={() =>
-            setView("emails")
+          title={
+            quoteTemplateRouteId
+            === "new"
+              ? "New quote template"
+              : (
+                  quoteDraft.name
+                  || "Quote template"
+                )
           }
-        >
-          <Mail />
-          <span>
-            <strong>
-              Email templates
-            </strong>
-            <small>
-              Reusable client messages
-            </small>
-          </span>
-        </button>
-      </div>
+          description="Configure reusable quote defaults, package choices and additional options. Quotes created from this template keep independent immutable snapshots."
+        />
 
-      {view === "quotes" ? (
-        <div className="crm-template-layout">
-          <AdminPanel
-            title="Quote templates"
-            description={`${quoteTemplates.length} reusable template${quoteTemplates.length === 1 ? "" : "s"}`}
-            icon={Sparkles}
-            actions={
-              canManage ? (
-                <AdminButton
-                  size="sm"
-                  icon={Plus}
-                  onClick={
-                    newQuoteTemplate
-                  }
+        {error ? (
+          <div className="admin-alert admin-alert--error">
+            {error}
+          </div>
+        ) : null}
+
+        {message ? (
+          <div className="admin-alert admin-alert--success">
+            {message}
+          </div>
+        ) : null}
+
+        {missingTemplate ? (
+          <AdminPanel>
+            <AdminEmptyState
+              icon={Sparkles}
+              title="Quote template unavailable"
+              description="This template could not be found in the current workspace."
+              action={
+                <Link
+                  to="/admin/crm/templates"
+                  className="admin-button admin-button--primary admin-button--sm"
                 >
-                  New template
-                </AdminButton>
-              ) : undefined
-            }
-          >
-            {!quoteTemplates.length ? (
-              <AdminEmptyState
-                icon={Sparkles}
-                title="No quote templates"
-                description="Create a template once, choose its packages and additional options, then reuse it for future enquiries."
-              />
-            ) : (
-              <div className="crm-template-list">
-                {quoteTemplates.map(
-                  (template) => (
-                    <button
-                      key={template.id}
-                      type="button"
-                      className={
-                        quoteId
-                        === template.id
-                          ? "active"
-                          : ""
-                      }
-                      onClick={() =>
-                        selectQuoteTemplate(
-                          template,
-                        )
-                      }
-                    >
-                      <span>
-                        <strong>
-                          {template.name}
-                        </strong>
-                        <small>
-                          {
-                            template
-                              .packages
-                              .length
-                          }{" "}
-                          package
-                          {
-                            template
-                              .packages
-                              .length
-                            === 1
-                              ? ""
-                              : "s"
-                          }{" "}
-                          ·{" "}
-                          {
-                            template
-                              .addons
-                              .length
-                          }{" "}
-                          additional option
-                          {
-                            template
-                              .addons
-                              .length
-                            === 1
-                              ? ""
-                              : "s"
-                          }
-                        </small>
-                      </span>
-
-                      <span className="crm-template-list__status">
-                        {template.default ? (
-                          <AdminStatus tone="success">
-                            default
-                          </AdminStatus>
-                        ) : null}
-
-                        <AdminStatus
-                          tone={
-                            template.status
-                            === "active"
-                              ? "success"
-                              : template.status
-                                === "draft"
-                                ? "warning"
-                                : "neutral"
-                          }
-                        >
-                          {template.status}
-                        </AdminStatus>
-                      </span>
-                    </button>
-                  ),
-                )}
-              </div>
-            )}
+                  Back to quote templates
+                </Link>
+              }
+            />
           </AdminPanel>
-
-          <div className="space-y-4">
+        ) : (
+<div className="space-y-4">
             <AdminPanel
               title={
                 quoteId
@@ -1470,7 +1374,198 @@ export function CRMCommercialTemplates() {
               )}
             </AdminPanel>
           </div>
+        )}
+      </AdminPage>
+    );
+  }
+
+
+  return (
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow={
+          <Link
+            to="/admin/crm"
+            className="admin-inline-link inline-flex items-center gap-1"
+          >
+            <ArrowLeft size={13} />
+            WedCRM
+          </Link>
+        }
+        title="Commercial templates"
+        description="Build reusable quote and email templates for this business. Templates remain editable while quotes created from them keep immutable snapshots."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link
+              to="/admin/crm/catalogue"
+              className="admin-button admin-button--secondary"
+            >
+              <PackageCheck className="admin-button__icon" />
+              Package catalogue
+            </Link>
+
+            <Link
+              to="/admin/crm/quotes"
+              className="admin-button admin-button--primary"
+            >
+              <FileText className="admin-button__icon" />
+              Open quotes
+            </Link>
+          </div>
+        }
+      />
+
+      {error ? (
+        <div className="admin-alert admin-alert--error">
+          {error}
         </div>
+      ) : null}
+
+      {message ? (
+        <div className="admin-alert admin-alert--success">
+          {message}
+        </div>
+      ) : null}
+
+      <div
+        className="crm-template-type-switcher"
+        aria-label="Commercial template type"
+      >
+        <button
+          type="button"
+          className={
+            view === "quotes"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setView("quotes")
+          }
+        >
+          <Sparkles />
+          <span>
+            <strong>
+              Quote templates
+            </strong>
+            <small>
+              Packages, extras and quote defaults
+            </small>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          className={
+            view === "emails"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setView("emails")
+          }
+        >
+          <Mail />
+          <span>
+            <strong>
+              Email templates
+            </strong>
+            <small>
+              Reusable client messages
+            </small>
+          </span>
+        </button>
+      </div>
+
+      {view === "quotes" ? (
+        <AdminPanel
+          title="Quote templates"
+          description={`${quoteTemplates.length} reusable template${quoteTemplates.length === 1 ? "" : "s"}`}
+          icon={Sparkles}
+          className="crm-template-list-page"
+          actions={
+            canManage ? (
+              <Link
+                to="/admin/crm/templates/quotes/new"
+                className="admin-button admin-button--primary admin-button--sm"
+              >
+                <Plus className="admin-button__icon" />
+                New template
+              </Link>
+            ) : undefined
+          }
+        >
+          {!quoteTemplates.length ? (
+            <AdminEmptyState
+              icon={Sparkles}
+              title="No quote templates"
+              description="Create a reusable quote template, then configure its packages and additional options on the template editor."
+              action={
+                canManage ? (
+                  <Link
+                    to="/admin/crm/templates/quotes/new"
+                    className="admin-button admin-button--primary admin-button--sm"
+                  >
+                    Create quote template
+                  </Link>
+                ) : undefined
+              }
+            />
+          ) : (
+            <div className="crm-template-list crm-template-list--links">
+              {quoteTemplates.map(
+                (template) => (
+                  <Link
+                    key={template.id}
+                    to={`/admin/crm/templates/quotes/${template.id}`}
+                    aria-label={`Edit quote template ${template.name}`}
+                  >
+                    <span>
+                      <strong>
+                        {template.name}
+                      </strong>
+
+                      <small>
+                        {template.packages.length}
+                        {" "}
+                        package
+                        {template.packages.length === 1
+                          ? ""
+                          : "s"}
+                        {" · "}
+                        {template.addons.length}
+                        {" "}
+                        additional option
+                        {template.addons.length === 1
+                          ? ""
+                          : "s"}
+                      </small>
+                    </span>
+
+                    <span className="crm-template-list__status">
+                      {template.default ? (
+                        <AdminStatus tone="success">
+                          default
+                        </AdminStatus>
+                      ) : null}
+
+                      <AdminStatus
+                        tone={
+                          template.status === "active"
+                            ? "success"
+                            : template.status === "draft"
+                              ? "warning"
+                              : "neutral"
+                        }
+                      >
+                        {template.status}
+                      </AdminStatus>
+                    </span>
+                  </Link>
+                ),
+              )}
+            </div>
+          )}
+        </AdminPanel>
       ) : (
         <div className="crm-template-layout">
           <AdminPanel

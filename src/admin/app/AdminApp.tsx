@@ -83,6 +83,7 @@ export function AdminApp() {
         <Route path="crm/quotes" element={<CRMQuotes />} />
         <Route path="crm/quotes/:id" element={<CRMQuote />} />
         <Route path="crm/templates" element={<CRMCommercialTemplates />} />
+        <Route path="crm/templates/quotes/:id" element={<CRMCommercialTemplates />} />
         <Route path="crm/email-settings" element={<CRMEmailSettings />} />
         <Route path="crm/questionnaires/:id" element={<CRMQuestionnaireTemplate />} />
         <Route path="crm/contracts/templates/:id" element={<CRMContractTemplate />} />

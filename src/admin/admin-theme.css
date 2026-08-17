@@ -7091,7 +7091,8 @@
   gap: 7px;
 }
 
-.crm-template-list > button {
+.crm-template-list > button,
+.crm-template-list--links > a {
   display: flex;
   width: 100%;
   align-items: flex-start;
@@ -11281,5 +11282,57 @@
   .crm-invoice-schedule
   article > .admin-status {
     grid-column: 1 / -1;
+  }
+}
+
+
+/* v1.10.11a — list-first quote templates */
+.crm-template-list-page {
+  width: 100%;
+  max-width: 1100px;
+}
+
+.crm-template-list--links > a {
+  color: #222;
+  text-decoration: none;
+  transition:
+    border-color .15s ease,
+    background .15s ease,
+    box-shadow .15s ease;
+}
+
+.crm-template-list--links > a:hover {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111)
+      35%,
+      var(--admin-border)
+    );
+  background:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111)
+      2.5%,
+      white
+    );
+  box-shadow:
+    0 4px 14px
+    rgba(17,17,17,.035);
+}
+
+.crm-quote-template-page {
+  max-width: 1500px;
+}
+
+@media (max-width: 760px) {
+  .crm-template-list--links > a {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .crm-template-list--links
+  .crm-template-list__status {
+    justify-content: flex-start;
   }
 }
