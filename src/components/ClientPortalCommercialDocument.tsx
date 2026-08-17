@@ -167,23 +167,164 @@ function labelKey(value: string) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function snapshotEntries(
-  value: Record<string, unknown> | undefined,
-) {
-  if (!value || typeof value !== "object") return [];
+type SnapshotKind =
+  | "business"
+  | "client"
+  | "booking";
 
-  return Object.entries(value)
-    .filter(([, item]) =>
+type SnapshotField = {
+  key: string;
+  label: string;
+  sourceKeys: string[];
+  format?: (value: string) => string;
+};
+
+const CLIENT_SNAPSHOT_FIELDS: Record<
+  SnapshotKind,
+  SnapshotField[]
+> = {
+  business: [
+    {
+      key: "name",
+      label: "Name",
+      sourceKeys: [
+        "businessName",
+        "publicName",
+        "legalName",
+      ],
+    },
+    {
+      key: "email",
+      label: "Email",
+      sourceKeys: [
+        "contactEmail",
+        "email",
+      ],
+    },
+    {
+      key: "website",
+      label: "Website",
+      sourceKeys: [
+        "websiteUrl",
+        "website",
+      ],
+    },
+  ],
+
+  client: [
+    {
+      key: "name",
+      label: "Name",
+      sourceKeys: [
+        "displayName",
+        "name",
+      ],
+    },
+    {
+      key: "email",
+      label: "Email",
+      sourceKeys: [
+        "email",
+      ],
+    },
+    {
+      key: "phone",
+      label: "Phone",
+      sourceKeys: [
+        "phone",
+      ],
+    },
+  ],
+
+  booking: [
+    {
+      key: "eventDate",
+      label: "Event date",
+      sourceKeys: [
+        "eventDate",
+      ],
+      format: dateLabel,
+    },
+    {
+      key: "venue",
+      label: "Venue",
+      sourceKeys: [
+        "venue",
+      ],
+    },
+    {
+      key: "package",
+      label: "Package",
+      sourceKeys: [
+        "packageName",
+      ],
+    },
+    {
+      key: "service",
+      label: "Service",
+      sourceKeys: [
+        "serviceName",
+      ],
+    },
+  ],
+};
+
+function snapshotPrimitive(
+  value: Record<string, unknown>,
+  sourceKeys: string[],
+) {
+  for (const sourceKey of sourceKeys) {
+    const item = value[sourceKey];
+
+    if (
       item !== null
       && item !== undefined
       && item !== ""
-      && ["string", "number", "boolean"].includes(typeof item)
-    )
-    .map(([key, item]) => ({
-      key,
-      label: labelKey(key),
-      value: String(item),
-    }));
+      && [
+        "string",
+        "number",
+        "boolean",
+      ].includes(typeof item)
+    ) {
+      return String(item);
+    }
+  }
+
+  return "";
+}
+
+function snapshotEntries(
+  kind: SnapshotKind,
+  value: Record<string, unknown>,
+) {
+  return CLIENT_SNAPSHOT_FIELDS[kind]
+    .map((field) => {
+      const rawValue =
+        snapshotPrimitive(
+          value,
+          field.sourceKeys,
+        );
+
+      if (!rawValue) return null;
+
+      return {
+        key: field.key,
+        label: field.label,
+        value:
+          field.format
+            ? field.format(rawValue)
+            : rawValue,
+      };
+    })
+    .filter(
+      (
+        entry,
+      ): entry is {
+        key: string;
+        label: string;
+        value: string;
+      } => Boolean(entry),
+    );
 }
 
 function contractBlocks(value: unknown) {
@@ -261,18 +402,25 @@ function contractBlocks(value: unknown) {
 
 function SnapshotPanel({
   title,
+  kind,
   value,
 }: {
   title: string;
+  kind: SnapshotKind;
   value: Record<string, unknown>;
 }) {
-  const entries = snapshotEntries(value);
+  const entries =
+    snapshotEntries(
+      kind,
+      value,
+    );
 
   if (!entries.length) return null;
 
   return (
     <section className="client-portal-document__snapshot">
       <h3>{title}</h3>
+
       <dl>
         {entries.map((entry) => (
           <div key={entry.key}>
@@ -326,14 +474,17 @@ function ContractDocument({
       <div className="client-portal-document__meta-grid">
         <SnapshotPanel
           title="Business"
+          kind="business"
           value={contract.business}
         />
         <SnapshotPanel
           title="Client"
+          kind="client"
           value={contract.client}
         />
         <SnapshotPanel
           title="Booking"
+          kind="booking"
           value={contract.booking}
         />
       </div>
@@ -453,14 +604,17 @@ function InvoiceDocument({
       <div className="client-portal-document__meta-grid">
         <SnapshotPanel
           title="From"
+          kind="business"
           value={invoice.business}
         />
         <SnapshotPanel
           title="Bill to"
+          kind="client"
           value={invoice.client}
         />
         <SnapshotPanel
           title="Booking"
+          kind="booking"
           value={invoice.booking}
         />
       </div>

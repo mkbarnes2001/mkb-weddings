@@ -4265,21 +4265,22 @@ footer .logo-mkb, footer .logo-weddings {
 .client-portal-document__meta-grid {
   display: grid;
   grid-template-columns: repeat(3,minmax(0,1fr));
-  gap: 12px;
-  margin: 22px 0;
+  gap: 18px;
+  margin: 14px 0 18px;
+  border-bottom: 1px solid rgba(0,0,0,.07);
+  padding: 11px 0 14px;
 }
 
 .client-portal-document__snapshot {
-  border-radius: 13px;
-  background: rgba(0,0,0,.025);
-  padding: 14px;
+  min-width: 0;
+  padding: 0;
 }
 
 .client-portal-document__snapshot h3,
 .client-portal-document__notes h3 {
-  margin: 0 0 10px;
-  color: #666;
-  font-size: 9px;
+  margin: 0 0 6px;
+  color: #737373;
+  font-size: 8px;
   font-weight: 750;
   letter-spacing: .09em;
   text-transform: uppercase;
@@ -4287,24 +4288,29 @@ footer .logo-mkb, footer .logo-weddings {
 
 .client-portal-document__snapshot dl {
   display: grid;
-  gap: 7px;
+  gap: 3px;
   margin: 0;
 }
 
 .client-portal-document__snapshot dl > div {
+  display: grid;
+  grid-template-columns: minmax(52px,auto) minmax(0,1fr);
+  gap: 7px;
   min-width: 0;
 }
 
 .client-portal-document__snapshot dt {
-  color: #929292;
+  color: #9a9a9a;
   font-size: 8px;
+  line-height: 1.4;
 }
 
 .client-portal-document__snapshot dd {
-  margin: 1px 0 0;
+  min-width: 0;
+  margin: 0;
   overflow-wrap: anywhere;
-  color: #222;
-  font-size: 10px;
+  color: #272727;
+  font-size: 9px;
   line-height: 1.4;
 }
 
