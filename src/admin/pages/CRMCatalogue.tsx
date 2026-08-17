@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Boxes, PackagePlus, Plus, Save, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { AdminButton, AdminEmptyState, AdminField, AdminPage, AdminPageHeader, AdminPanel, AdminStatus, AdminTab, AdminTabs } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
@@ -18,6 +22,14 @@ function lines(value: string[] | undefined) { return (value || []).join("\n"); }
 function splitLines(value: string) { return value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean); }
 
 export function CRMCatalogue() {
+
+  const {
+    id: packageRouteId,
+  } = useParams();
+
+  const navigate =
+    useNavigate();
+
   const { auth } = useProfessionalAuth();
   const canManage = auth.permissions.includes("crm:manage");
   const [view, setView] = useState<View>("packages");
@@ -34,21 +46,100 @@ export function CRMCatalogue() {
     setLoading(true); setError("");
     try {
       const catalogue = await AdminApiService.getCrmQuoteCatalogue();
-      setPackages(catalogue.packages); setAddons(catalogue.addons);
+      setPackages(
+        catalogue.packages,
+      );
+
+      setAddons(
+        catalogue.addons,
+      );
+
+      if (packageRouteId) {
+        if (
+          packageRouteId
+          === "new"
+        ) {
+          setPackageDraft({
+            ...emptyPackage,
+          });
+        } else {
+          const selectedPackage =
+            catalogue.packages.find(
+              (item) =>
+                item.id
+                === packageRouteId,
+            );
+
+          if (selectedPackage) {
+            setPackageDraft({
+              ...selectedPackage,
+            });
+          } else {
+            setPackageDraft({
+              ...emptyPackage,
+            });
+
+            setError(
+              "Package not found.",
+            );
+          }
+        }
+      }
     } catch (loadError) { setError(loadError instanceof Error ? loadError.message : "Unable to load package catalogue."); }
     finally { setLoading(false); }
   }
-  useEffect(() => { void load(); }, [auth.workspaceId]);
+  useEffect(() => {
+    void load();
+  }, [
+    auth.workspaceId,
+    packageRouteId,
+  ]);
 
   const selectedPackageAddonNames = useMemo(() => new Map(addons.map((addon) => [addon.id, addon.name])), [addons]);
 
   async function savePackage() {
-    setSaving(true); setError(""); setMessage("");
+    const creating =
+      !packageDraft.id;
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
     try {
-      const saved = await AdminApiService.saveCrmPackage(packageDraft.id, packageDraft);
-      setMessage(`${saved.name} saved.`); setPackageDraft(emptyPackage); await load();
-    } catch (saveError) { setError(saveError instanceof Error ? saveError.message : "Unable to save package."); }
-    finally { setSaving(false); }
+      const saved =
+        await AdminApiService
+          .saveCrmPackage(
+            packageDraft.id,
+            packageDraft,
+          );
+
+      setMessage(
+        `${saved.name} saved.`,
+      );
+
+      setPackageDraft({
+        ...saved,
+      });
+
+      if (creating) {
+        navigate(
+          `/admin/crm/catalogue/packages/${saved.id}`,
+          {
+            replace: true,
+          },
+        );
+      } else {
+        await load();
+      }
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Unable to save package.",
+      );
+    } finally {
+      setSaving(false);
+    }
   }
   async function saveAddon() {
     setSaving(true); setError(""); setMessage("");
@@ -61,14 +152,66 @@ export function CRMCatalogue() {
 
   if (loading && !packages.length && !addons.length) return <AdminPage><p className="text-sm text-neutral-500">Loading catalogue…</p></AdminPage>;
 
-  return <AdminPage>
-    <AdminPageHeader eyebrow={<Link to="/admin/crm" className="admin-inline-link inline-flex items-center gap-1"><ArrowLeft size={13} />CRM</Link>} title="Package catalogue" description="Workspace-owned packages and add-ons used to create immutable quote snapshots." actions={<Link className="admin-button admin-button--primary" to="/admin/crm/quotes"><Sparkles className="admin-button__icon" />Open quotes</Link>} />
-    {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
-    {message ? <div className="admin-alert admin-alert--success">{message}</div> : null}
-    <AdminTabs><AdminTab active={view === "packages"} onClick={() => setView("packages")}>Packages</AdminTab><AdminTab active={view === "addons"} onClick={() => setView("addons")}>Add-ons</AdminTab></AdminTabs>
+  if (packageRouteId) {
+    const missingPackage =
+      packageRouteId
+      !== "new"
+      && !packageDraft.id;
 
-    {view === "packages" ? <div className="crm-catalogue-layout">
-      <AdminPanel title={packageDraft.id ? "Edit package" : "New package"} description="Catalogue changes never alter existing quotes or booked Jobs." icon={PackagePlus} actions={packageDraft.id ? <AdminButton size="sm" onClick={() => setPackageDraft(emptyPackage)}>New</AdminButton> : undefined}>
+    return (
+      <AdminPage className="crm-package-editor-page">
+        <AdminPageHeader
+          eyebrow={
+            <Link
+              to="/admin/crm/catalogue"
+              className="admin-inline-link inline-flex items-center gap-1"
+            >
+              <ArrowLeft size={13} />
+              Packages
+            </Link>
+          }
+          title={
+            packageRouteId
+            === "new"
+              ? "New package"
+              : (
+                  packageDraft.name
+                  || "Package"
+                )
+          }
+          description="Configure the reusable package shown in quotes. Existing quote and booking snapshots remain unchanged when the catalogue is edited."
+        />
+
+        {error ? (
+          <div className="admin-alert admin-alert--error">
+            {error}
+          </div>
+        ) : null}
+
+        {message ? (
+          <div className="admin-alert admin-alert--success">
+            {message}
+          </div>
+        ) : null}
+
+        {missingPackage ? (
+          <AdminPanel>
+            <AdminEmptyState
+              icon={PackagePlus}
+              title="Package unavailable"
+              description="This package could not be found in the current workspace."
+              action={
+                <Link
+                  to="/admin/crm/catalogue"
+                  className="admin-button admin-button--primary admin-button--sm"
+                >
+                  Back to packages
+                </Link>
+              }
+            />
+          </AdminPanel>
+        ) : (
+<AdminPanel title={packageDraft.id ? "Edit package" : "New package"} description="Catalogue changes never alter existing quotes or booked Jobs." icon={PackagePlus} actions={packageDraft.id ? <AdminButton size="sm" onClick={() => navigate("/admin/crm/catalogue/packages/new")}>New</AdminButton> : undefined}>
         <div className="grid gap-3 md:grid-cols-2">
           <AdminField label="Name"><input className="admin-input" disabled={!canManage} value={packageDraft.name || ""} onChange={(event) => setPackageDraft((current) => ({ ...current, name: event.target.value }))} /></AdminField>
           <AdminField label="Internal code"><input className="admin-input" disabled={!canManage} value={packageDraft.internalCode || ""} onChange={(event) => setPackageDraft((current) => ({ ...current, internalCode: event.target.value }))} /></AdminField>
@@ -85,10 +228,117 @@ export function CRMCatalogue() {
         <AdminField label="Available selected add-ons" help="Add-ons set to Available for all packages do not need selecting here."><div className="crm-checkbox-grid">{addons.filter((addon) => addon.status !== "archived").map((addon) => <label key={addon.id}><input type="checkbox" disabled={!canManage} checked={(packageDraft.addonIds || []).includes(addon.id)} onChange={(event) => setPackageDraft((current) => ({ ...current, addonIds: event.target.checked ? [...(current.addonIds || []), addon.id] : (current.addonIds || []).filter((id) => id !== addon.id) }))} /><span>{addon.name}<small>{money(addon.priceAmount, addon.currency)} · {addon.requirement}</small></span></label>)}</div></AdminField>
         <div className="mt-4"><AdminButton variant="primary" icon={Save} disabled={!canManage || saving || !packageDraft.name?.trim()} onClick={() => void savePackage()}>Save package</AdminButton></div>
       </AdminPanel>
-      <AdminPanel title="Packages" description={`${packages.length} catalogue records`} icon={Boxes}>
-        {!packages.length ? <AdminEmptyState icon={PackagePlus} title="No packages" description="Create the first package without seeding MKB production data." /> : <div className="crm-catalogue-list">{packages.map((item) => <button key={item.id} type="button" onClick={() => setPackageDraft({ ...item })}><div><strong>{item.name}</strong><p>{item.description || item.serviceType}</p><small>{item.addonIds.map((id) => selectedPackageAddonNames.get(id)).filter(Boolean).join(" · ") || "All-package add-ons only"}</small></div><div><span>{money(item.priceAmount, item.currency)}</span><AdminStatus tone={item.status === "active" ? "success" : item.status === "hidden" ? "warning" : "neutral"}>{item.status}</AdminStatus>{item.recommended ? <AdminStatus tone="info">recommended</AdminStatus> : null}</div></button>)}</div>}
+        )}
+      </AdminPage>
+    );
+  }
+
+
+  return <AdminPage>
+    <AdminPageHeader eyebrow={<Link to="/admin/crm" className="admin-inline-link inline-flex items-center gap-1"><ArrowLeft size={13} />CRM</Link>} title="Package catalogue" description="Workspace-owned packages and add-ons used to create immutable quote snapshots." actions={<Link className="admin-button admin-button--primary" to="/admin/crm/quotes"><Sparkles className="admin-button__icon" />Open quotes</Link>} />
+    {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
+    {message ? <div className="admin-alert admin-alert--success">{message}</div> : null}
+    <AdminTabs><AdminTab active={view === "packages"} onClick={() => setView("packages")}>Packages</AdminTab><AdminTab active={view === "addons"} onClick={() => setView("addons")}>Add-ons</AdminTab></AdminTabs>
+
+    {view === "packages" ? (
+      <AdminPanel
+        title="Packages"
+        description={`${packages.length} catalogue record${packages.length === 1 ? "" : "s"}`}
+        icon={Boxes}
+        className="crm-package-list-page"
+        actions={
+          canManage ? (
+            <Link
+              to="/admin/crm/catalogue/packages/new"
+              className="admin-button admin-button--primary admin-button--sm"
+            >
+              <PackagePlus className="admin-button__icon" />
+              New package
+            </Link>
+          ) : undefined
+        }
+      >
+        {!packages.length ? (
+          <AdminEmptyState
+            icon={PackagePlus}
+            title="No packages"
+            description="Create the first reusable package for this workspace."
+            action={
+              canManage ? (
+                <Link
+                  to="/admin/crm/catalogue/packages/new"
+                  className="admin-button admin-button--primary admin-button--sm"
+                >
+                  Create package
+                </Link>
+              ) : undefined
+            }
+          />
+        ) : (
+          <div className="crm-catalogue-list crm-catalogue-list--links">
+            {packages.map(
+              (item) => (
+                <Link
+                  key={item.id}
+                  to={`/admin/crm/catalogue/packages/${item.id}`}
+                  aria-label={`Edit package ${item.name}`}
+                >
+                  <div>
+                    <strong>
+                      {item.name}
+                    </strong>
+
+                    <p>
+                      {item.description
+                        || item.serviceType}
+                    </p>
+
+                    <small>
+                      {item.addonIds
+                        .map(
+                          (id) =>
+                            selectedPackageAddonNames
+                              .get(id),
+                        )
+                        .filter(Boolean)
+                        .join(" · ")
+                        || "All-package add-ons only"}
+                    </small>
+                  </div>
+
+                  <div>
+                    <span>
+                      {money(
+                        item.priceAmount,
+                        item.currency,
+                      )}
+                    </span>
+
+                    <AdminStatus
+                      tone={
+                        item.status === "active"
+                          ? "success"
+                          : item.status === "hidden"
+                            ? "warning"
+                            : "neutral"
+                      }
+                    >
+                      {item.status}
+                    </AdminStatus>
+
+                    {item.recommended ? (
+                      <AdminStatus tone="info">
+                        recommended
+                      </AdminStatus>
+                    ) : null}
+                  </div>
+                </Link>
+              ),
+            )}
+          </div>
+        )}
       </AdminPanel>
-    </div> : null}
+    ) : null}
 
     {view === "addons" ? <div className="crm-catalogue-layout">
       <AdminPanel title={addonDraft.id ? "Edit add-on" : "New add-on"} description="Set quantity limits and whether the add-on is optional, recommended or mandatory." icon={Plus} actions={addonDraft.id ? <AdminButton size="sm" onClick={() => setAddonDraft(emptyAddon)}>New</AdminButton> : undefined}>

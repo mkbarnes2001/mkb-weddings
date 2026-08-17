@@ -2406,6 +2406,7 @@
 .crm-quote-option-list,
 .crm-version-list { display: grid; gap: 8px; }
 .crm-catalogue-list > button,
+.crm-catalogue-list--links > a,
 .crm-quote-option-list > button,
 .crm-version-list > button { display: grid; width: 100%; border: 1px solid var(--admin-border); border-radius: 10px; background: #fff; color: #222; padding: 11px; text-align: left; }
 .crm-catalogue-list > button.active,
@@ -11334,5 +11335,56 @@
   .crm-template-list--links
   .crm-template-list__status {
     justify-content: flex-start;
+  }
+}
+
+
+/* v1.10.11a — list-first Packages */
+.crm-package-list-page {
+  width: 100%;
+  max-width: 1180px;
+}
+
+.crm-catalogue-list--links > a {
+  color: #222;
+  text-decoration: none;
+  transition:
+    border-color .15s ease,
+    background .15s ease,
+    box-shadow .15s ease;
+}
+
+.crm-catalogue-list--links > a:hover {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111)
+      35%,
+      var(--admin-border)
+    );
+  background:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111)
+      2.5%,
+      white
+    );
+  box-shadow:
+    0 4px 14px
+    rgba(17,17,17,.035);
+}
+
+.crm-package-editor-page {
+  max-width: 1450px;
+}
+
+.crm-package-editor-page
+> .admin-panel {
+  max-width: 1180px;
+}
+
+@media (max-width: 760px) {
+  .crm-catalogue-list--links > a {
+    gap: 8px;
   }
 }
