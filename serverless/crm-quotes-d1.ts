@@ -2446,7 +2446,10 @@ export async function sendQuote(
     );
 
   const origin =
-    DEFAULT_CLIENT_PORTAL_ORIGIN;
+    await portalOrigin(
+      db,
+      actor.workspaceId,
+    );
 
   const loginUrl =
     `${origin}/api/public/client-portal/verify?token=${encodeURIComponent(invitation.rawToken)}`;

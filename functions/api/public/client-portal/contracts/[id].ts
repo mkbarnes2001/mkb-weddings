@@ -1,7 +1,14 @@
 import { getPublicContract, signPublicContract } from "../../../../../serverless/client-portal-commercial-d1";
 import { resolveClientPortalWorkspaceId } from "../../../../../serverless/tenant-context";
 
-type Env = { MKB_DB: D1Database };
+type Env = {
+  MKB_DB: D1Database;
+  RESEND_API_KEY?: string;
+  CLIENT_AUTH_FROM_EMAIL?: string;
+  CLIENT_AUTH_FROM_NAME?: string;
+  WEDPLANNED_AUTH_FROM_EMAIL?: string;
+  WEDPLANNED_AUTH_FROM_NAME?: string;
+};
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
@@ -68,6 +75,7 @@ export const onRequestPost: PagesFunction<Env> =
                 context.params.id || ""
               ),
               body,
+              context.env,
             ),
         },
         {

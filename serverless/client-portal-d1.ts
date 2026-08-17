@@ -1,3 +1,7 @@
+import {
+  sendProfessionalClientActionNotification,
+  type ProfessionalNotificationEnv,
+} from "./crm-client-action-notifications-d1";
 import { getJobCommercialWorkspace } from "./crm-booking-pack-d1";
 import { getAuthenticatedClientIdentity } from "./client-auth-d1";
 import { DEFAULT_CLIENT_PORTAL_ORIGIN } from "./tenant-context";
@@ -1376,7 +1380,14 @@ function validateSubmission(fields: QuestionnaireField[], responses: Record<stri
   return missing;
 }
 
-export async function savePublicQuestionnaire(db: D1Db, request: Request, workspaceId: string, instanceId: string, input: any) {
+export async function savePublicQuestionnaire(
+  db: D1Db,
+  request: Request,
+  workspaceId: string,
+  instanceId: string,
+  input: any,
+  env: ProfessionalNotificationEnv = {},
+) {
   const { identity, row } = await authorisedPublicInstance(db, request, workspaceId, instanceId);
   const fields = sanitiseSchema(row.schema_json);
   const allowed = new Set(fields.filter((field) => !["heading", "description", "file"].includes(field.type)).map((field) => field.id));
@@ -1535,6 +1546,44 @@ export async function savePublicQuestionnaire(db: D1Db, request: Request, worksp
     );
   }
   const refreshed = await instanceRow(db, workspaceId, instanceId);
+
+  const professionalNotificationAction =
+    Boolean(input?.submit)
+    && text(row.status) !== "completed"
+      ? "questionnaire_completed"
+      : text(row.status) === "completed"
+        ? "questionnaire_updated_after_completion"
+        : "questionnaire_updated";
+
+  await sendProfessionalClientActionNotification(
+    db,
+    env,
+    {
+      workspaceId,
+      jobId:
+        text(row.job_id),
+      action:
+        professionalNotificationAction,
+      documentTitle:
+        text(
+          row.title
+          || "Questionnaire",
+        ),
+      clientName:
+        text(
+          identity.displayName
+          || identity.email,
+        ),
+      clientEmail:
+        lower(identity.email),
+    },
+  ).catch((notificationError) => {
+    console.error(
+      "Unable to send questionnaire activity notification.",
+      notificationError,
+    );
+  });
+
   return hydrateInstance(refreshed, await instanceResponses(db, workspaceId, instanceId), await instanceFiles(db, workspaceId, instanceId));
 }
 

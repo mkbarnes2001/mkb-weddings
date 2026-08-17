@@ -90,7 +90,25 @@ function ProfessionalSignIn({ onSignedIn }: { onSignedIn: () => Promise<void> })
       style={{ fontFamily: '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif' }}
     >
       <section className="w-full max-w-lg rounded-3xl bg-white px-7 py-9 text-center shadow-xl ring-1 ring-black/[0.06] sm:px-10 sm:py-11">
-        <img src="/favicon-32x32.png" alt="MKB Weddings" className="mx-auto h-12 w-12 object-contain" />
+        <div
+          className="mx-auto inline-flex items-baseline text-[28px] leading-none tracking-[-0.055em]"
+          aria-label="WedPlanned"
+        >
+          <span
+            style={{
+              marginRight: "-.035em",
+              fontFamily: '"Times New Roman", Times, serif',
+              fontSize: "1.12em",
+              fontStyle: "italic",
+              fontWeight: 400,
+            }}
+          >
+            Wed
+          </span>
+          <span className="font-bold">
+            Planned
+          </span>
+        </div>
         <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-400">Professional access</p>
         <h1 className="mt-2 text-2xl font-semibold tracking-[-0.025em]">WedPlanned Pro sign in</h1>
         <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-neutral-600">Enter the email attached to your business membership. We will send a private one-time sign-in link.</p>

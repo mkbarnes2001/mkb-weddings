@@ -1,3 +1,7 @@
+import {
+  sendProfessionalClientActionNotification,
+  type ProfessionalNotificationEnv,
+} from "./crm-client-action-notifications-d1";
 import { getAuthenticatedClientIdentity } from "./client-auth-d1";
 
 type D1Db = any;
@@ -740,6 +744,7 @@ export async function signPublicContract(
   workspaceId: string,
   contractIdInput: string,
   input: any,
+  env: ProfessionalNotificationEnv = {},
 ) {
   const identity = await publicIdentity(
     db,
@@ -1223,6 +1228,34 @@ export async function signPublicContract(
       409,
     );
   }
+
+
+  await sendProfessionalClientActionNotification(
+    db,
+    env,
+    {
+      workspaceId,
+      jobId:
+        text(contract.job_id),
+      action:
+        "contract_signed",
+      documentTitle:
+        text(
+          contract.title
+          || contract.reference
+          || "Contract",
+        ),
+      clientName:
+        signerName,
+      clientEmail:
+        signerEmail,
+    },
+  ).catch((notificationError) => {
+    console.error(
+      "Unable to send contract signature notification.",
+      notificationError,
+    );
+  });
 
   return getPublicContract(
     db,

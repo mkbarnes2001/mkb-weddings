@@ -104,6 +104,11 @@ assert "async function ensureIdentity(" in quotes
 assert "await ensureIdentity(" in send_section
 assert "ensureQuoteIdentity(" not in quotes
 
+# Sent quote links must use the verified tenant public domain when
+# available rather than exposing the shared Cloudflare Pages hostname.
+assert "await portalOrigin(" in send_section
+assert "actor.workspaceId" in send_section
+
 # Raw secure URLs are not written into CRM communication history.
 assert "loggedQuoteEmailBody(" in quotes
 assert '"[secure quote link]"' in quotes
