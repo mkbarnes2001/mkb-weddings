@@ -81,6 +81,8 @@ export function AdminApp() {
         <Route path="crm/jobs/:jobId/invoices/:invoiceId" element={<CRMInvoice />} />
         <Route path="crm/catalogue" element={<CRMCatalogue />} />
         <Route path="crm/catalogue/packages/:id" element={<CRMCatalogue />} />
+        <Route path="crm/catalogue/addons" element={<CRMCatalogue />} />
+        <Route path="crm/catalogue/addons/:id" element={<CRMCatalogue />} />
         <Route path="crm/quotes" element={<CRMQuotes />} />
         <Route path="crm/quotes/:id" element={<CRMQuote />} />
         <Route path="crm/templates" element={<CRMCommercialTemplates />} />

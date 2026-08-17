@@ -160,15 +160,20 @@ addon_region = page[
     addon_branch:
 ]
 
+# v1.10.11a D3 subsequently makes Add-ons list-first too.
 for token in [
-    '"Edit add-on"',
-    '"New add-on"',
-    ">Save add-on</AdminButton>",
-    "saveAddon",
-    "setAddonDraft",
+    'to="/admin/crm/catalogue/addons/new"',
+    'to={`/admin/crm/catalogue/addons/${item.id}`}',
+    "crm-catalogue-list--links",
     "addons.map",
 ]:
     assert token in addon_region, token
+
+for token in [
+    '"Edit add-on"',
+    ">Save add-on</AdminButton>",
+]:
+    assert token not in addon_region, token
 
 
 for method in [
@@ -220,7 +225,7 @@ print(
     "  create canonicalisation: verified"
 )
 print(
-    "  Add-ons left unchanged for D3: verified"
+    "  Add-ons list-first compatibility: verified"
 )
 print(
     "  catalogue API/data model unchanged: verified"

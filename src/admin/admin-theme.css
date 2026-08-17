@@ -11388,3 +11388,26 @@
     gap: 8px;
   }
 }
+
+
+/* v1.10.11a — list-first Add-ons */
+.crm-addon-list-page {
+  width: 100%;
+  max-width: 1180px;
+}
+
+.crm-addon-editor-page {
+  max-width: 1450px;
+}
+
+.crm-addon-editor-page
+> .admin-panel {
+  max-width: 1180px;
+}
+
+@media (max-width: 760px) {
+  .crm-addon-list-page
+  .crm-catalogue-list--links > a {
+    gap: 8px;
+  }
+}

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Boxes, PackagePlus, Plus, Save, Sparkles } from "lucide-react";
 import {
   Link,
+  useLocation,
   useNavigate,
   useParams,
 } from "react-router-dom";
@@ -24,11 +25,29 @@ function splitLines(value: string) { return value.split(/\r?\n/).map((item) => i
 export function CRMCatalogue() {
 
   const {
-    id: packageRouteId,
+    id: catalogueRouteId,
   } = useParams();
+
+  const {
+    pathname,
+  } = useLocation();
 
   const navigate =
     useNavigate();
+
+  const packageRouteId =
+    pathname.startsWith(
+      "/admin/crm/catalogue/packages/",
+    )
+      ? catalogueRouteId
+      : undefined;
+
+  const addonRouteId =
+    pathname.startsWith(
+      "/admin/crm/catalogue/addons/",
+    )
+      ? catalogueRouteId
+      : undefined;
 
   const { auth } = useProfessionalAuth();
   const canManage = auth.permissions.includes("crm:manage");
@@ -85,6 +104,38 @@ export function CRMCatalogue() {
           }
         }
       }
+      if (addonRouteId) {
+        if (
+          addonRouteId
+          === "new"
+        ) {
+          setAddonDraft({
+            ...emptyAddon,
+          });
+        } else {
+          const selectedAddon =
+            catalogue.addons.find(
+              (item) =>
+                item.id
+                === addonRouteId,
+            );
+
+          if (selectedAddon) {
+            setAddonDraft({
+              ...selectedAddon,
+            });
+          } else {
+            setAddonDraft({
+              ...emptyAddon,
+            });
+
+            setError(
+              "Add-on not found.",
+            );
+          }
+        }
+      }
+
     } catch (loadError) { setError(loadError instanceof Error ? loadError.message : "Unable to load package catalogue."); }
     finally { setLoading(false); }
   }
@@ -93,7 +144,19 @@ export function CRMCatalogue() {
   }, [
     auth.workspaceId,
     packageRouteId,
+    addonRouteId,
   ]);
+
+  useEffect(() => {
+    setView(
+      pathname.startsWith(
+        "/admin/crm/catalogue/addons",
+      )
+        ? "addons"
+        : "packages",
+    );
+  }, [pathname]);
+
 
   const selectedPackageAddonNames = useMemo(() => new Map(addons.map((addon) => [addon.id, addon.name])), [addons]);
 
@@ -142,12 +205,48 @@ export function CRMCatalogue() {
     }
   }
   async function saveAddon() {
-    setSaving(true); setError(""); setMessage("");
+    const creating =
+      !addonDraft.id;
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
     try {
-      const saved = await AdminApiService.saveCrmAddon(addonDraft.id, addonDraft);
-      setMessage(`${saved.name} saved.`); setAddonDraft(emptyAddon); await load();
-    } catch (saveError) { setError(saveError instanceof Error ? saveError.message : "Unable to save add-on."); }
-    finally { setSaving(false); }
+      const saved =
+        await AdminApiService
+          .saveCrmAddon(
+            addonDraft.id,
+            addonDraft,
+          );
+
+      setMessage(
+        `${saved.name} saved.`,
+      );
+
+      setAddonDraft({
+        ...saved,
+      });
+
+      if (creating) {
+        navigate(
+          `/admin/crm/catalogue/addons/${saved.id}`,
+          {
+            replace: true,
+          },
+        );
+      } else {
+        await load();
+      }
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Unable to save add-on.",
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (loading && !packages.length && !addons.length) return <AdminPage><p className="text-sm text-neutral-500">Loading catalogue…</p></AdminPage>;
@@ -234,11 +333,103 @@ export function CRMCatalogue() {
   }
 
 
+  if (addonRouteId) {
+    const missingAddon =
+      addonRouteId
+      !== "new"
+      && !addonDraft.id;
+
+    return (
+      <AdminPage className="crm-addon-editor-page">
+        <AdminPageHeader
+          eyebrow={
+            <Link
+              to="/admin/crm/catalogue/addons"
+              className="admin-inline-link inline-flex items-center gap-1"
+            >
+              <ArrowLeft size={13} />
+              Add-ons
+            </Link>
+          }
+          title={
+            addonRouteId
+            === "new"
+              ? "New add-on"
+              : (
+                  addonDraft.name
+                  || "Add-on"
+                )
+          }
+          description="Configure a reusable quote extra, its package availability, requirement and quantity limits. Existing quote snapshots remain unchanged."
+        />
+
+        {error ? (
+          <div className="admin-alert admin-alert--error">
+            {error}
+          </div>
+        ) : null}
+
+        {message ? (
+          <div className="admin-alert admin-alert--success">
+            {message}
+          </div>
+        ) : null}
+
+        {missingAddon ? (
+          <AdminPanel>
+            <AdminEmptyState
+              icon={Plus}
+              title="Add-on unavailable"
+              description="This add-on could not be found in the current workspace."
+              action={
+                <Link
+                  to="/admin/crm/catalogue/addons"
+                  className="admin-button admin-button--primary admin-button--sm"
+                >
+                  Back to add-ons
+                </Link>
+              }
+            />
+          </AdminPanel>
+        ) : (
+<AdminPanel title={addonDraft.id ? "Edit add-on" : "New add-on"} description="Set quantity limits and whether the add-on is optional, recommended or mandatory." icon={Plus} actions={addonDraft.id ? <AdminButton size="sm" onClick={() => navigate("/admin/crm/catalogue/addons/new")}>New</AdminButton> : undefined}>
+        <div className="grid gap-3 md:grid-cols-2"><AdminField label="Name"><input className="admin-input" disabled={!canManage} value={addonDraft.name || ""} onChange={(event) => setAddonDraft((current) => ({ ...current, name: event.target.value }))} /></AdminField><AdminField label="Price"><input className="admin-input" type="number" min="0" step="0.01" disabled={!canManage} value={(addonDraft.priceAmount || 0) / 100} onChange={(event) => setAddonDraft((current) => ({ ...current, priceAmount: Math.round(Number(event.target.value || 0) * 100) }))} /></AdminField><AdminField label="Currency"><input className="admin-input" maxLength={3} disabled={!canManage} value={addonDraft.currency || "GBP"} onChange={(event) => setAddonDraft((current) => ({ ...current, currency: event.target.value.toUpperCase().slice(0, 3) }))} /></AdminField><AdminField label="Service type"><input className="admin-input" disabled={!canManage} value={addonDraft.serviceType || ""} onChange={(event) => setAddonDraft((current) => ({ ...current, serviceType: event.target.value }))} /></AdminField><AdminField label="Availability"><select className="admin-select" disabled={!canManage} value={addonDraft.availabilityScope || "all"} onChange={(event) => setAddonDraft((current) => ({ ...current, availabilityScope: event.target.value as CrmAddon["availabilityScope"] }))}><option value="all">All packages</option><option value="selected">Selected packages</option></select></AdminField><AdminField label="Requirement"><select className="admin-select" disabled={!canManage} value={addonDraft.requirement || "optional"} onChange={(event) => setAddonDraft((current) => ({ ...current, requirement: event.target.value as CrmAddon["requirement"] }))}><option value="optional">Optional</option><option value="recommended">Recommended</option><option value="mandatory">Mandatory</option></select></AdminField><AdminField label="State"><select className="admin-select" disabled={!canManage} value={addonDraft.status || "active"} onChange={(event) => setAddonDraft((current) => ({ ...current, status: event.target.value as CrmAddon["status"] }))}><option value="active">Active</option><option value="hidden">Hidden</option><option value="archived">Archived</option></select></AdminField><AdminField label="Minimum quantity"><input className="admin-input" type="number" min="0" disabled={!canManage} value={addonDraft.minimumQuantity || 0} onChange={(event) => setAddonDraft((current) => ({ ...current, minimumQuantity: Number(event.target.value || 0) }))} /></AdminField><AdminField label="Maximum quantity"><input className="admin-input" type="number" min="1" disabled={!canManage} value={addonDraft.maximumQuantity || 1} onChange={(event) => setAddonDraft((current) => ({ ...current, maximumQuantity: Number(event.target.value || 1) }))} /></AdminField><AdminField label="Display order"><input className="admin-input" type="number" disabled={!canManage} value={addonDraft.displayOrder || 0} onChange={(event) => setAddonDraft((current) => ({ ...current, displayOrder: Number(event.target.value || 0) }))} /></AdminField></div>
+        <div className="mt-3"><AdminField label="Description"><textarea className="admin-textarea min-h-28" disabled={!canManage} value={addonDraft.description || ""} onChange={(event) => setAddonDraft((current) => ({ ...current, description: event.target.value }))} /></AdminField></div>
+        <div className="mt-4"><AdminButton variant="primary" icon={Save} disabled={!canManage || saving || !addonDraft.name?.trim()} onClick={() => void saveAddon()}>Save add-on</AdminButton></div>
+      </AdminPanel>
+        )}
+      </AdminPage>
+    );
+  }
+
+
   return <AdminPage>
     <AdminPageHeader eyebrow={<Link to="/admin/crm" className="admin-inline-link inline-flex items-center gap-1"><ArrowLeft size={13} />CRM</Link>} title="Package catalogue" description="Workspace-owned packages and add-ons used to create immutable quote snapshots." actions={<Link className="admin-button admin-button--primary" to="/admin/crm/quotes"><Sparkles className="admin-button__icon" />Open quotes</Link>} />
     {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
     {message ? <div className="admin-alert admin-alert--success">{message}</div> : null}
-    <AdminTabs><AdminTab active={view === "packages"} onClick={() => setView("packages")}>Packages</AdminTab><AdminTab active={view === "addons"} onClick={() => setView("addons")}>Add-ons</AdminTab></AdminTabs>
+    <AdminTabs>
+      <AdminTab
+        active={view === "packages"}
+        onClick={() =>
+          navigate(
+            "/admin/crm/catalogue",
+          )
+        }
+      >
+        Packages
+      </AdminTab>
+
+      <AdminTab
+        active={view === "addons"}
+        onClick={() =>
+          navigate(
+            "/admin/crm/catalogue/addons",
+          )
+        }
+      >
+        Add-ons
+      </AdminTab>
+    </AdminTabs>
 
     {view === "packages" ? (
       <AdminPanel
@@ -340,13 +531,110 @@ export function CRMCatalogue() {
       </AdminPanel>
     ) : null}
 
-    {view === "addons" ? <div className="crm-catalogue-layout">
-      <AdminPanel title={addonDraft.id ? "Edit add-on" : "New add-on"} description="Set quantity limits and whether the add-on is optional, recommended or mandatory." icon={Plus} actions={addonDraft.id ? <AdminButton size="sm" onClick={() => setAddonDraft(emptyAddon)}>New</AdminButton> : undefined}>
-        <div className="grid gap-3 md:grid-cols-2"><AdminField label="Name"><input className="admin-input" disabled={!canManage} value={addonDraft.name || ""} onChange={(event) => setAddonDraft((current) => ({ ...current, name: event.target.value }))} /></AdminField><AdminField label="Price"><input className="admin-input" type="number" min="0" step="0.01" disabled={!canManage} value={(addonDraft.priceAmount || 0) / 100} onChange={(event) => setAddonDraft((current) => ({ ...current, priceAmount: Math.round(Number(event.target.value || 0) * 100) }))} /></AdminField><AdminField label="Currency"><input className="admin-input" maxLength={3} disabled={!canManage} value={addonDraft.currency || "GBP"} onChange={(event) => setAddonDraft((current) => ({ ...current, currency: event.target.value.toUpperCase().slice(0, 3) }))} /></AdminField><AdminField label="Service type"><input className="admin-input" disabled={!canManage} value={addonDraft.serviceType || ""} onChange={(event) => setAddonDraft((current) => ({ ...current, serviceType: event.target.value }))} /></AdminField><AdminField label="Availability"><select className="admin-select" disabled={!canManage} value={addonDraft.availabilityScope || "all"} onChange={(event) => setAddonDraft((current) => ({ ...current, availabilityScope: event.target.value as CrmAddon["availabilityScope"] }))}><option value="all">All packages</option><option value="selected">Selected packages</option></select></AdminField><AdminField label="Requirement"><select className="admin-select" disabled={!canManage} value={addonDraft.requirement || "optional"} onChange={(event) => setAddonDraft((current) => ({ ...current, requirement: event.target.value as CrmAddon["requirement"] }))}><option value="optional">Optional</option><option value="recommended">Recommended</option><option value="mandatory">Mandatory</option></select></AdminField><AdminField label="State"><select className="admin-select" disabled={!canManage} value={addonDraft.status || "active"} onChange={(event) => setAddonDraft((current) => ({ ...current, status: event.target.value as CrmAddon["status"] }))}><option value="active">Active</option><option value="hidden">Hidden</option><option value="archived">Archived</option></select></AdminField><AdminField label="Minimum quantity"><input className="admin-input" type="number" min="0" disabled={!canManage} value={addonDraft.minimumQuantity || 0} onChange={(event) => setAddonDraft((current) => ({ ...current, minimumQuantity: Number(event.target.value || 0) }))} /></AdminField><AdminField label="Maximum quantity"><input className="admin-input" type="number" min="1" disabled={!canManage} value={addonDraft.maximumQuantity || 1} onChange={(event) => setAddonDraft((current) => ({ ...current, maximumQuantity: Number(event.target.value || 1) }))} /></AdminField><AdminField label="Display order"><input className="admin-input" type="number" disabled={!canManage} value={addonDraft.displayOrder || 0} onChange={(event) => setAddonDraft((current) => ({ ...current, displayOrder: Number(event.target.value || 0) }))} /></AdminField></div>
-        <div className="mt-3"><AdminField label="Description"><textarea className="admin-textarea min-h-28" disabled={!canManage} value={addonDraft.description || ""} onChange={(event) => setAddonDraft((current) => ({ ...current, description: event.target.value }))} /></AdminField></div>
-        <div className="mt-4"><AdminButton variant="primary" icon={Save} disabled={!canManage || saving || !addonDraft.name?.trim()} onClick={() => void saveAddon()}>Save add-on</AdminButton></div>
+    {view === "addons" ? (
+      <AdminPanel
+        title="Add-ons"
+        description={`${addons.length} catalogue record${addons.length === 1 ? "" : "s"}`}
+        icon={Boxes}
+        className="crm-addon-list-page"
+        actions={
+          canManage ? (
+            <Link
+              to="/admin/crm/catalogue/addons/new"
+              className="admin-button admin-button--primary admin-button--sm"
+            >
+              <Plus className="admin-button__icon" />
+              New add-on
+            </Link>
+          ) : undefined
+        }
+      >
+        {!addons.length ? (
+          <AdminEmptyState
+            icon={Plus}
+            title="No add-ons"
+            description="Create optional, recommended or mandatory quote extras."
+            action={
+              canManage ? (
+                <Link
+                  to="/admin/crm/catalogue/addons/new"
+                  className="admin-button admin-button--primary admin-button--sm"
+                >
+                  Create add-on
+                </Link>
+              ) : undefined
+            }
+          />
+        ) : (
+          <div className="crm-catalogue-list crm-catalogue-list--links">
+            {addons.map(
+              (item) => (
+                <Link
+                  key={item.id}
+                  to={`/admin/crm/catalogue/addons/${item.id}`}
+                  aria-label={`Edit add-on ${item.name}`}
+                >
+                  <div>
+                    <strong>
+                      {item.name}
+                    </strong>
+
+                    <p>
+                      {item.description
+                        || item.serviceType}
+                    </p>
+
+                    <small>
+                      {item.availabilityScope === "all"
+                        ? "All packages"
+                        : "Selected packages"}
+                      {" · "}
+                      quantity
+                      {" "}
+                      {item.minimumQuantity}
+                      –
+                      {item.maximumQuantity}
+                    </small>
+                  </div>
+
+                  <div>
+                    <span>
+                      {money(
+                        item.priceAmount,
+                        item.currency,
+                      )}
+                    </span>
+
+                    <AdminStatus
+                      tone={
+                        item.requirement === "mandatory"
+                          ? "danger"
+                          : item.requirement === "recommended"
+                            ? "info"
+                            : "neutral"
+                      }
+                    >
+                      {item.requirement}
+                    </AdminStatus>
+
+                    <AdminStatus
+                      tone={
+                        item.status === "active"
+                          ? "success"
+                          : item.status === "hidden"
+                            ? "warning"
+                            : "neutral"
+                      }
+                    >
+                      {item.status}
+                    </AdminStatus>
+                  </div>
+                </Link>
+              ),
+            )}
+          </div>
+        )}
       </AdminPanel>
-      <AdminPanel title="Add-ons" description={`${addons.length} catalogue records`} icon={Boxes}>{!addons.length ? <AdminEmptyState icon={Plus} title="No add-ons" description="Create optional or mandatory quote extras." /> : <div className="crm-catalogue-list">{addons.map((item) => <button key={item.id} type="button" onClick={() => setAddonDraft({ ...item })}><div><strong>{item.name}</strong><p>{item.description || item.serviceType}</p><small>{item.availabilityScope === "all" ? "All packages" : "Selected packages"} · quantity {item.minimumQuantity}–{item.maximumQuantity}</small></div><div><span>{money(item.priceAmount, item.currency)}</span><AdminStatus tone={item.requirement === "mandatory" ? "danger" : item.requirement === "recommended" ? "info" : "neutral"}>{item.requirement}</AdminStatus><AdminStatus tone={item.status === "active" ? "success" : item.status === "hidden" ? "warning" : "neutral"}>{item.status}</AdminStatus></div></button>)}</div>}</AdminPanel>
-    </div> : null}
+    ) : null}
   </AdminPage>;
 }
