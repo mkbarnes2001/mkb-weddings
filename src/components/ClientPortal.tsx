@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
 import { ClientPortalCommercialDocument } from "./ClientPortalCommercialDocument";
@@ -325,6 +325,8 @@ export function ClientPortal() {
   const [selectedContractId, setSelectedContractId] = useState(initialContract);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(initialInvoice);
   const [quote, setQuote] = useState<PortalQuote | null>(null);
+  const questionnaireLoadRequestRef = useRef(0);
+  const quoteLoadRequestRef = useRef(0);
   const [selectedOptionId, setSelectedOptionId] = useState("");
   const [addonQuantities, setAddonQuantities] = useState<Record<string, number>>({});
   const [questionnaire, setQuestionnaire] = useState<PortalQuestionnaire | null>(null);
@@ -352,35 +354,173 @@ export function ClientPortal() {
   useEffect(() => { void loadPortal(); }, []);
 
   useEffect(() => {
-    if (!selectedId || !portal?.authenticated) { setQuestionnaire(null); setSupplierDirectory([]); return; }
+    const requestId =
+      ++questionnaireLoadRequestRef.current;
+
+    if (!selectedId || !portal?.authenticated) {
+      setQuestionnaire(null);
+      setSupplierDirectory([]);
+      setSaving(false);
+      return;
+    }
+
     setSaving(true);
     setError("");
-    jsonRequest<{ ok: true; questionnaire: PortalQuestionnaire; suppliers?: SupplierDirectoryOption[] }>(portalApiPath(`/api/public/client-portal/questionnaires/${encodeURIComponent(selectedId)}`))
-      .then((result) => { setQuestionnaire(result.questionnaire); setResponses(result.questionnaire.responses || {}); setSupplierDirectory(result.suppliers || []); })
-      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load questionnaire."))
-      .finally(() => setSaving(false));
+
+    jsonRequest<{ ok: true; questionnaire: PortalQuestionnaire; suppliers?: SupplierDirectoryOption[] }>(
+      portalApiPath(
+        `/api/public/client-portal/questionnaires/${encodeURIComponent(selectedId)}`,
+      ),
+    )
+      .then((result) => {
+        if (
+          requestId
+          !== questionnaireLoadRequestRef.current
+        ) {
+          return;
+        }
+
+        setQuestionnaire(result.questionnaire);
+        setResponses(
+          result.questionnaire.responses || {},
+        );
+        setSupplierDirectory(
+          result.suppliers || [],
+        );
+      })
+      .catch((loadError) => {
+        if (
+          requestId
+          !== questionnaireLoadRequestRef.current
+        ) {
+          return;
+        }
+
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Unable to load questionnaire.",
+        );
+      })
+      .finally(() => {
+        if (
+          requestId
+          === questionnaireLoadRequestRef.current
+        ) {
+          setSaving(false);
+        }
+      });
   }, [selectedId, portal?.authenticated]);
 
   useEffect(() => {
-    if (!selectedQuoteId || !portal?.authenticated) { setQuote(null); return; }
-    setSaving(true); setError("");
-    jsonRequest<{ ok: true; quote: PortalQuote }>(portalApiPath(`/api/public/client-portal/quotes/${encodeURIComponent(selectedQuoteId)}`))
+    const requestId =
+      ++quoteLoadRequestRef.current;
+
+    if (!selectedQuoteId || !portal?.authenticated) {
+      setQuote(null);
+      setSaving(false);
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+
+    jsonRequest<{ ok: true; quote: PortalQuote }>(
+      portalApiPath(
+        `/api/public/client-portal/quotes/${encodeURIComponent(selectedQuoteId)}`,
+      ),
+    )
       .then((result) => {
-        setQuote(result.quote);
-        const accepted = result.quote.acceptance;
-        const option = (accepted ? result.quote.currentVersion.options.find((item) => item.id === accepted.optionId) : null)
-          || result.quote.currentVersion.options.find((item) => item.recommended)
-          || result.quote.currentVersion.options[0];
-        setSelectedOptionId(option?.id || "");
-        const quantities: Record<string, number> = {};
-        for (const addon of option?.addons || []) {
-          const acceptedAddon = accepted?.selectedAddons.find((item) => item.id === addon.id || (item.addonId && item.addonId === addon.addonId));
-          quantities[addon.id] = acceptedAddon?.quantity ?? (addon.requirement === "mandatory" ? Math.max(1, addon.minimumQuantity, addon.defaultQuantity) : addon.defaultQuantity);
+        if (
+          requestId
+          !== quoteLoadRequestRef.current
+        ) {
+          return;
         }
-        setAddonQuantities(quantities);
+
+        setQuote(result.quote);
+
+        const accepted =
+          result.quote.acceptance;
+
+        const option =
+          (
+            accepted
+              ? result.quote.currentVersion.options.find(
+                  (item) =>
+                    item.id
+                    === accepted.optionId,
+                )
+              : null
+          )
+          || result.quote.currentVersion.options.find(
+            (item) =>
+              item.recommended,
+          )
+          || result.quote.currentVersion.options[0];
+
+        setSelectedOptionId(
+          option?.id || "",
+        );
+
+        const quantities:
+          Record<string, number> = {};
+
+        for (
+          const addon
+          of option?.addons || []
+        ) {
+          const acceptedAddon =
+            accepted?.selectedAddons.find(
+              (item) =>
+                item.id === addon.id
+                || (
+                  item.addonId
+                  && item.addonId
+                    === addon.addonId
+                ),
+            );
+
+          quantities[addon.id] =
+            acceptedAddon?.quantity
+            ?? (
+              addon.requirement
+              === "mandatory"
+                ? Math.max(
+                    1,
+                    addon.minimumQuantity,
+                    addon.defaultQuantity,
+                  )
+                : addon.defaultQuantity
+            );
+        }
+
+        setAddonQuantities(
+          quantities,
+        );
       })
-      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load quote."))
-      .finally(() => setSaving(false));
+      .catch((loadError) => {
+        if (
+          requestId
+          !== quoteLoadRequestRef.current
+        ) {
+          return;
+        }
+
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Unable to load quote.",
+        );
+      })
+      .finally(() => {
+        if (
+          requestId
+          === quoteLoadRequestRef.current
+        ) {
+          setSaving(false);
+        }
+      });
   }, [selectedQuoteId, portal?.authenticated]);
 
   const selectedJob = useMemo(() => portal?.jobs.find((job) => job.questionnaires.some((item) => item.id === selectedId)) || null, [portal?.jobs, selectedId]);

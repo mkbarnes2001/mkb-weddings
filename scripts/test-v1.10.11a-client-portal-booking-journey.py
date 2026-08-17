@@ -19,6 +19,15 @@ signature = (
 assert "function openNextBookingStep(" in portal
 assert '"wedplanned:booking-next"' in portal
 
+# Selection changes invalidate stale async document loads so a previous
+# quote/questionnaire request cannot overwrite the guided next step.
+assert "const questionnaireLoadRequestRef = useRef(0);" in portal
+assert "const quoteLoadRequestRef = useRef(0);" in portal
+assert "++questionnaireLoadRequestRef.current" in portal
+assert "++quoteLoadRequestRef.current" in portal
+assert "requestId\n          !== questionnaireLoadRequestRef.current" in portal
+assert "requestId\n          !== quoteLoadRequestRef.current" in portal
+
 journey = portal[
     portal.index("function openNextBookingStep("):
     portal.index("async function refreshQuestionnaire(")
