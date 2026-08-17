@@ -963,7 +963,17 @@ export function CRMJob() {
   const [templateId, setTemplateId] = useState("");
   const [contactId, setContactId] = useState("");
   const [dueAt, setDueAt] = useState("");
-  const [supplierReview, setSupplierReview] = useState<Record<string, { supplierId: string; role: string; notes: string }>>({});
+  const [supplierReview, setSupplierReview] = useState<
+    Record<
+      string,
+      {
+        action: "create" | "merge";
+        supplierId: string;
+        category: string;
+        notes: string;
+      }
+    >
+  >({});
   const [workflowTemplateId, setWorkflowTemplateId] = useState("");
   const [taskDraft, setTaskDraft] = useState({ title: "", description: "", taskType: "task", priority: "normal", dueAt: "" });
   const [communicationDraft, setCommunicationDraft] = useState({ channel: "note", direction: "internal", contactId: "", subject: "", body: "" });
@@ -996,11 +1006,43 @@ export function CRMJob() {
       setContactId((current) => current || result.contacts.find((item) => item.role === "primary")?.id || result.contacts[0]?.id || "");
       setWorkflowTemplateId((current) => current || result.workflowTemplates.find((item) => item.default)?.id || result.workflowTemplates[0]?.id || "");
       setCommunicationDraft((current) => ({ ...current, contactId: current.contactId || result.contacts.find((item) => item.role === "primary")?.id || result.contacts[0]?.id || "" }));
-      setSupplierReview((current) => {
-        const next = { ...current };
-        for (const submission of result.supplierSubmissions) if (!next[submission.id]) next[submission.id] = { supplierId: submission.resolvedSupplierId || submission.supplierId || "", role: submission.role || "Supplier", notes: "" };
-        return next;
-      });
+      setSupplierReview(
+        (current) => {
+          const next = {
+            ...current,
+          };
+
+          for (
+            const submission
+            of result.supplierSubmissions
+          ) {
+            if (next[submission.id]) {
+              continue;
+            }
+
+            const supplierId =
+              submission.resolvedSupplierId
+              || submission.supplierId
+              || "";
+
+            next[submission.id] = {
+              action:
+                supplierId
+                  ? "merge"
+                  : "create",
+              supplierId,
+              category:
+                submission.role
+                || "Other",
+              notes:
+                submission.reviewNotes
+                || "",
+            };
+          }
+
+          return next;
+        },
+      );
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Unable to load Job.");
     } finally {
@@ -1250,19 +1292,96 @@ export function CRMJob() {
     } finally { setSaving(false); }
   }
 
-  async function approveSupplier(submission: CrmSupplierSubmission) {
-    const review = supplierReview[submission.id] || { supplierId: "", role: submission.role || "Supplier", notes: "" };
-    const action = review.supplierId ? "merge this suggestion into the selected Supplier Master record" : "create a new Supplier Master record";
-    if (!window.confirm(`Approve ${submission.name || "this supplier"} and ${action}?`)) return;
-    setSaving(true); setError(""); setMessage("");
+  async function approveSupplier(
+    submission: CrmSupplierSubmission,
+  ) {
+    const review =
+      supplierReview[
+        submission.id
+      ] || {
+        action:
+          "create" as const,
+        supplierId: "",
+        category:
+          submission.role
+          || "Other",
+        notes: "",
+      };
+
+    const merging =
+      review.action
+      === "merge";
+
+    if (
+      merging
+      && !review.supplierId
+    ) {
+      setError(
+        "Choose the Supplier Master record to merge this suggestion into.",
+      );
+      return;
+    }
+
+    const actionDescription =
+      merging
+        ? "merge this suggestion into the selected Supplier Master record"
+        : "create a new Supplier Master record";
+
+    if (
+      !window.confirm(
+        `Approve ${
+          submission.name
+          || "this supplier"
+        } and ${actionDescription}?`,
+      )
+    ) {
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
     try {
-      const result = await AdminApiService.approveCrmSupplierSubmission(id, submission.id, { supplierId: review.supplierId || undefined, role: review.role, reviewNotes: review.notes });
-      setWorkspace(result);
-      setMessage(review.supplierId ? "Supplier suggestion merged and linked to the Wedding." : "Supplier approved, added to Supplier Master and linked to the Wedding.");
+      const result =
+        await AdminApiService
+          .approveCrmSupplierSubmission(
+            id,
+            submission.id,
+            {
+              supplierId:
+                merging
+                  ? review.supplierId
+                  : undefined,
+              category:
+                review.category,
+              role:
+                review.category,
+              reviewNotes:
+                review.notes,
+            },
+          );
+
+      setWorkspace(
+        result,
+      );
+
+      setMessage(
+        merging
+          ? "Supplier suggestion merged and linked to the Wedding."
+          : "Supplier approved, added to Supplier Master and linked to the Wedding.",
+      );
     } catch (approveError) {
-      setError(approveError instanceof Error ? approveError.message : "Unable to approve supplier.");
-    } finally { setSaving(false); }
+      setError(
+        approveError instanceof Error
+          ? approveError.message
+          : "Unable to approve supplier.",
+      );
+    } finally {
+      setSaving(false);
+    }
   }
+
 
   async function rejectSupplier(submission: CrmSupplierSubmission) {
     if (!window.confirm(`Reject ${submission.name || "this supplier suggestion"}?`)) return;
@@ -2202,9 +2321,444 @@ export function CRMJob() {
             </AdminAccordion>
           </div>
 
-          <AdminAccordion title="Supplier team" description="Approved Wedding suppliers and client suggestions." icon={Store} summary={pendingSubmissions.length ? <AdminStatus tone="warning">{pendingSubmissions.length} review</AdminStatus> : <AdminStatus tone="neutral">{workspace.linkedSuppliers.length} linked</AdminStatus>}>
-            {pendingSubmissions.length ? <div className="crm-supplier-review"><div className="crm-supplier-review__heading"><AdminStatus tone="warning">{pendingSubmissions.length} needs review</AdminStatus></div>{pendingSubmissions.map((submission) => { const review = supplierReview[submission.id] || { supplierId: "", role: submission.role, notes: "" }; return <article key={submission.id}><div className="flex items-start justify-between gap-2"><div><strong>{submission.name || "Unnamed supplier"}</strong><p>{submission.website || submission.instagram || submission.email || submission.location || "No contact details supplied"}</p></div><AdminStatus tone="warning">pending</AdminStatus></div><AdminField label="Wedding role"><input className="admin-input" value={review.role} disabled={!canManage} onChange={(event) => setSupplierReview((current) => ({ ...current, [submission.id]: { ...review, role: event.target.value } }))} /></AdminField><AdminField label="Approval action"><select className="admin-select" value={review.supplierId} disabled={!canManage} onChange={(event) => setSupplierReview((current) => ({ ...current, [submission.id]: { ...review, supplierId: event.target.value } }))}><option value="">Create new Supplier Master record</option>{workspace.supplierDirectory.map((supplier) => <option key={supplier.id} value={supplier.id}>Merge into {supplier.name}{supplier.category ? ` · ${supplier.category}` : ""}</option>)}</select></AdminField><AdminField label="Review note"><input className="admin-input" value={review.notes} disabled={!canManage} onChange={(event) => setSupplierReview((current) => ({ ...current, [submission.id]: { ...review, notes: event.target.value } }))} /></AdminField><div className="flex flex-wrap gap-2"><AdminButton variant="primary" size="sm" icon={CheckCircle2} disabled={saving || !canManage} onClick={() => void approveSupplier(submission)}>Approve</AdminButton><AdminButton variant="danger" size="sm" icon={X} disabled={saving || !canManage} onClick={() => void rejectSupplier(submission)}>Reject</AdminButton></div></article>; })}</div> : null}
-            {!workspace.linkedSuppliers.length ? <AdminEmptyState icon={Store} title="No suppliers linked" description="Approved supplier selections will appear here." /> : <div className="crm-linked-suppliers">{workspace.linkedSuppliers.map((supplier) => <article key={`${supplier.id}_${supplier.role}`}><div><strong>{supplier.name}</strong><p>{supplier.role}{supplier.location ? ` · ${supplier.location}` : ""}</p></div><AdminStatus tone="success">linked</AdminStatus></article>)}</div>}
+          <AdminAccordion
+            title="Supplier team"
+            description="Approved Wedding suppliers and client suggestions."
+            icon={Store}
+            summary={
+              pendingSubmissions.length ? (
+                <AdminStatus tone="warning">
+                  {pendingSubmissions.length}
+                  {" "}
+                  review
+                </AdminStatus>
+              ) : (
+                <AdminStatus tone="neutral">
+                  {workspace.linkedSuppliers.length}
+                  {" "}
+                  linked
+                </AdminStatus>
+              )
+            }
+          >
+            {pendingSubmissions.length ? (
+              <div className="crm-supplier-review">
+                <div className="crm-supplier-review__heading">
+                  <div>
+                    <strong>
+                      Needs review
+                    </strong>
+                    <span>
+                      Approve each client-supplied business into Supplier Master or merge it with an existing record.
+                    </span>
+                  </div>
+
+                  <AdminStatus tone="warning">
+                    {pendingSubmissions.length}
+                    {" "}
+                    pending
+                  </AdminStatus>
+                </div>
+
+                {pendingSubmissions.map(
+                  (submission) => {
+                    const review =
+                      supplierReview[
+                        submission.id
+                      ] || {
+                        action:
+                          "create" as const,
+                        supplierId:
+                          "",
+                        category:
+                          submission.role
+                          || "Other",
+                        notes:
+                          "",
+                      };
+
+                    const categoryOptions =
+                      Array.from(
+                        new Set(
+                          [
+                            ...workspace
+                              .supplierCategories,
+                            submission.role,
+                            "Other",
+                          ]
+                            .map(
+                              (item) =>
+                                String(
+                                  item
+                                  || "",
+                                ).trim(),
+                            )
+                            .filter(
+                              Boolean,
+                            ),
+                        ),
+                      );
+
+                    const contactDetails =
+                      [
+                        submission.website,
+                        submission.instagram
+                          ? `@${submission.instagram.replace(/^@/, "")}`
+                          : "",
+                        submission.email,
+                        submission.phone,
+                        submission.location,
+                        submission.county,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ");
+
+                    const merging =
+                      review.action
+                      === "merge";
+
+                    const mergeDirectory =
+                      [
+                        ...workspace
+                          .supplierDirectory,
+                      ].sort(
+                        (left, right) => {
+                          const leftMatch =
+                            left.category
+                            === review.category
+                              ? 0
+                              : 1;
+
+                          const rightMatch =
+                            right.category
+                            === review.category
+                              ? 0
+                              : 1;
+
+                          return (
+                            leftMatch
+                            - rightMatch
+                            || left.name
+                              .localeCompare(
+                                right.name,
+                              )
+                          );
+                        },
+                      );
+
+                    return (
+                      <article
+                        key={submission.id}
+                        className="crm-supplier-review__item"
+                      >
+                        <header className="crm-supplier-review__summary">
+                          <div>
+                            <strong>
+                              {submission.name
+                                || "Unnamed supplier"}
+                            </strong>
+
+                            <div className="crm-supplier-review__meta">
+                              <AdminStatus tone="warning">
+                                pending
+                              </AdminStatus>
+
+                              <AdminStatus tone="neutral">
+                                {review.category
+                                  || "Other"}
+                              </AdminStatus>
+                            </div>
+
+                            <p>
+                              {contactDetails
+                                || "No contact details supplied"}
+                            </p>
+                          </div>
+                        </header>
+
+                        <div className="crm-supplier-review__fields">
+                          <AdminField label="Category">
+                            <select
+                              className="admin-select"
+                              value={
+                                review.category
+                              }
+                              disabled={
+                                !canManage
+                              }
+                              onChange={(
+                                event,
+                              ) =>
+                                setSupplierReview(
+                                  (current) => ({
+                                    ...current,
+                                    [submission.id]:
+                                      {
+                                        ...review,
+                                        category:
+                                          event
+                                            .target
+                                            .value,
+                                      },
+                                  }),
+                                )
+                              }
+                            >
+                              {categoryOptions.map(
+                                (category) => (
+                                  <option
+                                    key={
+                                      category
+                                    }
+                                    value={
+                                      category
+                                    }
+                                  >
+                                    {category}
+                                  </option>
+                                ),
+                              )}
+                            </select>
+                          </AdminField>
+
+                          <AdminField label="Action">
+                            <select
+                              className="admin-select"
+                              value={
+                                review.action
+                              }
+                              disabled={
+                                !canManage
+                              }
+                              onChange={(
+                                event,
+                              ) => {
+                                const action =
+                                  event.target
+                                    .value
+                                  === "merge"
+                                    ? "merge"
+                                    : "create";
+
+                                setSupplierReview(
+                                  (current) => ({
+                                    ...current,
+                                    [submission.id]:
+                                      {
+                                        ...review,
+                                        action,
+                                        supplierId:
+                                          action
+                                          === "merge"
+                                            ? review
+                                                .supplierId
+                                            : "",
+                                      },
+                                  }),
+                                );
+                              }}
+                            >
+                              <option value="create">
+                                Create Supplier Master record
+                              </option>
+
+                              <option value="merge">
+                                Merge with existing Supplier Master
+                              </option>
+                            </select>
+                          </AdminField>
+
+                          {merging ? (
+                            <AdminField label="Existing supplier">
+                              <select
+                                className="admin-select"
+                                value={
+                                  review.supplierId
+                                }
+                                disabled={
+                                  !canManage
+                                }
+                                onChange={(
+                                  event,
+                                ) => {
+                                  const supplierId =
+                                    event.target
+                                      .value;
+
+                                  const supplier =
+                                    workspace
+                                      .supplierDirectory
+                                      .find(
+                                        (item) =>
+                                          item.id
+                                          === supplierId,
+                                      );
+
+                                  setSupplierReview(
+                                    (current) => ({
+                                      ...current,
+                                      [submission.id]:
+                                        {
+                                          ...review,
+                                          action:
+                                            "merge",
+                                          supplierId,
+                                          category:
+                                            supplier
+                                              ?.category
+                                            || review
+                                              .category,
+                                        },
+                                    }),
+                                  );
+                                }}
+                              >
+                                <option value="">
+                                  Choose Supplier Master record…
+                                </option>
+
+                                {mergeDirectory.map(
+                                  (supplier) => (
+                                    <option
+                                      key={
+                                        supplier.id
+                                      }
+                                      value={
+                                        supplier.id
+                                      }
+                                    >
+                                      {supplier.name}
+                                      {supplier.category
+                                        ? ` · ${supplier.category}`
+                                        : ""}
+                                    </option>
+                                  ),
+                                )}
+                              </select>
+                            </AdminField>
+                          ) : (
+                            <div className="crm-supplier-review__create-note">
+                              <strong>
+                                New Supplier Master record
+                              </strong>
+                              <span>
+                                The submitted business details will be copied into Supplier Master under the selected category.
+                              </span>
+                            </div>
+                          )}
+
+                          <AdminField label="Review note">
+                            <input
+                              className="admin-input"
+                              value={
+                                review.notes
+                              }
+                              disabled={
+                                !canManage
+                              }
+                              placeholder="Optional internal note"
+                              onChange={(
+                                event,
+                              ) =>
+                                setSupplierReview(
+                                  (current) => ({
+                                    ...current,
+                                    [submission.id]:
+                                      {
+                                        ...review,
+                                        notes:
+                                          event
+                                            .target
+                                            .value,
+                                      },
+                                  }),
+                                )
+                              }
+                            />
+                          </AdminField>
+                        </div>
+
+                        <div className="crm-supplier-review__actions">
+                          <AdminButton
+                            variant="primary"
+                            size="sm"
+                            icon={CheckCircle2}
+                            disabled={
+                              saving
+                              || !canManage
+                              || (
+                                merging
+                                && !review.supplierId
+                              )
+                            }
+                            onClick={() =>
+                              void approveSupplier(
+                                submission,
+                              )
+                            }
+                          >
+                            {merging
+                              ? "Merge & approve"
+                              : "Create & approve"}
+                          </AdminButton>
+
+                          <AdminButton
+                            variant="danger"
+                            size="sm"
+                            icon={X}
+                            disabled={
+                              saving
+                              || !canManage
+                            }
+                            onClick={() =>
+                              void rejectSupplier(
+                                submission,
+                              )
+                            }
+                          >
+                            Reject
+                          </AdminButton>
+                        </div>
+                      </article>
+                    );
+                  },
+                )}
+              </div>
+            ) : null}
+
+            {!workspace.linkedSuppliers.length ? (
+              <AdminEmptyState
+                icon={Store}
+                title="No suppliers linked"
+                description="Approved supplier selections will appear here."
+              />
+            ) : (
+              <div className="crm-linked-suppliers">
+                {workspace.linkedSuppliers.map(
+                  (supplier) => (
+                    <article
+                      key={`${supplier.id}_${supplier.role}`}
+                    >
+                      <div>
+                        <strong>
+                          {supplier.name}
+                        </strong>
+                        <p>
+                          {supplier.role}
+                          {supplier.location
+                            ? ` · ${supplier.location}`
+                            : ""}
+                        </p>
+                      </div>
+
+                      <AdminStatus tone="success">
+                        linked
+                      </AdminStatus>
+                    </article>
+                  ),
+                )}
+              </div>
+            )}
           </AdminAccordion>
 
           <AdminAccordion
