@@ -24,7 +24,7 @@ const fieldLabels: Record<QuestionnaireFieldType, string> = {
   radio: "Radio button select",
   checkbox: "Checkbox select",
   file: "File upload",
-  supplier: "Supplier selection",
+  supplier: "Supplier team",
 };
 
 function baseField(type: QuestionnaireFieldType): Pick<QuestionnaireField, "options" | "supplierRole" | "supplierCategory" | "allowUnlisted" | "multiple"> {
@@ -43,7 +43,9 @@ function blankField(type: QuestionnaireFieldType, index: number): QuestionnaireF
     id: `field_${Date.now()}_${index}`,
     type,
     label: content,
-    help: type === "supplier" ? "Choose an existing supplier or add one for approval." : "",
+    help: type === "supplier"
+      ? "Add each supplier as a Category + Supplier row. Supplier Master matches can be selected and unlisted suppliers can be sent for review."
+      : "",
     required: false,
     ...baseField(type),
   };
@@ -56,7 +58,10 @@ function normaliseField(field: QuestionnaireField): QuestionnaireField {
     supplierRole: field.supplierRole || "",
     supplierCategory: field.supplierCategory || "",
     allowUnlisted: field.allowUnlisted !== false,
-    multiple: field.multiple !== false,
+    multiple:
+      field.type === "supplier"
+        ? true
+        : field.multiple !== false,
   };
 }
 
@@ -73,7 +78,36 @@ function FieldPreview({ field }: { field: QuestionnaireField }) {
       {field.type === "radio" ? <div className="grid gap-2">{field.options.map((option) => <span key={option}><input type="radio" disabled /> {option}</span>)}</div> : null}
       {field.type === "checkbox" ? <div className="grid gap-2">{field.options.map((option) => <span key={option}><input type="checkbox" disabled /> {option}</span>)}</div> : null}
       {field.type === "file" ? <input type="file" disabled /> : null}
-      {field.type === "supplier" ? <div className="portal-supplier-preview"><select disabled><option>Search Supplier Master</option></select>{field.allowUnlisted ? <button type="button" disabled>+ Add supplier not listed</button> : null}<small>{field.multiple ? "Clients may add more than one supplier." : "One supplier can be selected."}</small></div> : null}
+      {field.type === "supplier" ? (
+        <div className="portal-supplier-preview">
+          <div className="grid grid-cols-[minmax(110px,.55fr)_minmax(0,1fr)] gap-2">
+            <small className="font-semibold uppercase tracking-[0.08em]">
+              Category
+            </small>
+            <small className="font-semibold uppercase tracking-[0.08em]">
+              Supplier
+            </small>
+
+            <select disabled>
+              <option>
+                Choose category
+              </option>
+            </select>
+
+            <input
+              disabled
+              placeholder="Search Supplier Master or type a supplier name"
+            />
+          </div>
+
+          <small>
+            Add as many supplier rows as needed.
+            {field.allowUnlisted
+              ? " Names not found in Supplier Master can be entered for review."
+              : ""}
+          </small>
+        </div>
+      ) : null}
     </label>
   );
 }
@@ -108,20 +142,78 @@ export function CRMQuestionnaireTemplate() {
     setTemplate((current) => current ? { ...current, fields: current.fields.map((field, fieldIndex) => fieldIndex === index ? normaliseField({ ...field, ...patch }) : field) } : current);
   }
 
-  function changeFieldType(index: number, type: QuestionnaireFieldType) {
+  function changeFieldType(
+    index: number,
+    type: QuestionnaireFieldType,
+  ) {
+    if (
+      type === "supplier"
+      && template?.fields.some(
+        (field, fieldIndex) =>
+          field.type === "supplier"
+          && fieldIndex !== index,
+      )
+    ) {
+      setError(
+        "Use the existing Supplier team field. A questionnaire only needs one supplier list.",
+      );
+      return;
+    }
+
+    setError("");
+
     setTemplate((current) => current ? {
       ...current,
-      fields: current.fields.map((field, fieldIndex) => fieldIndex === index ? normaliseField({
-        ...field,
-        type,
-        ...baseField(type),
-        required: ["heading", "description"].includes(type) ? false : field.required,
-      }) : field),
+      fields: current.fields.map(
+        (field, fieldIndex) =>
+          fieldIndex === index
+            ? normaliseField({
+                ...field,
+                type,
+                ...baseField(type),
+                required:
+                  ["heading", "description"].includes(type)
+                    ? false
+                    : field.required,
+              })
+            : field,
+      ),
     } : current);
   }
 
-  function addField(type: QuestionnaireFieldType) {
-    setTemplate((current) => current ? { ...current, fields: [...current.fields, blankField(type, current.fields.length + 1)] } : current);
+  function addField(
+    type: QuestionnaireFieldType,
+  ) {
+    if (
+      type === "supplier"
+      && template?.fields.some(
+        (field) =>
+          field.type === "supplier",
+      )
+    ) {
+      setError(
+        "Use the existing Supplier team field. A questionnaire only needs one supplier list.",
+      );
+      return;
+    }
+
+    setError("");
+
+    setTemplate(
+      (current) =>
+        current
+          ? {
+              ...current,
+              fields: [
+                ...current.fields,
+                blankField(
+                  type,
+                  current.fields.length + 1,
+                ),
+              ],
+            }
+          : current,
+    );
   }
 
   function moveField(from: number, to: number) {
@@ -192,11 +284,37 @@ export function CRMQuestionnaireTemplate() {
               <AdminField label="Status"><select className="admin-select" value={template.status} disabled={!canManage} onChange={(event) => setTemplate((current) => current ? { ...current, status: event.target.value as QuestionnaireTemplate["status"] } : current)}><option value="draft">Draft</option><option value="active">Active</option><option value="archived">Archived</option></select></AdminField>
             </div>
             <div className="questionnaire-field-palette">
-              {(Object.keys(fieldLabels) as QuestionnaireFieldType[]).map((type) => <AdminButton key={type} size="sm" icon={Plus} disabled={!canManage} onClick={() => addField(type)}>{fieldLabels[type]}</AdminButton>)}
+              {(Object.keys(fieldLabels) as QuestionnaireFieldType[]).map(
+                (type) => {
+                  const supplierAlreadyAdded =
+                    type === "supplier"
+                    && template.fields.some(
+                      (field) =>
+                        field.type === "supplier",
+                    );
+
+                  return (
+                    <AdminButton
+                      key={type}
+                      size="sm"
+                      icon={Plus}
+                      disabled={
+                        !canManage
+                        || supplierAlreadyAdded
+                      }
+                      onClick={() =>
+                        addField(type)
+                      }
+                    >
+                      {fieldLabels[type]}
+                    </AdminButton>
+                  );
+                },
+              )}
             </div>
           </AdminPanel>
 
-          <AdminPanel title="Questionnaire fields" description="Supplier selection fields search this business's Supplier Master and keep unlisted names in a review queue." icon={GripVertical}>
+          <AdminPanel title="Questionnaire fields" description="Use one Supplier team field. Clients complete it as Category + Supplier rows, with Supplier Master matching and an approval queue for names not yet listed." icon={GripVertical}>
             <div className="questionnaire-builder-fields">
               {!template.fields.length ? <div className="admin-empty-state"><h3>No fields yet</h3><p>Add a heading or question from the field palette.</p></div> : null}
               {template.fields.map((field, index) => (
@@ -216,7 +334,47 @@ export function CRMQuestionnaireTemplate() {
                     </div>
                     {!['heading','description'].includes(field.type) ? <AdminField label="Help text"><input className="admin-input" value={field.help} disabled={!canManage} onChange={(event) => updateField(index, { help: event.target.value })} /></AdminField> : null}
                     {["select", "radio", "checkbox"].includes(field.type) ? <AdminField label="Options" help="One option per line."><textarea className="admin-textarea min-h-24" value={field.options.join("\n")} disabled={!canManage} onChange={(event) => updateField(index, { options: event.target.value.split("\n").map((item) => item.trim()).filter(Boolean) })} /></AdminField> : null}
-                    {field.type === "supplier" ? <div className="questionnaire-supplier-config"><AdminField label="Wedding supplier role" help="The role used when linking the selected supplier to the Wedding."><input className="admin-input" value={field.supplierRole} disabled={!canManage} onChange={(event) => updateField(index, { supplierRole: event.target.value })} placeholder="Florist, videographer, band…" /></AdminField><AdminField label="Supplier category filter" help="Optional. Leave blank to search all active suppliers."><input className="admin-input" value={field.supplierCategory} disabled={!canManage} onChange={(event) => updateField(index, { supplierCategory: event.target.value })} placeholder="Florist" /></AdminField><label className="admin-choice-row"><div><strong>Allow supplier not listed</strong><p>Unlisted suppliers appear on the Job page for approval or merging.</p></div><input type="checkbox" checked={field.allowUnlisted} disabled={!canManage} onChange={(event) => updateField(index, { allowUnlisted: event.target.checked })} /></label><label className="admin-choice-row"><div><strong>Allow multiple suppliers</strong><p>Useful for a full supplier-team question. Disable for a single role such as florist.</p></div><input type="checkbox" checked={field.multiple} disabled={!canManage} onChange={(event) => updateField(index, { multiple: event.target.checked })} /></label></div> : null}
+                    {field.type === "supplier" ? (
+                      <div className="questionnaire-supplier-config">
+                        <div className="rounded-xl border border-black/[0.07] bg-neutral-50 px-3 py-3">
+                          <strong className="block text-[10px] font-semibold text-neutral-800">
+                            One Supplier team list
+                          </strong>
+                          <p className="mt-1 text-[9px] leading-5 text-neutral-500">
+                            Clients add suppliers as compact Category + Supplier rows. Supplier Master matches are selected from one searchable directory instead of creating a separate question for every supplier type.
+                          </p>
+                        </div>
+
+                        <label className="admin-choice-row">
+                          <div>
+                            <strong>
+                              Allow supplier not listed
+                            </strong>
+                            <p>
+                              A client may type a supplier name when no Supplier Master match exists. It will appear on the Job for approval or merging.
+                            </p>
+                          </div>
+
+                          <input
+                            type="checkbox"
+                            checked={
+                              field.allowUnlisted
+                            }
+                            disabled={!canManage}
+                            onChange={(event) =>
+                              updateField(
+                                index,
+                                {
+                                  allowUnlisted:
+                                    event.target
+                                      .checked,
+                                },
+                              )
+                            }
+                          />
+                        </label>
+                      </div>
+                    ) : null}
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       {!['heading','description'].includes(field.type) ? <label className="inline-flex items-center gap-2 text-[10px]"><input type="checkbox" checked={field.required} disabled={!canManage} onChange={(event) => updateField(index, { required: event.target.checked })} />Required</label> : <span />}
                       <div className="flex gap-2"><AdminButton size="sm" disabled={!canManage || index === 0} onClick={() => moveField(index, index - 1)}>Move up</AdminButton><AdminButton size="sm" disabled={!canManage || index === template.fields.length - 1} onClick={() => moveField(index, index + 1)}>Move down</AdminButton><AdminButton variant="danger" size="sm" icon={Trash2} disabled={!canManage} onClick={() => setTemplate((current) => current ? { ...current, fields: current.fields.filter((_, fieldIndex) => fieldIndex !== index) } : current)}>Remove</AdminButton></div>
