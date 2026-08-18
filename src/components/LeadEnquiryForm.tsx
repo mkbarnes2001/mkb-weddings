@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useRef,
   useState,
   type FormEvent,
   type ReactNode,
@@ -48,6 +49,20 @@ type LeadAddress = {
   placeId?: string;
   lat?: number;
   lng?: number;
+};
+
+type PlaceSuggestion = {
+  placeId: string;
+  text: string;
+  mainText: string;
+  secondaryText: string;
+};
+
+type PlaceDetail = {
+  placeId: string;
+  name: string;
+  formattedAddress: string;
+  address: LeadAddress;
 };
 
 type LeadFormConfig = {
@@ -564,24 +579,42 @@ export function LeadEnquiryForm({
 
       return (
         <div className="grid gap-3 md:grid-cols-2">
-          <input
-            className="md:col-span-2"
-            required={field.required}
-            disabled={submitting}
-            value={address.line1 || ""}
-            placeholder={
-              field.placeholder
-              || "Address line 1"
-            }
-            autoComplete="address-line1"
-            onChange={(event) =>
-              setAddressPart(
-                field.id,
-                "line1",
-                event.target.value,
-              )
-            }
-          />
+          <div className="md:col-span-2">
+            <PublicPlacesAutocomplete
+              kind="address"
+              value={
+                address.formattedAddress
+                || address.line1
+                || ""
+              }
+              placeholder={
+                field.placeholder
+                || "Start typing your address…"
+              }
+              autoComplete="address-line1"
+              required={field.required}
+              disabled={submitting}
+              onManualChange={(value) =>
+                setAnswer(
+                  field.id,
+                  {
+                    ...address,
+                    line1: value,
+                    formattedAddress: "",
+                    placeId: "",
+                    lat: undefined,
+                    lng: undefined,
+                  },
+                )
+              }
+              onPlaceSelect={(place) =>
+                setAnswer(
+                  field.id,
+                  place.address,
+                )
+              }
+            />
+          </div>
 
           <input
             className="md:col-span-2"
@@ -659,8 +692,8 @@ export function LeadEnquiryForm({
 
     if (field.type === "venue") {
       return (
-        <input
-          {...common}
+        <PublicPlacesAutocomplete
+          kind="venue"
           value={textAnswer(
             answers,
             field.id,
@@ -670,10 +703,19 @@ export function LeadEnquiryForm({
             || "Venue name or TBC"
           }
           autoComplete="off"
-          onChange={(event) =>
+          required={field.required}
+          disabled={submitting}
+          onManualChange={(value) =>
             setAnswer(
               field.id,
-              event.target.value,
+              value,
+            )
+          }
+          onPlaceSelect={(place) =>
+            setAnswer(
+              field.id,
+              place.name
+              || place.formattedAddress,
             )
           }
         />
@@ -890,6 +932,383 @@ export function LeadEnquiryForm({
   );
 
   return body;
+}
+
+function PublicPlacesAutocomplete({
+  kind,
+  value,
+  placeholder,
+  autoComplete,
+  required,
+  disabled,
+  onManualChange,
+  onPlaceSelect,
+}: {
+  kind: "address" | "venue";
+  value: string;
+  placeholder: string;
+  autoComplete: string;
+  required?: boolean;
+  disabled?: boolean;
+  onManualChange: (value: string) => void;
+  onPlaceSelect: (place: PlaceDetail) => void;
+}) {
+  const [
+    suggestions,
+    setSuggestions,
+  ] = useState<PlaceSuggestion[]>([]);
+
+  const [
+    configured,
+    setConfigured,
+  ] = useState<boolean | null>(
+    null,
+  );
+
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
+
+  const [
+    open,
+    setOpen,
+  ] = useState(false);
+
+  const [
+    query,
+    setQuery,
+  ] = useState(value);
+
+  const sessionTokenRef =
+    useRef<string>("");
+
+  useEffect(
+    () => {
+      setQuery(value);
+    },
+    [value],
+  );
+
+  useEffect(
+    () => {
+      const input =
+        query.trim();
+
+      if (
+        disabled
+        || input.length < 3
+      ) {
+        setSuggestions([]);
+        setLoading(false);
+        return;
+      }
+
+      if (
+        !sessionTokenRef.current
+      ) {
+        sessionTokenRef.current =
+          crypto.randomUUID();
+      }
+
+      const controller =
+        new AbortController();
+
+      const timer =
+        window.setTimeout(
+          async () => {
+            setLoading(true);
+
+            try {
+              const response =
+                await fetch(
+                  "/api/public/crm/places",
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type":
+                        "application/json",
+                      Accept:
+                        "application/json",
+                    },
+                    signal:
+                      controller.signal,
+                    body:
+                      JSON.stringify({
+                        action:
+                          "autocomplete",
+                        kind,
+                        input,
+                        sessionToken:
+                          sessionTokenRef.current,
+                      }),
+                  },
+                );
+
+              const payload =
+                await response
+                  .json()
+                  .catch(
+                    () => ({}),
+                  );
+
+              if (
+                controller.signal.aborted
+              ) {
+                return;
+              }
+
+              if (!response.ok) {
+                setSuggestions([]);
+                return;
+              }
+
+              setConfigured(
+                Boolean(
+                  payload.configured,
+                ),
+              );
+
+              setSuggestions(
+                Array.isArray(
+                  payload.suggestions,
+                )
+                  ? payload.suggestions
+                  : [],
+              );
+            } catch (lookupError) {
+              if (
+                !controller.signal.aborted
+              ) {
+                setSuggestions([]);
+              }
+            } finally {
+              if (
+                !controller.signal.aborted
+              ) {
+                setLoading(false);
+              }
+            }
+          },
+          280,
+        );
+
+      return () => {
+        window.clearTimeout(
+          timer,
+        );
+
+        controller.abort();
+      };
+    },
+    [
+      query,
+      kind,
+      disabled,
+    ],
+  );
+
+  async function choose(
+    suggestion:
+      PlaceSuggestion,
+  ) {
+    const token =
+      sessionTokenRef.current;
+
+    setQuery(
+      suggestion.text,
+    );
+
+    setOpen(false);
+    setSuggestions([]);
+
+    if (!token) {
+      onManualChange(
+        suggestion.mainText
+        || suggestion.text,
+      );
+
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response =
+        await fetch(
+          "/api/public/crm/places",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+              Accept:
+                "application/json",
+            },
+            body:
+              JSON.stringify({
+                action:
+                  "details",
+                kind,
+                placeId:
+                  suggestion.placeId,
+                sessionToken:
+                  token,
+              }),
+          },
+        );
+
+      const payload =
+        await response
+          .json()
+          .catch(
+            () => ({}),
+          );
+
+      if (
+        response.ok
+        && payload?.place
+      ) {
+        const place =
+          payload.place as PlaceDetail;
+
+        onPlaceSelect(
+          place,
+        );
+
+        setQuery(
+          kind === "venue"
+            ? (
+                place.name
+                || suggestion.mainText
+                || suggestion.text
+              )
+            : (
+                place.formattedAddress
+                || suggestion.text
+              ),
+        );
+      } else {
+        onManualChange(
+          kind === "venue"
+            ? (
+                suggestion.mainText
+                || suggestion.text
+              )
+            : suggestion.text,
+        );
+      }
+    } catch {
+      onManualChange(
+        kind === "venue"
+          ? (
+              suggestion.mainText
+              || suggestion.text
+            )
+          : suggestion.text,
+      );
+    } finally {
+      sessionTokenRef.current =
+        "";
+
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <input
+          value={query}
+          required={required}
+          disabled={disabled}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          onFocus={() =>
+            setOpen(true)
+          }
+          onBlur={() =>
+            window.setTimeout(
+              () => setOpen(false),
+              120,
+            )
+          }
+          onChange={(event) => {
+            const next =
+              event.target.value;
+
+            setQuery(next);
+            setOpen(true);
+            onManualChange(next);
+
+            if (
+              next.trim().length < 3
+            ) {
+              sessionTokenRef.current =
+                "";
+
+              setSuggestions([]);
+            }
+          }}
+        />
+
+        {loading ? (
+          <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-foreground/40" />
+        ) : null}
+      </div>
+
+      {open
+      && configured
+      && suggestions.length ? (
+        <div
+          className="absolute z-40 mt-2 w-full overflow-hidden border border-primary/15 bg-background shadow-xl"
+          role="listbox"
+        >
+          {suggestions.map(
+            (suggestion) => (
+              <button
+                key={
+                  suggestion.placeId
+                }
+                type="button"
+                role="option"
+                className="block w-full border-b border-primary/10 px-4 py-3 text-left last:border-b-0 hover:bg-secondary/50"
+                onMouseDown={(event) =>
+                  event.preventDefault()
+                }
+                onClick={() =>
+                  void choose(
+                    suggestion,
+                  )
+                }
+              >
+                <span className="block text-sm font-medium">
+                  {suggestion.mainText
+                    || suggestion.text}
+                </span>
+
+                {suggestion.secondaryText ? (
+                  <span className="mt-1 block text-xs text-foreground/55">
+                    {suggestion.secondaryText}
+                  </span>
+                ) : null}
+              </button>
+            ),
+          )}
+
+          <div className="flex justify-end border-t border-primary/10 px-3 py-2">
+            <span
+              className="text-[11px] font-medium text-foreground/55"
+              translate="no"
+              aria-label="Google Maps"
+            >
+              Google Maps
+            </span>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export function Enquire() {
