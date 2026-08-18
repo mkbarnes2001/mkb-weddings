@@ -1042,7 +1042,7 @@ async function getContactsForEnquiry(db: D1Db, workspaceId: string, enquiryId: s
 export async function getCrmOverview(db: D1Db, actor: CrmActor) {
   requirePermission(actor, "crm:read");
   await ensureCrmWorkspaceSetup(db, actor.workspaceId);
-  const [stageResult, enquiryResult, contactResult, jobResult, settings] = await Promise.all([
+  const [stageResult, enquiryResult, contactResult, jobResult, settings, schema] = await Promise.all([
     db.prepare(`SELECT * FROM crm_pipeline_stages WHERE workspace_id = ? AND status = 'active' ORDER BY sort_order, name`).bind(actor.workspaceId).all(),
     db.prepare(`${ENQUIRY_SELECT} WHERE e.workspace_id = ? AND e.status <> 'archived' ORDER BY e.created_at DESC`).bind(actor.workspaceId).all(),
     db.prepare(`SELECT * FROM crm_contacts WHERE workspace_id = ? AND status = 'active' ORDER BY updated_at DESC LIMIT 200`).bind(actor.workspaceId).all(),
@@ -1063,6 +1063,12 @@ export async function getCrmOverview(db: D1Db, actor: CrmActor) {
       LEFT JOIN workspace_settings settings ON settings.workspace_id = lead.workspace_id
       WHERE lead.workspace_id = ? LIMIT 1
     `).bind(actor.workspaceId).first(),
+    db.prepare(`
+      SELECT value
+      FROM schema_meta
+      WHERE key = 'schema_version'
+      LIMIT 1
+    `).first(),
   ]);
   const mailResult =
     await db.prepare(`
@@ -1119,7 +1125,7 @@ export async function getCrmOverview(db: D1Db, actor: CrmActor) {
         }),
       );
   return {
-    schemaVersion: 30,
+    schemaVersion: Number(schema?.value || 0),
     workspace: { id: actor.workspaceId, name: text(actor.businessName), currency: text(settings?.workspace_currency || "GBP") },
     stages: (stageResult.results || []).map(hydrateStage),
     enquiries,
