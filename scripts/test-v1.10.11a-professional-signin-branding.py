@@ -8,26 +8,77 @@ ROOT = Path(__file__).resolve().parents[1]
 auth = (
     ROOT
     / "src/admin/auth/ProfessionalAuth.tsx"
-).read_text(encoding="utf-8")
+).read_text(
+    encoding="utf-8",
+)
 
-# The shared professional entry point must never inherit tenant/MKB branding.
+css = (
+    ROOT
+    / "src/admin/admin-theme.css"
+).read_text(
+    encoding="utf-8",
+)
+
+# The shared professional entry point must never inherit
+# tenant / MKB branding.
 assert 'src="/favicon-32x32.png"' not in auth
 assert 'alt="MKB Weddings"' not in auth
 assert "MKB Weddings" not in auth
 
-# Use the same native WedPlanned text-wordmark fallback as the public site.
-assert 'aria-label="WedPlanned"' in auth
-assert '"Times New Roman", Times, serif' in auth
-assert "fontStyle: \"italic\"" in auth
-assert ">\n            Wed\n          </span>" in auth
-assert ">\n            Planned\n          </span>" in auth
+# Use the native WedPlanned text-wordmark fallback and
+# dedicated Admin styling rather than legacy inline styles.
+for token in (
+    'aria-label="WedPlanned"',
+    'className="professional-auth-brand"',
+    'className="professional-auth-brand__wed"',
+    'className="professional-auth-brand__planned"',
+    ">\n            Wed\n          </span>",
+    ">\n            Planned\n          </span>",
+):
+    assert token in auth, token
 
-# Professional authentication language remains platform-level.
-assert "Professional access" in auth
-assert "WedPlanned Pro sign in" in auth
-assert "business membership" in auth
+for token in (
+    ".professional-auth-brand__wed",
+    '"WedPlanned Canela"',
+    '"Canela"',
+    "font-style: italic;",
+    ".professional-auth-brand__planned",
+):
+    assert token in css, token
 
-print("PASS v1.10.11a professional sign-in branding")
-print("  MKB tenant branding removed: verified")
-print("  WedPlanned platform wordmark fallback: verified")
-print("  professional authentication messaging preserved: verified")
+# Legacy inline branding implementation must stay removed.
+assert 'style={{' not in auth[
+    auth.index(
+        'className="professional-auth-brand"'
+    ):
+    auth.index(
+        'className="professional-auth-eyebrow"'
+    )
+]
+
+# Professional authentication language remains platform-level
+# and matches the current WedPlanned public access language.
+for token in (
+    "Professional access",
+    "Sign in to your workspace.",
+    "business membership",
+):
+    assert token in auth, token
+
+assert "WedPlanned Pro sign in" not in auth
+
+print(
+    "PASS v1.10.11a professional sign-in branding"
+)
+print(
+    "  MKB tenant branding removed: verified"
+)
+print(
+    "  WedPlanned platform wordmark fallback: verified"
+)
+print(
+    "  dedicated Canela wordmark styling: verified"
+)
+print(
+    "  current professional authentication messaging: verified"
+)
