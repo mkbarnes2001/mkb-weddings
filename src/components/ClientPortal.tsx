@@ -1196,7 +1196,25 @@ export function ClientPortal() {
   async function requestLink() {
     setSaving(true); setError(""); setMessage("");
     try {
-      const result = await jsonRequest<{ ok: true; message: string }>(portalApiPath("/api/public/client-portal/request-link"), { method: "POST", body: JSON.stringify({ email }) });
+      const quoteId =
+        new URLSearchParams(
+          window.location.search,
+        ).get("quote")
+        || "";
+
+      const result = await jsonRequest<{ ok: true; message: string }>(
+        portalApiPath(
+          "/api/public/client-portal/request-link",
+        ),
+        {
+          method: "POST",
+          body: JSON.stringify({
+            email,
+            quoteId,
+          }),
+        },
+      );
+
       setMessage(result.message);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Unable to send sign-in link.");
@@ -1548,7 +1566,13 @@ export function ClientPortal() {
           <div className="client-portal-brand">{portal?.business?.logoUrl ? <img src={portal.business.logoUrl} alt="" /> : <span>WP</span>}</div>
           <p className="client-portal-eyebrow">Secure client portal</p>
           <h1>Open your wedding workspace</h1>
-          <p>Enter the email address linked to your quote or booking. We will send a one-time sign-in link.</p>
+          <p>
+            {new URLSearchParams(
+              window.location.search,
+            ).get("reauth") === "1"
+              ? "For security, this email sign-in link is no longer active. Enter your email address and we will send a fresh secure link so you can continue where you left off."
+              : "Enter the email address linked to your quote or booking. We will send a one-time sign-in link."}
+          </p>
           {error ? <div className="client-portal-alert client-portal-alert--error">{error}</div> : null}
           {message ? <div className="client-portal-alert client-portal-alert--success">{message}</div> : null}
           <label><span>Email address</span><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></label>

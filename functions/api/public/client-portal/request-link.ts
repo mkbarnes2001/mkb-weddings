@@ -15,7 +15,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const body: any = await context.request.json().catch(() => ({}));
     const workspaceId = await resolveClientPortalWorkspaceId(context.env.MKB_DB, context.request);
-    const result = await requestPortalMagicLink(context.env.MKB_DB, context.env, workspaceId, context.request.url, body?.email);
+    const result = await requestPortalMagicLink(
+      context.env.MKB_DB,
+      context.env,
+      workspaceId,
+      context.request.url,
+      body?.email,
+      body?.quoteId,
+    );
     return Response.json(result, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error: any) {
     return Response.json({ error: error?.message || "Unable to send secure sign-in link." }, { status: error?.statusCode || 500 });

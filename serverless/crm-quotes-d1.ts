@@ -3044,13 +3044,23 @@ export async function declineQuoteAsClient(db: D1Db, request: Request, workspace
   return { ok: true, status: "declined" };
 }
 
-export async function requestQuotePortalMagicLink(db: D1Db, env: QuoteEmailEnv, workspaceId: string, emailInput: unknown) {
+export async function requestQuotePortalMagicLink(db: D1Db, env: QuoteEmailEnv, workspaceId: string, emailInput: unknown, quoteIdInput?: unknown) {
   const email = lower(emailInput);
   if (!validEmail(email)) return false;
   const identity = await db.prepare(`SELECT * FROM client_identities WHERE workspace_id = ? AND email_normalized = ? AND status = 'active' LIMIT 1`).bind(workspaceId, email).first();
   if (!identity) return false;
   const rows = await quoteAccessForIdentity(db, workspaceId, text(identity.id));
-  const quote = (rows.results || []).find((item: any) => ["sent", "viewed"].includes(text(item.status)));
+  const requestedQuoteId = text(quoteIdInput);
+  const quote = (rows.results || []).find(
+    (item: any) =>
+      ["sent", "viewed"].includes(
+        text(item.status),
+      )
+      && (
+        !requestedQuoteId
+        || text(item.id) === requestedQuoteId
+      ),
+  );
   if (!quote) return false;
   const version = await fullVersion(db, workspaceId, text(quote.current_version_id));
   if (!version || !["sent", "viewed"].includes(version.status)) return false;
@@ -3069,9 +3079,12 @@ export async function verifyQuotePortalMagicLink(db: D1Db, rawToken: string) {
   const tokenHash = await sha256(text(rawToken));
   const row = await db.prepare(`SELECT invitation.*, identity.email, identity.display_name, identity.status AS identity_status FROM crm_quote_invitations invitation JOIN client_identities identity ON identity.id = invitation.identity_id AND identity.workspace_id = invitation.workspace_id JOIN crm_quote_client_access access ON access.quote_id = invitation.quote_id AND access.workspace_id = invitation.workspace_id AND access.identity_id = invitation.identity_id AND access.status = 'active' JOIN crm_quotes quote ON quote.id = invitation.quote_id AND quote.workspace_id = invitation.workspace_id AND quote.current_version_id = invitation.version_id WHERE invitation.token_hash = ? LIMIT 1`).bind(tokenHash).first();
   if (!row) return null;
-  if (text(row.identity_status) !== "active" || text(row.consumed_at) || !text(row.expires_at) || Date.parse(text(row.expires_at)) <= Date.now()) return { ok: false, status: 400, error: "This sign-in link is invalid or has expired." } as const;
+  if (text(row.identity_status) !== "active") return { ok: false, status: 400, error: "This sign-in link is invalid or has expired." } as const;
+  const returnPath = text(row.return_path).startsWith("/") ? text(row.return_path) : "/client-portal";
+  if (text(row.consumed_at)) return { ok: false, status: 400, error: "This sign-in link has already been used.", identityId: text(row.identity_id), returnPath } as const;
+  if (!text(row.expires_at) || Date.parse(text(row.expires_at)) <= Date.now()) return { ok: false, status: 400, error: "This sign-in link has expired.", identityId: text(row.identity_id), returnPath } as const;
   const consumed = await db.prepare(`UPDATE crm_quote_invitations SET consumed_at = CURRENT_TIMESTAMP WHERE id = ? AND consumed_at IS NULL AND datetime(expires_at) > CURRENT_TIMESTAMP`).bind(row.id).run();
-  if (Number(consumed?.meta?.changes || 0) !== 1) return { ok: false, status: 400, error: "This sign-in link is invalid, expired or has already been used." } as const;
+  if (Number(consumed?.meta?.changes || 0) !== 1) return { ok: false, status: 400, error: "This sign-in link is invalid, expired or has already been used.", identityId: text(row.identity_id), returnPath } as const;
   const rawSession = randomToken(32);
   const sessionHash = await sha256(rawSession);
   const sessionExpiresAt = new Date(Date.now() + CLIENT_SESSION_TTL_MS).toISOString();
@@ -3079,5 +3092,5 @@ export async function verifyQuotePortalMagicLink(db: D1Db, rawToken: string) {
     db.prepare(`UPDATE client_identities SET verified_at = COALESCE(verified_at, CURRENT_TIMESTAMP), last_authenticated_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).bind(row.identity_id),
     db.prepare(`INSERT INTO client_identity_sessions (id, identity_id, token_hash, expires_at, last_seen_at, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(`session_${crypto.randomUUID()}`, row.identity_id, sessionHash, sessionExpiresAt),
   ]);
-  return { ok: true, status: 200, sessionToken: rawSession, returnPath: text(row.return_path).startsWith("/") ? text(row.return_path) : "/client-portal" } as const;
+  return { ok: true, status: 200, sessionToken: rawSession, returnPath } as const;
 }

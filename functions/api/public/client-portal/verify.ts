@@ -1,4 +1,8 @@
-import { clientSessionCookie } from "../../../../serverless/client-auth-d1";
+import {
+  clearClientSessionCookie,
+  clientSessionCookie,
+  getAuthenticatedClientIdentity,
+} from "../../../../serverless/client-auth-d1";
 import { verifyPortalMagicLink } from "../../../../serverless/client-portal-d1";
 import {
   recordCrmEmailClick,
@@ -16,6 +20,62 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const url = new URL(context.request.url);
     const result = await verifyPortalMagicLink(context.env.MKB_DB, String(url.searchParams.get("token") || ""));
     if (!result.ok) {
+      if (
+        "identityId" in result
+        && "returnPath" in result
+        && result.identityId
+        && result.returnPath
+      ) {
+        const authenticatedIdentity =
+          await getAuthenticatedClientIdentity(
+            context.env.MKB_DB,
+            context.request,
+          );
+
+        if (
+          authenticatedIdentity?.id
+          === result.identityId
+        ) {
+          return new Response(null, {
+            status: 302,
+            headers: {
+              Location:
+                new URL(
+                  result.returnPath,
+                  url.origin,
+                ).toString(),
+              "Cache-Control":
+                "private, no-store",
+            },
+          });
+        }
+
+        const reauthUrl =
+          new URL(
+            result.returnPath,
+            url.origin,
+          );
+
+        reauthUrl.searchParams.set(
+          "reauth",
+          "1",
+        );
+
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location:
+              reauthUrl.toString(),
+            "Set-Cookie":
+              clearClientSessionCookie(
+                context.request.url,
+              ),
+            "Cache-Control":
+              "private, no-store",
+          },
+        });
+      }
+
       return new Response(errorPage(result.error), {
         status: result.status,
         headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "private, no-store" },

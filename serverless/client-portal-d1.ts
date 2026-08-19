@@ -1156,16 +1156,43 @@ async function publicIdentity(db: D1Db, request: Request, workspaceId: string) {
   return identity;
 }
 
-export async function requestPortalMagicLink(db: D1Db, env: EmailEnv, workspaceId: string, requestUrl: string, emailInput: unknown) {
+export async function requestPortalMagicLink(db: D1Db, env: EmailEnv, workspaceId: string, requestUrl: string, emailInput: unknown, quoteIdInput?: unknown) {
   const email = lower(emailInput);
   const generic = { ok: true, message: "If that email has active client-portal access, a secure sign-in link will arrive shortly." };
   if (!validEmail(email)) return generic;
   const identity = await db.prepare(`SELECT * FROM client_identities WHERE workspace_id = ? AND email_normalized = ? AND status = 'active' LIMIT 1`).bind(workspaceId, email).first();
   if (!identity) return generic;
+
+  const requestedQuoteId =
+    text(quoteIdInput);
+
+  if (requestedQuoteId) {
+    const targetedQuoteSent =
+      await requestQuotePortalMagicLink(
+        db,
+        env,
+        workspaceId,
+        email,
+        requestedQuoteId,
+      );
+
+    if (targetedQuoteSent) {
+      return generic;
+    }
+  }
+
   const accessRows = await portalAccessForIdentity(db, workspaceId, text(identity.id));
   const access = accessRows.results?.[0];
   if (!access) {
-    await requestQuotePortalMagicLink(db, env, workspaceId, email).catch(() => false);
+    if (!requestedQuoteId) {
+      await requestQuotePortalMagicLink(
+        db,
+        env,
+        workspaceId,
+        email,
+      ).catch(() => false);
+    }
+
     return generic;
   }
   const recent = await db.prepare(`
@@ -1239,10 +1266,11 @@ export async function verifyPortalMagicLink(db: D1Db, rawToken: string) {
     return { ok: false, status: 400, error: "This sign-in link is invalid or has expired." } as const;
   }
   if (text(row.identity_status) !== "active") return { ok: false, status: 400, error: "This sign-in link is invalid or has expired." } as const;
-  if (text(row.consumed_at)) return { ok: false, status: 400, error: "This sign-in link has already been used." } as const;
-  if (!text(row.expires_at) || Date.parse(text(row.expires_at)) <= Date.now()) return { ok: false, status: 400, error: "This sign-in link has expired." } as const;
+  const returnPath = text(row.return_path).startsWith("/") ? text(row.return_path) : "/client-portal";
+  if (text(row.consumed_at)) return { ok: false, status: 400, error: "This sign-in link has already been used.", identityId: text(row.identity_id), returnPath } as const;
+  if (!text(row.expires_at) || Date.parse(text(row.expires_at)) <= Date.now()) return { ok: false, status: 400, error: "This sign-in link has expired.", identityId: text(row.identity_id), returnPath } as const;
   const consumed = await db.prepare(`UPDATE crm_portal_invitations SET consumed_at = CURRENT_TIMESTAMP WHERE id = ? AND consumed_at IS NULL AND datetime(expires_at) > CURRENT_TIMESTAMP`).bind(row.id).run();
-  if (Number(consumed?.meta?.changes || 0) !== 1) return { ok: false, status: 400, error: "This sign-in link is invalid, expired or has already been used." } as const;
+  if (Number(consumed?.meta?.changes || 0) !== 1) return { ok: false, status: 400, error: "This sign-in link is invalid, expired or has already been used.", identityId: text(row.identity_id), returnPath } as const;
 
   const rawSession = randomToken(32);
   const sessionHash = await sha256(rawSession);
@@ -1254,7 +1282,6 @@ export async function verifyPortalMagicLink(db: D1Db, rawToken: string) {
     db.prepare(`INSERT INTO client_identity_sessions (id, identity_id, token_hash, expires_at, last_seen_at, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(`session_${crypto.randomUUID()}`, row.identity_id, sessionHash, sessionExpiresAt),
   ]);
   await recordJobActivity(db, { email: row.email }, text(row.workspace_id), text(row.job_id), "portal.signed_in", "Client signed in to the portal.", { identityId: row.identity_id });
-  const returnPath = text(row.return_path).startsWith("/") ? text(row.return_path) : "/client-portal";
   return { ok: true, status: 200, sessionToken: rawSession, returnPath } as const;
 }
 
