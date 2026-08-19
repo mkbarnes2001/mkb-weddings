@@ -57,20 +57,17 @@ assert db.execute(
     FROM schema_meta
     WHERE key='schema_version'
     """
-).fetchone()[0] == "44"
+).fetchone()[0] == "45"
 
 assert not db.execute(
     "PRAGMA foreign_key_check"
 ).fetchall()
 
-assert not list(
-    (
-        ROOT
-        / "d1/migrations"
-    ).glob(
-        "045*"
-    )
-)
+assert (
+    ROOT
+    / "d1/migrations"
+    / "045_crm_configurable_lead_form.sql"
+).is_file()
 
 
 # Shared renderer: no second professional answer model.
@@ -282,5 +279,5 @@ print(
 )
 
 print(
-    "  schema 44 / no migration 045: verified"
+    "  schema 45 / migration 045 compatibility: verified"
 )

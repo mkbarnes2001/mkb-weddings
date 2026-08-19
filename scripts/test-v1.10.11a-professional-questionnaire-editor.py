@@ -39,7 +39,7 @@ version = db.execute(
     "WHERE key='schema_version'"
 ).fetchone()[0]
 
-assert str(version) == "44"
+assert str(version) == "45"
 
 # One shared response instance is edited, not a professional copy.
 for token in (
