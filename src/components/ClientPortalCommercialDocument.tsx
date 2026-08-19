@@ -327,6 +327,86 @@ function snapshotEntries(
     );
 }
 
+const CLIENT_CONTRACT_TERM_FIELDS: SnapshotField[] = [
+  {
+    key: "invoiceTerms",
+    label: "Payment terms",
+    sourceKeys: [
+      "invoiceTerms",
+    ],
+  },
+  {
+    key: "finalBalanceDueDaysBeforeEvent",
+    label: "Final balance due",
+    sourceKeys: [
+      "finalBalanceDueDaysBeforeEvent",
+    ],
+    format: (value) =>
+      `${value} day${value === "1" ? "" : "s"} before event`,
+  },
+];
+
+function ContractTermsPanel({
+  value,
+}: {
+  value:
+    | Record<string, unknown>
+    | null
+    | undefined;
+}) {
+  const safeValue =
+    value && typeof value === "object"
+      ? value
+      : {};
+
+  const entries =
+    CLIENT_CONTRACT_TERM_FIELDS
+      .map((field) => {
+        const rawValue =
+          snapshotPrimitive(
+            safeValue,
+            field.sourceKeys,
+          );
+
+        if (!rawValue) return null;
+
+        return {
+          key: field.key,
+          label: field.label,
+          value:
+            field.format
+              ? field.format(rawValue)
+              : rawValue,
+        };
+      })
+      .filter(
+        (
+          entry,
+        ): entry is {
+          key: string;
+          label: string;
+          value: string;
+        } => Boolean(entry),
+      );
+
+  if (!entries.length) return null;
+
+  return (
+    <section className="client-portal-document__snapshot">
+      <h3>Contract terms</h3>
+
+      <dl>
+        {entries.map((entry) => (
+          <div key={entry.key}>
+            <dt>{entry.label}</dt>
+            <dd>{entry.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
 function contractBlocks(value: unknown) {
   if (typeof value === "string") {
     return value.trim()
@@ -505,12 +585,9 @@ function ContractDocument({
         )}
       </section>
 
-      {snapshotEntries(contract.terms).length ? (
-        <SnapshotPanel
-          title="Contract terms"
-          value={contract.terms}
-        />
-      ) : null}
+      <ContractTermsPanel
+        value={contract.terms}
+      />
 
       <section className="client-portal-document__signatures">
         <div>
