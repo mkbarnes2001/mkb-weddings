@@ -933,9 +933,24 @@ async function sendPortalEmail(env: EmailEnv, input: { to: string; businessName:
   const provider = lower(env.CLIENT_AUTH_EMAIL_PROVIDER || "resend");
   if (provider !== "resend") throw httpError(`Unsupported client-auth email provider: ${provider}`, 500);
   const apiKey = text(env.RESEND_API_KEY);
-  const fromEmail = text(env.CLIENT_AUTH_FROM_EMAIL || env.WEDPLANNED_AUTH_FROM_EMAIL);
-  if (!apiKey || !fromEmail) throw httpError("Client portal email is not configured. Add RESEND_API_KEY and CLIENT_AUTH_FROM_EMAIL to the public and Admin Pages projects.", 500);
-  const fromName = text(env.CLIENT_AUTH_FROM_NAME || env.WEDPLANNED_AUTH_FROM_NAME || input.businessName || "WedPlanned");
+  const fromEmail = text(
+    env.WEDPLANNED_AUTH_FROM_EMAIL
+    || env.CLIENT_AUTH_FROM_EMAIL,
+  );
+
+  if (!apiKey || !fromEmail) {
+    throw httpError(
+      "Client portal email is not configured. Add RESEND_API_KEY and WEDPLANNED_AUTH_FROM_EMAIL to the public and Admin Pages projects.",
+      500,
+    );
+  }
+
+  const fromName = text(
+    env.WEDPLANNED_AUTH_FROM_NAME
+    || env.CLIENT_AUTH_FROM_NAME
+    || input.businessName
+    || "WedPlanned",
+  );
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -1159,14 +1174,53 @@ export async function requestPortalMagicLink(db: D1Db, env: EmailEnv, workspaceI
   `).bind(workspaceId, identity.id).first();
   if (Number(recent?.total || 0) >= 3) return generic;
   const workspace = await db.prepare(`SELECT COALESCE(NULLIF(business_name,''), 'WedPlanned') AS business_name FROM workspace_settings WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first();
-  const invitation = await createPortalInvitation(db, workspaceId, access, { id: access.contact_id, email, display_name: access.contact_name }, identity, "", requestUrl);
-  await sendPortalEmail(env, {
-    to: email,
-    businessName: text(workspace?.business_name || "WedPlanned"),
-    jobTitle: text(access.title || access.reference),
-    loginUrl: invitation.loginUrl,
-    questionnaireCount: 0,
-  });
+  const invitation = await createPortalInvitation(
+    db,
+    workspaceId,
+    access,
+    {
+      id: access.contact_id,
+      email,
+      display_name: access.contact_name,
+    },
+    identity,
+    "",
+    requestUrl,
+  );
+
+  try {
+    await sendPortalEmail(env, {
+      to: email,
+      businessName:
+        text(
+          workspace?.business_name
+          || "WedPlanned",
+        ),
+      jobTitle:
+        text(
+          access.title
+          || access.reference,
+        ),
+      loginUrl:
+        invitation.loginUrl,
+      questionnaireCount: 0,
+    });
+  } catch (error) {
+    await db.prepare(`
+      DELETE FROM crm_portal_invitations
+      WHERE id = ?
+        AND workspace_id = ?
+    `)
+      .bind(
+        invitation.invitationId,
+        workspaceId,
+      )
+      .run()
+      .catch(() => {});
+
+    throw error;
+  }
+
   return generic;
 }
 
