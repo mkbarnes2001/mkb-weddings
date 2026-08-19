@@ -11827,3 +11827,280 @@ span {
     flex: 1 1 auto;
   }
 }
+/* v1.10.11a — WedPlanned professional authentication surface */
+
+.professional-auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  background: #f5f3ef;
+  padding: 70px 20px;
+  color: #161616;
+  font-family:
+    "Montserrat",
+    "Avenir Next",
+    Avenir,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+.professional-auth-card {
+  width: min(100%, 520px);
+  box-sizing: border-box;
+  border: 1px solid #d8d4cd;
+  border-radius: 18px;
+  background: #fff;
+  padding: 42px;
+  box-shadow:
+    0 22px 60px rgba(17, 17, 17, .06);
+}
+
+.professional-auth-brand {
+  display: inline-flex;
+  align-items: baseline;
+  margin-bottom: 55px;
+  color: #111;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: -.055em;
+}
+
+.professional-auth-brand__wed {
+  margin-right: -.035em;
+  font-family:
+    "WedPlanned Canela",
+    "Canela",
+    Georgia,
+    "Times New Roman",
+    Times,
+    serif;
+  font-size: 1.12em;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.professional-auth-brand__planned {
+  font-weight: 750;
+}
+
+.professional-auth-eyebrow {
+  margin: 0;
+  color: #77736c;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.professional-auth-title {
+  max-width: 440px;
+  margin: 10px 0 0;
+  color: #111;
+  font-family:
+    "Montserrat",
+    "Avenir Next",
+    Avenir,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  font-size: clamp(36px, 5vw, 55px);
+  font-weight: 650;
+  line-height: .98;
+  letter-spacing: -.055em;
+}
+
+.professional-auth-intro {
+  max-width: 420px;
+  margin: 20px 0 0;
+  color: #6b6862;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.professional-auth-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.professional-auth-field {
+  display: grid;
+  gap: 8px;
+}
+
+.professional-auth-field > span {
+  color: #595650;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.professional-auth-input-shell {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  border: 1px solid rgba(17, 17, 17, .16);
+  border-radius: 10px;
+  background: #faf9f7;
+  padding: 0 14px;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
+}
+
+.professional-auth-input-shell:focus-within {
+  border-color: rgba(17, 17, 17, .42);
+  background: #fff;
+  box-shadow:
+    0 0 0 3px rgba(17, 17, 17, .05);
+}
+
+.professional-auth-input-shell > svg {
+  flex: 0 0 auto;
+  color: #8a867f;
+}
+
+.professional-auth-input-shell input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: #161616;
+  font: inherit;
+  font-size: 14px;
+  outline: 0;
+}
+
+.professional-auth-input-shell input::placeholder {
+  color: #aaa69f;
+}
+
+.professional-auth-primary {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 10px;
+  background: #111;
+  padding: 0 18px;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  transition:
+    background 140ms ease,
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.professional-auth-primary:hover:not(:disabled) {
+  background: #292929;
+}
+
+.professional-auth-primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.professional-auth-primary:disabled {
+  cursor: default;
+  opacity: .42;
+}
+
+.professional-auth-message {
+  margin-top: 16px;
+  border-radius: 10px;
+  padding: 11px 13px;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.professional-auth-message--success {
+  background: #eef7f0;
+  color: #285c34;
+}
+
+.professional-auth-message--error {
+  background: #fbefef;
+  color: #8b3030;
+}
+
+.professional-auth-debug {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 16px;
+  color: #161616;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.professional-auth-refresh-boundary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 28px;
+  border-top: 1px solid #ebe8e2;
+  padding-top: 18px;
+}
+
+.professional-auth-refresh-boundary > span {
+  color: #8a867f;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.professional-auth-refresh {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: #4d4a45;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.professional-auth-refresh:hover {
+  color: #111;
+}
+
+@media (max-width: 640px) {
+  .professional-auth-page {
+    padding: 32px 16px;
+  }
+
+  .professional-auth-card {
+    padding: 32px 24px;
+  }
+
+  .professional-auth-brand {
+    margin-bottom: 40px;
+    font-size: 25px;
+  }
+
+  .professional-auth-title {
+    font-size: 42px;
+  }
+
+  .professional-auth-refresh-boundary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

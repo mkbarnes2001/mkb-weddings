@@ -85,61 +85,133 @@ function ProfessionalSignIn({ onSignedIn }: { onSignedIn: () => Promise<void> })
   }
 
   return (
-    <div
-      className="grid min-h-screen place-items-center bg-[#f5f3ef] px-5 py-10 text-neutral-950"
-      style={{ fontFamily: '"Montserrat", "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif' }}
-    >
-      <section className="w-full max-w-lg rounded-3xl bg-white px-7 py-9 text-center shadow-xl ring-1 ring-black/[0.06] sm:px-10 sm:py-11">
+    <main className="professional-auth-page">
+      <section
+        className="professional-auth-card"
+        aria-labelledby="professional-auth-title"
+      >
         <div
-          className="mx-auto inline-flex items-baseline text-[28px] leading-none tracking-[-0.055em]"
+          className="professional-auth-brand"
           aria-label="WedPlanned"
         >
-          <span
-            style={{
-              marginRight: "-.035em",
-              fontFamily: '"Times New Roman", Times, serif',
-              fontSize: "1.12em",
-              fontStyle: "italic",
-              fontWeight: 400,
-            }}
-          >
+          <span className="professional-auth-brand__wed">
             Wed
           </span>
-          <span className="font-bold">
+          <span className="professional-auth-brand__planned">
             Planned
           </span>
         </div>
-        <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-400">Professional access</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-[-0.025em]">WedPlanned Pro sign in</h1>
-        <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-neutral-600">Enter the email attached to your business membership. We will send a private one-time sign-in link.</p>
 
-        <form onSubmit={submit} className="mt-7 space-y-4">
-          <label className="block text-center">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-500">Email address</span>
-            <div className="mt-2 flex h-12 items-center gap-3 rounded-xl border border-black/10 bg-[#faf9f7] px-3.5 text-left focus-within:border-black/30 focus-within:ring-2 focus-within:ring-black/5">
-              <Mail size={16} className="text-neutral-400" />
-              <input type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@business.com" className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
+        <p className="professional-auth-eyebrow">
+          Professional access
+        </p>
+
+        <h1
+          id="professional-auth-title"
+          className="professional-auth-title"
+        >
+          Sign in to your workspace.
+        </h1>
+
+        <p className="professional-auth-intro">
+          Enter the email attached to your business membership.
+          We will send a private one-time sign-in link.
+        </p>
+
+        <form
+          onSubmit={submit}
+          className="professional-auth-form"
+        >
+          <label className="professional-auth-field">
+            <span>Email address</span>
+
+            <div className="professional-auth-input-shell">
+              <Mail
+                size={16}
+                aria-hidden="true"
+              />
+
+              <input
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
+                placeholder="you@business.com"
+              />
             </div>
           </label>
-          <button disabled={busy || !email.trim()} className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-black px-4 text-xs font-semibold text-white disabled:opacity-40">
-            {busy ? <LoaderCircle size={15} className="animate-spin" /> : <KeyRound size={15} />}
-            {busy ? "Sending…" : "Send secure sign-in link"}
+
+          <button
+            type="submit"
+            disabled={busy || !email.trim()}
+            className="professional-auth-primary"
+          >
+            {busy ? (
+              <LoaderCircle
+                size={15}
+                className="animate-spin"
+              />
+            ) : (
+              <KeyRound size={15} />
+            )}
+
+            {busy
+              ? "Sending…"
+              : "Send secure sign-in link"}
           </button>
         </form>
 
-        {message ? <div className="mt-5 rounded-xl bg-emerald-50 px-4 py-3 text-center text-xs leading-5 text-emerald-800">{message}</div> : null}
-        {error ? <div className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-center text-xs leading-5 text-red-800">{error}</div> : null}
+        {message ? (
+          <div
+            className="
+              professional-auth-message
+              professional-auth-message--success
+            "
+          >
+            {message}
+          </div>
+        ) : null}
+
+        {error ? (
+          <div
+            className="
+              professional-auth-message
+              professional-auth-message--error
+            "
+          >
+            {error}
+          </div>
+        ) : null}
+
         {debugUrl ? (
-          <a href={debugUrl} className="mt-4 inline-flex items-center gap-2 text-xs font-semibold underline underline-offset-4">
-            Open development sign-in link <ArrowRight size={13} />
+          <a
+            href={debugUrl}
+            className="professional-auth-debug"
+          >
+            Open development sign-in link
+            <ArrowRight size={13} />
           </a>
         ) : null}
 
-        <button onClick={onSignedIn} className="mx-auto mt-7 inline-flex items-center gap-2 text-[11px] font-medium text-neutral-500 hover:text-black">
-          <RefreshCw size={13} /> I have used the link — refresh session
-        </button>
+        <div className="professional-auth-refresh-boundary">
+          <span>
+            Already used your secure sign-in link?
+          </span>
+
+          <button
+            type="button"
+            onClick={onSignedIn}
+            className="professional-auth-refresh"
+          >
+            <RefreshCw size={13} />
+            Refresh session
+          </button>
+        </div>
       </section>
-    </div>
+    </main>
   );
 }
 
