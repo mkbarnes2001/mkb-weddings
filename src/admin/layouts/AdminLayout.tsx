@@ -41,6 +41,7 @@ const DEFAULT_PLATFORM_IDENTITY: PlatformBrandingIdentity = {
   adminHeaderActionSize: "compact",
   adminStatusSize: "compact",
   adminPageSpacing: "compact",
+  adminActionIcons: {},
 
 };
 

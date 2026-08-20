@@ -57,7 +57,7 @@ assert db.execute(
     FROM schema_meta
     WHERE key='schema_version'
     """
-).fetchone()[0] == "46"
+).fetchone()[0] == "47"
 
 assert not db.execute(
     "PRAGMA foreign_key_check"
@@ -279,5 +279,5 @@ print(
 )
 
 print(
-    "  schema 46 retains migration 045 compatibility: verified"
+    "  schema 47 retains migration 045 compatibility: verified"
 )

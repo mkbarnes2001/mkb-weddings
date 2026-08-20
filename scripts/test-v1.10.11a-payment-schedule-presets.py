@@ -59,7 +59,7 @@ operations = read(
 )
 
 
-# Canonical schema is now 45.
+# Canonical schema is now 47.
 con = sqlite3.connect(":memory:")
 
 con.execute(
@@ -79,7 +79,7 @@ version = con.execute(
 ).fetchone()
 
 assert version
-assert version[0] == "46"
+assert version[0] == "47"
 
 
 columns = {

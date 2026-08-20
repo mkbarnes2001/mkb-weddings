@@ -219,15 +219,21 @@ for token in [
     ".admin-page-actions",
     "margin-left: auto;",
     "justify-content: flex-end;",
-    "--admin-header-action-collapsed: 32px;",
-    "--admin-header-action-collapsed: 34px;",
-    ":has(.admin-button__icon)",
-    ":has(> svg)",
-    "max-width: 320px;",
-    ":focus-visible",
-    "overflow: hidden;",
+    "--admin-header-action-square: 32px;",
+    "--admin-header-action-square: 34px;",
+    ".admin-header-action--icon",
+    "width: var(--admin-header-action-square) !important;",
+    "height: var(--admin-header-action-square) !important;",
+    "overflow: visible;",
+    "content: attr(data-admin-tooltip);",
+    ":focus-visible::after",
 ]:
     assert token in cleanup, token
+
+
+# Hover/focus must not resize the real button.
+assert "max-width: 320px;" not in cleanup
+assert "transition:\\n    max-width" not in cleanup
 
 
 # Dedicated breadcrumb styling is removed.
@@ -286,15 +292,15 @@ print(
 )
 
 print(
-    "  icon-bearing actions collapse to icons"
+    "  icon-bearing actions remain fixed square controls"
 )
 
 print(
-    "  action labels reveal on hover"
+    "  action labels float independently on hover"
 )
 
 print(
-    "  action labels reveal on keyboard focus"
+    "  action labels float independently on keyboard focus"
 )
 
 print(

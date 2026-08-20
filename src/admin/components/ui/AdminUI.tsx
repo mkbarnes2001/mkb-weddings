@@ -3,14 +3,20 @@ import type {
   PlatformBrandingIdentity,
   PlatformModuleConfiguration,
 } from "../../types/platform";
+import { Children, cloneElement, isValidElement } from "react";
 import type {
   AnchorHTMLAttributes,
   ButtonHTMLAttributes,
   HTMLAttributes,
   LabelHTMLAttributes,
+  ReactElement,
   ReactNode,
 } from "react";
 import type { LucideIcon } from "lucide-react";
+import {
+  inferAdminActionKey,
+  resolveAdminActionIcon,
+} from "../../config/adminActionIcons";
 
 function cx(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
@@ -162,6 +168,397 @@ function AdminPageHeaderIdentity() {
   );
 }
 
+
+function adminHeaderActionText(
+  node: ReactNode,
+): string {
+  if (
+    typeof node === "string"
+    || typeof node === "number"
+  ) {
+    return String(node);
+  }
+
+  if (!isValidElement(node)) {
+    return "";
+  }
+
+  const props = node.props as {
+    children?: ReactNode;
+  };
+
+  return Children.toArray(
+    props.children,
+  )
+    .map(adminHeaderActionText)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+
+function adminHeaderClassTokens(
+  value: unknown,
+) {
+  return String(value || "")
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+
+function adminHeaderHasClass(
+  value: unknown,
+  token: string,
+) {
+  return adminHeaderClassTokens(
+    value,
+  ).includes(token);
+}
+
+
+function adminHeaderActionKey(
+  props: Record<string, unknown>,
+  label: string,
+) {
+  const explicit = String(
+    props["data-admin-action"] || "",
+  ).trim();
+
+  return explicit
+    || inferAdminActionKey(label);
+}
+
+
+function replaceRawAdminActionIcon(
+  children: ReactNode,
+  Icon: LucideIcon,
+  iconOnly = false,
+) {
+  let replaced = false;
+
+  return Children.map(
+    children,
+    (child) => {
+      if (
+        replaced
+        || !isValidElement(child)
+      ) {
+        return child;
+      }
+
+      const childProps =
+        child.props as Record<string, unknown>;
+
+      const isButtonIcon =
+        adminHeaderHasClass(
+          childProps.className,
+          "admin-button__icon",
+        );
+
+      if (
+        isButtonIcon
+        || iconOnly
+      ) {
+        replaced = true;
+
+        return (
+          <Icon
+            className={
+              isButtonIcon
+                ? "admin-button__icon"
+                : undefined
+            }
+            aria-hidden="true"
+          />
+        );
+      }
+
+      return child;
+    },
+  );
+}
+
+
+function transformAdminHeaderAction(
+  node: ReactNode,
+  overrides: Record<string, string>,
+): ReactNode {
+  if (!isValidElement(node)) {
+    return node;
+  }
+
+  const element =
+    node as ReactElement<Record<string, any>>;
+
+  const props =
+    element.props || {};
+
+  /*
+   * Shared button components can have their icon prop replaced directly.
+   * Their visible label remains in the DOM for semantic inference, but CSS
+   * hides it in page headers and exposes it through a floating tooltip.
+   */
+  if (
+    element.type === AdminButton
+    || element.type === AdminLinkButton
+  ) {
+    const label =
+      adminHeaderActionText(
+        props.children,
+      );
+
+    if (
+      !label
+      || !props.icon
+    ) {
+      return element;
+    }
+
+    const actionKey =
+      adminHeaderActionKey(
+        props,
+        label,
+      );
+
+    const Icon =
+      resolveAdminActionIcon(
+        actionKey,
+        overrides,
+      );
+
+    return cloneElement(
+      element,
+      {
+        ...props,
+        icon: Icon,
+        "aria-label":
+          props["aria-label"]
+          || label,
+        "data-admin-action":
+          actionKey,
+        "data-admin-tooltip":
+          label,
+        className: cx(
+          props.className,
+          "admin-header-action--icon",
+        ),
+      },
+    );
+  }
+
+  /*
+   * Dedicated AdminIconButton controls are already square. Give them the
+   * same configurable icon and floating tooltip while suppressing their
+   * native title tooltip.
+   */
+  if (
+    element.type === AdminIconButton
+  ) {
+    const label = String(
+      props.label
+      || props["aria-label"]
+      || "",
+    ).trim();
+
+    if (!label) {
+      return element;
+    }
+
+    const actionKey =
+      adminHeaderActionKey(
+        props,
+        label,
+      );
+
+    const Icon =
+      resolveAdminActionIcon(
+        actionKey,
+        overrides,
+      );
+
+    return cloneElement(
+      element,
+      {
+        ...props,
+        icon: Icon,
+        floatingTooltip: true,
+        "data-admin-action":
+          actionKey,
+        "data-admin-tooltip":
+          label,
+        className: cx(
+          props.className,
+          "admin-header-action--icon",
+        ),
+      },
+    );
+  }
+
+  const className =
+    String(
+      props.className || "",
+    );
+
+  const isAdminButton =
+    adminHeaderHasClass(
+      className,
+      "admin-button",
+    );
+
+  const isIconControl =
+    adminHeaderHasClass(
+      className,
+      "admin-icon-control",
+    )
+    || adminHeaderHasClass(
+      className,
+      "admin-icon-button",
+    );
+
+  if (
+    isAdminButton
+    || isIconControl
+  ) {
+    const visibleText =
+      adminHeaderActionText(
+        props.children,
+      );
+
+    const label = String(
+      visibleText
+      || props["aria-label"]
+      || props.title
+      || "",
+    )
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const children =
+      Children.toArray(
+        props.children,
+      );
+
+    const hasButtonIcon =
+      children.some(
+        (child) => {
+          if (!isValidElement(child)) {
+            return false;
+          }
+
+          const childProps =
+            child.props as Record<
+              string,
+              unknown
+            >;
+
+          return adminHeaderHasClass(
+            childProps.className,
+            "admin-button__icon",
+          );
+        },
+      );
+
+    const hasIcon =
+      isIconControl
+      || hasButtonIcon;
+
+    if (
+      label
+      && hasIcon
+    ) {
+      const actionKey =
+        adminHeaderActionKey(
+          props,
+          label,
+        );
+
+      const Icon =
+        resolveAdminActionIcon(
+          actionKey,
+          overrides,
+        );
+
+      const nextChildren =
+        replaceRawAdminActionIcon(
+          props.children,
+          Icon,
+          isIconControl,
+        );
+
+      return cloneElement(
+        element,
+        {
+          ...props,
+          "aria-label":
+            props["aria-label"]
+            || label,
+          title:
+            isIconControl
+              ? undefined
+              : props.title,
+          "data-admin-action":
+            actionKey,
+          "data-admin-tooltip":
+            label,
+          className: cx(
+            className,
+            "admin-header-action--icon",
+          ),
+        },
+        ...Children.toArray(
+          nextChildren,
+        ),
+      );
+    }
+
+    return element;
+  }
+
+  /*
+   * Header action containers are commonly fragments, divs or navs.
+   * Recurse through those containers without changing their layout.
+   */
+  if (
+    Object.prototype.hasOwnProperty.call(
+      props,
+      "children",
+    )
+  ) {
+    return cloneElement(
+      element,
+      undefined,
+      ...Children.toArray(
+        Children.map(
+          props.children,
+          (child) =>
+            transformAdminHeaderAction(
+              child,
+              overrides,
+            ),
+        ),
+      ),
+    );
+  }
+
+  return element;
+}
+
+
+function transformAdminHeaderActions(
+  actions: ReactNode,
+  overrides: Record<string, string>,
+) {
+  return Children.map(
+    actions,
+    (action) =>
+      transformAdminHeaderAction(
+        action,
+        overrides,
+      ),
+  );
+}
+
+
 export function AdminPageHeader({
   eyebrow,
   title,
@@ -177,6 +574,17 @@ export function AdminPageHeader({
   meta?: ReactNode;
   className?: string;
 }) {
+  const {
+    platformIdentity,
+  } = useOutletContext<AdminPageHeaderOutletContext>();
+
+  const resolvedActions = actions
+    ? transformAdminHeaderActions(
+        actions,
+        platformIdentity?.adminActionIcons || {},
+      )
+    : null;
+
   const backControl =
     eyebrow && typeof eyebrow !== "string"
       ? eyebrow
@@ -212,7 +620,7 @@ export function AdminPageHeader({
 
       {actions ? (
         <div className="admin-page-actions">
-          {actions}
+          {resolvedActions}
         </div>
       ) : null}
     </header>
@@ -314,18 +722,20 @@ export function AdminIconButton({
   label,
   variant = "secondary",
   className = "",
+  floatingTooltip = false,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   icon: LucideIcon;
   label: string;
   variant?: "secondary" | "ghost" | "danger";
+  floatingTooltip?: boolean;
 }) {
   return (
     <button
       {...props}
       type={props.type || "button"}
       aria-label={label}
-      title={props.title || label}
+      title={floatingTooltip ? props.title : props.title || label}
       className={cx("admin-icon-control", `admin-icon-control--${variant}`, className)}
     >
       <Icon aria-hidden="true" />

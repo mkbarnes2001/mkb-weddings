@@ -221,6 +221,7 @@ export type PlatformBrandingIdentity = {
   adminHeaderActionSize: "compact" | "standard";
   adminStatusSize: "compact" | "standard";
   adminPageSpacing: "compact" | "standard";
+  adminActionIcons: Record<string, string>;
   updatedAt?: string;
 };
 

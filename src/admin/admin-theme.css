@@ -12872,14 +12872,16 @@ svg {
 /* v1.10.12a — Admin header navigation and action cleanup */
 
 /*
- * Sidebar/module navigation is now the single Admin navigation source.
- * Page-header actions collapse to icons and reveal their labels on
- * pointer hover or keyboard focus.
+ * Sidebar/module navigation is the single Admin navigation source.
+ * Page-header actions remain right aligned at every viewport size.
+ *
+ * Icon-bearing controls are fixed square buttons. Their text never expands
+ * the button; the accessible label is shown in a separate floating tooltip.
  */
 
 .admin-shell
 .admin-page-actions {
-  --admin-header-action-collapsed: 32px;
+  --admin-header-action-square: 32px;
   flex: 0 0 auto;
   margin-left: auto;
   justify-content: flex-end;
@@ -12896,93 +12898,118 @@ svg {
 }
 
 
-/* Respect the existing configurable standard action size. */
+/* Respect the existing configurable standard header-action size. */
 .admin-shell
 [data-admin-header-action-size="standard"]
 .admin-page-actions {
-  --admin-header-action-collapsed: 34px;
+  --admin-header-action-square: 34px;
 }
 
 
 /*
- * Only icon-bearing controls collapse.
- * A rare text-only header control remains visible rather than becoming
- * an unexplained empty square.
+ * Only controls explicitly prepared by AdminPageHeader are converted.
+ * Text-only exceptional controls such as selects remain normal controls.
  */
 .admin-shell
 .admin-page-actions
-:is(a, button).admin-button:has(.admin-button__icon),
-.admin-shell
-.admin-page-actions
-:is(a, button).admin-button:has(> svg) {
-  width: auto;
-  min-width:
-    var(
-      --admin-header-action-collapsed
-    ) !important;
-  max-width:
-    var(
-      --admin-header-action-collapsed
-    );
-  overflow: hidden;
-  gap: 0;
-  padding-inline: 0 !important;
+.admin-header-action--icon {
+  position: relative;
+  box-sizing: border-box;
+  width: var(--admin-header-action-square) !important;
+  min-width: var(--admin-header-action-square) !important;
+  max-width: var(--admin-header-action-square) !important;
+  height: var(--admin-header-action-square) !important;
+  min-height: var(--admin-header-action-square) !important;
+  flex: 0 0 var(--admin-header-action-square);
+  justify-content: center;
+  gap: 0 !important;
+  padding: 0 !important;
+  overflow: visible;
   white-space: nowrap;
-  transition:
-    max-width 180ms ease,
-    padding-inline 180ms ease,
-    gap 180ms ease,
-    background-color 120ms ease,
-    border-color 120ms ease,
-    color 120ms ease,
-    transform 120ms ease;
+  font-size: 0 !important;
 }
 
 
-/* Icons remain centred in the collapsed control. */
+/* Keep the icon centred and independent from hidden button text. */
 .admin-shell
 .admin-page-actions
-:is(a, button).admin-button
+.admin-header-action--icon
 .admin-button__icon,
 .admin-shell
 .admin-page-actions
-:is(a, button).admin-button
+.admin-header-action--icon
 > svg {
-  flex: 0 0 auto;
-}
-
-
-/* Reveal the existing text label on hover or accessible keyboard focus. */
-.admin-shell
-.admin-page-actions
-:is(a, button).admin-button:has(.admin-button__icon):hover,
-.admin-shell
-.admin-page-actions
-:is(a, button).admin-button:has(.admin-button__icon):focus-visible,
-.admin-shell
-.admin-page-actions
-:is(a, button).admin-button:has(> svg):hover,
-.admin-shell
-.admin-page-actions
-:is(a, button).admin-button:has(> svg):focus-visible {
-  max-width: 320px;
-  gap: 5px;
-  padding-inline: 10px !important;
-}
-
-
-/* Existing dedicated icon controls stay icon-only. */
-.admin-shell
-.admin-page-actions
-:is(.admin-icon-control, .admin-icon-button) {
-  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  margin: 0;
 }
 
 
 /*
- * Earlier responsive rules left-align actions on mobile.
- * Header actions now remain right aligned at every viewport size.
+ * Floating label.
+ * It is positioned independently, so showing it cannot move or resize any
+ * button or neighbouring header action.
  */
+.admin-shell
+.admin-page-actions
+.admin-header-action--icon[data-admin-tooltip]::after {
+  content: attr(data-admin-tooltip);
+  position: absolute;
+  z-index: 120;
+  top: calc(100% + 7px);
+  right: 0;
+  width: max-content;
+  max-width: min(280px, 72vw);
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #171717;
+  color: #fff;
+  box-shadow:
+    0 6px 18px
+    rgba(0, 0, 0, 0.16);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-align: left;
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-2px);
+  transition:
+    opacity 110ms ease,
+    transform 110ms ease,
+    visibility 110ms ease;
+}
+
+
+.admin-shell
+.admin-page-actions
+.admin-header-action--icon[data-admin-tooltip]:hover::after,
+.admin-shell
+.admin-page-actions
+.admin-header-action--icon[data-admin-tooltip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+
+/* Existing dedicated icon controls use the same square dimensions. */
+.admin-shell
+.admin-page-actions
+:is(.admin-icon-control, .admin-icon-button).admin-header-action--icon {
+  width: var(--admin-header-action-square) !important;
+  min-width: var(--admin-header-action-square) !important;
+  max-width: var(--admin-header-action-square) !important;
+  height: var(--admin-header-action-square) !important;
+  min-height: var(--admin-header-action-square) !important;
+  flex: 0 0 var(--admin-header-action-square);
+}
+
+
 @media (max-width: 760px) {
   .admin-shell
   .admin-page-actions {
@@ -12999,5 +13026,137 @@ svg {
   > nav {
     margin-left: auto;
     justify-content: flex-end;
+  }
+}
+
+
+/* v1.10.12a — Platform Admin semantic action icon catalogue */
+
+.platform-action-icon-config {
+  display: grid;
+  gap: 14px;
+}
+
+.platform-action-icon-selection {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 11px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.platform-action-icon-current {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.platform-action-icon-current__glyph {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--admin-border);
+  border-radius: 7px;
+  background: #fafafa;
+}
+
+.platform-action-icon-current__glyph svg {
+  width: 16px;
+  height: 16px;
+}
+
+.platform-action-icon-current__copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.platform-action-icon-current__copy strong {
+  font-size: calc(12px * var(--admin-font-scale-effective, 1));
+}
+
+.platform-action-icon-current__copy span {
+  color: var(--admin-muted);
+  font-size: calc(10px * var(--admin-font-scale-effective, 1));
+}
+
+.platform-action-icon-catalogue {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(108px, 1fr)
+    );
+  gap: 7px;
+  max-height: 330px;
+  overflow: auto;
+  padding: 2px;
+}
+
+.platform-action-icon-option {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  border: 1px solid var(--admin-border);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--admin-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.platform-action-icon-option:hover {
+  border-color: #aaa;
+  background: #fafafa;
+}
+
+.platform-action-icon-option[aria-selected="true"] {
+  border-color: #555;
+  background: #f5f5f5;
+  box-shadow:
+    inset 0 0 0 1px #555;
+}
+
+.platform-action-icon-option svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+}
+
+.platform-action-icon-option span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: calc(10px * var(--admin-font-scale-effective, 1));
+}
+
+.platform-action-icon-empty {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: calc(11px * var(--admin-font-scale-effective, 1));
+}
+
+@media (max-width: 700px) {
+  .platform-action-icon-selection {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .platform-action-icon-catalogue {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
   }
 }

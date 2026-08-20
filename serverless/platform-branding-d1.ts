@@ -23,6 +23,7 @@ export type PlatformBrandingIdentityRecord = {
   adminHeaderActionSize: "compact" | "standard";
   adminStatusSize: "compact" | "standard";
   adminPageSpacing: "compact" | "standard";
+  adminActionIcons: Record<string, string>;
   updatedAt?: string;
 };
 
@@ -49,6 +50,7 @@ export const DEFAULT_PLATFORM_BRANDING_IDENTITY: PlatformBrandingIdentityRecord 
   adminHeaderActionSize: "compact",
   adminStatusSize: "compact",
   adminPageSpacing: "compact",
+  adminActionIcons: {},
 };
 
 function text(value: unknown) {
@@ -154,6 +156,116 @@ function requiredOption(
   return candidate;
 }
 
+
+function hydratedAdminActionIcons(
+  value: unknown,
+): Record<string, string> {
+  let parsed: unknown = {};
+
+  try {
+    parsed = JSON.parse(
+      text(value) || "{}",
+    );
+  } catch {
+    return {};
+  }
+
+  if (
+    !parsed
+    || typeof parsed !== "object"
+    || Array.isArray(parsed)
+  ) {
+    return {};
+  }
+
+  const result: Record<string, string> = {};
+
+  for (
+    const [rawKey, rawIcon]
+    of Object.entries(parsed)
+  ) {
+    const key = text(rawKey);
+    const icon = text(rawIcon);
+
+    if (
+      /^[a-z][a-z0-9-]{0,47}$/.test(key)
+      && /^[a-z][a-z0-9-]{0,63}$/.test(icon)
+    ) {
+      result[key] = icon;
+    }
+  }
+
+  return result;
+}
+
+
+function requiredAdminActionIcons(
+  value: unknown,
+): Record<string, string> {
+  if (
+    value === undefined
+    || value === null
+    || value === ""
+  ) {
+    return {};
+  }
+
+  if (
+    typeof value !== "object"
+    || Array.isArray(value)
+  ) {
+    throw httpError(
+      "Admin action icons must be an object.",
+      400,
+    );
+  }
+
+  const entries = Object.entries(value);
+
+  if (entries.length > 80) {
+    throw httpError(
+      "Too many Admin action icon overrides.",
+      400,
+    );
+  }
+
+  const result: Record<string, string> = {};
+
+  for (
+    const [rawKey, rawIcon]
+    of entries
+  ) {
+    const key = text(rawKey);
+    const icon = text(rawIcon);
+
+    if (
+      !/^[a-z][a-z0-9-]{0,47}$/.test(key)
+      || !/^[a-z][a-z0-9-]{0,63}$/.test(icon)
+    ) {
+      throw httpError(
+        "Admin action icon configuration contains an invalid key.",
+        400,
+      );
+    }
+
+    result[key] = icon;
+  }
+
+  const encoded = JSON.stringify(
+    result
+  );
+
+  if (encoded.length > 12000) {
+    throw httpError(
+      "Admin action icon configuration is too large.",
+      400,
+    );
+  }
+
+  return result;
+}
+
+
 function hydrate(row: any): PlatformBrandingIdentityRecord {
   if (!row) return { ...DEFAULT_PLATFORM_BRANDING_IDENTITY };
 
@@ -216,6 +328,9 @@ function hydrate(row: any): PlatformBrandingIdentityRecord {
       ["compact", "standard"],
       "compact",
     ) as PlatformBrandingIdentityRecord["adminPageSpacing"],
+    adminActionIcons: hydratedAdminActionIcons(
+      row.admin_action_icons_json,
+    ),
     updatedAt: row.updated_at || undefined,
   };
 }
@@ -350,6 +465,10 @@ function normalisePlatformBrandingIdentity(
     "Admin page spacing",
   ) as PlatformBrandingIdentityRecord["adminPageSpacing"];
 
+  const adminActionIcons = requiredAdminActionIcons(
+    incoming?.adminActionIcons,
+  );
+
   return {
     platformName,
     wordmarkUrl,
@@ -373,6 +492,7 @@ function normalisePlatformBrandingIdentity(
     adminHeaderActionSize,
     adminStatusSize,
     adminPageSpacing,
+    adminActionIcons,
   };
 }
 
@@ -406,6 +526,7 @@ function preparePlatformBrandingUpsert(
       admin_header_action_size,
       admin_status_size,
       admin_page_spacing,
+      admin_action_icons_json,
       updated_by_user_id,
       updated_by_email,
       created_at,
@@ -417,6 +538,7 @@ function preparePlatformBrandingUpsert(
       ?, ?, ?,
       ?, ?, ?, ?, ?,
       ?, ?, ?, ?,
+      ?,
       ?, ?,
       CURRENT_TIMESTAMP,
       CURRENT_TIMESTAMP
@@ -444,6 +566,7 @@ function preparePlatformBrandingUpsert(
       admin_header_action_size = excluded.admin_header_action_size,
       admin_status_size = excluded.admin_status_size,
       admin_page_spacing = excluded.admin_page_spacing,
+      admin_action_icons_json = excluded.admin_action_icons_json,
       updated_by_user_id = excluded.updated_by_user_id,
       updated_by_email = excluded.updated_by_email,
       updated_at = CURRENT_TIMESTAMP
@@ -470,6 +593,7 @@ function preparePlatformBrandingUpsert(
     identity.adminHeaderActionSize,
     identity.adminStatusSize,
     identity.adminPageSpacing,
+    JSON.stringify(identity.adminActionIcons),
     text(actor?.userId) || null,
     lower(actor?.email),
   );

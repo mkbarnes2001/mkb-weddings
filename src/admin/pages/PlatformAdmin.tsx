@@ -41,6 +41,12 @@ import {
   defaultAdminModuleConfigurations,
 } from "../navigation/adminModules";
 import {
+  adminActionDefinitions,
+  adminActionIconCatalogue,
+  configuredAdminActionIconKey,
+  defaultAdminActionIconKey,
+} from "../config/adminActionIcons";
+import {
   DEFAULT_SUPPLIER_ROLE_DEFINITIONS,
   SUPPLIER_CATEGORY_OPTIONS,
   normaliseSupplierTaxonomy,
@@ -115,6 +121,7 @@ const DEFAULT_PLATFORM_IDENTITY: PlatformBrandingIdentity = {
   adminHeaderActionSize: "compact",
   adminStatusSize: "compact",
   adminPageSpacing: "compact",
+  adminActionIcons: {},
 
 };
 
@@ -178,6 +185,7 @@ function identityFingerprint(identity: PlatformBrandingIdentity) {
     adminHeaderActionSize: identity.adminHeaderActionSize,
     adminStatusSize: identity.adminStatusSize,
     adminPageSpacing: identity.adminPageSpacing,
+    adminActionIcons: identity.adminActionIcons,
   });
 }
 
@@ -421,6 +429,8 @@ export function PlatformAdmin() {
   const [assetFile, setAssetFile] = useState<File | null>(null);
   const [assetInputKey, setAssetInputKey] = useState(0);
   const [assetUploading, setAssetUploading] = useState(false);
+  const [actionIconActionKey, setActionIconActionKey] = useState("create");
+  const [actionIconSearch, setActionIconSearch] = useState("");
   const [businessDraft, setBusinessDraft] = useState({
     businessName: "",
     slug: "",
@@ -634,6 +644,42 @@ export function PlatformAdmin() {
     await runAdmin(() => AdminApiService.savePlatformSupplierTaxonomy(taxonomy), "Global supplier categories and Wedding roles saved.");
   }
 
+  function updateAdminActionIcon(
+    actionKey: string,
+    iconKey: string,
+  ) {
+    const defaultIconKey =
+      defaultAdminActionIconKey(
+        actionKey,
+      );
+
+    setPlatformIdentity(
+      (current) => {
+        const next = {
+          ...(current.adminActionIcons || {}),
+        };
+
+        if (
+          !iconKey
+          || iconKey === defaultIconKey
+        ) {
+          delete next[actionKey];
+        } else {
+          next[actionKey] = iconKey;
+        }
+
+        return {
+          ...current,
+          adminActionIcons: next,
+        };
+      },
+    );
+
+    setMessage("");
+    setError("");
+  }
+
+
   function updateModule(moduleKey: PlatformModuleConfiguration["moduleKey"], patch: Partial<PlatformModuleConfiguration>) {
     setModules((current) => current.map((module) => module.moduleKey === moduleKey ? { ...module, ...patch } : module));
     setMessage("");
@@ -718,6 +764,69 @@ export function PlatformAdmin() {
   const iconAssets = platformAdmin.brandAssets.filter(
     (asset) => asset.assetType === "icon",
   );
+
+
+  const selectedActionDefinition =
+    adminActionDefinitions.find(
+      (definition) =>
+        definition.key
+        === actionIconActionKey,
+    )
+    || adminActionDefinitions[0];
+
+  const selectedAdminActionIconKey =
+    configuredAdminActionIconKey(
+      selectedActionDefinition.key,
+      platformIdentity.adminActionIcons,
+    );
+
+  const selectedAdminActionIcon =
+    adminActionIconCatalogue.find(
+      (option) =>
+        option.key
+        === selectedAdminActionIconKey,
+    )
+    || adminActionIconCatalogue[0];
+
+  const SelectedAdminActionIcon =
+    selectedAdminActionIcon.icon;
+
+  const defaultSelectedActionIconKey =
+    defaultAdminActionIconKey(
+      selectedActionDefinition.key,
+    );
+
+  const defaultSelectedActionIcon =
+    adminActionIconCatalogue.find(
+      (option) =>
+        option.key
+        === defaultSelectedActionIconKey,
+    );
+
+  const actionIconNeedle =
+    actionIconSearch
+      .trim()
+      .toLowerCase();
+
+  const filteredAdminActionIcons =
+    adminActionIconCatalogue.filter(
+      (option) => {
+        if (!actionIconNeedle) {
+          return true;
+        }
+
+        return [
+          option.key,
+          option.label,
+          ...option.keywords,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(
+            actionIconNeedle,
+          );
+      },
+    );
 
   return <AdminPage className="platform-admin-page">
     <AdminPageHeader
@@ -1397,6 +1506,136 @@ export function PlatformAdmin() {
                 </AdminField>
               </div>
             </section>
+
+          <section className="platform-module-control-group">
+            <header>
+              <strong>Admin action icons</strong>
+              <span>
+                Choose the global icon used for common Admin actions. Header buttons remain fixed square controls; their text appears as a floating label on hover or keyboard focus.
+              </span>
+            </header>
+
+            <div className="platform-action-icon-config">
+              <div className="platform-module-field-grid">
+                <AdminField label="Action">
+                  <FieldSelect
+                    value={selectedActionDefinition.key}
+                    onChange={(value) => {
+                      setActionIconActionKey(value);
+                      setActionIconSearch("");
+                    }}
+                  >
+                    {adminActionDefinitions.map(
+                      (definition) => (
+                        <option
+                          key={definition.key}
+                          value={definition.key}
+                        >
+                          {definition.label}
+                        </option>
+                      ),
+                    )}
+                  </FieldSelect>
+                </AdminField>
+
+                <AdminField
+                  label="Find an icon"
+                  help="Search the approved Lucide icon catalogue by name or purpose."
+                >
+                  <FieldInput
+                    value={actionIconSearch}
+                    onChange={setActionIconSearch}
+                    placeholder="Search icons…"
+                  />
+                </AdminField>
+              </div>
+
+              <div className="platform-action-icon-selection">
+                <div className="platform-action-icon-current">
+                  <span
+                    className="platform-action-icon-current__glyph"
+                    aria-hidden="true"
+                  >
+                    <SelectedAdminActionIcon />
+                  </span>
+
+                  <div className="platform-action-icon-current__copy">
+                    <strong>
+                      {selectedActionDefinition.label}
+                    </strong>
+                    <span>
+                      Current: {selectedAdminActionIcon.label}
+                      {" · "}
+                      Default: {defaultSelectedActionIcon?.label || defaultSelectedActionIconKey}
+                    </span>
+                  </div>
+                </div>
+
+                <AdminButton
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  disabled={
+                    !platformIdentity.adminActionIcons?.[
+                      selectedActionDefinition.key
+                    ]
+                  }
+                  onClick={() =>
+                    updateAdminActionIcon(
+                      selectedActionDefinition.key,
+                      defaultSelectedActionIconKey,
+                    )
+                  }
+                >
+                  Reset to default
+                </AdminButton>
+              </div>
+
+              {filteredAdminActionIcons.length ? (
+                <div
+                  className="platform-action-icon-catalogue"
+                  role="listbox"
+                  aria-label={`Icons for ${selectedActionDefinition.label}`}
+                >
+                  {filteredAdminActionIcons.map(
+                    (option) => {
+                      const OptionIcon =
+                        option.icon;
+
+                      const selected =
+                        option.key
+                        === selectedAdminActionIconKey;
+
+                      return (
+                        <button
+                          key={option.key}
+                          type="button"
+                          role="option"
+                          aria-selected={selected}
+                          className="platform-action-icon-option"
+                          title={option.label}
+                          onClick={() =>
+                            updateAdminActionIcon(
+                              selectedActionDefinition.key,
+                              option.key,
+                            )
+                          }
+                        >
+                          <OptionIcon aria-hidden="true" />
+                          <span>{option.label}</span>
+                        </button>
+                      );
+                    },
+                  )}
+                </div>
+              ) : (
+                <p className="platform-action-icon-empty">
+                  No icons match “{actionIconSearch}”.
+                </p>
+              )}
+            </div>
+          </section>
+
 
 <section className="platform-module-control-group">
             <header>
