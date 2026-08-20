@@ -180,6 +180,20 @@ function adminHeaderActionText(
     return String(node);
   }
 
+  /*
+   * JSX controls commonly expose mixed children as an array, for example
+   * [<Settings2 />, "Catalogue"]. Resolve each child before testing for a
+   * single React element so semantic action labels survive icon + text
+   * combinations.
+   */
+  if (Array.isArray(node)) {
+    return Children.toArray(node)
+      .map(adminHeaderActionText)
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
   if (!isValidElement(node)) {
     return "";
   }

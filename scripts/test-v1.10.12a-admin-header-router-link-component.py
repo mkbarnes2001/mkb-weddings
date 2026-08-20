@@ -20,6 +20,8 @@ assert (
 
 for token in [
     "ComponentProps<typeof RouterLink>",
+    "Array.isArray(node)",
+    "Children.toArray(node)",
     "platformIdentity?.adminActionIcons || {}",
     "resolveAdminActionIcon(",
     "data-admin-action=",
@@ -174,6 +176,10 @@ print(
 
 print(
     "  direct React Router admin-button links remaining: 0"
+)
+
+print(
+    "  mixed icon + text children resolve to semantic labels"
 )
 
 print(
