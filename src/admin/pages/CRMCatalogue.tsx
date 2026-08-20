@@ -260,15 +260,6 @@ export function CRMCatalogue() {
     return (
       <AdminPage className="crm-package-editor-page">
         <AdminPageHeader
-          eyebrow={
-            <Link
-              to="/admin/crm/catalogue"
-              className="admin-inline-link inline-flex items-center gap-1"
-            >
-              <ArrowLeft size={13} />
-              Packages
-            </Link>
-          }
           title={
             packageRouteId
             === "new"
@@ -342,15 +333,6 @@ export function CRMCatalogue() {
     return (
       <AdminPage className="crm-addon-editor-page">
         <AdminPageHeader
-          eyebrow={
-            <Link
-              to="/admin/crm/catalogue/addons"
-              className="admin-inline-link inline-flex items-center gap-1"
-            >
-              <ArrowLeft size={13} />
-              Add-ons
-            </Link>
-          }
           title={
             addonRouteId
             === "new"
@@ -404,7 +386,7 @@ export function CRMCatalogue() {
 
 
   return <AdminPage>
-    <AdminPageHeader eyebrow={<Link to="/admin/crm" className="admin-inline-link inline-flex items-center gap-1"><ArrowLeft size={13} />CRM</Link>} title="Package catalogue" description="Workspace-owned packages and add-ons used to create immutable quote snapshots." actions={<Link className="admin-button admin-button--primary" to="/admin/crm/quotes"><Sparkles className="admin-button__icon" />Open quotes</Link>} />
+    <AdminPageHeader title="Package catalogue" description="Workspace-owned packages and add-ons used to create immutable quote snapshots." actions={<Link className="admin-button admin-button--primary" to="/admin/crm/quotes"><Sparkles className="admin-button__icon" />Open quotes</Link>} />
     {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
     {message ? <div className="admin-alert admin-alert--success">{message}</div> : null}
     <AdminTabs>

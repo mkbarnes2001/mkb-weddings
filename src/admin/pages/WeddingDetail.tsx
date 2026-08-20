@@ -112,15 +112,6 @@ export function WeddingDetail() {
       {recordError ? <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{recordError}</div> : null}
 
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to="/admin/weddings"
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            Back to weddings
-          </Link>
-        }
         title="Wedding details"
         meta={
           <div className="flex flex-wrap items-center gap-2">

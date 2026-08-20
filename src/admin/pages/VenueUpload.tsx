@@ -244,15 +244,6 @@ export function VenueUpload() {
   return (
     <div className="space-y-7">
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to={`/admin/venues/${slug}/gallery`}
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            Back to venue gallery
-          </Link>
-        }
         title="Image upload"
         description="Upload finished JPEG, PNG or WebP images to the selected venue wedding."
         meta={

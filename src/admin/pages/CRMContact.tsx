@@ -68,7 +68,6 @@ export function CRMContact() {
   return (
     <AdminPage>
       <AdminPageHeader
-        eyebrow={<Link to="/admin/crm?view=contacts" className="admin-inline-link inline-flex items-center gap-1"><ArrowLeft size={13} />CRM contacts</Link>}
         title={detail.contact.displayName || "Contact"}
         description="One reusable client record shared by enquiries, Jobs and client portal access."
         meta={<div className="flex flex-wrap gap-2"><AdminStatus tone={detail.contact.status === "archived" ? "neutral" : "success"}>{detail.contact.status}</AdminStatus><AdminStatus tone="info">{detail.enquiries.length} enquiries</AdminStatus><AdminStatus tone="warning">{detail.jobs.length} Jobs</AdminStatus></div>}

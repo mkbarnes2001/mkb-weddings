@@ -242,15 +242,6 @@ export function CRMInvoice() {
   return (
     <AdminPage className="crm-invoice-page">
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to={`/admin/crm/jobs/${job.id}`}
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            {job.reference}
-          </Link>
-        }
         title={invoice.reference}
         description={[
           job.title,

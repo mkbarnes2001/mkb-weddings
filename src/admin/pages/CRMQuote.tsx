@@ -1353,15 +1353,6 @@ export function CRMQuote() {
     <AdminPage>
       <AdminPageHeader
         className="crm-quote-page-header"
-        eyebrow={
-          <Link
-            to="/admin/crm/quotes"
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            Quotes
-          </Link>
-        }
         title={quote.reference}
         description={[
           quote.clientName,

@@ -89,7 +89,6 @@ export function CRMWorkflowTemplate() {
   return (
     <AdminPage>
       <AdminPageHeader
-        eyebrow={<Link to="/admin/crm?view=workflows" className="admin-inline-link inline-flex items-center gap-1"><ArrowLeft size={13} />CRM workflows</Link>}
         title={template.name}
         description="Build a reusable sequence of dated tasks. Applied Jobs receive an independent task snapshot."
         meta={<div className="flex flex-wrap gap-2"><AdminStatus tone={template.status === "active" ? "success" : "neutral"}>{template.status}</AdminStatus><AdminStatus tone="info">{template.steps.length} steps</AdminStatus><AdminStatus tone={template.default ? "success" : "neutral"}>{template.default ? "default" : `version ${template.version}`}</AdminStatus></div>}

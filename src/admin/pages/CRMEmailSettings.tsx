@@ -395,15 +395,6 @@ export function CRMEmailSettings() {
   return (
     <AdminPage>
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to="/admin/crm"
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            WedCRM
-          </Link>
-        }
         title="Email settings"
         description="Choose how this business sends CRM correspondence. Authentication and security emails always remain on WedPlanned-managed delivery."
         actions={

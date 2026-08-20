@@ -762,15 +762,6 @@ export function CRMEnquiry() {
   return (
     <AdminPage className="crm-lead-workspace-page">
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to="/admin/crm?view=pipeline"
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            Leads
-          </Link>
-        }
         title={
           enquiry.primaryContact
             ?.displayName

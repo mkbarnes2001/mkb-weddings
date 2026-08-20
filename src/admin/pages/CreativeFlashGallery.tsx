@@ -104,15 +104,6 @@ export function CreativeFlashGallery() {
   const shownCount = images.length - hidden.size;
   return <div className="space-y-6">
     <AdminPageHeader
-      eyebrow={
-        <Link
-          to="/admin/gallery"
-          className="admin-inline-link inline-flex items-center gap-1"
-        >
-          <ArrowLeft size={13} />
-          Back to collections
-        </Link>
-      }
       title="Creative Flash"
       description="Reorder, hide, classify and choose the Creative Flash hero using the same workflow as Moments."
       meta={

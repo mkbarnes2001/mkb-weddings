@@ -348,15 +348,6 @@ export function CRMContractTemplate() {
   return (
     <AdminPage>
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to="/admin/crm?view=commercial-settings"
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            Commercial settings
-          </Link>
-        }
         title={template.name}
         description="Build reusable contract wording for this business. Generated contracts keep their own versioned snapshot, so later template edits never rewrite contracts already created for clients."
         actions={

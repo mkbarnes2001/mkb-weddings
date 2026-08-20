@@ -371,15 +371,6 @@ export function CustomCollectionGallery() {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to="/admin/custom-collections"
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            Back to custom collections
-          </Link>
-        }
         title="Collection gallery"
         description="Add images, curate their exact order, hide individual photographs and choose the gallery hero."
         meta={

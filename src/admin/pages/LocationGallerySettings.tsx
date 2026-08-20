@@ -99,15 +99,6 @@ export function LocationGallerySettingsPage() {
   return (
     <div className="space-y-7">
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to="/admin/gallery"
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            Gallery Management
-          </Link>
-        }
         title="Location Gallery"
         description="Choose which workspace location type powers the public gallery and configure its public presentation."
         meta={

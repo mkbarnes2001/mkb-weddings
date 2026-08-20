@@ -428,15 +428,6 @@ export function CRMQuotes() {
   return (
     <AdminPage>
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to="/admin/crm"
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            CRM
-          </Link>
-        }
         title="Quotes"
         description="Create Pick & Choose or Fixed quotes, send secure client links and keep every version attached to the client journey."
         actions={

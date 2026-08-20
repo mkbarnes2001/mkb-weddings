@@ -77,12 +77,14 @@ def main() -> None:
     assert 'href="#job-clients"' in job_page
     assert 'href="#job-questionnaires"' in job_page
 
-    # Wedding Workspace links back to its CRM Job and remains the shared asset hub.
+    # Wedding Workspace retains a direct operational action to its CRM Job
+    # without duplicating that navigation in the page-header eyebrow.
     assert "linkedJobRow" in wedding_workspace_api
     assert "job: linkedJobRow ?" in wedding_workspace_api
     assert "job:" in workspace_types
-    assert "CRM Job ${workspace.job.reference}" in wedding_workspace
+    assert 'to={`/admin/crm/jobs/${workspace.job.id}`}' in wedding_workspace
     assert "Open CRM Job" in wedding_workspace
+    assert "CRM Job ${workspace.job.reference}" not in wedding_workspace
     assert 'id="publishing-destinations"' in wedding_workspace
     assert "location.hash.slice(1)" in wedding_workspace
 

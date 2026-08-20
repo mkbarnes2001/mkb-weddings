@@ -41,7 +41,8 @@ def main() -> None:
     assert "admin-module-switcher" in layout
     assert "admin-mobile-module-switcher" in layout
     assert "admin-mobile-bottom-nav" in layout
-    assert 'aria-label="Breadcrumb"' in layout
+    assert 'aria-label="Breadcrumb"' not in layout
+    assert 'className="admin-context-bar"' not in layout
     assert "document.title" in layout
 
     # New landing and compatibility routes are additive; legacy routes remain available.
@@ -91,7 +92,7 @@ def main() -> None:
 
     # Responsive presentation is defined without schema or backend changes.
     for selector in [
-        ".admin-module-switcher", ".admin-context-bar", ".admin-module-metrics",
+        ".admin-module-switcher", ".admin-module-metrics",
         ".admin-module-destination-grid", ".admin-mobile-module-switcher",
     ]:
         assert selector in css, f"missing CSS selector {selector}"
@@ -102,7 +103,7 @@ def main() -> None:
 
     print("PASS v1.9.5a platform modules and navigation")
     print("  four-module switcher and module-specific navigation: verified")
-    print("  desktop, mobile, breadcrumbs and deep links: verified")
+    print("  desktop, mobile and deep links: verified")
     print("  existing Admin routes and public/private gallery boundary: verified")
     print("  source-only release; schema remains 31: verified")
 

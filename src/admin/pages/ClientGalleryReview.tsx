@@ -143,15 +143,6 @@ export function ClientGalleryReview() {
   return (
     <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to={`/admin/client-galleries/${id}`}
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            Back to Client Gallery
-          </Link>
-        }
         title="Gallery review"
         meta={
           <div className="flex flex-wrap items-center gap-2">

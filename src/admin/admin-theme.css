@@ -3037,12 +3037,6 @@
 .admin-sidebar-signout { display: inline-flex; min-height: 27px; align-items: center; justify-content: center; gap: 4px; border: 1px solid rgba(252,165,165,.2); border-radius: 7px; background: rgba(127,29,29,.16); color: #fecaca; padding: 0 7px; font-size: calc((7.5px) * var(--admin-font-scale-effective, 1)); font-weight: 650; white-space: nowrap; }
 .admin-sidebar-signout:hover { border-color: rgba(252,165,165,.38); background: rgba(153,27,27,.28); color: #fff; }
 .admin-sidebar-signout svg { width: 11px; height: 11px; }
-.admin-context-bar { display: flex; min-width: 0; align-items: center; gap: 7px; margin: 0 0 10px; color: var(--admin-muted); font-size: calc((9px) * var(--admin-font-scale-effective, 1)); }
-.admin-context-bar a { display: inline-flex; min-width: 0; align-items: center; gap: 6px; color: #333; font-weight: 650; text-decoration: none; }
-.admin-context-bar a:hover { color: #000; }
-.admin-context-bar a svg { width: 12px; height: 12px; }
-.admin-context-bar > svg { width: 11px; height: 11px; color: #aaa; }
-.admin-context-bar > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .admin-module-metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 9px; }
 .admin-module-metric { min-width: 0; border: 1px solid var(--admin-border); border-radius: 12px; background: rgba(255,255,255,.88); padding: 14px 15px; box-shadow: var(--admin-shadow); }
 .admin-module-metric strong { display: block; overflow: hidden; color: var(--admin-text); font-size: calc((22px) * var(--admin-font-scale-effective, 1)); font-weight: 650; letter-spacing: -.04em; text-overflow: ellipsis; white-space: nowrap; }
@@ -12871,5 +12865,139 @@ svg {
   .admin-shell:not(.admin-shell--platform)[data-admin-header-style="panel"]
   .admin-page-header {
     padding: 12px;
+  }
+}
+
+
+/* v1.10.12a — Admin header navigation and action cleanup */
+
+/*
+ * Sidebar/module navigation is now the single Admin navigation source.
+ * Page-header actions collapse to icons and reveal their labels on
+ * pointer hover or keyboard focus.
+ */
+
+.admin-shell
+.admin-page-actions {
+  --admin-header-action-collapsed: 32px;
+  flex: 0 0 auto;
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+.admin-shell
+.admin-page-actions
+> div,
+.admin-shell
+.admin-page-actions
+> nav {
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+
+/* Respect the existing configurable standard action size. */
+.admin-shell
+[data-admin-header-action-size="standard"]
+.admin-page-actions {
+  --admin-header-action-collapsed: 34px;
+}
+
+
+/*
+ * Only icon-bearing controls collapse.
+ * A rare text-only header control remains visible rather than becoming
+ * an unexplained empty square.
+ */
+.admin-shell
+.admin-page-actions
+:is(a, button).admin-button:has(.admin-button__icon),
+.admin-shell
+.admin-page-actions
+:is(a, button).admin-button:has(> svg) {
+  width: auto;
+  min-width:
+    var(
+      --admin-header-action-collapsed
+    ) !important;
+  max-width:
+    var(
+      --admin-header-action-collapsed
+    );
+  overflow: hidden;
+  gap: 0;
+  padding-inline: 0 !important;
+  white-space: nowrap;
+  transition:
+    max-width 180ms ease,
+    padding-inline 180ms ease,
+    gap 180ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+
+/* Icons remain centred in the collapsed control. */
+.admin-shell
+.admin-page-actions
+:is(a, button).admin-button
+.admin-button__icon,
+.admin-shell
+.admin-page-actions
+:is(a, button).admin-button
+> svg {
+  flex: 0 0 auto;
+}
+
+
+/* Reveal the existing text label on hover or accessible keyboard focus. */
+.admin-shell
+.admin-page-actions
+:is(a, button).admin-button:has(.admin-button__icon):hover,
+.admin-shell
+.admin-page-actions
+:is(a, button).admin-button:has(.admin-button__icon):focus-visible,
+.admin-shell
+.admin-page-actions
+:is(a, button).admin-button:has(> svg):hover,
+.admin-shell
+.admin-page-actions
+:is(a, button).admin-button:has(> svg):focus-visible {
+  max-width: 320px;
+  gap: 5px;
+  padding-inline: 10px !important;
+}
+
+
+/* Existing dedicated icon controls stay icon-only. */
+.admin-shell
+.admin-page-actions
+:is(.admin-icon-control, .admin-icon-button) {
+  flex: 0 0 auto;
+}
+
+
+/*
+ * Earlier responsive rules left-align actions on mobile.
+ * Header actions now remain right aligned at every viewport size.
+ */
+@media (max-width: 760px) {
+  .admin-shell
+  .admin-page-actions {
+    width: 100%;
+    align-self: stretch;
+    justify-content: flex-end;
+  }
+
+  .admin-shell
+  .admin-page-actions
+  > div,
+  .admin-shell
+  .admin-page-actions
+  > nav {
+    margin-left: auto;
+    justify-content: flex-end;
   }
 }

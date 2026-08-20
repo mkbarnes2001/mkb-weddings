@@ -141,14 +141,6 @@ export function CustomCollections() {
   return (
     <div className="space-y-7">
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to="/admin/gallery"
-            className="admin-inline-link"
-          >
-            Back to Gallery Management
-          </Link>
-        }
         title="Custom collections"
         description="Create and configure photographer galleries. Images are referenced rather than duplicated."
         meta={

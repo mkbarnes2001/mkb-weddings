@@ -834,15 +834,6 @@ export function CRMCommercialTemplates() {
     return (
       <AdminPage className="crm-quote-template-page">
         <AdminPageHeader
-          eyebrow={
-            <Link
-              to="/admin/crm/templates"
-              className="admin-inline-link inline-flex items-center gap-1"
-            >
-              <ArrowLeft size={13} />
-              Quote templates
-            </Link>
-          }
           title={
             quoteTemplateRouteId
             === "new"
@@ -1383,15 +1374,6 @@ export function CRMCommercialTemplates() {
   return (
     <AdminPage>
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to="/admin/crm"
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            WedCRM
-          </Link>
-        }
         title="Commercial templates"
         description="Build reusable quote and email templates for this business. Templates remain editable while quotes created from them keep immutable snapshots."
         actions={

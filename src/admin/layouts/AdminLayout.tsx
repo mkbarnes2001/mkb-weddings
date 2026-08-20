@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { ArrowLeft, Building2, Check, ChevronDown, ChevronRight, LogOut, Menu, ShieldCheck, X } from "lucide-react";
+import { ArrowLeft, Building2, Check, ChevronDown, LogOut, Menu, ShieldCheck, X } from "lucide-react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminModuleWordmark } from "../components/ui/AdminUI";
@@ -593,11 +593,6 @@ export function AdminLayout() {
           </header>
 
           <main className="admin-main-content">
-            <div className="admin-context-bar" aria-label="Breadcrumb">
-              <Link to={isPlatformRoute ? "/admin/platform" : currentModule.to}><ContextIcon />{currentContextLabel}</Link>
-              <ChevronRight aria-hidden="true" />
-              <span>{currentSectionLabel}</span>
-            </div>
             <Outlet
               context={{
                 moduleAppearance: currentAppearance,

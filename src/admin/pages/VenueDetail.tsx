@@ -61,15 +61,6 @@ export function VenueDetail() {
   return (
     <div className="space-y-7">
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to="/admin/venues"
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            Back to venues
-          </Link>
-        }
         title="Venue details"
         meta={
           <div className="flex flex-wrap items-center gap-2">

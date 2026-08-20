@@ -355,7 +355,6 @@ export function CRMQuestionnaireTemplate() {
   return (
     <AdminPage>
       <AdminPageHeader
-        eyebrow={<Link to="/admin/crm?view=questionnaires" className="admin-inline-link inline-flex items-center gap-1"><ArrowLeft size={13} />CRM questionnaires</Link>}
         title={template.name}
         description="Build a reusable questionnaire. Assigned questionnaires keep a versioned snapshot, so later template changes do not alter what a client received."
         actions={canManage ? <div className="flex gap-2"><AdminButton variant="danger" size="sm" icon={Trash2} onClick={() => void archive()} disabled={saving}>Archive</AdminButton><AdminButton variant="primary" icon={Save} onClick={() => void save()} disabled={saving}>Save template</AdminButton></div> : undefined}

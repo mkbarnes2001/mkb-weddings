@@ -400,15 +400,6 @@ export function MomentGallery() {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to="/admin/moments"
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            Back to moments
-          </Link>
-        }
         title="Moment gallery"
         description="Drag photographs to set the exact gallery order and control visibility."
         meta={

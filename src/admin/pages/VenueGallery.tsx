@@ -872,15 +872,6 @@ export function VenueGallery() {
   return (
     <div className="space-y-7">
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to={`/admin/venues/${venue.slug}`}
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            Back to venue
-          </Link>
-        }
         title="Venue gallery"
         description="Manage venue gallery membership, order and publishing."
         meta={

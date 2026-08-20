@@ -696,21 +696,6 @@ export function WeddingWorkspace() {
   return (
     <div className="wedding-workspace space-y-5" style={{ maxWidth: 1580 }}>
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to={
-              workspace.job
-                ? `/admin/crm/jobs/${workspace.job.id}`
-                : "/admin/weddings"
-            }
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            {workspace.job
-              ? `CRM Job ${workspace.job.reference}`
-              : "Wedding Stories"}
-          </Link>
-        }
         title="Wedding Workspace"
         meta={
           <div className="flex flex-wrap items-center gap-2">

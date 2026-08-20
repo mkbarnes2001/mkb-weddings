@@ -1775,15 +1775,6 @@ export function CRMJob() {
     <AdminPage className="crm-job-operations-page">
       <AdminPageHeader
         className="crm-job-page-header"
-        eyebrow={
-          <Link
-            to="/admin/crm?view=jobs"
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            Jobs
-          </Link>
-        }
         title={job.title}
         description={[
           job.reference,

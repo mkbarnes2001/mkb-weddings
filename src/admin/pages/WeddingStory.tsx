@@ -56,15 +56,6 @@ export function WeddingStory() {
   return (
     <div className="space-y-7">
       <AdminPageHeader
-        eyebrow={
-          <Link
-            to={`/admin/weddings/${story.slug}`}
-            className="admin-inline-link inline-flex items-center gap-1"
-          >
-            <ArrowLeft size={13} />
-            Back to wedding
-          </Link>
-        }
         title="Story"
         meta={
           <div className="flex flex-wrap items-center gap-2">

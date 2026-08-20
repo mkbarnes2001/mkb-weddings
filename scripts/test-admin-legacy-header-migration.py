@@ -82,13 +82,13 @@ def main() -> None:
     assert "Step {step + 1} of {steps.length}" in wizard
 
     gallery_editor = read("ClientGalleryEditor.tsx")
-    assert "Back to galleries" in gallery_editor
+    assert "Back to galleries" not in gallery_editor
     assert "Workspace" in gallery_editor
     assert "Preview" in gallery_editor
     assert "Share private gallery" in gallery_editor
 
     gallery_review = read("ClientGalleryReview.tsx")
-    assert "Back to Client Gallery" in gallery_review
+    assert "Back to Client Gallery" not in gallery_review
     assert "Copy filenames" in gallery_review
     assert "Download all originals" in gallery_review
 
@@ -97,18 +97,18 @@ def main() -> None:
     assert "Save gallery" in creative_flash
 
     custom_gallery = read("CustomCollectionGallery.tsx")
-    assert "Back to custom collections" in custom_gallery
+    assert "Back to custom collections" not in custom_gallery
     assert "View live gallery" in custom_gallery
 
     custom_collections = read("CustomCollections.tsx")
-    assert "Back to Gallery Management" in custom_collections
+    assert "Back to Gallery Management" not in custom_collections
 
     location_gallery = read("LocationGallerySettings.tsx")
     assert "View live" in location_gallery
     assert "Save gallery" in location_gallery
 
     moment_gallery = read("MomentGallery.tsx")
-    assert "Back to moments" in moment_gallery
+    assert "Back to moments" not in moment_gallery
     assert "View live gallery" in moment_gallery
 
     moments = read("Moments.tsx")
@@ -117,11 +117,11 @@ def main() -> None:
 
     new_venue = read("NewVenue.tsx")
     assert "Create venue" in new_venue
-    assert "Back to venues" in new_venue
+    assert "Back to venues" not in new_venue
 
     venue_content = read("VenueContentEditor.tsx")
     assert "Save venue" in venue_content
-    assert "Back to venue" in venue_content
+    assert "Back to venue" not in venue_content
 
     venue_detail = read("VenueDetail.tsx")
     assert "Website" in venue_detail
@@ -135,20 +135,20 @@ def main() -> None:
     assert "Save gallery" in venue_gallery
 
     gallery_migration = read("VenueGalleryMigration.tsx")
-    assert "Back to venues" in gallery_migration
+    assert "Back to venues" not in gallery_migration
     assert "ready" in gallery_migration
 
     venue_migration = read("VenueMigration.tsx")
-    assert "Back to venues" in venue_migration
+    assert "Back to venues" not in venue_migration
     assert "runMigration" in venue_migration
 
     venue_upload = read("VenueUpload.tsx")
-    assert "Back to venue gallery" in venue_upload
+    assert "Back to venue gallery" not in venue_upload
     assert "queuedCount" in venue_upload
 
     print("PASS legacy Admin header migration — all live legacy pages")
     print("  migrated live legacy pages: 25")
-    print("  back navigation retained: verified")
+    print("  redundant header back navigation removed: verified")
     print("  record summaries retained: verified")
     print("  operational actions retained: verified")
     print("  new-wedding success state: verified")
