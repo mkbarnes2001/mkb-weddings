@@ -1,4 +1,4 @@
-import { useOutletContext } from "react-router-dom";
+import { Link as RouterLink, useOutletContext } from "react-router-dom";
 import type {
   PlatformBrandingIdentity,
   PlatformModuleConfiguration,
@@ -358,6 +358,105 @@ function transformAdminHeaderAction(
       },
     );
   }
+
+  /*
+   * React Router Link is a component rather than a native <a>. Handle it
+   * explicitly so header navigation actions receive the same square-icon
+   * treatment as AdminButton without relying on generic component cloning.
+   */
+  if (
+    element.type === RouterLink
+  ) {
+    const className = String(
+      props.className || "",
+    );
+
+    const isAdminButton =
+      adminHeaderHasClass(
+        className,
+        "admin-button",
+      );
+
+    const isIconControl =
+      adminHeaderHasClass(
+        className,
+        "admin-icon-control",
+      )
+      || adminHeaderHasClass(
+        className,
+        "admin-icon-button",
+      );
+
+    if (
+      !isAdminButton
+      && !isIconControl
+    ) {
+      return element;
+    }
+
+    const visibleText =
+      adminHeaderActionText(
+        props.children,
+      );
+
+    const label = String(
+      visibleText
+      || props["aria-label"]
+      || props.title
+      || "",
+    )
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!label) {
+      return element;
+    }
+
+    const actionKey =
+      adminHeaderActionKey(
+        props,
+        label,
+      );
+
+    const Icon =
+      resolveAdminActionIcon(
+        actionKey,
+        overrides,
+      );
+
+    const nextChildren =
+      replaceRawAdminActionIcon(
+        props.children,
+        Icon,
+        isIconControl,
+      );
+
+    return cloneElement(
+      element,
+      {
+        ...props,
+        "aria-label":
+          props["aria-label"]
+          || label,
+        title:
+          isIconControl
+            ? undefined
+            : props.title,
+        "data-admin-action":
+          actionKey,
+        "data-admin-tooltip":
+          label,
+        className: cx(
+          className,
+          "admin-header-action--icon",
+        ),
+      },
+      ...Children.toArray(
+        nextChildren,
+      ),
+    );
+  }
+
 
   /*
    * Dedicated AdminIconButton controls are already square. Give them the

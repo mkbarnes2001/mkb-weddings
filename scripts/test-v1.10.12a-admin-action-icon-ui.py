@@ -65,6 +65,8 @@ wedding_workspace = (
 for token in [
     "transformAdminHeaderActions",
     "transformAdminHeaderAction",
+    "Link as RouterLink",
+    "element.type === RouterLink",
     "adminHeaderActionText",
     "inferAdminActionKey",
     "resolveAdminActionIcon",
@@ -192,6 +194,10 @@ print(
 
 print(
     "  all labelled header buttons receive semantic icons: verified"
+)
+
+print(
+    "  React Router Link header actions: explicitly transformed"
 )
 
 print(
