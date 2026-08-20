@@ -69,6 +69,7 @@ const LEAD_FORM_SYSTEM_KEYS = new Set([
 const LEAD_FORM_LOCKED_SYSTEM_KEYS = new Set([
   "firstName",
   "email",
+  "eventDate",
 ]);
 
 const DEFAULT_LEAD_FORM_FIELDS = [
@@ -162,11 +163,11 @@ const DEFAULT_LEAD_FORM_FIELDS = [
     label: "Wedding date",
     help: "",
     placeholder: "",
-    required: false,
+    required: true,
     enabled: true,
     options: [],
     systemKey: "eventDate",
-    locked: false,
+    locked: true,
   },
   {
     id: "dateFlexibility",
@@ -331,6 +332,7 @@ function normalizeLeadFormFields(value: unknown) {
   for (const systemKey of [
     "firstName",
     "email",
+    "eventDate",
   ]) {
     if (systemKeys.has(systemKey)) {
       continue;
@@ -1673,8 +1675,18 @@ export async function submitPublicEnquiry(db: D1Db, workspaceId: string, request
     ),
   );
 
+  const eventDate = text(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "eventDate",
+    ),
+  );
+
   if (!firstName) throw httpError("Enter your name.");
   if (!validEmail(email)) throw httpError("Enter a valid email address.");
+  if (!eventDate) throw httpError("Wedding date is required.", 400);
   if (settings.consentRequired && !input?.privacyConsent) throw httpError("Please confirm the privacy consent box.");
 
   const ip = text(request.headers.get("CF-Connecting-IP") || "unknown");
@@ -1707,14 +1719,6 @@ export async function submitPublicEnquiry(db: D1Db, workspaceId: string, request
     phone: leadSystemValue(input, fields, answers, "partnerPhone"),
   }, "website");
 
-  const eventDate = text(
-    leadSystemValue(
-      input,
-      fields,
-      answers,
-      "eventDate",
-    ),
-  );
   const dateFlexibility = text(
     leadSystemValue(
       input,

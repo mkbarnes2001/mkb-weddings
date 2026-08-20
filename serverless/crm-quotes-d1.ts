@@ -2320,6 +2320,17 @@ export async function sendQuote(
   const preview =
     context.preview;
 
+  if (
+    !text(
+      quote.event_date,
+    )
+  ) {
+    throw httpError(
+      "Add the wedding/event date before sending this quote.",
+      409,
+    );
+  }
+
   const bookingPack =
     await buildQuoteBookingPackSnapshot(
       db,
