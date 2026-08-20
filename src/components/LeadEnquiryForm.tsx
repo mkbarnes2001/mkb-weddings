@@ -1224,6 +1224,14 @@ function PublicPlacesAutocomplete({
           disabled={disabled}
           autoComplete={autoComplete}
           placeholder={placeholder}
+          aria-autocomplete="list"
+          aria-expanded={
+            Boolean(
+              open
+              && configured
+              && suggestions.length
+            )
+          }
           onFocus={() =>
             setOpen(true)
           }
@@ -1261,7 +1269,7 @@ function PublicPlacesAutocomplete({
       && configured
       && suggestions.length ? (
         <div
-          className="absolute z-40 mt-2 w-full overflow-hidden border border-primary/15 bg-background shadow-xl"
+          className="mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-black/10 bg-white p-1 shadow-[0_12px_30px_rgba(0,0,0,0.12)]"
           role="listbox"
         >
           {suggestions.map(
@@ -1272,7 +1280,7 @@ function PublicPlacesAutocomplete({
                 }
                 type="button"
                 role="option"
-                className="block w-full border-b border-primary/10 px-4 py-3 text-left last:border-b-0 hover:bg-secondary/50"
+                className="block w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-secondary/60 focus:bg-secondary/60 focus:outline-none"
                 onMouseDown={(event) =>
                   event.preventDefault()
                 }
@@ -1282,13 +1290,13 @@ function PublicPlacesAutocomplete({
                   )
                 }
               >
-                <span className="block text-sm font-medium">
+                <span className="block truncate text-sm font-semibold text-foreground">
                   {suggestion.mainText
                     || suggestion.text}
                 </span>
 
                 {suggestion.secondaryText ? (
-                  <span className="mt-1 block text-xs text-foreground/55">
+                  <span className="mt-0.5 block truncate text-[11px] leading-4 text-foreground/55">
                     {suggestion.secondaryText}
                   </span>
                 ) : null}
