@@ -40,6 +40,27 @@ platform_types = (
     encoding="utf-8",
 )
 
+email_settings = (
+    ROOT
+    / "src/admin/pages/CRMEmailSettings.tsx"
+).read_text(
+    encoding="utf-8",
+)
+
+crm_page = (
+    ROOT
+    / "src/admin/pages/CRM.tsx"
+).read_text(
+    encoding="utf-8",
+)
+
+wedding_workspace = (
+    ROOT
+    / "src/admin/pages/WeddingWorkspace.tsx"
+).read_text(
+    encoding="utf-8",
+)
+
 
 for token in [
     "transformAdminHeaderActions",
@@ -114,6 +135,37 @@ assert "inferAdminActionKey" in catalogue
 assert "resolveAdminActionIcon" in catalogue
 
 
+# Header action transformation must not depend on an icon
+# already existing in the source element.
+assert "|| !props.icon" not in admin_ui
+assert "const hasButtonIcon" not in admin_ui
+assert "const hasIcon" not in admin_ui
+
+assert (
+    "key=\"admin-header-action-icon\""
+    in admin_ui
+)
+
+assert (
+    'className="admin-button__icon"'
+    in admin_ui
+)
+
+
+# Representative React Router Link actions are deliberately
+# covered by the shared header runtime.
+assert "Email templates" in email_settings
+assert "<Link" in email_settings
+assert "Catalogue" in crm_page
+assert "Quotes" in crm_page
+
+# Even historic header links without source icons are supported:
+# the runtime now synthesises a semantic icon.
+assert "Open CRM Job" in wedding_workspace
+assert "Master content" in wedding_workspace
+assert "Publishing" in wedding_workspace
+
+
 print(
     "PASS v1.10.12a fixed Admin header actions + icon catalogue"
 )
@@ -139,7 +191,11 @@ print(
 )
 
 print(
-    "  text-only exceptional header controls remain normal: verified"
+    "  all labelled header buttons receive semantic icons: verified"
+)
+
+print(
+    "  non-button exceptional header controls remain normal: verified"
 )
 
 print(

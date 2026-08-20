@@ -236,7 +236,7 @@ function replaceRawAdminActionIcon(
 ) {
   let replaced = false;
 
-  return Children.map(
+  const mapped = Children.map(
     children,
     (child) => {
       if (
@@ -276,6 +276,22 @@ function replaceRawAdminActionIcon(
       return child;
     },
   );
+
+  if (
+    !replaced
+    && !iconOnly
+  ) {
+    return [
+      <Icon
+        key="admin-header-action-icon"
+        className="admin-button__icon"
+        aria-hidden="true"
+      />,
+      ...Children.toArray(mapped),
+    ];
+  }
+
+  return mapped;
 }
 
 
@@ -294,7 +310,7 @@ function transformAdminHeaderAction(
     element.props || {};
 
   /*
-   * Shared button components can have their icon prop replaced directly.
+   * Shared button components always receive the configured semantic icon.
    * Their visible label remains in the DOM for semantic inference, but CSS
    * hides it in page headers and exposes it through a floating tooltip.
    */
@@ -307,10 +323,7 @@ function transformAdminHeaderAction(
         props.children,
       );
 
-    if (
-      !label
-      || !props.icon
-    ) {
+    if (!label) {
       return element;
     }
 
@@ -433,39 +446,7 @@ function transformAdminHeaderAction(
       .replace(/\s+/g, " ")
       .trim();
 
-    const children =
-      Children.toArray(
-        props.children,
-      );
-
-    const hasButtonIcon =
-      children.some(
-        (child) => {
-          if (!isValidElement(child)) {
-            return false;
-          }
-
-          const childProps =
-            child.props as Record<
-              string,
-              unknown
-            >;
-
-          return adminHeaderHasClass(
-            childProps.className,
-            "admin-button__icon",
-          );
-        },
-      );
-
-    const hasIcon =
-      isIconControl
-      || hasButtonIcon;
-
-    if (
-      label
-      && hasIcon
-    ) {
+    if (label) {
       const actionKey =
         adminHeaderActionKey(
           props,
