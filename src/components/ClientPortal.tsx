@@ -244,6 +244,188 @@ function supplierAnswers(value: unknown, field: PortalQuestionField) {
   return [];
 }
 
+function SimpleSupplierQuestion({
+  field,
+  value,
+  suppliers,
+  categories: _categories,
+  disabled,
+  onChange,
+}: {
+  field: PortalQuestionField;
+  value: unknown;
+  suppliers: SupplierDirectoryOption[];
+  categories: string[];
+  disabled: boolean;
+  onChange: (value: SupplierAnswer[]) => void;
+}) {
+  const answers =
+    supplierAnswers(
+      value,
+      field,
+    );
+
+  const answer =
+    answers[0]
+    || emptySupplier(
+      field,
+    );
+
+  const targetCategory =
+    String(
+      field.supplierCategory
+      || field.label
+      || field.supplierRole
+      || "Supplier",
+    ).trim();
+
+  const categoryMatches =
+    suppliers.filter(
+      (supplier) =>
+        supplier.category
+          .trim()
+          .toLowerCase()
+        === targetCategory
+          .toLowerCase(),
+    );
+
+  const directory =
+    categoryMatches.length
+      ? categoryMatches
+      : suppliers;
+
+  const masterSupplier =
+    answer.supplierId
+      ? suppliers.find(
+          (supplier) =>
+            supplier.id
+            === answer.supplierId,
+        )
+      : undefined;
+
+  const datalistId =
+    `portal_supplier_simple_${field.id}`;
+
+  function chooseSupplier(
+    supplier: SupplierDirectoryOption,
+  ) {
+    onChange([
+      {
+        mode:
+          "existing",
+        supplierId:
+          supplier.id,
+        name:
+          supplier.name,
+        role:
+          targetCategory,
+        website:
+          supplier.website || "",
+        instagram:
+          supplier.instagram || "",
+        email:
+          supplier.email || "",
+        phone:
+          supplier.phone || "",
+        location:
+          supplier.location || "",
+        county:
+          supplier.county || "",
+      },
+    ]);
+  }
+
+  function changeSupplierText(
+    input: string,
+  ) {
+    const clean =
+      input.trim();
+
+    if (!clean) {
+      onChange([]);
+      return;
+    }
+
+    const match =
+      directory.find(
+        (supplier) =>
+          supplier.name
+            .trim()
+            .toLowerCase()
+          === clean
+            .toLowerCase(),
+      );
+
+    if (match) {
+      chooseSupplier(
+        match,
+      );
+      return;
+    }
+
+    onChange([
+      {
+        ...emptySupplier(
+          field,
+        ),
+        mode:
+          "unlisted",
+        name:
+          input,
+        role:
+          targetCategory,
+      },
+    ]);
+  }
+
+  return (
+    <div className="supplier-questionnaire-simple">
+      <input
+        list={datalistId}
+        value={answer.name || ""}
+        disabled={disabled}
+        placeholder="Start typing supplier name…"
+        autoComplete="off"
+        onChange={(event) =>
+          changeSupplierText(
+            event.target.value,
+          )
+        }
+      />
+
+      <datalist id={datalistId}>
+        {directory.map(
+          (supplier) => (
+            <option
+              key={supplier.id}
+              value={supplier.name}
+              label={
+                supplier.location
+                || supplier.county
+                || supplier.category
+              }
+            />
+          ),
+        )}
+      </datalist>
+
+      {answer.name ? (
+        <small className="supplier-questionnaire-simple__state">
+          {masterSupplier
+            ? [
+                "Matched",
+                masterSupplier.location
+                || masterSupplier.county,
+              ]
+                .filter(Boolean)
+                .join(" · ")
+            : "Not listed — this supplier will be reviewed."}
+        </small>
+      ) : null}
+    </div>
+  );
+}
+
 function SupplierQuestion({
   field,
   value,
@@ -1986,7 +2168,59 @@ export function ClientPortal() {
                   if (field.type === "description") return <p key={field.id} className="portal-question-description">{field.label}</p>;
                   const value = responses[field.id];
                   const files = questionnaire.files.filter((file) => file.fieldKey === field.id);
-                  if (field.type === "supplier") return <div key={field.id} className="portal-question-field"><span>{field.label}{field.required ? <b> *</b> : null}</span>{field.help ? <small>{field.help}</small> : null}<SupplierQuestion field={field} value={value} suppliers={supplierDirectory} categories={supplierCategories} disabled={saving} onChange={(next) => setResponses((current) => ({ ...current, [field.id]: next }))} /></div>;
+                  if (field.type === "supplier") {
+                    return (
+                      <div
+                        key={field.id}
+                        className="portal-question-field"
+                      >
+                        <span>
+                          {field.label}
+                          {field.required ? <b> *</b> : null}
+                        </span>
+
+                        {field.help ? (
+                          <small>
+                            {field.help}
+                          </small>
+                        ) : null}
+
+                        {field.multiple ? (
+                          <SupplierQuestion
+                            field={field}
+                            value={value}
+                            suppliers={supplierDirectory}
+                            categories={supplierCategories}
+                            disabled={saving}
+                            onChange={(next) =>
+                              setResponses(
+                                (current) => ({
+                                  ...current,
+                                  [field.id]: next,
+                                }),
+                              )
+                            }
+                          />
+                        ) : (
+                          <SimpleSupplierQuestion
+                            field={field}
+                            value={value}
+                            suppliers={supplierDirectory}
+                            categories={supplierCategories}
+                            disabled={saving}
+                            onChange={(next) =>
+                              setResponses(
+                                (current) => ({
+                                  ...current,
+                                  [field.id]: next,
+                                }),
+                              )
+                            }
+                          />
+                        )}
+                      </div>
+                    );
+                  }
                   if (
                     field.type === "address"
                     || field.type === "venue"

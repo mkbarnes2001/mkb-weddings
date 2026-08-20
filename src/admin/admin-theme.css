@@ -12104,3 +12104,34 @@ span {
     flex-direction: column;
   }
 }
+
+
+/* v1.10.12a — simple supplier questionnaire fields — admin */
+.supplier-questionnaire-simple {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.supplier-questionnaire-simple > input {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+}
+
+.supplier-questionnaire-simple__state {
+  color: #777;
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  line-height: 1.4;
+}
+
+.supplier-questionnaire-simple--admin {
+  max-width: 640px;
+}

@@ -173,6 +173,212 @@ function professionalSupplierAnswers(
 }
 
 
+function SimpleProfessionalSupplierQuestion({
+  field,
+  value,
+  suppliers,
+  categories: _categories,
+  disabled,
+  onChange,
+}: {
+  field: QuestionnaireField;
+  value: unknown;
+  suppliers:
+    CrmJobWorkspace["supplierDirectory"];
+  categories:
+    CrmJobWorkspace["supplierCategories"];
+  disabled: boolean;
+  onChange:
+    (value: unknown) => void;
+}) {
+  const answers =
+    professionalSupplierAnswers(
+      value,
+      field,
+    );
+
+  const answer =
+    answers[0]
+    || emptyProfessionalSupplier(
+      field,
+      "unlisted",
+    );
+
+  const targetCategory =
+    String(
+      field.supplierCategory
+      || field.label
+      || field.supplierRole
+      || "Supplier",
+    ).trim();
+
+  const categoryMatches =
+    suppliers.filter(
+      (supplier) =>
+        supplier.category
+          .trim()
+          .toLowerCase()
+        === targetCategory
+          .toLowerCase(),
+    );
+
+  const directory =
+    categoryMatches.length
+      ? categoryMatches
+      : suppliers;
+
+  const masterSupplier =
+    answer.supplierId
+      ? suppliers.find(
+          (supplier) =>
+            supplier.id
+            === answer.supplierId,
+        )
+      : undefined;
+
+  const datalistId =
+    `professional_supplier_simple_${field.id}`;
+
+  function chooseSupplier(
+    supplier:
+      CrmJobWorkspace[
+        "supplierDirectory"
+      ][number],
+  ) {
+    onChange([
+      {
+        mode:
+          "existing",
+        supplierId:
+          supplier.id,
+        name:
+          supplier.name,
+        role:
+          targetCategory,
+        website:
+          supplier.website || "",
+        instagram:
+          supplier.instagram || "",
+        email:
+          supplier.email || "",
+        phone:
+          supplier.phone || "",
+        location:
+          supplier.location || "",
+        county:
+          supplier.county || "",
+      },
+    ]);
+  }
+
+  function changeSupplierText(
+    input: string,
+  ) {
+    const clean =
+      input.trim();
+
+    if (!clean) {
+      onChange([]);
+      return;
+    }
+
+    const match =
+      directory.find(
+        (supplier) =>
+          supplier.name
+            .trim()
+            .toLowerCase()
+          === clean
+            .toLowerCase(),
+      );
+
+    if (match) {
+      chooseSupplier(
+        match,
+      );
+      return;
+    }
+
+    onChange([
+      {
+        ...emptyProfessionalSupplier(
+          field,
+          "unlisted",
+        ),
+        mode:
+          "unlisted",
+        name:
+          input,
+        role:
+          targetCategory,
+      },
+    ]);
+  }
+
+  return (
+    <div className="crm-questionnaire-editor__field">
+      <span>
+        {field.label}
+        {field.required ? (
+          <b> *</b>
+        ) : null}
+      </span>
+
+      {field.help ? (
+        <small>
+          {field.help}
+        </small>
+      ) : null}
+
+      <div className="supplier-questionnaire-simple supplier-questionnaire-simple--admin">
+        <input
+          className="admin-input"
+          list={datalistId}
+          value={answer.name || ""}
+          disabled={disabled}
+          placeholder="Start typing supplier name…"
+          autoComplete="off"
+          onChange={(event) =>
+            changeSupplierText(
+              event.target.value,
+            )
+          }
+        />
+
+        <datalist id={datalistId}>
+          {directory.map(
+            (supplier) => (
+              <option
+                key={supplier.id}
+                value={supplier.name}
+                label={
+                  supplier.location
+                  || supplier.county
+                  || supplier.category
+                }
+              />
+            ),
+          )}
+        </datalist>
+
+        {answer.name ? (
+          <small className="supplier-questionnaire-simple__state">
+            {masterSupplier
+              ? [
+                  "Supplier Master",
+                  masterSupplier.location
+                  || masterSupplier.county,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")
+              : "Needs review"}
+          </small>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function ProfessionalSupplierRows({
   field,
   value,
@@ -791,8 +997,19 @@ export function ProfessionalQuestionnaireField({
   }
 
   if (field.type === "supplier") {
-    return (
+    return field.multiple ? (
       <ProfessionalSupplierRows
+        field={field}
+        value={value}
+        suppliers={suppliers}
+        categories={
+          supplierCategories
+        }
+        disabled={disabled}
+        onChange={onChange}
+      />
+    ) : (
+      <SimpleProfessionalSupplierQuestion
         field={field}
         value={value}
         suppliers={suppliers}

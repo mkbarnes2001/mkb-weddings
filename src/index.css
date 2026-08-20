@@ -5043,3 +5043,22 @@ footer .logo-mkb, footer .logo-weddings {
     padding: 0 16px 16px;
   }
 }
+
+
+/* v1.10.12a — simple supplier questionnaire fields — public */
+.supplier-questionnaire-simple {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.supplier-questionnaire-simple > input {
+  width: 100%;
+  min-width: 0;
+}
+
+.supplier-questionnaire-simple__state {
+  color: rgba(17,17,17,.56);
+  font-size: 11px;
+  line-height: 1.4;
+}

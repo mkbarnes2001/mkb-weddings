@@ -101,8 +101,8 @@ def main() -> None:
     assert 'path="crm/contacts/:id"' in admin_app
     for needle in ["Workflow", "Supplier team", "Needs review", "Files", "Notes", "Edit client"]:
         assert needle.lower() in job_page.lower(), f"Job workspace missing {needle}"
-    assert "Supplier team" in builder and "Allow supplier not listed" in builder
-    assert "SupplierQuestion" in client and "Supplier not listed" in client
+    assert 'supplier: "Supplier"' in builder and "One supplier per question" in builder
+    assert "SimpleSupplierQuestion" in client and "Start typing supplier name…" in client
     assert '"crm_supplier_submissions"' in operations
     assert "duplicate CRM contacts" in contact_page
 
