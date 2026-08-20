@@ -34,7 +34,7 @@ type EmailEnv = {
 const PORTAL_LINK_TTL_MS = 30 * 60 * 1000;
 const CLIENT_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const FIELD_TYPES = new Set(["heading", "description", "short_text", "long_text", "select", "radio", "checkbox", "file", "supplier"]);
+const FIELD_TYPES = new Set(["heading", "description", "short_text", "long_text", "address", "venue", "select", "radio", "checkbox", "file", "supplier"]);
 
 function text(value: unknown) {
   return String(value ?? "").trim();
@@ -142,7 +142,7 @@ async function supplierCategoryOptions(
 
 export type QuestionnaireField = {
   id: string;
-  type: "heading" | "description" | "short_text" | "long_text" | "select" | "radio" | "checkbox" | "file" | "supplier";
+  type: "heading" | "description" | "short_text" | "long_text" | "address" | "venue" | "select" | "radio" | "checkbox" | "file" | "supplier";
   label: string;
   help: string;
   required: boolean;

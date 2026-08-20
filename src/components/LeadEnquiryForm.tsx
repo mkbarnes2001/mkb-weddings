@@ -934,8 +934,10 @@ export function LeadEnquiryForm({
   return body;
 }
 
-function PublicPlacesAutocomplete({
+export function PublicPlacesAutocomplete({
   kind,
+  context = "lead",
+  endpoint = "/api/public/crm/places",
   value,
   placeholder,
   autoComplete,
@@ -945,6 +947,8 @@ function PublicPlacesAutocomplete({
   onPlaceSelect,
 }: {
   kind: "address" | "venue";
+  context?: "lead" | "questionnaire";
+  endpoint?: string;
   value: string;
   placeholder: string;
   autoComplete: string;
@@ -1022,7 +1026,7 @@ function PublicPlacesAutocomplete({
             try {
               const response =
                 await fetch(
-                  "/api/public/crm/places",
+                  endpoint,
                   {
                     method: "POST",
                     headers: {
@@ -1038,6 +1042,7 @@ function PublicPlacesAutocomplete({
                         action:
                           "autocomplete",
                         kind,
+                        context,
                         input,
                         sessionToken:
                           sessionTokenRef.current,
@@ -1104,6 +1109,8 @@ function PublicPlacesAutocomplete({
     [
       query,
       kind,
+      context,
+      endpoint,
       disabled,
     ],
   );
@@ -1136,7 +1143,7 @@ function PublicPlacesAutocomplete({
     try {
       const response =
         await fetch(
-          "/api/public/crm/places",
+          endpoint,
           {
             method: "POST",
             headers: {
@@ -1150,6 +1157,7 @@ function PublicPlacesAutocomplete({
                 action:
                   "details",
                 kind,
+                context,
                 placeId:
                   suggestion.placeId,
                 sessionToken:

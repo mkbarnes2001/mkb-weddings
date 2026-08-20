@@ -1,4 +1,5 @@
 import { getPublicLeadForm } from "../../../../serverless/crm-d1";
+import { getAuthenticatedClientIdentity } from "../../../../serverless/client-auth-d1";
 import { resolvePublicWorkspaceId } from "../../../../serverless/tenant-context";
 
 type Env = {
@@ -532,36 +533,79 @@ async (context) => {
       );
     }
 
-    const form =
-      await getPublicLeadForm(
-        context.env.MKB_DB,
-        workspaceId,
-      );
-
     const body: any =
       await context.request
         .json()
-        .catch(() => ({}));
+        .catch(
+          () => ({}),
+        );
 
     const kind =
       lookupKind(
         body?.kind,
       );
 
-    if (
-      !kind
-      || !activeFieldExists(
-        form,
-        kind,
-      )
-    ) {
+    if (!kind) {
       return json(
         {
           error:
-            "Places lookup is not available for this form.",
+            "Places lookup is not available.",
         },
         404,
       );
+    }
+
+    const lookupContext =
+      text(
+        body?.context,
+      ) === "questionnaire"
+        ? "questionnaire"
+        : "lead";
+
+    if (
+      lookupContext
+      === "questionnaire"
+    ) {
+      const identity =
+        await getAuthenticatedClientIdentity(
+          context.env.MKB_DB,
+          context.request,
+        );
+
+      if (
+        !identity
+        || identity.workspaceId
+          !== workspaceId
+      ) {
+        return json(
+          {
+            error:
+              "Sign in to use questionnaire place search.",
+          },
+          401,
+        );
+      }
+    } else {
+      const form =
+        await getPublicLeadForm(
+          context.env.MKB_DB,
+          workspaceId,
+        );
+
+      if (
+        !activeFieldExists(
+          form,
+          kind,
+        )
+      ) {
+        return json(
+          {
+            error:
+              "Places lookup is not available for this form.",
+          },
+          404,
+        );
+      }
     }
 
     if (

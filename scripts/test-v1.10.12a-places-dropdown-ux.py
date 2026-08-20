@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+import re
 
 
 source = Path(
@@ -74,10 +75,19 @@ for marker in (
 
 # No behavioural regression.
 require(
-    component.count(
-        '"/api/public/crm/places"'
-    ) == 2,
-    "Places endpoints changed unexpectedly.",
+    'endpoint = "/api/public/crm/places"'
+    in component,
+    "Default Places endpoint changed unexpectedly.",
+)
+
+fetch_targets = re.findall(
+    r"fetch\(\s*([A-Za-z_][A-Za-z0-9_]*),",
+    component,
+)
+
+require(
+    fetch_targets.count("endpoint") == 2,
+    "Both Places requests must use the reusable endpoint.",
 )
 
 for marker in (

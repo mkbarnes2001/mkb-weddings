@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
 import { ClientPortalCommercialDocument } from "./ClientPortalCommercialDocument";
+import { PublicPlacesAutocomplete } from "./LeadEnquiryForm";
 import { ArrowLeft, CalendarDays, CheckCircle2, Download, FileText, Home, Images, LogOut, Mail, PackageCheck, Paperclip, Plus, Save, Search, Send, Trash2, XCircle } from "lucide-react";
 
 type SupplierDirectoryOption = {
@@ -1986,6 +1987,91 @@ export function ClientPortal() {
                   const value = responses[field.id];
                   const files = questionnaire.files.filter((file) => file.fieldKey === field.id);
                   if (field.type === "supplier") return <div key={field.id} className="portal-question-field"><span>{field.label}{field.required ? <b> *</b> : null}</span>{field.help ? <small>{field.help}</small> : null}<SupplierQuestion field={field} value={value} suppliers={supplierDirectory} categories={supplierCategories} disabled={saving} onChange={(next) => setResponses((current) => ({ ...current, [field.id]: next }))} /></div>;
+                  if (
+                    field.type === "address"
+                    || field.type === "venue"
+                  ) {
+                    return (
+                      <div
+                        key={field.id}
+                        className="portal-question-field"
+                      >
+                        <span>
+                          {field.label}
+                          {field.required ? (
+                            <b> *</b>
+                          ) : null}
+                        </span>
+
+                        {field.help ? (
+                          <small>
+                            {field.help}
+                          </small>
+                        ) : null}
+
+                        <PublicPlacesAutocomplete
+                          context="questionnaire"
+                          endpoint={
+                            portalApiPath(
+                              "/api/public/crm/places",
+                            )
+                          }
+                          kind={field.type}
+                          value={
+                            String(
+                              value ?? "",
+                            )
+                          }
+                          placeholder={
+                            field.type === "address"
+                              ? "Start typing an address…"
+                              : "Start typing a venue…"
+                          }
+                          autoComplete={
+                            field.type === "address"
+                              ? "street-address"
+                              : "off"
+                          }
+                          required={field.required}
+                          disabled={saving}
+                          onManualChange={
+                            (next) =>
+                              setResponses(
+                                (current) => ({
+                                  ...current,
+                                  [field.id]:
+                                    next,
+                                }),
+                              )
+                          }
+                          onPlaceSelect={
+                            (place) =>
+                              setResponses(
+                                (current) => ({
+                                  ...current,
+                                  [field.id]:
+                                    field.type === "venue"
+                                      ? (
+                                          place.name
+                                          || place
+                                            .formattedAddress
+                                        )
+                                      : (
+                                          place
+                                            .formattedAddress
+                                          || place
+                                            .address
+                                            .line1
+                                          || ""
+                                        ),
+                                }),
+                              )
+                          }
+                        />
+                      </div>
+                    );
+                  }
+
                   return <label key={field.id} className="portal-question-field"><span>{field.label}{field.required ? <b> *</b> : null}</span>{field.help ? <small>{field.help}</small> : null}{field.type === "short_text" ? <input value={String(value ?? "")} disabled={saving} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))} /> : null}{field.type === "long_text" ? <textarea value={String(value ?? "")} disabled={saving} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))} /> : null}{field.type === "select" ? <select value={String(value ?? "")} disabled={saving} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.value }))}><option value="">Choose an option</option>{field.options.map((option) => <option key={option}>{option}</option>)}</select> : null}{field.type === "radio" ? <div className="portal-choice-list">{field.options.map((option) => <label key={option}><input type="radio" name={field.id} checked={value === option} disabled={saving} onChange={() => setResponses((current) => ({ ...current, [field.id]: option }))} />{option}</label>)}</div> : null}{field.type === "checkbox" ? <div className="portal-choice-list">{field.options.map((option) => { const selected = Array.isArray(value) ? value as string[] : []; return <label key={option}><input type="checkbox" checked={selected.includes(option)} disabled={saving} onChange={(event) => setResponses((current) => ({ ...current, [field.id]: event.target.checked ? [...selected, option] : selected.filter((item) => item !== option) }))} />{option}</label>; })}</div> : null}{field.type === "file" ? <div className="portal-file-field"><input type="file" disabled={saving} onChange={(event) => { const file = event.target.files?.[0]; void upload(field.id, file); event.currentTarget.value = ""; }} /><div className="portal-file-list">{files.map((file) => <div key={file.id}><Paperclip /><a href={portalApiPath(`/api/public/client-portal/questionnaires/${encodeURIComponent(questionnaire.id)}/files/${encodeURIComponent(file.id)}`)} target="_blank" rel="noreferrer"><span>{file.filename}</span><small>{formatBytes(file.fileSize)}</small></a><button type="button" disabled={saving} onClick={() => void removeFile(file.id)}><Trash2 /></button></div>)}</div></div> : null}</label>;
                 })}
               </div>

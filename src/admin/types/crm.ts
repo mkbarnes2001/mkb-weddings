@@ -233,7 +233,7 @@ export type CrmEnquiryInput = {
   };
 };
 
-export type QuestionnaireFieldType = "heading" | "description" | "short_text" | "long_text" | "select" | "radio" | "checkbox" | "file" | "supplier";
+export type QuestionnaireFieldType = "heading" | "description" | "short_text" | "long_text" | "address" | "venue" | "select" | "radio" | "checkbox" | "file" | "supplier";
 
 export type QuestionnaireField = {
   id: string;

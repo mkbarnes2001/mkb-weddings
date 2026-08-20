@@ -20,6 +20,8 @@ const fieldLabels: Record<QuestionnaireFieldType, string> = {
   description: "Description",
   short_text: "Single-line field",
   long_text: "Multi-line field",
+  address: "Address",
+  venue: "Venue",
   select: "Dropdown select",
   radio: "Radio button select",
   checkbox: "Checkbox select",
@@ -38,7 +40,7 @@ function baseField(type: QuestionnaireFieldType): Pick<QuestionnaireField, "opti
 }
 
 function blankField(type: QuestionnaireFieldType, index: number): QuestionnaireField {
-  const content = type === "heading" ? "New section" : type === "description" ? "Add guidance for your client." : type === "supplier" ? "Supplier team" : "New question";
+  const content = type === "heading" ? "New section" : type === "description" ? "Add guidance for your client." : type === "supplier" ? "Supplier team" : type === "address" ? "Address" : type === "venue" ? "Venue" : "New question";
   return {
     id: `field_${Date.now()}_${index}`,
     type,
@@ -74,6 +76,8 @@ function FieldPreview({ field }: { field: QuestionnaireField }) {
       {field.help ? <small>{field.help}</small> : null}
       {field.type === "short_text" ? <input disabled placeholder="Client answer" /> : null}
       {field.type === "long_text" ? <textarea disabled placeholder="Client answer" /> : null}
+      {field.type === "address" ? <input disabled placeholder="Start typing an address…" /> : null}
+      {field.type === "venue" ? <input disabled placeholder="Start typing a venue…" /> : null}
       {field.type === "select" ? <select disabled><option>Choose an option</option>{field.options.map((option) => <option key={option}>{option}</option>)}</select> : null}
       {field.type === "radio" ? <div className="grid gap-2">{field.options.map((option) => <span key={option}><input type="radio" disabled /> {option}</span>)}</div> : null}
       {field.type === "checkbox" ? <div className="grid gap-2">{field.options.map((option) => <span key={option}><input type="checkbox" disabled /> {option}</span>)}</div> : null}

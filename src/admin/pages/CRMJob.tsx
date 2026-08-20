@@ -825,9 +825,18 @@ export function ProfessionalQuestionnaireField({
         </small>
       ) : null}
 
-      {field.type === "short_text" ? (
+      {field.type === "short_text"
+      || field.type === "address"
+      || field.type === "venue" ? (
         <input
           className="admin-input"
+          placeholder={
+            field.type === "address"
+              ? "Client address"
+              : field.type === "venue"
+                ? "Venue"
+                : undefined
+          }
           value={String(
             value ?? "",
           )}
