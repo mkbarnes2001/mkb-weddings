@@ -79,7 +79,7 @@ version = con.execute(
 ).fetchone()
 
 assert version
-assert version[0] == "45"
+assert version[0] == "46"
 
 
 columns = {

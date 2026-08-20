@@ -35,7 +35,7 @@ client = read(
     "src/components/ClientPortal.tsx"
 )
 
-# Full current schema is schema 45.
+# Full current schema is schema 46.
 db = sqlite3.connect(":memory:")
 db.executescript(schema)
 
@@ -45,7 +45,7 @@ version = db.execute(
     "WHERE key='schema_version'"
 ).fetchone()[0]
 
-assert str(version) == "45"
+assert str(version) == "46"
 
 instance_columns = {
     row[1]

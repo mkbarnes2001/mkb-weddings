@@ -32,7 +32,16 @@ const DEFAULT_PLATFORM_IDENTITY: PlatformBrandingIdentity = {
   adminMetaFontScale: 100,
   pageHeaderLogoScale: 100,
   sidebarLogoScale: 100,
-  mobileLogoScale: 100,
+  mobileLogoScale: 100,  adminHeaderStyle: "divider",
+  adminHeaderDensity: "compact",
+  adminHeaderTitleSize: "medium",
+  adminHeaderShadow: "off",
+  adminHeaderDescription: "show",
+  adminHeaderDescriptionSize: "small",
+  adminHeaderActionSize: "compact",
+  adminStatusSize: "compact",
+  adminPageSpacing: "compact",
+
 };
 
 type BrandingUpdatedDetail = {
@@ -373,6 +382,33 @@ export function AdminLayout() {
       style={shellStyle}
       data-active-button-style={activeButtonStyle}
       data-panel-accent={panelAccentStyle}
+      data-admin-header-style={
+        platformIdentity.adminHeaderStyle || "divider"
+      }
+      data-admin-header-density={
+        platformIdentity.adminHeaderDensity || "compact"
+      }
+      data-admin-header-title-size={
+        platformIdentity.adminHeaderTitleSize || "medium"
+      }
+      data-admin-header-shadow={
+        platformIdentity.adminHeaderShadow || "off"
+      }
+      data-admin-header-description={
+        platformIdentity.adminHeaderDescription || "show"
+      }
+      data-admin-header-description-size={
+        platformIdentity.adminHeaderDescriptionSize || "small"
+      }
+      data-admin-header-action-size={
+        platformIdentity.adminHeaderActionSize || "compact"
+      }
+      data-admin-status-size={
+        platformIdentity.adminStatusSize || "compact"
+      }
+      data-admin-page-spacing={
+        platformIdentity.adminPageSpacing || "compact"
+      }
       data-desktop-nav-background-custom={
         !isPlatformRoute && Boolean(currentAppearance.desktopNavBackgroundColor)
           ? "true"

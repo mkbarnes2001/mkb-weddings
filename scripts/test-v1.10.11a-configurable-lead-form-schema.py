@@ -508,7 +508,7 @@ assert one(
     FROM schema_meta
     WHERE key = 'schema_version'
     """,
-)[0] == "45"
+)[0] == "46"
 
 
 assert "fields_json" in table_columns(

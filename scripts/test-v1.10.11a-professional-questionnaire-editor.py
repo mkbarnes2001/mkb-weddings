@@ -26,7 +26,7 @@ server = read(
     "serverless/client-portal-d1.ts"
 )
 
-# Release remains schema 43.
+# Full current schema is schema 46.
 db = sqlite3.connect(":memory:")
 
 db.executescript(
@@ -39,7 +39,7 @@ version = db.execute(
     "WHERE key='schema_version'"
 ).fetchone()[0]
 
-assert str(version) == "45"
+assert str(version) == "46"
 
 # One shared response instance is edited, not a professional copy.
 for token in (

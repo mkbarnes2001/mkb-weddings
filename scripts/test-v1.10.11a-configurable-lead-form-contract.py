@@ -47,7 +47,7 @@ public_form = PUBLIC_FORM.read_text(
 
 
 # ------------------------------------------------------------
-# Schema-45 persistence boundary.
+# Current full-schema persistence boundary (schema 46).
 # ------------------------------------------------------------
 
 con = sqlite3.connect(
@@ -64,7 +64,7 @@ assert con.execute(
     FROM schema_meta
     WHERE key = 'schema_version'
     """
-).fetchone()[0] == "45"
+).fetchone()[0] == "46"
 
 assert "fields_json" in columns(
     con,

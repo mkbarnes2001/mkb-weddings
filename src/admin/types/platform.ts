@@ -212,6 +212,15 @@ export type PlatformBrandingIdentity = {
   pageHeaderLogoScale: number;
   sidebarLogoScale: number;
   mobileLogoScale: number;
+  adminHeaderStyle: "flat" | "divider" | "panel";
+  adminHeaderDensity: "compact" | "standard";
+  adminHeaderTitleSize: "small" | "medium" | "large";
+  adminHeaderShadow: "off" | "subtle";
+  adminHeaderDescription: "show" | "hide";
+  adminHeaderDescriptionSize: "small" | "standard";
+  adminHeaderActionSize: "compact" | "standard";
+  adminStatusSize: "compact" | "standard";
+  adminPageSpacing: "compact" | "standard";
   updatedAt?: string;
 };
 

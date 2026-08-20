@@ -12135,3 +12135,741 @@ span {
 .supplier-questionnaire-simple--admin {
   max-width: 640px;
 }
+
+
+/* v1.10.12a — WedPlanned Admin UI v2 shared refinement */
+
+/*
+ * Shared operational Admin surfaces.
+ *
+ * Platform Administration deliberately keeps its distinct
+ * control-plane presentation. Workspace modules receive the
+ * lighter, flatter WedPlanned treatment below.
+ */
+
+.admin-shell:not(.admin-shell--platform) .admin-main-content {
+  padding:
+    18px
+    20px
+    32px;
+}
+
+.admin-shell:not(.admin-shell--platform) .admin-page {
+  gap: 12px;
+}
+
+
+/* ----------------------------------------------------------
+   PAGE HEADERS
+   ---------------------------------------------------------- */
+
+.admin-shell:not(.admin-shell--platform)
+.admin-page-header {
+  align-items: center;
+  gap: 14px;
+  padding:
+    8px
+    2px
+    12px;
+  border: 0;
+  border-bottom:
+    1px
+    solid
+    var(--admin-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-page-header__content {
+  max-width: 1080px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-eyebrow {
+  margin-bottom: 3px;
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  font-weight: 600;
+  letter-spacing: .11em;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-page-title {
+  font-size:
+    calc(
+      clamp(
+        1.28rem,
+        1.75vw,
+        1.78rem
+      )
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  letter-spacing: -.025em;
+  line-height: 1.08;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-page-description {
+  max-width: 840px;
+  margin-top: 4px;
+  font-size:
+    calc(
+      10.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  line-height: 1.45;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-page-meta {
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-page-actions,
+.admin-shell:not(.admin-shell--platform)
+.admin-panel__actions {
+  gap: 5px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-page-header
+.admin-inline-link {
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      9px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  font-weight: 550;
+  text-decoration: none;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-page-header
+.admin-inline-link:hover {
+  color: var(--admin-text);
+}
+
+
+/* ----------------------------------------------------------
+   PANELS / CARDS
+   ---------------------------------------------------------- */
+
+.admin-shell:not(.admin-shell--platform)
+.admin-panel {
+  border-radius: 10px;
+  background: rgba(255,255,255,.9);
+  box-shadow: none;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-panel__header {
+  min-height: 46px;
+  gap: 10px;
+  padding:
+    9px
+    12px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-panel__heading {
+  gap: 8px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-panel__icon {
+  width: 27px;
+  height: 27px;
+  flex-basis: 27px;
+  border-radius: 7px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-panel__icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-panel__title {
+  font-size:
+    calc(
+      12.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-panel__description {
+  margin-top: 1px;
+  font-size:
+    calc(
+      9.25px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  line-height: 1.4;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-panel__body {
+  padding: 13px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-panel--compact
+.admin-panel__body {
+  padding: 12px;
+}
+
+
+/* ----------------------------------------------------------
+   BUTTONS / ACTIONS
+   ---------------------------------------------------------- */
+
+.admin-shell:not(.admin-shell--platform) {
+  --admin-control-height-sm: 28px;
+  --admin-control-height: 32px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-button,
+.admin-shell:not(.admin-shell--platform)
+.admin-action-primary,
+.admin-shell:not(.admin-shell--platform)
+.admin-action-secondary {
+  gap: 5px;
+  padding-inline: 10px !important;
+  font-size:
+    calc(
+      10px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    ) !important;
+  font-weight: 600 !important;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-button--sm {
+  padding-inline: 8px !important;
+  font-size:
+    calc(
+      9px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    ) !important;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-button__icon {
+  width: 12px;
+  height: 12px;
+  flex-basis: 12px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-icon-control,
+.admin-shell:not(.admin-shell--platform)
+.admin-icon-button {
+  width: 32px;
+  min-width: 32px !important;
+  height: 32px;
+  min-height: 32px !important;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-icon-control svg,
+.admin-shell:not(.admin-shell--platform)
+.admin-icon-button svg {
+  width: 13px;
+  height: 13px;
+}
+
+
+/* ----------------------------------------------------------
+   STATUS / META
+   ---------------------------------------------------------- */
+
+.admin-shell:not(.admin-shell--platform)
+.admin-status,
+.admin-shell:not(.admin-shell--platform)
+.admin-status-badge {
+  min-height: 18px;
+  padding:
+    1px
+    6px;
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  font-weight: 650;
+  letter-spacing: .035em;
+}
+
+
+/* ----------------------------------------------------------
+   TABS
+   ---------------------------------------------------------- */
+
+.admin-shell:not(.admin-shell--platform)
+.admin-tabs {
+  gap: 1px;
+  border-bottom:
+    1px
+    solid
+    var(--admin-border);
+  background: transparent;
+  padding-inline: 0;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-tab {
+  height: 32px;
+  gap: 5px;
+  padding:
+    0
+    9px;
+  font-size:
+    calc(
+      10px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+
+/* ----------------------------------------------------------
+   FORMS
+   ---------------------------------------------------------- */
+
+.admin-shell:not(.admin-shell--platform)
+.admin-field {
+  gap: 4px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-field__label {
+  font-size:
+    calc(
+      8.25px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  letter-spacing: .095em;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-field__help {
+  font-size:
+    calc(
+      9px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  line-height: 1.4;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.admin-input,
+.admin-shell:not(.admin-shell--platform)
+.admin-select,
+.admin-shell:not(.admin-shell--platform)
+.admin-textarea {
+  border-radius: 7px;
+}
+
+
+/* ----------------------------------------------------------
+   TOOLBARS
+   ---------------------------------------------------------- */
+
+.admin-shell:not(.admin-shell--platform)
+.admin-toolbar {
+  gap: 5px;
+  padding: 6px;
+  border-radius: 9px;
+  background: rgba(255,255,255,.78);
+}
+
+
+/* ----------------------------------------------------------
+   QUESTIONNAIRE BUILDER
+   ---------------------------------------------------------- */
+
+.admin-shell:not(.admin-shell--platform)
+.questionnaire-builder-layout {
+  grid-template-columns:
+    minmax(220px, .32fr)
+    minmax(0, 1fr);
+  gap: 10px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.questionnaire-builder-layout
+> .admin-panel:first-child {
+  top: 10px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.questionnaire-field-palette {
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.questionnaire-field-palette
+.admin-button {
+  justify-content: flex-start;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.questionnaire-builder-fields {
+  gap: 7px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.questionnaire-builder-field {
+  grid-template-columns:
+    28px
+    minmax(0,1fr);
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.questionnaire-builder-field__handle {
+  background: #faf9f7;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.questionnaire-builder-field__handle
+svg {
+  width: 13px;
+  height: 13px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.questionnaire-builder-field__body {
+  gap: 8px;
+  padding: 10px;
+}
+
+.admin-shell:not(.admin-shell--platform)
+.questionnaire-builder-field
+.rounded-xl {
+  border-radius: 7px !important;
+}
+
+
+/* ----------------------------------------------------------
+   REPEATING RECORDS
+   ---------------------------------------------------------- */
+
+.admin-shell:not(.admin-shell--platform)
+.questionnaire-template-card,
+.admin-shell:not(.admin-shell--platform)
+.questionnaire-instance-card,
+.admin-shell:not(.admin-shell--platform)
+.crm-operation-record,
+.admin-shell:not(.admin-shell--platform)
+.crm-enquiry-card {
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+
+/* ----------------------------------------------------------
+   RESPONSIVE
+   ---------------------------------------------------------- */
+
+@media (max-width: 980px) {
+  .admin-shell:not(.admin-shell--platform)
+  .admin-main-content {
+    padding:
+      15px
+      15px
+      28px;
+  }
+
+  .admin-shell:not(.admin-shell--platform)
+  .questionnaire-builder-layout {
+    grid-template-columns:
+      minmax(190px, .34fr)
+      minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-shell:not(.admin-shell--platform)
+  .admin-main-content {
+    padding:
+      12px
+      12px
+      24px;
+  }
+
+  .admin-shell:not(.admin-shell--platform)
+  .admin-page {
+    gap: 10px;
+  }
+
+  .admin-shell:not(.admin-shell--platform)
+  .admin-page-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+    padding:
+      5px
+      0
+      10px;
+  }
+
+  .admin-shell:not(.admin-shell--platform)
+  .admin-page-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .admin-shell:not(.admin-shell--platform)
+  .questionnaire-builder-layout {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+
+  .admin-shell:not(.admin-shell--platform)
+  .questionnaire-builder-layout
+  > .admin-panel:first-child {
+    position: static;
+  }
+}
+
+
+/* v1.10.12a — platform-controlled Admin header appearance */
+
+/* Workspace modules only. Platform Administration remains distinct. */
+
+.admin-shell:not(.admin-shell--platform)[data-admin-header-style="flat"]
+.admin-page-header {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-header-style="divider"]
+.admin-page-header {
+  border: 0;
+  border-bottom: 1px solid var(--admin-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-header-style="panel"]
+.admin-page-header {
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: rgba(255,255,255,.9);
+  box-shadow: none;
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-header-style="panel"][data-admin-header-shadow="subtle"]
+.admin-page-header {
+  box-shadow: var(--admin-shadow);
+}
+
+/* Flat always stays completely boxless. */
+.admin-shell:not(.admin-shell--platform)[data-admin-header-style="flat"]
+.admin-page-header {
+  box-shadow: none;
+}
+
+
+/* Density */
+.admin-shell:not(.admin-shell--platform)[data-admin-header-density="compact"]
+.admin-page-header {
+  gap: 14px;
+  padding: 8px 2px 12px;
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-header-density="standard"]
+.admin-page-header {
+  gap: 18px;
+  padding: 12px 2px 16px;
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-header-style="panel"][data-admin-header-density="compact"]
+.admin-page-header {
+  padding: 12px 14px;
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-header-style="panel"][data-admin-header-density="standard"]
+.admin-page-header {
+  padding: 16px 18px;
+}
+
+
+/* Title size */
+.admin-shell:not(.admin-shell--platform)[data-admin-header-title-size="small"]
+.admin-page-title {
+  font-size:
+    calc(
+      clamp(1.08rem, 1.45vw, 1.45rem)
+      * var(--admin-heading-scale-effective, 1)
+    );
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-header-title-size="medium"]
+.admin-page-title {
+  font-size:
+    calc(
+      clamp(1.28rem, 1.75vw, 1.78rem)
+      * var(--admin-heading-scale-effective, 1)
+    );
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-header-title-size="large"]
+.admin-page-title {
+  font-size:
+    calc(
+      clamp(1.5rem, 2.05vw, 2.1rem)
+      * var(--admin-heading-scale-effective, 1)
+    );
+}
+
+
+/* Description */
+.admin-shell:not(.admin-shell--platform)[data-admin-header-description="hide"]
+.admin-page-description {
+  display: none;
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-header-description-size="small"]
+.admin-page-description {
+  font-size:
+    calc(
+      10.5px
+      * var(--admin-font-scale-effective, 1)
+    );
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-header-description-size="standard"]
+.admin-page-description {
+  font-size:
+    calc(
+      12px
+      * var(--admin-font-scale-effective, 1)
+    );
+}
+
+
+/* Header actions */
+.admin-shell:not(.admin-shell--platform)[data-admin-header-action-size="compact"]
+.admin-page-actions .admin-button,
+.admin-shell:not(.admin-shell--platform)[data-admin-header-action-size="compact"]
+.admin-page-actions .admin-icon-control,
+.admin-shell:not(.admin-shell--platform)[data-admin-header-action-size="compact"]
+.admin-page-actions .admin-icon-button {
+  height: 32px;
+  min-height: 32px !important;
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-header-action-size="standard"]
+.admin-page-actions .admin-button,
+.admin-shell:not(.admin-shell--platform)[data-admin-header-action-size="standard"]
+.admin-page-actions .admin-icon-control,
+.admin-shell:not(.admin-shell--platform)[data-admin-header-action-size="standard"]
+.admin-page-actions .admin-icon-button {
+  height: 34px;
+  min-height: 34px !important;
+}
+
+
+/* Status pills */
+.admin-shell:not(.admin-shell--platform)[data-admin-status-size="compact"]
+.admin-status,
+.admin-shell:not(.admin-shell--platform)[data-admin-status-size="compact"]
+.admin-status-badge {
+  min-height: 18px;
+  padding: 1px 6px;
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-status-size="standard"]
+.admin-status,
+.admin-shell:not(.admin-shell--platform)[data-admin-status-size="standard"]
+.admin-status-badge {
+  min-height: 21px;
+  padding: 2px 7px;
+}
+
+
+/* Workspace spacing */
+.admin-shell:not(.admin-shell--platform)[data-admin-page-spacing="compact"]
+.admin-main-content {
+  padding: 18px 20px 32px;
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-page-spacing="compact"]
+.admin-page {
+  gap: 12px;
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-page-spacing="standard"]
+.admin-main-content {
+  padding: 22px 24px 36px;
+}
+
+.admin-shell:not(.admin-shell--platform)[data-admin-page-spacing="standard"]
+.admin-page {
+  gap: 16px;
+}
+
+@media (max-width: 760px) {
+  .admin-shell:not(.admin-shell--platform)[data-admin-page-spacing]
+  .admin-main-content {
+    padding: 12px 12px 24px;
+  }
+
+  .admin-shell:not(.admin-shell--platform)[data-admin-header-style="panel"]
+  .admin-page-header {
+    padding: 12px;
+  }
+}

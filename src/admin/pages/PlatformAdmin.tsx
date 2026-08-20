@@ -98,7 +98,24 @@ const DEFAULT_PLATFORM_IDENTITY: PlatformBrandingIdentity = {
   wordmarkUrl: "",
   darkWordmarkUrl: "",
   compactWordmarkUrl: "",
-  iconUrl: "",
+  iconUrl: "",  adminFontScale: 100,
+  adminHeadingFontScale: 100,
+  adminButtonFontScale: 100,
+  adminNavigationFontScale: 100,
+  adminMetaFontScale: 100,
+  pageHeaderLogoScale: 100,
+  sidebarLogoScale: 100,
+  mobileLogoScale: 100,
+  adminHeaderStyle: "divider",
+  adminHeaderDensity: "compact",
+  adminHeaderTitleSize: "medium",
+  adminHeaderShadow: "off",
+  adminHeaderDescription: "show",
+  adminHeaderDescriptionSize: "small",
+  adminHeaderActionSize: "compact",
+  adminStatusSize: "compact",
+  adminPageSpacing: "compact",
+
 };
 
 function moduleFingerprint(module: PlatformModuleConfiguration) {
@@ -152,6 +169,15 @@ function identityFingerprint(identity: PlatformBrandingIdentity) {
     pageHeaderLogoScale: identity.pageHeaderLogoScale,
     sidebarLogoScale: identity.sidebarLogoScale,
     mobileLogoScale: identity.mobileLogoScale,
+    adminHeaderStyle: identity.adminHeaderStyle,
+    adminHeaderDensity: identity.adminHeaderDensity,
+    adminHeaderTitleSize: identity.adminHeaderTitleSize,
+    adminHeaderShadow: identity.adminHeaderShadow,
+    adminHeaderDescription: identity.adminHeaderDescription,
+    adminHeaderDescriptionSize: identity.adminHeaderDescriptionSize,
+    adminHeaderActionSize: identity.adminHeaderActionSize,
+    adminStatusSize: identity.adminStatusSize,
+    adminPageSpacing: identity.adminPageSpacing,
   });
 }
 
@@ -1190,7 +1216,189 @@ export function PlatformAdmin() {
             </div>
           </section>
 
-          <section className="platform-module-control-group">
+                      <section className="platform-module-control-group">
+              <header>
+                <strong>Global Admin layout &amp; headers</strong>
+                <span>
+                  Control shared workspace page headers and density without changing source code.
+                  Platform Administration keeps its separate control-plane presentation.
+                </span>
+              </header>
+
+              <div className="platform-module-field-grid">
+                <AdminField
+                  label="Header style"
+                  help="Flat removes the box, border, background and shadow completely."
+                >
+                  <FieldSelect
+                    value={platformIdentity.adminHeaderStyle}
+                    onChange={(value) => {
+                      setPlatformIdentity((current) => ({
+                        ...current,
+                        adminHeaderStyle:
+                          value as PlatformBrandingIdentity["adminHeaderStyle"],
+                      }));
+                      setMessage("");
+                      setError("");
+                    }}
+                  >
+                    <option value="flat">Flat — no box or border</option>
+                    <option value="divider">Divider — bottom line only</option>
+                    <option value="panel">Panel — contained header</option>
+                  </FieldSelect>
+                </AdminField>
+
+                <AdminField label="Header density">
+                  <FieldSelect
+                    value={platformIdentity.adminHeaderDensity}
+                    onChange={(value) => {
+                      setPlatformIdentity((current) => ({
+                        ...current,
+                        adminHeaderDensity:
+                          value as PlatformBrandingIdentity["adminHeaderDensity"],
+                      }));
+                      setMessage("");
+                      setError("");
+                    }}
+                  >
+                    <option value="compact">Compact</option>
+                    <option value="standard">Standard</option>
+                  </FieldSelect>
+                </AdminField>
+
+                <AdminField label="Header title size">
+                  <FieldSelect
+                    value={platformIdentity.adminHeaderTitleSize}
+                    onChange={(value) => {
+                      setPlatformIdentity((current) => ({
+                        ...current,
+                        adminHeaderTitleSize:
+                          value as PlatformBrandingIdentity["adminHeaderTitleSize"],
+                      }));
+                      setMessage("");
+                      setError("");
+                    }}
+                  >
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                  </FieldSelect>
+                </AdminField>
+
+                <AdminField
+                  label="Header shadow"
+                  help="Subtle applies only to Panel style."
+                >
+                  <FieldSelect
+                    value={platformIdentity.adminHeaderShadow}
+                    onChange={(value) => {
+                      setPlatformIdentity((current) => ({
+                        ...current,
+                        adminHeaderShadow:
+                          value as PlatformBrandingIdentity["adminHeaderShadow"],
+                      }));
+                      setMessage("");
+                      setError("");
+                    }}
+                  >
+                    <option value="off">Off</option>
+                    <option value="subtle">Subtle</option>
+                  </FieldSelect>
+                </AdminField>
+
+                <AdminField label="Header descriptions">
+                  <FieldSelect
+                    value={platformIdentity.adminHeaderDescription}
+                    onChange={(value) => {
+                      setPlatformIdentity((current) => ({
+                        ...current,
+                        adminHeaderDescription:
+                          value as PlatformBrandingIdentity["adminHeaderDescription"],
+                      }));
+                      setMessage("");
+                      setError("");
+                    }}
+                  >
+                    <option value="show">Show</option>
+                    <option value="hide">Hide</option>
+                  </FieldSelect>
+                </AdminField>
+
+                <AdminField label="Description size">
+                  <FieldSelect
+                    value={platformIdentity.adminHeaderDescriptionSize}
+                    onChange={(value) => {
+                      setPlatformIdentity((current) => ({
+                        ...current,
+                        adminHeaderDescriptionSize:
+                          value as PlatformBrandingIdentity["adminHeaderDescriptionSize"],
+                      }));
+                      setMessage("");
+                      setError("");
+                    }}
+                  >
+                    <option value="small">Small</option>
+                    <option value="standard">Standard</option>
+                  </FieldSelect>
+                </AdminField>
+
+                <AdminField label="Header actions">
+                  <FieldSelect
+                    value={platformIdentity.adminHeaderActionSize}
+                    onChange={(value) => {
+                      setPlatformIdentity((current) => ({
+                        ...current,
+                        adminHeaderActionSize:
+                          value as PlatformBrandingIdentity["adminHeaderActionSize"],
+                      }));
+                      setMessage("");
+                      setError("");
+                    }}
+                  >
+                    <option value="compact">Compact</option>
+                    <option value="standard">Standard</option>
+                  </FieldSelect>
+                </AdminField>
+
+                <AdminField label="Status pills">
+                  <FieldSelect
+                    value={platformIdentity.adminStatusSize}
+                    onChange={(value) => {
+                      setPlatformIdentity((current) => ({
+                        ...current,
+                        adminStatusSize:
+                          value as PlatformBrandingIdentity["adminStatusSize"],
+                      }));
+                      setMessage("");
+                      setError("");
+                    }}
+                  >
+                    <option value="compact">Compact</option>
+                    <option value="standard">Standard</option>
+                  </FieldSelect>
+                </AdminField>
+
+                <AdminField label="Page spacing">
+                  <FieldSelect
+                    value={platformIdentity.adminPageSpacing}
+                    onChange={(value) => {
+                      setPlatformIdentity((current) => ({
+                        ...current,
+                        adminPageSpacing:
+                          value as PlatformBrandingIdentity["adminPageSpacing"],
+                      }));
+                      setMessage("");
+                      setError("");
+                    }}
+                  >
+                    <option value="compact">Compact</option>
+                    <option value="standard">Standard</option>
+                  </FieldSelect>
+                </AdminField>
+              </div>
+            </section>
+
+<section className="platform-module-control-group">
             <header>
               <strong>Global Admin logo sizing</strong>
               <span>
