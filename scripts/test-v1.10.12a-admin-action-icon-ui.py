@@ -154,12 +154,14 @@ assert (
 )
 
 
-# Representative React Router Link actions are deliberately
-# covered by the shared header runtime.
+# Representative internal header links use the explicit shared
+# AdminHeaderRouterLink component rather than relying on runtime
+# interception of React Router Link.
 assert "Email templates" in email_settings
-assert "<Link" in email_settings
+assert "<AdminHeaderRouterLink" in email_settings
 assert "Catalogue" in crm_page
 assert "Quotes" in crm_page
+assert crm_page.count("<AdminHeaderRouterLink") >= 2
 
 # Even historic header links without source icons are supported:
 # the runtime now synthesises a semantic icon.

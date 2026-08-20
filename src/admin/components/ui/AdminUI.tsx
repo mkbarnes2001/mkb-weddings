@@ -7,6 +7,7 @@ import { Children, cloneElement, isValidElement } from "react";
 import type {
   AnchorHTMLAttributes,
   ButtonHTMLAttributes,
+  ComponentProps,
   HTMLAttributes,
   LabelHTMLAttributes,
   ReactElement,
@@ -365,6 +366,13 @@ function transformAdminHeaderAction(
    * treatment as AdminButton without relying on generic component cloning.
    */
   if (
+    element.type === AdminHeaderRouterLink
+  ) {
+    return element;
+  }
+
+
+  if (
     element.type === RouterLink
   ) {
     const className = String(
@@ -635,6 +643,87 @@ function transformAdminHeaderActions(
         action,
         overrides,
       ),
+  );
+}
+
+
+
+export function AdminHeaderRouterLink({
+  children,
+  className = "",
+  ...props
+}: ComponentProps<typeof RouterLink>) {
+  const {
+    platformIdentity,
+  } = useOutletContext<AdminPageHeaderOutletContext>();
+
+  const label = String(
+    adminHeaderActionText(children)
+    || props["aria-label"]
+    || props.title
+    || "",
+  )
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const actionKey =
+    adminHeaderActionKey(
+      props as Record<string, unknown>,
+      label,
+    );
+
+  const Icon =
+    resolveAdminActionIcon(
+      actionKey,
+      platformIdentity?.adminActionIcons || {},
+    );
+
+  const iconOnly =
+    adminHeaderHasClass(
+      className,
+      "admin-icon-control",
+    )
+    || adminHeaderHasClass(
+      className,
+      "admin-icon-button",
+    );
+
+  const renderedChildren = iconOnly
+    ? (
+      <Icon aria-hidden="true" />
+    )
+    : replaceRawAdminActionIcon(
+        children,
+        Icon,
+        false,
+      );
+
+  return (
+    <RouterLink
+      {...props}
+      aria-label={
+        props["aria-label"]
+        || label
+        || undefined
+      }
+      title={
+        iconOnly
+          ? undefined
+          : props.title
+      }
+      data-admin-action={
+        actionKey
+      }
+      data-admin-tooltip={
+        label || undefined
+      }
+      className={cx(
+        className,
+        "admin-header-action--icon",
+      )}
+    >
+      {renderedChildren}
+    </RouterLink>
   );
 }
 

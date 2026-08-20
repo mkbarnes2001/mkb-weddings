@@ -1,10 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ExternalLink, Instagram, Pencil, Users } from "lucide-react";
+import {
+  useEffect,
+  useMemo,
+  useState } from "react";
+import { Link,
+  useParams } from "react-router-dom";
+import { ArrowLeft,
+  ExternalLink,
+  Instagram,
+  Pencil,
+  Users } from "lucide-react";
 import { WeddingService } from "../services/WeddingService";
 import type { WeddingRecord } from "../types/wedding";
-import { SupplierService, type SupplierRecord } from "../services/SupplierService";
-import { AdminPageHeader } from "../components/ui/AdminUI";
+import { SupplierService,
+  type SupplierRecord } from "../services/SupplierService";
+import { AdminPageHeader,
+  AdminHeaderRouterLink,
+} from "../components/ui/AdminUI";
 
 export function WeddingSuppliers() {
   const { slug } = useParams();
@@ -35,13 +46,13 @@ export function WeddingSuppliers() {
           </div>
         }
         actions={
-          <Link
+          <AdminHeaderRouterLink
             to={`/admin/weddings/${wedding.slug}/suppliers/edit`}
             className="admin-button admin-button--primary"
           >
             <Pencil className="admin-button__icon" />
             Edit suppliers
-          </Link>
+          </AdminHeaderRouterLink>
         }
       />
 

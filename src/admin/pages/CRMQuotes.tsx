@@ -2,7 +2,7 @@ import {
   useEffect,
   useMemo,
   useState,
-} from "react";
+  } from "react";
 import {
   ArrowLeft,
   CalendarDays,
@@ -11,12 +11,12 @@ import {
   Plus,
   Search,
   Sparkles,
-} from "lucide-react";
+  } from "lucide-react";
 import {
   Link,
   useNavigate,
   useSearchParams,
-} from "react-router-dom";
+  } from "react-router-dom";
 import {
   AdminButton,
   AdminEmptyState,
@@ -24,6 +24,7 @@ import {
   AdminPageHeader,
   AdminPanel,
   AdminStatus,
+  AdminHeaderRouterLink,
 } from "../components/ui/AdminUI";
 import {
   useProfessionalAuth,
@@ -432,21 +433,21 @@ export function CRMQuotes() {
         description="Create Pick & Choose or Fixed quotes, send secure client links and keep every version attached to the client journey."
         actions={
           <div className="flex flex-wrap gap-2">
-            <Link
+            <AdminHeaderRouterLink
               className="admin-button admin-button--secondary"
               to="/admin/crm/templates"
             >
               <Sparkles className="admin-button__icon" />
               Templates
-            </Link>
+            </AdminHeaderRouterLink>
 
-            <Link
+            <AdminHeaderRouterLink
               className="admin-button admin-button--secondary"
               to="/admin/crm/catalogue"
             >
               <PackageCheck className="admin-button__icon" />
               Package catalogue
-            </Link>
+            </AdminHeaderRouterLink>
           </div>
         }
       />

@@ -1,7 +1,7 @@
 import {
   useEffect,
   useState,
-} from "react";
+  } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -12,7 +12,7 @@ import {
   Server,
   ShieldCheck,
   Unplug,
-} from "lucide-react";
+  } from "lucide-react";
 import {
   Link,
 } from "react-router-dom";
@@ -23,6 +23,7 @@ import {
   AdminPageHeader,
   AdminPanel,
   AdminStatus,
+  AdminHeaderRouterLink,
 } from "../components/ui/AdminUI";
 import {
   useProfessionalAuth,
@@ -399,13 +400,13 @@ export function CRMEmailSettings() {
         description="Choose how this business sends CRM correspondence. Authentication and security emails always remain on WedPlanned-managed delivery."
         actions={
           <div className="flex flex-wrap gap-2">
-            <Link
+            <AdminHeaderRouterLink
               to="/admin/crm/templates"
               className="admin-button admin-button--secondary"
             >
               <Mail className="admin-button__icon" />
               Email templates
-            </Link>
+            </AdminHeaderRouterLink>
 
             {canManage ? (
               <AdminButton

@@ -1,5 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import {
+  useEffect,
+  useMemo,
+  useState } from "react";
+import { Link,
+  useParams } from "react-router-dom";
 import {
   ArrowLeft,
   BookOpen,
@@ -32,8 +36,17 @@ import {
   Users,
   Workflow,
   X,
-} from "lucide-react";
-import { AdminAccordion, AdminButton, AdminEmptyState, AdminField, AdminPage, AdminPageHeader, AdminPanel, AdminStatus } from "../components/ui/AdminUI";
+  } from "lucide-react";
+import { AdminAccordion,
+  AdminButton,
+  AdminEmptyState,
+  AdminField,
+  AdminPage,
+  AdminPageHeader,
+  AdminPanel,
+  AdminStatus,
+  AdminHeaderRouterLink,
+} from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
 import type {
@@ -1788,25 +1801,25 @@ export function CRMJob() {
         actions={
           <div className="crm-job-header-actions">
             {job.quoteId ? (
-              <Link
+              <AdminHeaderRouterLink
                 className="admin-icon-control"
                 to={`/admin/crm/quotes/${job.quoteId}`}
                 aria-label="Open quote"
                 title="Open quote"
               >
                 <PackageCheck aria-hidden="true" />
-              </Link>
+              </AdminHeaderRouterLink>
             ) : null}
 
             {job.weddingSlug ? (
-              <Link
+              <AdminHeaderRouterLink
                 className="admin-icon-control crm-job-header-action--primary"
                 to={`/admin/weddings/${job.weddingSlug}/workspace`}
                 aria-label="Open Wedding Workspace"
                 title="Open Wedding Workspace"
               >
                 <LayoutDashboard aria-hidden="true" />
-              </Link>
+              </AdminHeaderRouterLink>
             ) : null}
           </div>
         }

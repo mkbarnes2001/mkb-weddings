@@ -1,12 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, BookOpen, FileText, ListChecks, Pencil } from "lucide-react";
-import { StoryService, type StoryRecord } from "../services/StoryService";
+import {
+  useEffect,
+  useMemo,
+  useState } from "react";
+import { Link,
+  useParams } from "react-router-dom";
+import { ArrowLeft,
+  BookOpen,
+  FileText,
+  ListChecks,
+  Pencil } from "lucide-react";
+import { StoryService,
+  type StoryRecord } from "../services/StoryService";
 import { WeddingService } from "../services/WeddingService";
 import type { WeddingRecord } from "../types/wedding";
 import { ProgressBar } from "../components/ProgressBar";
 import { StatusBadge } from "../components/Badge";
-import { AdminPageHeader } from "../components/ui/AdminUI";
+import { AdminPageHeader,
+  AdminHeaderRouterLink,
+} from "../components/ui/AdminUI";
 
 export function WeddingStory() {
   const { slug } = useParams();
@@ -66,13 +77,13 @@ export function WeddingStory() {
           </div>
         }
         actions={
-          <Link
+          <AdminHeaderRouterLink
             to={`/admin/weddings/${story.slug}/content`}
             className="admin-button admin-button--primary"
           >
             <Pencil className="admin-button__icon" />
             Edit master content
-          </Link>
+          </AdminHeaderRouterLink>
         }
       />
 

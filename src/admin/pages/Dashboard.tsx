@@ -1,4 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -14,13 +17,14 @@ import {
   MapPinned,
   Save,
   Sparkles,
-} from "lucide-react";
-import { loadAdminData, type AdminData } from "../services/DataService";
+  } from "lucide-react";
+import { loadAdminData,
+  type AdminData } from "../services/DataService";
 import {
   AdminApiService,
   type WorkspaceRecord,
   type WorkspaceSettings,
-} from "../services/AdminApiService";
+  } from "../services/AdminApiService";
 import { ProgressBar } from "../components/ProgressBar";
 import {
   AdminButton,
@@ -29,6 +33,7 @@ import {
   AdminPageHeader,
   AdminPanel,
   AdminStatus,
+  AdminHeaderRouterLink,
 } from "../components/ui/AdminUI";
 
 type WebsiteConnectionPlatform =
@@ -322,7 +327,7 @@ export function Dashboard() {
       description="Monitor website connectivity, content readiness, galleries, assets, metadata, SEO and publishing from one operational dashboard."
       actions={websiteUrl
         ? <a href={websiteUrl} target="_blank" rel="noreferrer" className="admin-button admin-button--primary admin-button--md"><Globe2 className="admin-button__icon" />Open website</a>
-        : <Link to="/admin/website" className="admin-button admin-button--primary admin-button--md"><Globe2 className="admin-button__icon" />Configure website</Link>}
+        : <AdminHeaderRouterLink to="/admin/website" className="admin-button admin-button--primary admin-button--md"><Globe2 className="admin-button__icon" />Configure website</AdminHeaderRouterLink>}
     />
 
     <OverviewMetrics data={data} />
@@ -776,7 +781,7 @@ export function PublishingOverview() {
       eyebrow="WedStudio · Publishing"
       title="Publishing"
       description="Review public-content readiness and move incomplete stories, galleries, metadata and search content through the appropriate WedStudio tools."
-      actions={<Link to="/admin/weddings" className="admin-button admin-button--primary admin-button--md"><FileText className="admin-button__icon" />Review wedding stories</Link>}
+      actions={<AdminHeaderRouterLink to="/admin/weddings" className="admin-button admin-button--primary admin-button--md"><FileText className="admin-button__icon" />Review wedding stories</AdminHeaderRouterLink>}
     />
 
     <OverviewMetrics data={data} />

@@ -1,5 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  useEffect,
+  useMemo,
+  useState } from "react";
+import { Link,
+  useNavigate,
+  useParams } from "react-router-dom";
 import {
   Archive,
   ArrowLeft,
@@ -14,14 +19,16 @@ import {
   Trash2,
   Users,
   X,
-} from "lucide-react";
+  } from "lucide-react";
 import { WeddingService } from "../services/WeddingService";
 import type { WeddingRecord } from "../types/wedding";
 import { ProgressBar } from "../components/ProgressBar";
 import { StatusBadge } from "../components/Badge";
 import { SupplierService } from "../services/SupplierService";
 import { AdminApiService } from "../services/AdminApiService";
-import { AdminPageHeader } from "../components/ui/AdminUI";
+import { AdminPageHeader,
+  AdminHeaderRouterLink,
+} from "../components/ui/AdminUI";
 
 export function WeddingDetail() {
   const { slug } = useParams();
@@ -129,36 +136,36 @@ export function WeddingDetail() {
         }
         actions={
           <div className="flex flex-wrap justify-end gap-2">
-            <Link
+            <AdminHeaderRouterLink
               to={`/admin/weddings/${wedding.slug}/workspace`}
               className="admin-button admin-button--primary"
             >
               <LayoutDashboard className="admin-button__icon" />
               Wedding Workspace
-            </Link>
+            </AdminHeaderRouterLink>
 
             {isManagedWedding ? (
-              <Link
+              <AdminHeaderRouterLink
                 to={`/admin/weddings/${wedding.slug}/content`}
                 className="admin-button admin-button--secondary"
               >
                 Edit content
-              </Link>
+              </AdminHeaderRouterLink>
             ) : null}
 
-            <Link
+            <AdminHeaderRouterLink
               to={`/admin/weddings/${wedding.slug}/images`}
               className="admin-button admin-button--secondary"
             >
               Open images
-            </Link>
+            </AdminHeaderRouterLink>
 
-            <Link
+            <AdminHeaderRouterLink
               to={`/admin/weddings/${wedding.slug}/publish`}
               className="admin-button admin-button--secondary"
             >
               Publish
-            </Link>
+            </AdminHeaderRouterLink>
 
             <a
               href={`/blog/${wedding.slug}`}

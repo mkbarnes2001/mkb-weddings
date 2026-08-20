@@ -1,5 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import {
+  useEffect,
+  useMemo,
+  useState } from "react";
+import { Link,
+  useLocation,
+  useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Check,
@@ -18,15 +23,21 @@ import {
   UploadCloud,
   Users,
   X,
-} from "lucide-react";
+  } from "lucide-react";
 import type { WeddingDocument } from "../../lib/weddingEngine";
-import { AdminApiService, type LocationConfiguration, type VenueDiscoveryResult, type WorkspaceRecord } from "../services/AdminApiService";
-import { SupplierService, type MasterSupplier, type SupplierRecord } from "../services/SupplierService";
+import { AdminApiService,
+  type LocationConfiguration,
+  type VenueDiscoveryResult,
+  type WorkspaceRecord } from "../services/AdminApiService";
+import { SupplierService,
+  type MasterSupplier,
+  type SupplierRecord } from "../services/SupplierService";
 import { uploadPrivateOriginal } from "../lib/privateOriginalUpload";
 import type { VenueSummary } from "../types/venue";
 import type { WeddingWorkspacePayload } from "../types/weddingWorkspace";
 import { COUNTRY_OPTIONS } from "../data/countries";
-import { AdminSearchSelect, type AdminSearchSelectOption } from "../components/ui/AdminSearchSelect";
+import { AdminSearchSelect,
+  type AdminSearchSelectOption } from "../components/ui/AdminSearchSelect";
 import {
   DEFAULT_SUPPLIER_ROLE_DEFINITIONS,
   SUPPLIER_CATEGORY_OPTIONS,
@@ -37,8 +48,10 @@ import {
   weddingRoleOptionsForCategory,
   type SupplierRoleDefinition,
   type SupplierTaxonomySettings,
-} from "../data/supplierTaxonomy";
-import { AdminPageHeader } from "../components/ui/AdminUI";
+  } from "../data/supplierTaxonomy";
+import { AdminPageHeader,
+  AdminHeaderRouterLink,
+} from "../components/ui/AdminUI";
 
 const PUBLIC_ORIGIN = "https://www.mkbweddings.co.uk";
 
@@ -722,25 +735,25 @@ export function WeddingWorkspace() {
         actions={
           <div className="flex flex-wrap gap-2">
             {workspace.job ? (
-              <Link
+              <AdminHeaderRouterLink
                 to={`/admin/crm/jobs/${workspace.job.id}`}
                 className="admin-button admin-button--secondary"
               >
                 Open CRM Job
-              </Link>
+              </AdminHeaderRouterLink>
             ) : null}
-            <Link
+            <AdminHeaderRouterLink
               to={`/admin/weddings/${slug}/content`}
               className="admin-button admin-button--secondary"
             >
               Master content
-            </Link>
-            <Link
+            </AdminHeaderRouterLink>
+            <AdminHeaderRouterLink
               to={`/admin/weddings/${slug}/publish`}
               className="admin-button admin-button--primary"
             >
               Publishing
-            </Link>
+            </AdminHeaderRouterLink>
           </div>
         }
       />

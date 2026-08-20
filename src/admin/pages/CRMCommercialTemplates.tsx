@@ -1,7 +1,7 @@
 import {
   useEffect,
   useState,
-} from "react";
+  } from "react";
 import {
   ArrowLeft,
   Check,
@@ -12,12 +12,12 @@ import {
   Save,
   Sparkles,
   Trash2,
-} from "lucide-react";
+  } from "lucide-react";
 import {
   Link,
   useNavigate,
   useParams,
-} from "react-router-dom";
+  } from "react-router-dom";
 import {
   AdminButton,
   AdminEmptyState,
@@ -26,6 +26,7 @@ import {
   AdminPageHeader,
   AdminPanel,
   AdminStatus,
+  AdminHeaderRouterLink,
 } from "../components/ui/AdminUI";
 import {
   useProfessionalAuth,
@@ -1378,21 +1379,21 @@ export function CRMCommercialTemplates() {
         description="Build reusable quote and email templates for this business. Templates remain editable while quotes created from them keep immutable snapshots."
         actions={
           <div className="flex flex-wrap gap-2">
-            <Link
+            <AdminHeaderRouterLink
               to="/admin/crm/catalogue"
               className="admin-button admin-button--secondary"
             >
               <PackageCheck className="admin-button__icon" />
               Package catalogue
-            </Link>
+            </AdminHeaderRouterLink>
 
-            <Link
+            <AdminHeaderRouterLink
               to="/admin/crm/quotes"
               className="admin-button admin-button--primary"
             >
               <FileText className="admin-button__icon" />
               Open quotes
-            </Link>
+            </AdminHeaderRouterLink>
           </div>
         }
       />

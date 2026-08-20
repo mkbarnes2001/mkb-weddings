@@ -1,5 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  useEffect,
+  useMemo,
+  useState } from "react";
+import { Link,
+  useNavigate,
+  useParams } from "react-router-dom";
 import {
   ArrowLeft,
   BookOpen,
@@ -18,7 +23,7 @@ import {
   Save,
   UserRound,
   XCircle,
-} from "lucide-react";
+  } from "lucide-react";
 import {
   AdminButton,
   AdminEmptyState,
@@ -27,6 +32,7 @@ import {
   AdminPageHeader,
   AdminPanel,
   AdminStatus,
+  AdminHeaderRouterLink,
 } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
@@ -771,13 +777,13 @@ export function CRMEnquiry() {
         actions={
           <div className="flex flex-wrap gap-2">
             {quotes[0] ? (
-              <Link
+              <AdminHeaderRouterLink
                 to={`/admin/crm/quotes/${quotes[0].id}`}
                 className="admin-button admin-button--secondary"
               >
                 <PackageCheck className="admin-button__icon" />
                 Open quote
-              </Link>
+              </AdminHeaderRouterLink>
             ) : canManage
               && !detail.job ? (
               <AdminButton
@@ -792,7 +798,7 @@ export function CRMEnquiry() {
               </AdminButton>
             ) : null}
 
-            <Link
+            <AdminHeaderRouterLink
               to={`/admin/crm/enquiries/${id}/client-portal`}
               target="_blank"
               rel="noreferrer"
@@ -800,16 +806,16 @@ export function CRMEnquiry() {
             >
               <ExternalLink className="admin-button__icon" />
               Client Portal
-            </Link>
+            </AdminHeaderRouterLink>
 
             {detail.job ? (
-              <Link
+              <AdminHeaderRouterLink
                 to={`/admin/crm/jobs/${detail.job.id}`}
                 className="admin-button admin-button--secondary"
               >
                 <BriefcaseBusiness className="admin-button__icon" />
                 Job operations
-              </Link>
+              </AdminHeaderRouterLink>
             ) : null}
           </div>
         }

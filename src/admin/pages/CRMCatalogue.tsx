@@ -1,12 +1,30 @@
-import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Boxes, PackagePlus, Plus, Save, Sparkles } from "lucide-react";
+import {
+  useEffect,
+  useMemo,
+  useState } from "react";
+import { ArrowLeft,
+  Boxes,
+  PackagePlus,
+  Plus,
+  Save,
+  Sparkles } from "lucide-react";
 import {
   Link,
   useLocation,
   useNavigate,
   useParams,
-} from "react-router-dom";
-import { AdminButton, AdminEmptyState, AdminField, AdminPage, AdminPageHeader, AdminPanel, AdminStatus, AdminTab, AdminTabs } from "../components/ui/AdminUI";
+  } from "react-router-dom";
+import { AdminButton,
+  AdminEmptyState,
+  AdminField,
+  AdminPage,
+  AdminPageHeader,
+  AdminPanel,
+  AdminStatus,
+  AdminTab,
+  AdminTabs,
+  AdminHeaderRouterLink,
+} from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
 import type { CrmAddon, CrmPackage } from "../types/crm";
@@ -386,7 +404,7 @@ export function CRMCatalogue() {
 
 
   return <AdminPage>
-    <AdminPageHeader title="Package catalogue" description="Workspace-owned packages and add-ons used to create immutable quote snapshots." actions={<Link className="admin-button admin-button--primary" to="/admin/crm/quotes"><Sparkles className="admin-button__icon" />Open quotes</Link>} />
+    <AdminPageHeader title="Package catalogue" description="Workspace-owned packages and add-ons used to create immutable quote snapshots." actions={<AdminHeaderRouterLink className="admin-button admin-button--primary" to="/admin/crm/quotes"><Sparkles className="admin-button__icon" />Open quotes</AdminHeaderRouterLink>} />
     {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
     {message ? <div className="admin-alert admin-alert--success">{message}</div> : null}
     <AdminTabs>

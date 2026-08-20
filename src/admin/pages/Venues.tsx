@@ -1,9 +1,24 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState } from "react";
 import { Link } from "react-router-dom";
-import { Building2, GripVertical, Images, MapPin, Plus, Save, Search } from "lucide-react";
-import { AdminApiService, type LocationArea, type LocationTypeDefinition } from "../services/AdminApiService";
+import { Building2,
+  GripVertical,
+  Images,
+  MapPin,
+  Plus,
+  Save,
+  Search } from "lucide-react";
+import { AdminApiService,
+  type LocationArea,
+  type LocationTypeDefinition } from "../services/AdminApiService";
 import type { VenueSummary } from "../types/venue";
-import { AdminPage, AdminPageHeader, AdminToolbar } from "../components/ui/AdminUI";
+import { AdminPage,
+  AdminPageHeader,
+  AdminToolbar,
+  AdminHeaderRouterLink,
+} from "../components/ui/AdminUI";
 
 function venueHero(venue: VenueSummary) {
   const images = venue.gallery?.images || [];
@@ -104,7 +119,7 @@ export function Venues() {
         title="Venues"
         description="Manage venue records, public visibility and Gallery by Venue order without affecting linked weddings or assets."
         actions={<>
-          <Link to="/admin/venues/new" className="admin-button admin-button--secondary"><Plus className="admin-button__icon" />New venue</Link>
+          <AdminHeaderRouterLink to="/admin/venues/new" className="admin-button admin-button--secondary"><Plus className="admin-button__icon" />New venue</AdminHeaderRouterLink>
           <button type="button" onClick={saveLayout} disabled={!dirty || saving} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : dirty ? "Save order" : "Saved"}</button>
         </>}
       />

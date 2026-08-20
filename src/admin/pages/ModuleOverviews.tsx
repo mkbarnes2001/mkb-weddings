@@ -1,4 +1,8 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -12,9 +16,14 @@ import {
   ShoppingBag,
   Store,
   Users,
-} from "lucide-react";
+  } from "lucide-react";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
-import { AdminPage, AdminPageHeader, AdminPanel, AdminStatus } from "../components/ui/AdminUI";
+import { AdminPage,
+  AdminPageHeader,
+  AdminPanel,
+  AdminStatus,
+  AdminHeaderRouterLink,
+} from "../components/ui/AdminUI";
 import { AdminApiService, type WorkspaceRecord } from "../services/AdminApiService";
 import type { ClientGalleryListPayload } from "../types/clientGallery";
 import type { WedPlannedPlatformPayload } from "../types/platform";
@@ -60,7 +69,7 @@ export function ClientGalleriesOverview() {
       eyebrow="WedStore · Private delivery"
       title="Dashboard"
       description="Manage private image delivery, client activity, selections, store configuration and orders without mixing these assets with the public website portfolio."
-      actions={<Link to="/admin/client-galleries" className="admin-button admin-button--primary admin-button--md"><Images className="admin-button__icon" />Open galleries</Link>}
+      actions={<AdminHeaderRouterLink to="/admin/client-galleries" className="admin-button admin-button--primary admin-button--md"><Images className="admin-button__icon" />Open galleries</AdminHeaderRouterLink>}
     />
     {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
     <section className="admin-module-metrics">
@@ -106,7 +115,7 @@ export function BusinessOverview() {
       eyebrow="WedNav · Business home"
       title="Dashboard"
       description="Your central WedPlanned business home for workspace identity, services, suppliers, team and access to the specialist products."
-      actions={<Link to="/admin/wedplanned?tab=business" className="admin-button admin-button--primary admin-button--md"><Building2 className="admin-button__icon" />Edit business profile</Link>}
+      actions={<AdminHeaderRouterLink to="/admin/wedplanned?tab=business" className="admin-button admin-button--primary admin-button--md"><Building2 className="admin-button__icon" />Edit business profile</AdminHeaderRouterLink>}
       meta={<div className="flex flex-wrap gap-2"><AdminStatus tone={workspace?.status === "active" ? "success" : "warning"}>{workspace?.status || "loading"}</AdminStatus><AdminStatus tone="info">{workspace?.plan || "workspace"}</AdminStatus></div>}
     />
     {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}

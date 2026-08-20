@@ -1,12 +1,31 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState } from "react";
 import { Link } from "react-router-dom";
-import { Archive, FileText, GripVertical, Image as ImageIcon, LayoutDashboard, Plus, Save, Search, Trash2, Upload, Users, X } from "lucide-react";
+import { Archive,
+  FileText,
+  GripVertical,
+  Image as ImageIcon,
+  LayoutDashboard,
+  Plus,
+  Save,
+  Search,
+  Trash2,
+  Upload,
+  Users,
+  X } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import { WeddingService } from "../services/WeddingService";
-import type { WeddingPublicationStatus, WeddingRecord } from "../types/wedding";
+import type { WeddingPublicationStatus,
+  WeddingRecord } from "../types/wedding";
 import { ProgressBar } from "../components/ProgressBar";
 import { StatusBadge } from "../components/Badge";
-import { AdminPage, AdminPageHeader, AdminToolbar } from "../components/ui/AdminUI";
+import { AdminPage,
+  AdminPageHeader,
+  AdminToolbar,
+  AdminHeaderRouterLink,
+} from "../components/ui/AdminUI";
 
  type StatusFilter = "all" | WeddingPublicationStatus;
 
@@ -179,7 +198,7 @@ export function Weddings() {
         title="Wedding Stories"
         description="New booked weddings originate in CRM Jobs. Website story records appear here only after the wedding date, so future bookings do not create Website placeholders."
         actions={<>
-          <Link to="/admin/weddings/new" className="admin-button admin-button--secondary"><Plus className="admin-button__icon" />Add standalone story</Link>
+          <AdminHeaderRouterLink to="/admin/weddings/new" className="admin-button admin-button--secondary"><Plus className="admin-button__icon" />Add standalone story</AdminHeaderRouterLink>
           <button type="button" onClick={saveLayout} disabled={!dirty || saving} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : dirty ? "Save order" : "Saved"}</button>
         </>}
       />

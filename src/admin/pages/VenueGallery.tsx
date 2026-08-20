@@ -4,8 +4,10 @@ import {
   useRef,
   useState,
   type MouseEvent,
-} from "react";
-import { Link, useParams } from "react-router-dom";
+  } from "react";
+import { Link,
+  useParams,
+} from "react-router-dom";
 import {
   ArrowLeft,
   Check,
@@ -18,10 +20,11 @@ import {
   Trash2,
   Unlink,
   X,
-} from "lucide-react";
+  } from "lucide-react";
 import { AdminApiService } from "../services/AdminApiService";
 import type { CustomCollectionAssignmentOption } from "../types/customCollection";
-import type { LocationArea, LocationTypeDefinition } from "../services/AdminApiService";
+import type { LocationArea,
+  LocationTypeDefinition } from "../services/AdminApiService";
 import type { MomentRecord } from "../types/moment";
 import { WeddingService } from "../services/WeddingService";
 import { ImageManagerService } from "../services/ImageManagerService";
@@ -29,8 +32,10 @@ import type { ManagedWeddingImage } from "../types/imageManager";
 import type {
   VenueGalleryItem,
   VenueSummary,
-} from "../types/venue";
-import { AdminPageHeader } from "../components/ui/AdminUI";
+  } from "../types/venue";
+import { AdminPageHeader,
+  AdminHeaderRouterLink,
+} from "../components/ui/AdminUI";
 
 type AggregatedAsset = ManagedWeddingImage & {
   assetId: string;
@@ -888,19 +893,19 @@ export function VenueGallery() {
         }
         actions={
           <div className="flex flex-wrap gap-2">
-            <Link
+            <AdminHeaderRouterLink
               to={`/admin/venues/${venue.slug}/upload`}
               className="admin-button admin-button--secondary"
             >
               Upload images
-            </Link>
+            </AdminHeaderRouterLink>
 
-            <Link
+            <AdminHeaderRouterLink
               to="/admin/moments"
               className="admin-button admin-button--secondary"
             >
               Manage moments
-            </Link>
+            </AdminHeaderRouterLink>
 
             <button
               type="button"

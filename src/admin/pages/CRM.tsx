@@ -1,5 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  useEffect,
+  useMemo,
+  useState } from "react";
+import { Link,
+  useNavigate,
+  useSearchParams } from "react-router-dom";
 import {
   BriefcaseBusiness,
   CalendarDays,
@@ -22,7 +27,7 @@ import {
   UserRound,
   Users,
   Workflow,
-} from "lucide-react";
+  } from "lucide-react";
 import {
   AdminButton,
   AdminEmptyState,
@@ -31,6 +36,7 @@ import {
   AdminPageHeader,
   AdminPanel,
   AdminStatus,
+  AdminHeaderRouterLink,
 } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
@@ -560,7 +566,7 @@ export function CRM() {
           ? "Dashboard"
           : pageTitle[view]}
         description="A clear operational view of leads, bookings, deadlines and client activity across this workspace."
-        actions={<div className="flex flex-wrap gap-2"><Link to="/admin/crm/catalogue" className="admin-button admin-button--secondary admin-button--md"><Settings2 className="admin-button__icon" />Catalogue</Link><Link to="/admin/crm/quotes" className="admin-button admin-button--secondary admin-button--md"><FileQuestion className="admin-button__icon" />Quotes</Link>{canManage ? <AdminButton variant="primary" icon={Plus} onClick={() => setShowCreate((current) => !current)}>New enquiry</AdminButton> : null}</div>}
+        actions={<div className="flex flex-wrap gap-2"><AdminHeaderRouterLink to="/admin/crm/catalogue" className="admin-button admin-button--secondary admin-button--md"><Settings2 className="admin-button__icon" />Catalogue</AdminHeaderRouterLink><AdminHeaderRouterLink to="/admin/crm/quotes" className="admin-button admin-button--secondary admin-button--md"><FileQuestion className="admin-button__icon" />Quotes</AdminHeaderRouterLink>{canManage ? <AdminButton variant="primary" icon={Plus} onClick={() => setShowCreate((current) => !current)}>New enquiry</AdminButton> : null}</div>}
       />
 
       {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
