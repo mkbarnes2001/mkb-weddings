@@ -954,20 +954,15 @@ export function ClientPortal() {
           result.quote.acceptance;
 
         const option =
-          (
-            accepted
-              ? result.quote.currentVersion.options.find(
-                  (item) =>
-                    item.id
-                    === accepted.optionId,
-                )
-              : null
-          )
-          || result.quote.currentVersion.options.find(
-            (item) =>
-              item.recommended,
-          )
-          || result.quote.currentVersion.options[0];
+          accepted
+            ? result.quote.currentVersion.options.find(
+                (item) =>
+                  item.id
+                  === accepted.optionId,
+              )
+            : result.quote.quoteType === "fixed"
+              ? result.quote.currentVersion.options[0]
+              : undefined;
 
         setSelectedOptionId(
           option?.id || "",
@@ -1753,10 +1748,234 @@ export function ClientPortal() {
             </div>
           </section> : view === "contracts" ? <ClientPortalCommercialDocument kind="contract" id={selectedContractId} /> : view === "invoices" ? <ClientPortalCommercialDocument kind="invoice" id={selectedInvoiceId} /> : quote ? <article className="portal-quote-card">
             <div className="portal-quote-heading"><button className="client-portal-back" onClick={() => setSelectedQuoteId("")}><ArrowLeft />Back</button><span>{portal.business?.name || "WedPlanned"}</span><h1>Your quote</h1><p className="portal-quote-client">Prepared for {quote.clientName}{quote.partnerName ? ` and ${quote.partnerName}` : ""}</p><div className="portal-quote-meta"><strong>{quote.reference}</strong><span>{quote.quoteType === "fixed" ? "Fixed quote" : "Pick & Choose"}</span><span>Version {quote.currentVersion.versionNumber}</span><span>{formatDate(quote.eventDate)}</span><span>{quote.venueText || "Venue TBC"}</span>{quote.currentVersion.expiresAt ? <span>Expires {formatDate(quote.currentVersion.expiresAt)}</span> : null}</div>{quote.currentVersion.clientNotes ? <p>{quote.currentVersion.clientNotes}</p> : null}</div>
-            <div className="portal-package-grid">{quote.currentVersion.options.map((option) => <button type="button" key={option.id} className={`portal-package-card ${(quote.quoteType === "fixed" || selectedOptionId === option.id) ? "selected" : ""}`} disabled={quote.quoteType === "fixed" || ["accepted", "declined", "expired"].includes(quote.currentVersion.status)} onClick={() => { if (quote.quoteType !== "fixed") chooseQuoteOption(option); }}>{option.recommended ? <em>Recommended</em> : null}<span className="portal-package-check">{selectedOptionId === option.id ? <CheckCircle2 /> : null}</span><h2>{option.name}</h2>{option.description ? <p>{option.description}</p> : null}<strong>{money(option.basePriceAmount, option.currency)}</strong>{option.coverageMinutes ? <small>{Math.round(option.coverageMinutes / 60)} hours coverage</small> : null}<ul>{option.includedItems.map((item) => <li key={item}>{item}</li>)}</ul>{option.deliverables.length ? <div className="portal-package-deliverables"><b>Deliverables</b>{option.deliverables.map((item) => <span key={item}>{item}</span>)}</div> : null}</button>)}</div>
+            {quote.quoteType !== "fixed" && !acceptedQuote ? (
+              <div className="portal-package-intro">
+                <strong>Choose your package</strong>
+                <p>
+                  Select one package to continue. You can review
+                  and change your choice before accepting the quote.
+                </p>
+              </div>
+            ) : null}
+
+            <div className="portal-package-grid">
+              {quote.currentVersion.options.map((option) => {
+                const isSelected =
+                  quote.quoteType === "fixed"
+                  || selectedOptionId === option.id;
+
+                const selectionLabel =
+                  quote.quoteType === "fixed"
+                    ? "Quoted package"
+                    : acceptedQuote
+                      ? (
+                          isSelected
+                            ? "Selected package"
+                            : ""
+                        )
+                      : isSelected
+                        ? "Selected package"
+                        : "Select package";
+
+                return (
+                  <button
+                    type="button"
+                    key={option.id}
+                    className={`portal-package-card ${isSelected ? "selected" : ""}`}
+                    aria-pressed={quote.quoteType === "fixed" ? undefined : isSelected}
+                    disabled={quote.quoteType === "fixed" || ["accepted", "declined", "expired"].includes(quote.currentVersion.status)}
+                    onClick={() => { if (quote.quoteType !== "fixed") chooseQuoteOption(option); }}
+                  >
+                    {option.recommended ? (
+                      <em>Recommended</em>
+                    ) : null}
+
+                    <span className="portal-package-check">
+                      {isSelected ? (
+                        <CheckCircle2 />
+                      ) : null}
+                    </span>
+
+                    <h2>{option.name}</h2>
+
+                    {option.description ? (
+                      <p>{option.description}</p>
+                    ) : null}
+
+                    <strong>
+                      {money(
+                        option.basePriceAmount,
+                        option.currency,
+                      )}
+                    </strong>
+
+                    {option.coverageMinutes ? (
+                      <small>
+                        {Math.round(
+                          option.coverageMinutes / 60,
+                        )}{" "}
+                        hours coverage
+                      </small>
+                    ) : null}
+
+                    <ul>
+                      {option.includedItems.map(
+                        (item) => (
+                          <li key={item}>
+                            {item}
+                          </li>
+                        ),
+                      )}
+                    </ul>
+
+                    {option.deliverables.length ? (
+                      <div className="portal-package-deliverables">
+                        <b>Deliverables</b>
+
+                        {option.deliverables.map(
+                          (item) => (
+                            <span key={item}>
+                              {item}
+                            </span>
+                          ),
+                        )}
+                      </div>
+                    ) : null}
+
+                    {selectionLabel ? (
+                      <span
+                        className={`portal-package-select ${isSelected ? "selected" : ""}`}
+                      >
+                        {isSelected ? (
+                          <CheckCircle2 />
+                        ) : null}
+
+                        {selectionLabel}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
             {displayedQuoteAddons.length ? <section className="portal-quote-addons"><h2>{quote.quoteType === "fixed" ? "Included extras" : acceptedQuote ? "Selected extras" : "Optional extras"}</h2><p>{quote.quoteType === "fixed" ? "These required extras are already included in the fixed quote total." : acceptedQuote ? "Extras included in your accepted booking." : "Select permitted extras for your chosen package."}</p>{displayedQuoteAddons.map((addon) => { const quantity = addonQuantities[addon.id] ?? addon.defaultQuantity; const mandatory = addon.requirement === "mandatory"; return <div key={addon.id} className="portal-quote-addon"><div><strong>{addon.name}{mandatory ? <small>Required</small> : addon.requirement === "recommended" ? <small>Recommended</small> : null}</strong><p>{addon.description}</p></div><span>{money(addon.unitPriceAmount, addon.currency)}</span>{acceptedQuote || quote.quoteType === "fixed" ? <strong className="portal-quote-addon-accepted">× {quantity}</strong> : <label><span>Quantity</span><input type="number" min={mandatory ? Math.max(1, addon.minimumQuantity) : 0} max={addon.maximumQuantity} value={quantity} onChange={(event) => { const raw = Math.max(0, Math.min(addon.maximumQuantity, Number(event.target.value) || 0)); const next = mandatory ? Math.max(1, addon.minimumQuantity, raw) : raw > 0 ? Math.max(addon.minimumQuantity, raw) : 0; setAddonQuantities((current) => ({ ...current, [addon.id]: next })); }} /></label>}</div>; })}</section> : null}
-            <section className="portal-quote-summary"><h2>Price summary</h2><dl><div><dt>Subtotal</dt><dd>{money(displayedQuoteTotals.subtotal, acceptedQuote?.currency || quote.currentVersion.currency)}</dd></div>{displayedQuoteTotals.discount ? <div><dt>Discount</dt><dd>−{money(displayedQuoteTotals.discount, acceptedQuote?.currency || quote.currentVersion.currency)}</dd></div> : null}{quote.currentVersion.taxTreatment !== "none" ? <div><dt>Tax {quote.currentVersion.taxTreatment === "inclusive" ? "included" : ""}</dt><dd>{money(displayedQuoteTotals.tax, acceptedQuote?.currency || quote.currentVersion.currency)}</dd></div> : null}<div className="total"><dt>Total</dt><dd>{money(displayedQuoteTotals.total, acceptedQuote?.currency || quote.currentVersion.currency)}</dd></div></dl></section>
-            <footer className="portal-quote-actions">{quote.currentVersion.status === "accepted" ? <div className="client-portal-complete"><CheckCircle2 /><span>Quote accepted. Your booking is active.</span></div> : quote.currentVersion.status === "declined" ? <div className="client-portal-complete muted"><XCircle /><span>This quote was declined.</span></div> : quote.currentVersion.status === "expired" ? <div className="client-portal-complete muted"><XCircle /><span>This quote has expired.</span></div> : <><button className="secondary" disabled={saving} onClick={() => void declineQuote()}><XCircle />Decline quote</button><button disabled={saving || (quote.quoteType !== "fixed" && !selectedOptionId)} onClick={() => void acceptQuote()}><CheckCircle2 />Accept quote</button></>}</footer>
+            {quote.quoteType !== "fixed"
+            && !acceptedQuote
+            && !selectedQuoteOption ? (
+              <section className="portal-quote-summary portal-quote-summary--empty">
+                <h2>Price summary</h2>
+                <p>
+                  Select a package to see your total
+                  and available extras.
+                </p>
+              </section>
+            ) : (
+              <section className="portal-quote-summary">
+                <h2>Price summary</h2>
+
+                <dl>
+                  <div>
+                    <dt>Subtotal</dt>
+                    <dd>
+                      {money(
+                        displayedQuoteTotals.subtotal,
+                        acceptedQuote?.currency
+                        || quote.currentVersion.currency,
+                      )}
+                    </dd>
+                  </div>
+
+                  {displayedQuoteTotals.discount ? (
+                    <div>
+                      <dt>Discount</dt>
+                      <dd>
+                        −{money(
+                          displayedQuoteTotals.discount,
+                          acceptedQuote?.currency
+                          || quote.currentVersion.currency,
+                        )}
+                      </dd>
+                    </div>
+                  ) : null}
+
+                  {quote.currentVersion.taxTreatment
+                  !== "none" ? (
+                    <div>
+                      <dt>
+                        Tax{" "}
+                        {quote.currentVersion.taxTreatment
+                        === "inclusive"
+                          ? "included"
+                          : ""}
+                      </dt>
+                      <dd>
+                        {money(
+                          displayedQuoteTotals.tax,
+                          acceptedQuote?.currency
+                          || quote.currentVersion.currency,
+                        )}
+                      </dd>
+                    </div>
+                  ) : null}
+
+                  <div className="total">
+                    <dt>Total</dt>
+                    <dd>
+                      {money(
+                        displayedQuoteTotals.total,
+                        acceptedQuote?.currency
+                        || quote.currentVersion.currency,
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+            )}
+            <footer className="portal-quote-actions">
+              {quote.currentVersion.status === "accepted" ? (
+                <div className="client-portal-complete">
+                  <CheckCircle2 />
+                  <span>
+                    Quote accepted. Your booking is active.
+                  </span>
+                </div>
+              ) : quote.currentVersion.status === "declined" ? (
+                <div className="client-portal-complete muted">
+                  <XCircle />
+                  <span>
+                    This quote was declined.
+                  </span>
+                </div>
+              ) : quote.currentVersion.status === "expired" ? (
+                <div className="client-portal-complete muted">
+                  <XCircle />
+                  <span>
+                    This quote has expired.
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <button
+                    className="secondary"
+                    disabled={saving}
+                    onClick={() => void declineQuote()}
+                  >
+                    <XCircle />
+                    Decline quote
+                  </button>
+
+                  <button
+                    disabled={saving || (quote.quoteType !== "fixed" && !selectedOptionId)}
+                    onClick={() => void acceptQuote()}
+                  >
+                    <CheckCircle2 />
+
+                    {quote.quoteType !== "fixed" && !selectedOptionId
+                      ? "Select a package first"
+                      : "Accept quote"}
+                  </button>
+                </>
+              )}
+            </footer>
           </article> : !questionnaire ? <div className="client-portal-empty"><FileText /><h2>Select a quote or questionnaire</h2><p>Choose an item from the sidebar to continue.</p></div> : (
             <article className="portal-questionnaire-card">
               <div className="portal-questionnaire-heading"><button className="client-portal-back" onClick={() => setSelectedId("")}><ArrowLeft />Back</button><span>{selectedJob?.title}</span><h1>{questionnaire.title}</h1>{questionnaire.introduction ? <p>{questionnaire.introduction}</p> : null}<div className="portal-questionnaire-meta"><span>{questionnaire.status.replace(/_/g, " ")}</span>{questionnaire.dueAt ? <span>Planning target {formatDate(questionnaire.dueAt)}</span> : null}{questionnaire.lastSavedAt ? <span>Saved {new Date(questionnaire.lastSavedAt).toLocaleString("en-GB")}</span> : null}</div></div>

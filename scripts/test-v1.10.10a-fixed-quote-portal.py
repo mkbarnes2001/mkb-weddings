@@ -127,15 +127,16 @@ assert (
 )
 
 
-# Admin wording no longer describes Fixed as an open-ended
-# "starting from" quote.
+# v1.10.11a removed the redundant fixed-option summary copy.
+# The enduring Admin boundary is that a Fixed quote can contain
+# only one package option in the editor.
 assert (
-    '? "Quoted total"\n              : "Starting from"'
+    'quote.quoteType\n                  !== "fixed"\n                || !draft.options.length'
     in editor
 )
 
 assert (
-    '? "Exact quoted scope"\n              : "Before optional extras"'
+    '"Fixed package"'
     in editor
 )
 
