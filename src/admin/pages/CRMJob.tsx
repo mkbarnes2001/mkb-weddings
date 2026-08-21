@@ -24,7 +24,6 @@ import {
   MapPin,
   MessageCircle,
   MessageSquareText,
-  PenLine,
   PackageCheck,
   Phone,
   Plus,
@@ -36,7 +35,8 @@ import {
   Users,
   Workflow,
   X,
-  } from "lucide-react";
+  UserRoundCog,
+} from "lucide-react";
 import { AdminAccordion,
   AdminButton,
   AdminIconButton,
@@ -2372,7 +2372,7 @@ export function CRMJob() {
                         aria-label={`Edit ${contact.displayName}`}
                         title="Edit client"
                       >
-                        <PenLine aria-hidden="true" />
+                        <UserRoundCog aria-hidden="true" />
                       </Link>
 
                       <AdminIconButton

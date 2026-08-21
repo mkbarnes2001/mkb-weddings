@@ -1455,6 +1455,20 @@ function cloneLeadFormSettings(
 }
 
 function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: CrmLeadFormSettings; saving: boolean; canManage: boolean; onSave: (settings: CrmLeadFormSettings) => Promise<void> }) {
+
+  const [
+    expandedLeadFieldId,
+    setExpandedLeadFieldId,
+  ] = useState("");
+
+  const [
+    leadFieldDragIndex,
+    setLeadFieldDragIndex,
+  ] = useState<number | null>(
+    null,
+  );
+
+
   const [draft, setDraft] = useState<CrmLeadFormSettings>(
     () => cloneLeadFormSettings(settings),
   );
@@ -1792,302 +1806,510 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
       </AdminPanel>
 
       <AdminPanel
-        title="Form fields"
-        description="Choose which standard CRM fields appear, change their wording and add your own questions. First name and email stay required so every enquiry has a usable client identity."
-        icon={FileQuestion}
-        actions={
-          canManage
-            ? (
-                <AdminButton
-                  size="sm"
-                  variant="secondary"
-                  icon={Plus}
-                  disabled={saving}
-                  onClick={addQuestion}
-                >
-                  Add question
-                </AdminButton>
-              )
-            : undefined
-        }
-      >
-        <div className="space-y-3">
-          {draft.fields.map((field, index) => {
-            const custom = !field.systemKey;
-            const choices =
-              field.type === "select"
-              || field.type === "radio";
+          title="Form fields"
+          description="Build the public enquiry form from compact CRM fields. First name, email and wedding date are protected required fields."
+          icon={FileQuestion}
+          actions={
+            canManage
+              ? (
+                  <AdminButton
+                    size="sm"
+                    variant="secondary"
+                    icon={Plus}
+                    disabled={saving}
+                    onClick={addQuestion}
+                  >
+                    Add question
+                  </AdminButton>
+                )
+              : undefined
+          }
+          className="crm-lead-form-builder-panel"
+        >
+          <div className="crm-lead-form-builder">
+            {draft.fields.map(
+              (field, index) => {
+                const custom =
+                  !field.systemKey;
 
-            return (
-              <div
-                key={field.id}
-                className="rounded-xl border border-black/10 bg-white p-4"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <strong className="text-sm">
-                        {field.label || "Untitled field"}
-                      </strong>
+                const choices =
+                  field.type === "select"
+                  || field.type === "radio";
 
-                      <span className="rounded-full bg-neutral-100 px-2 py-1 text-[10px] uppercase tracking-[.08em] text-neutral-500">
-                        {custom
-                          ? "Custom question"
-                          : `CRM · ${field.systemKey}`}
-                      </span>
+                const expanded =
+                  expandedLeadFieldId
+                  === field.id;
 
-                      {field.locked ? (
-                        <span className="rounded-full bg-neutral-900 px-2 py-1 text-[10px] uppercase tracking-[.08em] text-white">
-                          Required identity
-                        </span>
-                      ) : null}
-                    </div>
+                const fieldTypeLabel =
+                  LEAD_FORM_FIELD_TYPE_OPTIONS
+                    .find(
+                      (option) =>
+                        option.value
+                        === field.type,
+                    )
+                    ?.label
+                  || field.type;
 
-                    <p className="mt-1 text-xs text-neutral-500">
-                      Field {index + 1} of {draft.fields.length}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      className="admin-button admin-button--secondary admin-button--sm"
-                      disabled={!canManage || saving || index === 0}
-                      onClick={() => moveField(index, -1)}
-                      aria-label={`Move ${field.label} up`}
-                    >
-                      ↑ Move up
-                    </button>
-
-                    <button
-                      type="button"
-                      className="admin-button admin-button--secondary admin-button--sm"
-                      disabled={
-                        !canManage
-                        || saving
-                        || index === draft.fields.length - 1
+                return (
+                  <article
+                    key={field.id}
+                    className={
+                      `crm-lead-form-builder-field${
+                        expanded
+                          ? " is-expanded"
+                          : ""
+                      }`
+                    }
+                    draggable={
+                      canManage
+                      && !saving
+                    }
+                    onDragStart={() =>
+                      setLeadFieldDragIndex(
+                        index,
+                      )
+                    }
+                    onDragOver={(event) =>
+                      event.preventDefault()
+                    }
+                    onDrop={() => {
+                      if (
+                        leadFieldDragIndex
+                        !== null
+                        && leadFieldDragIndex
+                          !== index
+                      ) {
+                        moveField(
+                          leadFieldDragIndex,
+                          index
+                          - leadFieldDragIndex,
+                        );
                       }
-                      onClick={() => moveField(index, 1)}
-                      aria-label={`Move ${field.label} down`}
-                    >
-                      ↓ Move down
-                    </button>
 
-                    {custom ? (
-                      <button
-                        type="button"
-                        className="admin-button admin-button--secondary admin-button--sm"
-                        disabled={!canManage || saving}
-                        onClick={() => removeField(index)}
-                      >
-                        Remove
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
-
-                <div className="mt-4 grid gap-3 lg:grid-cols-2">
-                  <AdminField label="Question / field label">
-                    <input
-                      className="admin-input"
-                      value={field.label}
-                      disabled={!canManage || saving}
-                      onChange={(event) =>
-                        patchField(
-                          index,
-                          {
-                            label:
-                              event.target.value,
-                          },
-                        )
-                      }
-                    />
-                  </AdminField>
-
-                  <AdminField
-                    label="Field type"
-                    help={
-                      field.systemKey
-                        ? "Standard CRM field types are fixed so submitted values continue mapping correctly."
-                        : "Custom questions are stored with the enquiry response."
+                      setLeadFieldDragIndex(
+                        null,
+                      );
+                    }}
+                    onDragEnd={() =>
+                      setLeadFieldDragIndex(
+                        null,
+                      )
                     }
                   >
-                    <select
-                      className="admin-select"
-                      value={field.type}
-                      disabled={
-                        !canManage
-                        || saving
-                        || Boolean(field.systemKey)
-                      }
-                      onChange={(event) =>
-                        patchField(
-                          index,
-                          {
-                            type: event.target.value as CrmLeadFormFieldType,
-                          },
-                        )
-                      }
+                    <div
+                      className="crm-lead-form-builder-field__handle"
+                      title="Drag to reorder"
+                      aria-hidden="true"
                     >
-                      {LEAD_FORM_FIELD_TYPE_OPTIONS.map(
-                        (option) => (
-                          <option
-                            key={option.value}
-                            value={option.value}
-                          >
-                            {option.label}
-                          </option>
-                        ),
-                      )}
-                    </select>
-                  </AdminField>
+                      <span>⋮⋮</span>
+                    </div>
 
-                  <AdminField
-                    label="Help text"
-                    help="Optional guidance shown underneath the field."
-                  >
-                    <input
-                      className="admin-input"
-                      value={field.help}
-                      disabled={!canManage || saving}
-                      onChange={(event) =>
-                        patchField(
-                          index,
-                          {
-                            help:
-                              event.target.value,
-                          },
-                        )
-                      }
-                    />
-                  </AdminField>
-
-                  <AdminField
-                    label="Placeholder"
-                    help="Optional example text shown before the client enters a value."
-                  >
-                    <input
-                      className="admin-input"
-                      value={field.placeholder}
-                      disabled={
-                        !canManage
-                        || saving
-                        || field.type === "checkbox"
-                        || field.type === "radio"
-                      }
-                      onChange={(event) =>
-                        patchField(
-                          index,
-                          {
-                            placeholder:
-                              event.target.value,
-                          },
-                        )
-                      }
-                    />
-                  </AdminField>
-
-                  {choices ? (
-                    <div className="lg:col-span-2">
-                      <AdminField
-                        label="Choices"
-                        help="Enter one option per line. The order here is the order clients see."
-                      >
-                        <textarea
-                          className="admin-textarea min-h-28"
-                          value={field.options.join("\n")}
-                          disabled={!canManage || saving}
-                          onChange={(event) =>
-                            patchField(
-                              index,
-                              {
-                                options:
-                                  event.target.value
-                                    .split("\n")
-                                    .map((value) =>
-                                      value.trim()
-                                    )
-                                    .filter(Boolean),
-                              },
+                    <div className="crm-lead-form-builder-field__content">
+                      <div className="crm-lead-form-builder-field__summary">
+                        <button
+                          type="button"
+                          className="crm-lead-form-builder-field__toggle"
+                          aria-expanded={expanded}
+                          onClick={() =>
+                            setExpandedLeadFieldId(
+                              expanded
+                                ? ""
+                                : field.id,
                             )
                           }
-                        />
-                      </AdminField>
+                        >
+                          <span className="crm-lead-form-builder-field__identity">
+                            <strong>
+                              {field.label
+                                || "Untitled field"}
+                            </strong>
+
+                            <span className="crm-lead-form-builder-field__meta">
+                              <span>
+                                {custom
+                                  ? "Custom question"
+                                  : `CRM · ${field.systemKey}`}
+                              </span>
+
+                              <span>
+                                {fieldTypeLabel}
+                              </span>
+
+                              <span
+                                className={
+                                  field.enabled
+                                    ? "is-on"
+                                    : "is-off"
+                                }
+                              >
+                                {field.enabled
+                                  ? "Visible"
+                                  : "Hidden"}
+                              </span>
+
+                              <span
+                                className={
+                                  field.required
+                                    ? "is-required"
+                                    : ""
+                                }
+                              >
+                                {field.required
+                                  ? "Required"
+                                  : "Optional"}
+                              </span>
+
+                              {field.locked ? (
+                                <span className="is-locked">
+                                  Protected
+                                </span>
+                              ) : null}
+                            </span>
+                          </span>
+
+                          <span
+                            className="crm-lead-form-builder-field__chevron"
+                            aria-hidden="true"
+                          >
+                            ⌄
+                          </span>
+                        </button>
+
+                        <div className="crm-lead-form-builder-field__actions">
+                          <button
+                            type="button"
+                            className="admin-icon-control"
+                            disabled={
+                              !canManage
+                              || saving
+                              || index === 0
+                            }
+                            onClick={() =>
+                              moveField(
+                                index,
+                                -1,
+                              )
+                            }
+                            aria-label={`Move ${field.label} up`}
+                            title="Move up"
+                          >
+                            ↑
+                          </button>
+
+                          <button
+                            type="button"
+                            className="admin-icon-control"
+                            disabled={
+                              !canManage
+                              || saving
+                              || index
+                                === draft.fields.length - 1
+                            }
+                            onClick={() =>
+                              moveField(
+                                index,
+                                1,
+                              )
+                            }
+                            aria-label={`Move ${field.label} down`}
+                            title="Move down"
+                          >
+                            ↓
+                          </button>
+
+                          {custom ? (
+                            <button
+                              type="button"
+                              className="admin-icon-control admin-icon-control--danger"
+                              disabled={
+                                !canManage
+                                || saving
+                              }
+                              onClick={() => {
+                                removeField(
+                                  index,
+                                );
+
+                                if (
+                                  expanded
+                                ) {
+                                  setExpandedLeadFieldId(
+                                    "",
+                                  );
+                                }
+                              }}
+                              aria-label={`Remove ${field.label}`}
+                              title="Remove field"
+                            >
+                              ×
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      {expanded ? (
+                        <div className="crm-lead-form-builder-field__editor">
+                          <div className="crm-lead-form-builder-field__grid">
+                            <AdminField label="Field label">
+                              <input
+                                className="admin-input"
+                                value={field.label}
+                                disabled={
+                                  !canManage
+                                  || saving
+                                }
+                                onChange={(event) =>
+                                  patchField(
+                                    index,
+                                    {
+                                      label:
+                                        event.target.value,
+                                    },
+                                  )
+                                }
+                              />
+                            </AdminField>
+
+                            <AdminField
+                              label="Field type"
+                              help={
+                                field.systemKey
+                                  ? "CRM mapped fields keep their fixed data type."
+                                  : "Choose how this custom question is answered."
+                              }
+                            >
+                              <select
+                                className="admin-select"
+                                value={field.type}
+                                disabled={
+                                  !canManage
+                                  || saving
+                                  || Boolean(
+                                    field.systemKey,
+                                  )
+                                }
+                                onChange={(event) =>
+                                  patchField(
+                                    index,
+                                    {
+                                      type:
+                                        event.target.value as CrmLeadFormFieldType,
+                                    },
+                                  )
+                                }
+                              >
+                                {LEAD_FORM_FIELD_TYPE_OPTIONS.map(
+                                  (option) => (
+                                    <option
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </option>
+                                  ),
+                                )}
+                              </select>
+                            </AdminField>
+
+                            <AdminField label="Help text">
+                              <input
+                                className="admin-input"
+                                value={field.help}
+                                disabled={
+                                  !canManage
+                                  || saving
+                                }
+                                placeholder="Optional guidance below the field"
+                                onChange={(event) =>
+                                  patchField(
+                                    index,
+                                    {
+                                      help:
+                                        event.target.value,
+                                    },
+                                  )
+                                }
+                              />
+                            </AdminField>
+
+                            <AdminField label="Placeholder">
+                              <input
+                                className="admin-input"
+                                value={
+                                  field.placeholder
+                                }
+                                disabled={
+                                  !canManage
+                                  || saving
+                                  || field.type
+                                    === "checkbox"
+                                  || field.type
+                                    === "radio"
+                                }
+                                placeholder="Optional example or prompt"
+                                onChange={(event) =>
+                                  patchField(
+                                    index,
+                                    {
+                                      placeholder:
+                                        event.target.value,
+                                    },
+                                  )
+                                }
+                              />
+                            </AdminField>
+                          </div>
+
+                          {choices ? (
+                            <AdminField
+                              label="Choices"
+                              help="One option per line."
+                            >
+                              <textarea
+                                className="admin-textarea min-h-24"
+                                value={
+                                  field.options.join(
+                                    "\n",
+                                  )
+                                }
+                                disabled={
+                                  !canManage
+                                  || saving
+                                }
+                                onChange={(event) =>
+                                  patchField(
+                                    index,
+                                    {
+                                      options:
+                                        event.target.value
+                                          .split("\n")
+                                          .map(
+                                            (value) =>
+                                              value.trim(),
+                                          )
+                                          .filter(
+                                            Boolean,
+                                          ),
+                                    },
+                                  )
+                                }
+                              />
+                            </AdminField>
+                          ) : null}
+
+                          {field.systemKey ? (
+                            <div className="crm-lead-form-builder-field__mapping">
+                              <strong>
+                                CRM mapping
+                              </strong>
+
+                              <span>
+                                {field.systemKey}
+                              </span>
+
+                              {field.locked ? (
+                                <small>
+                                  This field is required by the booking workflow and cannot be hidden or made optional.
+                                </small>
+                              ) : (
+                                <small>
+                                  This mapping is fixed so submitted enquiries continue populating the correct CRM field.
+                                </small>
+                              )}
+                            </div>
+                          ) : null}
+
+                          <div className="crm-lead-form-builder-field__flags">
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={
+                                  field.enabled
+                                }
+                                disabled={
+                                  !canManage
+                                  || saving
+                                  || field.locked
+                                }
+                                onChange={(event) =>
+                                  patchField(
+                                    index,
+                                    {
+                                      enabled:
+                                        event.target
+                                          .checked,
+                                    },
+                                  )
+                                }
+                              />
+
+                              <span>
+                                <strong>
+                                  Visible
+                                </strong>
+
+                                <small>
+                                  Show on public form
+                                </small>
+                              </span>
+                            </label>
+
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={
+                                  field.required
+                                }
+                                disabled={
+                                  !canManage
+                                  || saving
+                                  || field.locked
+                                  || !field.enabled
+                                }
+                                onChange={(event) =>
+                                  patchField(
+                                    index,
+                                    {
+                                      required:
+                                        event.target
+                                          .checked,
+                                    },
+                                  )
+                                }
+                              />
+
+                              <span>
+                                <strong>
+                                  Required
+                                </strong>
+
+                                <small>
+                                  Must be completed before submission
+                                </small>
+                              </span>
+                            </label>
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
-                  ) : null}
-                </div>
-
-                <div className="mt-4 grid gap-3 md:grid-cols-2">
-                  <label className="admin-choice-row">
-                    <div>
-                      <strong>Show this field</strong>
-                      <p>
-                        Hidden fields are not rendered or required
-                        on the public form.
-                      </p>
-                    </div>
-
-                    <input
-                      type="checkbox"
-                      checked={field.enabled}
-                      disabled={
-                        !canManage
-                        || saving
-                        || field.locked
-                      }
-                      onChange={(event) =>
-                        patchField(
-                          index,
-                          {
-                            enabled:
-                              event.target.checked,
-                          },
-                        )
-                      }
-                    />
-                  </label>
-
-                  <label className="admin-choice-row">
-                    <div>
-                      <strong>Required</strong>
-                      <p>
-                        Clients must complete this field before
-                        the enquiry can be submitted.
-                      </p>
-                    </div>
-
-                    <input
-                      type="checkbox"
-                      checked={field.required}
-                      disabled={
-                        !canManage
-                        || saving
-                        || field.locked
-                        || !field.enabled
-                      }
-                      onChange={(event) =>
-                        patchField(
-                          index,
-                          {
-                            required:
-                              event.target.checked,
-                          },
-                        )
-                      }
-                    />
-                  </label>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {!draft.fields.length ? (
-          <div className="rounded-xl border border-dashed border-black/15 p-6 text-sm text-neutral-500">
-            No form fields are configured.
+                  </article>
+                );
+              },
+            )}
           </div>
-        ) : null}
-      </AdminPanel>
+
+          {!draft.fields.length ? (
+            <div className="admin-empty-state">
+              <h3>
+                No form fields configured
+              </h3>
+
+              <p>
+                Add a custom question to start building the form.
+              </p>
+            </div>
+          ) : null}
+        </AdminPanel>
 
       {canManage ? (
         <div className="flex justify-end">

@@ -14839,3 +14839,346 @@ p {
     grid-row: 1 / span 2;
   }
 }
+
+
+/* v1.10.12a — compact Lead Form builder */
+
+.crm-lead-form-builder-panel
+.admin-panel__body {
+  padding: 10px 12px 12px;
+}
+
+.crm-lead-form-builder {
+  display: grid;
+  gap: 6px;
+}
+
+.crm-lead-form-builder-field {
+  display: grid;
+  grid-template-columns:
+    30px
+    minmax(0, 1fr);
+  overflow: hidden;
+  border:
+    1px solid
+    var(--admin-border);
+  border-radius:
+    var(--admin-radius-sm);
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+}
+
+.crm-lead-form-builder-field.is-expanded {
+  border-color:
+    var(--admin-border-strong);
+}
+
+.crm-lead-form-builder-field__handle {
+  display: grid;
+  min-height: 52px;
+  place-items: center;
+  border-right:
+    1px solid
+    var(--admin-border);
+  background:
+    var(
+      --admin-surface-muted,
+      #f8f7f4
+    );
+  color: #a3a3a3;
+  cursor: grab;
+  user-select: none;
+}
+
+.crm-lead-form-builder-field__handle
+span {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -4px;
+  transform: rotate(90deg);
+}
+
+.crm-lead-form-builder-field__content {
+  min-width: 0;
+}
+
+.crm-lead-form-builder-field__summary {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
+  min-height: 52px;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 7px 5px 10px;
+}
+
+.crm-lead-form-builder-field__toggle {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  text-align: left;
+}
+
+.crm-lead-form-builder-field__identity {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.crm-lead-form-builder-field__identity
+> strong {
+  overflow: hidden;
+  color: #262626;
+  font-size:
+    calc(
+      10px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-lead-form-builder-field__meta {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 9px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      7.7px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-lead-form-builder-field__meta
+> span {
+  white-space: nowrap;
+}
+
+.crm-lead-form-builder-field__meta
+.is-on {
+  color: #167344;
+}
+
+.crm-lead-form-builder-field__meta
+.is-off {
+  color: #a3a3a3;
+}
+
+.crm-lead-form-builder-field__meta
+.is-required {
+  color: #8a5a00;
+}
+
+.crm-lead-form-builder-field__meta
+.is-locked {
+  color: #525252;
+  font-weight: 650;
+}
+
+.crm-lead-form-builder-field__chevron {
+  flex: 0 0 auto;
+  color: #737373;
+  font-size: 14px;
+  transition:
+    transform .15s ease;
+}
+
+.crm-lead-form-builder-field.is-expanded
+.crm-lead-form-builder-field__chevron {
+  transform: rotate(180deg);
+}
+
+.crm-lead-form-builder-field__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.crm-lead-form-builder-field__actions
+.admin-icon-control {
+  width: 28px;
+  min-width: 28px !important;
+  height: 28px;
+  min-height: 28px !important;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.crm-lead-form-builder-field__editor {
+  display: grid;
+  gap: 10px;
+  border-top:
+    1px solid
+    var(--admin-border);
+  padding: 11px 10px 12px;
+}
+
+.crm-lead-form-builder-field__grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 9px 10px;
+}
+
+.crm-lead-form-builder-field__mapping {
+  display: grid;
+  grid-template-columns:
+    auto
+    minmax(0, 1fr);
+  align-items: baseline;
+  gap: 3px 8px;
+  border:
+    1px solid
+    var(--admin-border);
+  border-radius:
+    var(--admin-radius-sm);
+  background:
+    var(
+      --admin-surface-muted,
+      #f8f7f4
+    );
+  padding: 8px 9px;
+}
+
+.crm-lead-form-builder-field__mapping
+strong {
+  font-size:
+    calc(
+      8.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-lead-form-builder-field__mapping
+span {
+  overflow: hidden;
+  color: #525252;
+  font-size:
+    calc(
+      8.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  text-overflow: ellipsis;
+}
+
+.crm-lead-form-builder-field__mapping
+small {
+  grid-column: 1 / -1;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  line-height: 1.45;
+}
+
+.crm-lead-form-builder-field__flags {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.crm-lead-form-builder-field__flags
+label {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  border:
+    1px solid
+    var(--admin-border);
+  border-radius:
+    var(--admin-radius-sm);
+  padding: 8px 9px;
+}
+
+.crm-lead-form-builder-field__flags
+input {
+  flex: 0 0 auto;
+}
+
+.crm-lead-form-builder-field__flags
+span {
+  min-width: 0;
+}
+
+.crm-lead-form-builder-field__flags
+strong,
+.crm-lead-form-builder-field__flags
+small {
+  display: block;
+}
+
+.crm-lead-form-builder-field__flags
+strong {
+  font-size:
+    calc(
+      8.8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-lead-form-builder-field__flags
+small {
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      7.8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+
+@media (max-width: 760px) {
+  .crm-lead-form-builder-field__summary {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+
+  .crm-lead-form-builder-field__actions {
+    justify-content: flex-start;
+  }
+
+  .crm-lead-form-builder-field__grid,
+  .crm-lead-form-builder-field__flags {
+    grid-template-columns: 1fr;
+  }
+}

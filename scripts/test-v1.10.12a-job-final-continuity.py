@@ -33,9 +33,11 @@ booking = read(
 )
 
 
-# Cleaner client edit icon.
-assert "PenLine" in job
+# Cleaner centred client-management icon.
+assert "PenLine" not in job
 assert "<Pencil" not in job
+assert "UserRoundCog" in job
+assert 'title="Edit client"' in job
 
 
 # Real read-only Contract view.
