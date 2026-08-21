@@ -1920,7 +1920,9 @@ export function CRMJob() {
       {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
       {message ? <div className="admin-alert admin-alert--success">{message}</div> : null}
 
-      <AdminPanel
+            <div className="crm-job-primary-grid">
+        <div className="crm-job-primary-grid__workflow">
+<AdminPanel
         title="Wedding workflow"
         description="Wedding Photography · key booking and delivery milestones."
         icon={Workflow}
@@ -2164,8 +2166,17 @@ export function CRMJob() {
           </li>
         </ol>
       </AdminPanel>
+        </div>
+        <div className="crm-job-primary-grid__clients">
+<div id="job-clients" className="scroll-mt-5 crm-job-top-clients"><AdminAccordion title="Clients" description="Contact details and client portal access." icon={Users} defaultOpen summary={<AdminStatus tone="neutral">{workspace.contacts.length}</AdminStatus>}>
+            <div className="crm-job-clients">{workspace.contacts.map((contact) => { const access = activeAccessByContact.get(contact.id); return <article key={contact.id}><div><strong>{contact.displayName}</strong><p>{contact.role}</p><a href={contact.email ? `mailto:${contact.email}` : undefined}>{contact.email || "Email required"}</a>{contact.phone ? <span>{contact.phone}</span> : null}</div><div className="crm-job-client-actions"><Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/crm/contacts/${contact.id}`}><Pencil className="admin-button__icon" />Edit client</Link>{access ? <AdminStatus tone={access.acceptedAt ? "success" : "warning"}>{access.acceptedAt ? "portal active" : "invited"}</AdminStatus> : null}<AdminButton variant="primary" size="sm" icon={Mail} disabled={saving || !canManage || !contact.email} onClick={() => void invite(contact.id)}>{access ? "Send new link" : "Invite client"}</AdminButton>{access ? <AdminButton variant="danger" size="sm" icon={ShieldX} disabled={saving || !canManage} onClick={() => void revoke(access.identityId)}>Revoke</AdminButton> : null}</div></article>; })}</div>
+          </AdminAccordion></div>
+        </div>
+      </div>
 
-      <AdminPanel
+            <div className="crm-job-summary-grid">
+        <div className="crm-job-summary-grid__column crm-job-summary-grid__column--commercial">
+<AdminPanel
         title="Booking and payments"
         description="Commercial booking documents generated from the accepted quote, with the questionnaire kept alongside the client actions it supports."
         icon={BriefcaseBusiness}
@@ -2401,7 +2412,9 @@ export function CRMJob() {
           </article>
         </div>
       </AdminPanel>
-      <AdminPanel
+        </div>
+        <div className="crm-job-summary-grid__column crm-job-summary-grid__column--delivery">
+<AdminPanel
         title="Wedding delivery and content"
         description="The CRM Job is the booking source. Its linked Wedding Workspace feeds private delivery and Website content without duplicate uploads."
         icon={LayoutDashboard}
@@ -2451,6 +2464,8 @@ export function CRMJob() {
           </article>
         </div>
       </AdminPanel>
+        </div>
+      </div>
 
       <div className="crm-job-operations-grid">
         <div className="crm-job-operations-column">
@@ -2466,9 +2481,7 @@ export function CRMJob() {
         </div>
 
         <div className="crm-job-operations-column">
-          <div id="job-clients" className="scroll-mt-5"><AdminAccordion title="Clients" description="Contact details and client portal access." icon={Users} defaultOpen summary={<AdminStatus tone="neutral">{workspace.contacts.length}</AdminStatus>}>
-            <div className="crm-job-clients">{workspace.contacts.map((contact) => { const access = activeAccessByContact.get(contact.id); return <article key={contact.id}><div><strong>{contact.displayName}</strong><p>{contact.role}</p><a href={contact.email ? `mailto:${contact.email}` : undefined}>{contact.email || "Email required"}</a>{contact.phone ? <span>{contact.phone}</span> : null}</div><div className="crm-job-client-actions"><Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/crm/contacts/${contact.id}`}><Pencil className="admin-button__icon" />Edit client</Link>{access ? <AdminStatus tone={access.acceptedAt ? "success" : "warning"}>{access.acceptedAt ? "portal active" : "invited"}</AdminStatus> : null}<AdminButton variant="primary" size="sm" icon={Mail} disabled={saving || !canManage || !contact.email} onClick={() => void invite(contact.id)}>{access ? "Send new link" : "Invite client"}</AdminButton>{access ? <AdminButton variant="danger" size="sm" icon={ShieldX} disabled={saving || !canManage} onClick={() => void revoke(access.identityId)}>Revoke</AdminButton> : null}</div></article>; })}</div>
-          </AdminAccordion></div>
+
 
           <div
             id="job-questionnaires"

@@ -131,6 +131,30 @@ assert (
 
 
 # ------------------------------------------------------------
+# Compact Job dashboard composition.
+# ------------------------------------------------------------
+
+assert 'className="crm-job-primary-grid"' in job
+assert 'className="crm-job-summary-grid"' in job
+
+assert job.count('id="job-clients"') == 1
+
+assert (
+    job.index('title="Wedding workflow"')
+    < job.index('title="Clients"')
+    < job.index('title="Booking and payments"')
+    < job.index('title="Wedding delivery and content"')
+)
+
+for selector in (
+    ".crm-job-primary-grid",
+    ".crm-job-summary-grid",
+    ".crm-job-top-clients",
+):
+    assert selector in css, selector
+
+
+# ------------------------------------------------------------
 # WedPlanned-native compact vertical presentation.
 # ------------------------------------------------------------
 

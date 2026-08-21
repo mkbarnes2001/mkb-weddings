@@ -13296,3 +13296,167 @@ svg {
     gap: 9px;
   }
 }
+
+
+/* v1.10.12a — compact two-column Job dashboard */
+
+.crm-job-primary-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(320px, .78fr)
+    minmax(0, 1.22fr);
+  align-items: start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.crm-job-primary-grid__workflow,
+.crm-job-primary-grid__clients,
+.crm-job-summary-grid__column {
+  min-width: 0;
+}
+
+.crm-job-primary-grid
+.admin-panel,
+.crm-job-primary-grid
+.admin-accordion {
+  margin: 0;
+}
+
+.crm-job-top-clients {
+  min-width: 0;
+}
+
+.crm-job-top-clients
+.admin-accordion {
+  height: auto;
+}
+
+.crm-job-summary-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 12px;
+  min-width: 0;
+}
+
+
+/*
+ * Commercial cards contain more financial detail than the
+ * lifecycle cards. At half-page width they therefore stack
+ * vertically inside the Booking panel.
+ */
+.crm-job-summary-grid
+.crm-commercial-grid {
+  grid-template-columns:
+    minmax(0, 1fr);
+}
+
+
+/*
+ * Lifecycle cards remain compact enough for two columns,
+ * but move their action beneath the text so it does not
+ * squeeze the identity column.
+ */
+.crm-job-summary-grid
+.crm-wedding-lifecycle-grid {
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+}
+
+.crm-job-summary-grid
+.crm-wedding-lifecycle-card {
+  grid-template-columns:
+    28px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  padding: 9px;
+}
+
+.crm-job-summary-grid
+.crm-wedding-lifecycle-card__icon {
+  width: 28px;
+  height: 28px;
+}
+
+.crm-job-summary-grid
+.crm-wedding-lifecycle-card
+> .admin-button,
+.crm-job-summary-grid
+.crm-wedding-lifecycle-card
+> .admin-status {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.crm-job-summary-grid
+.crm-wedding-lifecycle-card
+small {
+  white-space: normal;
+}
+
+
+/*
+ * The Booking cards likewise use the compact two-column
+ * card shell at this narrower panel width.
+ */
+.crm-job-summary-grid
+.crm-commercial-card {
+  grid-template-columns:
+    32px minmax(0, 1fr);
+  gap: 9px;
+  padding: 11px;
+}
+
+.crm-job-summary-grid
+.crm-commercial-card__icon {
+  width: 32px;
+  height: 32px;
+}
+
+.crm-job-summary-grid
+.crm-commercial-card
+> .admin-button,
+.crm-job-summary-grid
+.crm-commercial-card
+> .crm-commercial-card__open {
+  grid-column: 2;
+  justify-self: start;
+}
+
+
+/*
+ * Intermediate and smaller Admin layouts return to the
+ * established single-column Job workspace.
+ */
+@media (max-width: 1180px) {
+  .crm-job-primary-grid,
+  .crm-job-summary-grid {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+
+  .crm-job-summary-grid
+  .crm-commercial-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .crm-job-summary-grid
+  .crm-commercial-grid,
+  .crm-job-summary-grid
+  .crm-wedding-lifecycle-grid {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .crm-job-primary-grid,
+  .crm-job-summary-grid {
+    gap: 10px;
+  }
+}
