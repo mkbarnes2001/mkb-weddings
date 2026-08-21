@@ -2208,7 +2208,10 @@ export function CRMJob() {
                         aria-label={`Edit ${contact.displayName}`}
                         title="Edit client"
                       >
-                        <Pencil aria-hidden="true" />
+                        <Pencil
+                          strokeWidth={2.25}
+                          aria-hidden="true"
+                        />
                       </Link>
 
                       <AdminIconButton
@@ -2218,8 +2221,12 @@ export function CRMJob() {
                             ? "Send new link"
                             : "Invite client"
                         }
+                        title={
+                          access
+                            ? "Send new link"
+                            : "Invite client"
+                        }
                         variant="secondary"
-                        floatingTooltip
                         disabled={
                           saving
                           || !canManage
@@ -2236,8 +2243,8 @@ export function CRMJob() {
                         <AdminIconButton
                           icon={ShieldX}
                           label="Revoke client portal access"
+                          title="Revoke client portal access"
                           variant="danger"
-                          floatingTooltip
                           disabled={
                             saving
                             || !canManage
@@ -2265,113 +2272,79 @@ export function CRMJob() {
         description="Invoice, contract, questionnaire and accepted quote."
         icon={BriefcaseBusiness}
         className="crm-commercial-panel"
-      >
-        {commercialQuote && canManageCommercial ? (
-          <div className="crm-booking-pack-repair">
-            <small>
-              Create any missing configured documents without replacing existing snapshots.
-            </small>
-
-            <AdminButton
+        actions={
+          commercialQuote && canManageCommercial ? (
+            <AdminIconButton
+              icon={PackageCheck}
+              label="Generate / repair booking pack"
+              title="Generate / repair booking pack"
               variant="secondary"
-              size="sm"
               disabled={saving}
               onClick={() =>
                 void repairBookingPack()
               }
-            >
-              Generate / repair booking pack
-            </AdminButton>
-          </div>
-        ) : null}
-
+            />
+          ) : null
+        }
+      >
         <div className="crm-commercial-grid crm-job-commercial-summary-list">
           {commercialInvoice ? (
-            <Link
-              className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row"
-              to={`/admin/crm/jobs/${job.id}/invoices/${commercialInvoice.id}`}
-              aria-label={`Open invoice ${commercialInvoice.reference}`}
-            >
+            <article className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row">
               <span className="crm-commercial-card__icon">
                 <FileText />
               </span>
 
-              <div className="crm-commercial-card__body crm-commercial-summary-row__copy">
-                <p>
-                  Invoice
+              <div className="crm-commercial-summary-row__copy">
+                <div className="crm-commercial-summary-row__identity">
+                  <span>
+                    Invoice
+                  </span>
+
+                  <strong>
+                    {commercialInvoice.reference}
+                  </strong>
+                </div>
+
+                <p className="crm-commercial-summary-line">
+                  Total{" "}
+                  {money(
+                    commercialInvoice.totalAmount,
+                    commercialInvoice.currency,
+                  )}
+                  {" · "}
+                  Paid{" "}
+                  {money(
+                    commercialInvoice.paidAmount,
+                    commercialInvoice.currency,
+                  )}
+                  {" · "}
+                  Balance{" "}
+                  {money(
+                    commercialInvoice.balanceAmount,
+                    commercialInvoice.currency,
+                  )}
                 </p>
 
-                <strong>
-                  {commercialInvoice.reference}
-                </strong>
-
-                <dl className="crm-commercial-card__metrics crm-commercial-summary-metrics">
-                  <div>
-                    <dt>Total</dt>
-                    <dd>
-                      {money(
-                        commercialInvoice.totalAmount,
-                        commercialInvoice.currency,
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>Paid</dt>
-                    <dd>
-                      {money(
-                        commercialInvoice.paidAmount,
-                        commercialInvoice.currency,
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>Balance</dt>
-                    <dd>
-                      {money(
-                        commercialInvoice.balanceAmount,
-                        commercialInvoice.currency,
-                      )}
-                    </dd>
-                  </div>
-                </dl>
-
                 {commercialInvoice.nextPayment ? (
-                  <div className="crm-commercial-card__next crm-commercial-summary-next">
-                    <span>
-                      Next payment
-                    </span>
-
-                    <strong>
-                      {commercialInvoice.nextPayment.label}
-                      {" · "}
-                      {money(
-                        commercialInvoice.nextPayment.balanceAmount,
-                        commercialInvoice.currency,
-                      )}
-                    </strong>
-
-                    <small>
-                      {commercialInvoice.nextPayment.dueDate
-                        ? `Due ${dateLabel(
-                            commercialInvoice.nextPayment.dueDate,
-                          )}`
-                        : "No due date set"}
-                    </small>
-
-                    <small>
-                      {commercialInvoice.nextPayment.status.replace(
-                        /_/g,
-                        " ",
-                      )}
-                    </small>
-                  </div>
+                  <small className="crm-commercial-summary-line crm-commercial-card__next">
+                    Next payment ·{" "}
+                    {commercialInvoice.nextPayment.label}
+                    {" · "}
+                    {money(
+                      commercialInvoice.nextPayment.balanceAmount,
+                      commercialInvoice.currency,
+                    )}
+                    {commercialInvoice.nextPayment.dueDate
+                      ? ` · Due ${dateLabel(
+                          commercialInvoice.nextPayment.dueDate,
+                        )}`
+                      : ""}
+                  </small>
                 ) : (
-                  <small className="crm-commercial-card__note">
+                  <small className="crm-commercial-summary-line">
                     {commercialInvoice.balanceAmount > 0
-                      ? "No payment schedule item is currently due."
-                      : "Invoice balance settled."}
+                      ? "No payment schedule item currently due"
+                      : "Invoice balance settled"}
                   </small>
                 )}
               </div>
@@ -2387,36 +2360,42 @@ export function CRMJob() {
                 )}
               </span>
 
-              <span
-                className="crm-commercial-card__open"
-                aria-hidden="true"
+              <Link
+                className="admin-icon-control crm-commercial-card__open"
+                to={`/admin/crm/jobs/${job.id}/invoices/${commercialInvoice.id}`}
+                aria-label={`Open invoice ${commercialInvoice.reference}`}
+                title="Open invoice"
               >
-                <ExternalLink />
-              </span>
-            </Link>
+                <ExternalLink aria-hidden="true" />
+              </Link>
+            </article>
           ) : (
             <article className="crm-commercial-card crm-commercial-summary-row">
               <span className="crm-commercial-card__icon">
                 <FileText />
               </span>
 
-              <div className="crm-commercial-card__body crm-commercial-summary-row__copy">
-                <p>
-                  Invoice
-                </p>
+              <div className="crm-commercial-summary-row__copy">
+                <div className="crm-commercial-summary-row__identity">
+                  <span>
+                    Invoice
+                  </span>
 
-                <strong>
-                  No invoice yet
-                </strong>
+                  <strong>
+                    No invoice yet
+                  </strong>
+                </div>
 
-                <small className="crm-commercial-card__note">
-                  Not generated
+                <small className="crm-commercial-summary-line">
+                  Booking invoice has not been generated
                 </small>
               </div>
 
               <span className="crm-commercial-summary-state">
-                not generated
+                Not generated
               </span>
+
+              <span className="crm-commercial-summary-action-spacer" />
             </article>
           )}
 
@@ -2425,59 +2404,32 @@ export function CRMJob() {
               <BookOpen />
             </span>
 
-            <div className="crm-commercial-card__body crm-commercial-summary-row__copy">
-              <p>
-                Contract
-              </p>
+            <div className="crm-commercial-summary-row__copy">
+              <div className="crm-commercial-summary-row__identity">
+                <span>
+                  Contract
+                </span>
 
-              <strong>
-                {commercialContract?.reference
-                  || "No contract yet"}
-              </strong>
+                <strong>
+                  {commercialContract?.reference
+                    || "No contract yet"}
+                </strong>
+              </div>
 
               {commercialContract ? (
-                <>
-                  <small className="crm-commercial-card__note">
-                    {commercialContract.title}
-                    {commercialContract.signedAt
-                      ? ` · Signed ${dateLabel(
-                          commercialContract.signedAt,
-                        )}`
-                      : commercialContract.sentAt
-                        ? ` · Sent ${dateLabel(
-                            commercialContract.sentAt,
-                          )}`
-                        : " · Draft document"}
-                  </small>
-
-                  <dl className="crm-commercial-card__metrics crm-commercial-card__metrics--two crm-commercial-summary-metrics">
-                    <div>
-                      <dt>
-                        Signatures
-                      </dt>
-
-                      <dd>
-                        {commercialContract.signatureCount}
-                        {" / "}
-                        {commercialContract.requiredSignatures}
-                      </dd>
-                    </div>
-
-                    <div>
-                      <dt>
-                        Version
-                      </dt>
-
-                      <dd>
-                        {commercialContract.versionNumber
-                          || "—"}
-                      </dd>
-                    </div>
-                  </dl>
-                </>
+                <p className="crm-commercial-summary-line">
+                  {commercialContract.title}
+                  {" · "}
+                  Signatures{" "}
+                  {commercialContract.signatureCount}
+                  /{commercialContract.requiredSignatures}
+                  {" · "}
+                  Version{" "}
+                  {commercialContract.versionNumber || "—"}
+                </p>
               ) : (
-                <small className="crm-commercial-card__note">
-                  Not generated
+                <small className="crm-commercial-summary-line">
+                  Booking contract has not been generated
                 </small>
               )}
             </div>
@@ -2496,20 +2448,22 @@ export function CRMJob() {
                     /_/g,
                     " ",
                   )
-                : "not generated"}
+                : "Not generated"}
             </span>
 
             {commercialContract?.status === "draft" ? (
               portal.status === "not_invited" ? (
-                <small className="crm-commercial-summary-row__hint">
-                  Invite client first
-                </small>
+                <span
+                  className="crm-commercial-summary-action-spacer crm-commercial-summary-action-spacer--disabled"
+                  aria-label="Invite client first"
+                  title="Invite client first"
+                />
               ) : canManageCommercial ? (
                 <AdminIconButton
                   icon={Mail}
                   label="Send to Client Portal"
+                  title="Send to Client Portal"
                   variant="secondary"
-                  floatingTooltip
                   disabled={saving}
                   onClick={() =>
                     void sendContractToPortal(
@@ -2518,40 +2472,38 @@ export function CRMJob() {
                   }
                 />
               ) : (
-                <small className="crm-commercial-summary-row__hint">
-                  Read-only
-                </small>
+                <span className="crm-commercial-summary-action-spacer" />
               )
-            ) : null}
+            ) : (
+              <span className="crm-commercial-summary-action-spacer" />
+            )}
           </article>
 
-          <a
-            className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row"
-            href="#job-questionnaires"
-            aria-label="Open Questionnaire management"
-          >
+          <article className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row">
             <span className="crm-commercial-card__icon">
               <ClipboardList />
             </span>
 
-            <div className="crm-commercial-card__body crm-commercial-summary-row__copy">
-              <p>
-                Questionnaire
-              </p>
+            <div className="crm-commercial-summary-row__copy">
+              <div className="crm-commercial-summary-row__identity">
+                <span>
+                  Questionnaire
+                </span>
 
-              <strong>
-                {bookingQuestionnaire?.title
-                  || "No booking questionnaire"}
-              </strong>
+                <strong>
+                  {bookingQuestionnaire?.title
+                    || "No booking questionnaire"}
+                </strong>
+              </div>
 
-              <small className="crm-commercial-card__note">
+              <small className="crm-commercial-summary-line">
                 {bookingQuestionnaire
                   ? bookingQuestionnaire.dueAt
                     ? `Planning target ${dateLabel(
                         bookingQuestionnaire.dueAt,
                       )}`
                     : "Assigned with no due date"
-                  : "Not assigned"}
+                  : "No questionnaire currently assigned"}
               </small>
             </div>
 
@@ -2569,107 +2521,95 @@ export function CRMJob() {
                     /_/g,
                     " ",
                   )
-                : "not assigned"}
+                : "Not assigned"}
             </span>
 
-            <span
-              className="crm-commercial-card__open"
-              aria-hidden="true"
+            <a
+              className="admin-icon-control crm-commercial-card__open"
+              href="#job-questionnaires"
+              aria-label="Open Questionnaire management"
+              title="Open questionnaire"
             >
-              <ExternalLink />
-            </span>
-          </a>
+              <ExternalLink aria-hidden="true" />
+            </a>
+          </article>
 
           {commercialQuote ? (
-            <Link
-              className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row"
-              to={`/admin/crm/quotes/${commercialQuote.id}`}
-              aria-label={`Open accepted quote ${commercialQuote.reference}`}
-            >
+            <article className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row">
               <span className="crm-commercial-card__icon">
                 <PackageCheck />
               </span>
 
-              <div className="crm-commercial-card__body crm-commercial-summary-row__copy">
-                <p>
-                  Accepted quote
-                </p>
+              <div className="crm-commercial-summary-row__copy">
+                <div className="crm-commercial-summary-row__identity">
+                  <span>
+                    Accepted quote
+                  </span>
 
-                <strong>
-                  {commercialQuote.reference}
-                </strong>
+                  <strong>
+                    {commercialQuote.reference}
+                  </strong>
+                </div>
 
-                <small className="crm-commercial-card__note">
+                <p className="crm-commercial-summary-line">
                   {commercialQuote.packageName
                     || job.packageName
                     || "Booked package"}
-                </small>
-
-                <dl className="crm-commercial-card__metrics crm-commercial-card__metrics--two crm-commercial-summary-metrics">
-                  <div>
-                    <dt>
-                      Total
-                    </dt>
-
-                    <dd>
-                      {money(
-                        commercialQuote.totalAmount,
-                        commercialQuote.currency,
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>
-                      Accepted
-                    </dt>
-
-                    <dd>
-                      {commercialQuote.acceptedAt
-                        ? dateLabel(
-                            commercialQuote.acceptedAt,
-                          )
-                        : "—"}
-                    </dd>
-                  </div>
-                </dl>
+                  {" · "}
+                  Total{" "}
+                  {money(
+                    commercialQuote.totalAmount,
+                    commercialQuote.currency,
+                  )}
+                  {commercialQuote.acceptedAt
+                    ? ` · Accepted ${dateLabel(
+                        commercialQuote.acceptedAt,
+                      )}`
+                    : ""}
+                </p>
               </div>
 
               <span className="crm-commercial-summary-state is-accepted">
-                accepted
+                Accepted
               </span>
 
-              <span
-                className="crm-commercial-card__open"
-                aria-hidden="true"
+              <Link
+                className="admin-icon-control crm-commercial-card__open"
+                to={`/admin/crm/quotes/${commercialQuote.id}`}
+                aria-label={`Open accepted quote ${commercialQuote.reference}`}
+                title="Open accepted quote"
               >
-                <ExternalLink />
-              </span>
-            </Link>
+                <ExternalLink aria-hidden="true" />
+              </Link>
+            </article>
           ) : (
             <article className="crm-commercial-card crm-commercial-summary-row">
               <span className="crm-commercial-card__icon">
                 <PackageCheck />
               </span>
 
-              <div className="crm-commercial-card__body crm-commercial-summary-row__copy">
-                <p>
-                  Accepted quote
-                </p>
+              <div className="crm-commercial-summary-row__copy">
+                <div className="crm-commercial-summary-row__identity">
+                  <span>
+                    Accepted quote
+                  </span>
 
-                <strong>
-                  {job.quoteReference
-                    || "No accepted quote"}
-                </strong>
+                  <strong>
+                    {job.quoteReference
+                      || "No accepted quote"}
+                  </strong>
+                </div>
 
-                <small className="crm-commercial-card__note">
-                  This Job does not currently have an accepted quote snapshot attached.
+                <small className="crm-commercial-summary-line">
+                  No accepted quote snapshot is linked
                 </small>
               </div>
 
               <span className="crm-commercial-summary-state">
-                not linked
+                Not linked
               </span>
+
+              <span className="crm-commercial-summary-action-spacer" />
             </article>
           )}
         </div>
@@ -2701,15 +2641,15 @@ export function CRMJob() {
 
             {lifecycle.wedding.exists ? (
               <Link
-                className="admin-button admin-button--secondary admin-button--sm"
+                className="admin-icon-control crm-wedding-lifecycle-action"
                 to={`/admin/weddings/${lifecycle.wedding.slug}/workspace`}
+                aria-label="Open Wedding Workspace"
+                title="Open Wedding Workspace"
               >
-                Open
+                <ExternalLink aria-hidden="true" />
               </Link>
             ) : (
-              <AdminStatus tone="danger">
-                review
-              </AdminStatus>
+              <span className="crm-wedding-lifecycle-action-spacer" />
             )}
           </article>
 
@@ -2732,12 +2672,16 @@ export function CRMJob() {
 
             {lifecycle.wedding.exists ? (
               <Link
-                className="admin-button admin-button--secondary admin-button--sm"
+                className="admin-icon-control crm-wedding-lifecycle-action"
                 to={`/admin/weddings/${lifecycle.wedding.slug}/workspace#preview-upload`}
+                aria-label="Manage Wedding assets"
+                title="Manage Wedding assets"
               >
-                Manage
+                <ExternalLink aria-hidden="true" />
               </Link>
-            ) : null}
+            ) : (
+              <span className="crm-wedding-lifecycle-action-spacer" />
+            )}
           </article>
 
           <article className="crm-wedding-lifecycle-card">
@@ -2759,16 +2703,20 @@ export function CRMJob() {
 
             {primaryGallery ? (
               <Link
-                className="admin-button admin-button--secondary admin-button--sm"
+                className="admin-icon-control crm-wedding-lifecycle-action"
                 to={`/admin/client-galleries/${primaryGallery.id}`}
+                aria-label="Open Client Gallery"
+                title="Open Client Gallery"
               >
-                Open
+                <ExternalLink aria-hidden="true" />
               </Link>
             ) : (
-              <AdminButton
-                variant="primary"
-                size="sm"
+              <AdminIconButton
                 icon={Plus}
+                label="Create Client Gallery"
+                title="Create Client Gallery"
+                className="crm-wedding-lifecycle-action"
+                variant="secondary"
                 disabled={
                   saving
                   || !canManage
@@ -2777,9 +2725,7 @@ export function CRMJob() {
                 onClick={() =>
                   void createClientGalleryFromJob()
                 }
-              >
-                Create
-              </AdminButton>
+              />
             )}
           </article>
 
@@ -2800,14 +2746,28 @@ export function CRMJob() {
 
             {lifecycle.wedding.exists ? (
               <Link
-                className="admin-button admin-button--secondary admin-button--sm"
+                className="admin-icon-control crm-wedding-lifecycle-action"
                 to={`/admin/weddings/${lifecycle.wedding.slug}/content`}
+                aria-label={
+                  lifecycle.story.state === "not_started"
+                    ? "Start Wedding Story"
+                    : "Edit Wedding Story"
+                }
+                title={
+                  lifecycle.story.state === "not_started"
+                    ? "Start Wedding Story"
+                    : "Edit Wedding Story"
+                }
               >
-                {lifecycle.story.state === "not_started"
-                  ? "Start"
-                  : "Edit"}
+                {lifecycle.story.state === "not_started" ? (
+                  <Plus aria-hidden="true" />
+                ) : (
+                  <ExternalLink aria-hidden="true" />
+                )}
               </Link>
-            ) : null}
+            ) : (
+              <span className="crm-wedding-lifecycle-action-spacer" />
+            )}
           </article>
 
           <article className="crm-wedding-lifecycle-card">
@@ -2829,12 +2789,16 @@ export function CRMJob() {
 
             {lifecycle.wedding.exists ? (
               <Link
-                className="admin-button admin-button--secondary admin-button--sm"
+                className="admin-icon-control crm-wedding-lifecycle-action"
                 to={`/admin/weddings/${lifecycle.wedding.slug}/workspace#publishing-destinations`}
+                aria-label="Manage Website galleries"
+                title="Manage Website galleries"
               >
-                Manage
+                <ExternalLink aria-hidden="true" />
               </Link>
-            ) : null}
+            ) : (
+              <span className="crm-wedding-lifecycle-action-spacer" />
+            )}
           </article>
         </div>
       </AdminPanel>

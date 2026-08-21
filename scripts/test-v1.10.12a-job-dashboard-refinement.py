@@ -96,8 +96,10 @@ assert "crm-job-clients-panel" in clients
 assert "Client portal · {portalLabel}" in clients
 assert "crm-job-client-portal-state" in clients
 assert "AdminIconButton" in clients
-assert "floatingTooltip" in clients
+assert 'title="Edit client"' in clients
+assert 'title={' in clients
 assert "Send new link" in clients
+assert 'title="Revoke client portal access"' in clients
 assert "Revoke client portal access" in clients
 
 assert 'id="job-clients"' in job
@@ -117,6 +119,8 @@ booking = component(
 
 for token in (
     "crm-job-commercial-summary-list",
+    "crm-commercial-summary-row__identity",
+    "crm-commercial-summary-line",
     'to={`/admin/crm/jobs/${job.id}/invoices/${commercialInvoice.id}`}',
     "crm-commercial-card__next",
     'href="#job-questionnaires"',
@@ -132,8 +136,12 @@ for token in (
     "commercialContract.id",
     "Send to Client Portal",
     'portal.status === "not_invited"',
+    'label="Generate / repair booking pack"',
 ):
     assert token in booking, token
+
+assert "crm-booking-pack-repair" not in booking
+assert "<dl className=" not in booking
 
 
 # Delivery/content owns only actual content destinations.
@@ -156,9 +164,18 @@ for forbidden in (
     "Client portal",
     "Questionnaires",
     "description=",
-    "<small",
+    'className="admin-button',
 ):
     assert forbidden not in delivery, forbidden
+
+assert delivery.count(
+    "crm-wedding-lifecycle-action"
+) >= 5
+assert 'title="Open Wedding Workspace"' in delivery
+assert 'title="Manage Wedding assets"' in delivery
+assert 'title="Create Client Gallery"' in delivery
+assert "Start Wedding Story" in delivery
+assert 'title="Manage Website galleries"' in delivery
 
 
 # Repeating dashboard records use the platform-controlled

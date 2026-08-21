@@ -13861,3 +13861,314 @@ small {
     grid-column: 2;
   }
 }
+
+
+/* v1.10.12a — Job dashboard final visual polish */
+
+/* Client actions: crisp, visible square controls. */
+.crm-job-client-actions .admin-icon-control {
+  width: 30px;
+  min-width: 30px !important;
+  height: 30px;
+  min-height: 30px !important;
+  border-color: var(--admin-border-strong) !important;
+  color: #171717 !important;
+}
+
+.crm-job-client-actions .admin-icon-control svg {
+  width: 14px;
+  height: 14px;
+  opacity: 1;
+  stroke-width: 2.15;
+}
+
+.crm-job-client-actions .admin-icon-control:hover {
+  border-color: rgba(17,17,17,.38) !important;
+  background: #f8f7f4 !important;
+}
+
+.crm-job-client-actions .admin-icon-control:disabled {
+  cursor: not-allowed;
+  opacity: .32;
+}
+
+.crm-job-client-actions .admin-icon-control--danger {
+  border-color: #fecaca !important;
+  color: #b91c1c !important;
+}
+
+
+/* Booking and payments: one consistent summary-row language. */
+.crm-commercial-panel .admin-panel__actions .admin-icon-control {
+  width: 30px;
+  min-width: 30px !important;
+  height: 30px;
+  min-height: 30px !important;
+}
+
+.crm-commercial-grid.crm-job-commercial-summary-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.crm-commercial-card.crm-commercial-summary-row {
+  display: grid;
+  grid-template-columns:
+    28px
+    minmax(0, 1fr)
+    auto
+    30px;
+  align-items: center;
+  gap: 9px;
+  min-height: 58px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  padding: 8px 9px;
+}
+
+.crm-commercial-summary-row
+.crm-commercial-card__icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  align-self: center;
+  border-radius: 7px;
+  background: #f3f4f6;
+  color: #525252;
+}
+
+.crm-commercial-summary-row
+.crm-commercial-card__icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.crm-commercial-summary-row__copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.crm-commercial-summary-row__identity {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.crm-commercial-summary-row__identity > span {
+  flex: 0 0 auto;
+  color: #8a8a8a;
+  font-size: calc(
+    7.5px * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 700;
+  letter-spacing: .085em;
+  text-transform: uppercase;
+}
+
+.crm-commercial-summary-row__identity > strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #262626;
+  font-size: calc(
+    9.5px * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-commercial-summary-line,
+.crm-commercial-card__next.crm-commercial-summary-line {
+  display: block;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--admin-muted);
+  padding: 0;
+  font-size: calc(
+    8px * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 450;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-commercial-summary-state {
+  align-self: center;
+  font-size: calc(
+    8px * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 650;
+  letter-spacing: 0;
+  text-transform: capitalize;
+}
+
+.crm-commercial-summary-row
+> .admin-icon-control,
+.crm-commercial-summary-row
+> .admin-icon-button {
+  width: 30px;
+  min-width: 30px !important;
+  height: 30px;
+  min-height: 30px !important;
+  align-self: center;
+}
+
+.crm-commercial-summary-action-spacer {
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+
+.crm-commercial-summary-action-spacer--disabled {
+  position: relative;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-sm);
+  opacity: .28;
+}
+
+.crm-commercial-summary-action-spacer--disabled::before {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: #a3a3a3;
+  content: "";
+}
+
+.crm-commercial-summary-row.crm-commercial-card--link:hover {
+  border-color: var(--admin-border-strong);
+  transform: none;
+}
+
+
+/* Delivery/content: tile content and action remain on one row. */
+.crm-wedding-lifecycle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.crm-wedding-lifecycle-card {
+  display: grid;
+  grid-template-columns:
+    28px
+    minmax(0, 1fr)
+    30px;
+  align-items: center;
+  gap: 9px;
+  min-height: 54px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  padding: 8px 9px;
+}
+
+.crm-wedding-lifecycle-card__icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 7px;
+  background: #f3f4f6;
+  color: #525252;
+}
+
+.crm-wedding-lifecycle-card__icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.crm-wedding-lifecycle-card > div {
+  min-width: 0;
+}
+
+.crm-wedding-lifecycle-card p {
+  margin: 0;
+  overflow: hidden;
+  color: #8a8a8a;
+  font-size: calc(
+    7.5px * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 700;
+  letter-spacing: .085em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.crm-wedding-lifecycle-card strong {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: #262626;
+  font-size: calc(
+    9px * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-wedding-lifecycle-action {
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  align-self: center;
+  justify-self: end;
+}
+
+.crm-wedding-lifecycle-action-spacer {
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+
+@media (max-width: 760px) {
+  .crm-commercial-card.crm-commercial-summary-row {
+    grid-template-columns:
+      28px
+      minmax(0, 1fr)
+      30px;
+  }
+
+  .crm-commercial-summary-state {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .crm-commercial-summary-row
+  > :is(
+    .admin-icon-control,
+    .admin-icon-button,
+    .crm-commercial-summary-action-spacer
+  ) {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+
+  .crm-commercial-summary-line {
+    white-space: normal;
+  }
+
+  .crm-wedding-lifecycle-grid {
+    grid-template-columns: 1fr;
+  }
+}
