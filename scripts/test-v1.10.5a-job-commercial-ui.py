@@ -84,15 +84,14 @@ def main() -> None:
     assert "crm-job-commercial-summary-list" in job
     assert "crm-commercial-summary-row" in job
 
+    # Record identities remain visible. Financial values are
+    # verified below through their actual commercial bindings rather
+    # than presentation-sensitive display wording/capitalisation.
     for label in (
         "Invoice",
         "Contract",
         "Questionnaire",
         "Accepted quote",
-        "Total",
-        "Paid",
-        "Balance",
-        "Next payment",
     ):
         assert label in job, label
 

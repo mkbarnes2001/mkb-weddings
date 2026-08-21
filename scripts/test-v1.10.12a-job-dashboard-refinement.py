@@ -119,10 +119,10 @@ booking = component(
 
 for token in (
     "crm-job-commercial-summary-list",
-    "crm-commercial-summary-row__identity",
+    "crm-booking-summary-row__heading",
     "crm-commercial-summary-line",
     'to={`/admin/crm/jobs/${job.id}/invoices/${commercialInvoice.id}`}',
-    "crm-commercial-card__next",
+    "crm-booking-summary-row__detail",
     'href="#job-questionnaires"',
     'to={`/admin/crm/quotes/${commercialQuote.id}`}',
     "commercialInvoice.totalAmount",
@@ -142,6 +142,10 @@ for token in (
 
 assert "crm-booking-pack-repair" not in booking
 assert "<dl className=" not in booking
+assert "crm-booking-summary-list" in booking
+assert booking.count("crm-booking-summary-row") >= 4
+assert "crm-commercial-card__icon" not in booking
+assert 'description="Invoice, contract, questionnaire and accepted quote."' not in booking
 
 
 # Delivery/content owns only actual content destinations.
@@ -176,6 +180,10 @@ assert 'title="Manage Wedding assets"' in delivery
 assert 'title="Create Client Gallery"' in delivery
 assert "Start Wedding Story" in delivery
 assert 'title="Manage Website galleries"' in delivery
+assert "crm-delivery-summary-list" in delivery
+assert delivery.count("crm-delivery-summary-row") == 5
+assert "crm-wedding-lifecycle-card" not in delivery
+assert "crm-wedding-lifecycle-card__icon" not in delivery
 
 
 # Repeating dashboard records use the platform-controlled
