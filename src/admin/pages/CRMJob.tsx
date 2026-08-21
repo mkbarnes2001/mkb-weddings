@@ -19,7 +19,6 @@ import {
   Globe2,
   Images,
   LayoutDashboard,
-  LockKeyhole,
   Mail,
   MapPin,
   MessageCircle,
@@ -39,6 +38,7 @@ import {
   } from "lucide-react";
 import { AdminAccordion,
   AdminButton,
+  AdminIconButton,
   AdminEmptyState,
   AdminField,
   AdminPage,
@@ -1874,7 +1874,6 @@ export function CRMJob() {
     || workspace.questionnaires[0]
     || null;
   const primaryGallery = lifecycle.primaryClientGallery;
-  const completedQuestionnaires = workspace.questionnaires.filter((item) => item.status === "completed").length;
   const storyLabel = lifecycle.story.state === "not_started" ? "not started" : lifecycle.story.state;
 
   return (
@@ -1940,9 +1939,6 @@ export function CRMJob() {
             <div className="crm-wedding-workflow__content">
               <div className="crm-wedding-workflow__heading">
                 <strong>Lead created</strong>
-                <AdminStatus tone="success">
-                  complete
-                </AdminStatus>
               </div>
 
               <p>
@@ -1966,9 +1962,6 @@ export function CRMJob() {
             <div className="crm-wedding-workflow__content">
               <div className="crm-wedding-workflow__heading">
                 <strong>Job accepted</strong>
-                <AdminStatus tone="success">
-                  complete
-                </AdminStatus>
               </div>
 
               <p>
@@ -1991,18 +1984,6 @@ export function CRMJob() {
             <div className="crm-wedding-workflow__content">
               <div className="crm-wedding-workflow__heading">
                 <strong>Wedding day</strong>
-
-                <AdminStatus
-                  tone={
-                    job.eventDate
-                      ? "info"
-                      : "warning"
-                  }
-                >
-                  {job.eventDate
-                    ? "scheduled"
-                    : "date required"}
-                </AdminStatus>
               </div>
 
               <p>
@@ -2067,18 +2048,6 @@ export function CRMJob() {
             <div className="crm-wedding-workflow__content">
               <div className="crm-wedding-workflow__heading">
                 <strong>Previews sent</strong>
-
-                <AdminStatus
-                  tone={
-                    previewsComplete
-                      ? "success"
-                      : "neutral"
-                  }
-                >
-                  {previewsComplete
-                    ? "complete"
-                    : "to do"}
-                </AdminStatus>
               </div>
 
               <p>
@@ -2140,18 +2109,6 @@ export function CRMJob() {
             <div className="crm-wedding-workflow__content">
               <div className="crm-wedding-workflow__heading">
                 <strong>Client photos delivered</strong>
-
-                <AdminStatus
-                  tone={
-                    deliveryComplete
-                      ? "success"
-                      : "neutral"
-                  }
-                >
-                  {deliveryComplete
-                    ? "Job complete"
-                    : "to do"}
-                </AdminStatus>
               </div>
 
               <p>
@@ -2168,9 +2125,136 @@ export function CRMJob() {
       </AdminPanel>
         </div>
         <div className="crm-job-primary-grid__clients">
-<div id="job-clients" className="scroll-mt-5 crm-job-top-clients"><AdminAccordion title="Clients" description="Contact details and client portal access." icon={Users} defaultOpen summary={<AdminStatus tone="neutral">{workspace.contacts.length}</AdminStatus>}>
-            <div className="crm-job-clients">{workspace.contacts.map((contact) => { const access = activeAccessByContact.get(contact.id); return <article key={contact.id}><div><strong>{contact.displayName}</strong><p>{contact.role}</p><a href={contact.email ? `mailto:${contact.email}` : undefined}>{contact.email || "Email required"}</a>{contact.phone ? <span>{contact.phone}</span> : null}</div><div className="crm-job-client-actions"><Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/crm/contacts/${contact.id}`}><Pencil className="admin-button__icon" />Edit client</Link>{access ? <AdminStatus tone={access.acceptedAt ? "success" : "warning"}>{access.acceptedAt ? "portal active" : "invited"}</AdminStatus> : null}<AdminButton variant="primary" size="sm" icon={Mail} disabled={saving || !canManage || !contact.email} onClick={() => void invite(contact.id)}>{access ? "Send new link" : "Invite client"}</AdminButton>{access ? <AdminButton variant="danger" size="sm" icon={ShieldX} disabled={saving || !canManage} onClick={() => void revoke(access.identityId)}>Revoke</AdminButton> : null}</div></article>; })}</div>
-          </AdminAccordion></div>
+<div id="job-clients" className="scroll-mt-5 crm-job-top-clients"><AdminPanel
+            title="Clients"
+            description="Contact details and client portal access."
+            icon={Users}
+            className="crm-job-clients-panel"
+            actions={
+              <span className="crm-job-panel-count">
+                {workspace.contacts.length}
+              </span>
+            }
+          >
+            <div className="crm-job-clients">
+              {workspace.contacts.map((contact) => {
+                const access =
+                  activeAccessByContact.get(
+                    contact.id,
+                  );
+
+                const portalStatus =
+                  !contact.email
+                    ? "email-required"
+                    : access?.acceptedAt
+                      ? "active"
+                      : access
+                        ? "invited"
+                        : "not-invited";
+
+                const portalLabel =
+                  portalStatus === "active"
+                    ? "Active"
+                    : portalStatus === "invited"
+                      ? "Invited"
+                      : portalStatus === "email-required"
+                        ? "Email required"
+                        : "Not invited";
+
+                return (
+                  <article key={contact.id}>
+                    <div className="crm-job-client-copy">
+                      <strong>
+                        {contact.displayName}
+                      </strong>
+
+                      <p>
+                        {contact.role}
+                      </p>
+
+                      <a
+                        href={
+                          contact.email
+                            ? `mailto:${contact.email}`
+                            : undefined
+                        }
+                      >
+                        {contact.email || "Email required"}
+                      </a>
+
+                      {contact.phone ? (
+                        <span>
+                          {contact.phone}
+                        </span>
+                      ) : null}
+
+                      <div
+                        className={
+                          `crm-job-client-portal-state is-${portalStatus}`
+                        }
+                      >
+                        <span aria-hidden="true"></span>
+
+                        <small>
+                          Client portal · {portalLabel}
+                        </small>
+                      </div>
+                    </div>
+
+                    <div className="crm-job-client-actions">
+                      <Link
+                        className="admin-icon-control crm-job-client-icon-action"
+                        to={`/admin/crm/contacts/${contact.id}`}
+                        aria-label={`Edit ${contact.displayName}`}
+                        title="Edit client"
+                      >
+                        <Pencil aria-hidden="true" />
+                      </Link>
+
+                      <AdminIconButton
+                        icon={Mail}
+                        label={
+                          access
+                            ? "Send new link"
+                            : "Invite client"
+                        }
+                        variant="secondary"
+                        floatingTooltip
+                        disabled={
+                          saving
+                          || !canManage
+                          || !contact.email
+                        }
+                        onClick={() =>
+                          void invite(
+                            contact.id,
+                          )
+                        }
+                      />
+
+                      {access ? (
+                        <AdminIconButton
+                          icon={ShieldX}
+                          label="Revoke client portal access"
+                          variant="danger"
+                          floatingTooltip
+                          disabled={
+                            saving
+                            || !canManage
+                          }
+                          onClick={() =>
+                            void revoke(
+                              access.identityId,
+                            )
+                          }
+                        />
+                      ) : null}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </AdminPanel></div>
         </div>
       </div>
 
@@ -2178,29 +2262,33 @@ export function CRMJob() {
         <div className="crm-job-summary-grid__column crm-job-summary-grid__column--commercial">
 <AdminPanel
         title="Booking and payments"
-        description="Commercial booking documents generated from the accepted quote, with the questionnaire kept alongside the client actions it supports."
+        description="Invoice, contract, questionnaire and accepted quote."
         icon={BriefcaseBusiness}
         className="crm-commercial-panel"
       >
         {commercialQuote && canManageCommercial ? (
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-black/[0.06] bg-neutral-50 px-4 py-3">
-            <small className="max-w-2xl text-[10px] leading-5 text-neutral-500">
-              Re-run the idempotent booking-pack checks to create any configured invoice, contract or questionnaire that is missing. Existing commercial snapshots are preserved.
+          <div className="crm-booking-pack-repair">
+            <small>
+              Create any missing configured documents without replacing existing snapshots.
             </small>
+
             <AdminButton
               variant="secondary"
               size="sm"
               disabled={saving}
-              onClick={() => void repairBookingPack()}
+              onClick={() =>
+                void repairBookingPack()
+              }
             >
               Generate / repair booking pack
             </AdminButton>
           </div>
         ) : null}
-        <div className="crm-commercial-grid">
+
+        <div className="crm-commercial-grid crm-job-commercial-summary-list">
           {commercialInvoice ? (
             <Link
-              className="crm-commercial-card crm-commercial-card--link"
+              className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row"
               to={`/admin/crm/jobs/${job.id}/invoices/${commercialInvoice.id}`}
               aria-label={`Open invoice ${commercialInvoice.reference}`}
             >
@@ -2208,30 +2296,16 @@ export function CRMJob() {
                 <FileText />
               </span>
 
-              <div className="crm-commercial-card__body">
-                <div className="crm-commercial-card__heading">
-                  <p>Invoice</p>
-
-                  <AdminStatus
-                    tone={
-                      commercialInvoice.status === "paid"
-                        ? "success"
-                        : commercialInvoice.status === "void"
-                          ? "danger"
-                          : commercialInvoice.status === "part_paid"
-                            ? "info"
-                            : "warning"
-                    }
-                  >
-                    {commercialInvoice.status.replace(/_/g, " ")}
-                  </AdminStatus>
-                </div>
+              <div className="crm-commercial-card__body crm-commercial-summary-row__copy">
+                <p>
+                  Invoice
+                </p>
 
                 <strong>
                   {commercialInvoice.reference}
                 </strong>
 
-                <dl className="crm-commercial-card__metrics">
+                <dl className="crm-commercial-card__metrics crm-commercial-summary-metrics">
                   <div>
                     <dt>Total</dt>
                     <dd>
@@ -2264,8 +2338,10 @@ export function CRMJob() {
                 </dl>
 
                 {commercialInvoice.nextPayment ? (
-                  <div className="crm-commercial-card__next">
-                    <span>Next payment</span>
+                  <div className="crm-commercial-card__next crm-commercial-summary-next">
+                    <span>
+                      Next payment
+                    </span>
 
                     <strong>
                       {commercialInvoice.nextPayment.label}
@@ -2284,17 +2360,12 @@ export function CRMJob() {
                         : "No due date set"}
                     </small>
 
-                    <AdminStatus
-                      tone={
-                        commercialInvoice.nextPayment.status === "overdue"
-                          ? "danger"
-                          : commercialInvoice.nextPayment.status === "part_paid"
-                            ? "info"
-                            : "warning"
-                      }
-                    >
-                      {commercialInvoice.nextPayment.status.replace(/_/g, " ")}
-                    </AdminStatus>
+                    <small>
+                      {commercialInvoice.nextPayment.status.replace(
+                        /_/g,
+                        " ",
+                      )}
+                    </small>
                   </div>
                 ) : (
                   <small className="crm-commercial-card__note">
@@ -2306,6 +2377,17 @@ export function CRMJob() {
               </div>
 
               <span
+                className={
+                  `crm-commercial-summary-state is-${commercialInvoice.status}`
+                }
+              >
+                {commercialInvoice.status.replace(
+                  /_/g,
+                  " ",
+                )}
+              </span>
+
+              <span
                 className="crm-commercial-card__open"
                 aria-hidden="true"
               >
@@ -2313,154 +2395,446 @@ export function CRMJob() {
               </span>
             </Link>
           ) : (
-            <article className="crm-commercial-card">
+            <article className="crm-commercial-card crm-commercial-summary-row">
               <span className="crm-commercial-card__icon">
                 <FileText />
               </span>
 
-              <div className="crm-commercial-card__body">
-                <div className="crm-commercial-card__heading">
-                  <p>Invoice</p>
-                  <AdminStatus tone="neutral">
-                    not generated
-                  </AdminStatus>
-                </div>
+              <div className="crm-commercial-card__body crm-commercial-summary-row__copy">
+                <p>
+                  Invoice
+                </p>
 
                 <strong>
                   No invoice yet
                 </strong>
 
                 <small className="crm-commercial-card__note">
-                  An accepted quote can generate the booking invoice automatically from its immutable commercial snapshot.
+                  Not generated
                 </small>
               </div>
+
+              <span className="crm-commercial-summary-state">
+                not generated
+              </span>
             </article>
           )}
-          <article className="crm-commercial-card">
-            <span className="crm-commercial-card__icon"><BookOpen /></span>
-            <div className="crm-commercial-card__body">
-              <div className="crm-commercial-card__heading">
-                <p>Contract</p>
-                {commercialContract
-                  ? <AdminStatus tone={commercialContract.status === "signed" ? "success" : commercialContract.status === "void" ? "danger" : commercialContract.status === "sent" || commercialContract.status === "viewed" ? "info" : "warning"}>{commercialContract.status.replace(/_/g, " ")}</AdminStatus>
-                  : <AdminStatus tone="neutral">not generated</AdminStatus>}
-              </div>
-              <strong>{commercialContract?.reference || "No contract yet"}</strong>
-              {commercialContract ? <>
-                <small className="crm-commercial-card__note">{commercialContract.title}</small>
-                <dl className="crm-commercial-card__metrics crm-commercial-card__metrics--two">
-                  <div><dt>Signatures</dt><dd>{commercialContract.signatureCount} / {commercialContract.requiredSignatures}</dd></div>
-                  <div><dt>Version</dt><dd>{commercialContract.versionNumber || "—"}</dd></div>
-                </dl>
-                <small className="crm-commercial-card__note">{commercialContract.signedAt ? `Signed ${dateLabel(commercialContract.signedAt)}` : commercialContract.sentAt ? `Sent ${dateLabel(commercialContract.sentAt)}` : "Draft document"}</small>
-              </> : <small className="crm-commercial-card__note">A contract is generated only when this workspace has an active default contract template configured.</small>}
+
+          <article className="crm-commercial-card crm-commercial-summary-row">
+            <span className="crm-commercial-card__icon">
+              <BookOpen />
+            </span>
+
+            <div className="crm-commercial-card__body crm-commercial-summary-row__copy">
+              <p>
+                Contract
+              </p>
+
+              <strong>
+                {commercialContract?.reference
+                  || "No contract yet"}
+              </strong>
+
+              {commercialContract ? (
+                <>
+                  <small className="crm-commercial-card__note">
+                    {commercialContract.title}
+                    {commercialContract.signedAt
+                      ? ` · Signed ${dateLabel(
+                          commercialContract.signedAt,
+                        )}`
+                      : commercialContract.sentAt
+                        ? ` · Sent ${dateLabel(
+                            commercialContract.sentAt,
+                          )}`
+                        : " · Draft document"}
+                  </small>
+
+                  <dl className="crm-commercial-card__metrics crm-commercial-card__metrics--two crm-commercial-summary-metrics">
+                    <div>
+                      <dt>
+                        Signatures
+                      </dt>
+
+                      <dd>
+                        {commercialContract.signatureCount}
+                        {" / "}
+                        {commercialContract.requiredSignatures}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        Version
+                      </dt>
+
+                      <dd>
+                        {commercialContract.versionNumber
+                          || "—"}
+                      </dd>
+                    </div>
+                  </dl>
+                </>
+              ) : (
+                <small className="crm-commercial-card__note">
+                  Not generated
+                </small>
+              )}
             </div>
+
+            <span
+              className={
+                `crm-commercial-summary-state ${
+                  commercialContract
+                    ? `is-${commercialContract.status}`
+                    : ""
+                }`
+              }
+            >
+              {commercialContract
+                ? commercialContract.status.replace(
+                    /_/g,
+                    " ",
+                  )
+                : "not generated"}
+            </span>
+
             {commercialContract?.status === "draft" ? (
-              portal.status === "not_invited"
-                ? <small className="crm-commercial-card__note">Invite a client to the Client Portal before sending this draft contract.</small>
-                : canManageCommercial
-                  ? <AdminButton
-                      variant="primary"
-                      size="sm"
-                      disabled={saving}
-                      onClick={() => void sendContractToPortal(commercialContract.id)}
-                    >
-                      Send to Client Portal
-                    </AdminButton>
-                  : <small className="crm-commercial-card__note">This draft is read-only in the current session.</small>
+              portal.status === "not_invited" ? (
+                <small className="crm-commercial-summary-row__hint">
+                  Invite client first
+                </small>
+              ) : canManageCommercial ? (
+                <AdminIconButton
+                  icon={Mail}
+                  label="Send to Client Portal"
+                  variant="secondary"
+                  floatingTooltip
+                  disabled={saving}
+                  onClick={() =>
+                    void sendContractToPortal(
+                      commercialContract.id,
+                    )
+                  }
+                />
+              ) : (
+                <small className="crm-commercial-summary-row__hint">
+                  Read-only
+                </small>
+              )
             ) : null}
           </article>
 
-          <article className="crm-commercial-card">
-            <span className="crm-commercial-card__icon"><ClipboardList /></span>
-            <div className="crm-commercial-card__body">
-              <div className="crm-commercial-card__heading">
-                <p>Questionnaire</p>
-                {bookingQuestionnaire
-                  ? <AdminStatus tone={statusTone(bookingQuestionnaire.status)}>{bookingQuestionnaire.status.replace(/_/g, " ")}</AdminStatus>
-                  : <AdminStatus tone="neutral">not assigned</AdminStatus>}
-              </div>
-              <strong>{bookingQuestionnaire?.title || "No booking questionnaire"}</strong>
-              <small className="crm-commercial-card__note">{bookingQuestionnaire
-                ? bookingQuestionnaire.dueAt
-                  ? `Due ${dateLabel(bookingQuestionnaire.dueAt)}`
-                  : "Assigned with no due date"
-                : "Automatic assignment remains off until a default questionnaire is configured and enabled."}</small>
-            </div>
-            <a className="admin-button admin-button--secondary admin-button--sm" href="#job-questionnaires">Manage</a>
-          </article>
+          <a
+            className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row"
+            href="#job-questionnaires"
+            aria-label="Open Questionnaire management"
+          >
+            <span className="crm-commercial-card__icon">
+              <ClipboardList />
+            </span>
 
-          <article className="crm-commercial-card">
-            <span className="crm-commercial-card__icon"><PackageCheck /></span>
-            <div className="crm-commercial-card__body">
-              <div className="crm-commercial-card__heading">
-                <p>Accepted quote</p>
-                {commercialQuote
-                  ? <AdminStatus tone="success">accepted</AdminStatus>
-                  : <AdminStatus tone="neutral">not linked</AdminStatus>}
-              </div>
-              <strong>{commercialQuote?.reference || job.quoteReference || "No accepted quote"}</strong>
-              {commercialQuote ? <>
-                <small className="crm-commercial-card__note">{commercialQuote.packageName || job.packageName || "Booked package"}</small>
-                <dl className="crm-commercial-card__metrics crm-commercial-card__metrics--two">
-                  <div><dt>Total</dt><dd>{money(commercialQuote.totalAmount, commercialQuote.currency)}</dd></div>
-                  <div><dt>Accepted</dt><dd>{commercialQuote.acceptedAt ? dateLabel(commercialQuote.acceptedAt) : "—"}</dd></div>
-                </dl>
-              </> : <small className="crm-commercial-card__note">This Job does not currently have an accepted quote snapshot attached.</small>}
+            <div className="crm-commercial-card__body crm-commercial-summary-row__copy">
+              <p>
+                Questionnaire
+              </p>
+
+              <strong>
+                {bookingQuestionnaire?.title
+                  || "No booking questionnaire"}
+              </strong>
+
+              <small className="crm-commercial-card__note">
+                {bookingQuestionnaire
+                  ? bookingQuestionnaire.dueAt
+                    ? `Planning target ${dateLabel(
+                        bookingQuestionnaire.dueAt,
+                      )}`
+                    : "Assigned with no due date"
+                  : "Not assigned"}
+              </small>
             </div>
-            {commercialQuote ? <Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/crm/quotes/${commercialQuote.id}`}>Open quote</Link> : null}
-          </article>
+
+            <span
+              className={
+                `crm-commercial-summary-state ${
+                  bookingQuestionnaire
+                    ? `is-${bookingQuestionnaire.status}`
+                    : ""
+                }`
+              }
+            >
+              {bookingQuestionnaire
+                ? bookingQuestionnaire.status.replace(
+                    /_/g,
+                    " ",
+                  )
+                : "not assigned"}
+            </span>
+
+            <span
+              className="crm-commercial-card__open"
+              aria-hidden="true"
+            >
+              <ExternalLink />
+            </span>
+          </a>
+
+          {commercialQuote ? (
+            <Link
+              className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row"
+              to={`/admin/crm/quotes/${commercialQuote.id}`}
+              aria-label={`Open accepted quote ${commercialQuote.reference}`}
+            >
+              <span className="crm-commercial-card__icon">
+                <PackageCheck />
+              </span>
+
+              <div className="crm-commercial-card__body crm-commercial-summary-row__copy">
+                <p>
+                  Accepted quote
+                </p>
+
+                <strong>
+                  {commercialQuote.reference}
+                </strong>
+
+                <small className="crm-commercial-card__note">
+                  {commercialQuote.packageName
+                    || job.packageName
+                    || "Booked package"}
+                </small>
+
+                <dl className="crm-commercial-card__metrics crm-commercial-card__metrics--two crm-commercial-summary-metrics">
+                  <div>
+                    <dt>
+                      Total
+                    </dt>
+
+                    <dd>
+                      {money(
+                        commercialQuote.totalAmount,
+                        commercialQuote.currency,
+                      )}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Accepted
+                    </dt>
+
+                    <dd>
+                      {commercialQuote.acceptedAt
+                        ? dateLabel(
+                            commercialQuote.acceptedAt,
+                          )
+                        : "—"}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+
+              <span className="crm-commercial-summary-state is-accepted">
+                accepted
+              </span>
+
+              <span
+                className="crm-commercial-card__open"
+                aria-hidden="true"
+              >
+                <ExternalLink />
+              </span>
+            </Link>
+          ) : (
+            <article className="crm-commercial-card crm-commercial-summary-row">
+              <span className="crm-commercial-card__icon">
+                <PackageCheck />
+              </span>
+
+              <div className="crm-commercial-card__body crm-commercial-summary-row__copy">
+                <p>
+                  Accepted quote
+                </p>
+
+                <strong>
+                  {job.quoteReference
+                    || "No accepted quote"}
+                </strong>
+
+                <small className="crm-commercial-card__note">
+                  This Job does not currently have an accepted quote snapshot attached.
+                </small>
+              </div>
+
+              <span className="crm-commercial-summary-state">
+                not linked
+              </span>
+            </article>
+          )}
         </div>
       </AdminPanel>
         </div>
         <div className="crm-job-summary-grid__column crm-job-summary-grid__column--delivery">
 <AdminPanel
         title="Wedding delivery and content"
-        description="The CRM Job is the booking source. Its linked Wedding Workspace feeds private delivery and Website content without duplicate uploads."
         icon={LayoutDashboard}
         className="crm-wedding-lifecycle-panel"
       >
         <div className="crm-wedding-lifecycle-grid">
           <article className="crm-wedding-lifecycle-card">
-            <span className="crm-wedding-lifecycle-card__icon"><LayoutDashboard /></span>
-            <div><p>Wedding Workspace</p><strong>{lifecycle.wedding.exists ? "Ready" : "Not linked"}</strong><small>{lifecycle.wedding.exists ? `${lifecycle.wedding.couple || lifecycle.wedding.title} · ${lifecycle.wedding.venue || "Venue TBC"}` : "A booked wedding should have one shared operational workspace."}</small></div>
-            {lifecycle.wedding.exists ? <Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/weddings/${lifecycle.wedding.slug}/workspace`}>Open</Link> : <AdminStatus tone="danger">review</AdminStatus>}
+            <span className="crm-wedding-lifecycle-card__icon">
+              <LayoutDashboard />
+            </span>
+
+            <div>
+              <p>
+                Wedding Workspace
+              </p>
+
+              <strong>
+                {lifecycle.wedding.exists
+                  ? "Ready"
+                  : "Not linked"}
+              </strong>
+            </div>
+
+            {lifecycle.wedding.exists ? (
+              <Link
+                className="admin-button admin-button--secondary admin-button--sm"
+                to={`/admin/weddings/${lifecycle.wedding.slug}/workspace`}
+              >
+                Open
+              </Link>
+            ) : (
+              <AdminStatus tone="danger">
+                review
+              </AdminStatus>
+            )}
           </article>
 
           <article className="crm-wedding-lifecycle-card">
-            <span className="crm-wedding-lifecycle-card__icon"><Images /></span>
-            <div><p>Wedding assets</p><strong>{lifecycle.wedding.assetCount} photographs</strong><small>{lifecycle.wedding.previewCount} selected for the Wedding Day Preview Set.</small></div>
-            {lifecycle.wedding.exists ? <Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/weddings/${lifecycle.wedding.slug}/workspace#preview-upload`}>Manage</Link> : null}
+            <span className="crm-wedding-lifecycle-card__icon">
+              <Images />
+            </span>
+
+            <div>
+              <p>
+                Wedding assets
+              </p>
+
+              <strong>
+                {lifecycle.wedding.assetCount}
+                {" "}
+                photographs
+              </strong>
+            </div>
+
+            {lifecycle.wedding.exists ? (
+              <Link
+                className="admin-button admin-button--secondary admin-button--sm"
+                to={`/admin/weddings/${lifecycle.wedding.slug}/workspace#preview-upload`}
+              >
+                Manage
+              </Link>
+            ) : null}
           </article>
 
           <article className="crm-wedding-lifecycle-card">
-            <span className="crm-wedding-lifecycle-card__icon"><Images /></span>
-            <div><p>Client Gallery</p><strong>{primaryGallery ? primaryGallery.title : "Not created"}</strong><small>{primaryGallery ? `${primaryGallery.status} · ${lifecycle.clientGalleries.length} linked gallery${lifecycle.clientGalleries.length === 1 ? "" : "s"}` : "Create a private gallery prefilled from this Job."}</small></div>
-            {primaryGallery ? <Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/client-galleries/${primaryGallery.id}`}>Open</Link> : <AdminButton variant="primary" size="sm" icon={Plus} disabled={saving || !canManage || !lifecycle.wedding.exists} onClick={() => void createClientGalleryFromJob()}>Create</AdminButton>}
+            <span className="crm-wedding-lifecycle-card__icon">
+              <Images />
+            </span>
+
+            <div>
+              <p>
+                Client Gallery
+              </p>
+
+              <strong>
+                {primaryGallery
+                  ? primaryGallery.title
+                  : "Not created"}
+              </strong>
+            </div>
+
+            {primaryGallery ? (
+              <Link
+                className="admin-button admin-button--secondary admin-button--sm"
+                to={`/admin/client-galleries/${primaryGallery.id}`}
+              >
+                Open
+              </Link>
+            ) : (
+              <AdminButton
+                variant="primary"
+                size="sm"
+                icon={Plus}
+                disabled={
+                  saving
+                  || !canManage
+                  || !lifecycle.wedding.exists
+                }
+                onClick={() =>
+                  void createClientGalleryFromJob()
+                }
+              >
+                Create
+              </AdminButton>
+            )}
           </article>
 
           <article className="crm-wedding-lifecycle-card">
-            <span className="crm-wedding-lifecycle-card__icon"><LockKeyhole /></span>
-            <div><p>Client portal</p><strong>{portal.label}</strong><small>{workspace.portalAccess.filter((item) => item.status === "active").length} active access record{workspace.portalAccess.filter((item) => item.status === "active").length === 1 ? "" : "s"}.</small></div>
-            <a className="admin-button admin-button--secondary admin-button--sm" href="#job-clients">Manage</a>
+            <span className="crm-wedding-lifecycle-card__icon">
+              <BookOpen />
+            </span>
+
+            <div>
+              <p>
+                Wedding Story
+              </p>
+
+              <strong>
+                {storyLabel}
+              </strong>
+            </div>
+
+            {lifecycle.wedding.exists ? (
+              <Link
+                className="admin-button admin-button--secondary admin-button--sm"
+                to={`/admin/weddings/${lifecycle.wedding.slug}/content`}
+              >
+                {lifecycle.story.state === "not_started"
+                  ? "Start"
+                  : "Edit"}
+              </Link>
+            ) : null}
           </article>
 
           <article className="crm-wedding-lifecycle-card">
-            <span className="crm-wedding-lifecycle-card__icon"><ClipboardList /></span>
-            <div><p>Questionnaires</p><strong>{workspace.questionnaires.length ? `${completedQuestionnaires} of ${workspace.questionnaires.length} complete` : "None assigned"}</strong><small>Responses and uploads stay attached to this Job.</small></div>
-            <a className="admin-button admin-button--secondary admin-button--sm" href="#job-questionnaires">Manage</a>
-          </article>
+            <span className="crm-wedding-lifecycle-card__icon">
+              <Globe2 />
+            </span>
 
-          <article className="crm-wedding-lifecycle-card">
-            <span className="crm-wedding-lifecycle-card__icon"><BookOpen /></span>
-            <div><p>Wedding Story</p><strong>{storyLabel}</strong><small>{lifecycle.story.state === "published" ? `${lifecycle.story.publishedImageCount} published story images.` : `${lifecycle.story.draftImageCount} draft story images.`}</small></div>
-            {lifecycle.wedding.exists ? <Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/weddings/${lifecycle.wedding.slug}/content`}>{lifecycle.story.state === "not_started" ? "Start" : "Edit"}</Link> : null}
-          </article>
+            <div>
+              <p>
+                Website galleries
+              </p>
 
-          <article className="crm-wedding-lifecycle-card">
-            <span className="crm-wedding-lifecycle-card__icon"><Globe2 /></span>
-            <div><p>Website galleries</p><strong>{lifecycle.publicAssignments.total} assignments</strong><small>{lifecycle.publicAssignments.venue} venue · {lifecycle.publicAssignments.moments} moments · {lifecycle.publicAssignments.galleries} collections.</small></div>
-            {lifecycle.wedding.exists ? <Link className="admin-button admin-button--secondary admin-button--sm" to={`/admin/weddings/${lifecycle.wedding.slug}/workspace#publishing-destinations`}>Manage</Link> : null}
+              <strong>
+                {lifecycle.publicAssignments.total}
+                {" "}
+                assignments
+              </strong>
+            </div>
+
+            {lifecycle.wedding.exists ? (
+              <Link
+                className="admin-button admin-button--secondary admin-button--sm"
+                to={`/admin/weddings/${lifecycle.wedding.slug}/workspace#publishing-destinations`}
+              >
+                Manage
+              </Link>
+            ) : null}
           </article>
         </div>
       </AdminPanel>

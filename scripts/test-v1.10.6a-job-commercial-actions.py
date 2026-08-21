@@ -134,8 +134,9 @@ def main() -> None:
         "repairCrmBookingPack",
         "sendCrmContractToPortal",
         "No email was sent.",
-        "Invite a client to the Client Portal "
-        "before sending this draft contract.",
+        'commercialContract?.status === "draft"',
+        'portal.status === "not_invited"',
+        "Invite client first",
     ):
         assert token in job, token
 

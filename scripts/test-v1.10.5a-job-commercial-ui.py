@@ -77,26 +77,49 @@ def main() -> None:
     ):
         assert token in types, token
 
-    # Compact commercial summary sits on the Job without duplicating
-    # the existing detailed quote/questionnaire sections.
+    # v1.10.12a keeps the commercial read model on the Job but
+    # presents it as compact operational summary rows. Assert the
+    # semantic data and real destinations rather than JSX whitespace.
     assert 'title="Booking and payments"' in job
+    assert "crm-job-commercial-summary-list" in job
+    assert "crm-commercial-summary-row" in job
+
     for label in (
-        ">Invoice<",
-        ">Contract<",
-        ">Questionnaire<",
-        ">Accepted quote<",
-        ">Total<",
-        ">Paid<",
-        ">Balance<",
-        ">Next payment<",
+        "Invoice",
+        "Contract",
+        "Questionnaire",
+        "Accepted quote",
+        "Total",
+        "Paid",
+        "Balance",
+        "Next payment",
     ):
         assert label in job, label
 
+    # Invoice summary and dedicated Invoice Admin destination.
+    assert "commercialInvoice.totalAmount" in job
+    assert "commercialInvoice.paidAmount" in job
+    assert "commercialInvoice.balanceAmount" in job
     assert "commercialInvoice.nextPayment" in job
+    assert (
+        'to={`/admin/crm/jobs/${job.id}/invoices/${commercialInvoice.id}`}'
+        in job
+    )
+
+    # Contract signature progress and real Client Portal action remain.
     assert "commercialContract.signatureCount" in job
     assert "commercialContract.requiredSignatures" in job
-    assert "commercialQuote.totalAmount" in job
+    assert "commercialContract.versionNumber" in job
+    assert "sendContractToPortal(" in job
+    assert "commercialContract.id" in job
+    assert "Send to Client Portal" in job
+
+    # Questionnaire shortcut still targets the authoritative lower editor.
     assert 'href="#job-questionnaires"' in job
+    assert 'id="job-questionnaires"' in job
+
+    # Accepted quote retains its immutable commercial summary and route.
+    assert "commercialQuote.totalAmount" in job
     assert (
         "to={`/admin/crm/quotes/${commercialQuote.id}`}"
         in job

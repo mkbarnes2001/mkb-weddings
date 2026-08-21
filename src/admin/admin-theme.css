@@ -13460,3 +13460,404 @@ small {
     gap: 10px;
   }
 }
+
+
+/* v1.10.12a — final compact Job dashboard refinement */
+
+.crm-wedding-workflow-panel .admin-panel__body,
+.crm-job-clients-panel .admin-panel__body,
+.crm-commercial-panel .admin-panel__body,
+.crm-wedding-lifecycle-panel .admin-panel__body {
+  padding: 10px 12px;
+}
+
+.crm-job-panel-count {
+  color: var(--admin-muted);
+  font-size: calc(
+    9px * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 650;
+}
+
+.crm-job-clients {
+  display: grid;
+  gap: 7px;
+}
+
+.crm-job-clients > article {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
+  align-items: center;
+  gap: 12px;
+  border:
+    1px solid
+    var(--admin-border);
+  border-radius: 9px;
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  padding: 9px 10px;
+}
+
+.crm-job-client-copy {
+  min-width: 0;
+}
+
+.crm-job-client-copy > strong {
+  display: block;
+  font-size: calc(
+    10.5px * var(--admin-font-scale-effective, 1)
+  );
+}
+
+.crm-job-client-copy > p {
+  margin: 2px 0 4px;
+}
+
+.crm-job-client-copy > a,
+.crm-job-client-copy > span {
+  width: fit-content;
+}
+
+.crm-job-client-portal-state {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  color: var(--admin-muted) !important;
+  font-size: calc(
+    8.5px * var(--admin-font-scale-effective, 1)
+  );
+}
+
+.crm-job-client-portal-state > span {
+  display: block !important;
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 999px;
+  background: #a3a3a3;
+}
+
+.crm-job-client-portal-state.is-active > span {
+  background: #16a34a;
+}
+
+.crm-job-client-portal-state.is-invited > span {
+  background: #d97706;
+}
+
+.crm-job-client-portal-state.is-email-required > span {
+  background: #dc2626;
+}
+
+.crm-job-client-portal-state small {
+  color: inherit;
+  font: inherit;
+}
+
+.crm-job-client-actions {
+  display: flex;
+  max-width: none;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.crm-job-client-actions
+:is(
+  .admin-icon-control,
+  .admin-icon-button
+) {
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
+  padding: 0;
+}
+
+.crm-job-client-actions
+.admin-icon-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crm-job-client-actions
+.admin-icon-control svg {
+  width: 14px;
+  height: 14px;
+}
+
+.crm-booking-pack-repair {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 7px;
+  border:
+    1px solid
+    var(--admin-border);
+  border-radius: 9px;
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  padding: 7px 9px;
+}
+
+.crm-booking-pack-repair small {
+  color: var(--admin-muted);
+  font-size: calc(
+    8.5px * var(--admin-font-scale-effective, 1)
+  );
+  line-height: 1.4;
+}
+
+.crm-commercial-grid.crm-job-commercial-summary-list {
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+.crm-commercial-card.crm-commercial-summary-row {
+  display: grid;
+  grid-template-columns:
+    30px
+    minmax(0, 1fr)
+    auto
+    24px;
+  align-items: center;
+  gap: 8px;
+  min-height: 50px;
+  border-radius: 9px;
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  padding: 7px 9px;
+}
+
+.crm-commercial-summary-row
+.crm-commercial-card__icon {
+  width: 28px;
+  height: 28px;
+}
+
+.crm-commercial-summary-row__copy {
+  min-width: 0;
+}
+
+.crm-commercial-summary-row__copy > p {
+  margin: 0;
+  color: #8a8a8a;
+  font-size: calc(
+    7.5px * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.crm-commercial-summary-row__copy > strong {
+  display: block;
+  margin-top: 1px;
+  overflow: hidden;
+  font-size: calc(
+    9.5px * var(--admin-font-scale-effective, 1)
+  );
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-commercial-summary-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 10px;
+  margin: 3px 0 0;
+}
+
+.crm-commercial-summary-metrics > div {
+  display: flex;
+  gap: 4px;
+}
+
+.crm-commercial-summary-metrics dt,
+.crm-commercial-summary-metrics dd,
+.crm-commercial-summary-row__copy > small {
+  margin: 0;
+  font-size: calc(
+    8px * var(--admin-font-scale-effective, 1)
+  );
+  line-height: 1.35;
+}
+
+.crm-commercial-summary-metrics dt,
+.crm-commercial-summary-row__copy > small {
+  color: var(--admin-muted);
+}
+
+.crm-commercial-summary-metrics dd {
+  color: #333;
+  font-weight: 600;
+}
+
+.crm-commercial-summary-next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px 6px;
+  margin: 3px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.crm-commercial-summary-next span,
+.crm-commercial-summary-next strong,
+.crm-commercial-summary-next small {
+  margin: 0;
+  font-size: calc(
+    8px * var(--admin-font-scale-effective, 1)
+  );
+  line-height: 1.35;
+}
+
+.crm-commercial-summary-next span,
+.crm-commercial-summary-next small {
+  color: var(--admin-muted);
+}
+
+.crm-commercial-summary-next strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.crm-commercial-summary-state {
+  color: var(--admin-muted);
+  font-size: calc(
+    8px * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 650;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.crm-commercial-summary-state:is(
+  .is-paid,
+  .is-signed,
+  .is-completed,
+  .is-accepted
+) {
+  color: #167344;
+}
+
+.crm-commercial-summary-state:is(
+  .is-issued,
+  .is-draft,
+  .is-sent,
+  .is-viewed,
+  .is-in_progress,
+  .is-part_paid
+) {
+  color: #a15c00;
+}
+
+.crm-commercial-summary-state:is(
+  .is-overdue,
+  .is-void
+) {
+  color: #b42318;
+}
+
+.crm-commercial-summary-row__hint {
+  color: var(--admin-muted);
+  font-size: calc(
+    8px * var(--admin-font-scale-effective, 1)
+  );
+  white-space: nowrap;
+}
+
+.crm-commercial-summary-row.crm-commercial-card--link:hover {
+  border-color:
+    var(--admin-border-strong);
+  transform: none;
+}
+
+.crm-wedding-lifecycle-grid {
+  gap: 7px;
+}
+
+.crm-wedding-lifecycle-card {
+  min-height: 49px;
+  border-radius: 9px;
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  padding: 8px 9px;
+}
+
+.crm-wedding-lifecycle-card p {
+  margin-bottom: 1px;
+}
+
+.crm-wedding-lifecycle-card
+.admin-button {
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .crm-job-clients > article {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-job-client-actions {
+    justify-content: flex-start;
+  }
+
+  .crm-booking-pack-repair {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .crm-booking-pack-repair
+  .admin-button {
+    width: 100%;
+  }
+
+  .crm-commercial-card.crm-commercial-summary-row {
+    grid-template-columns:
+      28px
+      minmax(0, 1fr)
+      24px;
+  }
+
+  .crm-commercial-summary-state {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .crm-commercial-summary-row
+  > :is(
+    .crm-commercial-card__open,
+    .admin-icon-button
+  ) {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+
+  .crm-commercial-summary-row__hint {
+    grid-column: 2;
+  }
+}

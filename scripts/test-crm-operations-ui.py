@@ -71,7 +71,11 @@ def main() -> None:
     # portal.status === "active" in the Job workspace JSX.
     assert "activeAccess.some((item) => Boolean(item.acceptedAt))" in job
     assert 'status: "active", label: "active"' in job
-    assert "portal.label" in job
+    # v1.10.12a moves the visible portal state into the
+    # Clients panel while retaining portal.status for real
+    # commercial prerequisites such as contract delivery.
+    assert "Client portal · {portalLabel}" in job
+    assert 'portal.status === "not_invited"' in job
     assert 'job.clientPortalStatus.replace' not in job
     assert 'title="Invoices"' not in job
     assert 'title="Contracts"' not in job

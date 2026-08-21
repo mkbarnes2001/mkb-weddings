@@ -66,15 +66,16 @@ def main() -> None:
         "Wedding Workspace",
         "Wedding assets",
         "Client Gallery",
-        "Client portal",
-        "Questionnaires",
         "Wedding Story",
         "Website galleries",
     ]:
         assert label in job_page, label
     assert "primaryClientGallery" in job_page
     assert "publicAssignments.total" in job_page
-    assert 'href="#job-clients"' in job_page
+    assert 'id="job-clients"' in job_page
+    assert 'title="Clients"' in job_page
+    assert "Client portal · {portalLabel}" in job_page
+    assert 'id="job-questionnaires"' in job_page
     assert 'href="#job-questionnaires"' in job_page
 
     # Wedding Workspace retains a direct operational action to its CRM Job
