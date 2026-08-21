@@ -110,7 +110,10 @@ def main() -> None:
     assert 'parts[0] === "workflows"' in route
     assert 'parts[2] === "communications"' in route
     assert "sendLeadAutoresponder" in public_route
-    assert "Acknowledgement subject" in overview and "Leads overview" in overview and "Task overview" in overview
+    # v1.10.12a compacts the acknowledgement UI; verify the
+    # actual setting binding rather than the old display label.
+    assert "draft.autoresponderSubject" in overview
+    assert "Leads overview" in overview and "Task overview" in overview
     # v1.10.12a replaces the generic Job task accordion and
     # horizontal progress strip with the compact Wedding Photography
     # workflow while retaining communication operations.

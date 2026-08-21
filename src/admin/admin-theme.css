@@ -15182,3 +15182,264 @@ small {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* v1.10.12a — compact Lead Form settings */
+
+.crm-lead-form-settings {
+  display: grid;
+  gap: 10px;
+}
+
+.crm-lead-form-settings__switches {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.crm-lead-form-settings__switch {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  border:
+    1px solid
+    var(--admin-border);
+  border-radius:
+    var(--admin-radius-sm);
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  padding: 9px 10px;
+}
+
+.crm-lead-form-settings__switch
+input {
+  flex: 0 0 auto;
+}
+
+.crm-lead-form-settings__switch
+span {
+  min-width: 0;
+}
+
+.crm-lead-form-settings__switch
+strong,
+.crm-lead-form-settings__switch
+small {
+  display: block;
+}
+
+.crm-lead-form-settings__switch
+strong {
+  color: #262626;
+  font-size:
+    calc(
+      9.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-lead-form-settings__switch
+small {
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-lead-form-settings__core,
+.crm-lead-form-settings__section-body {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 9px 10px;
+}
+
+.crm-lead-form-settings__wide {
+  grid-column: 1 / -1;
+}
+
+.crm-lead-form-settings__textarea {
+  min-height: 58px;
+}
+
+.crm-lead-form-settings__section {
+  overflow: hidden;
+  border:
+    1px solid
+    var(--admin-border);
+  border-radius:
+    var(--admin-radius-sm);
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+}
+
+.crm-lead-form-settings__section
+> summary {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+  padding: 8px 10px;
+}
+
+.crm-lead-form-settings__section
+> summary::-webkit-details-marker {
+  display: none;
+}
+
+.crm-lead-form-settings__section
+> summary
+> span:first-child {
+  min-width: 0;
+}
+
+.crm-lead-form-settings__section
+> summary
+strong,
+.crm-lead-form-settings__section
+> summary
+small {
+  display: block;
+}
+
+.crm-lead-form-settings__section
+> summary
+strong {
+  color: #262626;
+  font-size:
+    calc(
+      9.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-lead-form-settings__section
+> summary
+small {
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-lead-form-settings__section
+> summary
+> span:last-child {
+  flex: 0 0 auto;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  font-weight: 650;
+}
+
+.crm-lead-form-settings__section
+> summary
+> span:last-child.is-active {
+  color: #167344;
+}
+
+.crm-lead-form-settings__section-body {
+  border-top:
+    1px solid
+    var(--admin-border);
+  padding: 10px;
+}
+
+.crm-lead-form-settings__inline-flag {
+  display: flex;
+  min-height: var(--admin-control-height);
+  align-items: center;
+  gap: 8px;
+  border:
+    1px solid
+    var(--admin-border);
+  border-radius:
+    var(--admin-radius-sm);
+  padding: 7px 9px;
+}
+
+.crm-lead-form-settings__inline-flag
+span {
+  min-width: 0;
+}
+
+.crm-lead-form-settings__inline-flag
+strong,
+.crm-lead-form-settings__inline-flag
+small {
+  display: block;
+}
+
+.crm-lead-form-settings__inline-flag
+strong {
+  font-size:
+    calc(
+      8.8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-lead-form-settings__inline-flag
+small {
+  margin-top: 1px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      7.7px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+
+@media (max-width: 760px) {
+  .crm-lead-form-settings__switches,
+  .crm-lead-form-settings__core,
+  .crm-lead-form-settings__section-body {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-lead-form-settings__wide {
+    grid-column: 1;
+  }
+}

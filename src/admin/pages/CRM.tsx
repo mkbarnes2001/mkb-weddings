@@ -1596,214 +1596,335 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
           </a>
         }
       >
-        <div className="grid gap-4 lg:grid-cols-2">
-          <label className="admin-choice-row">
-            <div>
-              <strong>Accept public enquiries</strong>
-              <p>
-                Disable this to make the endpoint unavailable
-                without deleting pipeline data.
-              </p>
+          <div className="crm-lead-form-settings">
+            <div className="crm-lead-form-settings__switches">
+              <label className="crm-lead-form-settings__switch">
+                <input
+                  type="checkbox"
+                  checked={draft.enabled}
+                  disabled={!canManage || saving}
+                  onChange={(event) =>
+                    setDraft(
+                      (current) => ({
+                        ...current,
+                        enabled:
+                          event.target.checked,
+                      }),
+                    )
+                  }
+                />
+
+                <span>
+                  <strong>
+                    Accept public enquiries
+                  </strong>
+
+                  <small>
+                    {draft.enabled
+                      ? "Public form active"
+                      : "Public form unavailable"}
+                  </small>
+                </span>
+              </label>
+
+              <label className="crm-lead-form-settings__switch">
+                <input
+                  type="checkbox"
+                  checked={
+                    draft.autoresponderEnabled
+                  }
+                  disabled={!canManage || saving}
+                  onChange={(event) =>
+                    setDraft(
+                      (current) => ({
+                        ...current,
+                        autoresponderEnabled:
+                          event.target.checked,
+                      }),
+                    )
+                  }
+                />
+
+                <span>
+                  <strong>
+                    Acknowledgement email
+                  </strong>
+
+                  <small>
+                    {draft.autoresponderEnabled
+                      ? "Automatic reply enabled"
+                      : "Automatic reply disabled"}
+                  </small>
+                </span>
+              </label>
             </div>
 
-            <input
-              type="checkbox"
-              checked={draft.enabled}
-              disabled={!canManage}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  enabled: event.target.checked,
-                }))
-              }
-            />
-          </label>
+            <div className="crm-lead-form-settings__core">
+              <AdminField label="Form title">
+                <input
+                  className="admin-input"
+                  value={draft.title}
+                  disabled={!canManage || saving}
+                  onChange={(event) =>
+                    setDraft(
+                      (current) => ({
+                        ...current,
+                        title:
+                          event.target.value,
+                      }),
+                    )
+                  }
+                />
+              </AdminField>
 
-          <AdminField label="Notification email">
-            <input
-              className="admin-input"
-              type="email"
-              value={draft.notificationEmail}
-              disabled={!canManage}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  notificationEmail:
-                    event.target.value,
-                }))
-              }
-            />
-          </AdminField>
+              <AdminField label="Default service">
+                <input
+                  className="admin-input"
+                  value={draft.defaultService}
+                  disabled={!canManage || saving}
+                  placeholder="Wedding photography"
+                  onChange={(event) =>
+                    setDraft(
+                      (current) => ({
+                        ...current,
+                        defaultService:
+                          event.target.value,
+                      }),
+                    )
+                  }
+                />
+              </AdminField>
 
-          <label className="admin-choice-row">
-            <div>
-              <strong>Send acknowledgement email</strong>
-              <p>
-                Automatically confirm receipt to the person
-                who submits the public form.
-              </p>
+              <AdminField label="Notification email">
+                <input
+                  className="admin-input"
+                  type="email"
+                  value={draft.notificationEmail}
+                  disabled={!canManage || saving}
+                  onChange={(event) =>
+                    setDraft(
+                      (current) => ({
+                        ...current,
+                        notificationEmail:
+                          event.target.value,
+                      }),
+                    )
+                  }
+                />
+              </AdminField>
+
+              <AdminField label="Public URL">
+                <input
+                  className="admin-input"
+                  value={
+                    draft.publicPath
+                    || "/enquire"
+                  }
+                  disabled
+                />
+              </AdminField>
+
+              <AdminField
+                label="Introduction"
+                className="crm-lead-form-settings__wide"
+              >
+                <textarea
+                  className="admin-textarea crm-lead-form-settings__textarea"
+                  rows={2}
+                  value={draft.intro}
+                  disabled={!canManage || saving}
+                  onChange={(event) =>
+                    setDraft(
+                      (current) => ({
+                        ...current,
+                        intro:
+                          event.target.value,
+                      }),
+                    )
+                  }
+                />
+              </AdminField>
             </div>
 
-            <input
-              type="checkbox"
-              checked={draft.autoresponderEnabled}
-              disabled={!canManage}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  autoresponderEnabled:
-                    event.target.checked,
-                }))
-              }
-            />
-          </label>
+            <details className="crm-lead-form-settings__section">
+              <summary>
+                <span>
+                  <strong>
+                    Acknowledgement email
+                  </strong>
 
-          <AdminField
-            label="Acknowledgement subject"
-            help="Variables: {{first_name}}, {{reference}}, {{business_name}}, {{event_date}}, {{venue}}"
-          >
-            <input
-              className="admin-input"
-              value={draft.autoresponderSubject}
-              disabled={
-                !canManage
-                || !draft.autoresponderEnabled
-              }
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  autoresponderSubject:
-                    event.target.value,
-                }))
-              }
-            />
-          </AdminField>
+                  <small>
+                    Subject and confirmation message
+                  </small>
+                </span>
 
-          <AdminField
-            label="Acknowledgement message"
-            help="Sent as plain, accessible email content. Variables shown above are supported."
-          >
-            <textarea
-              className="admin-textarea min-h-32"
-              value={draft.autoresponderMessage}
-              disabled={
-                !canManage
-                || !draft.autoresponderEnabled
-              }
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  autoresponderMessage:
-                    event.target.value,
-                }))
-              }
-            />
-          </AdminField>
+                <span
+                  className={
+                    draft.autoresponderEnabled
+                      ? "is-active"
+                      : ""
+                  }
+                >
+                  {draft.autoresponderEnabled
+                    ? "Enabled"
+                    : "Disabled"}
+                </span>
+              </summary>
 
-          <AdminField label="Form title">
-            <input
-              className="admin-input"
-              value={draft.title}
-              disabled={!canManage}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  title: event.target.value,
-                }))
-              }
-            />
-          </AdminField>
+              <div className="crm-lead-form-settings__section-body">
+                <AdminField label="Subject">
+                  <input
+                    className="admin-input"
+                    value={
+                      draft.autoresponderSubject
+                    }
+                    disabled={!canManage || saving}
+                    onChange={(event) =>
+                      setDraft(
+                        (current) => ({
+                          ...current,
+                          autoresponderSubject:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+                </AdminField>
 
-          <AdminField
-            label="Default service"
-            help="Copied into new website enquiries; leave blank for a neutral form."
-          >
-            <input
-              className="admin-input"
-              value={draft.defaultService}
-              disabled={!canManage}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  defaultService:
-                    event.target.value,
-                }))
-              }
-              placeholder="Wedding photography"
-            />
-          </AdminField>
+                <AdminField
+                  label="Message"
+                  className="crm-lead-form-settings__wide"
+                >
+                  <textarea
+                    className="admin-textarea"
+                    rows={3}
+                    value={
+                      draft.autoresponderMessage
+                    }
+                    disabled={!canManage || saving}
+                    onChange={(event) =>
+                      setDraft(
+                        (current) => ({
+                          ...current,
+                          autoresponderMessage:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+                </AdminField>
+              </div>
+            </details>
 
-          <AdminField
-            label="Public URL"
-            help="Custom form paths will be added with the hosted-site routing release."
-          >
-            <input
-              className="admin-input"
-              value="/enquire"
-              disabled
-            />
-          </AdminField>
+            <details className="crm-lead-form-settings__section">
+              <summary>
+                <span>
+                  <strong>
+                    Confirmation & privacy
+                  </strong>
 
-          <AdminField label="Introduction">
-            <textarea
-              className="admin-textarea"
-              value={draft.intro}
-              disabled={!canManage}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  intro: event.target.value,
-                }))
-              }
-            />
-          </AdminField>
+                  <small>
+                    Thank-you message and consent text
+                  </small>
+                </span>
 
-          <AdminField label="Privacy consent text">
-            <textarea
-              className="admin-textarea"
-              value={draft.privacyText}
-              disabled={!canManage}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  privacyText:
-                    event.target.value,
-                }))
-              }
-            />
-          </AdminField>
+                <span>
+                  Review
+                </span>
+              </summary>
 
-          <AdminField label="Thank-you heading">
-            <input
-              className="admin-input"
-              value={draft.thankYouTitle}
-              disabled={!canManage}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  thankYouTitle:
-                    event.target.value,
-                }))
-              }
-            />
-          </AdminField>
+              <div className="crm-lead-form-settings__section-body">
+                <AdminField label="Thank-you heading">
+                  <input
+                    className="admin-input"
+                    value={draft.thankYouTitle}
+                    disabled={!canManage || saving}
+                    onChange={(event) =>
+                      setDraft(
+                        (current) => ({
+                          ...current,
+                          thankYouTitle:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+                </AdminField>
 
-          <AdminField label="Thank-you message">
-            <textarea
-              className="admin-textarea"
-              value={draft.thankYouMessage}
-              disabled={!canManage}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  thankYouMessage:
-                    event.target.value,
-                }))
-              }
-            />
-          </AdminField>
-        </div>
-      </AdminPanel>
+                <label className="crm-lead-form-settings__inline-flag">
+                  <input
+                    type="checkbox"
+                    checked={
+                      draft.consentRequired
+                    }
+                    disabled={!canManage || saving}
+                    onChange={(event) =>
+                      setDraft(
+                        (current) => ({
+                          ...current,
+                          consentRequired:
+                            event.target.checked,
+                        }),
+                      )
+                    }
+                  />
+
+                  <span>
+                    <strong>
+                      Require privacy consent
+                    </strong>
+
+                    <small>
+                      Client must confirm before submission
+                    </small>
+                  </span>
+                </label>
+
+                <AdminField
+                  label="Thank-you message"
+                  className="crm-lead-form-settings__wide"
+                >
+                  <textarea
+                    className="admin-textarea"
+                    rows={2}
+                    value={draft.thankYouMessage}
+                    disabled={!canManage || saving}
+                    onChange={(event) =>
+                      setDraft(
+                        (current) => ({
+                          ...current,
+                          thankYouMessage:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+                </AdminField>
+
+                <AdminField
+                  label="Privacy consent text"
+                  className="crm-lead-form-settings__wide"
+                >
+                  <textarea
+                    className="admin-textarea"
+                    rows={2}
+                    value={draft.privacyText}
+                    disabled={!canManage || saving}
+                    onChange={(event) =>
+                      setDraft(
+                        (current) => ({
+                          ...current,
+                          privacyText:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+                </AdminField>
+              </div>
+            </details>
+          </div>
+</AdminPanel>
 
       <AdminPanel
           title="Form fields"

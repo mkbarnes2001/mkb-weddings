@@ -35,7 +35,6 @@ import {
   Users,
   Workflow,
   X,
-  UserRoundCog,
 } from "lucide-react";
 import { AdminAccordion,
   AdminButton,
@@ -2372,7 +2371,7 @@ export function CRMJob() {
                         aria-label={`Edit ${contact.displayName}`}
                         title="Edit client"
                       >
-                        <UserRoundCog aria-hidden="true" />
+                        <UserRound aria-hidden="true" />
                       </Link>
 
                       <AdminIconButton

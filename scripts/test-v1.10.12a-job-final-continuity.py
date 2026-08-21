@@ -36,7 +36,8 @@ booking = read(
 # Cleaner centred client-management icon.
 assert "PenLine" not in job
 assert "<Pencil" not in job
-assert "UserRoundCog" in job
+assert "UserRoundCog" not in job
+assert "UserRound" in job
 assert 'title="Edit client"' in job
 
 
