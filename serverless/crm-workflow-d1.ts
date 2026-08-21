@@ -398,6 +398,52 @@ export async function updateJobTask(db: D1Db, actor: WorkflowActor, jobIdInput: 
   const status = ["pending", "completed", "cancelled"].includes(text(input?.status)) ? text(input.status) : text(current.status);
   const title = text(input?.title ?? current.title);
   if (!title) throw httpError("Enter a task title.");
+
+  const photographyDeliveryMilestone =
+    text(current.task_type) === "milestone"
+    && title.trim().toLowerCase()
+      === "client photos delivered";
+
+  const deliveryJob =
+    photographyDeliveryMilestone
+      ? await db.prepare(`
+          SELECT id, status
+          FROM crm_jobs
+          WHERE workspace_id = ?
+            AND id = ?
+          LIMIT 1
+        `).bind(
+          actor.workspaceId,
+          jobId,
+        ).first()
+      : null;
+
+  const deliveryJobStatus =
+    text(deliveryJob?.status);
+
+  if (
+    photographyDeliveryMilestone
+    && !deliveryJob
+  ) {
+    throw httpError(
+      "Job not found.",
+      404,
+    );
+  }
+
+  if (
+    photographyDeliveryMilestone
+    && status === "completed"
+    && ["cancelled", "archived"].includes(
+      deliveryJobStatus,
+    )
+  ) {
+    throw httpError(
+      "A cancelled or archived Job cannot be completed from final delivery.",
+      409,
+    );
+  }
+
   await db.prepare(`
     UPDATE crm_tasks SET title = ?, description = ?, task_type = ?, status = ?, priority = ?, due_at = ?,
       assigned_user_id = ?, completed_by_user_id = CASE WHEN ? = 'completed' THEN ? ELSE NULL END,
@@ -413,6 +459,80 @@ export async function updateJobTask(db: D1Db, actor: WorkflowActor, jobIdInput: 
     status, text(actor.userId) || null, status,
     actor.workspaceId, jobId, taskId,
   ).run();
+
+  if (
+    photographyDeliveryMilestone
+    && status !== text(current.status)
+  ) {
+    if (
+      status === "completed"
+      && deliveryJobStatus !== "completed"
+    ) {
+      await db.prepare(`
+        UPDATE crm_jobs
+        SET status = 'completed',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE workspace_id = ?
+          AND id = ?
+      `).bind(
+        actor.workspaceId,
+        jobId,
+      ).run();
+
+      await recordActivity(
+        db,
+        actor,
+        {
+          workspaceId:
+            actor.workspaceId,
+          jobId,
+          eventType:
+            "job.completed",
+          summary:
+            "Completed the Job after final client photo delivery.",
+          metadata: {
+            taskId,
+            source:
+              "photography_final_delivery",
+          },
+        },
+      );
+    } else if (
+      status === "pending"
+      && deliveryJobStatus === "completed"
+    ) {
+      await db.prepare(`
+        UPDATE crm_jobs
+        SET status = 'active',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE workspace_id = ?
+          AND id = ?
+      `).bind(
+        actor.workspaceId,
+        jobId,
+      ).run();
+
+      await recordActivity(
+        db,
+        actor,
+        {
+          workspaceId:
+            actor.workspaceId,
+          jobId,
+          eventType:
+            "job.reactivated",
+          summary:
+            "Reactivated the Job after reopening final client photo delivery.",
+          metadata: {
+            taskId,
+            source:
+              "photography_final_delivery",
+          },
+        },
+      );
+    }
+  }
+
   if (status !== text(current.status)) {
     await recordActivity(db, actor, { workspaceId: actor.workspaceId, jobId, eventType: `task.${status}`, summary: `${status === "completed" ? "Completed" : status === "cancelled" ? "Cancelled" : "Reopened"} task: ${title}.`, metadata: { taskId } });
   }

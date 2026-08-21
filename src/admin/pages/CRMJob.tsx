@@ -92,19 +92,6 @@ function portalState(workspace: CrmJobWorkspace) {
   return { status: "not_invited", label: "not invited" };
 }
 
-function workflowState(workspace: CrmJobWorkspace) {
-  const portal = portalState(workspace);
-  const completed = workspace.questionnaires.filter((item) => item.status === "completed").length;
-  const total = workspace.questionnaires.length;
-  const weddingPassed = workspace.job.eventDate ? new Date(`${workspace.job.eventDate}T23:59:59`).getTime() < Date.now() : false;
-  return [
-    { label: "Lead created", detail: workspace.enquiry?.reference || workspace.job.enquiryId || "Manual Job", complete: true },
-    { label: "Job accepted", detail: dateLabel(workspace.job.bookingDate || workspace.job.createdAt), complete: true },
-    { label: "Client portal", detail: portal.status === "active" ? "Access active" : portal.status === "invited" ? "Invitation sent" : "Not invited", complete: portal.status === "active" },
-    { label: "Questionnaires", detail: total ? `${completed} of ${total} completed` : "None assigned", complete: total > 0 && completed === total },
-    { label: "Wedding day", detail: dateLabel(workspace.job.eventDate), complete: weddingPassed },
-  ];
-}
 
 
 type ProfessionalSupplierAnswer = {
@@ -1633,6 +1620,90 @@ export function CRMJob() {
     } finally { setSaving(false); }
   }
 
+  async function togglePhotographyMilestone(
+    title: "Previews sent" | "Client photos delivered",
+  ) {
+    if (!id || !workspace) return;
+
+    setSaving(true);
+    setMessage("");
+    setError("");
+
+    try {
+      const matchesMilestone = (
+        task: CrmJobWorkspace["tasks"][number],
+      ) =>
+        task.status !== "cancelled"
+        && task.taskType === "milestone"
+        && task.title.trim().toLowerCase()
+          === title.toLowerCase();
+
+      let nextWorkspace = workspace;
+      let task =
+        nextWorkspace.tasks.find(
+          matchesMilestone,
+        );
+
+      if (!task) {
+        nextWorkspace =
+          await AdminApiService.createCrmJobTask(
+            id,
+            {
+              title,
+              description:
+                "Wedding Photography workflow milestone.",
+              taskType: "milestone",
+              priority: "normal",
+              dueAt: "",
+            },
+          );
+
+        task =
+          nextWorkspace.tasks.find(
+            matchesMilestone,
+          );
+
+        if (!task) {
+          throw new Error(
+            `Unable to create the ${title} milestone.`,
+          );
+        }
+      }
+
+      const nextStatus =
+        task.status === "completed"
+          ? "pending"
+          : "completed";
+
+      nextWorkspace =
+        await AdminApiService.updateCrmJobTask(
+          id,
+          task.id,
+          {
+            status: nextStatus,
+          },
+        );
+
+      setWorkspace(
+        nextWorkspace,
+      );
+
+      setMessage(
+        nextStatus === "completed"
+          ? `${title} completed.`
+          : `${title} reopened.`,
+      );
+    } catch (workflowError) {
+      setError(
+        workflowError instanceof Error
+          ? workflowError.message
+          : "Unable to update the Wedding workflow.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function applyWorkflow() {
     if (!workflowTemplateId) { setError("Choose a workflow template."); return; }
     setSaving(true); setError(""); setMessage("");
@@ -1768,7 +1839,29 @@ export function CRMJob() {
   if (loading && !workspace) return <AdminPage><p className="text-sm text-neutral-500">Loading Job workspace…</p></AdminPage>;
   if (!workspace) return <AdminPage><div className="admin-alert admin-alert--error">{error || "Job not found."}</div></AdminPage>;
   const { job } = workspace;
-  const workflow = workflowState(workspace);
+  const previewsTask =
+    workspace.tasks.find(
+      (task) =>
+        task.status !== "cancelled"
+        && task.taskType === "milestone"
+        && task.title.trim().toLowerCase()
+          === "previews sent",
+    );
+
+  const deliveryTask =
+    workspace.tasks.find(
+      (task) =>
+        task.status !== "cancelled"
+        && task.taskType === "milestone"
+        && task.title.trim().toLowerCase()
+          === "client photos delivered",
+    );
+
+  const previewsComplete =
+    previewsTask?.status === "completed";
+
+  const deliveryComplete =
+    deliveryTask?.status === "completed";
   const packageSnapshot = (job.packageSnapshot || {}) as any;
   const selectedAddons = Array.isArray(job.addonsSnapshot) ? job.addonsSnapshot as any[] : [];
   const portal = portalState(workspace);
@@ -1827,39 +1920,250 @@ export function CRMJob() {
       {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
       {message ? <div className="admin-alert admin-alert--success">{message}</div> : null}
 
-      <section
-        className="crm-job-progress-strip"
-        aria-label="Job progress"
+      <AdminPanel
+        title="Wedding workflow"
+        description="Wedding Photography · key booking and delivery milestones."
+        icon={Workflow}
+        className="crm-wedding-workflow-panel"
       >
-        {workflow.map(
-          (step, index) => (
-            <div
-              key={step.label}
-              className={
-                step.complete
-                  ? "complete"
+        <ol className="crm-wedding-workflow">
+          <li className="crm-wedding-workflow__item is-complete">
+            <span
+              className="crm-wedding-workflow__marker"
+              aria-hidden="true"
+            >
+              <Check />
+            </span>
+
+            <div className="crm-wedding-workflow__content">
+              <div className="crm-wedding-workflow__heading">
+                <strong>Lead created</strong>
+                <AdminStatus tone="success">
+                  complete
+                </AdminStatus>
+              </div>
+
+              <p>
+                {workspace.enquiry?.createdAt
+                  ? dateLabel(
+                      workspace.enquiry.createdAt,
+                    )
+                  : "Lead creation date unavailable"}
+              </p>
+            </div>
+          </li>
+
+          <li className="crm-wedding-workflow__item is-complete">
+            <span
+              className="crm-wedding-workflow__marker"
+              aria-hidden="true"
+            >
+              <Check />
+            </span>
+
+            <div className="crm-wedding-workflow__content">
+              <div className="crm-wedding-workflow__heading">
+                <strong>Job accepted</strong>
+                <AdminStatus tone="success">
+                  complete
+                </AdminStatus>
+              </div>
+
+              <p>
+                {job.bookingDate || job.createdAt
+                  ? dateLabel(
+                      job.bookingDate
+                        || job.createdAt,
+                    )
+                  : "Acceptance date unavailable"}
+              </p>
+            </div>
+          </li>
+
+          <li className="crm-wedding-workflow__item is-scheduled">
+            <span
+              className="crm-wedding-workflow__marker crm-wedding-workflow__marker--scheduled"
+              aria-hidden="true"
+            />
+
+            <div className="crm-wedding-workflow__content">
+              <div className="crm-wedding-workflow__heading">
+                <strong>Wedding day</strong>
+
+                <AdminStatus
+                  tone={
+                    job.eventDate
+                      ? "info"
+                      : "warning"
+                  }
+                >
+                  {job.eventDate
+                    ? "scheduled"
+                    : "date required"}
+                </AdminStatus>
+              </div>
+
+              <p>
+                {job.eventDate
+                  ? dateLabel(
+                      job.eventDate,
+                    )
+                  : "Wedding date not set"}
+                {" · "}
+                {job.venueText
+                  || lifecycle.wedding.venue
+                  || "Venue TBC"}
+              </p>
+            </div>
+          </li>
+
+          <li
+            className={
+              `crm-wedding-workflow__item ${
+                previewsComplete
+                  ? "is-complete"
                   : ""
+              }`
+            }
+          >
+            <button
+              type="button"
+              className={
+                `crm-wedding-workflow__toggle ${
+                  previewsComplete
+                    ? "is-complete"
+                    : ""
+                }`
+              }
+              aria-label={
+                previewsComplete
+                  ? "Reopen Previews sent milestone"
+                  : "Complete Previews sent milestone"
+              }
+              aria-pressed={
+                previewsComplete
+              }
+              title={
+                previewsComplete
+                  ? "Mark previews as not sent"
+                  : "Mark previews as sent"
+              }
+              disabled={
+                saving || !canManage
+              }
+              onClick={() =>
+                void togglePhotographyMilestone(
+                  "Previews sent",
+                )
               }
             >
-              <span>
-                {step.complete
-                  ? <Check />
-                  : index + 1}
-              </span>
+              {previewsComplete
+                ? <Check />
+                : null}
+            </button>
 
-              <div>
-                <strong>
-                  {step.label}
-                </strong>
+            <div className="crm-wedding-workflow__content">
+              <div className="crm-wedding-workflow__heading">
+                <strong>Previews sent</strong>
 
-                <small>
-                  {step.detail}
-                </small>
+                <AdminStatus
+                  tone={
+                    previewsComplete
+                      ? "success"
+                      : "neutral"
+                  }
+                >
+                  {previewsComplete
+                    ? "complete"
+                    : "to do"}
+                </AdminStatus>
               </div>
+
+              <p>
+                {previewsComplete
+                  && previewsTask?.completedAt
+                  ? `Completed ${dateLabel(
+                      previewsTask.completedAt,
+                    )}`
+                  : "Mark complete when the Wedding previews have been sent."}
+              </p>
             </div>
-          ),
-        )}
-      </section>
+          </li>
+
+          <li
+            className={
+              `crm-wedding-workflow__item ${
+                deliveryComplete
+                  ? "is-complete"
+                  : ""
+              }`
+            }
+          >
+            <button
+              type="button"
+              className={
+                `crm-wedding-workflow__toggle ${
+                  deliveryComplete
+                    ? "is-complete"
+                    : ""
+                }`
+              }
+              aria-label={
+                deliveryComplete
+                  ? "Reopen Client photos delivered milestone"
+                  : "Complete Client photos delivered milestone"
+              }
+              aria-pressed={
+                deliveryComplete
+              }
+              title={
+                deliveryComplete
+                  ? "Reopen final delivery"
+                  : "Mark client photos as delivered"
+              }
+              disabled={
+                saving || !canManage
+              }
+              onClick={() =>
+                void togglePhotographyMilestone(
+                  "Client photos delivered",
+                )
+              }
+            >
+              {deliveryComplete
+                ? <Check />
+                : null}
+            </button>
+
+            <div className="crm-wedding-workflow__content">
+              <div className="crm-wedding-workflow__heading">
+                <strong>Client photos delivered</strong>
+
+                <AdminStatus
+                  tone={
+                    deliveryComplete
+                      ? "success"
+                      : "neutral"
+                  }
+                >
+                  {deliveryComplete
+                    ? "Job complete"
+                    : "to do"}
+                </AdminStatus>
+              </div>
+
+              <p>
+                {deliveryComplete
+                  && deliveryTask?.completedAt
+                  ? `Completed ${dateLabel(
+                      deliveryTask.completedAt,
+                    )}`
+                  : "Final gallery delivery completes this Job."}
+              </p>
+            </div>
+          </li>
+        </ol>
+      </AdminPanel>
 
       <AdminPanel
         title="Booking and payments"
@@ -2154,11 +2458,6 @@ export function CRMJob() {
             <div className="crm-quote-job-summary"><dl className="admin-compact-details"><div><dt>Quote</dt><dd>{job.quoteReference || "—"} · v{job.quoteVersionNumber || 1}</dd></div><div><dt>Accepted</dt><dd>{dateLabel(job.acceptedQuoteAt || job.bookingDate)}</dd></div><div><dt>Package</dt><dd>{packageSnapshot.name || job.packageName || "—"}</dd></div><div><dt>Coverage</dt><dd>{packageSnapshot.coverageMinutes ? `${Math.round(packageSnapshot.coverageMinutes / 60)} hours` : "—"}</dd></div><div><dt>Subtotal</dt><dd>{money(job.bookingSubtotal, job.currency)}</dd></div><div><dt>Discount</dt><dd>{money(job.bookingDiscount, job.currency)}</dd></div><div><dt>Tax</dt><dd>{money(job.bookingTax, job.currency)}</dd></div><div><dt>Total booking value</dt><dd><strong>{money(job.valueAmount, job.currency)}</strong></dd></div></dl><div className="crm-quote-job-details"><section><h4>Included</h4>{Array.isArray(packageSnapshot.includedItems) && packageSnapshot.includedItems.length ? <ul>{packageSnapshot.includedItems.map((item: string) => <li key={item}>{item}</li>)}</ul> : <p>No included-item list stored.</p>}</section><section><h4>Selected add-ons</h4>{selectedAddons.length ? <ul>{selectedAddons.map((addon: any) => <li key={addon.id || addon.addonId || addon.name}><span>{addon.name}</span><strong>{addon.quantity || 1} × {money(addon.unitPriceAmount || 0, addon.currency || job.currency)}</strong></li>)}</ul> : <p>No optional add-ons selected.</p>}</section></div><Link className="admin-button admin-button--secondary admin-button--sm crm-inline-action" to={`/admin/crm/quotes/${job.quoteId}`}><ExternalLink className="admin-button__icon" />Open accepted quote</Link></div>
           </AdminAccordion> : null}
 
-          <AdminAccordion title="Workflow and tasks" description={workspace.workflow ? `${workspace.workflow.templateName} · ${workspace.taskStats.completed} of ${workspace.taskStats.total} complete` : "Apply a workflow or add a one-off task."} icon={Workflow} defaultOpen summary={<AdminStatus tone={workspace.taskStats.overdue ? "danger" : workspace.taskStats.pending ? "warning" : "success"}>{workspace.taskStats.overdue ? `${workspace.taskStats.overdue} overdue` : `${workspace.taskStats.pending} pending`}</AdminStatus>}>
-            {!workspace.workflow ? <div className="crm-apply-workflow"><AdminField label="Workflow template"><select className="admin-select" value={workflowTemplateId} disabled={!canManage} onChange={(event) => setWorkflowTemplateId(event.target.value)}><option value="">Choose workflow</option>{workspace.workflowTemplates.map((template) => <option key={template.id} value={template.id}>{template.name}{template.default ? " · default" : ""}</option>)}</select></AdminField><AdminButton variant="primary" icon={Workflow} disabled={saving || !canManage || !workflowTemplateId} onClick={() => void applyWorkflow()}>Apply workflow</AdminButton></div> : null}
-            {!workspace.tasks.length ? <AdminEmptyState icon={CheckCircle2} title="No tasks yet" description="Apply a workflow or add a task below." /> : <div className="crm-task-list">{workspace.tasks.filter((task) => task.status !== "cancelled").map((task) => { const overdue = task.status === "pending" && Boolean(task.dueAt && task.dueAt < new Date().toISOString().slice(0, 10)); return <article key={task.id} className={task.status === "completed" ? "complete" : overdue ? "overdue" : ""}><button type="button" aria-label={task.status === "completed" ? "Reopen task" : "Complete task"} disabled={saving || !canManage} onClick={() => void setTaskStatus(task.id, task.status === "completed" ? "pending" : "completed")}>{task.status === "completed" ? <Check /> : null}</button><div><strong>{task.title}</strong>{task.description ? <p>{task.description}</p> : null}<div className="flex flex-wrap gap-2"><AdminStatus tone={overdue ? "danger" : task.dueAt ? "warning" : "neutral"}>{task.dueAt ? dateLabel(task.dueAt) : "No due date"}</AdminStatus><AdminStatus tone={task.priority === "urgent" || task.priority === "high" ? "danger" : "neutral"}>{task.priority}</AdminStatus><AdminStatus tone="info">{task.taskType}</AdminStatus></div></div>{task.status === "pending" && canManage ? <AdminButton variant="ghost" size="sm" icon={Trash2} disabled={saving} onClick={() => void setTaskStatus(task.id, "cancelled")}>Cancel</AdminButton> : null}</article>; })}</div>}
-            {canManage ? <div className="crm-task-create"><div className="grid gap-3 md:grid-cols-2"><AdminField label="New task"><input className="admin-input" value={taskDraft.title} onChange={(event) => setTaskDraft((current) => ({ ...current, title: event.target.value }))} placeholder="Call client, review schedule…" /></AdminField><AdminField label="Due date"><input className="admin-input" type="date" value={taskDraft.dueAt} onChange={(event) => setTaskDraft((current) => ({ ...current, dueAt: event.target.value }))} /></AdminField><AdminField label="Type"><select className="admin-select" value={taskDraft.taskType} onChange={(event) => setTaskDraft((current) => ({ ...current, taskType: event.target.value }))}><option value="task">Task</option><option value="email">Email</option><option value="call">Call</option><option value="meeting">Meeting</option><option value="milestone">Milestone</option></select></AdminField><AdminField label="Priority"><select className="admin-select" value={taskDraft.priority} onChange={(event) => setTaskDraft((current) => ({ ...current, priority: event.target.value }))}><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></AdminField></div><AdminField label="Description"><textarea className="admin-textarea" value={taskDraft.description} onChange={(event) => setTaskDraft((current) => ({ ...current, description: event.target.value }))} /></AdminField><AdminButton variant="primary" icon={Plus} disabled={saving || !taskDraft.title.trim()} onClick={() => void createTask()}>Add task</AdminButton></div> : null}
-          </AdminAccordion>
 
           <AdminAccordion title="Communication" description="Send email or record calls, meetings, messages and internal notes." icon={MessageCircle} summary={<AdminStatus tone="neutral">{workspace.communications.length} records</AdminStatus>}>
             {canManage ? <div className="crm-communication-compose"><div className="grid gap-3 md:grid-cols-3"><AdminField label="Channel"><select className="admin-select" value={communicationDraft.channel} onChange={(event) => setCommunicationDraft((current) => ({ ...current, channel: event.target.value, direction: event.target.value === "note" ? "internal" : current.direction }))}><option value="note">Internal note</option><option value="email">Email</option><option value="phone">Phone call</option><option value="sms">Message / SMS</option><option value="meeting">Meeting</option></select></AdminField><AdminField label="Direction"><select className="admin-select" value={communicationDraft.direction} onChange={(event) => setCommunicationDraft((current) => ({ ...current, direction: event.target.value }))}><option value="internal">Internal</option><option value="outbound">Outbound</option><option value="inbound">Inbound</option></select></AdminField><AdminField label="Client"><select className="admin-select" value={communicationDraft.contactId} onChange={(event) => setCommunicationDraft((current) => ({ ...current, contactId: event.target.value }))}><option value="">No specific contact</option>{workspace.contacts.map((contact) => <option key={contact.id} value={contact.id}>{contact.displayName}</option>)}</select></AdminField></div><AdminField label="Subject"><input className="admin-input" value={communicationDraft.subject} onChange={(event) => setCommunicationDraft((current) => ({ ...current, subject: event.target.value }))} placeholder="Optional for calls and notes" /></AdminField><AdminField label="Message / notes"><textarea className="admin-textarea min-h-28" value={communicationDraft.body} onChange={(event) => setCommunicationDraft((current) => ({ ...current, body: event.target.value }))} /></AdminField><div className="flex flex-wrap gap-2"><AdminButton icon={MessageSquareText} disabled={saving || (!communicationDraft.body.trim() && !communicationDraft.subject.trim())} onClick={() => void saveCommunication(false)}>Log communication</AdminButton><AdminButton variant="primary" icon={Mail} disabled={saving || !communicationDraft.contactId || !communicationDraft.subject.trim() || !communicationDraft.body.trim()} onClick={() => void saveCommunication(true)}>Send email</AdminButton></div></div> : null}

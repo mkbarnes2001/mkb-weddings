@@ -13160,3 +13160,139 @@ svg {
       );
   }
 }
+
+
+/* v1.10.12a — Wedding Photography vertical workflow */
+.crm-wedding-workflow-panel .admin-panel__body {
+  padding-top: 8px;
+}
+
+.crm-wedding-workflow {
+  display: grid;
+  margin: 0;
+  padding: 2px 0 2px 4px;
+  list-style: none;
+}
+
+.crm-wedding-workflow__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+  gap: 11px;
+  min-width: 0;
+  padding: 0 0 18px;
+}
+
+.crm-wedding-workflow__item:last-child {
+  padding-bottom: 2px;
+}
+
+.crm-wedding-workflow__item:not(:last-child)::after {
+  position: absolute;
+  top: 25px;
+  bottom: 0;
+  left: 11px;
+  width: 1px;
+  background: rgba(17, 24, 39, 0.12);
+  content: "";
+}
+
+.crm-wedding-workflow__item.is-complete:not(:last-child)::after {
+  background: rgba(22, 163, 74, 0.28);
+}
+
+.crm-wedding-workflow__marker,
+.crm-wedding-workflow__toggle {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  width: 23px;
+  height: 23px;
+  flex: 0 0 23px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(17, 24, 39, 0.18);
+  border-radius: 999px;
+  background: #fff;
+  color: #fff;
+}
+
+.crm-wedding-workflow__marker > svg,
+.crm-wedding-workflow__toggle > svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.4;
+}
+
+.crm-wedding-workflow__item.is-complete
+.crm-wedding-workflow__marker,
+.crm-wedding-workflow__toggle.is-complete {
+  border-color: rgba(22, 163, 74, 0.7);
+  background: #16a34a;
+}
+
+.crm-wedding-workflow__marker--scheduled::after {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #111827;
+  content: "";
+}
+
+.crm-wedding-workflow__toggle {
+  cursor: pointer;
+  appearance: none;
+}
+
+.crm-wedding-workflow__toggle:hover:not(:disabled) {
+  border-color: rgba(17, 24, 39, 0.42);
+}
+
+.crm-wedding-workflow__toggle:focus-visible {
+  outline: 2px solid rgba(17, 24, 39, 0.75);
+  outline-offset: 2px;
+}
+
+.crm-wedding-workflow__toggle:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+
+.crm-wedding-workflow__content {
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.crm-wedding-workflow__heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.crm-wedding-workflow__heading strong {
+  min-width: 0;
+  color: #111827;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.crm-wedding-workflow__content > p {
+  margin: 4px 0 0;
+  color: #737373;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .crm-wedding-workflow__heading {
+    align-items: flex-start;
+  }
+
+  .crm-wedding-workflow__item {
+    gap: 9px;
+  }
+}

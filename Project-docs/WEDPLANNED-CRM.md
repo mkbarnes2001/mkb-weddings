@@ -219,3 +219,21 @@ The same supplier may hold more than one wedding role. Wedding-specific role/ord
 - Invitations use the verified workspace public domain and one-time hashed tokens.
 - Portal sessions reuse the established client identity/session cookie, while active Job access is checked on every request.
 - Supplier answers remain ordinary structured fields until v1.9.1b adds controlled Supplier Master resolution.
+
+
+## v1.10.12a — Job milestone workflow architecture
+
+The Wedding Photography Job workflow is a presentation over the existing CRM Job and task models rather than a new persistence subsystem.
+
+- `Lead created` is derived from the originating enquiry.
+- `Job accepted` is derived from the Job booking/creation state.
+- `Wedding day` is derived from the Job event date and venue.
+- `Previews sent` is persisted as a `crm_tasks` milestone.
+- `Client photos delivered` is persisted as a `crm_tasks` milestone.
+- Completing final client photo delivery also moves the CRM Job to `completed`.
+- Reopening final delivery reactivates a previously completed Job.
+- Cancelled or archived Jobs are protected from being completed by the delivery milestone.
+- Existing generic workflow templates and ad-hoc tasks remain part of the underlying CRM architecture even though they are no longer exposed as the primary Wedding Photography Job UI.
+- No additional database schema is required for this v1.10.12a refinement.
+
+Future productisation should resolve the visible Job workflow from the business service/category and its workflow template. Milestones may then expose optional automation hooks. WedStudio preview and final-gallery delivery events are the intended future automation sources for the photography workflow.

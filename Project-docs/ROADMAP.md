@@ -244,3 +244,29 @@ The Client Gallery management surface has been consolidated before commerce work
 - Managed public R2 logo upload, live preview and safe theme tokens.
 
 The Client Gallery workspace is now ready for Print Store navigation and product controls without further crowding the Photos screen.
+
+
+## v1.10.12a — Service-specific Job workflows
+
+The first compact vertical Job workflow is the Wedding Photography default:
+
+1. Lead created
+2. Job accepted
+3. Wedding day
+4. Previews sent
+5. Client photos delivered
+
+`Previews sent` and `Client photos delivered` are manual milestones initially. WedStudio should later complete them automatically when authoritative preview-delivery and final-gallery-delivery events exist.
+
+This photography workflow must not become the universal commercial workflow. The intended commercial architecture is:
+
+`business service/category → workflow template → milestone definitions → optional automation hooks`
+
+Examples for later releases:
+
+- Photographer: Wedding day → Previews → Client gallery delivery.
+- Videographer: Wedding day → Teaser → Highlight film → Full film.
+- Makeup artist: Trial → Final confirmation → Wedding day.
+- Venue and other wedding businesses may use completely different milestone sets.
+
+The existing generic workflow/task capability should remain available beneath these service-specific presentations. v1.10.12a does not build the full commercial workflow designer.

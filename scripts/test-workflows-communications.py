@@ -111,7 +111,26 @@ def main() -> None:
     assert 'parts[2] === "communications"' in route
     assert "sendLeadAutoresponder" in public_route
     assert "Acknowledgement subject" in overview and "Leads overview" in overview and "Task overview" in overview
-    assert "Workflow and tasks" in job_page and "Communication" in job_page and "Send email" in job_page
+    # v1.10.12a replaces the generic Job task accordion and
+    # horizontal progress strip with the compact Wedding Photography
+    # workflow while retaining communication operations.
+    assert 'title="Wedding workflow"' in job_page
+    for milestone in (
+        "Lead created",
+        "Job accepted",
+        "Wedding day",
+        "Previews sent",
+        "Client photos delivered",
+    ):
+        assert milestone in job_page, milestone
+    assert 'title="Workflow and tasks"' not in job_page
+    assert 'crm-job-progress-strip' not in job_page
+    assert "togglePhotographyMilestone" in job_page
+    assert "Communication" in job_page
+    assert "Send email" in job_page
+    assert "photographyDeliveryMilestone" in workflow
+    assert '"job.completed"' in workflow
+    assert '"job.reactivated"' in workflow
     assert "Default workflow" in builder and "Day offset" in builder
     assert 'path="crm/workflows/:id"' in app
     for table in required:

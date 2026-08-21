@@ -30,11 +30,12 @@ def main() -> None:
     assert '"No pending task"' in crm
     assert 'crm-schedule-list' in crm and 'nextTaskDueAt' in crm and 'eventDate' in crm
 
-    # Job workspace: clear functional accordions only; no future empty financial modules.
+    # Job workspace: clear functional sections only; no future empty
+    # financial modules. v1.10.12a moves the useful Job lifecycle into
+    # a dedicated vertical Wedding Photography workflow.
     assert "export function AdminAccordion" in ui
     for section in [
         'title="Quote and package"',
-        'title="Workflow and tasks"',
         'title="Communication"',
         'title="Clients"',
         'title="Questionnaires"',
@@ -43,17 +44,34 @@ def main() -> None:
         'title="Notes and activity"',
     ]:
         assert section in job, section
-    assert 'crm-job-progress-strip' in job
+
+    assert 'title="Wedding workflow"' in job
+
+    for milestone in (
+        "Lead created",
+        "Job accepted",
+        "Wedding day",
+        "Previews sent",
+        "Client photos delivered",
+    ):
+        assert milestone in job, milestone
+
+    assert 'title="Workflow and tasks"' not in job
+    assert 'crm-job-progress-strip' not in job
     assert 'crm-job-overview__facts' not in job
     assert 'CrmInvoicePaymentForm' not in job
-    # v1.10.11a removes the duplicated next-task fact from
-    # the Job overview. Task operations remain authoritative
-    # inside the real Workflow and tasks workspace.
+
+    # Persisted milestone state remains backed by crm_tasks rather
+    # than a parallel Job-workflow persistence model.
     assert "workspace.tasks" in job
-    assert "workspace.taskStats" in job
-    assert 'title="Workflow and tasks"' in job
+    assert "togglePhotographyMilestone" in job
     assert 'function portalState(workspace: CrmJobWorkspace)' in job
-    assert 'portal.status === "active"' in job
+    # Portal state remains derived from accepted active access;
+    # v1.10.12a renders the resolved label rather than branching on
+    # portal.status === "active" in the Job workspace JSX.
+    assert "activeAccess.some((item) => Boolean(item.acceptedAt))" in job
+    assert 'status: "active", label: "active"' in job
+    assert "portal.label" in job
     assert 'job.clientPortalStatus.replace' not in job
     assert 'title="Invoices"' not in job
     assert 'title="Contracts"' not in job
