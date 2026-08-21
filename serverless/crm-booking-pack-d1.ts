@@ -2417,6 +2417,12 @@ export async function getJobCommercialWorkspace(
         || latestSignature?.signed_at
         || latestSignature?.created_at
       ),
+      content: commercialJson(
+        version?.content_json,
+      ),
+      terms: commercialJson(
+        version?.terms_snapshot_json,
+      ),
     };
   }
 

@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   ClipboardList,
   ExternalLink,
+  Eye,
   FileText,
   FolderOpen,
   Globe2,
@@ -23,7 +24,7 @@ import {
   MapPin,
   MessageCircle,
   MessageSquareText,
-  Pencil,
+  PenLine,
   PackageCheck,
   Phone,
   Plus,
@@ -84,6 +85,156 @@ function answerLabel(value: unknown, field?: QuestionnaireField) {
   if (value && typeof value === "object") return JSON.stringify(value);
   return String(value ?? "Not answered");
 }
+
+
+type ContractPreviewBlock = {
+  heading: string;
+  body: string;
+};
+
+function contractPreviewBlocks(
+  value: unknown,
+): ContractPreviewBlock[] {
+  if (typeof value === "string") {
+    return value.trim()
+      ? [{
+          heading: "",
+          body: value,
+        }]
+      : [];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap(
+      (item) => {
+        if (typeof item === "string") {
+          return item.trim()
+            ? [{
+                heading: "",
+                body: item,
+              }]
+            : [];
+        }
+
+        if (
+          !item
+          || typeof item !== "object"
+        ) {
+          return [];
+        }
+
+        const record =
+          item as Record<
+            string,
+            unknown
+          >;
+
+        const heading = String(
+          record.heading
+          || record.title
+          || record.name
+          || "",
+        ).trim();
+
+        const rawBody =
+          record.body
+          ?? record.text
+          ?? record.content
+          ?? record.description
+          ?? "";
+
+        const body =
+          Array.isArray(rawBody)
+            ? rawBody
+                .map(String)
+                .join("\n")
+            : (
+                rawBody
+                && typeof rawBody
+                  === "object"
+              )
+              ? JSON.stringify(
+                  rawBody,
+                  null,
+                  2,
+                )
+              : String(
+                  rawBody || "",
+                );
+
+        return (
+          heading
+          || body.trim()
+        )
+          ? [{
+              heading,
+              body,
+            }]
+          : [];
+      },
+    );
+  }
+
+  if (
+    value
+    && typeof value === "object"
+  ) {
+    return Object.entries(
+      value as Record<
+        string,
+        unknown
+      >,
+    ).flatMap(
+      ([key, item]) => {
+        if (
+          item === null
+          || item === undefined
+          || item === ""
+        ) {
+          return [];
+        }
+
+        const body =
+          Array.isArray(item)
+            ? item
+                .map(String)
+                .join("\n")
+            : typeof item === "object"
+              ? JSON.stringify(
+                  item,
+                  null,
+                  2,
+                )
+              : String(item);
+
+        const heading =
+          key
+            .replace(
+              /([a-z])([A-Z])/g,
+              "$1 $2",
+            )
+            .replace(
+              /[_-]+/g,
+              " ",
+            )
+            .replace(
+              /^./,
+              (character) =>
+                character
+                  .toUpperCase(),
+            );
+
+        return [{
+          heading,
+          body,
+        }];
+      },
+    );
+  }
+
+  return [];
+}
+
 
 function portalState(workspace: CrmJobWorkspace) {
   const activeAccess = workspace.portalAccess.filter((item) => item.status === "active");
@@ -1204,6 +1355,12 @@ export function CRMJob() {
   const [taskDraft, setTaskDraft] = useState({ title: "", description: "", taskType: "task", priority: "normal", dueAt: "" });
   const [communicationDraft, setCommunicationDraft] = useState({ channel: "note", direction: "internal", contactId: "", subject: "", body: "" });
 
+
+  const [
+    contractPreviewOpen,
+    setContractPreviewOpen,
+  ] = useState(false);
+
   const [
     questionnaireEditorId,
     setQuestionnaireEditorId,
@@ -1863,12 +2020,19 @@ export function CRMJob() {
   const deliveryComplete =
     deliveryTask?.status === "completed";
   const packageSnapshot = (job.packageSnapshot || {}) as any;
-  const selectedAddons = Array.isArray(job.addonsSnapshot) ? job.addonsSnapshot as any[] : [];
   const portal = portalState(workspace);
   const lifecycle = workspace.lifecycle;
   const commercial = workspace.commercial;
   const commercialInvoice = commercial.invoice;
   const commercialContract = commercial.contract;
+
+  const contractPreview =
+    commercialContract
+      ? contractPreviewBlocks(
+          commercialContract.content,
+        )
+      : [];
+
   const commercialQuote = commercial.quote;
   const bookingQuestionnaire = workspace.questionnaires.find((item) => item.status !== "completed")
     || workspace.questionnaires[0]
@@ -2208,10 +2372,7 @@ export function CRMJob() {
                         aria-label={`Edit ${contact.displayName}`}
                         title="Edit client"
                       >
-                        <Pencil
-                          strokeWidth={2.25}
-                          aria-hidden="true"
-                        />
+                        <PenLine aria-hidden="true" />
                       </Link>
 
                       <AdminIconButton
@@ -2421,33 +2582,48 @@ export function CRMJob() {
                 : "Not generated"}
             </span>
 
-            {commercialContract?.status === "draft" ? (
-              portal.status === "not_invited" ? (
-                <span
-                  className="crm-booking-summary-row__action-spacer is-disabled"
-                  aria-label="Invite client first"
-                  title="Invite client first"
-                />
-              ) : canManageCommercial ? (
+            <div className="crm-booking-summary-row__actions">
+              {commercialContract ? (
                 <AdminIconButton
-                  icon={Mail}
-                  label="Send to Client Portal"
-                  title="Send to Client Portal"
-                  className="crm-booking-summary-row__action"
+                  icon={Eye}
+                  label="View contract"
+                  title="View contract"
                   variant="secondary"
-                  disabled={saving}
                   onClick={() =>
-                    void sendContractToPortal(
-                      commercialContract.id,
+                    setContractPreviewOpen(
+                      true,
                     )
                   }
                 />
               ) : (
                 <span className="crm-booking-summary-row__action-spacer" />
-              )
-            ) : (
-              <span className="crm-booking-summary-row__action-spacer" />
-            )}
+              )}
+
+              {commercialContract?.status === "draft" ? (
+                portal.status === "not_invited" ? (
+                  <span
+                    className="crm-booking-summary-row__action-spacer is-disabled"
+                    aria-label="Invite client first"
+                    title="Invite client first"
+                  />
+                ) : canManageCommercial ? (
+                  <AdminIconButton
+                    icon={Mail}
+                    label="Send to Client Portal"
+                    title="Send to Client Portal"
+                    variant="secondary"
+                    disabled={saving}
+                    onClick={() =>
+                      void sendContractToPortal(
+                        commercialContract.id,
+                      )
+                    }
+                  />
+                ) : (
+                  <span className="crm-booking-summary-row__action-spacer" />
+                )
+              ) : null}
+            </div>
           </div>
 
           <div className="crm-commercial-summary-row crm-commercial-card--link crm-booking-summary-row">
@@ -2763,9 +2939,68 @@ export function CRMJob() {
 
       <div className="crm-job-operations-grid">
         <div className="crm-job-operations-column">
-          {job.quoteId ? <AdminAccordion title="Quote and package" description="Accepted commercial details are locked to this booking." icon={PackageCheck} defaultOpen summary={<AdminStatus tone="success">{money(job.valueAmount, job.currency)}</AdminStatus>}>
-            <div className="crm-quote-job-summary"><dl className="admin-compact-details"><div><dt>Quote</dt><dd>{job.quoteReference || "—"} · v{job.quoteVersionNumber || 1}</dd></div><div><dt>Accepted</dt><dd>{dateLabel(job.acceptedQuoteAt || job.bookingDate)}</dd></div><div><dt>Package</dt><dd>{packageSnapshot.name || job.packageName || "—"}</dd></div><div><dt>Coverage</dt><dd>{packageSnapshot.coverageMinutes ? `${Math.round(packageSnapshot.coverageMinutes / 60)} hours` : "—"}</dd></div><div><dt>Subtotal</dt><dd>{money(job.bookingSubtotal, job.currency)}</dd></div><div><dt>Discount</dt><dd>{money(job.bookingDiscount, job.currency)}</dd></div><div><dt>Tax</dt><dd>{money(job.bookingTax, job.currency)}</dd></div><div><dt>Total booking value</dt><dd><strong>{money(job.valueAmount, job.currency)}</strong></dd></div></dl><div className="crm-quote-job-details"><section><h4>Included</h4>{Array.isArray(packageSnapshot.includedItems) && packageSnapshot.includedItems.length ? <ul>{packageSnapshot.includedItems.map((item: string) => <li key={item}>{item}</li>)}</ul> : <p>No included-item list stored.</p>}</section><section><h4>Selected add-ons</h4>{selectedAddons.length ? <ul>{selectedAddons.map((addon: any) => <li key={addon.id || addon.addonId || addon.name}><span>{addon.name}</span><strong>{addon.quantity || 1} × {money(addon.unitPriceAmount || 0, addon.currency || job.currency)}</strong></li>)}</ul> : <p>No optional add-ons selected.</p>}</section></div><Link className="admin-button admin-button--secondary admin-button--sm crm-inline-action" to={`/admin/crm/quotes/${job.quoteId}`}><ExternalLink className="admin-button__icon" />Open accepted quote</Link></div>
-          </AdminAccordion> : null}
+          {job.quoteId ? (
+            <AdminAccordion
+              title="Quote and package"
+              description="Accepted quote and package."
+              icon={PackageCheck}
+              defaultOpen
+              summary={
+                <AdminStatus tone="success">
+                  {money(
+                    commercialQuote?.totalAmount
+                      ?? job.valueAmount,
+                    commercialQuote?.currency
+                      || job.currency,
+                  )}
+                </AdminStatus>
+              }
+            >
+              <article className="crm-job-quote-compact">
+                <div className="crm-job-quote-compact__copy">
+                  <strong>
+                    {commercialQuote?.packageName
+                      || packageSnapshot.name
+                      || job.packageName
+                      || "Booked package"}
+                  </strong>
+
+                  <p>
+                    {commercialQuote?.reference
+                      || job.quoteReference
+                      || "Accepted quote"}
+                  </p>
+
+                  <small>
+                    Accepted{" "}
+                    {dateLabel(
+                      commercialQuote?.acceptedAt
+                      || job.acceptedQuoteAt
+                      || job.bookingDate,
+                    )}
+                  </small>
+                </div>
+
+                <strong className="crm-job-quote-compact__value">
+                  {money(
+                    commercialQuote?.totalAmount
+                      ?? job.valueAmount,
+                    commercialQuote?.currency
+                      || job.currency,
+                  )}
+                </strong>
+
+                <Link
+                  className="admin-icon-control crm-job-quote-compact__action"
+                  to={`/admin/crm/quotes/${job.quoteId}`}
+                  aria-label="Open accepted quote"
+                  title="Open accepted quote"
+                >
+                  <Eye aria-hidden="true" />
+                </Link>
+              </article>
+            </AdminAccordion>
+          ) : null}
 
 
           <AdminAccordion title="Communication" description="Send email or record calls, meetings, messages and internal notes." icon={MessageCircle} summary={<AdminStatus tone="neutral">{workspace.communications.length} records</AdminStatus>}>
@@ -2783,7 +3018,7 @@ export function CRMJob() {
           >
             <AdminAccordion
               title="Questionnaires"
-              description="Assign, review and update the same living planning forms your clients use."
+              description="Questionnaire details for this Job."
               icon={ClipboardList}
               summary={
                 <AdminStatus tone="neutral">
@@ -2791,167 +3026,78 @@ export function CRMJob() {
                 </AdminStatus>
               }
             >
-              {canManage ? (
-                <div className="crm-questionnaire-assign">
-                  <AdminField label="Template">
-                    <select
-                      className="admin-select"
-                      value={templateId}
-                      disabled={!canManage}
-                      onChange={(event) =>
-                        setTemplateId(
-                          event.target.value,
-                        )
-                      }
-                    >
-                      {workspace.templates.map(
-                        (template) => (
-                          <option
-                            key={template.id}
-                            value={template.id}
-                          >
-                            {template.name}
-                          </option>
-                        ),
-                      )}
-                    </select>
-                  </AdminField>
-
-                  <AdminField label="Client">
-                    <select
-                      className="admin-select"
-                      value={contactId}
-                      disabled={!canManage}
-                      onChange={(event) =>
-                        setContactId(
-                          event.target.value,
-                        )
-                      }
-                    >
-                      {workspace.contacts.map(
-                        (contact) => (
-                          <option
-                            key={contact.id}
-                            value={contact.id}
-                          >
-                            {contact.displayName}
-                            {" "}
-                            ({contact.role})
-                          </option>
-                        ),
-                      )}
-                    </select>
-                  </AdminField>
-
-                  <AdminField
-                    label="Planning target"
-                    help="Advisory only. The questionnaire remains editable after this date."
+              <div className="crm-job-questionnaire-readonly">
+                <div className="crm-job-questionnaire-readonly__toolbar">
+                  <Link
+                    className="admin-button admin-button--secondary admin-button--sm"
+                    to="/admin/crm?view=questionnaires"
                   >
-                    <input
-                      className="admin-input"
-                      type="date"
-                      value={dueAt}
-                      disabled={!canManage}
-                      onChange={(event) =>
-                        setDueAt(
-                          event.target.value,
-                        )
-                      }
+                    <ExternalLink
+                      className="admin-button__icon"
+                      aria-hidden="true"
                     />
-                  </AdminField>
-
-                  <AdminButton
-                    variant="primary"
-                    icon={Plus}
-                    disabled={
-                      saving
-                      || !canManage
-                      || !templateId
-                      || !contactId
-                    }
-                    onClick={() =>
-                      void assign()
-                    }
-                  >
-                    Assign questionnaire
-                  </AdminButton>
+                    Open Questionnaires
+                  </Link>
                 </div>
-              ) : null}
 
-              {!workspace.questionnaires.length ? (
-                <AdminEmptyState
-                  icon={FileText}
-                  title="No questionnaires assigned"
-                  description="Assign a template above when client information is needed."
-                />
-              ) : (
-                <div className="crm-questionnaire-instance-list">
-                  {workspace.questionnaires.map(
-                    (item) => {
-                      const editing =
-                        questionnaireEditorId
-                        === item.id;
+                {!workspace.questionnaires.length ? (
+                  <AdminEmptyState
+                    icon={ClipboardList}
+                    title="No questionnaires assigned"
+                    description="Questionnaires assigned to this Job will appear here."
+                  />
+                ) : (
+                  <div className="crm-job-questionnaire-readonly__list">
+                    {workspace.questionnaires.map(
+                      (item) => {
+                        const lastEditor =
+                          item.lastSavedByLabel
+                          || (
+                            item.lastSavedByType
+                            === "client"
+                              ? item.assignedContactName
+                                || "Client"
+                              : item.lastSavedByType
+                                === "professional"
+                                ? "WedCRM user"
+                                : ""
+                          );
 
-                      const lastEditor =
-                        item.lastSavedByLabel
-                        || (
-                          item.lastSavedByType
-                          === "client"
-                            ? item.assignedContactName
-                              || "Client"
-                            : item.lastSavedByType
-                              === "professional"
-                              ? "WedCRM user"
-                              : ""
-                        );
+                        return (
+                          <article
+                            key={item.id}
+                            className="questionnaire-instance-card crm-job-questionnaire-readonly__card"
+                          >
+                            <header className="crm-job-questionnaire-readonly__header">
+                              <div>
+                                <strong>
+                                  {item.title}
+                                </strong>
 
-                      return (
-                        <article
-                          key={item.id}
-                          className={`questionnaire-instance-card${
-                            editing
-                              ? " is-editing"
-                              : ""
-                          }`}
-                        >
-                          <header className="crm-questionnaire-instance__header">
-                            <div>
-                              <h3>
-                                {item.title}
-                              </h3>
+                                <p>
+                                  {item.assignedContactName
+                                    || "Client not assigned"}
+                                </p>
 
-                              <p>
-                                {item.assignedContactName
-                                  || "Client not assigned"}
+                                {item.lastSavedAt ? (
+                                  <small>
+                                    Last updated{" "}
+                                    {new Date(
+                                      item.lastSavedAt,
+                                    ).toLocaleString(
+                                      "en-GB",
+                                    )}
+                                    {lastEditor
+                                      ? ` by ${lastEditor}`
+                                      : ""}
+                                  </small>
+                                ) : (
+                                  <small>
+                                    No answers saved yet.
+                                  </small>
+                                )}
+                              </div>
 
-                                {item.dueAt
-                                  ? ` · planning target ${dateLabel(item.dueAt)}`
-                                  : ""}
-                              </p>
-
-                              {item.lastSavedAt ? (
-                                <small>
-                                  Last updated{" "}
-                                  {new Date(
-                                    item.lastSavedAt,
-                                  ).toLocaleString(
-                                    "en-GB",
-                                  )}
-                                  {lastEditor
-                                    ? ` by ${lastEditor}`
-                                    : ""}
-                                  {item.lastSavedByType
-                                    ? ` · ${item.lastSavedByType === "professional" ? "WedCRM" : "client"}`
-                                    : ""}
-                                </small>
-                              ) : (
-                                <small>
-                                  No answers saved yet.
-                                </small>
-                              )}
-                            </div>
-
-                            <div className="crm-questionnaire-instance__actions">
                               <AdminStatus
                                 tone={
                                   statusTone(
@@ -2964,154 +3110,15 @@ export function CRMJob() {
                                   " ",
                                 )}
                               </AdminStatus>
+                            </header>
 
-                              {canEditQuestionnaires ? (
-                                editing ? (
-                                  <AdminButton
-                                    variant="ghost"
-                                    size="sm"
-                                    disabled={saving}
-                                    onClick={() =>
-                                      cancelQuestionnaireEdit()
-                                    }
-                                  >
-                                    Close editor
-                                  </AdminButton>
-                                ) : (
-                                  <AdminButton
-                                    variant="secondary"
-                                    size="sm"
-                                    disabled={saving}
-                                    onClick={() =>
-                                      beginQuestionnaireEdit(
-                                        item,
-                                      )
-                                    }
-                                  >
-                                    Edit answers
-                                  </AdminButton>
-                                )
-                              ) : null}
-                            </div>
-                          </header>
+                            {item.introduction ? (
+                              <p className="crm-job-questionnaire-readonly__intro">
+                                {item.introduction}
+                              </p>
+                            ) : null}
 
-                          {item.introduction ? (
-                            <p className="crm-questionnaire-instance__intro">
-                              {item.introduction}
-                            </p>
-                          ) : null}
-
-                          {editing ? (
-                            <div className="crm-questionnaire-editor">
-                              <div className="crm-questionnaire-editor__notice">
-                                You are editing the same questionnaire answers visible to the client. Saving here updates their Client Portal; it does not create a separate professional copy.
-                              </div>
-
-                              <div className="crm-questionnaire-editor__fields">
-                                {item.fields.map(
-                                  (field) => (
-                                    <ProfessionalQuestionnaireField
-                                      key={
-                                        field.id
-                                      }
-                                      field={
-                                        field
-                                      }
-                                      value={
-                                        questionnaireDraft[
-                                          field.id
-                                        ]
-                                      }
-                                      suppliers={
-                                        workspace.supplierDirectory
-                                      }
-                                      supplierCategories={
-                                        workspace.supplierCategories
-                                      }
-                                      fileCount={
-                                        item.files.filter(
-                                          (file) =>
-                                            file.fieldKey
-                                            === field.id,
-                                        ).length
-                                      }
-                                      disabled={
-                                        saving
-                                        || !canEditQuestionnaires
-                                      }
-                                      onChange={(
-                                        value,
-                                      ) =>
-                                        updateQuestionnaireAnswer(
-                                          field.id,
-                                          value,
-                                        )
-                                      }
-                                    />
-                                  ),
-                                )}
-                              </div>
-
-                              <footer className="crm-questionnaire-editor__footer">
-                                <div>
-                                  {item.status === "completed" ? (
-                                    <>
-                                      <AdminStatus tone="success">
-                                        Complete
-                                      </AdminStatus>
-                                      <span>
-                                        This milestone stays complete when later details are updated.
-                                      </span>
-                                    </>
-                                  ) : (
-                                    <span>
-                                      Save work at any time, or mark the planning questionnaire complete when the required details are ready.
-                                    </span>
-                                  )}
-                                </div>
-
-                                <div>
-                                  <AdminButton
-                                    variant="secondary"
-                                    disabled={
-                                      saving
-                                      || !canEditQuestionnaires
-                                    }
-                                    onClick={() =>
-                                      void saveQuestionnaireAnswers(
-                                        item,
-                                        false,
-                                      )
-                                    }
-                                  >
-                                    {saving
-                                      ? "Saving…"
-                                      : "Save changes"}
-                                  </AdminButton>
-
-                                  {item.status !== "completed" ? (
-                                    <AdminButton
-                                      variant="primary"
-                                      icon={CheckCircle2}
-                                      disabled={
-                                        saving
-                                        || !canEditQuestionnaires
-                                      }
-                                      onClick={() =>
-                                        void saveQuestionnaireAnswers(
-                                          item,
-                                          true,
-                                        )
-                                      }
-                                    >
-                                      Mark as complete
-                                    </AdminButton>
-                                  ) : null}
-                                </div>
-                              </footer>
-                            </div>
-                          ) : (
-                            <div className="crm-questionnaire-instance__responses">
+                            <div className="crm-job-questionnaire-readonly__responses">
                               {item.fields
                                 .filter(
                                   (field) =>
@@ -3126,9 +3133,7 @@ export function CRMJob() {
                                 .map(
                                   (field) => (
                                     <div
-                                      key={
-                                        field.id
-                                      }
+                                      key={field.id}
                                       className="questionnaire-response-row"
                                     >
                                       <span>
@@ -3147,13 +3152,13 @@ export function CRMJob() {
                                   ),
                                 )}
                             </div>
-                          )}
-                        </article>
-                      );
-                    },
-                  )}
-                </div>
-              )}
+                          </article>
+                        );
+                      },
+                    )}
+                  </div>
+                )}
+              </div>
             </AdminAccordion>
           </div>
 
@@ -3791,6 +3796,105 @@ export function CRMJob() {
           </AdminAccordion>
         </div>
       </div>
+
+      {contractPreviewOpen && commercialContract ? (
+        <div
+          className="crm-job-contract-preview"
+          role="presentation"
+        >
+          <button
+            type="button"
+            className="crm-job-contract-preview__backdrop"
+            aria-label="Close contract preview"
+            onClick={() =>
+              setContractPreviewOpen(
+                false,
+              )
+            }
+          />
+
+          <section
+            className="crm-job-contract-preview__dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="crm-job-contract-preview-title"
+          >
+            <header className="crm-job-contract-preview__header">
+              <div>
+                <strong id="crm-job-contract-preview-title">
+                  {commercialContract.title
+                    || "Booking contract"}
+                </strong>
+
+                <small>
+                  {commercialContract.reference}
+                  {" · "}
+                  Version{" "}
+                  {commercialContract.versionNumber
+                    || 1}
+                </small>
+              </div>
+
+              <AdminStatus
+                tone={
+                  commercialContract.status === "signed"
+                    ? "success"
+                    : commercialContract.status === "void"
+                      ? "danger"
+                      : commercialContract.status === "draft"
+                        ? "warning"
+                        : "info"
+                }
+              >
+                {commercialContract.status.replace(
+                  /_/g,
+                  " ",
+                )}
+              </AdminStatus>
+
+              <AdminIconButton
+                icon={X}
+                label="Close contract preview"
+                title="Close contract preview"
+                variant="secondary"
+                onClick={() =>
+                  setContractPreviewOpen(
+                    false,
+                  )
+                }
+              />
+            </header>
+
+            <div className="crm-job-contract-preview__body">
+              {contractPreview.length ? (
+                contractPreview.map(
+                  (block, index) => (
+                    <section
+                      key={`${block.heading}-${index}`}
+                      className="crm-job-contract-preview__block"
+                    >
+                      {block.heading ? (
+                        <h3>
+                          {block.heading}
+                        </h3>
+                      ) : null}
+
+                      <p>
+                        {block.body}
+                      </p>
+                    </section>
+                  ),
+                )
+              ) : (
+                <p className="crm-job-contract-preview__empty">
+                  No contract text is available for this generated version.
+                </p>
+              )}
+            </div>
+          </section>
+        </div>
+      ) : null}
+
     </AdminPage>
   );
 }

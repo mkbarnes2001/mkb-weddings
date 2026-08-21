@@ -523,8 +523,10 @@ export type CrmJobCommercialContract = {
   sentAt: string;
   requiredSignatures: number;
   signatureCount: number;
-  signedAt: string;
+  signedAt: string;  content: unknown;
+  terms: unknown;
 };
+
 
 export type CrmJobCommercialQuote = {
   id: string;
