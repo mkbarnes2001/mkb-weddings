@@ -789,7 +789,7 @@ export function CRMEnquiry() {
           : statusLabel(
               leadLifecycle.story.state,
             )
-        : "Available after booking";
+        : "After booking";
 
     const leadBookingQuestionnaire =
       questionnaires.find(
@@ -982,7 +982,6 @@ export function CRMEnquiry() {
         <div className="crm-job-summary-grid__column crm-job-summary-grid__column--commercial">
           <AdminPanel
             title="Booking and payments"
-            description="Invoice, contract, questionnaire and quote."
             icon={BriefcaseBusiness}
             className="crm-booking-summary-panel"
           >
@@ -1072,11 +1071,11 @@ export function CRMEnquiry() {
                     </div>
 
                     <small className="crm-booking-summary-row__detail">
-                      Available after booking
+                      After booking
                     </small>
                   </div>
 
-                  <span className="crm-commercial-summary-state crm-booking-summary-row__state">
+                  <span className="crm-commercial-summary-state crm-booking-summary-row__state is-inactive">
                     Not generated
                   </span>
 
@@ -1108,7 +1107,7 @@ export function CRMEnquiry() {
                     </p>
                   ) : (
                     <small className="crm-booking-summary-row__detail">
-                      Available after booking
+                      After booking
                     </small>
                   )}
                 </div>
@@ -1118,7 +1117,7 @@ export function CRMEnquiry() {
                     `crm-commercial-summary-state crm-booking-summary-row__state ${
                       contract
                         ? `is-${contract.status}`
-                        : ""
+                        : "is-inactive"
                     }`
                   }
                 >
@@ -1157,7 +1156,7 @@ export function CRMEnquiry() {
                         : "Assigned with no due date"
                       : detail.job
                         ? "No questionnaire currently assigned"
-                        : "Available after booking"}
+                        : "After booking"}
                   </small>
                 </div>
 
@@ -1166,7 +1165,7 @@ export function CRMEnquiry() {
                     `crm-commercial-summary-state crm-booking-summary-row__state ${
                       leadBookingQuestionnaire
                         ? `is-${leadBookingQuestionnaire.status}`
-                        : ""
+                        : "is-inactive"
                     }`
                   }
                 >
@@ -1258,7 +1257,7 @@ export function CRMEnquiry() {
                     </small>
                   </div>
 
-                  <span className="crm-commercial-summary-state crm-booking-summary-row__state">
+                  <span className="crm-commercial-summary-state crm-booking-summary-row__state is-inactive">
                     Not created
                   </span>
 
@@ -1292,7 +1291,7 @@ export function CRMEnquiry() {
                 >
                   {leadLifecycle?.wedding.exists
                                         ? "Ready"
-                                        : "Available after booking"}
+                                        : "After booking"}
                 </span>
 
                 {leadLifecycle?.wedding.exists ? (
@@ -1319,7 +1318,7 @@ export function CRMEnquiry() {
                 >
                   {leadLifecycle?.wedding.exists
                                         ? `${leadLifecycle.wedding.assetCount} photographs`
-                                        : "Available after booking"}
+                                        : "After booking"}
                 </span>
 
                 {leadLifecycle?.wedding.exists ? (
@@ -1348,7 +1347,7 @@ export function CRMEnquiry() {
                                         ? leadPrimaryGallery.title
                                         : detail.job
                                           ? "Not created"
-                                          : "Available after booking"}
+                                          : "After booking"}
                 </span>
 
                 {leadPrimaryGallery ? (
@@ -1428,7 +1427,7 @@ export function CRMEnquiry() {
                 >
                   {leadLifecycle?.wedding.exists
                                         ? `${leadLifecycle.publicAssignments.total} assignments`
-                                        : "Available after booking"}
+                                        : "After booking"}
                 </span>
 
                 {leadLifecycle?.wedding.exists ? (
@@ -1452,8 +1451,7 @@ export function CRMEnquiry() {
       <div className="crm-job-operations-grid">
         <div className="crm-job-operations-column">
           <AdminAccordion
-            title="Lead details"
-            description="Core Wedding information used through quoting and booking."
+            title="Wedding details"
             icon={BriefcaseBusiness}
             defaultOpen
             summary={
@@ -1658,7 +1656,6 @@ export function CRMEnquiry() {
 
           <AdminAccordion
             title="Quote and package"
-            description="Pricing and quote revisions attached to this Wedding journey."
             icon={PackageCheck}
             defaultOpen
             summary={
@@ -1767,7 +1764,6 @@ export function CRMEnquiry() {
 
           <AdminAccordion
             title="Communication"
-            description="Email delivery and engagement across this Wedding journey."
             icon={MessageCircle}
             summary={
               <AdminStatus tone="neutral">
@@ -1848,7 +1844,6 @@ export function CRMEnquiry() {
           >
             <AdminAccordion
               title="Questionnaires"
-              description="Planning forms attached to the same Wedding journey."
               icon={ClipboardList}
               summary={
                 <AdminStatus tone="neutral">
@@ -1910,7 +1905,6 @@ export function CRMEnquiry() {
 
           <AdminAccordion
             title="Supplier team"
-            description="Wedding suppliers linked after booking."
             icon={Users}
             summary={
               <AdminStatus tone="neutral">
@@ -1921,7 +1915,7 @@ export function CRMEnquiry() {
             {!detail.job ? (
               <AdminEmptyState
                 icon={Users}
-                title="Available after booking"
+                title="After booking"
                 description="The Wedding supplier team becomes available when this Lead converts to a Job."
               />
             ) : !jobWorkspace?.linkedSuppliers.length ? (
@@ -1956,7 +1950,6 @@ export function CRMEnquiry() {
 
           <AdminAccordion
             title="Files"
-            description="Private planning files shared through the Wedding journey."
             icon={FolderOpen}
             summary={
               <AdminStatus tone="neutral">
@@ -2128,7 +2121,6 @@ export function CRMEnquiry() {
 
           <AdminAccordion
             title="Notes and activity"
-            description="Original enquiry notes and the latest operational changes."
             icon={MessageSquareText}
             summary={
               <AdminStatus tone="neutral">
@@ -2188,7 +2180,6 @@ export function CRMEnquiry() {
       && !detail.job ? (
         <AdminAccordion
           title="Close lead"
-          description="Lost leads remain part of the Wedding history."
           icon={XCircle}
         >
               <AdminField label="Reason">

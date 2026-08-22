@@ -76,12 +76,12 @@ for label in (
 
 # Pre-booking Lead retains only lifecycle-appropriate differences.
 for token in (
-    'title="Lead details"',
+    'title="Wedding details"',
     'title="Close lead"',
     "createQuote",
     "markLost",
     "createLeadClientGallery",
-    "Available after booking",
+    "After booking",
 ):
     assert token in lead, token
 

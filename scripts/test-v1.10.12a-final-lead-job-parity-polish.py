@@ -138,7 +138,7 @@ for forbidden in (
 
 # Lead lifecycle semantics remain different only by state.
 for token in (
-    "Available after booking",
+    "After booking",
     "journeyQuote",
     "leadLifecycle",
     "leadPrimaryGallery",

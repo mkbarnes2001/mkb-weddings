@@ -83,7 +83,6 @@ export function CRMWeddingWorkflowPanel({
   return (
     <AdminPanel
       title="Wedding workflow"
-      description="Wedding Photography · key booking and delivery milestones."
       icon={Workflow}
       className="crm-wedding-workflow-panel"
     >
@@ -256,7 +255,7 @@ export function CRMWeddingWorkflowPanel({
 
             <p>
               {!jobAccepted
-                ? "Available after booking."
+                ? "After booking."
                 : previewsComplete
                   && previewsCompletedAt
                   ? `Completed ${formatDate(
@@ -331,7 +330,7 @@ export function CRMWeddingWorkflowPanel({
 
             <p>
               {!jobAccepted
-                ? "Available after booking."
+                ? "After booking."
                 : deliveryComplete
                   && deliveryCompletedAt
                   ? `Completed ${formatDate(
@@ -363,7 +362,6 @@ export function CRMClientsPanel({
   return (
     <AdminPanel
       title="Clients"
-      description="Contact details and client portal access."
       icon={Users}
       className="crm-job-clients-panel"
       actions={

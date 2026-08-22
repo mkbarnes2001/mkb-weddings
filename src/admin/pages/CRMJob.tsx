@@ -2765,7 +2765,6 @@ export function CRMJob() {
           {job.quoteId ? (
             <AdminAccordion
               title="Quote and package"
-              description="Accepted quote and package."
               icon={PackageCheck}
               defaultOpen
               summary={
@@ -2826,7 +2825,7 @@ export function CRMJob() {
           ) : null}
 
 
-          <AdminAccordion title="Communication" description="Send email or record calls, meetings, messages and internal notes." icon={MessageCircle} summary={<AdminStatus tone="neutral">{workspace.communications.length} records</AdminStatus>}>
+          <AdminAccordion title="Communication" icon={MessageCircle} summary={<AdminStatus tone="neutral">{workspace.communications.length} records</AdminStatus>}>
             {canManage ? <div className="crm-communication-compose"><div className="grid gap-3 md:grid-cols-3"><AdminField label="Channel"><select className="admin-select" value={communicationDraft.channel} onChange={(event) => setCommunicationDraft((current) => ({ ...current, channel: event.target.value, direction: event.target.value === "note" ? "internal" : current.direction }))}><option value="note">Internal note</option><option value="email">Email</option><option value="phone">Phone call</option><option value="sms">Message / SMS</option><option value="meeting">Meeting</option></select></AdminField><AdminField label="Direction"><select className="admin-select" value={communicationDraft.direction} onChange={(event) => setCommunicationDraft((current) => ({ ...current, direction: event.target.value }))}><option value="internal">Internal</option><option value="outbound">Outbound</option><option value="inbound">Inbound</option></select></AdminField><AdminField label="Client"><select className="admin-select" value={communicationDraft.contactId} onChange={(event) => setCommunicationDraft((current) => ({ ...current, contactId: event.target.value }))}><option value="">No specific contact</option>{workspace.contacts.map((contact) => <option key={contact.id} value={contact.id}>{contact.displayName}</option>)}</select></AdminField></div><AdminField label="Subject"><input className="admin-input" value={communicationDraft.subject} onChange={(event) => setCommunicationDraft((current) => ({ ...current, subject: event.target.value }))} placeholder="Optional for calls and notes" /></AdminField><AdminField label="Message / notes"><textarea className="admin-textarea min-h-28" value={communicationDraft.body} onChange={(event) => setCommunicationDraft((current) => ({ ...current, body: event.target.value }))} /></AdminField><div className="flex flex-wrap gap-2"><AdminButton icon={MessageSquareText} disabled={saving || (!communicationDraft.body.trim() && !communicationDraft.subject.trim())} onClick={() => void saveCommunication(false)}>Log communication</AdminButton><AdminButton variant="primary" icon={Mail} disabled={saving || !communicationDraft.contactId || !communicationDraft.subject.trim() || !communicationDraft.body.trim()} onClick={() => void saveCommunication(true)}>Send email</AdminButton></div></div> : null}
             {!workspace.communications.length ? <AdminEmptyState icon={MessageCircle} title="No communication recorded" description="Emails and logged contact history will appear here." /> : <div className="crm-communication-list">{workspace.communications.map((item) => <article key={item.id}><div className="crm-communication-list__icon">{item.channel === "email" ? <Mail /> : item.channel === "phone" ? <Phone /> : item.channel === "meeting" ? <Users /> : <MessageSquareText />}</div><div><div className="flex flex-wrap items-center gap-2"><strong>{item.subject || item.channel.replace(/_/g, " ")}</strong><AdminStatus tone={item.status === "failed" ? "danger" : item.status === "sent" ? "success" : "neutral"}>{item.status}</AdminStatus><AdminStatus tone="info">{item.direction}</AdminStatus></div><p>{item.body}</p><small>{item.contactName || item.contactEmail || "Internal"} · {dateLabel(item.occurredAt)}{item.actorEmail ? ` · ${item.actorEmail}` : ""}</small></div></article>)}</div>}
           </AdminAccordion>
@@ -2841,7 +2840,6 @@ export function CRMJob() {
           >
             <AdminAccordion
               title="Questionnaires"
-              description="Questionnaire details for this Job."
               icon={ClipboardList}
               summary={
                 <AdminStatus tone="neutral">
@@ -2987,7 +2985,6 @@ export function CRMJob() {
 
           <AdminAccordion
             title="Supplier team"
-            description="Approved Wedding suppliers and client suggestions."
             icon={Store}
             summary={
               pendingSubmissions.length ? (
@@ -3427,7 +3424,6 @@ export function CRMJob() {
 
           <AdminAccordion
             title="Files"
-            description="Private planning files shared between this business and the client, plus questionnaire attachments."
             icon={FolderOpen}
             summary={
               <AdminStatus tone="neutral">
@@ -3613,7 +3609,7 @@ export function CRMJob() {
             ) : null}
           </AdminAccordion>
 
-          <AdminAccordion title="Notes and activity" description="Original enquiry notes and the latest operational changes." icon={MessageSquareText} summary={<AdminStatus tone="neutral">{workspace.activities.length} events</AdminStatus>}>
+          <AdminAccordion title="Notes and activity" icon={MessageSquareText} summary={<AdminStatus tone="neutral">{workspace.activities.length} events</AdminStatus>}>
             {workspace.enquiry?.notes ? <div className="crm-job-note"><strong>{workspace.enquiry.reference}</strong><p>{workspace.enquiry.notes}</p><small>{workspace.enquiry.source}{workspace.enquiry.campaign ? ` · ${workspace.enquiry.campaign}` : ""} · {dateLabel(workspace.enquiry.createdAt)}</small></div> : <p className="text-[10px] text-neutral-500">No enquiry notes recorded.</p>}
             <div className="crm-activity-list crm-activity-list--spaced">{workspace.activities.map((item) => <div key={item.id}><span></span><section><strong>{item.summary}</strong><p>{dateLabel(item.createdAt)}{item.actorEmail ? ` · ${item.actorEmail}` : ""}</p></section></div>)}</div>
           </AdminAccordion>

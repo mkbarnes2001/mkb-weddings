@@ -87,7 +87,7 @@ assert (
 
 for token in [
     'title="Wedding workflow"',
-    'title="Lead details"',
+    'title="Wedding details"',
     'title="Clients"',
     'title="Communication"',
     'title="Quote and package"',

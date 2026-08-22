@@ -90,7 +90,7 @@ assert (
 
 
 for token in (
-    'title="Lead details"',
+    'title="Wedding details"',
     'title="Communication"',
     'title="Quote and package"',
     'title="Booking and payments"',

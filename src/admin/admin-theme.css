@@ -15922,3 +15922,12 @@ small {
   margin: 0 !important;
   transform: none !important;
 }
+
+
+/* v1.10.12a — workspace heading and inactive-state polish */
+
+.crm-lead-workspace-page
+.crm-booking-summary-row__state.is-inactive {
+  color: var(--admin-muted);
+  font-weight: 550;
+}

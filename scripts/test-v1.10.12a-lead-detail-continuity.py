@@ -48,7 +48,7 @@ for token in (
 for title in (
     'title="Booking and payments"',
     'title="Wedding delivery and content"',
-    'title="Lead details"',
+    'title="Wedding details"',
     'title="Quote and package"',
     'title="Communication"',
     'title="Questionnaires"',
@@ -60,7 +60,7 @@ for title in (
 
 
 details_pos = page.index(
-    'title="Lead details"'
+    'title="Wedding details"'
 )
 
 details_end = page.index(
