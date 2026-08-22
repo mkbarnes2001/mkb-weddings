@@ -690,80 +690,53 @@ export function CRMEnquiry() {
             ? "warning"
             : "neutral";
 
-  const journey = [
-    {
-      label: "Lead created",
-      detail:
-        dateOnly(
-          enquiry.createdAt,
-        ),
-      complete: true,
-    },
-    {
-      label: "Quote",
-      detail:
-        journeyQuote
-          ? statusLabel(
-              journeyQuote.status,
-            )
-          : "Not started",
-      complete:
-        quoteProgressed,
-    },
-    {
-      label: "Contract",
-      detail:
-        contract
-          ? contractComplete
-            ? "Signed"
-            : statusLabel(
-                contract.status,
+    const journey = [
+      {
+        label: "Lead created",
+        detail:
+          dateOnly(
+            enquiry.createdAt,
+          ),
+        complete: true,
+      },
+      {
+        label: "Quote",
+        detail:
+          journeyQuote
+            ? statusLabel(
+                journeyQuote.status,
               )
-          : "Not started",
-      complete:
-        contractComplete,
-    },
-    {
-      label: "Questionnaire",
-      detail:
-        questionnaires.length
-          ? `${completedQuestionnaires} of ${questionnaires.length} completed`
-          : "Not started",
-      complete:
-        questionnaireComplete,
-    },
-    {
-      label: "Deposit",
-      detail:
-        invoice
-          ? paymentRecorded
-            ? "Payment recorded"
-            : statusLabel(
-                invoice.status,
-              )
-          : "Not invoiced",
-      complete:
-        paymentRecorded,
-    },
-    {
-      label: "Event",
-      detail:
-        dateOnly(
-          enquiry.eventDate,
-        ),
-      complete:
-        eventPassed,
-    },
-    {
-      label: "Complete",
-      detail:
-        jobStatus === "completed"
-          ? "Complete"
-          : "Pending",
-      complete:
-        jobStatus === "completed",
-    },
-  ];
+            : "Not started",
+        complete:
+          quoteProgressed,
+      },
+      {
+        label: "Quote accepted",
+        detail:
+          journeyQuote?.status
+            === "accepted"
+          || detail.job
+            ? "Accepted"
+            : "Pending",
+        complete:
+          journeyQuote?.status
+            === "accepted"
+          || Boolean(
+            detail.job,
+          ),
+      },
+      {
+        label: "Job accepted",
+        detail:
+          detail.job
+            ? "Booked"
+            : "Pending",
+        complete:
+          Boolean(
+            detail.job,
+          ),
+      },
+    ];
 
   return (
     <AdminPage className="crm-lead-workspace-page">
@@ -833,80 +806,16 @@ export function CRMEnquiry() {
         </div>
       ) : null}
 
-      <AdminPanel
+      <div className="crm-lead-primary-grid">
+        <div className="crm-lead-primary-grid__journey">
+<AdminPanel
         title="Client journey"
-        description="Lead → quote → questionnaire → contract → invoice"
+        description="Lead → quote → accepted booking"
         icon={Check}
-        className="crm-lead-workspace-overview-panel crm-lead-workspace-overview-panel--compact"
+        className="crm-lead-workspace-overview-panel crm-lead-workspace-overview-panel--compact crm-lead-journey-panel"
         compact
       >
         <div className="crm-lead-workspace-overview">
-          <div className="crm-lead-workspace-overview__identity">
-            <span
-              className="crm-record-dot"
-              aria-hidden="true"
-            />
-
-            <div>
-              <p>{lifecycle}</p>
-
-              <h2>
-                {enquiry.primaryContact
-                  ?.displayName
-                  || enquiry.reference}
-              </h2>
-
-              <small>
-                {enquiry.partnerContact
-                  ?.displayName
-                  ? `${enquiry.partnerContact.displayName} · `
-                  : ""}
-                {enquiry.reference}
-              </small>
-            </div>
-          </div>
-
-          <dl className="crm-lead-workspace-overview__facts">
-            <div>
-              <dt>Service</dt>
-              <dd>
-                <BriefcaseBusiness />
-                {enquiry.serviceInterest
-                  || enquiry.eventType
-                  || "Not specified"}
-              </dd>
-            </div>
-
-            <div>
-              <dt>Event date</dt>
-              <dd>
-                <CalendarDays />
-                {dateOnly(
-                  enquiry.eventDate,
-                )}
-              </dd>
-            </div>
-
-            <div>
-              <dt>Venue</dt>
-              <dd>
-                <MapPin />
-                {enquiry.venueText
-                  || "Venue TBC"}
-              </dd>
-            </div>
-
-            <div>
-              <dt>Mail</dt>
-              <dd>
-                <Mail />
-                {statusLabel(
-                  enquiry.mailStatus,
-                )}
-              </dd>
-            </div>
-          </dl>
-
           <div
             className="crm-lead-workspace-journey"
             aria-label="Client journey"
@@ -934,6 +843,7 @@ export function CRMEnquiry() {
                     <strong>
                       {item.label}
                     </strong>
+
                     <small>
                       {item.detail}
                     </small>
@@ -944,306 +854,366 @@ export function CRMEnquiry() {
           </div>
         </div>
       </AdminPanel>
+        </div>
+        <div className="crm-lead-primary-grid__client">
+<AdminPanel
+              title="Client"
+              description="Contact details for this Lead."
+              icon={UserRound}
+              className="crm-lead-client-panel"
+              actions={
+                canManage ? (
+                  <AdminButton
+                    size="sm"
+                    variant="secondary"
+                    icon={Save}
+                    disabled={saving}
+                    onClick={() =>
+                      void save()
+                    }
+                  >
+                    Save
+                  </AdminButton>
+                ) : undefined
+              }
+            >
+              <div className="crm-lead-contact-editors">
+                <ContactEditor
+                  title="Primary client"
+                  value={
+                    form.primaryContact
+                    || {}
+                  }
+                  disabled={!canManage}
+                  onChange={(value) =>
+                    setForm(
+                      (current) => ({
+                        ...current,
+                        primaryContact:
+                          value,
+                      }),
+                    )
+                  }
+                />
+
+                <ContactEditor
+                  title="Partner / second client"
+                  value={
+                    form.partnerContact
+                    || {}
+                  }
+                  disabled={!canManage}
+                  onChange={(value) =>
+                    setForm(
+                      (current) => ({
+                        ...current,
+                        partnerContact:
+                          value,
+                      }),
+                    )
+                  }
+                />
+              </div>
+            </AdminPanel>
+        </div>
+      </div>
 
       <div className="crm-lead-workspace-layout">
         <main className="crm-lead-workspace-main">
-          <AdminPanel
-            title="Lead details"
-            description="Core enquiry details remain the source for quote and booking information."
-            icon={BriefcaseBusiness}
-            actions={
-              canManage ? (
-                <AdminButton
-                  size="sm"
-                  variant="primary"
-                  icon={Save}
-                  disabled={saving}
-                  onClick={() =>
-                    void save()
-                  }
+          <div className="crm-lead-summary-grid">
+            <div className="crm-lead-summary-grid__details">
+<AdminPanel
+              title="Lead details"
+              description="Core details used for quoting and booking."
+              icon={BriefcaseBusiness}
+              className="crm-lead-details-panel"
+              actions={
+                canManage ? (
+                  <AdminButton
+                    size="sm"
+                    variant="primary"
+                    icon={Save}
+                    disabled={saving}
+                    onClick={() =>
+                      void save()
+                    }
+                  >
+                    Save
+                  </AdminButton>
+                ) : undefined
+              }
+            >
+              <div className="crm-lead-details-grid">
+                <AdminField label="Pipeline stage">
+                  <select
+                    className="admin-select"
+                    value={
+                      form.stageId
+                      || ""
+                    }
+                    disabled={
+                      !canManage
+                      || enquiry.status
+                        === "won"
+                    }
+                    onChange={(event) =>
+                      setForm(
+                        (current) => ({
+                          ...current,
+                          stageId:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  >
+                    {(overview?.stages || [])
+                      .filter(
+                        (item) =>
+                          item.type === "open"
+                          || item.id
+                            === form.stageId,
+                      )
+                      .map(
+                        (item) => (
+                          <option
+                            key={item.id}
+                            value={item.id}
+                          >
+                            {item.name}
+                          </option>
+                        ),
+                      )}
+                  </select>
+                </AdminField>
+
+                <AdminField label="Service">
+                  <input
+                    className="admin-input"
+                    disabled={!canManage}
+                    value={
+                      form.serviceInterest
+                      || ""
+                    }
+                    onChange={(event) =>
+                      setForm(
+                        (current) => ({
+                          ...current,
+                          serviceInterest:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+                </AdminField>
+
+                <AdminField label="Wedding date">
+                  <input
+                    className="admin-input"
+                    type="date"
+                    disabled={
+                      !canManage
+                      || enquiry.status
+                        === "won"
+                    }
+                    value={
+                      form.eventDate
+                      || ""
+                    }
+                    onChange={(event) =>
+                      setForm(
+                        (current) => ({
+                          ...current,
+                          eventDate:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+                </AdminField>
+
+                <AdminField label="Venue">
+                  <input
+                    className="admin-input"
+                    disabled={!canManage}
+                    value={
+                      form.venueText
+                      || ""
+                    }
+                    placeholder="Venue or TBC"
+                    onChange={(event) =>
+                      setForm(
+                        (current) => ({
+                          ...current,
+                          venueText:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+                </AdminField>
+
+                <AdminField label="Source">
+                  <input
+                    className="admin-input"
+                    disabled={!canManage}
+                    value={
+                      form.source
+                      || ""
+                    }
+                    placeholder="Website, referral, Instagram…"
+                    onChange={(event) =>
+                      setForm(
+                        (current) => ({
+                          ...current,
+                          source:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+                </AdminField>
+
+                <AdminField label="Campaign">
+                  <input
+                    className="admin-input"
+                    disabled={!canManage}
+                    value={
+                      form.campaign
+                      || ""
+                    }
+                    placeholder="Optional"
+                    onChange={(event) =>
+                      setForm(
+                        (current) => ({
+                          ...current,
+                          campaign:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+                </AdminField>
+
+                <AdminField
+                  label="Notes"
+                  className="crm-lead-details-grid__wide"
                 >
-                  Save
-                </AdminButton>
-              ) : undefined
-            }
-          >
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              <AdminField label="Pipeline stage">
-                <select
-                  className="admin-select"
-                  value={
-                    form.stageId
-                    || ""
-                  }
-                  disabled={
-                    !canManage
-                    || enquiry.status
-                      === "won"
-                  }
-                  onChange={(event) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        stageId:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                >
-                  {(overview?.stages || [])
-                    .filter(
-                      (item) =>
-                        item.type === "open"
-                        || item.id
-                          === form.stageId,
-                    )
-                    .map(
-                      (item) => (
-                        <option
-                          key={item.id}
-                          value={item.id}
+                  <textarea
+                    className="admin-textarea"
+                    rows={3}
+                    disabled={!canManage}
+                    value={
+                      form.notes
+                      || ""
+                    }
+                    onChange={(event) =>
+                      setForm(
+                        (current) => ({
+                          ...current,
+                          notes:
+                            event.target.value,
+                        }),
+                      )
+                    }
+                  />
+                </AdminField>
+              </div>
+            </AdminPanel>
+            </div>
+            <div className="crm-lead-summary-grid__quotes">
+<AdminPanel
+              title="Quotes"
+              description="Pricing sent during this Lead journey."
+              icon={PackageCheck}
+              className="crm-lead-quotes-panel"
+              actions={
+                canManage
+                && !detail.job
+                && !quotes.length ? (
+                  <AdminButton
+                    variant="primary"
+                    size="sm"
+                    icon={Plus}
+                    disabled={saving}
+                    onClick={() =>
+                      void createQuote()
+                    }
+                  >
+                    Create quote
+                  </AdminButton>
+                ) : undefined
+              }
+            >
+              {!quotes.length ? (
+                <AdminEmptyState
+                  icon={PackageCheck}
+                  title="No quote created"
+                  description="Create a quote when the lead is ready for pricing."
+                />
+              ) : (
+                <div className="crm-lead-quote-list">
+                  {quotes.map(
+                    (quote) => (
+                      <article
+                        key={quote.id}
+                        className="crm-lead-quote-row"
+                      >
+                        <div className="crm-lead-quote-row__copy">
+                          <strong>
+                            {quote.reference}
+                          </strong>
+
+                          <small>
+                            {quote.quoteType
+                              === "fixed"
+                              ? "Fixed"
+                              : "Pick & Choose"}
+                            {" · "}
+                            v
+                            {quote.currentVersion
+                              ?.versionNumber
+                              || 1}
+                          </small>
+                        </div>
+
+                        <span
+                          className={
+                            `crm-lead-quote-row__state is-${quote.status}`
+                          }
                         >
-                          {item.name}
-                        </option>
-                      ),
-                    )}
-                </select>
-              </AdminField>
+                          {statusLabel(
+                            quote.status,
+                          )}
+                        </span>
 
-              <AdminField label="Event date">
-                <input
-                  className="admin-input"
-                  type="date"
-                  disabled={
-                    !canManage
-                    || enquiry.status
-                      === "won"
-                  }
-                  value={
-                    form.eventDate
-                    || ""
-                  }
-                  onChange={(event) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        eventDate:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                />
-              </AdminField>
+                        <strong className="crm-lead-quote-row__value">
+                          {money(
+                            quote.currentVersion
+                              ?.totalAmount
+                              || 0,
+                            quote.currency
+                              || "GBP",
+                          )}
+                        </strong>
 
-              <AdminField label="Date flexibility">
-                <input
-                  className="admin-input"
-                  disabled={!canManage}
-                  value={
-                    form.dateFlexibility
-                    || ""
-                  }
-                  onChange={(event) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        dateFlexibility:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                  placeholder="Fixed / flexible / month"
-                />
-              </AdminField>
-
-              <AdminField label="Venue">
-                <input
-                  className="admin-input"
-                  disabled={!canManage}
-                  value={
-                    form.venueText
-                    || ""
-                  }
-                  onChange={(event) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        venueText:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                  placeholder="Venue or TBC"
-                />
-              </AdminField>
-
-              <AdminField label="Service">
-                <input
-                  className="admin-input"
-                  disabled={!canManage}
-                  value={
-                    form.serviceInterest
-                    || ""
-                  }
-                  onChange={(event) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        serviceInterest:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                />
-              </AdminField>
-
-              <AdminField label="Package interest">
-                <input
-                  className="admin-input"
-                  disabled={!canManage}
-                  value={
-                    form.packageInterest
-                    || ""
-                  }
-                  onChange={(event) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        packageInterest:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                />
-              </AdminField>
-
-              <AdminField label="Budget minimum (£)">
-                <input
-                  className="admin-input"
-                  type="number"
-                  min="0"
-                  disabled={!canManage}
-                  value={
-                    form.budgetMin == null
-                      ? ""
-                      : form.budgetMin
-                        / 100
-                  }
-                  onChange={(event) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        budgetMin:
-                          event.target.value
-                            ? Math.round(
-                                Number(
-                                  event.target.value,
-                                ) * 100,
-                              )
-                            : null,
-                      }),
-                    )
-                  }
-                />
-              </AdminField>
-
-              <AdminField label="Budget maximum (£)">
-                <input
-                  className="admin-input"
-                  type="number"
-                  min="0"
-                  disabled={!canManage}
-                  value={
-                    form.budgetMax == null
-                      ? ""
-                      : form.budgetMax
-                        / 100
-                  }
-                  onChange={(event) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        budgetMax:
-                          event.target.value
-                            ? Math.round(
-                                Number(
-                                  event.target.value,
-                                ) * 100,
-                              )
-                            : null,
-                      }),
-                    )
-                  }
-                />
-              </AdminField>
+                        <Link
+                          className="admin-icon-control crm-lead-quote-row__action"
+                          to={`/admin/crm/quotes/${quote.id}`}
+                          aria-label={`Open quote ${quote.reference}`}
+                          title="Open quote"
+                        >
+                          <ExternalLink aria-hidden="true" />
+                        </Link>
+                      </article>
+                    ),
+                  )}
+                </div>
+              )}
+            </AdminPanel>
             </div>
+          </div>
 
-            <div className="mt-4">
-              <AdminField label="Notes">
-                <textarea
-                  className="admin-textarea min-h-32"
-                  disabled={!canManage}
-                  value={
-                    form.notes
-                    || ""
-                  }
-                  onChange={(event) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        notes:
-                          event.target.value,
-                      }),
-                    )
-                  }
-                />
-              </AdminField>
-            </div>
-          </AdminPanel>
 
-          <AdminPanel
-            title="Client"
-            description="Contact details remain attached to the same journey before and after booking."
-            icon={UserRound}
-          >
-            <div className="grid gap-5 md:grid-cols-2">
-              <ContactEditor
-                title="Primary client"
-                value={
-                  form.primaryContact
-                  || {}
-                }
-                disabled={!canManage}
-                onChange={(value) =>
-                  setForm(
-                    (current) => ({
-                      ...current,
-                      primaryContact:
-                        value,
-                    }),
-                  )
-                }
-              />
-
-              <ContactEditor
-                title="Partner / second client"
-                value={
-                  form.partnerContact
-                  || {}
-                }
-                disabled={!canManage}
-                onChange={(value) =>
-                  setForm(
-                    (current) => ({
-                      ...current,
-                      partnerContact:
-                        value,
-                    }),
-                  )
-                }
-              />
-            </div>
-          </AdminPanel>
 
           <AdminPanel
             title="Mail"
@@ -1314,111 +1284,7 @@ export function CRMEnquiry() {
             )}
           </AdminPanel>
 
-          <AdminPanel
-            title="Quotes"
-            description="Package choices and quote revisions remain attached to this journey."
-            icon={PackageCheck}
-            actions={
-              canManage
-              && !detail.job
-              && !quotes.length ? (
-                <AdminButton
-                  variant="primary"
-                  size="sm"
-                  icon={Plus}
-                  disabled={saving}
-                  onClick={() =>
-                    void createQuote()
-                  }
-                >
-                  Create quote
-                </AdminButton>
-              ) : undefined
-            }
-          >
-            {!quotes.length ? (
-              <AdminEmptyState
-                icon={PackageCheck}
-                title="No quote created"
-                description="Create a quote when the lead is ready for pricing."
-              />
-            ) : (
-              <div className="admin-table-wrap">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Reference</th>
-                      <th>Type</th>
-                      <th>Version</th>
-                      <th>Status</th>
-                      <th>Total</th>
-                    </tr>
-                  </thead>
 
-                  <tbody>
-                    {quotes.map(
-                      (quote) => (
-                        <tr key={quote.id}>
-                          <td>
-                            <Link
-                              className="admin-inline-link"
-                              to={`/admin/crm/quotes/${quote.id}`}
-                            >
-                              {quote.reference}
-                            </Link>
-                          </td>
-
-                          <td>
-                            {quote.quoteType
-                              === "fixed"
-                              ? "Fixed"
-                              : "Pick & Choose"}
-                          </td>
-
-                          <td>
-                            v
-                            {quote.currentVersion
-                              ?.versionNumber
-                              || 1}
-                          </td>
-
-                          <td>
-                            <AdminStatus
-                              tone={
-                                quote.status === "accepted"
-                                  ? "success"
-                                  : quote.status === "declined"
-                                    || quote.status === "expired"
-                                    ? "danger"
-                                    : quote.status === "sent"
-                                      || quote.status === "viewed"
-                                      ? "info"
-                                      : "warning"
-                              }
-                            >
-                              {statusLabel(
-                                quote.status,
-                              )}
-                            </AdminStatus>
-                          </td>
-
-                          <td>
-                            {money(
-                              quote.currentVersion
-                                ?.totalAmount
-                                || 0,
-                              quote.currency
-                                || "GBP",
-                            )}
-                          </td>
-                        </tr>
-                      ),
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </AdminPanel>
 
           <div className="crm-lead-workspace-document-grid">
             <AdminPanel
@@ -1932,6 +1798,91 @@ export function CRMEnquiry() {
   );
 }
 
-function ContactEditor({ title, value, disabled, onChange }: { title: string; value: NonNullable<CrmEnquiryInput["primaryContact"]>; disabled: boolean; onChange: (value: NonNullable<CrmEnquiryInput["primaryContact"]>) => void }) {
-  return <div className="rounded-xl bg-neutral-50 p-4"><h3 className="mb-3 text-sm font-semibold">{title}</h3><div className="grid gap-3 sm:grid-cols-2"><AdminField label="First name"><input className="admin-input" disabled={disabled} value={value.firstName || ""} onChange={(event) => onChange({ ...value, firstName: event.target.value })} /></AdminField><AdminField label="Last name"><input className="admin-input" disabled={disabled} value={value.lastName || ""} onChange={(event) => onChange({ ...value, lastName: event.target.value })} /></AdminField><AdminField label="Email"><input className="admin-input" type="email" disabled={disabled} value={value.email || ""} onChange={(event) => onChange({ ...value, email: event.target.value })} /></AdminField><AdminField label="Phone"><input className="admin-input" disabled={disabled} value={value.phone || ""} onChange={(event) => onChange({ ...value, phone: event.target.value })} /></AdminField></div></div>;
+function ContactEditor({
+  title,
+  value,
+  disabled,
+  onChange,
+}: {
+  title: string;
+  value: NonNullable<
+    CrmEnquiryInput["primaryContact"]
+  >;
+  disabled: boolean;
+  onChange: (
+    value: NonNullable<
+      CrmEnquiryInput["primaryContact"]
+    >,
+  ) => void;
+}) {
+  return (
+    <section className="crm-lead-contact-editor">
+      <h3>
+        {title}
+      </h3>
+
+      <div className="crm-lead-contact-editor__grid">
+        <AdminField label="First name">
+          <input
+            className="admin-input"
+            disabled={disabled}
+            value={value.firstName || ""}
+            onChange={(event) =>
+              onChange({
+                ...value,
+                firstName:
+                  event.target.value,
+              })
+            }
+          />
+        </AdminField>
+
+        <AdminField label="Last name">
+          <input
+            className="admin-input"
+            disabled={disabled}
+            value={value.lastName || ""}
+            onChange={(event) =>
+              onChange({
+                ...value,
+                lastName:
+                  event.target.value,
+              })
+            }
+          />
+        </AdminField>
+
+        <AdminField label="Email">
+          <input
+            className="admin-input"
+            type="email"
+            disabled={disabled}
+            value={value.email || ""}
+            onChange={(event) =>
+              onChange({
+                ...value,
+                email:
+                  event.target.value,
+              })
+            }
+          />
+        </AdminField>
+
+        <AdminField label="Phone">
+          <input
+            className="admin-input"
+            disabled={disabled}
+            value={value.phone || ""}
+            onChange={(event) =>
+              onChange({
+                ...value,
+                phone:
+                  event.target.value,
+              })
+            }
+          />
+        </AdminField>
+      </div>
+    </section>
+  );
 }

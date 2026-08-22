@@ -93,7 +93,7 @@ assert "expandedLeadFieldId" in crm
 # Client Edit action now uses a simple centred person icon.
 assert "UserRoundCog" not in job
 assert "PenLine" not in job
-assert "UserRound" in job
+assert "ContactRound" in job
 assert 'title="Edit client"' in job
 
 
@@ -127,7 +127,7 @@ print(
     "  field builder: preserved"
 )
 print(
-    "  client edit icon: centred UserRound"
+    "  client edit icon: centred ContactRound"
 )
 print(
     "  schema migration: not required"

@@ -31,10 +31,10 @@ import {
   ShieldX,
   Store,
   Trash2,
-  UserRound,
   Users,
   Workflow,
   X,
+  ContactRound,
 } from "lucide-react";
 import { AdminAccordion,
   AdminButton,
@@ -2371,7 +2371,7 @@ export function CRMJob() {
                         aria-label={`Edit ${contact.displayName}`}
                         title="Edit client"
                       >
-                        <UserRound aria-hidden="true" />
+                        <ContactRound aria-hidden="true" />
                       </Link>
 
                       <AdminIconButton

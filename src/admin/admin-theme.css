@@ -15443,3 +15443,452 @@ small {
     grid-column: 1;
   }
 }
+
+
+/* v1.10.12a — Lead detail Job-continuity redesign */
+
+.crm-lead-primary-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(300px, .4fr)
+    minmax(0, .6fr);
+  align-items: stretch;
+  gap: 12px;
+}
+
+.crm-lead-primary-grid
+> div {
+  min-width: 0;
+}
+
+.crm-lead-primary-grid
+.admin-panel {
+  height: 100%;
+}
+
+
+/* Vertical Lead journey matching Job workflow language. */
+.crm-lead-journey-panel
+.admin-panel__body {
+  padding: 11px 12px;
+}
+
+.crm-lead-workspace-overview-panel--compact
+.crm-lead-workspace-journey {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
+  overflow: visible;
+  padding: 0;
+}
+
+.crm-lead-workspace-overview-panel--compact
+.crm-lead-workspace-journey
+> div {
+  position: relative;
+  display: grid;
+  grid-template-columns:
+    30px minmax(0, 1fr) !important;
+  align-items: start;
+  gap: 10px;
+  min-height: 52px;
+}
+
+.crm-lead-workspace-overview-panel--compact
+.crm-lead-workspace-journey
+> div:not(:last-child)::after {
+  position: absolute;
+  top: 28px !important;
+  right: auto !important;
+  bottom: -2px;
+  left: 14px !important;
+  width: 1px !important;
+  height: auto !important;
+  background: #deddd8;
+  content: "";
+}
+
+.crm-lead-workspace-overview-panel--compact
+.crm-lead-workspace-journey
+> div.complete:not(:last-child)::after {
+  background: #86d5a2;
+}
+
+.crm-lead-workspace-overview-panel--compact
+.crm-lead-workspace-journey
+> div
+> span {
+  display: grid;
+  width: 29px;
+  min-width: 29px;
+  height: 29px;
+  place-items: center;
+  border: 1px solid var(--admin-border);
+  border-radius: 999px;
+  background: #fff;
+  color: #777;
+}
+
+.crm-lead-workspace-overview-panel--compact
+.crm-lead-workspace-journey
+> div.complete
+> span {
+  border-color: #86d5a2;
+  background: #eaf8ef;
+  color: #16713c;
+}
+
+.crm-lead-workspace-overview-panel--compact
+.crm-lead-workspace-journey
+strong {
+  margin-top: 2px;
+  font-size:
+    calc(
+      10px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-lead-workspace-overview-panel--compact
+.crm-lead-workspace-journey
+small {
+  display: block !important;
+  margin-top: 3px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8.3px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+
+/* Client block aligned with Job Clients panel. */
+.crm-lead-client-panel
+.admin-panel__body {
+  padding: 11px 12px;
+}
+
+.crm-lead-contact-editors {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 0;
+}
+
+.crm-lead-contact-editor {
+  min-width: 0;
+  padding-right: 12px;
+}
+
+.crm-lead-contact-editor
++ .crm-lead-contact-editor {
+  border-left:
+    1px solid
+    var(--admin-border);
+  padding-right: 0;
+  padding-left: 12px;
+}
+
+.crm-lead-contact-editor
+h3 {
+  margin: 0 0 9px;
+  color: #262626;
+  font-size:
+    calc(
+      9.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  font-weight: 650;
+}
+
+.crm-lead-contact-editor__grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 8px 9px;
+}
+
+
+/* Lead details + Quotes mirror Job second-row hierarchy. */
+.crm-lead-summary-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 12px;
+}
+
+.crm-lead-summary-grid
+> div {
+  min-width: 0;
+}
+
+.crm-lead-summary-grid
+.admin-panel {
+  height: 100%;
+}
+
+.crm-lead-details-panel
+.admin-panel__body,
+.crm-lead-quotes-panel
+.admin-panel__body {
+  padding: 11px 12px;
+}
+
+.crm-lead-details-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 8px 10px;
+}
+
+.crm-lead-details-grid__wide {
+  grid-column: 1 / -1;
+}
+
+
+/* Compact quote list instead of table. */
+.crm-lead-quote-list {
+  display: block;
+}
+
+.crm-lead-quote-row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto
+    auto
+    30px;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  border-bottom:
+    1px solid
+    var(--admin-border);
+  padding: 7px 0;
+}
+
+.crm-lead-quote-row:last-child {
+  border-bottom: 0;
+}
+
+.crm-lead-quote-row__copy {
+  min-width: 0;
+}
+
+.crm-lead-quote-row__copy
+strong,
+.crm-lead-quote-row__copy
+small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-lead-quote-row__copy
+strong {
+  color: #262626;
+  font-size:
+    calc(
+      9.7px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-lead-quote-row__copy
+small {
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-lead-quote-row__state {
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  font-weight: 650;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.crm-lead-quote-row__state:is(
+  .is-accepted
+) {
+  color: #167344;
+}
+
+.crm-lead-quote-row__state:is(
+  .is-sent,
+  .is-viewed,
+  .is-draft
+) {
+  color: #a15c00;
+}
+
+.crm-lead-quote-row__state:is(
+  .is-declined,
+  .is-expired
+) {
+  color: #b42318;
+}
+
+.crm-lead-quote-row__value {
+  color: #262626;
+  font-size:
+    calc(
+      9px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  white-space: nowrap;
+}
+
+.crm-lead-quote-row__action {
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+}
+
+
+/* Remaining Lead workspace becomes lower operations, not a sticky side UI. */
+.crm-lead-workspace-layout {
+  grid-template-columns: 1fr !important;
+  gap: 12px;
+}
+
+.crm-lead-workspace-main {
+  gap: 12px;
+}
+
+.crm-lead-workspace-aside {
+  position: static !important;
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.crm-lead-workspace-aside
+> :last-child {
+  grid-column: 1 / -1;
+}
+
+.crm-lead-workspace-page
+.admin-panel {
+  background:
+    var(
+      --admin-module-section-background,
+      rgba(255,255,255,.88)
+    );
+}
+
+.crm-lead-workspace-page
+.crm-lead-workspace-document-grid
+> .admin-panel {
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+}
+
+
+@media (max-width: 1180px) {
+  .crm-lead-primary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-lead-contact-editors {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .crm-lead-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-lead-workspace-aside {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-lead-workspace-aside
+  > :last-child {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 680px) {
+  .crm-lead-contact-editors,
+  .crm-lead-contact-editor__grid,
+  .crm-lead-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-lead-contact-editor {
+    padding-right: 0;
+  }
+
+  .crm-lead-contact-editor
+  + .crm-lead-contact-editor {
+    margin-top: 12px;
+    border-top:
+      1px solid
+      var(--admin-border);
+    border-left: 0;
+    padding-top: 12px;
+    padding-left: 0;
+  }
+
+  .crm-lead-details-grid__wide {
+    grid-column: 1;
+  }
+
+  .crm-lead-quote-row {
+    grid-template-columns:
+      minmax(0, 1fr)
+      30px;
+    gap: 4px 8px;
+  }
+
+  .crm-lead-quote-row__state,
+  .crm-lead-quote-row__value {
+    grid-column: 1;
+  }
+
+  .crm-lead-quote-row__action {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+  }
+}

@@ -185,10 +185,34 @@ assert (
     not in _regression_enquiry
 ), "ExternalLink must not be imported from React"
 
+# React hooks may be formatted across one or more lines.
+import re as _regression_re
+
+_regression_react_import = _regression_re.search(
+    r'import\s*\{(?P<body>.*?)\}\s*'
+    r'from\s*"react";',
+    _regression_enquiry,
+    _regression_re.DOTALL,
+)
+
 assert (
-    'import { useEffect, useMemo, useState } from "react";'
-    in _regression_enquiry
-), "React hooks import is malformed"
+    _regression_react_import is not None
+), "React named import is malformed"
+
+_regression_react_hooks = {
+    item.strip()
+    for item
+    in _regression_react_import.group("body").split(",")
+    if item.strip()
+}
+
+assert {
+    "useEffect",
+    "useMemo",
+    "useState",
+}.issubset(
+    _regression_react_hooks
+), "Required React hooks are missing"
 
 _lucide_start = _regression_enquiry.index(
     'from "react-router-dom";'

@@ -37,7 +37,7 @@ booking = read(
 assert "PenLine" not in job
 assert "<Pencil" not in job
 assert "UserRoundCog" not in job
-assert "UserRound" in job
+assert "ContactRound" in job
 assert 'title="Edit client"' in job
 
 
