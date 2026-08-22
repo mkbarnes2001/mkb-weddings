@@ -237,3 +237,58 @@ The Wedding Photography Job workflow is a presentation over the existing CRM Job
 - No additional database schema is required for this v1.10.12a refinement.
 
 Future productisation should resolve the visible Job workflow from the business service/category and its workflow template. Milestones may then expose optional automation hooks. WedStudio preview and final-gallery delivery events are the intended future automation sources for the photography workflow.
+
+## WedNav setup orchestration and WedCRM ownership boundary
+
+WedNav will provide the persistent Business Setup / readiness experience for wedding professionals, but WedCRM remains the authoritative owner of client-acquisition and booking configuration.
+
+### WedCRM ownership
+
+The following remain managed inside WedCRM:
+
+- Lead Form / Form Studio;
+- CRM field mapping;
+- lead acknowledgement and enquiry behaviour;
+- Client Portal;
+- client and booking workflows;
+- CRM email configuration;
+- packages, quotes and related commercial setup.
+
+WedNav may display completion/readiness states for these capabilities and provide **Configure** links, but it must not duplicate their editing interfaces.
+
+### Lead Form / Form Studio
+
+The Lead Form should evolve into a dedicated Form Studio with the workflow:
+
+**Build → Style → Configure → Publish**
+
+- **Build** — field selection, ordering, CRM mappings and required fields.
+- **Style** — width, typography, input/button style, colours and live preview.
+- **Configure** — acknowledgement, confirmation, redirect, consent and submission behaviour.
+- **Publish** — hosted URL, embed code and website placement.
+
+The Form Studio remains part of WedCRM because submitted forms create CRM Leads and begin the booking journey.
+
+### WedStudio integration
+
+Website ownership remains with WedStudio.
+
+The Form Studio Publish step should consume the existing WedStudio Website connection so a professional can:
+
+- add the Lead Form directly to a WedPlanned-managed website;
+- obtain embed code for an external website;
+- use a WedPlanned-hosted form URL;
+- see the currently connected website;
+- jump to WedStudio → Website if website setup is incomplete.
+
+### WedNav readiness
+
+WedNav should surface Lead Form state such as:
+
+- Active / inactive;
+- required-field readiness;
+- public URL;
+- website placement / embed status;
+- acknowledgement-email readiness.
+
+This is orchestration and status only. WedCRM remains the single source of truth for the underlying Lead Form configuration.

@@ -270,3 +270,98 @@ Examples for later releases:
 - Venue and other wedding businesses may use completely different milestone sets.
 
 The existing generic workflow/task capability should remain available beneath these service-specific presentations. v1.10.12a does not build the full commercial workflow designer.
+
+## WedNav — Central business setup and readiness hub
+
+**Status:** Planned product foundation / follow-on.
+
+WedNav is the central business-management and setup hub for a wedding professional. It should orchestrate first-run setup and ongoing business readiness without duplicating the specialist configuration owned by WedCRM, WedStudio or WedStore.
+
+### Product model
+
+- WedNav owns setup progress, readiness status and navigation.
+- Specialist modules continue to own the actual configuration.
+- A setting should have one authoritative editing location.
+- WedNav should deep-link to that authoritative location rather than reproduce the same controls.
+- The first-run onboarding experience should become a persistent Business Setup area rather than disappearing once onboarding is complete.
+
+### Business Setup wizard
+
+The wizard should guide a professional through the principal areas required to operate their business:
+
+1. **Business profile**
+   - Business identity, contact information and core business details.
+   - Managed in WedNav / central business administration.
+
+2. **Services and pricing**
+   - Services, packages and commercial foundations.
+   - Managed by the appropriate WedCRM commercial surfaces.
+
+3. **Email**
+   - Sending identity, notification email and communication readiness.
+   - Managed in WedCRM.
+
+4. **Lead capture**
+   - Lead Form active state, field readiness, public URL and publishing/embed status.
+   - Managed in WedCRM → Lead Form / Form Studio.
+
+5. **Client portal**
+   - Portal readiness, access and related client-facing configuration.
+   - Managed in WedCRM → Client Portal.
+
+6. **Payments**
+   - Payment-provider and commercial-payment readiness.
+   - Managed by the appropriate WedCRM / WedStore configuration.
+
+7. **Website connection**
+   - Connected website, platform and connection status.
+   - Managed in WedStudio → Website.
+
+8. **Publishing**
+   - Website-content and gallery/story publishing readiness.
+   - Managed in WedStudio.
+
+9. **Store**
+   - Store and product/commerce readiness.
+   - Managed in WedStore.
+
+### Persistent readiness view
+
+After first-run setup, the same WedNav area should remain available as an ongoing business-health view.
+
+Examples:
+
+- `Business setup · 7 of 9 complete`
+- `Website · Connected`
+- `Lead form · Active`
+- `Client portal · Ready`
+- `Email · Needs attention`
+- `Payments · Not configured`
+
+Each item should provide a concise status and a **Configure** action that opens the owning module.
+
+### Cross-module rule
+
+**WedNav = central business setup, readiness and navigation.**
+
+**WedCRM = client acquisition, CRM, bookings and related commercial/client configuration.**
+
+**WedStudio = website connection, website content and publishing.**
+
+**WedStore = commerce.**
+
+Centralisation in WedNav must not create duplicate settings or competing sources of truth.
+
+### Form Studio integration
+
+The planned WedCRM Form Studio remains owned by WedCRM because it creates Leads and starts the CRM booking journey.
+
+Its **Publish** step should integrate with the Website connection owned by WedStudio and offer:
+
+- direct placement on a WedPlanned-managed website;
+- external website embed code;
+- a hosted form URL;
+- connected-website status;
+- a link to WedStudio → Website when website connection has not yet been configured.
+
+WedNav should surface Lead Form readiness and website/embed status as part of the Business Setup wizard, while configuration remains in the owning modules.
