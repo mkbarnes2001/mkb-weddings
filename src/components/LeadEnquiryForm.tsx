@@ -578,114 +578,135 @@ export function LeadEnquiryForm({
         );
 
       return (
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <PublicPlacesAutocomplete
-              kind="address"
-              value={
-                address.formattedAddress
-                || address.line1
-                || ""
-              }
-              placeholder={
-                field.placeholder
-                || "Start typing your address…"
-              }
-              autoComplete="address-line1"
-              required={field.required}
-              disabled={submitting}
-              onManualChange={(value) =>
-                setAnswer(
-                  field.id,
-                  {
-                    ...address,
-                    line1: value,
-                    formattedAddress: "",
-                    placeId: "",
-                    lat: undefined,
-                    lng: undefined,
-                  },
-                )
-              }
-              onPlaceSelect={(place) =>
-                setAnswer(
-                  field.id,
-                  place.address,
-                )
-              }
-            />
-          </div>
-
-          <input
-            className="md:col-span-2"
+        <div className="space-y-2">
+          <PublicPlacesAutocomplete
+            kind="address"
+            value={
+              address.formattedAddress
+              || address.line1
+              || ""
+            }
+            placeholder={
+              field.placeholder
+              || "Start typing your address…"
+            }
+            autoComplete="address-line1"
+            required={field.required}
             disabled={submitting}
-            value={address.line2 || ""}
-            placeholder="Address line 2"
-            autoComplete="address-line2"
-            onChange={(event) =>
-              setAddressPart(
+            onManualChange={(value) =>
+              setAnswer(
                 field.id,
-                "line2",
-                event.target.value,
+                {
+                  ...address,
+                  line1: value,
+                  formattedAddress: "",
+                  placeId: "",
+                  lat: undefined,
+                  lng: undefined,
+                },
+              )
+            }
+            onPlaceSelect={(place) =>
+              setAnswer(
+                field.id,
+                place.address,
               )
             }
           />
 
-          <input
-            disabled={submitting}
-            value={address.city || ""}
-            placeholder="Town / city"
-            autoComplete="address-level2"
-            onChange={(event) =>
-              setAddressPart(
-                field.id,
-                "city",
-                event.target.value,
-              )
-            }
-          />
+          <details className="rounded-lg border border-black/10 bg-black/[0.02]">
+            <summary className="cursor-pointer list-none px-3 py-2 text-xs font-medium text-foreground/60">
+              Edit address details
+            </summary>
 
-          <input
-            disabled={submitting}
-            value={address.county || ""}
-            placeholder="County / region"
-            autoComplete="address-level1"
-            onChange={(event) =>
-              setAddressPart(
-                field.id,
-                "county",
-                event.target.value,
-              )
-            }
-          />
+            <div className="grid gap-3 border-t border-black/10 p-3 md:grid-cols-2">
+              <input
+                className="md:col-span-2"
+                disabled={submitting}
+                value={address.line1 || ""}
+                placeholder="Address line 1"
+                autoComplete="address-line1"
+                onChange={(event) =>
+                  setAddressPart(
+                    field.id,
+                    "line1",
+                    event.target.value,
+                  )
+                }
+              />
 
-          <input
-            disabled={submitting}
-            value={address.postcode || ""}
-            placeholder="Postcode"
-            autoComplete="postal-code"
-            onChange={(event) =>
-              setAddressPart(
-                field.id,
-                "postcode",
-                event.target.value,
-              )
-            }
-          />
+              <input
+                className="md:col-span-2"
+                disabled={submitting}
+                value={address.line2 || ""}
+                placeholder="Address line 2"
+                autoComplete="address-line2"
+                onChange={(event) =>
+                  setAddressPart(
+                    field.id,
+                    "line2",
+                    event.target.value,
+                  )
+                }
+              />
 
-          <input
-            disabled={submitting}
-            value={address.country || ""}
-            placeholder="Country"
-            autoComplete="country-name"
-            onChange={(event) =>
-              setAddressPart(
-                field.id,
-                "country",
-                event.target.value,
-              )
-            }
-          />
+              <input
+                disabled={submitting}
+                value={address.city || ""}
+                placeholder="Town / city"
+                autoComplete="address-level2"
+                onChange={(event) =>
+                  setAddressPart(
+                    field.id,
+                    "city",
+                    event.target.value,
+                  )
+                }
+              />
+
+              <input
+                disabled={submitting}
+                value={address.county || ""}
+                placeholder="County / region"
+                autoComplete="address-level1"
+                onChange={(event) =>
+                  setAddressPart(
+                    field.id,
+                    "county",
+                    event.target.value,
+                  )
+                }
+              />
+
+              <input
+                disabled={submitting}
+                value={address.postcode || ""}
+                placeholder="Postcode"
+                autoComplete="postal-code"
+                onChange={(event) =>
+                  setAddressPart(
+                    field.id,
+                    "postcode",
+                    event.target.value,
+                  )
+                }
+              />
+
+              <input
+                disabled={submitting}
+                value={address.country || ""}
+                placeholder="Country"
+                autoComplete="country-name"
+                onChange={(event) =>
+                  setAddressPart(
+                    field.id,
+                    "country",
+                    event.target.value,
+                  )
+                }
+              />
+            </div>
+          </details>
         </div>
       );
     }
@@ -984,6 +1005,19 @@ export function PublicPlacesAutocomplete({
     setQuery,
   ] = useState(value);
 
+  const [
+    activeIndex,
+    setActiveIndex,
+  ] = useState(-1);
+
+  const listIdRef =
+    useRef("");
+
+  if (!listIdRef.current) {
+    listIdRef.current =
+      `places-${kind}-${crypto.randomUUID()}`;
+  }
+
   const sessionTokenRef =
     useRef<string>("");
 
@@ -1223,38 +1257,140 @@ export function PublicPlacesAutocomplete({
     }
   }
 
+  const visibleSuggestions =
+    suggestions.slice(
+      0,
+      5,
+    );
+
+  const listId =
+    listIdRef.current;
+
+  const expanded =
+    Boolean(
+      open
+      && configured
+      && visibleSuggestions.length,
+    );
+
   return (
-    <div className="relative">
-      <div className="relative">
+    <div className="relative w-full">
+      <div className="relative w-full">
         <input
+          role="combobox"
           value={query}
           required={required}
           disabled={disabled}
           autoComplete={autoComplete}
           placeholder={placeholder}
           aria-autocomplete="list"
-          aria-expanded={
-            Boolean(
-              open
-              && configured
-              && suggestions.length
-            )
+          aria-expanded={expanded}
+          aria-controls={
+            expanded
+              ? listId
+              : undefined
           }
+          aria-activedescendant={
+            expanded
+            && activeIndex >= 0
+              ? `${listId}-option-${activeIndex}`
+              : undefined
+          }
+          className="w-full"
           onFocus={() =>
             setOpen(true)
           }
           onBlur={() =>
             window.setTimeout(
-              () => setOpen(false),
+              () => {
+                setOpen(false);
+                setActiveIndex(-1);
+              },
               120,
             )
           }
+          onKeyDown={(event) => {
+            if (
+              event.key === "ArrowDown"
+            ) {
+              if (
+                !visibleSuggestions.length
+              ) {
+                return;
+              }
+
+              event.preventDefault();
+              setOpen(true);
+
+              setActiveIndex(
+                (current) =>
+                  current < 0
+                    ? 0
+                    : Math.min(
+                        current + 1,
+                        visibleSuggestions.length - 1,
+                      ),
+              );
+
+              return;
+            }
+
+            if (
+              event.key === "ArrowUp"
+            ) {
+              if (
+                !visibleSuggestions.length
+              ) {
+                return;
+              }
+
+              event.preventDefault();
+              setOpen(true);
+
+              setActiveIndex(
+                (current) =>
+                  current <= 0
+                    ? 0
+                    : current - 1,
+              );
+
+              return;
+            }
+
+            if (
+              event.key === "Enter"
+              && expanded
+              && activeIndex >= 0
+              && visibleSuggestions[
+                activeIndex
+              ]
+            ) {
+              event.preventDefault();
+
+              void choose(
+                visibleSuggestions[
+                  activeIndex
+                ],
+              );
+
+              return;
+            }
+
+            if (
+              event.key === "Escape"
+            ) {
+              event.preventDefault();
+              setOpen(false);
+              setActiveIndex(-1);
+            }
+          }}
           onChange={(event) => {
             const next =
               event.target.value;
 
             setQuery(next);
             setOpen(true);
+            setActiveIndex(-1);
             onManualChange(next);
 
             if (
@@ -1269,28 +1405,48 @@ export function PublicPlacesAutocomplete({
         />
 
         {loading ? (
-          <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-foreground/40" />
+          <Loader2
+            aria-hidden="true"
+            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-foreground/40"
+          />
         ) : null}
       </div>
 
-      {open
-      && configured
-      && suggestions.length ? (
+      {expanded ? (
         <div
-          className="mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-black/10 bg-white p-1 shadow-[0_12px_30px_rgba(0,0,0,0.12)]"
+          id={listId}
           role="listbox"
+          className="absolute left-0 right-0 z-[90] mt-1.5 w-full max-h-72 overflow-y-auto rounded-xl border border-black/10 bg-white p-1 shadow-[0_12px_30px_rgba(0,0,0,0.12)]"
         >
-          {suggestions.map(
-            (suggestion) => (
+          {visibleSuggestions.map(
+            (
+              suggestion,
+              index,
+            ) => (
               <button
                 key={
                   suggestion.placeId
                 }
+                id={`${listId}-option-${index}`}
                 type="button"
                 role="option"
-                className="block w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-secondary/60 focus:bg-secondary/60 focus:outline-none"
+                aria-selected={
+                  index
+                  === activeIndex
+                }
+                className={`block min-w-0 w-full overflow-hidden rounded-lg px-3 py-2.5 text-left transition-colors focus:outline-none ${
+                  index
+                  === activeIndex
+                    ? "bg-secondary/60"
+                    : "hover:bg-secondary/60"
+                }`}
                 onMouseDown={(event) =>
                   event.preventDefault()
+                }
+                onMouseEnter={() =>
+                  setActiveIndex(
+                    index,
+                  )
                 }
                 onClick={() =>
                   void choose(
@@ -1298,14 +1454,17 @@ export function PublicPlacesAutocomplete({
                   )
                 }
               >
-                <span className="block truncate text-sm font-semibold text-foreground">
+                <span className="block min-w-0 truncate text-sm font-semibold text-foreground">
                   {suggestion.mainText
                     || suggestion.text}
                 </span>
 
                 {suggestion.secondaryText ? (
-                  <span className="mt-0.5 block truncate text-[11px] leading-4 text-foreground/55">
-                    {suggestion.secondaryText}
+                  <span className="mt-0.5 block min-w-0 truncate text-[11px] leading-4 text-foreground/55">
+                    {
+                      suggestion
+                        .secondaryText
+                    }
                   </span>
                 ) : null}
               </button>
@@ -1322,6 +1481,13 @@ export function PublicPlacesAutocomplete({
             </span>
           </div>
         </div>
+      ) : null}
+
+      {configured === false
+      && query.trim().length >= 3 ? (
+        <p className="mt-1.5 text-[11px] leading-4 text-foreground/50">
+          Place search is unavailable. You can continue typing manually.
+        </p>
       ) : null}
     </div>
   );
