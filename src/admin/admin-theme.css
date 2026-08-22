@@ -15892,3 +15892,33 @@ small {
     grid-row: 1 / span 3;
   }
 }
+
+
+/* v1.10.12a — final Lead / Job parity polish */
+
+/*
+ * Shared Lead / Job client edit action.
+ * Keep the plain Lucide User glyph, but make its SVG box
+ * independent from inherited inline/control positioning.
+ */
+.crm-job-client-actions
+.crm-job-client-icon-action {
+  position: relative;
+  display: grid !important;
+  box-sizing: border-box;
+  place-items: center !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+}
+
+.crm-job-client-actions
+.crm-job-client-icon-action > svg {
+  position: static !important;
+  inset: auto !important;
+  display: block !important;
+  width: 14px !important;
+  height: 14px !important;
+  flex: 0 0 14px !important;
+  margin: 0 !important;
+  transform: none !important;
+}

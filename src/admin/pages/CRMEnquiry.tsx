@@ -984,17 +984,14 @@ export function CRMEnquiry() {
             title="Booking and payments"
             description="Invoice, contract, questionnaire and quote."
             icon={BriefcaseBusiness}
-            className="crm-commercial-panel"
+            className="crm-booking-summary-panel"
           >
-            <div className="crm-commercial-grid crm-job-commercial-summary-list">
+            <div className="crm-booking-summary-list">
               {invoice ? (
-                <article className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row">
-                  <span className="crm-commercial-card__icon">
-                    <FileText />
-                  </span>
+                <article className="crm-booking-summary-row">
 
-                  <div className="crm-commercial-summary-row__copy">
-                    <div className="crm-commercial-summary-row__identity">
+                  <div className="crm-booking-summary-row__copy">
+                    <div className="crm-booking-summary-row__heading">
                       <span>
                         Invoice
                       </span>
@@ -1004,7 +1001,7 @@ export function CRMEnquiry() {
                       </strong>
                     </div>
 
-                    <p className="crm-commercial-summary-line">
+                    <p className="crm-booking-summary-row__detail">
                       Total{" "}
                       {money(
                         invoice.totalAmount,
@@ -1025,7 +1022,7 @@ export function CRMEnquiry() {
                     </p>
 
                     {invoice.nextPayment ? (
-                      <small className="crm-commercial-summary-line crm-commercial-card__next">
+                      <small className="crm-booking-summary-row__detail crm-commercial-card__next">
                         Next payment ·{" "}
                         {invoice.nextPayment.label}
                         {invoice.nextPayment.dueDate
@@ -1039,7 +1036,7 @@ export function CRMEnquiry() {
 
                   <span
                     className={
-                      `crm-commercial-summary-state is-${invoice.status}`
+                      `crm-commercial-summary-state crm-booking-summary-row__state is-${invoice.status}`
                     }
                   >
                     {statusLabel(
@@ -1049,7 +1046,7 @@ export function CRMEnquiry() {
 
                   {detail.job ? (
                     <Link
-                      className="admin-icon-control crm-commercial-card__open"
+                      className="admin-icon-control crm-commercial-card__open crm-booking-summary-row__action"
                       to={`/admin/crm/jobs/${detail.job.id}/invoices/${invoice.id}`}
                       aria-label={`Open invoice ${invoice.reference}`}
                       title="Open invoice"
@@ -1057,17 +1054,14 @@ export function CRMEnquiry() {
                       <ExternalLink aria-hidden="true" />
                     </Link>
                   ) : (
-                    <span className="crm-commercial-summary-action-spacer" />
+                    <span className="crm-commercial-summary-action-spacer crm-booking-summary-row__action-spacer" />
                   )}
                 </article>
               ) : (
-                <article className="crm-commercial-card crm-commercial-summary-row">
-                  <span className="crm-commercial-card__icon">
-                    <FileText />
-                  </span>
+                <article className="crm-booking-summary-row">
 
-                  <div className="crm-commercial-summary-row__copy">
-                    <div className="crm-commercial-summary-row__identity">
+                  <div className="crm-booking-summary-row__copy">
+                    <div className="crm-booking-summary-row__heading">
                       <span>
                         Invoice
                       </span>
@@ -1077,26 +1071,23 @@ export function CRMEnquiry() {
                       </strong>
                     </div>
 
-                    <small className="crm-commercial-summary-line">
+                    <small className="crm-booking-summary-row__detail">
                       Available after booking
                     </small>
                   </div>
 
-                  <span className="crm-commercial-summary-state">
+                  <span className="crm-commercial-summary-state crm-booking-summary-row__state">
                     Not generated
                   </span>
 
-                  <span className="crm-commercial-summary-action-spacer" />
+                  <span className="crm-commercial-summary-action-spacer crm-booking-summary-row__action-spacer" />
                 </article>
               )}
 
-              <article className="crm-commercial-card crm-commercial-summary-row">
-                <span className="crm-commercial-card__icon">
-                  <BookOpen />
-                </span>
+              <article className="crm-booking-summary-row">
 
-                <div className="crm-commercial-summary-row__copy">
-                  <div className="crm-commercial-summary-row__identity">
+                <div className="crm-booking-summary-row__copy">
+                  <div className="crm-booking-summary-row__heading">
                     <span>
                       Contract
                     </span>
@@ -1108,7 +1099,7 @@ export function CRMEnquiry() {
                   </div>
 
                   {contract ? (
-                    <p className="crm-commercial-summary-line">
+                    <p className="crm-booking-summary-row__detail">
                       {contract.title}
                       {" · "}
                       Signatures{" "}
@@ -1116,7 +1107,7 @@ export function CRMEnquiry() {
                       /{contract.requiredSignatures}
                     </p>
                   ) : (
-                    <small className="crm-commercial-summary-line">
+                    <small className="crm-booking-summary-row__detail">
                       Available after booking
                     </small>
                   )}
@@ -1124,7 +1115,7 @@ export function CRMEnquiry() {
 
                 <span
                   className={
-                    `crm-commercial-summary-state ${
+                    `crm-commercial-summary-state crm-booking-summary-row__state ${
                       contract
                         ? `is-${contract.status}`
                         : ""
@@ -1140,16 +1131,13 @@ export function CRMEnquiry() {
                     : "Not generated"}
                 </span>
 
-                <span className="crm-commercial-summary-action-spacer" />
+                <span className="crm-commercial-summary-action-spacer crm-booking-summary-row__action-spacer" />
               </article>
 
-              <article className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row">
-                <span className="crm-commercial-card__icon">
-                  <ClipboardList />
-                </span>
+              <article className="crm-booking-summary-row">
 
-                <div className="crm-commercial-summary-row__copy">
-                  <div className="crm-commercial-summary-row__identity">
+                <div className="crm-booking-summary-row__copy">
+                  <div className="crm-booking-summary-row__heading">
                     <span>
                       Questionnaire
                     </span>
@@ -1160,7 +1148,7 @@ export function CRMEnquiry() {
                     </strong>
                   </div>
 
-                  <small className="crm-commercial-summary-line">
+                  <small className="crm-booking-summary-row__detail">
                     {leadBookingQuestionnaire
                       ? leadBookingQuestionnaire.dueAt
                         ? `Planning target ${dateOnly(
@@ -1175,7 +1163,7 @@ export function CRMEnquiry() {
 
                 <span
                   className={
-                    `crm-commercial-summary-state ${
+                    `crm-commercial-summary-state crm-booking-summary-row__state ${
                       leadBookingQuestionnaire
                         ? `is-${leadBookingQuestionnaire.status}`
                         : ""
@@ -1190,7 +1178,7 @@ export function CRMEnquiry() {
                 </span>
 
                 <a
-                  className="admin-icon-control crm-commercial-card__open"
+                  className="admin-icon-control crm-commercial-card__open crm-booking-summary-row__action"
                   href="#lead-questionnaires"
                   aria-label="Open Questionnaire section"
                   title="Open questionnaire"
@@ -1200,13 +1188,10 @@ export function CRMEnquiry() {
               </article>
 
               {journeyQuote ? (
-                <article className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row">
-                  <span className="crm-commercial-card__icon">
-                    <PackageCheck />
-                  </span>
+                <article className="crm-booking-summary-row">
 
-                  <div className="crm-commercial-summary-row__copy">
-                    <div className="crm-commercial-summary-row__identity">
+                  <div className="crm-booking-summary-row__copy">
+                    <div className="crm-booking-summary-row__heading">
                       <span>
                         {detail.job
                           ? "Accepted quote"
@@ -1218,7 +1203,7 @@ export function CRMEnquiry() {
                       </strong>
                     </div>
 
-                    <p className="crm-commercial-summary-line">
+                    <p className="crm-booking-summary-row__detail">
                       {journeyQuote.quoteType
                         === "fixed"
                         ? "Fixed"
@@ -1237,7 +1222,7 @@ export function CRMEnquiry() {
 
                   <span
                     className={
-                      `crm-commercial-summary-state is-${journeyQuote.status}`
+                      `crm-commercial-summary-state crm-booking-summary-row__state is-${journeyQuote.status}`
                     }
                   >
                     {statusLabel(
@@ -1246,7 +1231,7 @@ export function CRMEnquiry() {
                   </span>
 
                   <Link
-                    className="admin-icon-control crm-commercial-card__open"
+                    className="admin-icon-control crm-commercial-card__open crm-booking-summary-row__action"
                     to={`/admin/crm/quotes/${journeyQuote.id}`}
                     aria-label={`Open quote ${journeyQuote.reference}`}
                     title="Open quote"
@@ -1255,13 +1240,10 @@ export function CRMEnquiry() {
                   </Link>
                 </article>
               ) : (
-                <article className="crm-commercial-card crm-commercial-summary-row">
-                  <span className="crm-commercial-card__icon">
-                    <PackageCheck />
-                  </span>
+                <article className="crm-booking-summary-row">
 
-                  <div className="crm-commercial-summary-row__copy">
-                    <div className="crm-commercial-summary-row__identity">
+                  <div className="crm-booking-summary-row__copy">
+                    <div className="crm-booking-summary-row__heading">
                       <span>
                         Quote
                       </span>
@@ -1271,16 +1253,16 @@ export function CRMEnquiry() {
                       </strong>
                     </div>
 
-                    <small className="crm-commercial-summary-line">
+                    <small className="crm-booking-summary-row__detail">
                       Create a quote when the Lead is ready for pricing
                     </small>
                   </div>
 
-                  <span className="crm-commercial-summary-state">
+                  <span className="crm-commercial-summary-state crm-booking-summary-row__state">
                     Not created
                   </span>
 
-                  <span className="crm-commercial-summary-action-spacer" />
+                  <span className="crm-commercial-summary-action-spacer crm-booking-summary-row__action-spacer" />
                 </article>
               )}
             </div>
@@ -1291,29 +1273,31 @@ export function CRMEnquiry() {
           <AdminPanel
             title="Wedding delivery and content"
             icon={LayoutDashboard}
-            className="crm-wedding-lifecycle-panel"
+            className="crm-delivery-summary-panel"
           >
-            <div className="crm-wedding-lifecycle-grid">
-              <article className="crm-wedding-lifecycle-card">
-                <span className="crm-wedding-lifecycle-card__icon">
-                  <LayoutDashboard />
+            <div className="crm-delivery-summary-list">
+              <article className="crm-delivery-summary-row">
+                <strong>
+                  Wedding Workspace
+                </strong>
+
+                <span
+                  className={
+                  `crm-delivery-summary-state ${
+                    leadLifecycle?.wedding.exists
+                      ? "is-ready"
+                      : ""
+                  }`
+                }
+                >
+                  {leadLifecycle?.wedding.exists
+                                        ? "Ready"
+                                        : "Available after booking"}
                 </span>
-
-                <div>
-                  <p>
-                    Wedding Workspace
-                  </p>
-
-                  <strong>
-                    {leadLifecycle?.wedding.exists
-                      ? "Ready"
-                      : "Available after booking"}
-                  </strong>
-                </div>
 
                 {leadLifecycle?.wedding.exists ? (
                   <Link
-                    className="admin-icon-control crm-wedding-lifecycle-action"
+                    className="admin-icon-control crm-delivery-summary-action"
                     to={`/admin/weddings/${leadLifecycle.wedding.slug}/workspace`}
                     aria-label="Open Wedding Workspace"
                     title="Open Wedding Workspace"
@@ -1321,30 +1305,26 @@ export function CRMEnquiry() {
                     <ExternalLink aria-hidden="true" />
                   </Link>
                 ) : (
-                  <span className="crm-wedding-lifecycle-action-spacer" />
+                  <span className="crm-delivery-summary-action-spacer" />
                 )}
               </article>
 
-              <article className="crm-wedding-lifecycle-card">
-                <span className="crm-wedding-lifecycle-card__icon">
-                  <Images />
+              <article className="crm-delivery-summary-row">
+                <strong>
+                  Wedding assets
+                </strong>
+
+                <span
+                  className="crm-delivery-summary-state"
+                >
+                  {leadLifecycle?.wedding.exists
+                                        ? `${leadLifecycle.wedding.assetCount} photographs`
+                                        : "Available after booking"}
                 </span>
-
-                <div>
-                  <p>
-                    Wedding assets
-                  </p>
-
-                  <strong>
-                    {leadLifecycle?.wedding.exists
-                      ? `${leadLifecycle.wedding.assetCount} photographs`
-                      : "Available after booking"}
-                  </strong>
-                </div>
 
                 {leadLifecycle?.wedding.exists ? (
                   <Link
-                    className="admin-icon-control crm-wedding-lifecycle-action"
+                    className="admin-icon-control crm-delivery-summary-action"
                     to={`/admin/weddings/${leadLifecycle.wedding.slug}/workspace#preview-upload`}
                     aria-label="Manage Wedding assets"
                     title="Manage Wedding assets"
@@ -1352,32 +1332,28 @@ export function CRMEnquiry() {
                     <ExternalLink aria-hidden="true" />
                   </Link>
                 ) : (
-                  <span className="crm-wedding-lifecycle-action-spacer" />
+                  <span className="crm-delivery-summary-action-spacer" />
                 )}
               </article>
 
-              <article className="crm-wedding-lifecycle-card">
-                <span className="crm-wedding-lifecycle-card__icon">
-                  <Images />
+              <article className="crm-delivery-summary-row">
+                <strong>
+                  Client Gallery
+                </strong>
+
+                <span
+                  className="crm-delivery-summary-state"
+                >
+                  {leadPrimaryGallery
+                                        ? leadPrimaryGallery.title
+                                        : detail.job
+                                          ? "Not created"
+                                          : "Available after booking"}
                 </span>
-
-                <div>
-                  <p>
-                    Client Gallery
-                  </p>
-
-                  <strong>
-                    {leadPrimaryGallery
-                      ? leadPrimaryGallery.title
-                      : detail.job
-                        ? "Not created"
-                        : "Available after booking"}
-                  </strong>
-                </div>
 
                 {leadPrimaryGallery ? (
                   <Link
-                    className="admin-icon-control crm-wedding-lifecycle-action"
+                    className="admin-icon-control crm-delivery-summary-action"
                     to={`/admin/client-galleries/${leadPrimaryGallery.id}`}
                     aria-label="Open Client Gallery"
                     title="Open Client Gallery"
@@ -1389,7 +1365,7 @@ export function CRMEnquiry() {
                   && canManage ? (
                   <button
                     type="button"
-                    className="admin-icon-control crm-wedding-lifecycle-action"
+                    className="admin-icon-control crm-delivery-summary-action"
                     disabled={saving}
                     onClick={() =>
                       void createLeadClientGallery()
@@ -1400,28 +1376,24 @@ export function CRMEnquiry() {
                     <Plus aria-hidden="true" />
                   </button>
                 ) : (
-                  <span className="crm-wedding-lifecycle-action-spacer" />
+                  <span className="crm-delivery-summary-action-spacer" />
                 )}
               </article>
 
-              <article className="crm-wedding-lifecycle-card">
-                <span className="crm-wedding-lifecycle-card__icon">
-                  <BookOpen />
+              <article className="crm-delivery-summary-row">
+                <strong>
+                  Wedding Story
+                </strong>
+
+                <span
+                  className="crm-delivery-summary-state"
+                >
+                  {leadStoryLabel}
                 </span>
-
-                <div>
-                  <p>
-                    Wedding Story
-                  </p>
-
-                  <strong>
-                    {leadStoryLabel}
-                  </strong>
-                </div>
 
                 {leadLifecycle?.wedding.exists ? (
                   <Link
-                    className="admin-icon-control crm-wedding-lifecycle-action"
+                    className="admin-icon-control crm-delivery-summary-action"
                     to={`/admin/weddings/${leadLifecycle.wedding.slug}/content`}
                     aria-label={
                       leadLifecycle.story.state
@@ -1442,30 +1414,26 @@ export function CRMEnquiry() {
                       : <ExternalLink aria-hidden="true" />}
                   </Link>
                 ) : (
-                  <span className="crm-wedding-lifecycle-action-spacer" />
+                  <span className="crm-delivery-summary-action-spacer" />
                 )}
               </article>
 
-              <article className="crm-wedding-lifecycle-card">
-                <span className="crm-wedding-lifecycle-card__icon">
-                  <Globe2 />
+              <article className="crm-delivery-summary-row">
+                <strong>
+                  Website galleries
+                </strong>
+
+                <span
+                  className="crm-delivery-summary-state"
+                >
+                  {leadLifecycle?.wedding.exists
+                                        ? `${leadLifecycle.publicAssignments.total} assignments`
+                                        : "Available after booking"}
                 </span>
-
-                <div>
-                  <p>
-                    Website galleries
-                  </p>
-
-                  <strong>
-                    {leadLifecycle?.wedding.exists
-                      ? `${leadLifecycle.publicAssignments.total} assignments`
-                      : "Available after booking"}
-                  </strong>
-                </div>
 
                 {leadLifecycle?.wedding.exists ? (
                   <Link
-                    className="admin-icon-control crm-wedding-lifecycle-action"
+                    className="admin-icon-control crm-delivery-summary-action"
                     to={`/admin/weddings/${leadLifecycle.wedding.slug}/workspace#publishing-destinations`}
                     aria-label="Manage Website galleries"
                     title="Manage Website galleries"
@@ -1473,7 +1441,7 @@ export function CRMEnquiry() {
                     <ExternalLink aria-hidden="true" />
                   </Link>
                 ) : (
-                  <span className="crm-wedding-lifecycle-action-spacer" />
+                  <span className="crm-delivery-summary-action-spacer" />
                 )}
               </article>
             </div>
