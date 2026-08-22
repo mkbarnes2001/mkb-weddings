@@ -1,85 +1,70 @@
 #!/usr/bin/env python3
-"""v1.10.12a Lead detail Job-continuity regression."""
+"""v1.10.12a Lead detail continuity regression."""
 
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
-page = (
-    ROOT
-    / "src/admin/pages/CRMEnquiry.tsx"
-).read_text(
-    encoding="utf-8",
+
+def read(path: str) -> str:
+    return (
+        ROOT / path
+    ).read_text(
+        encoding="utf-8",
+    )
+
+
+page = read(
+    "src/admin/pages/CRMEnquiry.tsx"
 )
 
-job = (
-    ROOT
-    / "src/admin/pages/CRMJob.tsx"
-).read_text(
-    encoding="utf-8",
-)
-
-css = (
-    ROOT
-    / "src/admin/admin-theme.css"
-).read_text(
-    encoding="utf-8",
+shared = read(
+    "src/admin/components/crm/"
+    "CRMWeddingWorkspaceShared.tsx"
 )
 
 
-# Top Lead hierarchy mirrors Job.
 for token in (
-    "crm-lead-primary-grid",
-    'title="Client journey"',
-    'title="Client"',
-    "crm-lead-contact-editors",
-    "crm-lead-summary-grid",
-    'title="Lead details"',
-    'title="Quotes"',
+    "CRMWeddingWorkflowPanel",
+    "CRMClientsPanel",
+    "crm-job-primary-grid",
+    "crm-job-summary-grid",
+    "crm-job-operations-grid",
 ):
     assert token in page, token
 
 
-# Lead workflow stops at booking.
-journey_start = page.index(
-    "const journey = ["
-)
-
-journey_end = page.index(
-    "];",
-    journey_start,
-)
-
-journey = page[
-    journey_start:
-    journey_end
-]
-
 for token in (
     "Lead created",
-    'label: "Quote"',
-    "Quote accepted",
     "Job accepted",
+    "Wedding day",
+    "Previews sent",
+    "Client photos delivered",
 ):
-    assert token in journey, token
+    assert token in shared, token
 
-for forbidden in (
-    'label: "Contract"',
-    'label: "Questionnaire"',
-    'label: "Deposit"',
-    'label: "Event"',
+
+for title in (
+    'title="Booking and payments"',
+    'title="Wedding delivery and content"',
+    'title="Lead details"',
+    'title="Quote and package"',
+    'title="Communication"',
+    'title="Questionnaires"',
+    'title="Supplier team"',
+    'title="Files"',
+    'title="Notes and activity"',
 ):
-    assert forbidden not in journey, forbidden
+    assert title in page, title
 
 
-# Main Lead details are intentionally concise.
 details_pos = page.index(
     'title="Lead details"'
 )
 
 details_end = page.index(
-    "</AdminPanel>",
+    "</AdminAccordion>",
     details_pos,
 )
 
@@ -87,6 +72,7 @@ details = page[
     details_pos:
     details_end
 ]
+
 
 for token in (
     "Pipeline stage",
@@ -99,16 +85,16 @@ for token in (
 ):
     assert token in details, token
 
+
 for forbidden in (
     "Date flexibility",
     "Package interest",
     "Budget minimum",
     "Budget maximum",
 ):
-    assert forbidden not in details, forbidden
+    assert forbidden not in details
 
 
-# Underlying fields remain in the type/data model elsewhere.
 for token in (
     "dateFlexibility",
     "packageInterest",
@@ -118,93 +104,57 @@ for token in (
     assert token in page, token
 
 
-# Quotes are compact rows, not another table.
-quotes_pos = page.index(
-    'title="Quotes"'
-)
-
-quotes_end = page.index(
-    "</AdminPanel>",
-    quotes_pos,
-)
-
-quotes = page[
-    quotes_pos:
-    quotes_end
-]
-
-assert "crm-lead-quote-list" in quotes
-assert "crm-lead-quote-row" in quotes
-assert "<table" not in quotes
-assert "quote.quoteType" in quotes
-assert '"Pick & Choose"' in quotes
-assert '"Fixed"' in quotes
-
-
-# Existing operational surfaces remain.
 for token in (
-    'title="Mail"',
-    'title="Contracts"',
-    'title="Questionnaires"',
-    'title="Invoices"',
-    'title="Files"',
-    'title="Journey"',
-    'title="History"',
     "Client Portal",
-    "Open Job operations",
     "createQuote",
+    "markLost",
     "uploadLeadPlanningFile",
+    "createLeadClientGallery",
+    "Files begin after booking",
 ):
     assert token in page, token
 
 
-# Job client action uses a neutral centred contact icon.
-assert "ContactRound" in job
-assert "UserRoundCog" not in job
-assert "PenLine" not in job
-assert 'title="Edit client"' in job
-
-
-# New continuity styling.
-assert (
-    "/* v1.10.12a — Lead detail Job-continuity redesign */"
-    in css
-)
-
-for token in (
-    ".crm-lead-primary-grid",
-    ".crm-lead-summary-grid",
-    ".crm-lead-quote-row",
-    ".crm-lead-contact-editor",
+for forbidden in (
+    'title="Journey"',
+    "crm-lead-workspace-layout",
+    "crm-lead-summary-grid",
 ):
-    assert token in css, token
+    assert forbidden not in page
 
 
-# No schema migration.
 assert not list(
-    (ROOT / "d1" / "migrations")
-    .glob("048*")
+    (
+        ROOT
+        / "d1/migrations"
+    ).glob("048*")
 )
 
 
 print(
-    "PASS v1.10.12a Lead detail Job-continuity redesign"
+    "PASS v1.10.12a Lead detail continuity"
 )
+
 print(
-    "  Lead journey + Client top row: verified"
+    "  shared Wedding workflow + Clients: verified"
 )
+
 print(
-    "  concise Lead details: verified"
+    "  Job-style summary grid: verified"
 )
+
 print(
-    "  compact Quotes: verified"
+    "  Job-style operations grid: verified"
 )
+
 print(
-    "  operational functionality: preserved"
+    "  concise editable Lead details: preserved"
 )
+
 print(
-    "  ContactRound Job edit icon: verified"
+    "  Lead-specific actions: preserved"
 )
+
 print(
     "  schema migration required: no"
 )

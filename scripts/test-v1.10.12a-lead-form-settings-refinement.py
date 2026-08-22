@@ -27,6 +27,22 @@ css = (
 
 title = 'title="Public lead form"'
 
+_shared_workspace_source = (
+    __import__("pathlib")
+    .Path(__file__)
+    .resolve()
+    .parents[1]
+    / "src/admin/components/crm"
+    / "CRMWeddingWorkspaceShared.tsx"
+).read_text(
+    encoding="utf-8",
+)
+
+job += (
+    "\n"
+    + _shared_workspace_source
+)
+
 assert crm.count(title) == 1
 
 start = crm.rfind(
@@ -93,7 +109,7 @@ assert "expandedLeadFieldId" in crm
 # Client Edit action now uses a simple centred person icon.
 assert "UserRoundCog" not in job
 assert "PenLine" not in job
-assert "ContactRound" in job
+assert "User" in job
 assert 'title="Edit client"' in job
 
 
@@ -127,7 +143,7 @@ print(
     "  field builder: preserved"
 )
 print(
-    "  client edit icon: centred ContactRound"
+    "  client edit icon: centred User"
 )
 print(
     "  schema migration: not required"

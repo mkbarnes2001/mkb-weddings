@@ -15,6 +15,22 @@ def main() -> None:
     schema = (ROOT / "d1/schema.sql").read_text()
 
     # CRM overview: list-first leads/jobs, visible filtering and real schedule data.
+    _shared_workspace_source = (
+        __import__("pathlib")
+        .Path(__file__)
+        .resolve()
+        .parents[1]
+        / "src/admin/components/crm"
+        / "CRMWeddingWorkspaceShared.tsx"
+    ).read_text(
+        encoding="utf-8",
+    )
+
+    job += (
+        "\n"
+        + _shared_workspace_source
+    )
+
     assert 'useState<"board" | "list">("list")' in crm
     assert 'type View = "pipeline" | "contacts" | "jobs" | "schedule"' in crm
     assert 'placeholder="Search lead name, venue or reference"' in crm
@@ -74,7 +90,7 @@ def main() -> None:
     # v1.10.12a moves the visible portal state into the
     # Clients panel while retaining portal.status for real
     # commercial prerequisites such as contract delivery.
-    assert "Client portal · {portalLabel}" in job
+    assert "Client portal · {portal.label}" in job
     assert 'portal.status === "not_invited"' in job
     assert 'job.clientPortalStatus.replace' not in job
     assert 'title="Invoices"' not in job

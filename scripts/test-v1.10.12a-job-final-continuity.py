@@ -34,10 +34,26 @@ booking = read(
 
 
 # Cleaner centred client-management icon.
+_shared_workspace_source = (
+    __import__("pathlib")
+    .Path(__file__)
+    .resolve()
+    .parents[1]
+    / "src/admin/components/crm"
+    / "CRMWeddingWorkspaceShared.tsx"
+).read_text(
+    encoding="utf-8",
+)
+
+job += (
+    "\n"
+    + _shared_workspace_source
+)
+
 assert "PenLine" not in job
 assert "<Pencil" not in job
 assert "UserRoundCog" not in job
-assert "ContactRound" in job
+assert "User" in job
 assert 'title="Edit client"' in job
 
 

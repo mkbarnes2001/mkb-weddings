@@ -29,6 +29,22 @@ app = read(
 )
 
 
+_shared_workspace_source = (
+    __import__("pathlib")
+    .Path(__file__)
+    .resolve()
+    .parents[1]
+    / "src/admin/components/crm"
+    / "CRMWeddingWorkspaceShared.tsx"
+).read_text(
+    encoding="utf-8",
+)
+
+page += (
+    "\n"
+    + _shared_workspace_source
+)
+
 assert (
     'path="crm/enquiries/:id" element={<CRMEnquiry />}'
     in app
@@ -70,28 +86,26 @@ assert (
 
 
 for token in [
-    'title="Client journey"',
+    'title="Wedding workflow"',
     'title="Lead details"',
-    'title="Client"',
-    'title="Mail"',
-    'title="Quotes"',
-    'title="Contracts"',
+    'title="Clients"',
+    'title="Communication"',
+    'title="Quote and package"',
+    'title="Booking and payments"',
     'title="Questionnaires"',
-    'title="Invoices"',
     'title="Files"',
-    'title="Journey"',
-    'title="History"',
+    'title="Notes and activity"',
 ]:
     assert token in page, token
 
 
 assert (
-    'aria-label="Client journey"'
+    'aria-label="Wedding workflow"'
     in page
 )
 
 assert (
-    "Detailed CRM events are kept separate from the concise Journey."
+    "Original enquiry notes and the latest operational changes."
     in page
 )
 
@@ -138,8 +152,10 @@ assert '"Pick & Choose"' in page
 assert '"Fixed"' in page
 
 
-assert "Job operations" in page
-assert "Open Job operations" in page
+# v1.10.12a removes the duplicate lower Journey panel.
+# Verify the persistent Lead -> Job transition route instead.
+assert "/admin/crm/jobs/${detail.job.id}" in page
+assert "AdminHeaderRouterLink" in page
 
 
 assert "questionnaireFileUrl" in page

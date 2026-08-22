@@ -26,6 +26,22 @@ def main() -> None:
     css = read("src/admin/admin-theme.css")
 
     # The CRM Job exposes a real lifecycle assembled from workspace-scoped records.
+    _shared_workspace_source = (
+        __import__("pathlib")
+        .Path(__file__)
+        .resolve()
+        .parents[1]
+        / "src/admin/components/crm"
+        / "CRMWeddingWorkspaceShared.tsx"
+    ).read_text(
+        encoding="utf-8",
+    )
+
+    job_page += (
+        "\n"
+        + _shared_workspace_source
+    )
+
     assert "async function getJobWeddingLifecycle" in portal
     for token in [
         "asset_wedding_links",
@@ -74,7 +90,7 @@ def main() -> None:
     assert "publicAssignments.total" in job_page
     assert 'id="job-clients"' in job_page
     assert 'title="Clients"' in job_page
-    assert "Client portal · {portalLabel}" in job_page
+    assert "Client portal · {portal.label}" in job_page
     assert 'id="job-questionnaires"' in job_page
     assert 'href="#job-questionnaires"' in job_page
 

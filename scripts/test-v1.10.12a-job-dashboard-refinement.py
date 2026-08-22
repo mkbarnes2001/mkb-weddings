@@ -64,14 +64,20 @@ job = read(
     "src/admin/pages/CRMJob.tsx"
 )
 
+shared = read(
+    "src/admin/components/crm/"
+    "CRMWeddingWorkspaceShared.tsx"
+)
+
 css = read(
     "src/admin/admin-theme.css"
 )
 
 
-# Workflow markers carry state without redundant status pills.
+# Workflow visual structure now has one shared source for
+# Lead and Job.
 workflow = component(
-    job,
+    shared,
     "AdminPanel",
     "Wedding workflow",
 )
@@ -84,24 +90,30 @@ assert "Previews sent" in workflow
 assert "Client photos delivered" in workflow
 
 
-# Clients now shares the same panel surface as Workflow.
+# Clients visual structure is shared too.
 clients = component(
-    job,
+    shared,
     "AdminPanel",
     "Clients",
 )
 
 assert "<AdminAccordion" not in clients
 assert "crm-job-clients-panel" in clients
-assert "Client portal · {portalLabel}" in clients
+assert "Client portal · {portal.label}" in clients
 assert "crm-job-client-portal-state" in clients
-assert "AdminIconButton" in clients
 assert 'title="Edit client"' in clients
-assert 'title={' in clients
-assert "Send new link" in clients
-assert 'title="Revoke client portal access"' in clients
-assert "Revoke client portal access" in clients
+assert "<User aria-hidden" in clients
 
+
+# Job keeps lifecycle-specific portal operations while
+# rendering the shared Clients panel.
+assert "CRMClientsPanel" in job
+assert "renderActions" in job
+assert "AdminIconButton" in job
+assert 'title={' in job
+assert "Send new link" in job
+assert 'title="Revoke client portal access"' in job
+assert "Revoke client portal access" in job
 assert 'id="job-clients"' in job
 
 

@@ -23,6 +23,12 @@ import {
   Save,
   UserRound,
   XCircle,
+  Globe2,
+  Images,
+  LayoutDashboard,
+  MessageCircle,
+  MessageSquareText,
+  Users,
   } from "lucide-react";
 import {
   AdminButton,
@@ -33,6 +39,7 @@ import {
   AdminPanel,
   AdminStatus,
   AdminHeaderRouterLink,
+  AdminAccordion,
 } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
@@ -44,6 +51,11 @@ import type {
   CrmOverview,
   CrmQuote,
 } from "../types/crm";
+import {
+  CRMClientsPanel,
+  CRMWeddingWorkflowPanel,
+} from "../components/crm/CRMWeddingWorkspaceShared";
+
 
 function dateTime(value?: string) {
   if (!value) return "";
@@ -515,6 +527,49 @@ export function CRMEnquiry() {
   }
 
 
+  async function createLeadClientGallery() {
+    const jobId =
+      detail?.job?.id;
+
+    if (
+      !jobId
+      || !canManage
+    ) {
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const result =
+        await AdminApiService
+          .createCrmJobClientGallery(
+            jobId,
+          );
+
+      setJobWorkspace(
+        result.workspace,
+      );
+
+      setMessage(
+        result.idempotent
+          ? "The existing linked client gallery is ready to open."
+          : "Client gallery created from this Wedding workspace.",
+      );
+    } catch (galleryError) {
+      setError(
+        galleryError instanceof Error
+          ? galleryError.message
+          : "Unable to create the client gallery.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+
   function createQuote() {
     navigate(
       `/admin/crm/quotes?enquiryId=${encodeURIComponent(id)}`,
@@ -690,57 +745,64 @@ export function CRMEnquiry() {
             ? "warning"
             : "neutral";
 
-    const journey = [
-      {
-        label: "Lead created",
-        detail:
-          dateOnly(
-            enquiry.createdAt,
-          ),
-        complete: true,
-      },
-      {
-        label: "Quote",
-        detail:
-          journeyQuote
-            ? statusLabel(
-                journeyQuote.status,
-              )
-            : "Not started",
-        complete:
-          quoteProgressed,
-      },
-      {
-        label: "Quote accepted",
-        detail:
-          journeyQuote?.status
-            === "accepted"
-          || detail.job
-            ? "Accepted"
-            : "Pending",
-        complete:
-          journeyQuote?.status
-            === "accepted"
-          || Boolean(
-            detail.job,
-          ),
-      },
-      {
-        label: "Job accepted",
-        detail:
-          detail.job
-            ? "Booked"
-            : "Pending",
-        complete:
-          Boolean(
-            detail.job,
-          ),
-      },
-    ];
+    const leadPreviewsTask =
+      jobWorkspace?.tasks.find(
+        (task) =>
+          task.status !== "cancelled"
+          && task.taskType === "milestone"
+          && task.title.trim().toLowerCase()
+            === "previews sent",
+      );
+
+    const leadDeliveryTask =
+      jobWorkspace?.tasks.find(
+        (task) =>
+          task.status !== "cancelled"
+          && task.taskType === "milestone"
+          && task.title.trim().toLowerCase()
+            === "client photos delivered",
+      );
+
+    const leadPreviewsComplete =
+      leadPreviewsTask?.status
+        === "completed";
+
+    const leadDeliveryComplete =
+      leadDeliveryTask?.status
+        === "completed";
+
+
+    const leadLifecycle =
+      jobWorkspace?.lifecycle
+      || null;
+
+    const leadPrimaryGallery =
+      leadLifecycle
+        ?.primaryClientGallery
+      || null;
+
+    const leadStoryLabel =
+      leadLifecycle
+        ? leadLifecycle.story.state
+            === "not_started"
+          ? "Not started"
+          : statusLabel(
+              leadLifecycle.story.state,
+            )
+        : "Available after booking";
+
+    const leadBookingQuestionnaire =
+      questionnaires.find(
+        (item) =>
+          item.status !== "completed",
+      )
+      || questionnaires[0]
+      || null;
 
   return (
-    <AdminPage className="crm-lead-workspace-page">
+    <AdminPage className="crm-lead-workspace-page crm-job-operations-page">
       <AdminPageHeader
+        className="crm-job-page-header"
         title={
           enquiry.primaryContact
             ?.displayName
@@ -806,143 +868,648 @@ export function CRMEnquiry() {
         </div>
       ) : null}
 
-      <div className="crm-lead-primary-grid">
-        <div className="crm-lead-primary-grid__journey">
-<AdminPanel
-        title="Client journey"
-        description="Lead → quote → accepted booking"
-        icon={Check}
-        className="crm-lead-workspace-overview-panel crm-lead-workspace-overview-panel--compact crm-lead-journey-panel"
-        compact
-      >
-        <div className="crm-lead-workspace-overview">
-          <div
-            className="crm-lead-workspace-journey"
-            aria-label="Client journey"
-          >
-            {journey.map(
-              (
-                item,
-                index,
-              ) => (
-                <div
-                  key={item.label}
-                  className={
-                    item.complete
-                      ? "complete"
-                      : ""
-                  }
-                >
-                  <span>
-                    {item.complete
-                      ? <Check />
-                      : index + 1}
-                  </span>
-
-                  <div>
-                    <strong>
-                      {item.label}
-                    </strong>
-
-                    <small>
-                      {item.detail}
-                    </small>
-                  </div>
-                </div>
-              ),
-            )}
-          </div>
+      <div className="crm-job-primary-grid">
+        <div className="crm-job-primary-grid__workflow">
+          <CRMWeddingWorkflowPanel
+            leadCreatedAt={
+              enquiry.createdAt
+            }
+            jobAccepted={
+              Boolean(
+                detail.job,
+              )
+            }
+            jobAcceptedAt={
+              detail.job?.bookingDate
+              || detail.job?.createdAt
+              || ""
+            }
+            eventDate={
+              enquiry.eventDate
+              || ""
+            }
+            venue={
+              enquiry.venueText
+              || ""
+            }
+            previewsComplete={
+              leadPreviewsComplete
+            }
+            previewsCompletedAt={
+              leadPreviewsTask?.completedAt
+              || ""
+            }
+            deliveryComplete={
+              leadDeliveryComplete
+            }
+            deliveryCompletedAt={
+              leadDeliveryTask?.completedAt
+              || ""
+            }
+            formatDate={
+              dateOnly
+            }
+          />
         </div>
-      </AdminPanel>
-        </div>
-        <div className="crm-lead-primary-grid__client">
-<AdminPanel
-              title="Client"
-              description="Contact details for this Lead."
-              icon={UserRound}
-              className="crm-lead-client-panel"
-              actions={
-                canManage ? (
-                  <AdminButton
-                    size="sm"
-                    variant="secondary"
-                    icon={Save}
-                    disabled={saving}
-                    onClick={() =>
-                      void save()
-                    }
-                  >
-                    Save
-                  </AdminButton>
-                ) : undefined
+
+        <div className="crm-job-primary-grid__clients">
+          <CRMClientsPanel
+            contacts={
+              detail.contacts
+            }
+            getPortalState={(
+              contact,
+            ) => {
+              if (!contact.email) {
+                return {
+                  status:
+                    "email-required",
+                  label:
+                    "Email required",
+                };
               }
-            >
-              <div className="crm-lead-contact-editors">
-                <ContactEditor
-                  title="Primary client"
-                  value={
-                    form.primaryContact
-                    || {}
-                  }
-                  disabled={!canManage}
-                  onChange={(value) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        primaryContact:
-                          value,
-                      }),
-                    )
-                  }
-                />
 
-                <ContactEditor
-                  title="Partner / second client"
-                  value={
-                    form.partnerContact
-                    || {}
-                  }
-                  disabled={!canManage}
-                  onChange={(value) =>
-                    setForm(
-                      (current) => ({
-                        ...current,
-                        partnerContact:
-                          value,
-                      }),
-                    )
-                  }
-                />
-              </div>
-            </AdminPanel>
+              if (!detail.job) {
+                return {
+                  status:
+                    "not-invited",
+                  label:
+                    "Begins after booking",
+                };
+              }
+
+              const access =
+                jobWorkspace
+                  ?.portalAccess
+                  .find(
+                    (item) =>
+                      item.contactId
+                        === contact.id
+                      && item.status
+                        === "active",
+                  );
+
+              if (access?.acceptedAt) {
+                return {
+                  status:
+                    "active",
+                  label:
+                    "Active",
+                };
+              }
+
+              if (access) {
+                return {
+                  status:
+                    "invited",
+                  label:
+                    "Invited",
+                };
+              }
+
+              return {
+                status:
+                  "not-invited",
+                label:
+                  "Not invited",
+              };
+            }}
+          />
         </div>
       </div>
 
-      <div className="crm-lead-workspace-layout">
-        <main className="crm-lead-workspace-main">
-          <div className="crm-lead-summary-grid">
-            <div className="crm-lead-summary-grid__details">
-<AdminPanel
-              title="Lead details"
-              description="Core details used for quoting and booking."
-              icon={BriefcaseBusiness}
-              className="crm-lead-details-panel"
-              actions={
-                canManage ? (
-                  <AdminButton
-                    size="sm"
-                    variant="primary"
-                    icon={Save}
-                    disabled={saving}
-                    onClick={() =>
-                      void save()
+      <div className="crm-job-summary-grid">
+        <div className="crm-job-summary-grid__column crm-job-summary-grid__column--commercial">
+          <AdminPanel
+            title="Booking and payments"
+            description="Invoice, contract, questionnaire and quote."
+            icon={BriefcaseBusiness}
+            className="crm-commercial-panel"
+          >
+            <div className="crm-commercial-grid crm-job-commercial-summary-list">
+              {invoice ? (
+                <article className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row">
+                  <span className="crm-commercial-card__icon">
+                    <FileText />
+                  </span>
+
+                  <div className="crm-commercial-summary-row__copy">
+                    <div className="crm-commercial-summary-row__identity">
+                      <span>
+                        Invoice
+                      </span>
+
+                      <strong>
+                        {invoice.reference}
+                      </strong>
+                    </div>
+
+                    <p className="crm-commercial-summary-line">
+                      Total{" "}
+                      {money(
+                        invoice.totalAmount,
+                        invoice.currency,
+                      )}
+                      {" · "}
+                      Paid{" "}
+                      {money(
+                        invoice.paidAmount,
+                        invoice.currency,
+                      )}
+                      {" · "}
+                      Balance{" "}
+                      {money(
+                        invoice.balanceAmount,
+                        invoice.currency,
+                      )}
+                    </p>
+
+                    {invoice.nextPayment ? (
+                      <small className="crm-commercial-summary-line crm-commercial-card__next">
+                        Next payment ·{" "}
+                        {invoice.nextPayment.label}
+                        {invoice.nextPayment.dueDate
+                          ? ` · Due ${dateOnly(
+                              invoice.nextPayment.dueDate,
+                            )}`
+                          : ""}
+                      </small>
+                    ) : null}
+                  </div>
+
+                  <span
+                    className={
+                      `crm-commercial-summary-state is-${invoice.status}`
                     }
                   >
-                    Save
-                  </AdminButton>
-                ) : undefined
-              }
-            >
+                    {statusLabel(
+                      invoice.status,
+                    )}
+                  </span>
+
+                  {detail.job ? (
+                    <Link
+                      className="admin-icon-control crm-commercial-card__open"
+                      to={`/admin/crm/jobs/${detail.job.id}/invoices/${invoice.id}`}
+                      aria-label={`Open invoice ${invoice.reference}`}
+                      title="Open invoice"
+                    >
+                      <ExternalLink aria-hidden="true" />
+                    </Link>
+                  ) : (
+                    <span className="crm-commercial-summary-action-spacer" />
+                  )}
+                </article>
+              ) : (
+                <article className="crm-commercial-card crm-commercial-summary-row">
+                  <span className="crm-commercial-card__icon">
+                    <FileText />
+                  </span>
+
+                  <div className="crm-commercial-summary-row__copy">
+                    <div className="crm-commercial-summary-row__identity">
+                      <span>
+                        Invoice
+                      </span>
+
+                      <strong>
+                        No invoice yet
+                      </strong>
+                    </div>
+
+                    <small className="crm-commercial-summary-line">
+                      Available after booking
+                    </small>
+                  </div>
+
+                  <span className="crm-commercial-summary-state">
+                    Not generated
+                  </span>
+
+                  <span className="crm-commercial-summary-action-spacer" />
+                </article>
+              )}
+
+              <article className="crm-commercial-card crm-commercial-summary-row">
+                <span className="crm-commercial-card__icon">
+                  <BookOpen />
+                </span>
+
+                <div className="crm-commercial-summary-row__copy">
+                  <div className="crm-commercial-summary-row__identity">
+                    <span>
+                      Contract
+                    </span>
+
+                    <strong>
+                      {contract?.reference
+                        || "No contract yet"}
+                    </strong>
+                  </div>
+
+                  {contract ? (
+                    <p className="crm-commercial-summary-line">
+                      {contract.title}
+                      {" · "}
+                      Signatures{" "}
+                      {contract.signatureCount}
+                      /{contract.requiredSignatures}
+                    </p>
+                  ) : (
+                    <small className="crm-commercial-summary-line">
+                      Available after booking
+                    </small>
+                  )}
+                </div>
+
+                <span
+                  className={
+                    `crm-commercial-summary-state ${
+                      contract
+                        ? `is-${contract.status}`
+                        : ""
+                    }`
+                  }
+                >
+                  {contract
+                    ? contractComplete
+                      ? "Signed"
+                      : statusLabel(
+                          contract.status,
+                        )
+                    : "Not generated"}
+                </span>
+
+                <span className="crm-commercial-summary-action-spacer" />
+              </article>
+
+              <article className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row">
+                <span className="crm-commercial-card__icon">
+                  <ClipboardList />
+                </span>
+
+                <div className="crm-commercial-summary-row__copy">
+                  <div className="crm-commercial-summary-row__identity">
+                    <span>
+                      Questionnaire
+                    </span>
+
+                    <strong>
+                      {leadBookingQuestionnaire?.title
+                        || "No booking questionnaire"}
+                    </strong>
+                  </div>
+
+                  <small className="crm-commercial-summary-line">
+                    {leadBookingQuestionnaire
+                      ? leadBookingQuestionnaire.dueAt
+                        ? `Planning target ${dateOnly(
+                            leadBookingQuestionnaire.dueAt,
+                          )}`
+                        : "Assigned with no due date"
+                      : detail.job
+                        ? "No questionnaire currently assigned"
+                        : "Available after booking"}
+                  </small>
+                </div>
+
+                <span
+                  className={
+                    `crm-commercial-summary-state ${
+                      leadBookingQuestionnaire
+                        ? `is-${leadBookingQuestionnaire.status}`
+                        : ""
+                    }`
+                  }
+                >
+                  {leadBookingQuestionnaire
+                    ? statusLabel(
+                        leadBookingQuestionnaire.status,
+                      )
+                    : "Not assigned"}
+                </span>
+
+                <a
+                  className="admin-icon-control crm-commercial-card__open"
+                  href="#lead-questionnaires"
+                  aria-label="Open Questionnaire section"
+                  title="Open questionnaire"
+                >
+                  <ExternalLink aria-hidden="true" />
+                </a>
+              </article>
+
+              {journeyQuote ? (
+                <article className="crm-commercial-card crm-commercial-card--link crm-commercial-summary-row">
+                  <span className="crm-commercial-card__icon">
+                    <PackageCheck />
+                  </span>
+
+                  <div className="crm-commercial-summary-row__copy">
+                    <div className="crm-commercial-summary-row__identity">
+                      <span>
+                        {detail.job
+                          ? "Accepted quote"
+                          : "Quote"}
+                      </span>
+
+                      <strong>
+                        {journeyQuote.reference}
+                      </strong>
+                    </div>
+
+                    <p className="crm-commercial-summary-line">
+                      {journeyQuote.quoteType
+                        === "fixed"
+                        ? "Fixed"
+                        : "Pick & Choose"}
+                      {" · "}
+                      Total{" "}
+                      {money(
+                        journeyQuote.currentVersion
+                          ?.totalAmount
+                          || 0,
+                        journeyQuote.currency
+                          || "GBP",
+                      )}
+                    </p>
+                  </div>
+
+                  <span
+                    className={
+                      `crm-commercial-summary-state is-${journeyQuote.status}`
+                    }
+                  >
+                    {statusLabel(
+                      journeyQuote.status,
+                    )}
+                  </span>
+
+                  <Link
+                    className="admin-icon-control crm-commercial-card__open"
+                    to={`/admin/crm/quotes/${journeyQuote.id}`}
+                    aria-label={`Open quote ${journeyQuote.reference}`}
+                    title="Open quote"
+                  >
+                    <ExternalLink aria-hidden="true" />
+                  </Link>
+                </article>
+              ) : (
+                <article className="crm-commercial-card crm-commercial-summary-row">
+                  <span className="crm-commercial-card__icon">
+                    <PackageCheck />
+                  </span>
+
+                  <div className="crm-commercial-summary-row__copy">
+                    <div className="crm-commercial-summary-row__identity">
+                      <span>
+                        Quote
+                      </span>
+
+                      <strong>
+                        No quote created
+                      </strong>
+                    </div>
+
+                    <small className="crm-commercial-summary-line">
+                      Create a quote when the Lead is ready for pricing
+                    </small>
+                  </div>
+
+                  <span className="crm-commercial-summary-state">
+                    Not created
+                  </span>
+
+                  <span className="crm-commercial-summary-action-spacer" />
+                </article>
+              )}
+            </div>
+          </AdminPanel>
+        </div>
+
+        <div className="crm-job-summary-grid__column crm-job-summary-grid__column--delivery">
+          <AdminPanel
+            title="Wedding delivery and content"
+            icon={LayoutDashboard}
+            className="crm-wedding-lifecycle-panel"
+          >
+            <div className="crm-wedding-lifecycle-grid">
+              <article className="crm-wedding-lifecycle-card">
+                <span className="crm-wedding-lifecycle-card__icon">
+                  <LayoutDashboard />
+                </span>
+
+                <div>
+                  <p>
+                    Wedding Workspace
+                  </p>
+
+                  <strong>
+                    {leadLifecycle?.wedding.exists
+                      ? "Ready"
+                      : "Available after booking"}
+                  </strong>
+                </div>
+
+                {leadLifecycle?.wedding.exists ? (
+                  <Link
+                    className="admin-icon-control crm-wedding-lifecycle-action"
+                    to={`/admin/weddings/${leadLifecycle.wedding.slug}/workspace`}
+                    aria-label="Open Wedding Workspace"
+                    title="Open Wedding Workspace"
+                  >
+                    <ExternalLink aria-hidden="true" />
+                  </Link>
+                ) : (
+                  <span className="crm-wedding-lifecycle-action-spacer" />
+                )}
+              </article>
+
+              <article className="crm-wedding-lifecycle-card">
+                <span className="crm-wedding-lifecycle-card__icon">
+                  <Images />
+                </span>
+
+                <div>
+                  <p>
+                    Wedding assets
+                  </p>
+
+                  <strong>
+                    {leadLifecycle?.wedding.exists
+                      ? `${leadLifecycle.wedding.assetCount} photographs`
+                      : "Available after booking"}
+                  </strong>
+                </div>
+
+                {leadLifecycle?.wedding.exists ? (
+                  <Link
+                    className="admin-icon-control crm-wedding-lifecycle-action"
+                    to={`/admin/weddings/${leadLifecycle.wedding.slug}/workspace#preview-upload`}
+                    aria-label="Manage Wedding assets"
+                    title="Manage Wedding assets"
+                  >
+                    <ExternalLink aria-hidden="true" />
+                  </Link>
+                ) : (
+                  <span className="crm-wedding-lifecycle-action-spacer" />
+                )}
+              </article>
+
+              <article className="crm-wedding-lifecycle-card">
+                <span className="crm-wedding-lifecycle-card__icon">
+                  <Images />
+                </span>
+
+                <div>
+                  <p>
+                    Client Gallery
+                  </p>
+
+                  <strong>
+                    {leadPrimaryGallery
+                      ? leadPrimaryGallery.title
+                      : detail.job
+                        ? "Not created"
+                        : "Available after booking"}
+                  </strong>
+                </div>
+
+                {leadPrimaryGallery ? (
+                  <Link
+                    className="admin-icon-control crm-wedding-lifecycle-action"
+                    to={`/admin/client-galleries/${leadPrimaryGallery.id}`}
+                    aria-label="Open Client Gallery"
+                    title="Open Client Gallery"
+                  >
+                    <ExternalLink aria-hidden="true" />
+                  </Link>
+                ) : detail.job
+                  && leadLifecycle?.wedding.exists
+                  && canManage ? (
+                  <button
+                    type="button"
+                    className="admin-icon-control crm-wedding-lifecycle-action"
+                    disabled={saving}
+                    onClick={() =>
+                      void createLeadClientGallery()
+                    }
+                    aria-label="Create Client Gallery"
+                    title="Create Client Gallery"
+                  >
+                    <Plus aria-hidden="true" />
+                  </button>
+                ) : (
+                  <span className="crm-wedding-lifecycle-action-spacer" />
+                )}
+              </article>
+
+              <article className="crm-wedding-lifecycle-card">
+                <span className="crm-wedding-lifecycle-card__icon">
+                  <BookOpen />
+                </span>
+
+                <div>
+                  <p>
+                    Wedding Story
+                  </p>
+
+                  <strong>
+                    {leadStoryLabel}
+                  </strong>
+                </div>
+
+                {leadLifecycle?.wedding.exists ? (
+                  <Link
+                    className="admin-icon-control crm-wedding-lifecycle-action"
+                    to={`/admin/weddings/${leadLifecycle.wedding.slug}/content`}
+                    aria-label={
+                      leadLifecycle.story.state
+                        === "not_started"
+                        ? "Start Wedding Story"
+                        : "Edit Wedding Story"
+                    }
+                    title={
+                      leadLifecycle.story.state
+                        === "not_started"
+                        ? "Start Wedding Story"
+                        : "Edit Wedding Story"
+                    }
+                  >
+                    {leadLifecycle.story.state
+                      === "not_started"
+                      ? <Plus aria-hidden="true" />
+                      : <ExternalLink aria-hidden="true" />}
+                  </Link>
+                ) : (
+                  <span className="crm-wedding-lifecycle-action-spacer" />
+                )}
+              </article>
+
+              <article className="crm-wedding-lifecycle-card">
+                <span className="crm-wedding-lifecycle-card__icon">
+                  <Globe2 />
+                </span>
+
+                <div>
+                  <p>
+                    Website galleries
+                  </p>
+
+                  <strong>
+                    {leadLifecycle?.wedding.exists
+                      ? `${leadLifecycle.publicAssignments.total} assignments`
+                      : "Available after booking"}
+                  </strong>
+                </div>
+
+                {leadLifecycle?.wedding.exists ? (
+                  <Link
+                    className="admin-icon-control crm-wedding-lifecycle-action"
+                    to={`/admin/weddings/${leadLifecycle.wedding.slug}/workspace#publishing-destinations`}
+                    aria-label="Manage Website galleries"
+                    title="Manage Website galleries"
+                  >
+                    <ExternalLink aria-hidden="true" />
+                  </Link>
+                ) : (
+                  <span className="crm-wedding-lifecycle-action-spacer" />
+                )}
+              </article>
+            </div>
+          </AdminPanel>
+        </div>
+      </div>
+
+      <div className="crm-job-operations-grid">
+        <div className="crm-job-operations-column">
+          <AdminAccordion
+            title="Lead details"
+            description="Core Wedding information used through quoting and booking."
+            icon={BriefcaseBusiness}
+            defaultOpen
+            summary={
+              <AdminStatus tone={lifecycleTone}>
+                {lifecycle}
+              </AdminStatus>
+            }
+          >
+            {canManage ? (
+              <div className="mb-3 flex justify-end">
+                <AdminButton
+                  size="sm"
+                  variant="primary"
+                  icon={Save}
+                  disabled={saving}
+                  onClick={() =>
+                    void save()
+                  }
+                >
+                  Save
+                </AdminButton>
+              </div>
+            ) : null}
+
               <div className="crm-lead-details-grid">
                 <AdminField label="Pipeline stage">
                   <select
@@ -1118,32 +1685,50 @@ export function CRMEnquiry() {
                   />
                 </AdminField>
               </div>
-            </AdminPanel>
-            </div>
-            <div className="crm-lead-summary-grid__quotes">
-<AdminPanel
-              title="Quotes"
-              description="Pricing sent during this Lead journey."
-              icon={PackageCheck}
-              className="crm-lead-quotes-panel"
-              actions={
-                canManage
-                && !detail.job
-                && !quotes.length ? (
-                  <AdminButton
-                    variant="primary"
-                    size="sm"
-                    icon={Plus}
-                    disabled={saving}
-                    onClick={() =>
-                      void createQuote()
-                    }
-                  >
-                    Create quote
-                  </AdminButton>
-                ) : undefined
-              }
-            >
+
+          </AdminAccordion>
+
+          <AdminAccordion
+            title="Quote and package"
+            description="Pricing and quote revisions attached to this Wedding journey."
+            icon={PackageCheck}
+            defaultOpen
+            summary={
+              <AdminStatus
+                tone={
+                  journeyQuote?.status === "accepted"
+                    ? "success"
+                    : journeyQuote
+                      ? "info"
+                      : "neutral"
+                }
+              >
+                {journeyQuote
+                  ? statusLabel(
+                      journeyQuote.status,
+                    )
+                  : "Not created"}
+              </AdminStatus>
+            }
+          >
+            {canManage
+            && !detail.job
+            && !quotes.length ? (
+              <div className="mb-3 flex justify-end">
+                <AdminButton
+                  variant="primary"
+                  size="sm"
+                  icon={Plus}
+                  disabled={saving}
+                  onClick={() =>
+                    void createQuote()
+                  }
+                >
+                  Create quote
+                </AdminButton>
+              </div>
+            ) : null}
+
               {!quotes.length ? (
                 <AdminEmptyState
                   icon={PackageCheck}
@@ -1209,16 +1794,18 @@ export function CRMEnquiry() {
                   )}
                 </div>
               )}
-            </AdminPanel>
-            </div>
-          </div>
 
+          </AdminAccordion>
 
-
-          <AdminPanel
-            title="Mail"
-            description="Delivery and engagement are independent from quote-document views."
-            icon={Mail}
+          <AdminAccordion
+            title="Communication"
+            description="Email delivery and engagement across this Wedding journey."
+            icon={MessageCircle}
+            summary={
+              <AdminStatus tone="neutral">
+                {mailCommunications.length} records
+              </AdminStatus>
+            }
           >
             {!mailCommunications.length ? (
               <AdminEmptyState
@@ -1282,73 +1869,24 @@ export function CRMEnquiry() {
                 )}
               </div>
             )}
-          </AdminPanel>
 
+          </AdminAccordion>
+        </div>
 
-
-          <div className="crm-lead-workspace-document-grid">
-            <AdminPanel
-              title="Contracts"
-              description="Contract progress from the accepted booking."
-              icon={BookOpen}
-              compact
-            >
-              {contract ? (
-                <div className="crm-lead-document-summary">
-                  <div>
-                    <span>Contract</span>
-                    <strong>
-                      {contract.title
-                        || contract.reference}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>Status</span>
-                    <AdminStatus
-                      tone={
-                        contractComplete
-                          ? "success"
-                          : contract.sentAt
-                            ? "warning"
-                            : "neutral"
-                      }
-                    >
-                      {contractComplete
-                        ? "Signed"
-                        : statusLabel(
-                            contract.status,
-                          )}
-                    </AdminStatus>
-                  </div>
-
-                  <div>
-                    <span>Signatures</span>
-                    <strong>
-                      {contract.signatureCount}
-                      {" / "}
-                      {contract.requiredSignatures}
-                    </strong>
-                  </div>
-                </div>
-              ) : (
-                <AdminEmptyState
-                  icon={BookOpen}
-                  title="No contract yet"
-                  description={
-                    detail.job
-                      ? "No contract is currently attached to this booking."
-                      : "Contract progression begins after quote acceptance."
-                  }
-                />
-              )}
-            </AdminPanel>
-
-            <AdminPanel
+        <div className="crm-job-operations-column">
+          <div
+            id="lead-questionnaires"
+            className="scroll-mt-5"
+          >
+            <AdminAccordion
               title="Questionnaires"
-              description="Assigned questionnaires remain part of the same client journey."
+              description="Planning forms attached to the same Wedding journey."
               icon={ClipboardList}
-              compact
+              summary={
+                <AdminStatus tone="neutral">
+                  {questionnaires.length}
+                </AdminStatus>
+              }
             >
               {!questionnaires.length ? (
                 <AdminEmptyState
@@ -1398,101 +1936,66 @@ export function CRMEnquiry() {
                   )}
                 </div>
               )}
-            </AdminPanel>
 
-            <AdminPanel
-              title="Invoices"
-              description="Invoice, payment and deposit progress from the accepted booking."
-              icon={FileText}
-              compact
-            >
-              {invoice ? (
-                <div className="crm-lead-document-summary">
-                  <div>
-                    <span>Invoice</span>
-                    <strong>
-                      {invoice.reference}
-                    </strong>
-                  </div>
+            </AdminAccordion>
+          </div>
 
-                  <div>
-                    <span>Status</span>
-                    <AdminStatus
-                      tone={
-                        invoice.balanceAmount <= 0
-                          ? "success"
-                          : invoice.paidAmount > 0
-                            ? "warning"
-                            : "neutral"
-                      }
-                    >
-                      {statusLabel(
-                        invoice.status,
-                      )}
-                    </AdminStatus>
-                  </div>
+          <AdminAccordion
+            title="Supplier team"
+            description="Wedding suppliers linked after booking."
+            icon={Users}
+            summary={
+              <AdminStatus tone="neutral">
+                {jobWorkspace?.linkedSuppliers.length || 0} linked
+              </AdminStatus>
+            }
+          >
+            {!detail.job ? (
+              <AdminEmptyState
+                icon={Users}
+                title="Available after booking"
+                description="The Wedding supplier team becomes available when this Lead converts to a Job."
+              />
+            ) : !jobWorkspace?.linkedSuppliers.length ? (
+              <AdminEmptyState
+                icon={Users}
+                title="No suppliers linked"
+                description="Supplier records linked to this Wedding will appear here."
+              />
+            ) : (
+              <div className="crm-lead-document-list">
+                {jobWorkspace.linkedSuppliers.map(
+                  (supplier) => (
+                    <article key={supplier.id}>
+                      <div>
+                        <strong>
+                          {supplier.displayName
+                            || supplier.name}
+                        </strong>
 
-                  <div>
-                    <span>Total</span>
-                    <strong>
-                      {money(
-                        invoice.totalAmount,
-                        invoice.currency,
-                      )}
-                    </strong>
-                  </div>
+                        <small>
+                          {supplier.role
+                            || supplier.category
+                            || "Supplier"}
+                        </small>
+                      </div>
+                    </article>
+                  ),
+                )}
+              </div>
+            )}
+          </AdminAccordion>
 
-                  <div>
-                    <span>Paid</span>
-                    <strong>
-                      {money(
-                        invoice.paidAmount,
-                        invoice.currency,
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>Balance</span>
-                    <strong>
-                      {money(
-                        invoice.balanceAmount,
-                        invoice.currency,
-                      )}
-                    </strong>
-                  </div>
-
-                  {invoice.nextPayment ? (
-                    <div>
-                      <span>Next payment</span>
-                      <strong>
-                        {invoice.nextPayment.label}
-                        {invoice.nextPayment.dueDate
-                          ? ` · ${dateOnly(invoice.nextPayment.dueDate)}`
-                          : ""}
-                      </strong>
-                    </div>
-                  ) : null}
-                </div>
-              ) : (
-                <AdminEmptyState
-                  icon={FileText}
-                  title="Not invoiced"
-                  description={
-                    detail.job
-                      ? "No invoice is currently attached to this booking."
-                      : "Invoice and deposit progression begins after acceptance."
-                  }
-                />
-              )}
-            </AdminPanel>
-
-            <AdminPanel
-              title="Files"
-              description="Private planning files shared across the booked client journey."
-              icon={FolderOpen}
-              compact
-            >
+          <AdminAccordion
+            title="Files"
+            description="Private planning files shared through the Wedding journey."
+            icon={FolderOpen}
+            summary={
+              <AdminStatus tone="neutral">
+                {workspaceFileCount}
+              </AdminStatus>
+            }
+          >
               {jobWorkspace
               && canManage ? (
                 <div className="crm-lead-files-upload">
@@ -1652,78 +2155,31 @@ export function CRMEnquiry() {
                   ) : null}
                 </div>
               )}
-            </AdminPanel>
-          </div>
-        </main>
 
-        <aside className="crm-lead-workspace-aside">
-          <AdminPanel
-            title="Journey"
-            description="Current client state"
-            icon={Check}
-            compact
+          </AdminAccordion>
+
+          <AdminAccordion
+            title="Notes and activity"
+            description="Original enquiry notes and the latest operational changes."
+            icon={MessageSquareText}
+            summary={
+              <AdminStatus tone="neutral">
+                {detail.activities.length} events
+              </AdminStatus>
+            }
           >
-            <dl className="admin-compact-details">
-              <div>
-                <dt>Lifecycle</dt>
-                <dd>{lifecycle}</dd>
-              </div>
+            {enquiry.notes ? (
+              <div className="mb-4">
+                <strong className="block text-[10px] font-semibold text-neutral-700">
+                  Original enquiry notes
+                </strong>
 
-              <div>
-                <dt>Stage</dt>
-                <dd>
-                  {stage?.name
-                    || enquiry.stageName}
-                </dd>
-              </div>
-
-              <div>
-                <dt>Mail</dt>
-                <dd>
-                  {statusLabel(
-                    enquiry.mailStatus,
-                  )}
-                </dd>
-              </div>
-
-              <div>
-                <dt>Created</dt>
-                <dd>
-                  {dateTime(
-                    enquiry.createdAt,
-                  )}
-                </dd>
-              </div>
-
-              <div>
-                <dt>Updated</dt>
-                <dd>
-                  {dateTime(
-                    enquiry.updatedAt,
-                  )}
-                </dd>
-              </div>
-            </dl>
-
-            {detail.job ? (
-              <div className="mt-4">
-                <Link
-                  className="admin-button admin-button--secondary admin-button--sm"
-                  to={`/admin/crm/jobs/${detail.job.id}`}
-                >
-                  <BriefcaseBusiness className="admin-button__icon" />
-                  Open Job operations
-                </Link>
+                <p className="mt-1 whitespace-pre-wrap text-[10px] leading-5 text-neutral-500">
+                  {enquiry.notes}
+                </p>
               </div>
             ) : null}
-          </AdminPanel>
 
-          <AdminPanel
-            title="History"
-            description="Detailed CRM events are kept separate from the concise Journey."
-            icon={Clock3}
-            compact
-          >
             {!detail.activities.length ? (
               <AdminEmptyState
                 icon={Clock3}
@@ -1754,17 +2210,19 @@ export function CRMEnquiry() {
                 )}
               </div>
             )}
-          </AdminPanel>
 
-          {canManage
-          && enquiry.status !== "won"
-          && !detail.job ? (
-            <AdminPanel
-              title="Close lead"
-              description="Lost leads remain part of the client history."
-              icon={XCircle}
-              compact
-            >
+          </AdminAccordion>
+        </div>
+      </div>
+
+      {canManage
+      && enquiry.status !== "won"
+      && !detail.job ? (
+        <AdminAccordion
+          title="Close lead"
+          description="Lost leads remain part of the Wedding history."
+          icon={XCircle}
+        >
               <AdminField label="Reason">
                 <textarea
                   className="admin-textarea"
@@ -1790,10 +2248,9 @@ export function CRMEnquiry() {
                   Mark lost
                 </AdminButton>
               </div>
-            </AdminPanel>
-          ) : null}
-        </aside>
-      </div>
+
+        </AdminAccordion>
+      ) : null}
     </AdminPage>
   );
 }

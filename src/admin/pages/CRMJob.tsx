@@ -34,7 +34,6 @@ import {
   Users,
   Workflow,
   X,
-  ContactRound,
 } from "lucide-react";
 import { AdminAccordion,
   AdminButton,
@@ -55,6 +54,11 @@ import type {
   QuestionnaireField,
   QuestionnaireInstance,
 } from "../types/crm";
+import {
+  CRMClientsPanel,
+  CRMWeddingWorkflowPanel,
+} from "../components/crm/CRMWeddingWorkspaceShared";
+
 
 function dateLabel(value?: string) {
   if (!value) return "Date TBC";
@@ -2084,344 +2088,164 @@ export function CRMJob() {
 
             <div className="crm-job-primary-grid">
         <div className="crm-job-primary-grid__workflow">
-<AdminPanel
-        title="Wedding workflow"
-        description="Wedding Photography · key booking and delivery milestones."
-        icon={Workflow}
-        className="crm-wedding-workflow-panel"
-      >
-        <ol className="crm-wedding-workflow">
-          <li className="crm-wedding-workflow__item is-complete">
-            <span
-              className="crm-wedding-workflow__marker"
-              aria-hidden="true"
-            >
-              <Check />
-            </span>
-
-            <div className="crm-wedding-workflow__content">
-              <div className="crm-wedding-workflow__heading">
-                <strong>Lead created</strong>
-              </div>
-
-              <p>
-                {workspace.enquiry?.createdAt
-                  ? dateLabel(
-                      workspace.enquiry.createdAt,
-                    )
-                  : "Lead creation date unavailable"}
-              </p>
-            </div>
-          </li>
-
-          <li className="crm-wedding-workflow__item is-complete">
-            <span
-              className="crm-wedding-workflow__marker"
-              aria-hidden="true"
-            >
-              <Check />
-            </span>
-
-            <div className="crm-wedding-workflow__content">
-              <div className="crm-wedding-workflow__heading">
-                <strong>Job accepted</strong>
-              </div>
-
-              <p>
-                {job.bookingDate || job.createdAt
-                  ? dateLabel(
-                      job.bookingDate
-                        || job.createdAt,
-                    )
-                  : "Acceptance date unavailable"}
-              </p>
-            </div>
-          </li>
-
-          <li className="crm-wedding-workflow__item is-scheduled">
-            <span
-              className="crm-wedding-workflow__marker crm-wedding-workflow__marker--scheduled"
-              aria-hidden="true"
-            />
-
-            <div className="crm-wedding-workflow__content">
-              <div className="crm-wedding-workflow__heading">
-                <strong>Wedding day</strong>
-              </div>
-
-              <p>
-                {job.eventDate
-                  ? dateLabel(
-                      job.eventDate,
-                    )
-                  : "Wedding date not set"}
-                {" · "}
-                {job.venueText
-                  || lifecycle.wedding.venue
-                  || "Venue TBC"}
-              </p>
-            </div>
-          </li>
-
-          <li
-            className={
-              `crm-wedding-workflow__item ${
-                previewsComplete
-                  ? "is-complete"
-                  : ""
-              }`
-            }
-          >
-            <button
-              type="button"
-              className={
-                `crm-wedding-workflow__toggle ${
-                  previewsComplete
-                    ? "is-complete"
-                    : ""
-                }`
-              }
-              aria-label={
-                previewsComplete
-                  ? "Reopen Previews sent milestone"
-                  : "Complete Previews sent milestone"
-              }
-              aria-pressed={
-                previewsComplete
-              }
-              title={
-                previewsComplete
-                  ? "Mark previews as not sent"
-                  : "Mark previews as sent"
-              }
-              disabled={
-                saving || !canManage
-              }
-              onClick={() =>
-                void togglePhotographyMilestone(
-                  "Previews sent",
-                )
-              }
-            >
-              {previewsComplete
-                ? <Check />
-                : null}
-            </button>
-
-            <div className="crm-wedding-workflow__content">
-              <div className="crm-wedding-workflow__heading">
-                <strong>Previews sent</strong>
-              </div>
-
-              <p>
-                {previewsComplete
-                  && previewsTask?.completedAt
-                  ? `Completed ${dateLabel(
-                      previewsTask.completedAt,
-                    )}`
-                  : "Mark complete when the Wedding previews have been sent."}
-              </p>
-            </div>
-          </li>
-
-          <li
-            className={
-              `crm-wedding-workflow__item ${
-                deliveryComplete
-                  ? "is-complete"
-                  : ""
-              }`
-            }
-          >
-            <button
-              type="button"
-              className={
-                `crm-wedding-workflow__toggle ${
-                  deliveryComplete
-                    ? "is-complete"
-                    : ""
-                }`
-              }
-              aria-label={
-                deliveryComplete
-                  ? "Reopen Client photos delivered milestone"
-                  : "Complete Client photos delivered milestone"
-              }
-              aria-pressed={
-                deliveryComplete
-              }
-              title={
-                deliveryComplete
-                  ? "Reopen final delivery"
-                  : "Mark client photos as delivered"
-              }
-              disabled={
-                saving || !canManage
-              }
-              onClick={() =>
-                void togglePhotographyMilestone(
-                  "Client photos delivered",
-                )
-              }
-            >
-              {deliveryComplete
-                ? <Check />
-                : null}
-            </button>
-
-            <div className="crm-wedding-workflow__content">
-              <div className="crm-wedding-workflow__heading">
-                <strong>Client photos delivered</strong>
-              </div>
-
-              <p>
-                {deliveryComplete
-                  && deliveryTask?.completedAt
-                  ? `Completed ${dateLabel(
-                      deliveryTask.completedAt,
-                    )}`
-                  : "Final gallery delivery completes this Job."}
-              </p>
-            </div>
-          </li>
-        </ol>
-      </AdminPanel>
+<CRMWeddingWorkflowPanel
+        leadCreatedAt={
+          workspace.enquiry?.createdAt
+          || ""
+        }
+        jobAccepted
+        jobAcceptedAt={
+          job.bookingDate
+          || job.createdAt
+          || ""
+        }
+        eventDate={
+          job.eventDate
+          || ""
+        }
+        venue={
+          job.venueText
+          || lifecycle.wedding.venue
+          || ""
+        }
+        previewsComplete={
+          previewsComplete
+        }
+        previewsCompletedAt={
+          previewsTask?.completedAt
+          || ""
+        }
+        deliveryComplete={
+          deliveryComplete
+        }
+        deliveryCompletedAt={
+          deliveryTask?.completedAt
+          || ""
+        }
+        canToggle={
+          canManage
+        }
+        busy={
+          saving
+        }
+        onTogglePreviews={() =>
+          void togglePhotographyMilestone(
+            "Previews sent",
+          )
+        }
+        onToggleDelivery={() =>
+          void togglePhotographyMilestone(
+            "Client photos delivered",
+          )
+        }
+        formatDate={
+          dateLabel
+        }
+      />
         </div>
         <div className="crm-job-primary-grid__clients">
-<div id="job-clients" className="scroll-mt-5 crm-job-top-clients"><AdminPanel
-            title="Clients"
-            description="Contact details and client portal access."
-            icon={Users}
-            className="crm-job-clients-panel"
-            actions={
-              <span className="crm-job-panel-count">
-                {workspace.contacts.length}
-              </span>
+<div id="job-clients" className="scroll-mt-5 crm-job-top-clients"><CRMClientsPanel
+            contacts={
+              workspace.contacts
             }
-          >
-            <div className="crm-job-clients">
-              {workspace.contacts.map((contact) => {
-                const access =
-                  activeAccessByContact.get(
-                    contact.id,
-                  );
-
-                const portalStatus =
-                  !contact.email
-                    ? "email-required"
-                    : access?.acceptedAt
-                      ? "active"
-                      : access
-                        ? "invited"
-                        : "not-invited";
-
-                const portalLabel =
-                  portalStatus === "active"
-                    ? "Active"
-                    : portalStatus === "invited"
-                      ? "Invited"
-                      : portalStatus === "email-required"
-                        ? "Email required"
-                        : "Not invited";
-
-                return (
-                  <article key={contact.id}>
-                    <div className="crm-job-client-copy">
-                      <strong>
-                        {contact.displayName}
-                      </strong>
-
-                      <p>
-                        {contact.role}
-                      </p>
-
-                      <a
-                        href={
-                          contact.email
-                            ? `mailto:${contact.email}`
-                            : undefined
-                        }
-                      >
-                        {contact.email || "Email required"}
-                      </a>
-
-                      {contact.phone ? (
-                        <span>
-                          {contact.phone}
-                        </span>
-                      ) : null}
-
-                      <div
-                        className={
-                          `crm-job-client-portal-state is-${portalStatus}`
-                        }
-                      >
-                        <span aria-hidden="true"></span>
-
-                        <small>
-                          Client portal · {portalLabel}
-                        </small>
-                      </div>
-                    </div>
-
-                    <div className="crm-job-client-actions">
-                      <Link
-                        className="admin-icon-control crm-job-client-icon-action"
-                        to={`/admin/crm/contacts/${contact.id}`}
-                        aria-label={`Edit ${contact.displayName}`}
-                        title="Edit client"
-                      >
-                        <ContactRound aria-hidden="true" />
-                      </Link>
-
-                      <AdminIconButton
-                        icon={Mail}
-                        label={
-                          access
-                            ? "Send new link"
-                            : "Invite client"
-                        }
-                        title={
-                          access
-                            ? "Send new link"
-                            : "Invite client"
-                        }
-                        variant="secondary"
-                        disabled={
-                          saving
-                          || !canManage
-                          || !contact.email
-                        }
-                        onClick={() =>
-                          void invite(
-                            contact.id,
-                          )
-                        }
-                      />
-
-                      {access ? (
-                        <AdminIconButton
-                          icon={ShieldX}
-                          label="Revoke client portal access"
-                          title="Revoke client portal access"
-                          variant="danger"
-                          disabled={
-                            saving
-                            || !canManage
-                          }
-                          onClick={() =>
-                            void revoke(
-                              access.identityId,
-                            )
-                          }
-                        />
-                      ) : null}
-                    </div>
-                  </article>
+            getPortalState={(
+              contact,
+            ) => {
+              const access =
+                activeAccessByContact.get(
+                  contact.id,
                 );
-              })}
-            </div>
-          </AdminPanel></div>
+
+              if (!contact.email) {
+                return {
+                  status:
+                    "email-required",
+                  label:
+                    "Email required",
+                };
+              }
+
+              if (access?.acceptedAt) {
+                return {
+                  status:
+                    "active",
+                  label:
+                    "Active",
+                };
+              }
+
+              if (access) {
+                return {
+                  status:
+                    "invited",
+                  label:
+                    "Invited",
+                };
+              }
+
+              return {
+                status:
+                  "not-invited",
+                label:
+                  "Not invited",
+              };
+            }}
+            renderActions={(
+              contact,
+            ) => {
+              const access =
+                activeAccessByContact.get(
+                  contact.id,
+                );
+
+              return (
+                <>
+                  <AdminIconButton
+                    icon={Mail}
+                    label={
+                      access
+                        ? "Send new link"
+                        : "Invite client"
+                    }
+                    title={
+                      access
+                        ? "Send new link"
+                        : "Invite client"
+                    }
+                    variant="secondary"
+                    disabled={
+                      saving
+                      || !canManage
+                      || !contact.email
+                    }
+                    onClick={() =>
+                      void invite(
+                        contact.id,
+                      )
+                    }
+                  />
+
+                  {access ? (
+                    <AdminIconButton
+                      icon={ShieldX}
+                      label="Revoke client portal access"
+                      title="Revoke client portal access"
+                      variant="danger"
+                      disabled={
+                        saving
+                        || !canManage
+                      }
+                      onClick={() =>
+                        void revoke(
+                          access.identityId,
+                        )
+                      }
+                    />
+                  ) : null}
+                </>
+              );
+            }}
+          /></div>
         </div>
       </div>
 

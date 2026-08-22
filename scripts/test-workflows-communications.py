@@ -117,7 +117,18 @@ def main() -> None:
     # v1.10.12a replaces the generic Job task accordion and
     # horizontal progress strip with the compact Wedding Photography
     # workflow while retaining communication operations.
-    assert 'title="Wedding workflow"' in job_page
+    # v1.10.12a: Wedding workflow visual structure is shared
+    # by Lead and Job; CRMJob retains lifecycle-specific behaviour.
+    shared_workspace = (
+        ROOT
+        / "src/admin/components/crm"
+        / "CRMWeddingWorkspaceShared.tsx"
+    ).read_text(
+        encoding="utf-8",
+    )
+
+    assert "CRMWeddingWorkflowPanel" in job_page
+    assert 'title="Wedding workflow"' in shared_workspace
     for milestone in (
         "Lead created",
         "Job accepted",
@@ -125,7 +136,10 @@ def main() -> None:
         "Previews sent",
         "Client photos delivered",
     ):
-        assert milestone in job_page, milestone
+        assert (
+            milestone in shared_workspace
+            or milestone in job_page
+        ), milestone
     assert 'title="Workflow and tasks"' not in job_page
     assert 'crm-job-progress-strip' not in job_page
     assert "togglePhotographyMilestone" in job_page
