@@ -9,6 +9,23 @@ type Env = {
 
 type LookupKind = "address" | "venue";
 
+type PlacesLocationBias = {
+  circle: {
+    center: {
+      latitude: number;
+      longitude: number;
+    };
+    radius: number;
+  };
+};
+
+type RequestWithGeo = Request & {
+  cf?: {
+    latitude?: string | null;
+    longitude?: string | null;
+  };
+};
+
 type AddressComponent = {
   longText?: string;
   shortText?: string;
@@ -139,6 +156,50 @@ function placesRegionCode(
   }
 
   return "";
+}
+
+
+function placesLocationBias(
+  request: Request,
+): PlacesLocationBias | undefined {
+  const cf =
+    (request as RequestWithGeo)
+      .cf;
+
+  const latitude =
+    Number(
+      cf?.latitude,
+    );
+
+  const longitude =
+    Number(
+      cf?.longitude,
+    );
+
+  if (
+    !Number.isFinite(
+      latitude,
+    )
+    || !Number.isFinite(
+      longitude,
+    )
+    || latitude < -90
+    || latitude > 90
+    || longitude < -180
+    || longitude > 180
+  ) {
+    return undefined;
+  }
+
+  return {
+    circle: {
+      center: {
+        latitude,
+        longitude,
+      },
+      radius: 50_000,
+    },
+  };
 }
 
 
@@ -387,6 +448,7 @@ async function googleAutocomplete(
   input: string,
   token: string,
   regionCode: string,
+  locationBias?: PlacesLocationBias,
 ) {
   const response = await fetch(
     "https://places.googleapis.com/v1/places:autocomplete",
@@ -403,6 +465,7 @@ async function googleAutocomplete(
         sessionToken: token,
         includeQueryPredictions: false,
         ...(regionCode ? { regionCode } : {}),
+        ...(locationBias ? { locationBias } : {}),
       }),
     },
   );
@@ -733,6 +796,11 @@ async (context) => {
             ?.default_country,
         );
 
+      const locationBias =
+        placesLocationBias(
+          context.request,
+        );
+
       return json({
         ok: true,
         provider: "google",
@@ -743,6 +811,7 @@ async (context) => {
             input,
             token,
             regionCode,
+            locationBias,
           ),
       });
     }
