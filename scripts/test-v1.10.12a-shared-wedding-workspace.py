@@ -102,12 +102,10 @@ for token in (
     assert token in lead, token
 
 
-assert not list(
-    (
-        ROOT
-        / "d1/migrations"
-    ).glob("048*")
-)
+assert (
+    ROOT
+    / "d1/migrations/048_crm_lead_source_continuity.sql"
+).is_file()
 
 
 print(
@@ -135,5 +133,5 @@ print(
 )
 
 print(
-    "  schema migration required: no"
+    "  release schema: 48 · Lead Source continuity"
 )

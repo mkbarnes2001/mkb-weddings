@@ -10,8 +10,9 @@ crm = (
     ROOT / "src/admin/pages/CRM.tsx"
 ).read_text(encoding="utf-8")
 
-job = (
-    ROOT / "src/admin/pages/CRMJob.tsx"
+shared = (
+    ROOT
+    / "src/admin/components/crm/CRMWeddingWorkspaceShared.tsx"
 ).read_text(encoding="utf-8")
 
 css = (
@@ -107,9 +108,9 @@ assert (
 )
 
 
-# Pen/pencil edit symbol removed from Job Client action.
-assert "PenLine" not in job
-assert 'title="Edit client"' in job
+# Pen/pencil edit symbol removed from shared Client action.
+assert "PenLine" not in shared
+assert 'title="Edit client"' in shared
 
 
 # New builder styling exists and uses configured record surface.
@@ -124,11 +125,11 @@ assert (
 )
 
 
-# No release migration.
-assert not list(
-    (ROOT / "d1" / "migrations")
-    .glob("048*")
-)
+# v1.10.12a now owns schema 48 for canonical Lead Source continuity.
+assert (
+    ROOT
+    / "d1/migrations/048_crm_lead_source_continuity.sql"
+).is_file()
 
 
 print(
@@ -150,5 +151,5 @@ print(
     "  client management icon replaces pen: verified"
 )
 print(
-    "  schema migration required: no"
+    "  release schema: 48 · Lead Source continuity"
 )

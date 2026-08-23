@@ -120,11 +120,11 @@ assert (
 )
 
 
-# No migration.
-assert not list(
-    (ROOT / "d1" / "migrations")
-    .glob("048*")
-)
+# v1.10.12a now includes schema 48 for canonical Lead Source continuity.
+assert (
+    ROOT
+    / "d1/migrations/048_crm_lead_source_continuity.sql"
+).is_file()
 
 
 print(
@@ -146,5 +146,5 @@ print(
     "  client edit icon: centred User"
 )
 print(
-    "  schema migration: not required"
+    "  release schema: 48 · Lead Source continuity"
 )

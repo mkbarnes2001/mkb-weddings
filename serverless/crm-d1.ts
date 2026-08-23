@@ -64,6 +64,7 @@ const LEAD_FORM_SYSTEM_KEYS = new Set([
   "budgetMin",
   "budgetMax",
   "message",
+  "leadSource",
 ]);
 
 const LEAD_FORM_LOCKED_SYSTEM_KEYS = new Set([
@@ -193,6 +194,28 @@ const DEFAULT_LEAD_FORM_FIELDS = [
     systemKey: "venueText",
     locked: false,
   },
+    {
+      id: "leadSource",
+      type: "select",
+      label: "How did you hear about us?",
+      help: "",
+      placeholder: "Choose an option",
+      required: false,
+      enabled: true,
+      options: [
+        "Google",
+        "Instagram",
+        "Facebook",
+        "TikTok",
+        "Referral",
+        "Wedding venue",
+        "Wedding fair",
+        "Previous client",
+        "Other",
+      ],
+      systemKey: "leadSource",
+      locked: false,
+    },
   {
     id: "packageInterest",
     type: "short_text",
@@ -346,6 +369,29 @@ function normalizeLeadFormFields(value: unknown) {
       fields.unshift(protectedField);
       ids.add(protectedField.id);
       systemKeys.add(systemKey);
+    }
+  }
+
+  if (!systemKeys.has("leadSource")) {
+    const leadSourceField =
+      defaults.find(
+        (field) =>
+          field.systemKey
+          === "leadSource",
+      );
+
+    if (leadSourceField) {
+      fields.push(
+        leadSourceField,
+      );
+
+      ids.add(
+        leadSourceField.id,
+      );
+
+      systemKeys.add(
+        "leadSource",
+      );
     }
   }
 
@@ -691,6 +737,7 @@ function hydrateEnquiry(row: any) {
     stageType: text(row.stage_type),
     status: text(row.status),
     source: text(row.source),
+    leadSource: text(row.lead_source),
     campaign: text(row.campaign),
     eventType: text(row.event_type),
     eventDate: text(row.event_date),
@@ -828,6 +875,7 @@ function hydrateJob(row: any) {
     title: text(row.title),
     bookingDate: text(row.booking_date),
     eventDate: text(row.event_date),
+    leadSource: text(row.lead_source),
     serviceName: text(row.service_name),
     packageName: text(row.package_name),
     valueAmount: row.value_amount == null ? null : Number(row.value_amount),
@@ -1212,14 +1260,14 @@ export async function createAdminEnquiry(db: D1Db, actor: CrmActor, input: any) 
   const statements: any[] = [
     db.prepare(`
       INSERT INTO crm_enquiries (
-        id, workspace_id, reference, stage_id, status, source, campaign, event_type,
+        id, workspace_id, reference, stage_id, status, source, lead_source, campaign, event_type,
         event_date, date_flexibility, venue_text, venue_id, venue_slug,
         service_interest, package_interest, budget_min, budget_max, currency,
         notes, assigned_user_id, consent_json, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, 'open', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES (?, ?, ?, ?, 'open', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).bind(
       enquiryId, actor.workspaceId, reference, stage.id,
-      text(input?.source || "manual"), text(input?.campaign), text(input?.eventType || "wedding"),
+      text(input?.source || "manual"), text(input?.leadSource), text(input?.campaign), text(input?.eventType || "wedding"),
       text(input?.eventDate), text(input?.dateFlexibility), text(input?.venueText), text(input?.venueId), text(input?.venueSlug),
       text(input?.serviceInterest), text(input?.packageInterest), integer(input?.budgetMin), integer(input?.budgetMax), text(input?.currency || "GBP"),
       text(input?.notes), text(input?.assignedUserId) || null, JSON.stringify(input?.consent || {}),
@@ -1256,7 +1304,7 @@ export async function updateAdminEnquiry(db: D1Db, actor: CrmActor, enquiryId: s
   const statements: any[] = [
     db.prepare(`
       UPDATE crm_enquiries SET
-        stage_id = ?, status = ?, source = ?, campaign = ?, event_type = ?, event_date = ?,
+        stage_id = ?, status = ?, source = ?, lead_source = ?, campaign = ?, event_type = ?, event_date = ?,
         date_flexibility = ?, venue_text = ?, venue_id = ?, venue_slug = ?,
         service_interest = ?, package_interest = ?, budget_min = ?, budget_max = ?,
         currency = ?, notes = ?, assigned_user_id = ?,
@@ -1265,7 +1313,7 @@ export async function updateAdminEnquiry(db: D1Db, actor: CrmActor, enquiryId: s
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ? AND workspace_id = ?
     `).bind(
-      stage.id, stageStatus, text(input?.source ?? current.source), text(input?.campaign ?? current.campaign), text(input?.eventType ?? current.event_type), text(input?.eventDate ?? current.event_date),
+      stage.id, stageStatus, text(input?.source ?? current.source), text(input?.leadSource ?? current.lead_source), text(input?.campaign ?? current.campaign), text(input?.eventType ?? current.event_type), text(input?.eventDate ?? current.event_date),
       text(input?.dateFlexibility ?? current.date_flexibility), text(input?.venueText ?? current.venue_text), text(input?.venueId ?? current.venue_id), text(input?.venueSlug ?? current.venue_slug),
       text(input?.serviceInterest ?? current.service_interest), text(input?.packageInterest ?? current.package_interest), integer(input?.budgetMin ?? current.budget_min), integer(input?.budgetMax ?? current.budget_max),
       text(input?.currency ?? current.currency), text(input?.notes ?? current.notes), text(input?.assignedUserId ?? current.assigned_user_id) || null,
@@ -1392,8 +1440,8 @@ export async function acceptEnquiry(db: D1Db, actor: CrmActor, enquiryId: string
         assigned_user_id, venue_text, venue_id, venue_slug, wedding_slug,
         quote_id, quote_version_id, quote_reference, quote_version_number, accepted_quote_at,
         booking_subtotal, booking_discount, booking_tax, package_snapshot_json,
-        addons_snapshot_json, quote_snapshot_json, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, 'booked', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        addons_snapshot_json, quote_snapshot_json, lead_source, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, 'booked', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).bind(
       jobId, actor.workspaceId, jobReference, enquiryId, text(enquiryRow.event_type || "wedding"), title,
       new Date().toISOString().slice(0, 10), text(enquiryRow.event_date), text(input?.serviceName || enquiryRow.service_interest), text(input?.packageName || enquiryRow.package_interest),
@@ -1401,7 +1449,7 @@ export async function acceptEnquiry(db: D1Db, actor: CrmActor, enquiryId: string
       text(enquiryRow.venue_text), text(enquiryRow.venue_id), text(enquiryRow.venue_slug), linkedWeddingSlug,
       text(input?.quoteId) || null, text(input?.quoteVersionId) || null, text(input?.quoteReference), input?.quoteVersionNumber == null ? null : integer(input?.quoteVersionNumber),
       text(input?.acceptedQuoteAt) || null, integer(input?.bookingSubtotal), integer(input?.bookingDiscount), integer(input?.bookingTax),
-      JSON.stringify(input?.packageSnapshot || {}), JSON.stringify(input?.addonsSnapshot || []), JSON.stringify(input?.quoteSnapshot || {}),
+      JSON.stringify(input?.packageSnapshot || {}), JSON.stringify(input?.addonsSnapshot || []), JSON.stringify(input?.quoteSnapshot || {}), text(enquiryRow.lead_source),
     ),
     db.prepare(`
       UPDATE crm_enquiries SET stage_id = ?, status = 'won', won_at = CURRENT_TIMESTAMP,
@@ -1735,6 +1783,15 @@ export async function submitPublicEnquiry(db: D1Db, workspaceId: string, request
       "venueText",
     ),
   );
+  const leadSource = text(
+    leadSystemValue(
+      input,
+      fields,
+      answers,
+      "leadSource",
+    ),
+  );
+
   const packageInterest = text(
     leadSystemValue(
       input,
@@ -1782,9 +1839,9 @@ export async function submitPublicEnquiry(db: D1Db, workspaceId: string, request
         id, workspace_id, reference, stage_id, status, source, campaign, event_type,
         event_date, date_flexibility, venue_text, service_interest, package_interest,
         budget_min, budget_max, currency, notes, consent_json, request_fingerprint,
-        lead_form_schema_json, lead_form_answers_json,
+        lead_source, lead_form_schema_json, lead_form_answers_json,
         created_at, updated_at
-      ) VALUES (?, ?, ?, ?, 'open', 'website', ?, 'wedding', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES (?, ?, ?, ?, 'open', 'website', ?, 'wedding', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).bind(
       enquiryId,
       workspaceId,
@@ -1802,6 +1859,7 @@ export async function submitPublicEnquiry(db: D1Db, workspaceId: string, request
       message,
       JSON.stringify(consent),
       fingerprint,
+      leadSource,
       JSON.stringify(fields),
       JSON.stringify(answers),
     ),

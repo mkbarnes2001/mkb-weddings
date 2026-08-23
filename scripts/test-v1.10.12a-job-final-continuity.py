@@ -155,11 +155,11 @@ for token in (
     assert token in css, token
 
 
-# No schema migration.
-assert not list(
-    (ROOT / "d1" / "migrations")
-    .glob("048*")
-)
+# v1.10.12a release schema is 48 for canonical Lead Source continuity.
+assert (
+    ROOT
+    / "d1/migrations/048_crm_lead_source_continuity.sql"
+).is_file()
 
 
 print(

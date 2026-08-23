@@ -35,6 +35,7 @@ export type CrmEnquiry = {
   stageType: string;
   status: "open" | "won" | "lost" | "archived";
   source: string;
+  leadSource: string;
   campaign: string;
   eventType: string;
   eventDate: string;
@@ -83,6 +84,7 @@ export type CrmJob = {
   title: string;
   bookingDate: string;
   eventDate: string;
+  leadSource: string;
   serviceName: string;
   packageName: string;
   valueAmount: number | null;
@@ -201,6 +203,7 @@ export type CrmEnquiryDetail = {
 export type CrmEnquiryInput = {
   stageId?: string;
   source?: string;
+  leadSource?: string;
   campaign?: string;
   eventType?: string;
   eventDate?: string;

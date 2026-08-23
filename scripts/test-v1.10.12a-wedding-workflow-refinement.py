@@ -9,6 +9,14 @@ job = (
     ROOT / "src/admin/pages/CRMJob.tsx"
 ).read_text()
 
+shared = (
+    ROOT
+    / "src/admin/components/crm/CRMWeddingWorkspaceShared.tsx"
+).read_text(
+    encoding="utf-8",
+)
+
+
 workflow = (
     ROOT / "serverless/crm-workflow-d1.ts"
 ).read_text()
@@ -26,10 +34,16 @@ schema = (
 # Vertical Wedding Photography workflow replaces generic UI.
 # ------------------------------------------------------------
 
-assert 'title="Wedding workflow"' in job
+assert 'title="Wedding workflow"' in shared
+# The compact shared panel deliberately carries no helper description.
 assert (
     'description="Wedding Photography · key booking and delivery milestones."'
-    in job
+    not in shared
+)
+
+assert (
+    'className="crm-wedding-workflow-panel"'
+    in shared
 )
 
 for milestone in (
@@ -39,7 +53,7 @@ for milestone in (
     "Previews sent",
     "Client photos delivered",
 ):
-    assert milestone in job, milestone
+    assert milestone in shared, milestone
 
 assert 'title="Workflow and tasks"' not in job
 assert 'crm-job-progress-strip' not in job
@@ -139,9 +153,19 @@ assert 'className="crm-job-summary-grid"' in job
 
 assert job.count('id="job-clients"') == 1
 
+assert job.count(
+    "<CRMWeddingWorkflowPanel"
+) == 1
+
+assert job.count(
+    "<CRMClientsPanel"
+) == 1
+
+assert 'title="Clients"' in shared
+
 assert (
-    job.index('title="Wedding workflow"')
-    < job.index('title="Clients"')
+    job.index("<CRMWeddingWorkflowPanel")
+    < job.index("<CRMClientsPanel")
     < job.index('title="Booking and payments"')
     < job.index('title="Wedding delivery and content"')
 )
@@ -190,5 +214,5 @@ print(
 )
 
 print(
-    "  schema change required: no"
+    "  workflow persistence model: existing schema retained"
 )
