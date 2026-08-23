@@ -114,6 +114,34 @@ function placeId(value: unknown) {
   return id;
 }
 
+function placesRegionCode(
+  value: unknown,
+) {
+  const countryCode =
+    text(value)
+      .trim()
+      .toUpperCase();
+
+  if (
+    countryCode === "GB"
+    || countryCode === "UK"
+  ) {
+    return "uk";
+  }
+
+  if (
+    /^[A-Z]{2}$/.test(
+      countryCode,
+    )
+  ) {
+    return countryCode
+      .toLowerCase();
+  }
+
+  return "";
+}
+
+
 function lookupKind(
   value: unknown,
 ): LookupKind | "" {
@@ -358,6 +386,7 @@ async function googleAutocomplete(
   apiKey: string,
   input: string,
   token: string,
+  regionCode: string,
 ) {
   const response = await fetch(
     "https://places.googleapis.com/v1/places:autocomplete",
@@ -373,6 +402,7 @@ async function googleAutocomplete(
         input,
         sessionToken: token,
         includeQueryPredictions: false,
+        ...(regionCode ? { regionCode } : {}),
       }),
     },
   );
@@ -684,6 +714,25 @@ async (context) => {
         });
       }
 
+      const workspaceSettings =
+        await context.env.MKB_DB
+          .prepare(`
+            SELECT default_country
+            FROM workspace_settings
+            WHERE workspace_id = ?
+            LIMIT 1
+          `)
+          .bind(
+            workspaceId,
+          )
+          .first();
+
+      const regionCode =
+        placesRegionCode(
+          workspaceSettings
+            ?.default_country,
+        );
+
       return json({
         ok: true,
         provider: "google",
@@ -693,6 +742,7 @@ async (context) => {
             apiKey,
             input,
             token,
+            regionCode,
           ),
       });
     }
