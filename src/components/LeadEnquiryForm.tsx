@@ -614,12 +614,15 @@ export function LeadEnquiryForm({
             }
           />
 
-          <details className="rounded-lg border border-black/10 bg-black/[0.02]">
-            <summary className="cursor-pointer list-none px-3 py-2 text-xs font-medium text-foreground/60">
-              Edit address details
+          <details className="group">
+            <summary
+              className="inline-flex cursor-pointer list-none items-center text-[11px] font-medium text-foreground/45 underline decoration-foreground/20 underline-offset-2 transition-colors hover:text-foreground/65"
+              style={{ listStyle: "none" }}
+            >
+              Can't find your address? Enter manually
             </summary>
 
-            <div className="grid gap-3 border-t border-black/10 p-3 md:grid-cols-2">
+            <div className="mt-2 grid gap-3 rounded-lg border border-black/10 bg-black/[0.02] p-3 md:grid-cols-2">
               <input
                 className="md:col-span-2"
                 disabled={submitting}

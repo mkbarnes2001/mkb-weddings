@@ -37,7 +37,7 @@ address = source[
 for marker in (
     "<PublicPlacesAutocomplete",
     'kind="address"',
-    "Edit address details",
+    "Can't find your address? Enter manually",
     "<details",
     "<summary",
     'placeholder="Address line 1"',
@@ -159,7 +159,7 @@ print(
     "  search-first Address UI: verified"
 )
 print(
-    "  structured address details collapsed: verified"
+    "  subtle manual address fallback: verified"
 )
 print(
     "  maximum five visible suggestions: verified"
