@@ -64,7 +64,7 @@ assert con.execute(
     FROM schema_meta
     WHERE key = 'schema_version'
     """
-).fetchone()[0] == "48"
+).fetchone()[0] == "49"
 
 assert "fields_json" in columns(
     con,

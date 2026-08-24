@@ -240,14 +240,11 @@ for token in (
     assert token in css, token
 
 
-# Venue identity belongs to the next gate.
-assert not list(
-    (
-        ROOT
-        / "d1"
-        / "migrations"
-    ).glob("049*")
-)
+# Gate 2D.2A itself is schema-neutral.
+# Later release gates may legitimately add migrations, so this
+# historical regression must not assert repository-wide migration
+# absence. Its persistence contract remains the existing
+# crm_lead_form_settings.fields_json / options[] model verified above.
 
 
 print(
