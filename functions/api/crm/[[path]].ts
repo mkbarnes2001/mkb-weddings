@@ -31,6 +31,11 @@ import {
   updateCrmJobWeddingDetails,
 } from "../../../serverless/crm-d1";
 import {
+  getCrmEnquiryDeletePreflight,
+  getCrmJobDeletePreflight,
+} from "../../../serverless/crm-delete-d1";
+
+import {
   approveSupplierSubmission,
   archiveQuestionnaireTemplate,
   assignQuestionnaire,
@@ -226,6 +231,50 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           await getCrmCommercialSettings(
             context.env.MKB_DB,
             actor,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
+    if (
+      parts[0] === "enquiries"
+      && parts[1]
+      && parts[2] === "delete-preflight"
+      && parts.length === 3
+    ) {
+      return Response.json({
+        ok: true,
+        preflight:
+          await getCrmEnquiryDeletePreflight(
+            context.env.MKB_DB,
+            actor,
+            parts[1],
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
+    if (
+      parts[0] === "jobs"
+      && parts[1]
+      && parts[2] === "delete-preflight"
+      && parts.length === 3
+    ) {
+      return Response.json({
+        ok: true,
+        preflight:
+          await getCrmJobDeletePreflight(
+            context.env.MKB_DB,
+            actor,
+            parts[1],
           ),
       }, {
         headers: {
