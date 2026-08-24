@@ -121,6 +121,247 @@ function statusSummary(
   return statuses.join(", ");
 }
 
+
+async function hiddenCommercialHistoryBlockers(
+  db: D1Db,
+  actor: CrmDeleteActor,
+  target: {
+    enquiryId?: string;
+    jobId?: string;
+  },
+) {
+  const enquiryId =
+    text(target.enquiryId);
+
+  const jobId =
+    text(target.jobId);
+
+  const [
+    hiddenQuoteVersions,
+    hiddenQuoteAcceptances,
+    hiddenInvoices,
+    hiddenContractVersions,
+    hiddenContracts,
+  ] = await Promise.all([
+    countRows(
+      db,
+      `
+        SELECT COUNT(
+          DISTINCT version.id
+        ) AS total
+        FROM crm_quote_versions version
+        JOIN crm_quotes quote
+          ON quote.id =
+             version.quote_id
+         AND quote.workspace_id =
+             version.workspace_id
+        WHERE quote.workspace_id = ?
+          AND quote.status = 'draft'
+          AND version.status <> 'draft'
+          AND (
+            (
+              ? <> ''
+              AND quote.enquiry_id = ?
+            )
+            OR (
+              ? <> ''
+              AND quote.accepted_job_id = ?
+            )
+          )
+      `,
+      [
+        actor.workspaceId,
+        enquiryId,
+        enquiryId,
+        jobId,
+        jobId,
+      ],
+    ),
+
+    countRows(
+      db,
+      `
+        SELECT COUNT(
+          DISTINCT acceptance.id
+        ) AS total
+        FROM crm_quote_acceptances
+          acceptance
+        JOIN crm_quotes quote
+          ON quote.id =
+             acceptance.quote_id
+         AND quote.workspace_id =
+             acceptance.workspace_id
+        WHERE quote.workspace_id = ?
+          AND quote.status = 'draft'
+          AND (
+            (
+              ? <> ''
+              AND quote.enquiry_id = ?
+            )
+            OR (
+              ? <> ''
+              AND quote.accepted_job_id = ?
+            )
+          )
+      `,
+      [
+        actor.workspaceId,
+        enquiryId,
+        enquiryId,
+        jobId,
+        jobId,
+      ],
+    ),
+
+    jobId
+      ? countRows(
+          db,
+          `
+            SELECT COUNT(*) AS total
+            FROM crm_invoices
+            WHERE workspace_id = ?
+              AND job_id = ?
+              AND status = 'draft'
+              AND (
+                issued_at IS NOT NULL
+                OR sent_at IS NOT NULL
+                OR paid_at IS NOT NULL
+                OR voided_at IS NOT NULL
+                OR (
+                  quote_acceptance_id
+                    IS NOT NULL
+                  AND trim(
+                    quote_acceptance_id
+                  ) <> ''
+                )
+              )
+          `,
+          [
+            actor.workspaceId,
+            jobId,
+          ],
+        )
+      : Promise.resolve(0),
+
+    jobId
+      ? countRows(
+          db,
+          `
+            SELECT COUNT(
+              DISTINCT version.id
+            ) AS total
+            FROM crm_contract_versions
+              version
+            JOIN crm_contracts contract
+              ON contract.id =
+                 version.contract_id
+             AND contract.workspace_id =
+                 version.workspace_id
+            WHERE contract.workspace_id = ?
+              AND contract.job_id = ?
+              AND contract.status = 'draft'
+              AND version.status <> 'draft'
+          `,
+          [
+            actor.workspaceId,
+            jobId,
+          ],
+        )
+      : Promise.resolve(0),
+
+    jobId
+      ? countRows(
+          db,
+          `
+            SELECT COUNT(*) AS total
+            FROM crm_contracts
+            WHERE workspace_id = ?
+              AND job_id = ?
+              AND status = 'draft'
+              AND (
+                sent_at IS NOT NULL
+                OR viewed_at IS NOT NULL
+                OR signed_at IS NOT NULL
+                OR voided_at IS NOT NULL
+                OR (
+                  quote_acceptance_id
+                    IS NOT NULL
+                  AND trim(
+                    quote_acceptance_id
+                  ) <> ''
+                )
+              )
+          `,
+          [
+            actor.workspaceId,
+            jobId,
+          ],
+        )
+      : Promise.resolve(0),
+  ]);
+
+  const blockers:
+    CrmDeletePreflightItem[] = [];
+
+  if (hiddenQuoteVersions) {
+    blockers.push(
+      item(
+        "hidden-quote-version-history",
+        "Client-visible quote version history",
+        "A quote is marked draft but contains a version that has already left draft. Preserve that commercial history.",
+        hiddenQuoteVersions,
+      ),
+    );
+  }
+
+  if (hiddenQuoteAcceptances) {
+    blockers.push(
+      item(
+        "hidden-quote-acceptance-history",
+        "Quote acceptance history",
+        "A draft-labelled quote contains an immutable client acceptance and cannot be erased.",
+        hiddenQuoteAcceptances,
+      ),
+    );
+  }
+
+  if (hiddenInvoices) {
+    blockers.push(
+      item(
+        "hidden-invoice-history",
+        "Invoice lifecycle history",
+        "A draft-labelled invoice has already entered a client-visible or financial lifecycle and cannot be erased.",
+        hiddenInvoices,
+      ),
+    );
+  }
+
+  if (hiddenContractVersions) {
+    blockers.push(
+      item(
+        "hidden-contract-version-history",
+        "Client-visible contract version history",
+        "A contract is marked draft but contains a version that has already left draft. Preserve that legal history.",
+        hiddenContractVersions,
+      ),
+    );
+  }
+
+  if (hiddenContracts) {
+    blockers.push(
+      item(
+        "hidden-contract-history",
+        "Contract lifecycle history",
+        "A draft-labelled contract has already entered a client-visible or legal lifecycle and cannot be erased.",
+        hiddenContracts,
+      ),
+    );
+  }
+
+  return blockers;
+}
+
+
 export async function getCrmEnquiryDeletePreflight(
   db: D1Db,
   actor: CrmDeleteActor,
@@ -392,6 +633,17 @@ export async function getCrmEnquiryDeletePreflight(
       ),
     );
   }
+
+
+  blockers.push(
+    ...await hiddenCommercialHistoryBlockers(
+      db,
+      actor,
+      {
+        enquiryId,
+      },
+    ),
+  );
 
   return {
     policyVersion:
@@ -1308,6 +1560,18 @@ export async function getCrmJobDeletePreflight(
       ),
     );
   }
+
+
+  blockers.push(
+    ...await hiddenCommercialHistoryBlockers(
+      db,
+      actor,
+      {
+        enquiryId,
+        jobId,
+      },
+    ),
+  );
 
   return {
     policyVersion:

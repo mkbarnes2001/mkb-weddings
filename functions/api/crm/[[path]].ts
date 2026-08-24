@@ -37,6 +37,7 @@ import {
 
 import {
   deleteCrmEnquiryPermanently,
+  deleteCrmJobPermanently,
 } from "../../../serverless/crm-delete-actions-d1";
 
 import {
@@ -109,6 +110,7 @@ import {
 
 type Env = {
   MKB_DB: D1Database;
+  MKB_PRIVATE_ASSETS: R2Bucket;
   WEDPLANNED_AUTH_ENFORCED?: string;
   WEDPLANNED_BOOTSTRAP_EMAIL?: string;
   RESEND_API_KEY?: string;
@@ -1197,6 +1199,39 @@ export const onRequestDelete:
         );
 
       if (
+      parts[0] === "jobs"
+      && parts[1]
+      && parts.length === 2
+    ) {
+      const body: any =
+        await context.request
+          .json()
+          .catch(
+            () => ({}),
+          );
+
+      return Response.json(
+        {
+          ok: true,
+          deletion:
+            await deleteCrmJobPermanently(
+              context.env.MKB_DB,
+              context.env.MKB_PRIVATE_ASSETS,
+              actor,
+              parts[1],
+              body?.confirmation,
+            ),
+        },
+        {
+          headers: {
+            "Cache-Control":
+              "private, no-store",
+          },
+        },
+      );
+    }
+
+    if (
         parts[0] === "enquiries"
         && parts[1]
         && parts.length === 2

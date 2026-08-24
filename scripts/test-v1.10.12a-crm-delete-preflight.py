@@ -107,7 +107,7 @@ for token in (
 # No destructive CRM endpoint has been introduced by Gate 2C.1.
 assert (
     "deleteCrmJobPermanently"
-    not in route
+    in route
 )
 
 
@@ -225,7 +225,7 @@ print(
     "  client-visible commercial history: blocker"
 )
 print(
-    "  Job permanent DELETE endpoint: absent"
+    "  Job permanent DELETE endpoint: owned by Gate 2C.3B"
 )
 print(
     "  schema change: none"

@@ -133,7 +133,7 @@ for token in (
     assert token in action, token
 
 
-# The Lead DELETE endpoint exists, Job DELETE does not.
+# The Lead DELETE endpoint remains; Job DELETE is now owned by Gate 2C.3B.
 assert (
     "deleteCrmEnquiryPermanently"
     in route
@@ -151,7 +151,7 @@ assert (
 
 assert (
     "deleteCrmJobPermanently"
-    not in route
+    in route
 )
 
 
@@ -188,7 +188,7 @@ print(
     "  platform deletion audit: retained"
 )
 print(
-    "  Job permanent delete: absent"
+    "  Job permanent delete: separately covered by Gate 2C.3B"
 )
 print(
     "  schema change: none"
