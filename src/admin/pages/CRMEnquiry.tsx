@@ -54,6 +54,7 @@ import type {
 import {
   CRMClientsPanel,
   CRMWeddingWorkflowPanel,
+  CRMWeddingDetailsPanel,
 } from "../components/crm/CRMWeddingWorkspaceShared";
 
 
@@ -419,33 +420,92 @@ export function CRMEnquiry() {
       ],
     );
 
-  async function save() {
+
+  async function saveContextualDetails(
+    input: {
+      jobName: string;
+      eventDate: string;
+      venue: string;
+      leadSource: string;
+      stageId: string;
+      service: string;
+      campaign: string;
+      notes: string;
+    },
+  ) {
     setSaving(true);
     setError("");
     setMessage("");
 
-    try {
-      await AdminApiService
-        .updateCrmEnquiry(
-          id,
-          form,
-        );
-
-      setMessage(
-        "Lead saved.",
+    const booked =
+      Boolean(
+        detail?.job?.id,
       );
 
+    try {
+      if (
+        booked
+        && detail?.job?.id
+      ) {
+        await AdminApiService
+          .updateCrmJobWeddingDetails(
+            detail.job.id,
+            {
+              title:
+                input.jobName,
+              eventDate:
+                input.eventDate,
+              venueText:
+                input.venue,
+              leadSource:
+                input.leadSource,
+            },
+          );
+      } else {
+        await AdminApiService
+          .updateCrmEnquiry(
+            id,
+            {
+              stageId:
+                input.stageId,
+              serviceInterest:
+                input.service,
+              eventDate:
+                input.eventDate,
+              venueText:
+                input.venue,
+              leadSource:
+                input.leadSource,
+              campaign:
+                input.campaign,
+              notes:
+                input.notes,
+            },
+          );
+      }
+
       await load();
+
+      setMessage(
+        booked
+          ? "Wedding details saved."
+          : "Lead details saved.",
+      );
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Unable to save lead.",
+          : booked
+            ? "Unable to save Wedding details."
+            : "Unable to save Lead details.",
       );
+
+      throw saveError;
     } finally {
       setSaving(false);
     }
   }
+
 
   async function markLost() {
     if (
@@ -910,6 +970,89 @@ export function CRMEnquiry() {
               dateOnly
             }
           />
+        </div>
+
+
+        <div className="crm-job-primary-grid__wedding">
+          <CRMWeddingDetailsPanel
+              mode={
+                detail.job?.id
+                  ? "wedding"
+                  : "lead"
+              }
+              jobName={
+                detail.job?.title
+                || ""
+              }
+              eventDate={
+                detail.job?.eventDate
+                || enquiry.eventDate
+                || ""
+              }
+              venue={
+                detail.job?.venueText
+                || enquiry.venueText
+                || ""
+              }
+              leadSource={
+                detail.job?.leadSource
+                || enquiry.leadSource
+                || ""
+              }
+              stageId={
+                form.stageId
+                || enquiry.stageId
+                || ""
+              }
+              stageName={
+                stage?.name
+                || ""
+              }
+              stageOptions={
+                (overview?.stages || [])
+                  .filter(
+                    (item) =>
+                      item.type === "open"
+                      || item.id
+                        === (
+                          form.stageId
+                          || enquiry.stageId
+                        ),
+                  )
+                  .map(
+                    (item) => ({
+                      id: item.id,
+                      name: item.name,
+                    }),
+                  )
+              }
+              service={
+                form.serviceInterest
+                || enquiry.serviceInterest
+                || ""
+              }
+              technicalSource={
+                form.source
+                || enquiry.source
+                || ""
+              }
+              campaign={
+                form.campaign
+                || enquiry.campaign
+                || ""
+              }
+              notes={
+                form.notes
+                || enquiry.notes
+                || ""
+              }
+              formatDate={dateOnly}
+              canEdit={canManage}
+              busy={saving}
+              onSave={
+                saveContextualDetails
+              }
+            />
         </div>
 
         <div className="crm-job-primary-grid__clients">
@@ -1450,210 +1593,6 @@ export function CRMEnquiry() {
 
       <div className="crm-job-operations-grid">
         <div className="crm-job-operations-column">
-          <AdminAccordion
-            title="Wedding details"
-            icon={BriefcaseBusiness}
-            defaultOpen
-            summary={
-              <AdminStatus tone={lifecycleTone}>
-                {lifecycle}
-              </AdminStatus>
-            }
-          >
-            {canManage ? (
-              <div className="mb-3 flex justify-end">
-                <AdminButton
-                  size="sm"
-                  variant="primary"
-                  icon={Save}
-                  disabled={saving}
-                  onClick={() =>
-                    void save()
-                  }
-                >
-                  Save
-                </AdminButton>
-              </div>
-            ) : null}
-
-              <div className="crm-lead-details-grid">
-                <AdminField label="Pipeline stage">
-                  <select
-                    className="admin-select"
-                    value={
-                      form.stageId
-                      || ""
-                    }
-                    disabled={
-                      !canManage
-                      || enquiry.status
-                        === "won"
-                    }
-                    onChange={(event) =>
-                      setForm(
-                        (current) => ({
-                          ...current,
-                          stageId:
-                            event.target.value,
-                        }),
-                      )
-                    }
-                  >
-                    {(overview?.stages || [])
-                      .filter(
-                        (item) =>
-                          item.type === "open"
-                          || item.id
-                            === form.stageId,
-                      )
-                      .map(
-                        (item) => (
-                          <option
-                            key={item.id}
-                            value={item.id}
-                          >
-                            {item.name}
-                          </option>
-                        ),
-                      )}
-                  </select>
-                </AdminField>
-
-                <AdminField label="Service">
-                  <input
-                    className="admin-input"
-                    disabled={!canManage}
-                    value={
-                      form.serviceInterest
-                      || ""
-                    }
-                    onChange={(event) =>
-                      setForm(
-                        (current) => ({
-                          ...current,
-                          serviceInterest:
-                            event.target.value,
-                        }),
-                      )
-                    }
-                  />
-                </AdminField>
-
-                <AdminField label="Wedding date">
-                  <input
-                    className="admin-input"
-                    type="date"
-                    disabled={
-                      !canManage
-                      || enquiry.status
-                        === "won"
-                    }
-                    value={
-                      form.eventDate
-                      || ""
-                    }
-                    onChange={(event) =>
-                      setForm(
-                        (current) => ({
-                          ...current,
-                          eventDate:
-                            event.target.value,
-                        }),
-                      )
-                    }
-                  />
-                </AdminField>
-
-                <AdminField label="Venue">
-                  <input
-                    className="admin-input"
-                    disabled={!canManage}
-                    value={
-                      form.venueText
-                      || ""
-                    }
-                    placeholder="Venue or TBC"
-                    onChange={(event) =>
-                      setForm(
-                        (current) => ({
-                          ...current,
-                          venueText:
-                            event.target.value,
-                        }),
-                      )
-                    }
-                  />
-                </AdminField>
-
-                <AdminField label="Source">
-                  <input
-                    className="admin-input"
-                    disabled={!canManage}
-                    value={
-                      form.source
-                      || ""
-                    }
-                    placeholder="Website, referral, Instagram…"
-                    onChange={(event) =>
-                      setForm(
-                        (current) => ({
-                          ...current,
-                          source:
-                            event.target.value,
-                        }),
-                      )
-                    }
-                  />
-                </AdminField>
-
-                <AdminField label="Campaign">
-                  <input
-                    className="admin-input"
-                    disabled={!canManage}
-                    value={
-                      form.campaign
-                      || ""
-                    }
-                    placeholder="Optional"
-                    onChange={(event) =>
-                      setForm(
-                        (current) => ({
-                          ...current,
-                          campaign:
-                            event.target.value,
-                        }),
-                      )
-                    }
-                  />
-                </AdminField>
-
-                <AdminField
-                  label="Notes"
-                  className="crm-lead-details-grid__wide"
-                >
-                  <textarea
-                    className="admin-textarea"
-                    rows={3}
-                    disabled={!canManage}
-                    value={
-                      form.notes
-                      || ""
-                    }
-                    onChange={(event) =>
-                      setForm(
-                        (current) => ({
-                          ...current,
-                          notes:
-                            event.target.value,
-                        }),
-                      )
-                    }
-                  />
-                </AdminField>
-              </div>
-
-          </AdminAccordion>
-
           <AdminAccordion
             title="Quote and package"
             icon={PackageCheck}

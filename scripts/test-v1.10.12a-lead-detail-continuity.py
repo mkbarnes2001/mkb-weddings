@@ -48,7 +48,6 @@ for token in (
 for title in (
     'title="Booking and payments"',
     'title="Wedding delivery and content"',
-    'title="Wedding details"',
     'title="Quote and package"',
     'title="Communication"',
     'title="Questionnaires"',
@@ -59,27 +58,34 @@ for title in (
     assert title in page, title
 
 
-details_pos = page.index(
-    'title="Wedding details"'
+assert (
+    "<CRMWeddingDetailsPanel"
+    in page
 )
 
-details_end = page.index(
-    "</AdminAccordion>",
-    details_pos,
+assert (
+    '"Lead details"'
+    in shared
 )
 
-details = page[
-    details_pos:
-    details_end
-]
+assert (
+    '"Wedding details"'
+    in shared
+)
+
+assert (
+    'title="Lead details"'
+    not in page
+)
+
+
+details = shared
 
 
 for token in (
     "Pipeline stage",
     "Service",
-    "Wedding date",
-    "Venue",
-    "Source",
+    "Technical source",
     "Campaign",
     "Notes",
 ):

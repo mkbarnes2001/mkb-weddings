@@ -28,6 +28,7 @@ import {
   saveLeadFormSettings,
   updateAdminEnquiry,
   updateCrmContact,
+  updateCrmJobWeddingDetails,
 } from "../../../serverless/crm-d1";
 import {
   approveSupplierSubmission,
@@ -968,6 +969,34 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
             actor,
             parts[2],
             body,
+          ),
+      }, {
+        headers: {
+          "Cache-Control":
+            "private, no-store",
+        },
+      });
+    }
+
+    if (
+      parts[0] === "jobs"
+      && parts[1]
+      && parts.length === 2
+    ) {
+      await updateCrmJobWeddingDetails(
+        context.env.MKB_DB,
+        actor,
+        parts[1],
+        body,
+      );
+
+      return Response.json({
+        ok: true,
+        workspace:
+          await getCrmJobWorkspace(
+            context.env.MKB_DB,
+            actor,
+            parts[1],
           ),
       }, {
         headers: {

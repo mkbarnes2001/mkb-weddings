@@ -1335,6 +1335,270 @@ export async function updateAdminEnquiry(db: D1Db, actor: CrmActor, enquiryId: s
   return getCrmEnquiry(db, actor, enquiryId);
 }
 
+
+export async function updateCrmJobWeddingDetails(
+  db: D1Db,
+  actor: CrmActor,
+  jobId: string,
+  input: any,
+) {
+  requirePermission(
+    actor,
+    "crm:manage",
+  );
+
+  const current =
+    await db.prepare(`
+      SELECT *
+      FROM crm_jobs
+      WHERE workspace_id = ?
+        AND id = ?
+      LIMIT 1
+    `)
+      .bind(
+        actor.workspaceId,
+        jobId,
+      )
+      .first();
+
+  if (!current) {
+    throw httpError(
+      "Job not found.",
+      404,
+    );
+  }
+
+  const title = text(
+    input?.title
+    ?? current.title,
+  );
+
+  const eventDate = text(
+    input?.eventDate
+    ?? current.event_date,
+  );
+
+  const venueText = text(
+    input?.venueText
+    ?? current.venue_text,
+  );
+
+  const leadSource = text(
+    input?.leadSource
+    ?? current.lead_source,
+  );
+
+  if (!title) {
+    throw httpError(
+      "Job name is required.",
+      400,
+    );
+  }
+
+  if (!eventDate) {
+    throw httpError(
+      "Wedding date is required.",
+      400,
+    );
+  }
+
+  const enquiryId = text(
+    current.enquiry_id,
+  );
+
+  const weddingSlug = text(
+    current.wedding_slug,
+  );
+
+  const now =
+    new Date().toISOString();
+
+  const statements: any[] = [
+    db.prepare(`
+      UPDATE crm_jobs
+      SET
+        title = ?,
+        event_date = ?,
+        venue_text = ?,
+        lead_source = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE workspace_id = ?
+        AND id = ?
+    `).bind(
+      title,
+      eventDate,
+      venueText,
+      leadSource,
+      actor.workspaceId,
+      jobId,
+    ),
+  ];
+
+  /*
+   * Once a Lead is accepted, the Job becomes the canonical
+   * Wedding-details editor. Keep the originating Lead aligned
+   * so Lead and Job never display contradictory values.
+   */
+  if (enquiryId) {
+    statements.push(
+      db.prepare(`
+        UPDATE crm_enquiries
+        SET
+          event_date = ?,
+          venue_text = ?,
+          lead_source = ?,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE workspace_id = ?
+          AND id = ?
+      `).bind(
+        eventDate,
+        venueText,
+        leadSource,
+        actor.workspaceId,
+        enquiryId,
+      ),
+    );
+  }
+
+  /*
+   * A booked Job may already own a Wedding Workspace.
+   * Keep its canonical date and venue aligned too.
+   *
+   * document_json is updated only when it contains valid JSON;
+   * relational columns remain authoritative regardless.
+   */
+  if (weddingSlug) {
+    statements.push(
+      db.prepare(`
+        UPDATE weddings
+        SET
+          venue = ?,
+          wedding_date = ?,
+          document_json =
+            CASE
+              WHEN json_valid(document_json)
+              THEN json_set(
+                document_json,
+                '$.venue',
+                ?,
+                '$.weddingDate',
+                ?,
+                '$.updatedAt',
+                ?
+              )
+              ELSE document_json
+            END,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE workspace_id = ?
+          AND slug = ?
+      `).bind(
+        venueText,
+        eventDate,
+        venueText,
+        eventDate,
+        now,
+        actor.workspaceId,
+        weddingSlug,
+      ),
+    );
+  }
+
+  statements.push(
+    db.prepare(`
+      INSERT INTO crm_activities (
+        id,
+        workspace_id,
+        entity_type,
+        entity_id,
+        event_type,
+        summary,
+        actor_user_id,
+        actor_email,
+        metadata_json
+      ) VALUES (
+        ?,
+        ?,
+        'job',
+        ?,
+        'job.wedding_details.updated',
+        'Updated Wedding details.',
+        ?,
+        ?,
+        ?
+      )
+    `).bind(
+      `crm_activity_${crypto.randomUUID()}`,
+      actor.workspaceId,
+      jobId,
+      text(actor.userId) || null,
+      lower(actor.email),
+      JSON.stringify({
+        title,
+        eventDate,
+        venueText,
+        leadSource,
+        enquiryId,
+        weddingSlug,
+      }),
+    ),
+  );
+
+  await db.batch(
+    statements,
+  );
+
+  await platformAudit(
+    db,
+    actor,
+    {
+      eventType:
+        "crm.job.wedding_details.updated",
+      entityType:
+        "crm_job",
+      entityId:
+        jobId,
+      summary:
+        `Updated Wedding details for ${
+          text(current.reference)
+          || jobId
+        }.`,
+      metadata: {
+        enquiryId,
+        weddingSlug,
+        eventDate,
+        venueText,
+        leadSource,
+      },
+    },
+  );
+
+  const updated =
+    await db.prepare(`
+      SELECT *
+      FROM crm_jobs
+      WHERE workspace_id = ?
+        AND id = ?
+      LIMIT 1
+    `)
+      .bind(
+        actor.workspaceId,
+        jobId,
+      )
+      .first();
+
+  if (!updated) {
+    throw httpError(
+      "Job could not be reloaded.",
+      500,
+    );
+  }
+
+  return hydrateJob(
+    updated,
+  );
+}
+
+
 export async function moveEnquiryStage(db: D1Db, actor: CrmActor, enquiryId: string, stageId: string) {
   return updateAdminEnquiry(db, actor, enquiryId, { stageId });
 }

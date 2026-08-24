@@ -1503,6 +1503,33 @@ export class AdminApiService {
     return result.workspace;
   }
 
+
+  static async updateCrmJobWeddingDetails(
+    id: string,
+    input: {
+      title?: string;
+      eventDate?: string;
+      venueText?: string;
+      leadSource?: string;
+    },
+  ) {
+    const result = await request<{
+      ok: true;
+      workspace: CrmJobWorkspace;
+    }>(
+      `/api/crm/jobs/${
+        encodeURIComponent(id)
+      }`,
+      {
+        method: "PUT",
+        body: JSON.stringify(input),
+      },
+    );
+
+    return result.workspace;
+  }
+
+
   static async getCrmJobWorkspace(id: string) {
     const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(id)}`);
     return result.workspace;

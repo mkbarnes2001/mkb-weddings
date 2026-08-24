@@ -124,13 +124,51 @@ for title in (
     )
 
 
+# Lead / Wedding details now share one contextual
+# component. The Lead page selects the lifecycle mode;
+# the shared component owns the displayed heading.
 assert (
-    'title="Wedding details"'
+    "<CRMWeddingDetailsPanel"
     in lead
 )
 
 assert (
+    'mode={'
+    in lead
+)
+
+assert (
+    '? "wedding"'
+    in lead
+)
+
+assert (
+    ': "lead"'
+    in lead
+)
+
+assert (
+    '"Lead details"'
+    in shared
+)
+
+assert (
+    '"Wedding details"'
+    in shared
+)
+
+assert (
+    'title={panelLabel}'
+    in shared
+)
+
+assert (
     'title="Lead details"'
+    not in lead
+)
+
+assert (
+    'title="Wedding details"'
     not in lead
 )
 
@@ -240,7 +278,7 @@ print(
 )
 
 print(
-    "  Wedding details terminology: unified"
+    "  contextual Lead / Wedding details: verified"
 )
 
 print(

@@ -57,6 +57,7 @@ import type {
 import {
   CRMClientsPanel,
   CRMWeddingWorkflowPanel,
+  CRMWeddingDetailsPanel,
 } from "../components/crm/CRMWeddingWorkspaceShared";
 
 
@@ -1460,6 +1461,50 @@ export function CRMJob() {
     + jobFiles.length;
   const pendingSubmissions = useMemo(() => (workspace?.supplierSubmissions || []).filter((item) => item.status === "pending"), [workspace?.supplierSubmissions]);
 
+
+  async function saveWeddingDetails(
+    input: {
+      jobName: string;
+      eventDate: string;
+      venue: string;
+      leadSource: string;
+    },
+  ) {
+    setSaving(true);
+    setError("");
+    setMessage("");
+
+    try {
+      setWorkspace(
+        await AdminApiService
+          .updateCrmJobWeddingDetails(
+            id,
+            {
+              title: input.jobName,
+              eventDate: input.eventDate,
+              venueText: input.venue,
+              leadSource: input.leadSource,
+            },
+          ),
+      );
+
+      setMessage(
+        "Wedding details saved.",
+      );
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Unable to save Wedding details.",
+      );
+
+      throw saveError;
+    } finally {
+      setSaving(false);
+    }
+  }
+
+
   async function repairBookingPack() {
     setSaving(true);
     setError("");
@@ -2143,6 +2188,35 @@ export function CRMJob() {
         }
       />
         </div>
+
+        <div className="crm-job-primary-grid__wedding">
+          <CRMWeddingDetailsPanel
+            jobName={
+              job.title
+              || ""
+            }
+            eventDate={
+              job.eventDate
+              || ""
+            }
+            venue={
+              job.venueText
+              || lifecycle.wedding.venue
+              || ""
+            }
+            leadSource={
+              job.leadSource
+              || ""
+            }
+            formatDate={dateLabel}
+            canEdit={canManage}
+            busy={saving}
+            onSave={
+              saveWeddingDetails
+            }
+          />
+        </div>
+
         <div className="crm-job-primary-grid__clients">
 <div id="job-clients" className="scroll-mt-5 crm-job-top-clients"><CRMClientsPanel
             contacts={

@@ -15931,3 +15931,269 @@ small {
   color: var(--admin-muted);
   font-weight: 550;
 }
+
+
+/* v1.10.12a — Gate 2B.1 shared Wedding summary */
+
+.crm-job-primary-grid {
+  grid-template-columns:
+    minmax(250px, .95fr)
+    minmax(220px, .75fr)
+    minmax(300px, 1.15fr);
+}
+
+.crm-job-primary-grid__workflow,
+.crm-job-primary-grid__wedding,
+.crm-job-primary-grid__clients {
+  min-width: 0;
+}
+
+.crm-wedding-details-panel
+.admin-panel__body {
+  padding: 10px 12px;
+}
+
+.crm-wedding-details-summary {
+  margin: 0;
+}
+
+.crm-wedding-details-summary > div {
+  display: grid;
+  grid-template-columns:
+    minmax(78px, .44fr)
+    minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom:
+    1px solid
+    var(--admin-border);
+}
+
+.crm-wedding-details-summary
+> div:first-child {
+  padding-top: 1px;
+}
+
+.crm-wedding-details-summary
+> div:last-child {
+  padding-bottom: 1px;
+  border-bottom: 0;
+}
+
+.crm-wedding-details-summary dt {
+  color: var(--admin-muted);
+  font-size: calc(
+    8px
+    * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 650;
+}
+
+.crm-wedding-details-summary dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #262626;
+  font-size: calc(
+    9.5px
+    * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 600;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (
+  max-width: 1180px
+) and (
+  min-width: 761px
+) {
+  .crm-job-primary-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .crm-job-primary-grid__clients {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .crm-job-primary-grid {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+
+  .crm-job-primary-grid__clients {
+    grid-column: auto;
+  }
+}
+
+
+/* v1.10.12a — Gate 2B.1 top workspace equal-height polish */
+
+.crm-job-primary-grid {
+  align-items: stretch;
+}
+
+.crm-job-primary-grid__workflow,
+.crm-job-primary-grid__wedding,
+.crm-job-primary-grid__clients {
+  display: flex;
+}
+
+.crm-job-primary-grid__workflow
+> :is(.admin-panel, .admin-accordion),
+.crm-job-primary-grid__wedding
+> :is(.admin-panel, .admin-accordion),
+.crm-job-primary-grid__clients
+> :is(.admin-panel, .admin-accordion) {
+  width: 100%;
+  height: 100%;
+}
+
+.crm-wedding-details-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.crm-wedding-details-panel
+.admin-panel__body {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.crm-wedding-details-summary {
+  display: grid;
+  width: 100%;
+  grid-template-rows:
+    repeat(4, minmax(0, 1fr));
+}
+
+.crm-wedding-details-summary > div {
+  align-content: center;
+}
+
+@media (max-width: 1180px) {
+  .crm-job-primary-grid__workflow,
+  .crm-job-primary-grid__wedding,
+  .crm-job-primary-grid__clients {
+    display: block;
+  }
+
+  .crm-job-primary-grid__workflow
+  > :is(.admin-panel, .admin-accordion),
+  .crm-job-primary-grid__wedding
+  > :is(.admin-panel, .admin-accordion),
+  .crm-job-primary-grid__clients
+  > :is(.admin-panel, .admin-accordion) {
+    height: auto;
+  }
+}
+
+
+/* v1.10.12a — Wedding details Admin typography correction */
+
+/*
+ * Wedding details is an Admin operational panel.
+ * Do not allow generic definition-list / serif typography
+ * to override the canonical WedPlanned Admin sans stack.
+ */
+.crm-wedding-details-panel,
+.crm-wedding-details-panel
+.admin-panel__body,
+.crm-wedding-details-summary,
+.crm-wedding-details-summary dt,
+.crm-wedding-details-summary dd {
+  font-family: inherit !important;
+}
+
+.crm-wedding-details-summary dt {
+  font-style: normal;
+  letter-spacing: -0.005em;
+}
+
+.crm-wedding-details-summary dd {
+  font-style: normal;
+  letter-spacing: -0.005em;
+}
+
+
+/* v1.10.12a — Gate 2B.2 Wedding details edit mode */
+
+.crm-wedding-details-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.crm-wedding-details-edit {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+}
+
+.crm-wedding-details-edit
+.admin-field {
+  margin: 0;
+}
+
+.crm-wedding-details-edit
+.admin-input {
+  min-height: 32px;
+  font-family: inherit;
+}
+
+.crm-wedding-details-readonly-field {
+  display: grid;
+  gap: 3px;
+  padding-bottom: 7px;
+  border-bottom:
+    1px solid
+    var(--admin-border);
+}
+
+.crm-wedding-details-readonly-field
+> span {
+  color: var(--admin-muted);
+  font-size: calc(
+    8px
+    * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 650;
+}
+
+.crm-wedding-details-readonly-field
+> strong {
+  color: #262626;
+  font-size: calc(
+    9.5px
+    * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 600;
+}
+
+.crm-wedding-details-panel
+.admin-panel__actions
+.admin-icon-control {
+  width: 30px;
+  min-width: 30px !important;
+  height: 30px;
+  min-height: 30px !important;
+}
+
+
+/* v1.10.12a — contextual Lead / Wedding details */
+
+.crm-wedding-details-summary {
+  grid-template-rows: none;
+  grid-auto-rows:
+    minmax(0, 1fr);
+}
+
+.crm-wedding-details-edit
+.admin-textarea {
+  font-family: inherit;
+}

@@ -89,8 +89,47 @@ assert (
 )
 
 
+# Wedding details is now owned by the shared
+# Wedding workspace component. The Lead page
+# renders that shared component and separately
+# owns its Lead-specific operational accordion.
+assert (
+    "<CRMWeddingDetailsPanel"
+    in lead
+)
+
+assert (
+    '"Wedding details"'
+    in shared
+)
+
+assert (
+    '"Lead details"'
+    in shared
+)
+
+assert (
+    'title="Lead details"'
+    not in lead
+)
+
+assert (
+    'mode={'
+    in lead
+)
+
+assert (
+    '"lead"'
+    in lead
+)
+
+assert (
+    '"wedding"'
+    in lead
+)
+
+
 for token in (
-    'title="Wedding details"',
     'title="Communication"',
     'title="Quote and package"',
     'title="Booking and payments"',
