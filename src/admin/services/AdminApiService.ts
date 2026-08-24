@@ -69,6 +69,7 @@ import type { CrmAddon,
   CrmQuoteSendInput,
   CrmDeletePreflight,
   CrmLeadDeleteReceipt,
+  CrmJobDeleteReceipt,
 } from "../types/crm";
 import type {
   WedPlannedPublicAppearanceAdministration,
@@ -1633,6 +1634,45 @@ export class AdminApiService {
   static async getCrmJobWorkspace(id: string) {
     const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(id)}`);
     return result.workspace;
+  }
+
+
+  static async getCrmJobDeletePreflight(
+    id: string,
+  ) {
+    const result = await request<{
+      ok: true;
+      preflight: CrmDeletePreflight;
+    }>(
+      `/api/crm/jobs/${
+        encodeURIComponent(id)
+      }/delete-preflight`,
+    );
+
+    return result.preflight;
+  }
+
+
+  static async deleteCrmJobPermanently(
+    id: string,
+    confirmation: string,
+  ) {
+    const result = await request<{
+      ok: true;
+      deletion: CrmJobDeleteReceipt;
+    }>(
+      `/api/crm/jobs/${
+        encodeURIComponent(id)
+      }`,
+      {
+        method: "DELETE",
+        body: JSON.stringify({
+          confirmation,
+        }),
+      },
+    );
+
+    return result.deletion;
   }
 
   static jobFileUrl(

@@ -246,6 +246,31 @@ export type CrmLeadDeleteReceipt = {
   policyVersion: string;
 };
 
+export type CrmJobDeleteReceipt = {
+  ok: true;
+  policyVersion: string;
+  targetType: "job";
+  targetId: string;
+  reference: string;
+  deleted: {
+    job: number;
+    originatingLead: number;
+    draftQuotes: number;
+    draftInvoices: number;
+    draftContracts: number;
+    privateFiles: number;
+  };
+  preserved: {
+    contactIds: string[];
+    weddingSlug: string;
+    weddingWorkspace: boolean;
+    weddingStory: boolean;
+    clientGalleries: boolean;
+    canonicalAssets: boolean;
+    websiteAssignments: boolean;
+  };
+};
+
 
 export type CrmEnquiryInput = {
   stageId?: string;

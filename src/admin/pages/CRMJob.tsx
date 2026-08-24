@@ -2,8 +2,7 @@ import {
   useEffect,
   useMemo,
   useState } from "react";
-import { Link,
-  useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   BookOpen,
@@ -54,6 +53,7 @@ import type {
   QuestionnaireField,
   QuestionnaireInstance,
 } from "../types/crm";
+import type { CrmDeletePreflight } from "../types/crm";
 import {
   CRMClientsPanel,
   CRMWeddingWorkflowPanel,
@@ -1335,6 +1335,7 @@ export function ProfessionalQuestionnaireField({
 
 export function CRMJob() {
   const { id = "" } = useParams();
+  const navigate = useNavigate();
   const { auth } = useProfessionalAuth();
   const [workspace, setWorkspace] = useState<CrmJobWorkspace | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1376,6 +1377,29 @@ export function CRMJob() {
   ] = useState<
     Record<string, unknown>
   >({});
+
+
+  const [
+    jobDeleteOpen,
+    setJobDeleteOpen,
+  ] = useState(false);
+
+  const [
+    jobDeleteBusy,
+    setJobDeleteBusy,
+  ] = useState(false);
+
+  const [
+    jobDeletePreflight,
+    setJobDeletePreflight,
+  ] = useState<
+    CrmDeletePreflight | null
+  >(null);
+
+  const [
+    jobDeleteConfirmation,
+    setJobDeleteConfirmation,
+  ] = useState("");
 
   const canManage = auth.permissions.includes("crm:manage");
   const canManageCommercial = canManage && auth.accessMode !== "support";
@@ -2040,6 +2064,122 @@ export function CRMJob() {
     }
   }
 
+
+
+  async function openJobDeleteDialog() {
+    if (!canManageCommercial) {
+      return;
+    }
+
+    setJobDeleteBusy(true);
+    setError("");
+    setMessage("");
+    setJobDeleteConfirmation("");
+    setJobDeletePreflight(null);
+
+    try {
+      const preflight =
+        await AdminApiService
+          .getCrmJobDeletePreflight(
+            id,
+          );
+
+      setJobDeletePreflight(
+        preflight,
+      );
+
+      setJobDeleteOpen(
+        true,
+      );
+    } catch (deleteError) {
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Unable to check Job deletion dependencies.",
+      );
+    } finally {
+      setJobDeleteBusy(
+        false,
+      );
+    }
+  }
+
+
+  function closeJobDeleteDialog() {
+    if (jobDeleteBusy) {
+      return;
+    }
+
+    setJobDeleteOpen(
+      false,
+    );
+
+    setJobDeleteConfirmation(
+      "",
+    );
+  }
+
+
+  async function permanentlyDeleteJob() {
+    if (
+      !canManageCommercial
+      || !jobDeletePreflight?.canDelete
+      || jobDeleteConfirmation !== "DELETE"
+    ) {
+      return;
+    }
+
+    setJobDeleteBusy(true);
+    setError("");
+    setMessage("");
+
+    try {
+      await AdminApiService
+        .deleteCrmJobPermanently(
+          id,
+          jobDeleteConfirmation,
+        );
+
+      navigate(
+        "/admin/crm?view=jobs",
+        {
+          replace: true,
+        },
+      );
+    } catch (deleteError) {
+      /*
+       * Dependencies can change after the dialog
+       * opens. Re-fetch the server-authoritative
+       * preflight if the destructive request fails.
+       */
+      try {
+        const nextPreflight =
+          await AdminApiService
+            .getCrmJobDeletePreflight(
+              id,
+            );
+
+        setJobDeletePreflight(
+          nextPreflight,
+        );
+      } catch {
+        /*
+         * Keep the last known preflight visible if
+         * the refresh itself cannot be loaded.
+         */
+      }
+
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Unable to permanently delete this Job.",
+      );
+    } finally {
+      setJobDeleteBusy(
+        false,
+      );
+    }
+  }
 
   if (loading && !workspace) return <AdminPage><p className="text-sm text-neutral-500">Loading Job workspace…</p></AdminPage>;
   if (!workspace) return <AdminPage><div className="admin-alert admin-alert--error">{error || "Job not found."}</div></AdminPage>;
@@ -3690,6 +3830,213 @@ export function CRMJob() {
         </div>
       </div>
 
+
+      {canManageCommercial ? (
+        <AdminAccordion
+          title="Record actions"
+          icon={Trash2}
+        >
+          <div className="crm-lead-close-actions crm-job-record-actions">
+            <article className="crm-lead-close-option crm-lead-close-option--danger">
+              <div>
+                <strong>
+                  Permanently delete CRM Job
+                </strong>
+
+                <p>
+                  Use cancellation or archival for normal retained
+                  business records. Permanent deletion removes this
+                  CRM Job and its originating Lead only when the
+                  protected dependency check allows it.
+                </p>
+
+                <small>
+                  Wedding Workspace, Wedding Story, Client Galleries,
+                  photographs and Website assignments are preserved.
+                </small>
+              </div>
+
+              <AdminButton
+                variant="danger"
+                size="sm"
+                icon={Trash2}
+                disabled={
+                  saving
+                  || jobDeleteBusy
+                }
+                onClick={() =>
+                  void openJobDeleteDialog()
+                }
+              >
+                {jobDeleteBusy
+                  ? "Checking…"
+                  : "Delete permanently"}
+              </AdminButton>
+            </article>
+          </div>
+        </AdminAccordion>
+      ) : null}
+
+
+      {jobDeleteOpen
+      && jobDeletePreflight ? (
+        <div
+          className="crm-delete-dialog"
+          role="presentation"
+        >
+          <button
+            type="button"
+            className="crm-delete-dialog__backdrop"
+            aria-label="Close permanent deletion dialog"
+            disabled={jobDeleteBusy}
+            onClick={
+              closeJobDeleteDialog
+            }
+          />
+
+          <section
+            className="crm-delete-dialog__panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="crm-job-delete-title"
+          >
+            <header className="crm-delete-dialog__header">
+              <div>
+                <span>
+                  Permanent CRM deletion
+                </span>
+
+                <h2 id="crm-job-delete-title">
+                  Delete{" "}
+                  {jobDeletePreflight.reference
+                    || job.reference}
+                  ?
+                </h2>
+
+                <p>
+                  The server has checked the Job dependencies below.
+                  This removes only the permitted CRM lifecycle.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="admin-icon-control"
+                aria-label="Close permanent deletion dialog"
+                title="Close"
+                disabled={jobDeleteBusy}
+                onClick={
+                  closeJobDeleteDialog
+                }
+              >
+                <X aria-hidden="true" />
+              </button>
+            </header>
+
+            <div className="crm-delete-preflight">
+              <JobDeletePreflightGroup
+                title="Will be deleted"
+                tone="delete"
+                items={
+                  jobDeletePreflight
+                    .willDelete
+                }
+              />
+
+              <JobDeletePreflightGroup
+                title="Will be preserved"
+                tone="preserve"
+                items={
+                  jobDeletePreflight
+                    .willPreserve
+                }
+              />
+
+              <JobDeletePreflightGroup
+                title="Cannot delete until resolved"
+                tone="blocker"
+                items={
+                  jobDeletePreflight
+                    .blockers
+                }
+              />
+            </div>
+
+            {jobDeletePreflight.canDelete ? (
+              <div className="crm-delete-dialog__confirmation">
+                <label htmlFor="crm-job-delete-confirmation">
+                  Type{" "}
+                  <strong>
+                    DELETE
+                  </strong>{" "}
+                  to confirm
+                </label>
+
+                <input
+                  id="crm-job-delete-confirmation"
+                  className="admin-input"
+                  autoFocus
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder="DELETE"
+                  value={
+                    jobDeleteConfirmation
+                  }
+                  disabled={
+                    jobDeleteBusy
+                  }
+                  onChange={(event) =>
+                    setJobDeleteConfirmation(
+                      event.target.value,
+                    )
+                  }
+                />
+              </div>
+            ) : (
+              <div className="crm-delete-dialog__blocked">
+                Permanent deletion is unavailable until every
+                blocker above has been resolved.
+              </div>
+            )}
+
+            <footer className="crm-delete-dialog__actions">
+              <AdminButton
+                variant="secondary"
+                size="sm"
+                disabled={
+                  jobDeleteBusy
+                }
+                onClick={
+                  closeJobDeleteDialog
+                }
+              >
+                Cancel
+              </AdminButton>
+
+              <AdminButton
+                variant="danger"
+                size="sm"
+                icon={Trash2}
+                disabled={
+                  jobDeleteBusy
+                  || !jobDeletePreflight
+                    .canDelete
+                  || jobDeleteConfirmation
+                    !== "DELETE"
+                }
+                onClick={() =>
+                  void permanentlyDeleteJob()
+                }
+              >
+                {jobDeleteBusy
+                  ? "Deleting…"
+                  : "Permanently delete Job"}
+              </AdminButton>
+            </footer>
+          </section>
+        </div>
+      ) : null}
+
       {contractPreviewOpen && commercialContract ? (
         <div
           className="crm-job-contract-preview"
@@ -3789,5 +4136,59 @@ export function CRMJob() {
       ) : null}
 
     </AdminPage>
+  );
+}
+
+function JobDeletePreflightGroup({
+  title,
+  tone,
+  items,
+}: {
+  title: string;
+  tone:
+    | "delete"
+    | "preserve"
+    | "blocker";
+  items:
+    CrmDeletePreflight["willDelete"];
+}) {
+  if (!items.length) {
+    return null;
+  }
+
+  return (
+    <section
+      className={
+        `crm-delete-preflight-group crm-delete-preflight-group--${tone}`
+      }
+    >
+      <h3>
+        {title}
+      </h3>
+
+      <ul>
+        {items.map(
+          (item) => (
+            <li key={item.key}>
+              <div>
+                <strong>
+                  {item.label}
+                </strong>
+
+                <p>
+                  {item.detail}
+                </p>
+              </div>
+
+              {item.count != null ? (
+                <span>
+                  {item.count}
+                </span>
+              ) : null}
+            </li>
+          ),
+        )}
+      </ul>
+    </section>
   );
 }

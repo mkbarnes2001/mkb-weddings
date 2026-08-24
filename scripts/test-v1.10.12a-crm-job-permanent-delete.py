@@ -270,20 +270,7 @@ assert (
     in schema
 )
 
-# No UI is part of 2C.3B.
-job_page = read(
-    "src/admin/pages/CRMJob.tsx"
-)
-
-assert (
-    "deleteCrmJobPermanently"
-    not in job_page
-)
-
-assert (
-    "getCrmJobDeletePreflight"
-    not in job_page
-)
+# Gate 2C.3B remains the backend authority. The Admin UI is owned by Gate 2C.3D.
 
 # No schema change.
 assert not list(
@@ -324,7 +311,7 @@ print(
     "  deletion audit: retained"
 )
 print(
-    "  Job delete UI: absent"
+    "  Job delete UI: separately covered by Gate 2C.3D"
 )
 print(
     "  schema change: none"

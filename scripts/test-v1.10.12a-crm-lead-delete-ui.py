@@ -180,14 +180,21 @@ assert (
 )
 
 
-# Job permanent deletion remains outside Gate 2C.2B.
+# Gate 2C.3D adds Job permanent deletion to the
+# shared Admin client, while the Lead page remains
+# isolated from the Job destructive action.
 assert (
     "deleteCrmJobPermanently"
-    not in service
+    in service
 )
 
 assert (
     "deleteCrmJobPermanently"
+    not in page
+)
+
+assert (
+    "getCrmJobDeletePreflight"
     not in page
 )
 
@@ -223,7 +230,7 @@ print(
     "  successful deletion: returns to Leads"
 )
 print(
-    "  Job permanent delete UI: absent"
+    "  Job permanent delete UI: isolated to Job workspace"
 )
 print(
     "  schema change: none"
