@@ -1,16 +1,75 @@
-import type { MasterSupplier, SupplierRecord } from "./SupplierService";
+import type {
+  MasterSupplier,
+  SupplierRecord } from "./SupplierService";
 import type { StoryFact } from "./StoryService";
 import type { WeddingDocument } from "../../lib/weddingEngine";
 import type { ImageManagerDocument } from "../types/imageManager";
-import type { MomentGalleryPayload, MomentRepositoryDocument } from "../types/moment";
-import type { CustomCollection, CustomCollectionGalleryPayload, CustomCollectionMembershipPayload } from "../types/customCollection";
-import type { VenueDocument, VenueSummary } from "../types/venue";
-import type { AssetLibraryFilters, AssetLibraryPayload } from "../types/asset";
-import type { ClientGalleryDetailPayload, ClientGalleryFavouritesPayload, ClientGalleryListPayload, ClientGalleryRecord, PrivateOriginalUploadSession, PrivateOriginalUploadedPart } from "../types/clientGallery";
-import type { WeddingPreviewAssignmentInput, WeddingWorkspacePayload } from "../types/weddingWorkspace";
-import type { ClientGalleryStoreAdminPayload, ClientGalleryStoreSettings, PrintStoreAdminPayload, PrintStoreOrderStatus, PrintStorePriceList, PrintStoreProduct } from "../types/printStore";
-import type { PlatformAdministrationPayload, PlatformBrandAsset, PlatformBrandingIdentity, PlatformModuleConfiguration, PlatformSupplierTaxonomy, ProfessionalAuthState, ProfessionalInvitationResult, WedPlannedPlatformPayload, WedPlannedBusiness, WedPlannedMember, WedPlannedOperationsPayload, WedPlannedServiceArea } from "../types/platform";
-import type { CrmAddon, CrmContactDetail, CrmEnquiryDetail, CrmEnquiryInput, CrmJobWorkspace, CrmLeadFormSettings, CrmOverview, CrmPackage, CrmQuote, CrmQuoteOverview, CrmWorkflowOverview, CrmWorkflowTemplate, QuestionnaireInstance, QuestionnaireOverview, QuestionnaireTemplate, CrmCommercialSettingsInput, CrmCommercialSettingsPayload, CrmPaymentSchedulePreset, CrmPaymentSchedulePresetInput, CrmContractTemplate, CrmQuoteTemplate, CrmQuoteTemplateInput, CrmEmailTemplate, CrmEmailTemplateInput, CrmEmailSettings, CrmEmailSettingsInput, CrmQuoteSendPreview, CrmQuoteSendInput } from "../types/crm";
+import type { MomentGalleryPayload,
+  MomentRepositoryDocument } from "../types/moment";
+import type { CustomCollection,
+  CustomCollectionGalleryPayload,
+  CustomCollectionMembershipPayload } from "../types/customCollection";
+import type { VenueDocument,
+  VenueSummary } from "../types/venue";
+import type { AssetLibraryFilters,
+  AssetLibraryPayload } from "../types/asset";
+import type { ClientGalleryDetailPayload,
+  ClientGalleryFavouritesPayload,
+  ClientGalleryListPayload,
+  ClientGalleryRecord,
+  PrivateOriginalUploadSession,
+  PrivateOriginalUploadedPart } from "../types/clientGallery";
+import type { WeddingPreviewAssignmentInput,
+  WeddingWorkspacePayload } from "../types/weddingWorkspace";
+import type { ClientGalleryStoreAdminPayload,
+  ClientGalleryStoreSettings,
+  PrintStoreAdminPayload,
+  PrintStoreOrderStatus,
+  PrintStorePriceList,
+  PrintStoreProduct } from "../types/printStore";
+import type { PlatformAdministrationPayload,
+  PlatformBrandAsset,
+  PlatformBrandingIdentity,
+  PlatformModuleConfiguration,
+  PlatformSupplierTaxonomy,
+  ProfessionalAuthState,
+  ProfessionalInvitationResult,
+  WedPlannedPlatformPayload,
+  WedPlannedBusiness,
+  WedPlannedMember,
+  WedPlannedOperationsPayload,
+  WedPlannedServiceArea } from "../types/platform";
+import type { CrmAddon,
+  CrmContactDetail,
+  CrmEnquiryDetail,
+  CrmEnquiryInput,
+  CrmJobWorkspace,
+  CrmLeadFormSettings,
+  CrmOverview,
+  CrmPackage,
+  CrmQuote,
+  CrmQuoteOverview,
+  CrmWorkflowOverview,
+  CrmWorkflowTemplate,
+  QuestionnaireInstance,
+  QuestionnaireOverview,
+  QuestionnaireTemplate,
+  CrmCommercialSettingsInput,
+  CrmCommercialSettingsPayload,
+  CrmPaymentSchedulePreset,
+  CrmPaymentSchedulePresetInput,
+  CrmContractTemplate,
+  CrmQuoteTemplate,
+  CrmQuoteTemplateInput,
+  CrmEmailTemplate,
+  CrmEmailTemplateInput,
+  CrmEmailSettings,
+  CrmEmailSettingsInput,
+  CrmQuoteSendPreview,
+  CrmQuoteSendInput,
+  CrmDeletePreflight,
+  CrmLeadDeleteReceipt,
+} from "../types/crm";
 import type {
   WedPlannedPublicAppearanceAdministration,
   WedPlannedPublicTheme,
@@ -1345,6 +1404,47 @@ export class AdminApiService {
     const result = await request<{ ok: true; detail: CrmEnquiryDetail }>(`/api/crm/enquiries/${encodeURIComponent(id)}`);
     return result.detail;
   }
+
+  static async getCrmEnquiryDeletePreflight(
+    id: string,
+  ) {
+    const result = await request<{
+      ok: true;
+      preflight:
+        CrmDeletePreflight;
+    }>(
+      `/api/crm/enquiries/${
+        encodeURIComponent(id)
+      }/delete-preflight`,
+    );
+
+    return result.preflight;
+  }
+
+
+  static async deleteCrmEnquiryPermanently(
+    id: string,
+    confirmation: string,
+  ) {
+    const result = await request<{
+      ok: true;
+      receipt:
+        CrmLeadDeleteReceipt;
+    }>(
+      `/api/crm/enquiries/${
+        encodeURIComponent(id)
+      }`,
+      {
+        method: "DELETE",
+        body: JSON.stringify({
+          confirmation,
+        }),
+      },
+    );
+
+    return result.receipt;
+  }
+
 
   static async getCrmContact(id: string) {
     const result = await request<{ ok: true; detail: CrmContactDetail }>(`/api/crm/contacts/${encodeURIComponent(id)}`);

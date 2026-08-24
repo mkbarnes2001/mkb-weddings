@@ -16197,3 +16197,318 @@ small {
 .admin-textarea {
   font-family: inherit;
 }
+
+/* v1.10.12a — Gate 2C.2B Lead permanent-delete UI */
+
+.crm-lead-close-actions {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.crm-lead-close-option {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+  border:
+    1px solid
+    var(--admin-border);
+  border-radius: 12px;
+  background: #fafafa;
+  padding: 13px;
+}
+
+.crm-lead-close-option--danger {
+  border-color: #fecaca;
+  background: #fff7f7;
+}
+
+.crm-lead-close-option__heading {
+  display: grid;
+  gap: 4px;
+}
+
+.crm-lead-close-option__heading strong {
+  font-size: calc(
+    10px
+    * var(--admin-font-scale-effective, 1)
+  );
+}
+
+.crm-lead-close-option__heading p {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: calc(
+    8.5px
+    * var(--admin-font-scale-effective, 1)
+  );
+  line-height: 1.55;
+}
+
+.crm-lead-close-option--danger
+.crm-lead-close-option__heading strong {
+  color: #991b1b;
+}
+
+.crm-delete-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.crm-delete-dialog__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, .56);
+  cursor: default;
+}
+
+.crm-delete-dialog__panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(720px, 100%);
+  max-height: 88vh;
+  gap: 16px;
+  overflow-y: auto;
+  border:
+    1px solid
+    rgba(0, 0, 0, .1);
+  border-radius: 18px;
+  background: #fff;
+  padding: 20px;
+  box-shadow:
+    0 24px 70px
+    rgba(0, 0, 0, .26);
+}
+
+.crm-delete-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.crm-delete-dialog__header > div {
+  min-width: 0;
+}
+
+.crm-delete-dialog__header span {
+  display: block;
+  color: #b91c1c;
+  font-size: calc(
+    8px
+    * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.crm-delete-dialog__header h2 {
+  margin: 4px 0 0;
+  font-family: inherit;
+  font-size: calc(
+    18px
+    * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 650;
+}
+
+.crm-delete-dialog__header p {
+  max-width: 560px;
+  margin: 7px 0 0;
+  color: var(--admin-muted);
+  font-size: calc(
+    9px
+    * var(--admin-font-scale-effective, 1)
+  );
+  line-height: 1.55;
+}
+
+.crm-delete-dialog__loading,
+.crm-delete-dialog__blocked {
+  border-radius: 10px;
+  padding: 11px 12px;
+  font-size: calc(
+    9px
+    * var(--admin-font-scale-effective, 1)
+  );
+}
+
+.crm-delete-dialog__loading {
+  background: #f5f5f5;
+  color: var(--admin-muted);
+}
+
+.crm-delete-dialog__blocked {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.crm-delete-preflight {
+  display: grid;
+  gap: 10px;
+}
+
+.crm-delete-preflight-group {
+  overflow: hidden;
+  border:
+    1px solid
+    var(--admin-border);
+  border-radius: 11px;
+}
+
+.crm-delete-preflight-group > h3 {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: calc(
+    9px
+    * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 700;
+}
+
+.crm-delete-preflight-group--delete {
+  border-color: #fecaca;
+}
+
+.crm-delete-preflight-group--delete
+> h3 {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.crm-delete-preflight-group--preserve {
+  border-color: #bbf7d0;
+}
+
+.crm-delete-preflight-group--preserve
+> h3 {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.crm-delete-preflight-group--blocker {
+  border-color: #fde68a;
+}
+
+.crm-delete-preflight-group--blocker
+> h3 {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.crm-delete-preflight-group ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.crm-delete-preflight-group li {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
+  gap: 12px;
+  border-top:
+    1px solid
+    var(--admin-border);
+  padding: 9px 10px;
+}
+
+.crm-delete-preflight-group li:first-child {
+  border-top: 0;
+}
+
+.crm-delete-preflight-group li strong {
+  display: block;
+  font-size: calc(
+    9px
+    * var(--admin-font-scale-effective, 1)
+  );
+}
+
+.crm-delete-preflight-group li p {
+  margin: 3px 0 0;
+  color: var(--admin-muted);
+  font-size: calc(
+    8px
+    * var(--admin-font-scale-effective, 1)
+  );
+  line-height: 1.45;
+}
+
+.crm-delete-preflight-group li > span {
+  align-self: start;
+  min-width: 24px;
+  border-radius: 999px;
+  background: #f5f5f5;
+  padding: 3px 7px;
+  font-size: calc(
+    8px
+    * var(--admin-font-scale-effective, 1)
+  );
+  font-weight: 650;
+  text-align: center;
+}
+
+.crm-delete-dialog__confirmation {
+  display: grid;
+  gap: 6px;
+  border-top:
+    1px solid
+    var(--admin-border);
+  padding-top: 13px;
+}
+
+.crm-delete-dialog__confirmation label {
+  font-size: calc(
+    9px
+    * var(--admin-font-scale-effective, 1)
+  );
+}
+
+.crm-delete-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  border-top:
+    1px solid
+    var(--admin-border);
+  padding-top: 13px;
+}
+
+@media (max-width: 760px) {
+  .crm-lead-close-actions {
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+
+  .crm-delete-dialog {
+    align-items: flex-end;
+    padding: 8px;
+  }
+
+  .crm-delete-dialog__panel {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .crm-delete-dialog__actions {
+    display: grid;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}

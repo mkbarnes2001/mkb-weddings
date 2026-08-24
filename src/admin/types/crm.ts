@@ -200,6 +200,53 @@ export type CrmEnquiryDetail = {
   quotes?: CrmQuote[];
 };
 
+export type CrmDeletePreflightItem = {
+  key: string;
+  label: string;
+  detail: string;
+  count?: number;
+};
+
+
+export type CrmDeletePreflight = {
+  policyVersion: string;
+  targetType:
+    | "lead"
+    | "job";
+  targetId: string;
+  reference: string;
+  displayName: string;
+  canDelete: boolean;
+  confirmationText: "DELETE";
+  willDelete:
+    CrmDeletePreflightItem[];
+  willPreserve:
+    CrmDeletePreflightItem[];
+  blockers:
+    CrmDeletePreflightItem[];
+};
+
+
+export type CrmLeadDeleteReceipt = {
+  targetType: "lead";
+  targetId: string;
+  reference: string;
+  deletedAt: string;
+  deleted: {
+    lead: number;
+    draftQuotes: number;
+    contactLinks: number;
+    communications: number;
+    tasks: number;
+    activities: number;
+  };
+  preserved: {
+    contactIds: string[];
+  };
+  policyVersion: string;
+};
+
+
 export type CrmEnquiryInput = {
   stageId?: string;
   source?: string;

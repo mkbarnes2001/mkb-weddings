@@ -29,7 +29,9 @@ import {
   MessageCircle,
   MessageSquareText,
   Users,
-  } from "lucide-react";
+  Trash2,
+  X,
+} from "lucide-react";
 import {
   AdminButton,
   AdminEmptyState,
@@ -50,6 +52,8 @@ import type {
   CrmJobWorkspace,
   CrmOverview,
   CrmQuote,
+  CrmDeletePreflight,
+  CrmDeletePreflightItem,
 } from "../types/crm";
 import {
   CRMClientsPanel,
@@ -231,6 +235,34 @@ export function CRMEnquiry() {
 
   const [quotes, setQuotes] =
     useState<CrmQuote[]>([]);
+
+  const [
+    deleteOpen,
+    setDeleteOpen,
+  ] = useState(false);
+
+  const [
+    deleteBusy,
+    setDeleteBusy,
+  ] = useState(false);
+
+  const [
+    deleteConfirm,
+    setDeleteConfirm,
+  ] = useState("");
+
+  const [
+    deleteError,
+    setDeleteError,
+  ] = useState("");
+
+  const [
+    deletePreflight,
+    setDeletePreflight,
+  ] =
+    useState<
+      CrmDeletePreflight | null
+    >(null);
 
   const canManage =
     auth.permissions.includes(
@@ -503,6 +535,104 @@ export function CRMEnquiry() {
       throw saveError;
     } finally {
       setSaving(false);
+    }
+  }
+
+
+  async function openLeadDeleteDialog() {
+    setDeleteOpen(true);
+    setDeleteBusy(true);
+    setDeleteConfirm("");
+    setDeleteError("");
+    setDeletePreflight(null);
+
+    try {
+      setDeletePreflight(
+        await AdminApiService
+          .getCrmEnquiryDeletePreflight(
+            id,
+          ),
+      );
+    } catch (preflightError) {
+      setDeleteError(
+        preflightError
+          instanceof Error
+          ? preflightError.message
+          : "Unable to check whether this Lead can be deleted.",
+      );
+    } finally {
+      setDeleteBusy(false);
+    }
+  }
+
+
+  function closeLeadDeleteDialog() {
+    if (deleteBusy) {
+      return;
+    }
+
+    setDeleteOpen(false);
+    setDeleteConfirm("");
+    setDeleteError("");
+    setDeletePreflight(null);
+  }
+
+
+  async function permanentlyDeleteLead() {
+    if (
+      deleteBusy
+      || !deletePreflight
+      || !deletePreflight.canDelete
+      || deleteConfirm
+        !== deletePreflight
+          .confirmationText
+    ) {
+      return;
+    }
+
+    setDeleteBusy(true);
+    setDeleteError("");
+
+    try {
+      await AdminApiService
+        .deleteCrmEnquiryPermanently(
+          id,
+          deleteConfirm,
+        );
+
+      setDeleteOpen(false);
+
+      navigate(
+        "/admin/crm",
+        {
+          replace: true,
+        },
+      );
+    } catch (deleteActionError) {
+      setDeleteError(
+        deleteActionError
+          instanceof Error
+          ? deleteActionError.message
+          : "Unable to permanently delete this Lead.",
+      );
+
+      /*
+       * The server re-runs preflight immediately
+       * before deletion. Refresh the visible policy
+       * if a blocker appeared after the dialog opened.
+       */
+      try {
+        setDeletePreflight(
+          await AdminApiService
+            .getCrmEnquiryDeletePreflight(
+              id,
+            ),
+        );
+      } catch {
+        // Keep the original deletion error visible.
+      }
+    } finally {
+      setDeleteBusy(false);
     }
   }
 
@@ -2121,6 +2251,20 @@ export function CRMEnquiry() {
           title="Close lead"
           icon={XCircle}
         >
+          <div className="crm-lead-close-actions">
+            <section className="crm-lead-close-option">
+              <div className="crm-lead-close-option__heading">
+                <strong>
+                  Mark lost
+                </strong>
+
+                <p>
+                  Use this for a normal business outcome such as no response,
+                  unavailable date or the client choosing another supplier.
+                  The Lead and its history remain in CRM.
+                </p>
+              </div>
+
               <AdminField label="Reason">
                 <textarea
                   className="admin-textarea"
@@ -2134,11 +2278,14 @@ export function CRMEnquiry() {
                 />
               </AdminField>
 
-              <div className="mt-3">
+              <div>
                 <AdminButton
                   variant="danger"
                   size="sm"
-                  disabled={saving}
+                  disabled={
+                    saving
+                    || deleteBusy
+                  }
                   onClick={() =>
                     void markLost()
                   }
@@ -2146,12 +2293,270 @@ export function CRMEnquiry() {
                   Mark lost
                 </AdminButton>
               </div>
+            </section>
 
+            <section className="crm-lead-close-option crm-lead-close-option--danger">
+              <div className="crm-lead-close-option__heading">
+                <strong>
+                  Delete permanently
+                </strong>
+
+                <p>
+                  Use only for duplicate, test or incorrectly created Leads.
+                  WedCRM checks dependencies first. Master client records are
+                  preserved.
+                </p>
+              </div>
+
+              <div>
+                <AdminButton
+                  variant="danger"
+                  size="sm"
+                  icon={Trash2}
+                  disabled={
+                    saving
+                    || deleteBusy
+                  }
+                  onClick={() =>
+                    void openLeadDeleteDialog()
+                  }
+                >
+                  {deleteBusy
+                    ? "Checking…"
+                    : "Delete permanently"}
+                </AdminButton>
+              </div>
+            </section>
+          </div>
         </AdminAccordion>
+      ) : null}
+
+
+      {deleteOpen ? (
+        <div
+          className="crm-delete-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="crm-lead-delete-title"
+        >
+          <button
+            type="button"
+            className="crm-delete-dialog__backdrop"
+            aria-label="Close permanent deletion dialog"
+            disabled={deleteBusy}
+            onClick={
+              closeLeadDeleteDialog
+            }
+          />
+
+          <section className="crm-delete-dialog__panel">
+            <header className="crm-delete-dialog__header">
+              <div>
+                <span>
+                  Permanent deletion
+                </span>
+
+                <h2 id="crm-lead-delete-title">
+                  Delete{" "}
+                  {deletePreflight?.displayName
+                    || enquiry.reference}
+                  ?
+                </h2>
+
+                <p>
+                  This action cannot be undone.
+                  WedCRM checks the record immediately
+                  before deletion so newly linked work
+                  cannot be removed accidentally.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="admin-icon-control"
+                aria-label="Close delete dialog"
+                title="Close"
+                disabled={deleteBusy}
+                onClick={
+                  closeLeadDeleteDialog
+                }
+              >
+                <X aria-hidden="true" />
+              </button>
+            </header>
+
+            {deleteBusy
+            && !deletePreflight ? (
+              <div className="crm-delete-dialog__loading">
+                Checking Lead dependencies…
+              </div>
+            ) : null}
+
+            {deleteError ? (
+              <div className="admin-alert admin-alert--error">
+                {deleteError}
+              </div>
+            ) : null}
+
+            {deletePreflight ? (
+              <>
+                <div className="crm-delete-preflight">
+                  <DeletePreflightGroup
+                    title="Will be deleted"
+                    tone="delete"
+                    items={
+                      deletePreflight
+                        .willDelete
+                    }
+                  />
+
+                  <DeletePreflightGroup
+                    title="Will be preserved"
+                    tone="preserve"
+                    items={
+                      deletePreflight
+                        .willPreserve
+                    }
+                  />
+
+                  <DeletePreflightGroup
+                    title="Cannot delete until resolved"
+                    tone="blocker"
+                    items={
+                      deletePreflight
+                        .blockers
+                    }
+                  />
+                </div>
+
+                {deletePreflight.canDelete ? (
+                  <div className="crm-delete-dialog__confirmation">
+                    <label htmlFor="crm-lead-delete-confirmation">
+                      Type{" "}
+                      <strong>
+                        DELETE
+                      </strong>{" "}
+                      to confirm
+                    </label>
+
+                    <input
+                      id="crm-lead-delete-confirmation"
+                      className="admin-input"
+                      autoFocus
+                      autoComplete="off"
+                      value={deleteConfirm}
+                      disabled={deleteBusy}
+                      placeholder="DELETE"
+                      onChange={(event) =>
+                        setDeleteConfirm(
+                          event.target.value,
+                        )
+                      }
+                    />
+                  </div>
+                ) : (
+                  <div className="crm-delete-dialog__blocked">
+                    Permanent deletion is unavailable
+                    until every blocker above has been
+                    resolved.
+                  </div>
+                )}
+              </>
+            ) : null}
+
+            <footer className="crm-delete-dialog__actions">
+              <AdminButton
+                variant="secondary"
+                disabled={deleteBusy}
+                onClick={
+                  closeLeadDeleteDialog
+                }
+              >
+                Cancel
+              </AdminButton>
+
+              <AdminButton
+                variant="danger"
+                icon={Trash2}
+                disabled={
+                  deleteBusy
+                  || !deletePreflight
+                  || !deletePreflight
+                    .canDelete
+                  || deleteConfirm
+                    !== deletePreflight
+                      .confirmationText
+                }
+                onClick={() =>
+                  void permanentlyDeleteLead()
+                }
+              >
+                {deleteBusy
+                  ? "Deleting…"
+                  : "Delete permanently"}
+              </AdminButton>
+            </footer>
+          </section>
+        </div>
       ) : null}
     </AdminPage>
   );
 }
+
+function DeletePreflightGroup({
+  title,
+  tone,
+  items,
+}: {
+  title: string;
+  tone:
+    | "delete"
+    | "preserve"
+    | "blocker";
+  items:
+    CrmDeletePreflightItem[];
+}) {
+  if (!items.length) {
+    return null;
+  }
+
+  return (
+    <section
+      className={
+        `crm-delete-preflight-group crm-delete-preflight-group--${tone}`
+      }
+    >
+      <h3>
+        {title}
+      </h3>
+
+      <ul>
+        {items.map(
+          (item) => (
+            <li key={item.key}>
+              <div>
+                <strong>
+                  {item.label}
+                </strong>
+
+                <p>
+                  {item.detail}
+                </p>
+              </div>
+
+              {item.count != null ? (
+                <span>
+                  {item.count}
+                </span>
+              ) : null}
+            </li>
+          ),
+        )}
+      </ul>
+    </section>
+  );
+}
+
 
 function ContactEditor({
   title,
