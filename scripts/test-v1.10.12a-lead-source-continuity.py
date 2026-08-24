@@ -202,7 +202,10 @@ for token in (
     assert token in field, token
 
 
-# Existing configured forms recover the new optional field.
+# Lead Source is optional in the configurable public form.
+# Once a workspace has explicitly removed it, normalisation must
+# preserve that omission rather than silently resurrecting it.
+# The booking-critical identity/date fields remain protected.
 normalise_start = crm.index(
     "function normalizeLeadFormFields("
 )
@@ -217,12 +220,17 @@ normalise = crm[
     normalise_end
 ]
 
+assert (
+    'if (!systemKeys.has("leadSource"))'
+    not in normalise
+)
+
 for token in (
-    'if (!systemKeys.has("leadSource"))',
-    'field.systemKey',
-    '=== "leadSource"',
-    "fields.push(",
-    "leadSourceField",
+    '"firstName"',
+    '"email"',
+    '"eventDate"',
+    "protectedField",
+    "fields.unshift(",
 ):
     assert token in normalise, token
 
@@ -371,7 +379,7 @@ print(
 )
 
 print(
-    "  saved Lead Form recovery: verified"
+    "  saved Lead Form optional-field omission: respected"
 )
 
 print(

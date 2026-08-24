@@ -40,29 +40,57 @@ for token in (
     "LEAD_FORM_FIELD_TYPE_OPTIONS",
     "cloneLeadFormSettings",
     'title="Form fields"',
-    "Add question",
+    "Add custom question",
     "function patchField(",
     "function moveField(",
     "function removeField(",
     "function addQuestion()",
     "Custom question",
-    "Required identity",
+    "CRM mapping",
     "Move up",
     "Move down",
-    "Show this field",
+    "Visible",
     "Required",
-    "field.options.join",
-    'value="/enquire"',
+    "crm-lead-form-choice-row",
+    "draft.publicPath",
     "onSave(draft)",
 ):
     assert token in crm, token
 
 
-# Core/system CRM mappings cannot be arbitrarily changed into
-# another input type, while custom questions can be removed.
-assert "Boolean(field.systemKey)" in crm
-assert "field.systemKey\n      || field.locked" in crm
-assert "field.locked\n                      }" in crm
+# CRM-mapped fields keep their fixed canonical input type.
+# Only booking-critical locked mappings are non-removable;
+# unlocked CRM fields and custom questions may be removed.
+field_type_start = crm.index(
+    'label="Field type"'
+)
+field_type_end = crm.index(
+    "</AdminField>",
+    field_type_start,
+)
+field_type_region = crm[
+    field_type_start:
+    field_type_end
+]
+
+assert "Boolean(" in field_type_region
+assert "field.systemKey" in field_type_region
+assert "{!field.locked ? (" in crm
+
+remove_start = crm.index(
+    "function removeField("
+)
+remove_end = crm.index(
+    "function restoreCrmField(",
+    remove_start,
+)
+remove_helper = crm[
+    remove_start:remove_end
+]
+
+assert "|| field.locked" in remove_helper
+assert "|| field.systemKey" not in remove_helper
+assert "function restoreCrmField(" in crm
 
 
 # ------------------------------------------------------------
@@ -115,8 +143,8 @@ for token in (
     assert token in public, token
 
 
-# Venue is a first-class field but deliberately remains manual until
-# the separately guarded public Places endpoint is added in F3.
+# Venue remains a first-class configurable field. Google Places
+# behaviour is covered by the dedicated Places regressions.
 assert 'field.type === "venue"' in public
 assert 'placeholder={\n            field.placeholder\n            || "Venue name or TBC"' in public
 

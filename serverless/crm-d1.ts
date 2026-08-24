@@ -372,29 +372,6 @@ function normalizeLeadFormFields(value: unknown) {
     }
   }
 
-  if (!systemKeys.has("leadSource")) {
-    const leadSourceField =
-      defaults.find(
-        (field) =>
-          field.systemKey
-          === "leadSource",
-      );
-
-    if (leadSourceField) {
-      fields.push(
-        leadSourceField,
-      );
-
-      ids.add(
-        leadSourceField.id,
-      );
-
-      systemKeys.add(
-        "leadSource",
-      );
-    }
-  }
-
   return fields.length
     ? fields
     : defaultLeadFormFields();
@@ -1174,6 +1151,40 @@ export async function getCrmOverview(db: D1Db, actor: CrmActor) {
           ),
         }),
       );
+  const leadFormFields =
+    normalizeLeadFormFields(
+      settings?.fields_json,
+    );
+
+  const leadFormSystemKeys =
+    new Set(
+      leadFormFields
+        .map(
+          (field: any) =>
+            text(field.systemKey),
+        )
+        .filter(Boolean),
+    );
+
+  const availableLeadFormFields =
+    defaultLeadFormFields()
+      .filter(
+        (field) =>
+          Boolean(field.systemKey)
+          && !field.locked
+          && !leadFormSystemKeys.has(
+            field.systemKey,
+          ),
+      )
+      .map(
+        (field) => ({
+          ...field,
+          options: [
+            ...field.options,
+          ],
+        }),
+      );
+
   return {
     schemaVersion: Number(schema?.value || 0),
     workspace: { id: actor.workspaceId, name: text(actor.businessName), currency: text(settings?.workspace_currency || "GBP") },
@@ -1195,7 +1206,10 @@ export async function getCrmOverview(db: D1Db, actor: CrmActor) {
       autoresponderEnabled: Boolean(settings?.autoresponder_enabled),
       autoresponderSubject: text(settings?.autoresponder_subject || "We have received your enquiry"),
       autoresponderMessage: text(settings?.autoresponder_message || "Thank you for getting in touch. We have received your enquiry and will reply as soon as possible."),
-      fields: normalizeLeadFormFields(settings?.fields_json),
+      fields:
+        leadFormFields,
+      availableFields:
+        availableLeadFormFields,
     },
     stats: {
       open: enquiries.filter((item: any) => item.status === "open").length,

@@ -1530,24 +1530,124 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
   function removeField(
     index: number,
   ) {
-    const field = draft.fields[index];
+    const field =
+      draft.fields[index];
 
     if (
       !field
-      || field.systemKey
       || field.locked
     ) {
       return;
     }
 
-    setDraft((current) => ({
-      ...current,
-      fields: current.fields.filter(
-        (_, fieldIndex) =>
-          fieldIndex !== index,
-      ),
-    }));
+    setDraft(
+      (current) => {
+        const removed =
+          current.fields[
+            index
+          ];
+
+        if (
+          !removed
+          || removed.locked
+        ) {
+          return current;
+        }
+
+        const fields =
+          current.fields.filter(
+            (_, fieldIndex) =>
+              fieldIndex
+              !== index,
+          );
+
+        if (
+          !removed.systemKey
+        ) {
+          return {
+            ...current,
+            fields,
+          };
+        }
+
+        const availableFields = [
+          ...(
+            current.availableFields
+            || []
+          ).filter(
+            (candidate) =>
+              candidate.systemKey
+              !== removed.systemKey,
+          ),
+          {
+            ...removed,
+            options: [
+              ...removed.options,
+            ],
+          },
+        ];
+
+        return {
+          ...current,
+          fields,
+          availableFields,
+        };
+      },
+    );
   }
+
+
+  function restoreCrmField(
+    systemKey: string,
+  ) {
+    if (!systemKey) {
+      return;
+    }
+
+    const template =
+      (
+        draft.availableFields
+        || []
+      ).find(
+        (field) =>
+          field.systemKey
+          === systemKey,
+      );
+
+    if (!template) {
+      return;
+    }
+
+    setDraft(
+      (current) => ({
+        ...current,
+        fields: [
+          ...current.fields,
+          {
+            ...template,
+            enabled: true,
+            options: [
+              ...template.options,
+            ],
+          },
+        ],
+        availableFields:
+          (
+            current.availableFields
+            || []
+          ).filter(
+            (field) =>
+              field.systemKey
+              !== systemKey,
+          ),
+      }),
+    );
+
+    setExpandedLeadFieldId(
+      template.id,
+    );
+  }
+
 
   function addQuestion() {
     const id = [
@@ -1933,15 +2033,62 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
           actions={
             canManage
               ? (
-                  <AdminButton
-                    size="sm"
-                    variant="secondary"
-                    icon={Plus}
-                    disabled={saving}
-                    onClick={addQuestion}
-                  >
-                    Add question
-                  </AdminButton>
+                  <div className="crm-lead-form-builder-panel__actions">
+                    <select
+                      className="admin-select crm-lead-form-builder-add-field"
+                      aria-label="Add CRM field"
+                      value=""
+                      disabled={
+                        saving
+                        || !(
+                          draft.availableFields
+                          || []
+                        ).length
+                      }
+                      onChange={(event) => {
+                        const systemKey =
+                          event.target.value;
+
+                        if (systemKey) {
+                          restoreCrmField(
+                            systemKey,
+                          );
+                        }
+                      }}
+                    >
+                      <option value="">
+                        Add CRM field…
+                      </option>
+
+                      {(
+                        draft.availableFields
+                        || []
+                      ).map(
+                        (field) => (
+                          <option
+                            key={
+                              field.systemKey
+                            }
+                            value={
+                              field.systemKey
+                            }
+                          >
+                            {field.label}
+                          </option>
+                        ),
+                      )}
+                    </select>
+
+                    <AdminButton
+                      size="sm"
+                      variant="secondary"
+                      icon={Plus}
+                      disabled={saving}
+                      onClick={addQuestion}
+                    >
+                      Add custom question
+                    </AdminButton>
+                  </div>
                 )
               : undefined
           }
@@ -2138,7 +2285,7 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
                             ↓
                           </button>
 
-                          {custom ? (
+                          {!field.locked ? (
                             <button
                               type="button"
                               className="admin-icon-control admin-icon-control--danger"
@@ -2281,42 +2428,181 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
                             </AdminField>
                           </div>
 
-                          {choices ? (
-                            <AdminField
-                              label="Choices"
-                              help="One option per line."
-                            >
-                              <textarea
-                                className="admin-textarea min-h-24"
-                                value={
-                                  field.options.join(
-                                    "\n",
-                                  )
-                                }
-                                disabled={
-                                  !canManage
-                                  || saving
-                                }
-                                onChange={(event) =>
-                                  patchField(
-                                    index,
-                                    {
-                                      options:
-                                        event.target.value
-                                          .split("\n")
-                                          .map(
-                                            (value) =>
-                                              value.trim(),
-                                          )
-                                          .filter(
-                                            Boolean,
-                                          ),
-                                    },
-                                  )
-                                }
-                              />
-                            </AdminField>
-                          ) : null}
+                            {choices ? (
+                              <AdminField
+                                label="Choices"
+                                help="Add each option separately. Press Enter to add the next option."
+                              >
+                                <div className="crm-lead-form-choice-editor">
+                                  <div className="crm-lead-form-choice-list">
+                                    {field.options.map(
+                                      (
+                                        option,
+                                        optionIndex,
+                                      ) => (
+                                        <div
+                                          key={
+                                            `${field.id}_${optionIndex}`
+                                          }
+                                          className="crm-lead-form-choice-row"
+                                        >
+                                          <span
+                                            className="crm-lead-form-choice-row__number"
+                                            aria-hidden="true"
+                                          >
+                                            {optionIndex + 1}
+                                          </span>
+
+                                          <input
+                                            id={
+                                              `crm-lead-form-choice-${field.id}-${optionIndex}`
+                                            }
+                                            className="admin-input"
+                                            value={option}
+                                            disabled={
+                                              !canManage
+                                              || saving
+                                            }
+                                            placeholder={
+                                              `Option ${optionIndex + 1}`
+                                            }
+                                            onChange={(event) => {
+                                              const next = [
+                                                ...field.options,
+                                              ];
+
+                                              next[
+                                                optionIndex
+                                              ] =
+                                                event.target
+                                                  .value;
+
+                                              patchField(
+                                                index,
+                                                {
+                                                  options:
+                                                    next,
+                                                },
+                                              );
+                                            }}
+                                            onKeyDown={(event) => {
+                                              if (
+                                                event.key
+                                                !== "Enter"
+                                              ) {
+                                                return;
+                                              }
+
+                                              event.preventDefault();
+
+                                              const next = [
+                                                ...field.options,
+                                              ];
+
+                                              next.splice(
+                                                optionIndex
+                                                  + 1,
+                                                0,
+                                                "",
+                                              );
+
+                                              patchField(
+                                                index,
+                                                {
+                                                  options:
+                                                    next,
+                                                },
+                                              );
+
+                                              window.setTimeout(
+                                                () =>
+                                                  document
+                                                    .getElementById(
+                                                      `crm-lead-form-choice-${field.id}-${optionIndex + 1}`,
+                                                    )
+                                                    ?.focus(),
+                                                0,
+                                              );
+                                            }}
+                                          />
+
+                                          <button
+                                            type="button"
+                                            className="admin-icon-control admin-icon-control--danger"
+                                            disabled={
+                                              !canManage
+                                              || saving
+                                            }
+                                            aria-label={
+                                              `Remove option ${optionIndex + 1}`
+                                            }
+                                            title="Remove option"
+                                            onClick={() =>
+                                              patchField(
+                                                index,
+                                                {
+                                                  options:
+                                                    field.options
+                                                      .filter(
+                                                        (
+                                                          _,
+                                                          itemIndex,
+                                                        ) =>
+                                                          itemIndex
+                                                          !== optionIndex,
+                                                      ),
+                                                },
+                                              )
+                                            }
+                                          >
+                                            ×
+                                          </button>
+                                        </div>
+                                      ),
+                                    )}
+                                  </div>
+
+                                  <AdminButton
+                                    size="sm"
+                                    variant="secondary"
+                                    icon={Plus}
+                                    disabled={
+                                      !canManage
+                                      || saving
+                                      || field.options
+                                        .length
+                                        >= 50
+                                    }
+                                    onClick={() => {
+                                      const next = [
+                                        ...field.options,
+                                        "",
+                                      ];
+
+                                      patchField(
+                                        index,
+                                        {
+                                          options:
+                                            next,
+                                        },
+                                      );
+
+                                      window.setTimeout(
+                                        () =>
+                                          document
+                                            .getElementById(
+                                              `crm-lead-form-choice-${field.id}-${next.length - 1}`,
+                                            )
+                                            ?.focus(),
+                                        0,
+                                      );
+                                    }}
+                                  >
+                                    Add option
+                                  </AdminButton>
+                                </div>
+                              </AdminField>
+                            ) : null}
 
                           {field.systemKey ? (
                             <div className="crm-lead-form-builder-field__mapping">
@@ -2426,7 +2712,7 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
               </h3>
 
               <p>
-                Add a custom question to start building the form.
+                Add a CRM field or custom question to start building the form.
               </p>
             </div>
           ) : null}

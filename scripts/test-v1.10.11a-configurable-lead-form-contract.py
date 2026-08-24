@@ -145,7 +145,8 @@ for token in (
     "LEAD_FORM_LOCKED_SYSTEM_KEYS",
     "field.type === \"select\" || field.type === \"radio\"",
     "field.required",
-    "fields: normalizeLeadFormFields(settings?.fields_json)",
+    "leadFormFields",
+    "availableLeadFormFields",
     "fields: normalizeLeadFormFields(row.fields_json)",
 ):
     assert token in server, token

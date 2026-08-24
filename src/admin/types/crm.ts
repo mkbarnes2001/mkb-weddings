@@ -169,6 +169,7 @@ export type CrmLeadFormSettings = {
   autoresponderSubject: string;
   autoresponderMessage: string;
   fields: CrmLeadFormField[];
+  availableFields?: CrmLeadFormField[];
 };
 
 export type CrmOverview = {
