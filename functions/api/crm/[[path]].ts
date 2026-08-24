@@ -36,6 +36,10 @@ import {
 } from "../../../serverless/crm-delete-d1";
 
 import {
+  deleteCrmEnquiryPermanently,
+} from "../../../serverless/crm-delete-actions-d1";
+
+import {
   approveSupplierSubmission,
   archiveQuestionnaireTemplate,
   assignQuestionnaire,
@@ -1176,3 +1180,62 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     return errorResponse(error);
   }
 };
+
+
+export const onRequestDelete:
+  PagesFunction<Env> =
+  async (context) => {
+    try {
+      const actor =
+        await actorFor(
+          context,
+        );
+
+      const parts =
+        routeParts(
+          context.params.path,
+        );
+
+      if (
+        parts[0] === "enquiries"
+        && parts[1]
+        && parts.length === 2
+      ) {
+        const body: any =
+          await context.request
+            .json()
+            .catch(() => ({}));
+
+        return Response.json({
+          ok: true,
+          receipt:
+            await deleteCrmEnquiryPermanently(
+              context.env.MKB_DB,
+              actor,
+              parts[1],
+              body?.confirmation,
+            ),
+        }, {
+          headers: {
+            "Cache-Control":
+              "private, no-store",
+          },
+        });
+      }
+
+      const error =
+        new Error(
+          "CRM DELETE route not found.",
+        ) as Error & {
+          statusCode?: number;
+        };
+
+      error.statusCode = 404;
+
+      throw error;
+    } catch (error: any) {
+      return errorResponse(
+        error,
+      );
+    }
+  };
