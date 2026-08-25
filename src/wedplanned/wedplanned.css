@@ -1932,3 +1932,143 @@ body {
     text-align: left;
   }
 }
+
+
+/* v1.10.12a Gate 2E.2B — published typography reliability */
+
+/*
+ * publicTheme.tsx already publishes these values from the
+ * stored appearance theme. This final semantic layer ensures
+ * older component-specific pixel declarations cannot mask
+ * the published settings.
+ */
+
+
+/* Main / body copy */
+.wp-site :is(
+  p,
+  li,
+  .wp-section-intro > span,
+  .wp-product-card
+    > span:not(.wp-product-wordmark)
+) {
+  font-size:
+    var(
+      --wp-body-desktop,
+      14px
+    ) !important;
+}
+
+
+/* Navigation */
+.wp-site .wp-desktop-nav a,
+.wp-site .wp-text-link {
+  font-size:
+    var(
+      --wp-nav-desktop,
+      13px
+    ) !important;
+}
+
+
+/* Buttons / controls */
+.wp-site .wp-button {
+  font-size:
+    var(
+      --wp-button-font-size,
+      12px
+    ) !important;
+}
+
+
+/* Helper / metadata */
+.wp-site :is(
+  .wp-eyebrow,
+  .wp-section-intro > p,
+  .wp-product-card__purpose,
+  .wp-footer__bottom,
+  .wp-footer__grid strong
+) {
+  font-size:
+    var(
+      --wp-meta-font-size,
+      10px
+    ) !important;
+}
+
+
+/* Heading hierarchy */
+.wp-site h1 {
+  font-size:
+    var(
+      --wp-h1-desktop,
+      70px
+    ) !important;
+}
+
+.wp-site h2 {
+  font-size:
+    var(
+      --wp-h2-desktop,
+      46px
+    ) !important;
+}
+
+.wp-site h3 {
+  font-size:
+    var(
+      --wp-h3-desktop,
+      23px
+    ) !important;
+}
+
+
+@media (max-width: 760px) {
+  .wp-site :is(
+    p,
+    li,
+    .wp-section-intro > span,
+    .wp-product-card
+      > span:not(.wp-product-wordmark)
+  ) {
+    font-size:
+      var(
+        --wp-body-mobile,
+        14px
+      ) !important;
+  }
+
+  .wp-site
+  .wp-mobile-nav
+  a:not(.wp-button) {
+    font-size:
+      var(
+        --wp-nav-mobile,
+        13px
+      ) !important;
+  }
+
+  .wp-site h1 {
+    font-size:
+      var(
+        --wp-h1-mobile,
+        54px
+      ) !important;
+  }
+
+  .wp-site h2 {
+    font-size:
+      var(
+        --wp-h2-mobile,
+        38px
+      ) !important;
+  }
+
+  .wp-site h3 {
+    font-size:
+      var(
+        --wp-h3-mobile,
+        20px
+      ) !important;
+  }
+}

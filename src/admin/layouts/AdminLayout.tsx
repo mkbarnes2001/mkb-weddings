@@ -296,6 +296,25 @@ export function AdminLayout() {
     baseFontScale
     * ((platformIdentity.adminMetaFontScale || 100) / 100);
 
+  /*
+   * Gate 2E.2: semantic Admin typography roles.
+   * Persisted percentage controls remain backwards compatible.
+   */
+  const roleMainFontSize =
+    11 * baseFontScale;
+
+  const roleHeadingFontSize =
+    18 * headingFontScale;
+
+  const roleSubheadingFontSize =
+    11 * buttonFontScale;
+
+  const roleNavigationFontSize =
+    9 * navigationFontScale;
+
+  const roleHelperFontSize =
+    8.5 * metaFontScale;
+
   const pageHeaderLogoScale =
     ((platformIdentity.pageHeaderLogoScale || 100) / 100)
     * (isPlatformRoute
@@ -326,6 +345,17 @@ export function AdminLayout() {
     "--admin-button-scale-effective": buttonFontScale,
     "--admin-navigation-scale-effective": navigationFontScale,
     "--admin-meta-scale-effective": metaFontScale,
+
+    "--admin-role-main-size":
+      `${roleMainFontSize}px`,
+    "--admin-role-heading-size":
+      `${roleHeadingFontSize}px`,
+    "--admin-role-subheading-size":
+      `${roleSubheadingFontSize}px`,
+    "--admin-role-navigation-size":
+      `${roleNavigationFontSize}px`,
+    "--admin-role-helper-size":
+      `${roleHelperFontSize}px`,
 
     "--admin-page-header-logo-scale-effective": pageHeaderLogoScale,
     "--admin-sidebar-logo-scale-effective": sidebarLogoScale,

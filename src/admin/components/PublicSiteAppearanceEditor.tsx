@@ -456,6 +456,15 @@ function PublicAppearancePreview({
         ? theme.typography.navigationMobilePx
         : theme.typography.navigationDesktopPx
     }px`,
+    "--preview-button-size":
+      `${theme.typography.buttonPx}px`,
+    "--preview-meta-size":
+      `${theme.typography.metaPx}px`,
+    "--preview-h3-size": `${
+      mode === "mobile"
+        ? theme.typography.h3MobilePx
+        : theme.typography.h3DesktopPx
+    }px`,
     "--preview-h1-size": `${
       mode === "mobile"
         ? theme.typography.h1MobilePx

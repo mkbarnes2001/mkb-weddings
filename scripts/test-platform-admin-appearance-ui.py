@@ -16,11 +16,11 @@ def main() -> None:
     # Global controls.
     for token in (
         "Global Admin typography",
-        "Overall Admin text",
-        "Headings",
-        "Buttons & controls",
-        "Navigation & menus",
-        "Status / helper text",
+        "Main / body text",
+        "Heading / H1",
+        "Subheading / controls",
+        "Navigation",
+        "Helper / metadata",
         "Global Admin logo sizing",
         "Page-header logos",
         "Desktop sidebar logos",

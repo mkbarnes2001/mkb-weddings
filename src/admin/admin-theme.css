@@ -6673,6 +6673,94 @@
   flex-direction: column;
 }
 
+
+
+/* v1.10.12a Gate 2E.2B — public appearance typography reliability */
+
+/*
+ * The public-site preview remains isolated from Admin
+ * typography, but now consumes every draft typography
+ * role directly. No preview clamp masks a saved value.
+ */
+
+.public-appearance-preview {
+  font-size:
+    var(
+      --preview-body-size,
+      14px
+    );
+}
+
+.public-appearance-preview__header
+nav
+span {
+  font-size:
+    var(
+      --preview-nav-size,
+      13px
+    ) !important;
+}
+
+.public-appearance-preview
+button {
+  font-size:
+    var(
+      --preview-button-size,
+      12px
+    ) !important;
+}
+
+.public-appearance-preview
+small {
+  font-size:
+    var(
+      --preview-meta-size,
+      10px
+    ) !important;
+}
+
+.public-appearance-preview
+h1 {
+  font-size:
+    var(
+      --preview-h1-size,
+      70px
+    ) !important;
+}
+
+.public-appearance-preview
+h2 {
+  font-size:
+    var(
+      --preview-h2-size,
+      46px
+    ) !important;
+}
+
+.public-appearance-preview
+h3 {
+  font-size:
+    var(
+      --preview-h3-size,
+      23px
+    ) !important;
+}
+
+.public-appearance-preview
+:is(
+  .public-appearance-preview__hero p,
+  .public-appearance-preview__product-grid
+    article
+    p,
+  .public-appearance-preview__footer p
+) {
+  font-size:
+    var(
+      --preview-body-size,
+      14px
+    ) !important;
+}
+
 /* PUBLIC_APPEARANCE_PREVIEW_TYPOGRAPHY_ISOLATION_END */
 
 .public-appearance-publish-summary {
@@ -11856,7 +11944,7 @@ span {
   align-items: baseline;
   margin-bottom: 55px;
   color: #111;
-  font-size: 28px;
+  font-size: calc((28px) * var(--admin-font-scale-effective, 1));
   line-height: 1;
   letter-spacing: -.055em;
 }
@@ -11882,7 +11970,7 @@ span {
 .professional-auth-eyebrow {
   margin: 0;
   color: #77736c;
-  font-size: 10px;
+  font-size: calc((10px) * var(--admin-font-scale-effective, 1));
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -11899,7 +11987,7 @@ span {
     "Helvetica Neue",
     Arial,
     sans-serif;
-  font-size: clamp(36px, 5vw, 55px);
+  font-size: calc((clamp(36px, 5vw, 55px)) * var(--admin-font-scale-effective, 1));
   font-weight: 650;
   line-height: .98;
   letter-spacing: -.055em;
@@ -11909,7 +11997,7 @@ span {
   max-width: 420px;
   margin: 20px 0 0;
   color: #6b6862;
-  font-size: 14px;
+  font-size: calc((14px) * var(--admin-font-scale-effective, 1));
   line-height: 1.7;
 }
 
@@ -11926,7 +12014,7 @@ span {
 
 .professional-auth-field > span {
   color: #595650;
-  font-size: 10px;
+  font-size: calc((10px) * var(--admin-font-scale-effective, 1));
   font-weight: 700;
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -11968,7 +12056,7 @@ span {
   padding: 0;
   color: #161616;
   font: inherit;
-  font-size: 14px;
+  font-size: calc((14px) * var(--admin-font-scale-effective, 1));
   outline: 0;
 }
 
@@ -11989,7 +12077,7 @@ span {
   color: #fff;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: calc((12px) * var(--admin-font-scale-effective, 1));
   font-weight: 700;
   transition:
     background 140ms ease,
@@ -12014,7 +12102,7 @@ span {
   margin-top: 16px;
   border-radius: 10px;
   padding: 11px 13px;
-  font-size: 12px;
+  font-size: calc((12px) * var(--admin-font-scale-effective, 1));
   line-height: 1.55;
 }
 
@@ -12034,7 +12122,7 @@ span {
   gap: 7px;
   margin-top: 16px;
   color: #161616;
-  font-size: 11px;
+  font-size: calc((11px) * var(--admin-font-scale-effective, 1));
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -12052,7 +12140,7 @@ span {
 
 .professional-auth-refresh-boundary > span {
   color: #8a867f;
-  font-size: 11px;
+  font-size: calc((11px) * var(--admin-font-scale-effective, 1));
   line-height: 1.45;
 }
 
@@ -12067,7 +12155,7 @@ span {
   color: #4d4a45;
   cursor: pointer;
   font: inherit;
-  font-size: 11px;
+  font-size: calc((11px) * var(--admin-font-scale-effective, 1));
   font-weight: 700;
 }
 
@@ -12086,11 +12174,11 @@ span {
 
   .professional-auth-brand {
     margin-bottom: 40px;
-    font-size: 25px;
+    font-size: calc((25px) * var(--admin-font-scale-effective, 1));
   }
 
   .professional-auth-title {
-    font-size: 42px;
+    font-size: calc((42px) * var(--admin-font-scale-effective, 1));
   }
 
   .professional-auth-refresh-boundary {
@@ -12968,7 +13056,7 @@ svg {
   box-shadow:
     0 6px 18px
     rgba(0, 0, 0, 0.16);
-  font-size: 11px;
+  font-size: calc((11px) * var(--admin-font-scale-effective, 1));
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: 0;
@@ -13275,7 +13363,7 @@ svg {
 .crm-wedding-workflow__heading strong {
   min-width: 0;
   color: #111827;
-  font-size: 11px;
+  font-size: calc((11px) * var(--admin-font-scale-effective, 1));
   font-weight: 650;
   line-height: 1.35;
 }
@@ -13283,7 +13371,7 @@ svg {
 .crm-wedding-workflow__content > p {
   margin: 4px 0 0;
   color: #737373;
-  font-size: 9px;
+  font-size: calc((9px) * var(--admin-font-scale-effective, 1));
   line-height: 1.5;
 }
 
@@ -14895,7 +14983,7 @@ p {
 
 .crm-lead-form-builder-field__handle
 span {
-  font-size: 13px;
+  font-size: calc((13px) * var(--admin-font-scale-effective, 1));
   font-weight: 700;
   letter-spacing: -4px;
   transform: rotate(90deg);
@@ -14998,7 +15086,7 @@ span {
 .crm-lead-form-builder-field__chevron {
   flex: 0 0 auto;
   color: #737373;
-  font-size: 14px;
+  font-size: calc((14px) * var(--admin-font-scale-effective, 1));
   transition:
     transform .15s ease;
 }
@@ -15020,7 +15108,7 @@ span {
   min-width: 28px !important;
   height: 28px;
   min-height: 28px !important;
-  font-size: 12px;
+  font-size: calc((12px) * var(--admin-font-scale-effective, 1));
   font-weight: 650;
 }
 
@@ -16650,4 +16738,715 @@ small {
   > .admin-button {
     width: 100%;
   }
+}
+
+
+/* v1.10.12a Gate 2E.1 — CRM presentation consistency */
+
+/*
+ * Outer operational surfaces always use the configured
+ * module Section background. Repeating records inside those
+ * surfaces use Record background.
+ */
+.admin-shell:not(.admin-shell--platform) :is(
+  .admin-panel,
+  .admin-accordion
+) {
+  background-color:
+    var(
+      --admin-module-section-background,
+      #fff
+    ) !important;
+}
+
+.admin-shell:not(.admin-shell--platform) :is(
+  .crm-job-clients > article,
+  .crm-quote-job-summary,
+  .questionnaire-instance-card,
+  .crm-supplier-review > article,
+  .crm-linked-suppliers > *,
+  .crm-communication-list > article
+) {
+  background-color:
+    var(
+      --admin-module-record-background,
+      #fff
+    ) !important;
+}
+
+/*
+ * Accordion bodies remain part of the Section surface.
+ * The contained records provide the second visual level.
+ */
+.admin-shell:not(.admin-shell--platform)
+.admin-accordion__body {
+  background: transparent;
+}
+
+
+/* Quote page header: explicit Send / Resend icon control. */
+
+.crm-quote-header-send {
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111) 18%,
+      var(--admin-border)
+    );
+  background:
+    var(--admin-module-section-background, #fff);
+  color: #171717;
+}
+
+.crm-quote-header-send:hover:not(:disabled) {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111) 42%,
+      var(--admin-border)
+    );
+  background:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111) 7%,
+      var(--admin-module-section-background, #fff)
+    );
+}
+
+.crm-quote-header-send svg {
+  display: block;
+  width: 15px;
+  height: 15px;
+  color: currentColor;
+  stroke: currentColor;
+}
+
+
+/* Compact Lead-list mail engagement state. */
+
+.crm-lead-cell--mail {
+  display: flex;
+  min-width: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.crm-lead-cell--mail .admin-status {
+  min-height: 19px;
+  padding: 2px 6px;
+  font-size:
+    calc(
+      7.6px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  line-height: 1;
+}
+
+.crm-lead-cell--mail > small {
+  display: inline-block;
+  margin: 0;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      7.4px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  line-height: 1.1;
+}
+
+
+/*
+ * Quote email preview now follows the current WedPlanned
+ * Section / Record hierarchy instead of behaving like a
+ * legacy standalone utility window.
+ */
+
+.crm-quote-send-overlay {
+  padding: 20px;
+  background: rgba(15, 23, 42, .48);
+  backdrop-filter: blur(7px);
+}
+
+.crm-quote-send-dialog {
+  width:
+    min(
+      1080px,
+      calc(100vw - 32px)
+    );
+  max-height:
+    min(
+      900px,
+      calc(100vh - 32px)
+    );
+  overflow: hidden;
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111) 14%,
+      var(--admin-border)
+    );
+  border-radius: 17px;
+  background:
+    var(--admin-module-section-background, #fff);
+  box-shadow:
+    0 28px 80px rgba(15, 23, 42, .2);
+}
+
+.crm-quote-send-dialog__header {
+  min-height: 0;
+  align-items: flex-start;
+  border-bottom:
+    1px solid var(--admin-border);
+  background:
+    var(--admin-module-section-background, #fff);
+  padding: 17px 19px 15px;
+}
+
+.crm-quote-send-dialog__header
+> div
+> span {
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      7.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  font-weight: 700;
+  letter-spacing: .11em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.crm-quote-send-dialog__header h2 {
+  margin: 5px 0 0;
+  font-size:
+    calc(
+      18px
+      * var(
+        --admin-heading-scale-effective,
+        var(
+          --admin-font-scale-effective,
+          1
+        )
+      )
+    );
+  font-weight: 650;
+  letter-spacing: -.025em;
+  line-height: 1.15;
+}
+
+.crm-quote-send-dialog__header p {
+  max-width: 650px;
+  margin: 6px 0 0;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      9.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  line-height: 1.45;
+}
+
+.crm-quote-send-dialog__header
+> button {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  flex: 0 0 31px;
+  place-items: center;
+  border:
+    1px solid var(--admin-border);
+  border-radius: 9px;
+  background:
+    var(--admin-module-record-background, #fff);
+  color: #555;
+  font-size: calc((18px) * var(--admin-font-scale-effective, 1));
+  line-height: 1;
+}
+
+.crm-quote-send-compose {
+  min-width: 0;
+  overflow: auto;
+  background:
+    var(--admin-module-section-background, #fff);
+  padding: 17px 19px 20px;
+}
+
+.crm-quote-send-addresses {
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.crm-quote-send-addresses > div {
+  min-width: 0;
+  border:
+    1px solid var(--admin-border);
+  border-radius: 10px;
+  background:
+    var(--admin-module-record-background, #fff);
+  padding: 10px 11px;
+}
+
+.crm-quote-send-addresses span,
+.crm-quote-send-summary span,
+.crm-quote-send-provider > span {
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      7.2px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.crm-quote-send-addresses strong {
+  margin-top: 4px;
+  font-size:
+    calc(
+      9.6px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-quote-send-addresses small {
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-quote-send-message {
+  min-height: 190px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.crm-quote-send-booking-pack {
+  border:
+    1px solid var(--admin-border);
+  border-radius: 12px;
+  background:
+    var(--admin-module-record-background, #fff);
+  padding: 13px;
+}
+
+.crm-quote-send-booking-pack__header {
+  gap: 12px;
+}
+
+.crm-quote-send-booking-pack__header
+strong {
+  font-size:
+    calc(
+      10px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-quote-send-booking-pack__header p {
+  max-width: 650px;
+  font-size:
+    calc(
+      8.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  line-height: 1.45;
+}
+
+.crm-quote-send-sidebar {
+  min-width: 0;
+  overflow: auto;
+  border-left:
+    1px solid var(--admin-border);
+  background:
+    color-mix(
+      in srgb,
+      var(--admin-module-page-background, #f5f3ef) 58%,
+      var(--admin-module-section-background, #fff)
+    );
+  padding: 17px;
+}
+
+.crm-quote-send-provider,
+.crm-quote-send-summary {
+  border:
+    1px solid var(--admin-border);
+  border-radius: 11px;
+  background:
+    var(--admin-module-record-background, #fff);
+  padding: 11px;
+}
+
+.crm-quote-send-provider strong,
+.crm-quote-send-summary strong {
+  overflow-wrap: anywhere;
+  font-size:
+    calc(
+      9px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-quote-send-dialog__footer {
+  border-top:
+    1px solid var(--admin-border);
+  background:
+    var(--admin-module-section-background, #fff);
+  padding: 11px 18px;
+}
+
+@media (max-width: 900px) {
+  .crm-quote-send-overlay {
+    padding: 10px;
+  }
+
+  .crm-quote-send-dialog {
+    width:
+      calc(100vw - 20px);
+    max-height:
+      calc(100vh - 20px);
+  }
+
+  .crm-quote-send-sidebar {
+    border-top:
+      1px solid var(--admin-border);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .crm-lead-cell--mail {
+    white-space: normal;
+  }
+
+  .crm-quote-send-dialog__header {
+    padding: 14px;
+  }
+
+  .crm-quote-send-compose,
+  .crm-quote-send-sidebar {
+    padding: 14px;
+  }
+
+  .crm-quote-send-addresses {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-quote-send-message {
+    min-height: 160px;
+  }
+}
+
+
+/* v1.10.12a Gate 2E.2A — semantic Admin typography */
+
+/* Primary page heading */
+.admin-shell:not(.admin-shell--platform)
+:is(
+  .admin-page-header h1,
+  .admin-page-header__title
+) {
+  font-size:
+    var(
+      --admin-role-heading-size,
+      18px
+    ) !important;
+}
+
+/* Panel / operational subheadings */
+.admin-shell:not(.admin-shell--platform)
+:is(
+  .admin-panel__heading strong,
+  .admin-panel__title,
+  .admin-accordion__heading strong,
+  .admin-empty-state h3,
+  .crm-operation-record__title-row h3,
+  .questionnaire-template-card strong
+) {
+  font-size:
+    var(
+      --admin-role-subheading-size,
+      11px
+    ) !important;
+}
+
+/* Main readable interface copy */
+.admin-shell:not(.admin-shell--platform)
+:is(
+  .admin-input,
+  .admin-select,
+  .admin-textarea,
+  .admin-table,
+  .crm-job-note p,
+  .crm-communication-list p
+) {
+  font-size:
+    var(
+      --admin-role-main-size,
+      11px
+    ) !important;
+}
+
+/* Buttons use the same compact subheading/control role */
+.admin-shell:not(.admin-shell--platform)
+:is(
+  .admin-button,
+  .admin-action-primary,
+  .admin-action-secondary
+) {
+  font-size:
+    var(
+      --admin-role-subheading-size,
+      11px
+    ) !important;
+}
+
+/* Helper / metadata role */
+.admin-shell:not(.admin-shell--platform)
+:is(
+  .admin-status,
+  .admin-panel__description,
+  .admin-accordion__heading small,
+  .crm-job-note small,
+  .crm-communication-list small
+) {
+  font-size:
+    var(
+      --admin-role-helper-size,
+      8.5px
+    ) !important;
+}
+
+/* Navigation role */
+.admin-shell:not(.admin-shell--platform)
+:is(
+  .admin-module-link,
+  .admin-mobile-bottom-nav span,
+  .admin-mobile-more nav a
+) {
+  font-size:
+    var(
+      --admin-role-navigation-size,
+      9px
+    ) !important;
+}
+
+
+/* v1.10.12a Gate 2E visual — quote send dialog shell inheritance */
+
+/*
+ * The send preview is now portalled into .admin-shell,
+ * inheriting the active WedCRM module theme and semantic
+ * typography variables.
+ */
+
+.crm-quote-send-dialog {
+  color: var(--admin-text, #171717);
+  font-family:
+    "Montserrat",
+    "Avenir Next",
+    Avenir,
+    "Helvetica Neue",
+    Arial,
+    sans-serif !important;
+  font-size:
+    var(
+      --admin-role-main-size,
+      11px
+    );
+  letter-spacing: -0.005em;
+}
+
+.crm-quote-send-dialog
+:is(
+  button,
+  input,
+  select,
+  textarea
+) {
+  font-family: inherit !important;
+}
+
+.crm-quote-send-dialog__header h2 {
+  font-size:
+    var(
+      --admin-role-heading-size,
+      18px
+    ) !important;
+  font-weight: 650;
+}
+
+.crm-quote-send-dialog__header p {
+  font-size:
+    var(
+      --admin-role-main-size,
+      11px
+    ) !important;
+}
+
+.crm-quote-send-dialog
+:is(
+  .crm-quote-send-dialog__header
+    > div
+    > span,
+  .crm-quote-send-addresses span,
+  .crm-quote-send-summary span,
+  .crm-quote-send-provider > span,
+  .crm-quote-send-booking-pack__header
+    > div
+    > span,
+  .crm-quote-send-booking-pack__summary span
+) {
+  font-size:
+    var(
+      --admin-role-helper-size,
+      8.5px
+    ) !important;
+}
+
+.crm-quote-send-dialog
+:is(
+  .crm-quote-send-addresses strong,
+  .crm-quote-send-provider strong,
+  .crm-quote-send-summary strong,
+  .crm-quote-send-booking-pack__header strong,
+  .crm-quote-send-booking-pack__summary strong
+) {
+  font-size:
+    var(
+      --admin-role-main-size,
+      11px
+    ) !important;
+}
+
+.crm-quote-send-dialog
+:is(
+  .crm-quote-send-addresses small,
+  .crm-quote-send-booking-pack__header p,
+  .crm-quote-send-booking-pack__notice,
+  .crm-quote-send-booking-pack__invoice small
+) {
+  font-size:
+    var(
+      --admin-role-helper-size,
+      8.5px
+    ) !important;
+}
+
+.crm-quote-send-dialog
+.admin-select,
+.crm-quote-send-dialog
+.admin-input {
+  min-height: 36px;
+  appearance: none;
+  border:
+    1px solid var(--admin-border);
+  border-radius: 9px;
+  background-color:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  color: var(--admin-text, #171717);
+  padding-right: 32px;
+  font-size:
+    var(
+      --admin-role-main-size,
+      11px
+    ) !important;
+}
+
+.crm-quote-send-dialog
+.admin-select {
+  background-image:
+    linear-gradient(
+      45deg,
+      transparent 50%,
+      #737373 50%
+    ),
+    linear-gradient(
+      135deg,
+      #737373 50%,
+      transparent 50%
+    );
+  background-position:
+    calc(100% - 15px) 50%,
+    calc(100% - 10px) 50%;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+}
+
+.crm-quote-send-dialog
+.admin-textarea {
+  appearance: none;
+  border:
+    1px solid var(--admin-border);
+  border-radius: 9px;
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  color: var(--admin-text, #171717);
+  font-size:
+    var(
+      --admin-role-main-size,
+      11px
+    ) !important;
+  line-height: 1.55;
+}
+
+.crm-quote-send-dialog
+.crm-quote-send-message {
+  min-height: 190px;
+}
+
+.crm-quote-send-dialog__footer {
+  align-items: center;
+  gap: 8px;
 }

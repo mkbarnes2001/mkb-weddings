@@ -43,7 +43,6 @@ def main() -> None:
         "Preview · {pixelValue}px",
         'basePx={11}',
         'basePx={18}',
-        'basePx={10}',
         'basePx={9}',
         'basePx={8.5}',
         'preview="Body text"',
@@ -53,6 +52,26 @@ def main() -> None:
         'preview="Helper text"',
     ):
         assert token in page, token
+
+    # Gate 2E.2A replaces the former generic
+    # Buttons & controls 10px reference with the
+    # semantic Subheading / controls role at 11px.
+    subheading_start = page.index(
+        'label="Subheading / controls"'
+    )
+
+    subheading_end = page.find(
+        "<PlatformFontSizeControl",
+        subheading_start + 1,
+    )
+
+    assert subheading_end != -1
+
+    subheading_control = page[
+        subheading_start:subheading_end
+    ]
+
+    assert "basePx={11}" in subheading_control
 
     for field in (
         "adminFontScale",
@@ -94,7 +113,8 @@ def main() -> None:
     )
 
     assert (
-        "These values apply across every Admin module."
+        "Set consistent role-based font sizes "
+        "for every Admin module."
         in page
     )
 

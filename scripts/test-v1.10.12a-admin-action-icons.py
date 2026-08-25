@@ -139,7 +139,10 @@ with tempfile.NamedTemporaryFile(
     ).fetchone()
 
     assert version
-    assert str(version[0]) == "47"
+    # d1/schema.sql is cumulative. Migration 047 is
+    # asserted independently above; the current schema
+    # must finish at the repository schema version.
+    assert str(version[0]) == "49"
 
     columns = {
         row[1]: row
@@ -206,5 +209,5 @@ print(
 )
 
 print(
-    "  production migration applied: NO"
+    "  current cumulative schema version: 49"
 )

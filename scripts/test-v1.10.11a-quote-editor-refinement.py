@@ -77,7 +77,8 @@ assert "void save()" in header
 
 assert '"Resend quote"' in header
 assert '"Send quote"' in header
-assert 'className="crm-quote-send-icon"' in header
+assert 'className="crm-quote-header-send"' in header
+assert 'data-admin-action="send"' in header
 assert "void openSendPreview()" in header
 
 
@@ -85,6 +86,10 @@ assert "void openSendPreview()" in header
 # editable.
 assert "Create revision" in header
 assert "void revise()" in header
+assert 'icon={CopyPlus}' in header
+assert 'label="Create revision"' in header
+assert 'data-admin-action="duplicate"' in header
+assert 'className="crm-quote-header-revision"' in header
 
 
 # ------------------------------------------------------------

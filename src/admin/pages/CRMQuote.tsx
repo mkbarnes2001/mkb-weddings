@@ -1434,8 +1434,11 @@ export function CRMQuote() {
                 }
               />
             ) : (
-              <AdminButton
+              <AdminIconButton
                 icon={CopyPlus}
+                label="Create revision"
+                data-admin-action="duplicate"
+                className="crm-quote-header-revision"
                 disabled={
                   saving
                   || !canManage
@@ -1445,9 +1448,7 @@ export function CRMQuote() {
                 onClick={() =>
                   void revise()
                 }
-              >
-                Create revision
-              </AdminButton>
+              />
             )}
 
             <AdminIconButton
@@ -1457,7 +1458,8 @@ export function CRMQuote() {
                   ? "Resend quote"
                   : "Send quote"
               }
-              className="crm-quote-send-icon"
+              data-admin-action="send"
+              className="crm-quote-header-send"
               disabled={
                 saving
                 || !canManage
@@ -3582,7 +3584,9 @@ export function CRMQuote() {
           </section>
         </div>
             ),
-            document.body,
+            document.querySelector<HTMLElement>(
+              ".admin-shell",
+            ) || document.body,
           )
         : null}
 

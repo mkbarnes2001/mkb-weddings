@@ -170,7 +170,7 @@ assert (
 )
 
 assert (
-    "Overall Admin text"
+    "Main / body text"
     in page
 )
 

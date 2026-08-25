@@ -1230,14 +1230,14 @@ export function PlatformAdmin() {
           <section className="platform-module-control-group">
             <header>
               <strong>Global Admin typography</strong>
-              <span>Set reference font sizes in pixels with a live preview. These values apply across every Admin module.</span>
+              <span>Set consistent role-based font sizes for every Admin module. Heading, subheading, main text and helper text use the same reference sizes throughout the interface.</span>
             </header>
 
             <div className="platform-module-field-grid platform-module-field-grid--scales">
               <PlatformFontSizeControl
-                label="Overall Admin text"
+                label="Main / body text"
                 value={platformIdentity.adminFontScale}
-                help="Master scale applied across Admin body text, records, forms and supporting content."
+                help="Reference size for records, forms, tables and normal body copy."
                 onChange={(value) => {
                   setPlatformIdentity((current) => ({
                     ...current,
@@ -1252,9 +1252,9 @@ export function PlatformAdmin() {
                 />
 
               <PlatformFontSizeControl
-                label="Headings"
+                label="Heading / H1"
                 value={platformIdentity.adminHeadingFontScale}
-                help="Additional scale for page, panel and operational headings."
+                help="Reference size for primary page headings. Panel headings use the subheading role."
                 onChange={(value) => {
                   setPlatformIdentity((current) => ({
                     ...current,
@@ -1270,9 +1270,9 @@ export function PlatformAdmin() {
                 />
 
               <PlatformFontSizeControl
-                label="Buttons & controls"
+                label="Subheading / controls"
                 value={platformIdentity.adminButtonFontScale}
-                help="Additional scale for buttons and primary controls."
+                help="Reference size for panel subheadings, buttons and primary controls."
                 onChange={(value) => {
                   setPlatformIdentity((current) => ({
                     ...current,
@@ -1282,15 +1282,15 @@ export function PlatformAdmin() {
                   setError("");
                 }}
 
-                basePx={10}
+                basePx={11}
                 preview="Button text"
                 parentScale={(platformIdentity.adminFontScale || 100) / 100}
                 />
 
               <PlatformFontSizeControl
-                label="Navigation & menus"
+                label="Navigation"
                 value={platformIdentity.adminNavigationFontScale}
-                help="Additional scale for desktop and mobile navigation labels."
+                help="Reference size for desktop and mobile navigation labels."
                 onChange={(value) => {
                   setPlatformIdentity((current) => ({
                     ...current,
@@ -1306,9 +1306,9 @@ export function PlatformAdmin() {
                 />
 
               <PlatformFontSizeControl
-                label="Status / helper text"
+                label="Helper / metadata"
                 value={platformIdentity.adminMetaFontScale}
-                help="Additional scale for badges, metadata, helper copy and compact labels."
+                help="Reference size for status badges, metadata, field help and compact supporting copy."
                 onChange={(value) => {
                   setPlatformIdentity((current) => ({
                     ...current,
