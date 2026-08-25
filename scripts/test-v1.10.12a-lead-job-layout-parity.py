@@ -76,7 +76,6 @@ for label in (
 
 # Pre-booking Lead retains only lifecycle-appropriate differences.
 for token in (
-    'title="Wedding details"',
     'title="Close lead"',
     "createQuote",
     "markLost",
@@ -84,6 +83,17 @@ for token in (
     "After booking",
 ):
     assert token in lead, token
+
+
+# Later Gate 2B refinement moved Lead/Wedding details into the
+# shared contextual details panel. The Lead page should render
+# the shared component rather than own a literal Wedding-details
+# panel title.
+assert "<CRMWeddingDetailsPanel" in lead
+assert '"Lead details"' in shared
+assert '"Wedding details"' in shared
+assert "title={panelLabel}" in shared
+assert 'title="Wedding details"' not in lead
 
 
 # Old parallel Lead page architecture is gone.

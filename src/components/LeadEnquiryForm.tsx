@@ -729,19 +729,56 @@ export function LeadEnquiryForm({
           autoComplete="off"
           required={field.required}
           disabled={submitting}
-          onManualChange={(value) =>
+          onManualChange={(value) => {
             setAnswer(
               field.id,
               value,
-            )
-          }
-          onPlaceSelect={(place) =>
+            );
+
+            // Manual editing invalidates any previously selected
+            // Google identity. Never retain a stale Place ID behind
+            // free-text venue content.
+            setAnswer(
+              "__venuePlace",
+              null,
+            );
+          }}
+          onPlaceSelect={(place) => {
             setAnswer(
               field.id,
               place.name
               || place.formattedAddress,
-            )
-          }
+            );
+
+            // Keep the public CRM Venue answer as a plain string.
+            // The structured Google identity is submission metadata
+            // and is normalised server-side before persistence.
+            setAnswer(
+              "__venuePlace",
+              {
+                placeId:
+                  place.placeId,
+                name:
+                  place.name
+                  || place.formattedAddress,
+                formattedAddress:
+                  place.formattedAddress,
+                town:
+                  place.address?.city
+                  || "",
+                county:
+                  place.address?.county
+                  || "",
+                country:
+                  place.address?.country
+                  || "",
+                lat:
+                  place.address?.lat,
+                lng:
+                  place.address?.lng,
+              },
+            );
+          }}
         />
       );
     }

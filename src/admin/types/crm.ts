@@ -26,6 +26,17 @@ export type CrmContact = {
   updatedAt: string;
 };
 
+export type CrmVenuePlaceSnapshot = {
+  placeId: string;
+  name: string;
+  formattedAddress: string;
+  town: string;
+  county: string;
+  country: string;
+  lat?: number;
+  lng?: number;
+};
+
 export type CrmEnquiry = {
   id: string;
   reference: string;
@@ -43,6 +54,8 @@ export type CrmEnquiry = {
   venueText: string;
   venueId: string;
   venueSlug: string;
+  venuePlaceId: string;
+  venuePlace: CrmVenuePlaceSnapshot;
   serviceInterest: string;
   packageInterest: string;
   budgetMin: number | null;
@@ -92,6 +105,8 @@ export type CrmJob = {
   venueText: string;
   venueId: string;
   venueSlug: string;
+  venuePlaceId: string;
+  venuePlace: CrmVenuePlaceSnapshot;
   clientPortalStatus: string;
   weddingSlug: string;
   quoteId: string;

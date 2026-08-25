@@ -82,6 +82,7 @@ export type VenueDocument = {
   id: string;
   slug: string;
   name: string;
+  googlePlaceId: string;
   county: string;
   town: string;
   country: string;

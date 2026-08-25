@@ -134,7 +134,18 @@ export function WeddingWorkspace() {
   const [supplierRole, setSupplierRole] = useState("");
   const [showNewVenue, setShowNewVenue] = useState(false);
   const [showVenuePicker, setShowVenuePicker] = useState(false);
-  const [newVenue, setNewVenue] = useState({ name: "", town: "", county: "", country: "Northern Ireland", additionalLocationId: "", website: "", instagram: "" });
+  const [newVenue, setNewVenue] = useState({
+    name: "",
+    town: "",
+    county: "",
+    country: "Northern Ireland",
+    additionalLocationId: "",
+    website: "",
+    instagram: "",
+    googlePlaceId: "",
+    formattedAddress: "",
+    googleMapsUrl: "",
+  });
   const [showNewSupplier, setShowNewSupplier] = useState(false);
   const [newSupplier, setNewSupplier] = useState({ name: "", category: "", role: "", website: "", instagram: "", email: "" });
   const [previewIds, setPreviewIds] = useState<string[]>([]);
@@ -357,6 +368,15 @@ export function WeddingWorkspace() {
       town: venue.town || current.town,
       county: venue.county || current.county,
       country: venue.country || current.country,
+      googlePlaceId:
+        venue.id
+        || "",
+      formattedAddress:
+        venue.formattedAddress
+        || "",
+      googleMapsUrl:
+        venue.googleMapsUrl
+        || "",
     }));
     setVenueDirectoryQuery(venue.name);
     setMessage("Venue details loaded from the directory. Review them before creating your own master venue record.");
@@ -403,6 +423,8 @@ export function WeddingWorkspace() {
         schemaVersion: 1,
         slug: finalSlug,
         name,
+        googlePlaceId:
+          newVenue.googlePlaceId.trim(),
         town: newVenue.town.trim(),
         county: newVenue.county.trim(),
         country: newVenue.country.trim(),
@@ -414,10 +436,19 @@ export function WeddingWorkspace() {
           website: normaliseWebsite(newVenue.website),
           instagram: cleanInstagram(newVenue.instagram).replace(/^@/, ""),
           facebook: "",
-          googleMaps: "",
+          googleMaps:
+            newVenue.googleMapsUrl.trim(),
         },
         contact: { email: "", phone: "", coordinatorName: "", coordinatorEmail: "" },
-        practical: { address: "", parking: "", accommodation: "", ceremonyTypes: "", capacity: "", outdoorCeremony: false },
+        practical: {
+          address:
+            newVenue.formattedAddress.trim(),
+          parking: "",
+          accommodation: "",
+          ceremonyTypes: "",
+          capacity: "",
+          outdoorCeremony: false,
+        },
         notes: { general: "", portraitLocations: "", rainBackup: "", sunsetNotes: "", restrictions: "" },
         seo: { title: "", description: "" },
       });
@@ -436,7 +467,20 @@ export function WeddingWorkspace() {
       setShowNewVenue(false);
       setVenueDirectoryResults([]);
       setVenueDirectoryQuery("");
-      setNewVenue({ name: "", town: "", county: "", country: workspaceRecord?.settings.defaultCountry || "Northern Ireland", additionalLocationId: "", website: "", instagram: "" });
+      setNewVenue({
+        name: "",
+        town: "",
+        county: "",
+        country:
+          workspaceRecord?.settings.defaultCountry
+          || "Northern Ireland",
+        additionalLocationId: "",
+        website: "",
+        instagram: "",
+        googlePlaceId: "",
+        formattedAddress: "",
+        googleMapsUrl: "",
+      });
       setMessage(`${created.name} created and linked to this wedding.`);
       await reload();
     } catch (err) {

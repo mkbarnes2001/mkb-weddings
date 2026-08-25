@@ -191,6 +191,14 @@ export function cleanVenue(incoming: any, existing: any = null) {
     id: text(existingDoc.id || incoming?.id) || `venue_${crypto.randomUUID()}`,
     slug,
     name,
+    googlePlaceId:
+      text(
+        incoming?.googlePlaceId
+        ?? existingDoc.googlePlaceId,
+      ).slice(
+        0,
+        300,
+      ),
     town: text(incoming?.town),
     county: text(incoming?.county),
     country: text(incoming?.country || existingDoc.country),
@@ -251,6 +259,11 @@ function hydrateVenue(row: any) {
     id: text(doc.id || row.id),
     slug: text(row.slug || doc.slug),
     name: text(row.name || doc.name),
+    googlePlaceId:
+      text(
+        row.google_place_id
+        || doc.googlePlaceId,
+      ),
     town: text(row.town || doc.town),
     county: text(row.county || doc.county),
     country: text(row.country || doc.country),
@@ -393,15 +406,42 @@ export async function createAdminVenue(db: D1Db, incoming: any, workspaceId: str
   const exists = await db.prepare(`SELECT slug FROM venues WHERE slug = ? AND workspace_id = ?`).bind(venue.slug, workspaceId).first();
   if (exists) throw httpError("A venue with this slug already exists.", 409);
 
+  if (venue.googlePlaceId) {
+    const placeDuplicate =
+      await db.prepare(`
+        SELECT slug
+        FROM venues
+        WHERE workspace_id = ?
+          AND google_place_id = ?
+        LIMIT 1
+      `).bind(
+        workspaceId,
+        venue.googlePlaceId,
+      ).first();
+
+    if (placeDuplicate) {
+      throw httpError(
+        "This Google venue is already linked to an existing WedStudio venue.",
+        409,
+      );
+    }
+  }
+
   await db.prepare(`
     INSERT INTO venues (
       slug, id, name, town, county, country, status, hero_asset_id,
-      seo_title, seo_description, document_json, published_json, published_at, updated_at, workspace_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', NULL, ?, ?)
+      seo_title, seo_description, document_json, published_json,
+      published_at, updated_at, google_place_id, workspace_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', NULL, ?, ?, ?)
   `).bind(
     venue.slug, venue.id, venue.name, venue.town, venue.county, venue.country,
     venue.status, venue.gallery.heroAssetId || venue.heroImageId,
-    venue.seo.title, venue.seo.description, JSON.stringify(venue), venue.updatedAt, workspaceId,
+    venue.seo.title,
+    venue.seo.description,
+    JSON.stringify(venue),
+    venue.updatedAt,
+    venue.googlePlaceId,
+    workspaceId,
   ).run();
   await syncVenueImages(db, venue, workspaceId);
   return getAdminVenue(db, venue.slug, workspaceId);
@@ -412,6 +452,29 @@ export async function updateAdminVenue(db: D1Db, routeSlug: string, incoming: an
   if (!row) throw httpError("Venue not found.", 404);
   const existing = hydrateVenue(row);
   const venue = cleanVenue(incoming, existing);
+
+  if (venue.googlePlaceId) {
+    const placeDuplicate =
+      await db.prepare(`
+        SELECT slug
+        FROM venues
+        WHERE workspace_id = ?
+          AND google_place_id = ?
+          AND slug <> ?
+        LIMIT 1
+      `).bind(
+        workspaceId,
+        venue.googlePlaceId,
+        routeSlug,
+      ).first();
+
+    if (placeDuplicate) {
+      throw httpError(
+        "This Google venue is already linked to another WedStudio venue.",
+        409,
+      );
+    }
+  }
 
   if (routeSlug !== venue.slug) {
     if (row.status === "published" && text(row.published_json)) {
@@ -431,24 +494,31 @@ export async function updateAdminVenue(db: D1Db, routeSlug: string, incoming: an
     await db.prepare(`
       UPDATE venues SET
         id = ?, name = ?, town = ?, county = ?, country = ?, status = ?, hero_asset_id = ?,
-        seo_title = ?, seo_description = ?, document_json = ?, updated_at = ?
+        seo_title = ?, seo_description = ?, document_json = ?,
+        google_place_id = ?, updated_at = ?
       WHERE slug = ? AND workspace_id = ?
     `).bind(
       venue.id, venue.name, venue.town, venue.county, venue.country, venue.status,
       venue.gallery.heroAssetId || venue.heroImageId, venue.seo.title, venue.seo.description,
-      JSON.stringify(venue), venue.updatedAt, routeSlug, workspaceId,
+      JSON.stringify(venue), venue.googlePlaceId, venue.updatedAt, routeSlug, workspaceId,
     ).run();
   } else {
     await db.batch([
       db.prepare(`
         INSERT INTO venues (
           slug, id, name, town, county, country, status, hero_asset_id,
-          seo_title, seo_description, document_json, published_json, published_at, updated_at, workspace_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          seo_title, seo_description, document_json, published_json,
+          published_at, updated_at, google_place_id, workspace_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         venue.slug, venue.id, venue.name, venue.town, venue.county, venue.country, venue.status,
         venue.gallery.heroAssetId || venue.heroImageId, venue.seo.title, venue.seo.description,
-        JSON.stringify(venue), publishedJson, publishedAt, venue.updatedAt, workspaceId,
+        JSON.stringify(venue),
+        publishedJson,
+        publishedAt,
+        venue.updatedAt,
+        venue.googlePlaceId,
+        workspaceId,
       ),
       db.prepare(`DELETE FROM venues WHERE slug = ? AND workspace_id = ?`).bind(routeSlug, workspaceId),
       db.prepare(`UPDATE weddings SET venue_slug = ? WHERE venue_slug = ? AND workspace_id = ?`).bind(venue.slug, routeSlug, workspaceId),

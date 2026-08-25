@@ -87,7 +87,6 @@ assert (
 
 for token in [
     'title="Wedding workflow"',
-    'title="Wedding details"',
     'title="Clients"',
     'title="Communication"',
     'title="Quote and package"',
@@ -104,10 +103,10 @@ assert (
     in page
 )
 
-assert (
-    "Original enquiry notes and the latest operational changes."
-    in page
-)
+# Later compact-workspace refinement removed this descriptive
+# helper sentence. The durable historical contract is the
+# Notes and activity panel itself, asserted in the panel-title
+# list immediately above.
 
 
 for label in [
@@ -182,6 +181,24 @@ for selector in [
     ".crm-lead-document-list",
 ]:
     assert selector in css, selector
+
+
+
+# v1.10.12a later refinement:
+# Lead and booked-Wedding contexts now share one details panel.
+# The literal page-level title checked by the original v1.10.10a
+# regression was superseded by this contextual shared contract.
+shared_details = (
+    ROOT
+    / "src/admin/components/crm/CRMWeddingWorkspaceShared.tsx"
+).read_text(
+    encoding="utf-8",
+)
+
+assert "const panelLabel" in shared_details
+assert '"Lead details"' in shared_details
+assert '"Wedding details"' in shared_details
+assert "title={panelLabel}" in shared_details
 
 
 print(

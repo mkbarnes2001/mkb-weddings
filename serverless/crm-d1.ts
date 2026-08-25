@@ -418,6 +418,113 @@ function normalizeLeadAddress(value: unknown) {
   return address;
 }
 
+function normalizeLeadVenuePlace(
+  value: unknown,
+) {
+  const source =
+    value
+    && typeof value === "object"
+    && !Array.isArray(value)
+      ? value as any
+      : {};
+
+  const placeId =
+    text(
+      source.placeId,
+    ).slice(
+      0,
+      300,
+    );
+
+  if (!placeId) {
+    return {};
+  }
+
+  const snapshot: any = {
+    placeId,
+  };
+
+  for (const key of [
+    "name",
+    "formattedAddress",
+    "town",
+    "county",
+    "country",
+  ]) {
+    const valueText =
+      text(
+        source[key],
+      ).slice(
+        0,
+        500,
+      );
+
+    if (valueText) {
+      snapshot[key] =
+        valueText;
+    }
+  }
+
+  const lat =
+    Number(
+      source.lat,
+    );
+
+  const lng =
+    Number(
+      source.lng,
+    );
+
+  if (
+    Number.isFinite(lat)
+    && lat >= -90
+    && lat <= 90
+  ) {
+    snapshot.lat = lat;
+  }
+
+  if (
+    Number.isFinite(lng)
+    && lng >= -180
+    && lng <= 180
+  ) {
+    snapshot.lng = lng;
+  }
+
+  return snapshot;
+}
+
+async function exactVenueForGooglePlace(
+  db: D1Db,
+  workspaceId: string,
+  placeId: string,
+) {
+  const id =
+    text(
+      placeId,
+    );
+
+  if (!id) {
+    return null;
+  }
+
+  return db.prepare(`
+    SELECT
+      id,
+      slug,
+      name,
+      google_place_id
+    FROM venues
+    WHERE workspace_id = ?
+      AND google_place_id = ?
+    LIMIT 1
+  `).bind(
+    workspaceId,
+    id,
+  ).first();
+}
+
+
 function hasLeadAddress(value: unknown) {
   return Object.keys(
     normalizeLeadAddress(value),
@@ -722,6 +829,17 @@ function hydrateEnquiry(row: any) {
     venueText: text(row.venue_text),
     venueId: text(row.venue_id),
     venueSlug: text(row.venue_slug),
+    venuePlaceId:
+      text(
+        row.venue_place_id,
+      ),
+    venuePlace:
+      normalizeLeadVenuePlace(
+        safeJson(
+          row.venue_place_json,
+          {},
+        ),
+      ),
     serviceInterest: text(row.service_interest),
     packageInterest: text(row.package_interest),
     budgetMin: row.budget_min == null ? null : Number(row.budget_min),
@@ -860,6 +978,17 @@ function hydrateJob(row: any) {
     venueText: text(row.venue_text),
     venueId: text(row.venue_id),
     venueSlug: text(row.venue_slug),
+    venuePlaceId:
+      text(
+        row.venue_place_id,
+      ),
+    venuePlace:
+      normalizeLeadVenuePlace(
+        safeJson(
+          row.venue_place_json,
+          {},
+        ),
+      ),
     clientPortalStatus: text(row.client_portal_status),
     weddingSlug: text(row.wedding_slug),
     quoteId: text(row.quote_id),
@@ -1657,18 +1786,63 @@ export async function acceptEnquiry(db: D1Db, actor: CrmActor, enquiryId: string
   const partner = contacts.find((item: any) => item.role === "partner");
   if (!primary) throw httpError("A primary client is required before accepting this booking.", 409);
 
+  const venueMatch =
+    text(
+      enquiryRow.venue_slug,
+    )
+      ? await db.prepare(`
+          SELECT
+            slug,
+            id,
+            name,
+            google_place_id
+          FROM venues
+          WHERE workspace_id = ?
+            AND slug = ?
+          LIMIT 1
+        `).bind(
+          actor.workspaceId,
+          text(
+            enquiryRow.venue_slug,
+          ),
+        ).first()
+      : text(
+          enquiryRow.venue_place_id,
+        )
+        ? await exactVenueForGooglePlace(
+            db,
+            actor.workspaceId,
+            text(
+              enquiryRow
+                .venue_place_id,
+            ),
+          )
+        : null;
+
+  const resolvedVenueSlug =
+    text(
+      venueMatch?.slug
+      || enquiryRow.venue_slug,
+    );
+
+  const resolvedVenueId =
+    text(
+      venueMatch?.id
+      || enquiryRow.venue_id,
+    );
+
   let linkedWeddingSlug = text(input?.weddingSlug);
   let weddingInsert: any = null;
   if (linkedWeddingSlug) {
     const linked = await db.prepare(`SELECT slug FROM weddings WHERE workspace_id = ? AND slug = ? LIMIT 1`).bind(actor.workspaceId, linkedWeddingSlug).first();
     if (!linked) throw httpError("The selected Wedding record does not belong to this business.", 404);
   } else {
-    const venueMatch = text(enquiryRow.venue_slug)
-      ? await db.prepare(`SELECT slug, id, name FROM venues WHERE workspace_id = ? AND slug = ? LIMIT 1`).bind(actor.workspaceId, enquiryRow.venue_slug).first()
-      : text(enquiryRow.venue_text)
-        ? await db.prepare(`SELECT slug, id, name FROM venues WHERE workspace_id = ? AND lower(name) = lower(?) LIMIT 1`).bind(actor.workspaceId, enquiryRow.venue_text).first()
-        : null;
-    const venueName = text(venueMatch?.name || enquiryRow.venue_text || "Venue TBC");
+    const venueName =
+      text(
+        venueMatch?.name
+        || enquiryRow.venue_text
+        || "Venue TBC",
+      );
     const firstNames = [text(primary.firstName || primary.displayName).split(" ")[0], partner ? text(partner.firstName || partner.displayName).split(" ")[0] : ""].filter(Boolean);
     const couple = firstNames.join(" & ") || text(primary.displayName);
     linkedWeddingSlug = await uniqueWeddingSlug(db, `${venueName}-${firstNames.join("-and-") || couple}`);
@@ -1679,8 +1853,10 @@ export async function acceptEnquiry(db: D1Db, actor: CrmActor, enquiryId: string
       title,
       couple,
       venue: venueName,
-      venueSlug: text(venueMatch?.slug || enquiryRow.venue_slug || slugify(venueName)),
-      venueId: text(venueMatch?.id || enquiryRow.venue_id),
+      venueSlug:
+        resolvedVenueSlug,
+      venueId:
+        resolvedVenueId,
       weddingDate: text(enquiryRow.event_date),
       excerpt: "",
       intro: "",
@@ -1715,25 +1891,66 @@ export async function acceptEnquiry(db: D1Db, actor: CrmActor, enquiryId: string
       INSERT INTO crm_jobs (
         id, workspace_id, reference, enquiry_id, job_type, status, title,
         booking_date, event_date, service_name, package_name, value_amount, currency,
-        assigned_user_id, venue_text, venue_id, venue_slug, wedding_slug,
+        assigned_user_id,
+        venue_text, venue_id, venue_slug,
+        venue_place_id, venue_place_json,
+        wedding_slug,
         quote_id, quote_version_id, quote_reference, quote_version_number, accepted_quote_at,
         booking_subtotal, booking_discount, booking_tax, package_snapshot_json,
         addons_snapshot_json, quote_snapshot_json, lead_source, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, 'booked', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES (
+        ?, ?, ?, ?, ?, 'booked',
+        ?, ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+      )
     `).bind(
       jobId, actor.workspaceId, jobReference, enquiryId, text(enquiryRow.event_type || "wedding"), title,
       new Date().toISOString().slice(0, 10), text(enquiryRow.event_date), text(input?.serviceName || enquiryRow.service_interest), text(input?.packageName || enquiryRow.package_interest),
       integer(input?.valueAmount ?? enquiryRow.budget_max), text(enquiryRow.currency || "GBP"), text(enquiryRow.assigned_user_id) || text(actor.userId) || null,
-      text(enquiryRow.venue_text), text(enquiryRow.venue_id), text(enquiryRow.venue_slug), linkedWeddingSlug,
+      text(
+        enquiryRow.venue_text,
+      ),
+      resolvedVenueId,
+      resolvedVenueSlug,
+      text(
+        enquiryRow.venue_place_id,
+      ),
+      JSON.stringify(
+        normalizeLeadVenuePlace(
+          safeJson(
+            enquiryRow.venue_place_json,
+            {},
+          ),
+        ),
+      ),
+      linkedWeddingSlug,
       text(input?.quoteId) || null, text(input?.quoteVersionId) || null, text(input?.quoteReference), input?.quoteVersionNumber == null ? null : integer(input?.quoteVersionNumber),
       text(input?.acceptedQuoteAt) || null, integer(input?.bookingSubtotal), integer(input?.bookingDiscount), integer(input?.bookingTax),
       JSON.stringify(input?.packageSnapshot || {}), JSON.stringify(input?.addonsSnapshot || []), JSON.stringify(input?.quoteSnapshot || {}), text(enquiryRow.lead_source),
     ),
     db.prepare(`
-      UPDATE crm_enquiries SET stage_id = ?, status = 'won', won_at = CURRENT_TIMESTAMP,
-        accepted_job_id = ?, converted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ? AND workspace_id = ? AND accepted_job_id IS NULL
-    `).bind(acceptedStage.id, jobId, enquiryId, actor.workspaceId),
+      UPDATE crm_enquiries SET
+        stage_id = ?,
+        status = 'won',
+        won_at = CURRENT_TIMESTAMP,
+        accepted_job_id = ?,
+        converted_at = CURRENT_TIMESTAMP,
+        venue_id = ?,
+        venue_slug = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+        AND workspace_id = ?
+        AND accepted_job_id IS NULL
+    `).bind(
+      acceptedStage.id,
+      jobId,
+      resolvedVenueId,
+      resolvedVenueSlug,
+      enquiryId,
+      actor.workspaceId,
+    ),
   );
   for (const contact of contacts) {
     statements.push(db.prepare(`INSERT INTO crm_job_contacts (job_id, workspace_id, contact_id, role) VALUES (?, ?, ?, ?)`).bind(jobId, actor.workspaceId, contact.id, contact.role));
@@ -2061,6 +2278,41 @@ export async function submitPublicEnquiry(db: D1Db, workspaceId: string, request
       "venueText",
     ),
   );
+
+  const venuePlace =
+    venueText
+      ? normalizeLeadVenuePlace(
+          input?.venuePlace
+          ?? input?.answers
+            ?.__venuePlace,
+        )
+      : {};
+
+  const venuePlaceId =
+    text(
+      (venuePlace as any)
+        .placeId,
+    );
+
+  const canonicalVenue =
+    venuePlaceId
+      ? await exactVenueForGooglePlace(
+          db,
+          workspaceId,
+          venuePlaceId,
+        )
+      : null;
+
+  const venueId =
+    text(
+      canonicalVenue?.id,
+    );
+
+  const venueSlug =
+    text(
+      canonicalVenue?.slug,
+    );
+
   const leadSource = text(
     leadSystemValue(
       input,
@@ -2115,11 +2367,19 @@ export async function submitPublicEnquiry(db: D1Db, workspaceId: string, request
     db.prepare(`
       INSERT INTO crm_enquiries (
         id, workspace_id, reference, stage_id, status, source, campaign, event_type,
-        event_date, date_flexibility, venue_text, service_interest, package_interest,
+        event_date, date_flexibility, venue_text,
+        venue_id, venue_slug, venue_place_id, venue_place_json,
+        service_interest, package_interest,
         budget_min, budget_max, currency, notes, consent_json, request_fingerprint,
         lead_source, lead_form_schema_json, lead_form_answers_json,
         created_at, updated_at
-      ) VALUES (?, ?, ?, ?, 'open', 'website', ?, 'wedding', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES (
+        ?, ?, ?, ?, 'open', 'website', ?, 'wedding',
+        ?, ?, ?,
+        ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+      )
     `).bind(
       enquiryId,
       workspaceId,
@@ -2129,6 +2389,12 @@ export async function submitPublicEnquiry(db: D1Db, workspaceId: string, request
       eventDate,
       dateFlexibility,
       venueText,
+      venueId,
+      venueSlug,
+      venuePlaceId,
+      JSON.stringify(
+        venuePlace,
+      ),
       text(input?.serviceInterest || settings.defaultService || "Wedding photography"),
       packageInterest,
       budgetMin,
