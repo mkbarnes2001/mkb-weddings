@@ -118,6 +118,42 @@ for token in (
     assert token in css, token
 
 
+# Jobs overview production presentation hotfix.
+jobs_marker = (
+    "/* v1.10.12a Gate 2E production hotfix — "
+    "Jobs overview presentation */"
+)
+
+assert jobs_marker in css
+
+jobs_css = css[
+    css.index(jobs_marker):
+]
+
+for token in (
+    ".admin-button.admin-header-action--icon",
+    "font-size: 0 !important",
+    ".crm-operation-record--job",
+    '"Montserrat"',
+    "font-family: inherit !important",
+):
+    assert token in jobs_css, token
+
+for token in (
+    'jobs: "Jobs overview"',
+    'to="/admin/crm/catalogue"',
+    'to="/admin/crm/quotes"',
+    "Catalogue",
+    "Quotes",
+    "New enquiry",
+    'className="crm-operation-record crm-operation-record--job"',
+    "<dt>Wedding day</dt>",
+    "<dt>Venue</dt>",
+    "<dt>Next task</dt>",
+):
+    assert token in crm, token
+
+
 # Gate 2E.1 is presentation-only.
 assert not list(
     (ROOT / "d1/migrations").glob("050*")
@@ -139,6 +175,9 @@ print(
 )
 print(
     "  compact mail engagement state: verified"
+)
+print(
+    "  Jobs header actions / Admin font: verified"
 )
 print(
     "  behaviour / schema unchanged: verified"
