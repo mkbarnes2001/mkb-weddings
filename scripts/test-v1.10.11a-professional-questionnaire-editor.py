@@ -1,32 +1,49 @@
 #!/usr/bin/env python3
-"""Focused regression for v1.10.11a WedCRM living questionnaire editor."""
+"""Focused regression for the v1.10.11a shared questionnaire editor.
+
+Current ownership:
+- CRMClientPortalPreview owns professional response editing.
+- CRMJob exposes a read-only questionnaire summary and navigation.
+- Both use the same canonical questionnaire instance / response tables.
+"""
 
 from pathlib import Path
 import sqlite3
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def read(path: str) -> str:
-    return (ROOT / path).read_text(
+    return (
+        ROOT / path
+    ).read_text(
         encoding="utf-8"
     )
 
 
-page = read(
+preview = read(
+    "src/admin/pages/CRMClientPortalPreview.tsx"
+)
+
+job = read(
     "src/admin/pages/CRMJob.tsx"
 )
+
 css = read(
     "src/admin/admin-theme.css"
 )
+
 api = read(
     "src/admin/services/AdminApiService.ts"
 )
+
 server = read(
     "serverless/client-portal-d1.ts"
 )
 
-# Full current schema is schema 47.
+
+# Full current schema.
 db = sqlite3.connect(":memory:")
 
 db.executescript(
@@ -39,9 +56,13 @@ version = db.execute(
     "WHERE key='schema_version'"
 ).fetchone()[0]
 
-assert str(version) == "47"
+assert str(version) == "49"
 
-# One shared response instance is edited, not a professional copy.
+
+# -------------------------------------------------------------
+# Professional response editing is owned by Client Portal Preview.
+# -------------------------------------------------------------
+
 for token in (
     "questionnaireEditorId",
     "questionnaireDraft",
@@ -49,27 +70,90 @@ for token in (
     "saveQuestionnaireAnswers(",
     "AdminApiService",
     ".saveQuestionnaireInstance(",
+    "ProfessionalQuestionnaireField",
 ):
-    assert token in page, token
+    assert token in preview, token
 
+
+# No parallel professional questionnaire copy is introduced.
 assert (
     "professionalQuestionnaire"
-    not in page
+    not in preview
 )
 
 assert (
     "questionnaireCopy"
-    not in page
+    not in preview
 )
 
-# Support-mode sessions are read-only both in UI and server.
-compact = "".join(
-    page.split()
+
+# -------------------------------------------------------------
+# Job workspace intentionally exposes a read-only summary.
+# -------------------------------------------------------------
+
+for token in (
+    "crm-job-questionnaire-readonly",
+    "Open Questionnaires",
+    "questionnaire-response-row",
+    "Last updated",
+    "WedCRM user",
+):
+    assert token in job, token
+
+
+# Editing controls belong to the dedicated preview/editor rather
+# than the Job questionnaire summary.
+job_panel_start = job.index(
+    'className="crm-job-questionnaire-readonly"'
+)
+
+job_panel_end = job.index(
+    'title="Supplier team"',
+    job_panel_start,
+)
+
+job_panel = job[
+    job_panel_start:
+    job_panel_end
+]
+
+for retired_from_job in (
+    "Edit answers",
+    "Save changes",
+    "Submit updates",
+):
+    assert (
+        retired_from_job
+        not in job_panel
+    ), retired_from_job
+
+
+# -------------------------------------------------------------
+# Support mode is read-only in both UI and server boundaries.
+# -------------------------------------------------------------
+
+compact_preview = "".join(
+    preview.split()
 )
 
 assert (
-    'canEditQuestionnaires=canManage&&auth.accessMode!=="support"'
-    in compact
+    'auth.permissions.includes("crm:manage",)'
+    in compact_preview
+)
+
+assert (
+    '&&auth.accessMode!=="support"'
+    in compact_preview
+)
+
+assert (
+    "Questionnaire editing is read-only for this session."
+    in preview
+)
+
+assert (
+    "Support-mode access cannot change client questionnaire responses."
+    in preview
 )
 
 assert (
@@ -82,28 +166,66 @@ assert (
     in server
 )
 
-# Living questionnaire UX.
+
+# -------------------------------------------------------------
+# Current professional living-questionnaire UX.
+# -------------------------------------------------------------
+
 for token in (
     "Edit answers",
+    "Close editor",
     "Save changes",
-    "Mark as complete",
-    "planning target",
-    "same questionnaire answers visible to the client",
-    "remains marked complete",
+    "Submit",
+    "Submit updates",
+    "Save work without completing the questionnaire",
 ):
-    assert token in page, token
+    assert token in preview, token
 
-# Attribution is surfaced in WedCRM.
+
+# Completion remains editable.
+assert (
+    'questionnaire.status'
+    in preview
+)
+
+assert (
+    '=== "completed"'
+    in preview
+)
+
+assert (
+    "Submit updates"
+    in preview
+)
+
+
+# -------------------------------------------------------------
+# Last-editor attribution is visible in both relevant surfaces.
+# -------------------------------------------------------------
+
 for token in (
     "lastSavedAt",
     "lastSavedByLabel",
     "lastSavedByType",
     "Last updated",
-    "WedCRM",
+    "WedCRM user",
 ):
-    assert token in page, token
+    assert token in preview, token
 
-# Every standard answer type is editable.
+for token in (
+    "lastSavedAt",
+    "lastSavedByLabel",
+    "lastSavedByType",
+    "Last updated",
+    "WedCRM user",
+):
+    assert token in job, token
+
+
+# -------------------------------------------------------------
+# Shared field renderer still owns all answer types.
+# -------------------------------------------------------------
+
 for token in (
     'field.type === "short_text"',
     'field.type === "long_text"',
@@ -111,21 +233,23 @@ for token in (
     'field.type === "radio"',
     'field.type === "checkbox"',
 ):
-    assert token in page, token
+    assert token in job, token
 
-# File responses stay attached to the same questionnaire and are not
-# replaced by an unsupported professional-only upload model.
+
+# File responses remain part of the same questionnaire / Files model.
 assert (
     'field.type === "file"'
-    in page
+    in job
 )
 
 assert (
-    "Questionnaire attachments remain managed through the shared Files area and Client Portal."
-    in page
+    "Questionnaire attachments remain managed through "
+    "the shared Files area and Client Portal."
+    in job
 )
 
-# Supplier values retain the Client Portal structured answer shape.
+
+# Structured Supplier answers retain the Client Portal shape.
 for token in (
     "type ProfessionalSupplierAnswer",
     '"existing"',
@@ -137,14 +261,17 @@ for token in (
     "phone:",
     "location:",
     "county:",
-    "workspace.supplierDirectory",
     "field.supplierCategory",
     "field.allowUnlisted",
     "field.multiple",
 ):
-    assert token in page, token
+    assert token in job, token
 
-# Professional save transport remains the single shared endpoint.
+
+# -------------------------------------------------------------
+# Professional transport remains one shared response endpoint.
+# -------------------------------------------------------------
+
 assert (
     "static async saveQuestionnaireInstance("
     in api
@@ -155,7 +282,8 @@ assert (
     in api
 )
 
-# Server persists professional changes into the same canonical tables.
+
+# Server persists professional changes into canonical tables.
 professional_start = server.index(
     "export async function saveQuestionnaireInstanceAdmin("
 )
@@ -176,21 +304,44 @@ for token in (
     "'professional'",
     "updated_by_user_id",
     "last_saved_by_user_id",
+    "last_saved_by_label",
 ):
     assert token in professional, token
 
-# WedPlanned-native responsive styling exists.
+
+# Completion remains a milestone rather than being reset by edits.
+for token in (
+    "ELSE status",
+    "completed_at",
+):
+    assert token in professional, token
+
+
+# Shared responsive editor styling remains available to the
+# dedicated professional editing surface.
 for token in (
     ".crm-questionnaire-editor",
     ".crm-questionnaire-editor__field",
-    ".crm-questionnaire-editor__suppliers",
     ".crm-questionnaire-editor__footer",
+    ".crm-client-portal-preview__questionnaire-editor",
     "@media (max-width: 680px)",
 ):
     assert token in css, token
 
+
+assert not list(
+    (ROOT / "d1/migrations").glob("050*")
+)
+
+
 print(
     "PASS v1.10.11a professional shared questionnaire editor"
+)
+print(
+    "  Client Portal Preview editing ownership: verified"
+)
+print(
+    "  Job read-only questionnaire summary: verified"
 )
 print(
     "  same questionnaire instance: verified"
@@ -200,9 +351,6 @@ print(
 )
 print(
     "  structured supplier answers preserved: verified"
-)
-print(
-    "  standard answer field editing: verified"
 )
 print(
     "  completion remains a milestone: verified"
@@ -215,4 +363,7 @@ print(
 )
 print(
     "  responsive WedPlanned UI: verified"
+)
+print(
+    "  schema 49: verified"
 )

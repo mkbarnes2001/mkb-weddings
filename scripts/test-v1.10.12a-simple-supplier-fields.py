@@ -125,11 +125,14 @@ assert (
 )
 
 
-# Builder creates multiple simple supplier questions.
+# Builder creates multiple simple supplier questions and now
+# configures each Supplier field from the canonical platform taxonomy.
 for marker in [
     'supplier: "Supplier"',
-    "One supplier per question",
-    "Set the question label to the role",
+    'label="Supplier category"',
+    'label="Wedding role"',
+    "supplierRolesForCategory",
+    "Supplier categories and Wedding roles come from the platform supplier taxonomy.",
     "Start typing supplier name…",
     "Supplier Master matches automatically",
 ]:
@@ -141,6 +144,8 @@ for retired in [
     "supplierAlreadyAdded",
     "One Supplier team list",
     "Category + Supplier rows",
+    "One supplier per question",
+    "Set the question label to the role",
 ]:
     assert retired not in builder, retired
 

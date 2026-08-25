@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Focused v1.10.11a regression for compact supplier questionnaire rows."""
+"""v1.10.11a supplier questionnaire compatibility regression.
+
+The v1.10.12a simple Supplier field supersedes the old Category +
+Supplier row for newly-created fields. The old multi-row renderer is
+retained intentionally for versioned legacy questionnaire snapshots.
+"""
 
 from pathlib import Path
 
@@ -36,7 +41,8 @@ css = read(
 )
 
 
-# Platform-controlled category list is read without a schema change.
+# Platform-controlled supplier categories continue to be exposed
+# without a schema change.
 for token in [
     "async function supplierCategoryOptions(",
     "FROM platform_categories",
@@ -46,7 +52,6 @@ for token in [
     assert token in server, token
 
 
-# Job workspace exposes the category list to professional editing.
 assert (
     "supplierCategories: string[];"
     in types
@@ -57,14 +62,10 @@ assert (
     in server
 )
 
-assert (
-    "workspace.supplierCategories"
-    in job
-)
 
-
-# Authenticated public questionnaire receives the same category list
-# and the full Supplier Master details required for answer autofill.
+# Authenticated client questionnaire still receives Supplier Master
+# details and category context required for both current and legacy
+# versioned questionnaire snapshots.
 for token in [
     "supplierCategories:",
     "supplier.website",
@@ -83,26 +84,98 @@ for token in [
     "email: string;",
     "phone: string;",
     "supplierCategories",
-    "categories={supplierCategories}",
 ]:
     assert token in client, token
 
 
-# Client uses one compact Category + Supplier row.
+# -------------------------------------------------------------
+# Current client Supplier field: one compact supplier-name input.
+# Category is defined by the questionnaire field configuration,
+# not selected again by the client.
+# -------------------------------------------------------------
+
+simple_client_start = client.index(
+    "function SimpleSupplierQuestion({"
+)
+
+simple_client_end = client.index(
+    "function SupplierQuestion({",
+    simple_client_start,
+)
+
+simple_client = client[
+    simple_client_start:
+    simple_client_end
+]
+
+for token in [
+    "targetCategory",
+    "field.supplierCategory",
+    "field.label",
+    "field.supplierRole",
+    "Start typing supplier name…",
+    "<datalist",
+    'mode:\n          "existing"',
+    'mode:\n          "unlisted"',
+    "supplier.website",
+    "supplier.instagram",
+    "supplier.email",
+    "supplier.phone",
+    "supplier.location",
+    "supplier.county",
+    "Not listed — this supplier will be reviewed.",
+]:
+    assert token in simple_client, token
+
+
+# -------------------------------------------------------------
+# Legacy client Category + Supplier rows remain for existing
+# versioned questionnaires whose Supplier field has multiple=true.
+# -------------------------------------------------------------
+
+legacy_client_start = client.index(
+    "function SupplierQuestion({"
+)
+
+legacy_client_end = client.index(
+    "type PortalView",
+    legacy_client_start,
+)
+
+legacy_client = client[
+    legacy_client_start:
+    legacy_client_end
+]
+
 for token in [
     "supplier-questionnaire-table",
     "supplier-questionnaire-row",
     "supplier-questionnaire-category",
     "supplier-questionnaire-supplier",
-    "Start typing a supplier name",
     "<datalist",
-    "Search Supplier Master, or type a name if it is not listed.",
     "Supplier not listed? Type the business name",
+    "supplier.website",
+    "supplier.instagram",
+    "supplier.email",
+    "supplier.phone",
+    "supplier.location",
+    "supplier.county",
+]:
+    assert token in legacy_client, token
+
+
+# Client renderer explicitly routes new fields to simple input and
+# old multiple snapshots to the legacy row renderer.
+for token in [
+    "field.multiple ? (",
+    "<SupplierQuestion",
+    "<SimpleSupplierQuestion",
+    "categories={supplierCategories}",
 ]:
     assert token in client, token
 
 
-# Old client multi-control workflow is gone.
+# Retired pre-compact controls stay absent.
 for token in [
     "Choose existing",
     "Add unlisted",
@@ -112,24 +185,67 @@ for token in [
     assert token not in client, token
 
 
-# Selecting an exact Supplier Master match hydrates its stored details.
-client_supplier_start = client.index(
-    "function SupplierQuestion({"
+# -------------------------------------------------------------
+# Current professional editor mirrors the simple client field.
+# -------------------------------------------------------------
+
+simple_pro_start = job.index(
+    "function SimpleProfessionalSupplierQuestion({"
 )
 
-client_supplier_end = client.index(
-    "type PortalView",
-    client_supplier_start,
+simple_pro_end = job.index(
+    "function ProfessionalSupplierRows({",
+    simple_pro_start,
 )
 
-client_supplier = client[
-    client_supplier_start:
-    client_supplier_end
+simple_pro = job[
+    simple_pro_start:
+    simple_pro_end
 ]
 
 for token in [
-    'mode:\n          "existing"',
-    "supplierId:",
+    "targetCategory",
+    "field.supplierCategory",
+    "field.label",
+    "field.supplierRole",
+    "Start typing supplier name…",
+    "<datalist",
+    "supplier.website",
+    "supplier.instagram",
+    "supplier.email",
+    "supplier.phone",
+    "supplier.location",
+    "supplier.county",
+    '"Needs review"',
+]:
+    assert token in simple_pro, token
+
+
+# -------------------------------------------------------------
+# Legacy professional multi-row renderer remains available.
+# -------------------------------------------------------------
+
+legacy_pro_start = job.index(
+    "function ProfessionalSupplierRows({"
+)
+
+legacy_pro_end = job.index(
+    "export function ProfessionalQuestionnaireField",
+    legacy_pro_start,
+)
+
+legacy_pro = job[
+    legacy_pro_start:
+    legacy_pro_end
+]
+
+for token in [
+    "supplier-questionnaire-table--admin",
+    "supplier-questionnaire-row",
+    "supplier-questionnaire-category",
+    "professional_supplier_",
+    "<datalist",
+    "Not in Supplier Master — will enter the review queue.",
     "supplier.website",
     "supplier.instagram",
     "supplier.email",
@@ -137,48 +253,22 @@ for token in [
     "supplier.location",
     "supplier.county",
 ]:
-    assert token in client_supplier, token
+    assert token in legacy_pro, token
 
 
-# Professional editor uses the same compact row/typeahead model.
+# Professional renderer also explicitly preserves the compatibility
+# branch for old multiple snapshots.
 for token in [
-    "function ProfessionalSupplierRows({",
-    "CrmJobWorkspace[\"supplierCategories\"]",
-    "supplier-questionnaire-table--admin",
-    "professional_supplier_",
-    "<datalist",
-    "Start typing a supplier name",
-    "Not in Supplier Master — will enter the review queue.",
+    "return field.multiple ? (",
+    "<ProfessionalSupplierRows",
+    "<SimpleProfessionalSupplierQuestion",
+    "supplierCategories",
 ]:
     assert token in job, token
 
 
-professional_start = job.index(
-    "function ProfessionalSupplierRows({"
-)
-
-professional_end = job.index(
-    "export function ProfessionalQuestionnaireField",
-    professional_start,
-)
-
-professional = job[
-    professional_start:
-    professional_end
-]
-
-for token in [
-    "supplier.website",
-    "supplier.instagram",
-    "supplier.email",
-    "supplier.phone",
-    "supplier.location",
-    "supplier.county",
-]:
-    assert token in professional, token
-
-
-# Existing structured persistence and approval paths remain authoritative.
+# Existing structured persistence and review/approval paths remain
+# authoritative for both UI representations.
 for token in [
     "function supplierAnswers(",
     "async function syncSupplierAnswers(",
@@ -190,22 +280,21 @@ for token in [
     assert token in server, token
 
 
-# The compatibility field still carries the selected category into
-# the existing review/create-master pipeline.
 assert (
     "category: text(input?.category || row.role)"
     in server
 )
 
 
-marker = (
+# Legacy CSS must remain while versioned multiple snapshots exist.
+legacy_marker = (
     "/* v1.10.11a — compact supplier questionnaire rows */"
 )
 
-assert marker in css
+assert legacy_marker in css
 
-e2_css = css[
-    css.index(marker):
+legacy_css = css[
+    css.index(legacy_marker):
 ]
 
 for token in [
@@ -216,32 +305,47 @@ for token in [
     ".supplier-questionnaire-remove",
     "@media (max-width: 680px)",
 ]:
-    assert token in e2_css, token
+    assert token in legacy_css, token
+
+
+# New simple-field styling must coexist with legacy row styling.
+assert (
+    "simple supplier questionnaire fields — admin"
+    in css
+)
+
+
+assert not list(
+    (ROOT / "d1/migrations").glob("050*")
+)
 
 
 print(
-    "PASS v1.10.11a compact supplier questionnaire rows"
+    "PASS v1.10.11a supplier questionnaire compatibility"
 )
 print(
     "  platform supplier categories: verified"
 )
 print(
-    "  client Category + Supplier rows: verified"
+    "  current client simple supplier field: verified"
 )
 print(
-    "  Supplier Master typeahead: verified"
+    "  current professional simple supplier field: verified"
 )
 print(
-    "  known-supplier detail autofill: verified"
+    "  legacy client Category + Supplier rows: retained"
 )
 print(
-    "  unlisted free-text review path: verified"
+    "  legacy professional multi-row editor: retained"
 )
 print(
-    "  professional editor parity: verified"
+    "  Supplier Master detail hydration: verified"
 )
 print(
-    "  existing approval/persistence contract: verified"
+    "  unlisted review path: verified"
+)
+print(
+    "  approval / persistence contract: verified"
 )
 print(
     "  schema transition: none"

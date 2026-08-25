@@ -99,9 +99,35 @@ def main() -> None:
     assert 'parts[0] === "contacts"' in route
     assert 'parts[2] === "supplier-submissions"' in route
     assert 'path="crm/contacts/:id"' in admin_app
-    for needle in ["Workflow", "Supplier team", "Needs review", "Files", "Notes", "Edit client"]:
+    for needle in ["Workflow", "Supplier team", "Needs review", "Files", "Notes"]:
         assert needle.lower() in job_page.lower(), f"Job workspace missing {needle}"
-    assert 'supplier: "Supplier"' in builder and "One supplier per question" in builder
+
+    # The Job now uses the shared compact Clients panel rather than
+    # the retired text-labelled "Edit client" action.
+    for needle in [
+        "CRMClientsPanel",
+        "renderActions",
+        "AdminIconButton",
+        "Invite client",
+    ]:
+        assert needle in job_page, f"Job client panel missing {needle}"
+
+    # Supplier questions now consume the canonical platform taxonomy
+    # rather than relying on helper copy instructing users to encode
+    # the supplier role manually in the question label.
+    for needle in [
+        'supplier: "Supplier"',
+        'label="Supplier category"',
+        'label="Wedding role"',
+        "supplierRolesForCategory",
+    ]:
+        assert needle in builder, f"Questionnaire builder missing {needle}"
+
+    for retired in [
+        "One supplier per question",
+        "Set the question label to the role",
+    ]:
+        assert retired not in builder, retired
     assert "SimpleSupplierQuestion" in client and "Start typing supplier name…" in client
     assert '"crm_supplier_submissions"' in operations
     assert "duplicate CRM contacts" in contact_page

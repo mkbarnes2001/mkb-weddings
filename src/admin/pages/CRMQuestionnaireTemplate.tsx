@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Eye, GripVertical, ListPlus, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Eye, GripVertical, ListPlus, Save, Trash2 } from "lucide-react";
 import {
   AdminButton,
   AdminField,
@@ -14,6 +14,11 @@ import {
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
 import type { QuestionnaireField, QuestionnaireFieldType, QuestionnaireTemplate } from "../types/crm";
+import {
+  DEFAULT_SUPPLIER_ROLE_DEFINITIONS,
+  SUPPLIER_CATEGORY_OPTIONS,
+  normaliseSupplierTaxonomy,
+} from "../data/supplierTaxonomy";
 
 const fieldLabels: Record<QuestionnaireFieldType, string> = {
   heading: "Heading",
@@ -244,6 +249,21 @@ export function CRMQuestionnaireTemplate() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+
+  const [
+    expandedQuestionnaireFieldId,
+    setExpandedQuestionnaireFieldId,
+  ] = useState("");
+
+  const [
+    supplierTaxonomy,
+    setSupplierTaxonomy,
+  ] = useState(() =>
+    normaliseSupplierTaxonomy(
+      SUPPLIER_CATEGORY_OPTIONS,
+      DEFAULT_SUPPLIER_ROLE_DEFINITIONS,
+    ),
+  );
   const canManage = auth.permissions.includes("crm:manage");
 
   useEffect(() => {
@@ -255,6 +275,37 @@ export function CRMQuestionnaireTemplate() {
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [id, auth.workspaceId]);
+
+  /*
+   * Supplier taxonomy is platform-owned but business-readable through
+   * /api/platform, the same path already used by Wedding Workspace.
+   */
+  useEffect(() => {
+    let active = true;
+
+    AdminApiService
+      .getWedPlannedPlatform()
+      .then((platform) => {
+        if (!active) return;
+
+        setSupplierTaxonomy(
+          normaliseSupplierTaxonomy(
+            platform.supplierTaxonomy?.categories,
+            platform.supplierTaxonomy?.roles,
+          ),
+        );
+      })
+      .catch(() => {
+        /*
+         * Keep the source-owned taxonomy fallback if the platform
+         * foundation read is temporarily unavailable.
+         */
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [auth.workspaceId]);
 
   const fieldCount = template?.fields.length || 0;
   const requiredCount = useMemo(() => template?.fields.filter((field) => field.required).length || 0, [template?.fields]);
@@ -370,71 +421,744 @@ export function CRMQuestionnaireTemplate() {
 
       {mode === "build" ? (
         <div className="questionnaire-builder-layout">
-          <AdminPanel title="Template" description="Add fields from the palette, then drag the handle to reorder." icon={ListPlus} compact>
+          <AdminPanel title="Template" description="Edit the template details. Add and reorder questions from the compact field list." icon={ListPlus} compact>
             <div className="grid gap-3">
               <AdminField label="Template name"><input className="admin-input" value={template.name} disabled={!canManage} onChange={(event) => setTemplate((current) => current ? { ...current, name: event.target.value } : current)} /></AdminField>
               <AdminField label="Description"><textarea className="admin-textarea" value={template.description} disabled={!canManage} onChange={(event) => setTemplate((current) => current ? { ...current, description: event.target.value } : current)} /></AdminField>
               <AdminField label="Status"><select className="admin-select" value={template.status} disabled={!canManage} onChange={(event) => setTemplate((current) => current ? { ...current, status: event.target.value as QuestionnaireTemplate["status"] } : current)}><option value="draft">Draft</option><option value="active">Active</option><option value="archived">Archived</option></select></AdminField>
             </div>
-            <div className="questionnaire-field-palette">
-              {(Object.keys(fieldLabels) as QuestionnaireFieldType[]).map(
-                (type) => (
-                  <AdminButton
-                    key={type}
-                    size="sm"
-                    icon={Plus}
-                    disabled={!canManage}
-                    onClick={() =>
-                      addField(type)
-                    }
+          </AdminPanel>
+
+            <AdminPanel
+              title="Questionnaire fields"
+              description="Build the questionnaire from compact fields. Supplier questions use the platform-owned supplier taxonomy."
+              icon={GripVertical}
+              actions={
+                canManage ? (
+                  <select
+                    className="admin-select questionnaire-builder-add-field"
+                    aria-label="Add questionnaire field"
+                    value=""
+                    disabled={saving}
+                    onChange={(event) => {
+                      const type =
+                        event.target.value as QuestionnaireFieldType;
+
+                      if (type) {
+                        addField(type);
+                      }
+                    }}
                   >
-                    {fieldLabels[type]}
-                  </AdminButton>
-                ),
-              )}
-            </div>
-          </AdminPanel>
+                    <option value="">
+                      Add field…
+                    </option>
 
-          <AdminPanel title="Questionnaire fields" description="Use a separate Supplier field for each supplier role. Clients type one supplier name; Supplier Master matches link automatically and other names go to review." icon={GripVertical}>
-            <div className="questionnaire-builder-fields">
-              {!template.fields.length ? <div className="admin-empty-state"><h3>No fields yet</h3><p>Add a heading or question from the field palette.</p></div> : null}
-              {template.fields.map((field, index) => (
-                <article
-                  key={field.id}
-                  className="questionnaire-builder-field"
-                  draggable={canManage}
-                  onDragStart={() => setDragIndex(index)}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={() => { if (dragIndex != null) moveField(dragIndex, index); setDragIndex(null); }}
-                >
-                  <div className="questionnaire-builder-field__handle" title="Drag to reorder"><GripVertical /></div>
-                  <div className="questionnaire-builder-field__body">
-                    <div className="grid gap-3 md:grid-cols-[170px_minmax(0,1fr)]">
-                      <AdminField label="Field type"><select className="admin-select" value={field.type} disabled={!canManage} onChange={(event) => changeFieldType(index, event.target.value as QuestionnaireFieldType)}>{(Object.keys(fieldLabels) as QuestionnaireFieldType[]).map((type) => <option key={type} value={type}>{fieldLabels[type]}</option>)}</select></AdminField>
-                      <AdminField label={field.type === "description" ? "Text" : field.type === "heading" ? "Heading" : "Question label"}><input className="admin-input" value={field.label} disabled={!canManage} onChange={(event) => updateField(index, { label: event.target.value })} /></AdminField>
-                    </div>
-                    {!['heading','description'].includes(field.type) ? <AdminField label="Help text"><input className="admin-input" value={field.help} disabled={!canManage} onChange={(event) => updateField(index, { help: event.target.value })} /></AdminField> : null}
-                    {["select", "radio", "checkbox"].includes(field.type) ? <AdminField label="Options" help="One option per line."><textarea className="admin-textarea min-h-24" value={field.options.join("\n")} disabled={!canManage} onChange={(event) => updateField(index, { options: event.target.value.split("\n").map((item) => item.trim()).filter(Boolean) })} /></AdminField> : null}
-                    {field.type === "supplier" ? (
-                      <div className="rounded-xl border border-black/[0.07] bg-neutral-50 px-3 py-3">
-                        <strong className="block text-[10px] font-semibold text-neutral-800">
-                          One supplier per question
-                        </strong>
-
-                        <p className="mt-1 text-[9px] leading-5 text-neutral-500">
-                          Set the question label to the role, for example Videographer, Florist or Cake. The client only types the supplier name. Supplier Master matches link automatically; names not found are sent for review.
-                        </p>
-                      </div>
-                    ) : null}
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      {!['heading','description'].includes(field.type) ? <label className="inline-flex items-center gap-2 text-[10px]"><input type="checkbox" checked={field.required} disabled={!canManage} onChange={(event) => updateField(index, { required: event.target.checked })} />Required</label> : <span />}
-                      <div className="flex gap-2"><AdminButton size="sm" disabled={!canManage || index === 0} onClick={() => moveField(index, index - 1)}>Move up</AdminButton><AdminButton size="sm" disabled={!canManage || index === template.fields.length - 1} onClick={() => moveField(index, index + 1)}>Move down</AdminButton><AdminButton variant="danger" size="sm" icon={Trash2} disabled={!canManage} onClick={() => setTemplate((current) => current ? { ...current, fields: current.fields.filter((_, fieldIndex) => fieldIndex !== index) } : current)}>Remove</AdminButton></div>
-                    </div>
+                    {(
+                      Object.keys(fieldLabels) as QuestionnaireFieldType[]
+                    ).map((type) => (
+                      <option
+                        key={type}
+                        value={type}
+                      >
+                        {fieldLabels[type]}
+                      </option>
+                    ))}
+                  </select>
+                ) : undefined
+              }
+            >
+              <div className="questionnaire-builder-fields">
+                {!template.fields.length ? (
+                  <div className="admin-empty-state">
+                    <h3>No fields yet</h3>
+                    <p>
+                      Choose a field type from Add field… to begin.
+                    </p>
                   </div>
-                </article>
-              ))}
-            </div>
-          </AdminPanel>
+                ) : null}
+
+                {template.fields.map(
+                  (field, index) => {
+                    const expanded =
+                      expandedQuestionnaireFieldId
+                      === field.id;
+
+                    const categoryKnown =
+                      supplierTaxonomy.categories
+                        .includes(
+                          field.supplierCategory,
+                        );
+
+                    const supplierRolesForCategory =
+                      field.type === "supplier"
+                      && field.supplierCategory
+                        ? supplierTaxonomy.roles
+                            .filter(
+                              (role) =>
+                                role.category
+                                === field.supplierCategory,
+                            )
+                        : [];
+
+                    const roleInSelectedCategory =
+                      supplierRolesForCategory.some(
+                        (role) =>
+                          role.name
+                          === field.supplierRole,
+                      );
+
+                    return (
+                      <article
+                        key={field.id}
+                        className={
+                          `questionnaire-builder-field${
+                            expanded
+                              ? " is-expanded"
+                              : ""
+                          }`
+                        }
+                        draggable={
+                          canManage
+                          && !saving
+                        }
+                        onDragStart={() =>
+                          setDragIndex(index)
+                        }
+                        onDragOver={(event) =>
+                          event.preventDefault()
+                        }
+                        onDrop={() => {
+                          if (
+                            dragIndex != null
+                          ) {
+                            moveField(
+                              dragIndex,
+                              index,
+                            );
+                          }
+
+                          setDragIndex(null);
+                        }}
+                        onDragEnd={() =>
+                          setDragIndex(null)
+                        }
+                      >
+                        <div
+                          className="questionnaire-builder-field__handle"
+                          title="Drag to reorder"
+                          aria-hidden="true"
+                        >
+                          <GripVertical />
+                        </div>
+
+                        <div className="questionnaire-builder-field__content">
+                          <div className="questionnaire-builder-field__summary">
+                            <button
+                              type="button"
+                              className="questionnaire-builder-field__toggle"
+                              aria-expanded={
+                                expanded
+                              }
+                              onClick={() =>
+                                setExpandedQuestionnaireFieldId(
+                                  expanded
+                                    ? ""
+                                    : field.id,
+                                )
+                              }
+                            >
+                              <span className="questionnaire-builder-field__identity">
+                                <strong>
+                                  {field.label
+                                    || "Untitled field"}
+                                </strong>
+
+                                <span className="questionnaire-builder-field__meta">
+                                  <span>
+                                    {
+                                      fieldLabels[
+                                        field.type
+                                      ]
+                                    }
+                                  </span>
+
+                                  {![
+                                    "heading",
+                                    "description",
+                                  ].includes(
+                                    field.type,
+                                  ) ? (
+                                    <span
+                                      className={
+                                        field.required
+                                          ? "is-required"
+                                          : ""
+                                      }
+                                    >
+                                      {field.required
+                                        ? "Required"
+                                        : "Optional"}
+                                    </span>
+                                  ) : null}
+
+                                  {field.type
+                                    === "supplier"
+                                    && field
+                                      .supplierCategory ? (
+                                      <span>
+                                        {
+                                          field
+                                            .supplierCategory
+                                        }
+                                      </span>
+                                    ) : null}
+
+                                  {field.type
+                                    === "supplier"
+                                    && field
+                                      .supplierRole ? (
+                                      <span>
+                                        {
+                                          field
+                                            .supplierRole
+                                        }
+                                      </span>
+                                    ) : null}
+                                </span>
+                              </span>
+
+                              <span
+                                className="questionnaire-builder-field__chevron"
+                                aria-hidden="true"
+                              >
+                                <ChevronDown />
+                              </span>
+                            </button>
+
+                            <div className="questionnaire-builder-field__actions">
+                              <button
+                                type="button"
+                                className="admin-icon-control"
+                                disabled={
+                                  !canManage
+                                  || saving
+                                  || index === 0
+                                }
+                                onClick={() =>
+                                  moveField(
+                                    index,
+                                    index - 1,
+                                  )
+                                }
+                                aria-label={`Move ${field.label} up`}
+                                title="Move up"
+                              >
+                                <ChevronUp
+                                  aria-hidden="true"
+                                />
+                              </button>
+
+                              <button
+                                type="button"
+                                className="admin-icon-control"
+                                disabled={
+                                  !canManage
+                                  || saving
+                                  || index
+                                    === template
+                                      .fields
+                                      .length
+                                      - 1
+                                }
+                                onClick={() =>
+                                  moveField(
+                                    index,
+                                    index + 1,
+                                  )
+                                }
+                                aria-label={`Move ${field.label} down`}
+                                title="Move down"
+                              >
+                                <ChevronDown
+                                  aria-hidden="true"
+                                />
+                              </button>
+
+                              <button
+                                type="button"
+                                className="admin-icon-control questionnaire-builder-field__remove"
+                                disabled={
+                                  !canManage
+                                  || saving
+                                }
+                                onClick={() => {
+                                  setTemplate(
+                                    (current) =>
+                                      current
+                                        ? {
+                                            ...current,
+                                            fields:
+                                              current
+                                                .fields
+                                                .filter(
+                                                  (
+                                                    _,
+                                                    fieldIndex,
+                                                  ) =>
+                                                    fieldIndex
+                                                    !== index,
+                                                ),
+                                          }
+                                        : current,
+                                  );
+
+                                  if (
+                                    expandedQuestionnaireFieldId
+                                    === field.id
+                                  ) {
+                                    setExpandedQuestionnaireFieldId(
+                                      "",
+                                    );
+                                  }
+                                }}
+                                aria-label={`Remove ${field.label}`}
+                                title="Remove field"
+                              >
+                                <Trash2
+                                  aria-hidden="true"
+                                />
+                              </button>
+                            </div>
+                          </div>
+
+                          {expanded ? (
+                            <div className="questionnaire-builder-field__editor">
+                              <div className="questionnaire-builder-field__grid">
+                                <AdminField label="Field type">
+                                  <select
+                                    className="admin-select"
+                                    value={
+                                      field.type
+                                    }
+                                    disabled={
+                                      !canManage
+                                      || saving
+                                    }
+                                    onChange={(
+                                      event,
+                                    ) =>
+                                      changeFieldType(
+                                        index,
+                                        event.target.value as QuestionnaireFieldType,
+                                      )
+                                    }
+                                  >
+                                    {(
+                                      Object.keys(fieldLabels) as QuestionnaireFieldType[]
+                                    ).map(
+                                      (type) => (
+                                        <option
+                                          key={type}
+                                          value={type}
+                                        >
+                                          {
+                                            fieldLabels[
+                                              type
+                                            ]
+                                          }
+                                        </option>
+                                      ),
+                                    )}
+                                  </select>
+                                </AdminField>
+
+                                <AdminField
+                                  label={
+                                    field.type
+                                    === "description"
+                                      ? "Text"
+                                      : field.type
+                                          === "heading"
+                                        ? "Heading"
+                                        : "Question label"
+                                  }
+                                >
+                                  <input
+                                    className="admin-input"
+                                    value={
+                                      field.label
+                                    }
+                                    disabled={
+                                      !canManage
+                                      || saving
+                                    }
+                                    onChange={(
+                                      event,
+                                    ) =>
+                                      updateField(
+                                        index,
+                                        {
+                                          label:
+                                            event
+                                              .target
+                                              .value,
+                                        },
+                                      )
+                                    }
+                                  />
+                                </AdminField>
+                              </div>
+
+                              {![
+                                "heading",
+                                "description",
+                              ].includes(
+                                field.type,
+                              ) ? (
+                                <AdminField label="Help text">
+                                  <input
+                                    className="admin-input"
+                                    value={
+                                      field.help
+                                    }
+                                    disabled={
+                                      !canManage
+                                      || saving
+                                    }
+                                    onChange={(
+                                      event,
+                                    ) =>
+                                      updateField(
+                                        index,
+                                        {
+                                          help:
+                                            event
+                                              .target
+                                              .value,
+                                        },
+                                      )
+                                    }
+                                  />
+                                </AdminField>
+                              ) : null}
+
+                              {[
+                                "select",
+                                "radio",
+                                "checkbox",
+                              ].includes(
+                                field.type,
+                              ) ? (
+                                <AdminField
+                                  label="Options"
+                                  help="One option per line."
+                                >
+                                  <textarea
+                                    className="admin-textarea"
+                                    value={
+                                      field.options
+                                        .join("\n")
+                                    }
+                                    disabled={
+                                      !canManage
+                                      || saving
+                                    }
+                                    onChange={(
+                                      event,
+                                    ) =>
+                                      updateField(
+                                        index,
+                                        {
+                                          options:
+                                            event
+                                              .target
+                                              .value
+                                              .split(
+                                                "\n",
+                                              )
+                                              .map(
+                                                (
+                                                  item,
+                                                ) =>
+                                                  item
+                                                    .trim(),
+                                              )
+                                              .filter(
+                                                Boolean,
+                                              ),
+                                        },
+                                      )
+                                    }
+                                  />
+                                </AdminField>
+                              ) : null}
+
+                              {field.type
+                                === "supplier" ? (
+                                <div className="questionnaire-builder-supplier-config">
+                                  <div className="questionnaire-builder-supplier-config__grid">
+                                    <AdminField
+                                      label="Supplier category"
+                                      help="Controlled centrally in Platform Administration."
+                                    >
+                                      <select
+                                        className="admin-select"
+                                        value={
+                                          field
+                                            .supplierCategory
+                                        }
+                                        disabled={
+                                          !canManage
+                                          || saving
+                                        }
+                                        onChange={(
+                                          event,
+                                        ) => {
+                                          const supplierCategory =
+                                            event
+                                              .target
+                                              .value;
+
+                                          const currentRole =
+                                            supplierTaxonomy
+                                              .roles
+                                              .find(
+                                                (
+                                                  role,
+                                                ) =>
+                                                  role
+                                                    .name
+                                                  === field
+                                                    .supplierRole,
+                                              );
+
+                                          const roleStillValid =
+                                            currentRole
+                                            && currentRole
+                                              .category
+                                              === supplierCategory;
+
+                                          updateField(
+                                            index,
+                                            {
+                                              supplierCategory,
+                                              supplierRole:
+                                                roleStillValid
+                                                  ? field
+                                                      .supplierRole
+                                                  : "",
+                                            },
+                                          );
+                                        }}
+                                      >
+                                        <option value="">
+                                          Choose category…
+                                        </option>
+
+                                        {field
+                                          .supplierCategory
+                                          && !categoryKnown ? (
+                                          <option
+                                            value={
+                                              field
+                                                .supplierCategory
+                                            }
+                                          >
+                                            {
+                                              field
+                                                .supplierCategory
+                                            }
+                                            {" · existing"}
+                                          </option>
+                                        ) : null}
+
+                                        {supplierTaxonomy
+                                          .categories
+                                          .map(
+                                            (
+                                              category,
+                                            ) => (
+                                              <option
+                                                key={
+                                                  category
+                                                }
+                                                value={
+                                                  category
+                                                }
+                                              >
+                                                {
+                                                  category
+                                                }
+                                              </option>
+                                            ),
+                                          )}
+                                      </select>
+                                    </AdminField>
+
+                                    <AdminField
+                                      label="Wedding role"
+                                      help={
+                                        field
+                                          .supplierCategory
+                                          ? "Filtered to the selected supplier category."
+                                          : "Choose a supplier category first."
+                                      }
+                                    >
+                                      <select
+                                        className="admin-select"
+                                        value={
+                                          field
+                                            .supplierRole
+                                        }
+                                        disabled={
+                                          !canManage
+                                          || saving
+                                          || !field
+                                            .supplierCategory
+                                        }
+                                        onChange={(
+                                          event,
+                                        ) => {
+                                          const supplierRole =
+                                            event
+                                              .target
+                                              .value;
+
+                                          const currentLabel =
+                                            field.label
+                                              .trim()
+                                              .toLowerCase();
+
+                                          const genericLabel =
+                                            [
+                                              "",
+                                              "supplier",
+                                              "supplier team",
+                                              "new question",
+                                            ].includes(
+                                              currentLabel,
+                                            );
+
+                                          updateField(
+                                            index,
+                                            {
+                                              supplierRole,
+                                              ...(
+                                                genericLabel
+                                                && supplierRole
+                                                  ? {
+                                                      label:
+                                                        supplierRole,
+                                                    }
+                                                  : {}
+                                              ),
+                                            },
+                                          );
+                                        }}
+                                      >
+                                        <option value="">
+                                          Choose Wedding role…
+                                        </option>
+
+                                        {field
+                                          .supplierRole
+                                          && !roleInSelectedCategory ? (
+                                          <option
+                                            value={
+                                              field
+                                                .supplierRole
+                                            }
+                                          >
+                                            {
+                                              field
+                                                .supplierRole
+                                            }
+                                            {" · existing"}
+                                          </option>
+                                        ) : null}
+
+                                        {supplierRolesForCategory
+                                          .map(
+                                            (
+                                              role,
+                                            ) => (
+                                              <option
+                                                key={
+                                                  role.name
+                                                }
+                                                value={
+                                                  role.name
+                                                }
+                                              >
+                                                {
+                                                  role.name
+                                                }
+                                              </option>
+                                            ),
+                                          )}
+                                      </select>
+                                    </AdminField>
+                                  </div>
+
+                                  <small className="questionnaire-builder-supplier-config__help">
+                                    Supplier categories and Wedding roles come from the platform supplier taxonomy. Supplier Master matching and review behaviour are unchanged.
+                                  </small>
+                                </div>
+                              ) : null}
+
+                              {![
+                                "heading",
+                                "description",
+                              ].includes(
+                                field.type,
+                              ) ? (
+                                <div className="questionnaire-builder-field__flags">
+                                  <label>
+                                    <input
+                                      type="checkbox"
+                                      checked={
+                                        field
+                                          .required
+                                      }
+                                      disabled={
+                                        !canManage
+                                        || saving
+                                      }
+                                      onChange={(
+                                        event,
+                                      ) =>
+                                        updateField(
+                                          index,
+                                          {
+                                            required:
+                                              event
+                                                .target
+                                                .checked,
+                                          },
+                                        )
+                                      }
+                                    />
+
+                                    <span>
+                                      <strong>
+                                        Required
+                                      </strong>
+                                      <small>
+                                        The client must complete this field before submitting the questionnaire.
+                                      </small>
+                                    </span>
+                                  </label>
+                                </div>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      </article>
+                    );
+                  },
+                )}
+              </div>
+            </AdminPanel>
         </div>
       ) : (
         <AdminPanel title="Client preview" description="This is the questionnaire layout clients will complete inside their secure portal." icon={Eye}>
