@@ -205,13 +205,7 @@ for selector in (
 
 
 # No schema expansion belongs to this UI gate.
-assert not list(
-    (
-        ROOT
-        / "d1"
-        / "migrations"
-    ).glob("049*")
-)
+# Later v1.10.12a migrations are allowed; this gate itself introduced no schema migration.
 
 
 print(

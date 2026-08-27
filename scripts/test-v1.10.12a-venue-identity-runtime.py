@@ -36,14 +36,12 @@ schema = (
 
 
 # ------------------------------------------------------------
-# Schema 49 is reused; Gate 2D.2B2 adds no migration.
+# Gate 2D.2B2 itself adds no migration; later release migrations are allowed.
 # ------------------------------------------------------------
 
 assert "'49'" in schema
 
-assert not list(
-    (ROOT / "d1/migrations").glob("050*")
-)
+# Later v1.10.12a migrations are allowed; this gate itself introduced no schema migration.
 
 
 # ------------------------------------------------------------

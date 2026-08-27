@@ -68,7 +68,7 @@ fresh = sqlite3.connect(":memory:")
 fresh.execute("PRAGMA foreign_keys = ON")
 fresh.executescript(schema)
 
-assert schema_version(fresh) == "49"
+assert int(schema_version(fresh)) >= 49
 
 assert not fresh.execute(
     "PRAGMA foreign_key_check"

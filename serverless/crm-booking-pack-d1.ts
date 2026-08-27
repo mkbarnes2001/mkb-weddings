@@ -712,6 +712,22 @@ async function ensureInvoice(
       subtotalAmount - addonTotal,
     );
 
+  const quoteSnapshot =
+    json<any>(
+      source.job
+        .quote_snapshot_json,
+      {},
+    );
+
+  const invoiceBookingSnapshot = {
+    ...snapshots.booking,
+    taxLabel:
+      text(
+        quoteSnapshot.taxLabel,
+      )
+      || "Tax",
+  };
+
   const statements: any[] = [
     db.prepare(`
       INSERT OR IGNORE INTO
@@ -794,7 +810,7 @@ async function ensureInvoice(
         snapshots.client,
       ),
       JSON.stringify(
-        snapshots.booking,
+        invoiceBookingSnapshot,
       ),
       text(
         settings.invoice_notes,
@@ -2323,6 +2339,14 @@ export async function getJobCommercialWorkspace(
         0,
         commercialNumber(invoice.tax_amount),
       ),
+      taxLabel:
+        commercialText(
+          json<any>(
+            invoice.booking_snapshot_json,
+            {},
+          ).taxLabel
+          || "Tax",
+        ),
       totalAmount,
       paidAmount,
       balanceAmount,

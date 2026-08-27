@@ -10,7 +10,7 @@ import {
   Save,
 } from "lucide-react";
 import {
-  AdminButton,
+  AdminIconButton,
   AdminField,
   AdminPanel,
   AdminStatus,
@@ -384,21 +384,18 @@ export function CrmPaymentSchedulePresets({
   return (
     <AdminPanel
       title="Payment schedule presets"
-      description="Create reusable deposit and final-balance schedules, then choose the right schedule on each quote."
+      compact
       icon={CreditCard}
       actions={
         canManage ? (
-          <AdminButton
-            variant="secondary"
-            size="sm"
+          <AdminIconButton
             icon={Plus}
+            label="New schedule"
             disabled={saving}
             onClick={
               newSchedule
             }
-          >
-            New schedule
-          </AdminButton>
+          />
         ) : undefined
       }
     >
@@ -770,16 +767,15 @@ export function CrmPaymentSchedulePresets({
               />
 
               <span>
-                Use as the default schedule for new quotes
+                Default for new quotes
               </span>
             </label>
 
             <div className="crm-payment-preset-editor__actions">
               {canManage ? (
-                <AdminButton
-                  variant="primary"
-                  size="sm"
+                <AdminIconButton
                   icon={Save}
+                  label={activeId ? "Save schedule" : "Create schedule"}
                   disabled={
                     saving
                     || !draft.name
@@ -788,13 +784,7 @@ export function CrmPaymentSchedulePresets({
                   onClick={() =>
                     void save()
                   }
-                >
-                  {saving
-                    ? "Saving…"
-                    : activeId
-                      ? "Save schedule"
-                      : "Create schedule"}
-                </AdminButton>
+                />
               ) : null}
 
               {canManage
@@ -802,38 +792,32 @@ export function CrmPaymentSchedulePresets({
                 && !selected.default
                 && selected.status
                   === "active" ? (
-                <AdminButton
-                  variant="secondary"
-                  size="sm"
+                <AdminIconButton
                   icon={Check}
+                  label="Make default"
                   disabled={saving}
                   onClick={() =>
                     void makeDefault(
                       selected,
                     )
                   }
-                >
-                  Make default
-                </AdminButton>
+                />
               ) : null}
 
               {canManage
                 && selected
                 && selected.status
                   === "active" ? (
-                <AdminButton
-                  variant="secondary"
-                  size="sm"
+                <AdminIconButton
                   icon={Archive}
+                  label="Archive"
                   disabled={saving}
                   onClick={() =>
                     void archive(
                       selected,
                     )
                   }
-                >
-                  Archive
-                </AdminButton>
+                />
               ) : null}
             </div>
           </div>

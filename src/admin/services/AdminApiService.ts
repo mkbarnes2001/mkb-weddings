@@ -58,6 +58,8 @@ import type { CrmAddon,
   CrmCommercialSettingsPayload,
   CrmPaymentSchedulePreset,
   CrmPaymentSchedulePresetInput,
+  CrmPaymentSettings,
+  CrmPaymentsOverview,
   CrmContractTemplate,
   CrmQuoteTemplate,
   CrmQuoteTemplateInput,
@@ -2158,6 +2160,132 @@ export class AdminApiService {
     );
 
     return result.template;
+  }
+
+  static async getCrmPaymentsOverview() {
+    const result =
+      await request<{
+        ok: true;
+        payments: CrmPaymentsOverview;
+      }>(
+        "/api/crm/payments",
+      );
+
+    return result.payments;
+  }
+
+  static async getCrmPaymentSettings() {
+    return request<{
+      ok: true;
+      settings: CrmPaymentSettings;
+      stripeConnectConfigured: boolean;
+    }>(
+      "/api/crm/payments/settings",
+    );
+  }
+
+  static async saveCrmPaymentSettings(
+    input: {
+      cardPaymentsEnabled: boolean;
+      bankTransferEnabled: boolean;
+      bankAccountName: string;
+      bankName: string;
+      bankSortCode: string;
+      bankAccountNumber: string;
+      bankIban: string;
+      bankBic: string;
+      bankTransferInstructions: string;
+    },
+  ) {
+    return request<{
+      ok: true;
+      settings: CrmPaymentSettings;
+      stripeConnectConfigured: boolean;
+    }>(
+      "/api/crm/payments/settings",
+      {
+        method: "PUT",
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  static async startCrmStripeOnboarding() {
+    const result =
+      await request<{
+        ok: true;
+        connection: {
+          authorizationUrl: string;
+          accountId: string;
+          expiresAt: string;
+        };
+      }>(
+        "/api/crm/payments/stripe/onboard",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            returnPath:
+              "/admin/crm/payment-setup",
+          }),
+        },
+      );
+
+    return result.connection;
+  }
+
+
+  static async startCrmStripeConnection() {
+    const result =
+      await request<{
+        ok: true;
+        connection: {
+          authorizationUrl: string;
+          expiresAt: string;
+        };
+      }>(
+        "/api/crm/payments/stripe/connect",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            returnPath:
+              "/admin/crm/payment-setup",
+          }),
+        },
+      );
+
+    return result.connection;
+  }
+
+  static async syncCrmStripeConnection() {
+    const result =
+      await request<{
+        ok: true;
+        settings: CrmPaymentSettings;
+      }>(
+        "/api/crm/payments/stripe/sync",
+        {
+          method: "POST",
+          body: "{}",
+        },
+      );
+
+    return result.settings;
+  }
+
+  static async disconnectCrmStripeConnection() {
+    const result =
+      await request<{
+        ok: true;
+        settings: CrmPaymentSettings;
+      }>(
+        "/api/crm/payments/stripe/disconnect",
+        {
+          method: "POST",
+          body: "{}",
+        },
+      );
+
+    return result.settings;
   }
 
   static async getCrmPaymentSchedulePresets(

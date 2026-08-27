@@ -110,10 +110,12 @@ assert "crm-job-overview__facts" not in job
 assert "crm-job-overview__identity" not in job
 
 # v1.10.12a deliberately supersedes the former horizontal progress
-# strip with the vertical Wedding workflow while preserving the
-# compact v1.10.11a Job header and commercial workspace.
-assert 'title="Wedding workflow"' in job
-assert 'className="crm-wedding-workflow"' in job
+# strip with the shared Wedding workspace workflow while preserving
+# the compact v1.10.11a Job header and commercial workspace.
+#
+# The shared workflow itself is covered by the dedicated v1.10.12a
+# Wedding-workspace regressions; this historical regression only owns
+# the legacy Job progress-strip removal contract.
 assert "crm-job-progress-strip" not in job
 assert 'aria-label="Job progress"' not in job
 

@@ -30,6 +30,7 @@ import {
   } from "lucide-react";
 import {
   AdminButton,
+  AdminIconButton,
   AdminEmptyState,
   AdminField,
   AdminPage,
@@ -831,6 +832,12 @@ function CommercialSettings({
         payload.settings.defaultContractTemplateId,
       defaultQuestionnaireTemplateId:
         payload.settings.defaultQuestionnaireTemplateId,
+      defaultTaxTreatment:
+        payload.settings.defaultTaxTreatment,
+      defaultTaxRateBasisPoints:
+        payload.settings.defaultTaxRateBasisPoints,
+      taxLabel:
+        payload.settings.taxLabel,
       depositType:
         payload.settings.depositType,
       depositValue:
@@ -875,9 +882,10 @@ function CommercialSettings({
     return (
       <AdminPanel
         title="Commercial settings"
-        description="Loading workspace booking and invoice defaults."
         icon={Settings2}
-      >
+
+        compact
+>
         <p className="text-[10px] text-neutral-500">
           Loading commercial settings…
         </p>
@@ -889,9 +897,10 @@ function CommercialSettings({
     return (
       <AdminPanel
         title="Commercial settings"
-        description="Workspace booking and invoice defaults are unavailable."
         icon={Settings2}
-      >
+
+        compact
+>
         <p className="text-[10px] text-red-700">
           {error || "Unable to load commercial settings."}
         </p>
@@ -926,17 +935,14 @@ function CommercialSettings({
 
       <AdminPanel
         title="Booking automation"
-        description="Choose what WedCRM prepares automatically after a quote is accepted."
         icon={Settings2}
-      >
-        <div className="grid gap-3 lg:grid-cols-2">
-          <label className="admin-choice-row">
+
+        compact
+>
+        <div className="grid gap-2 lg:grid-cols-2">
+          <label className="admin-choice-row crm-commercial-choice-row">
             <div>
               <strong>Create contract automatically</strong>
-              <p>
-                Generate the booking contract from the active
-                workspace default template.
-              </p>
             </div>
             <input
               type="checkbox"
@@ -952,7 +958,6 @@ function CommercialSettings({
 
           <AdminField
             label="Default contract template"
-            help="Only active workspace templates can be selected."
           >
             <select
               className="admin-select"
@@ -981,13 +986,9 @@ function CommercialSettings({
             </select>
           </AdminField>
 
-          <label className="admin-choice-row">
+          <label className="admin-choice-row crm-commercial-choice-row">
             <div>
               <strong>Create invoice automatically</strong>
-              <p>
-                Build the first invoice and payment schedule from
-                the accepted quote snapshot.
-              </p>
             </div>
             <input
               type="checkbox"
@@ -1001,13 +1002,9 @@ function CommercialSettings({
             />
           </label>
 
-          <label className="admin-choice-row">
+          <label className="admin-choice-row crm-commercial-choice-row">
             <div>
               <strong>Assign questionnaire automatically</strong>
-              <p>
-                Add the selected questionnaire to the booking pack
-                when the quote becomes a Job.
-              </p>
             </div>
             <input
               type="checkbox"
@@ -1023,7 +1020,6 @@ function CommercialSettings({
 
           <AdminField
             label="Default questionnaire"
-            help="Only active workspace templates can be selected."
           >
             <select
               className="admin-select"
@@ -1056,38 +1052,33 @@ function CommercialSettings({
 
       <AdminPanel
         title="Contract templates"
-        description="Build reusable contract wording. Existing generated contracts keep their saved snapshots when templates are changed later."
         icon={FileQuestion}
         actions={
           canManage ? (
-            <AdminButton
-              variant="primary"
-              size="sm"
+            <AdminIconButton
               icon={Plus}
+              label="New contract template"
               disabled={
                 creatingContractTemplate
               }
               onClick={() =>
                 void createContractTemplate()
               }
-            >
-              {creatingContractTemplate
-                ? "Creating…"
-                : "New template"}
-            </AdminButton>
+            />
           ) : undefined
         }
-      >
+
+        compact
+>
         {contractTemplatesLoading ? (
           <p className="text-[10px] text-neutral-500">
             Loading contract templates…
           </p>
         ) : !contractTemplates.length ? (
-          <AdminEmptyState
-            icon={FileQuestion}
-            title="No contract templates"
-            description="Create an inactive template, enter your own contract wording, then activate it when ready."
-          />
+          <div className="crm-commercial-empty-row">
+            <FileQuestion aria-hidden="true" />
+            <span>No contract templates</span>
+          </div>
         ) : (
           <div className="questionnaire-template-grid">
             {contractTemplates.map(
@@ -1154,10 +1145,11 @@ function CommercialSettings({
 
       <AdminPanel
         title="Legacy payment fallback"
-        description="Set the default deposit and deadline rules used when a booking invoice is generated."
         icon={Settings2}
-      >
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+
+        compact
+>
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
           <AdminField label="Deposit type">
             <select
               className="admin-select"
@@ -1191,11 +1183,6 @@ function CommercialSettings({
               payload.settings.depositType === "percentage"
                 ? "Deposit (%)"
                 : "Deposit (£)"
-            }
-            help={
-              payload.settings.depositType === "percentage"
-                ? "Percentage of the accepted booking total."
-                : "Fixed deposit amount in the workspace currency."
             }
           >
             <input
@@ -1236,7 +1223,6 @@ function CommercialSettings({
 
           <AdminField
             label="Deposit due after acceptance"
-            help="Number of days after quote acceptance."
           >
             <input
               className="admin-input"
@@ -1260,7 +1246,6 @@ function CommercialSettings({
 
           <AdminField
             label="Final balance before event"
-            help="Number of days before the wedding or event."
           >
             <input
               className="admin-input"
@@ -1284,7 +1269,6 @@ function CommercialSettings({
 
           <AdminField
             label="Questionnaire due before event"
-            help="Default questionnaire deadline in days before the event."
           >
             <input
               className="admin-input"
@@ -1309,14 +1293,123 @@ function CommercialSettings({
       </AdminPanel>
 
       <AdminPanel
-        title="Invoice numbering"
-        description="Control the workspace invoice prefix and display width without resetting the live sequence."
+        title="Tax defaults"
         icon={Settings2}
-      >
-        <div className="grid gap-3 md:grid-cols-3">
+
+        compact
+>
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          <AdminField
+            label="Tax treatment"
+          >
+            <select
+              className="admin-select"
+              value={
+                payload.settings.defaultTaxTreatment
+              }
+              disabled={!canManage || saving}
+              onChange={(event) => {
+                const defaultTaxTreatment =
+                  event.target.value as
+                    CrmCommercialSettingsPayload["settings"]["defaultTaxTreatment"];
+
+                patchSettings({
+                  defaultTaxTreatment,
+                  defaultTaxRateBasisPoints:
+                    defaultTaxTreatment === "none"
+                      ? 0
+                      : payload.settings
+                          .defaultTaxRateBasisPoints,
+                });
+              }}
+            >
+              <option value="none">
+                No tax
+              </option>
+              <option value="inclusive">
+                Included in prices
+              </option>
+              <option value="exclusive">
+                Added to prices
+              </option>
+            </select>
+          </AdminField>
+
+          <AdminField
+            label="Tax label"
+          >
+            <input
+              className="admin-input"
+              value={
+                payload.settings.taxLabel
+              }
+              maxLength={40}
+              disabled={!canManage || saving}
+              onChange={(event) =>
+                patchSettings({
+                  taxLabel:
+                    event.target.value,
+                })
+              }
+            />
+          </AdminField>
+
+          <AdminField
+            label="Tax rate (%)"
+          >
+            <input
+              className="admin-input"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              value={
+                payload.settings
+                  .defaultTaxRateBasisPoints
+                / 100
+              }
+              disabled={
+                !canManage
+                || saving
+                || payload.settings
+                  .defaultTaxTreatment
+                  === "none"
+              }
+              onChange={(event) => {
+                const rate =
+                  Math.min(
+                    100,
+                    Math.max(
+                      0,
+                      Number(
+                        event.target.value
+                        || 0,
+                      ),
+                    ),
+                  );
+
+                patchSettings({
+                  defaultTaxRateBasisPoints:
+                    Math.round(
+                      rate * 100,
+                    ),
+                });
+              }}
+            />
+          </AdminField>
+        </div>
+
+      </AdminPanel>
+
+      <AdminPanel
+        title="Invoice numbering"
+        icon={Settings2}
+
+        compact
+>
+        <div className="grid gap-2 md:grid-cols-3">
           <AdminField
             label="Invoice prefix"
-            help="For example INV."
           >
             <input
               className="admin-input"
@@ -1336,7 +1429,6 @@ function CommercialSettings({
 
           <AdminField
             label="Number padding"
-            help="4 displays invoice 27 as 0027."
           >
             <input
               className="admin-input"
@@ -1362,7 +1454,6 @@ function CommercialSettings({
 
           <AdminField
             label="Next invoice number"
-            help="Operational sequence state. Saving settings never resets this number."
           >
             <input
               className="admin-input"
@@ -1377,13 +1468,14 @@ function CommercialSettings({
 
       <AdminPanel
         title="Invoice wording"
-        description="Default client-facing notes and payment terms copied into newly generated invoices."
         icon={Settings2}
-      >
-        <div className="grid gap-3 lg:grid-cols-2">
+
+        compact
+>
+        <div className="grid gap-2 lg:grid-cols-2">
           <AdminField label="Invoice notes">
             <textarea
-              className="admin-textarea min-h-28"
+              className="admin-textarea min-h-20"
               value={payload.settings.invoiceNotes}
               disabled={!canManage || saving}
               onChange={(event) =>
@@ -1396,7 +1488,7 @@ function CommercialSettings({
 
           <AdminField label="Invoice terms">
             <textarea
-              className="admin-textarea min-h-28"
+              className="admin-textarea min-h-20"
               value={payload.settings.invoiceTerms}
               disabled={!canManage || saving}
               onChange={(event) =>
@@ -1409,17 +1501,13 @@ function CommercialSettings({
         </div>
       </AdminPanel>
 
-      <div className="flex flex-wrap items-center justify-end gap-3">
-        <AdminButton
-          variant="primary"
+      <div className="flex items-center justify-end">
+        <AdminIconButton
           icon={Save}
+          label="Save commercial settings"
           disabled={!canManage || saving}
           onClick={() => void save()}
-        >
-          {saving
-            ? "Saving…"
-            : "Save commercial settings"}
-        </AdminButton>
+        />
       </div>
     </div>
   );

@@ -93,8 +93,12 @@ for token in (
     assert token in css, token
 
 
+# Typography remains schema-neutral. Migration 050 now
+# legitimately belongs to the later Connected Payments gate.
 assert not list(
-    (ROOT / "d1/migrations").glob("050*")
+    (ROOT / "d1/migrations").glob(
+        "*typography*.sql"
+    )
 )
 
 
@@ -112,5 +116,5 @@ print(
     "  persisted typography fields: preserved"
 )
 print(
-    "  schema remains 49: verified"
+    "  typography gate remains schema-neutral: verified"
 )

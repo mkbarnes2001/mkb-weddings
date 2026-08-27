@@ -198,10 +198,13 @@ assert (
     not in page
 )
 
+# This UI gate is schema-neutral. Later v1.10.12a gates
+# legitimately add migration 049+; those must not invalidate
+# the earlier Lead-delete UI contract.
 assert not list(
-    (
-        ROOT / "d1/migrations"
-    ).glob("049*")
+    (ROOT / "d1/migrations").glob(
+        "*lead*delete*.sql"
+    )
 )
 
 

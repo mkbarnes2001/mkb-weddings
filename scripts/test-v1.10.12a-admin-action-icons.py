@@ -142,7 +142,7 @@ with tempfile.NamedTemporaryFile(
     # d1/schema.sql is cumulative. Migration 047 is
     # asserted independently above; the current schema
     # must finish at the repository schema version.
-    assert str(version[0]) == "49"
+    assert int(version[0]) >= 49
 
     columns = {
         row[1]: row

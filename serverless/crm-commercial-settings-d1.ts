@@ -252,6 +252,9 @@ export async function getCrmCommercialSettings(
         auto_assign_questionnaire,
         default_contract_template_id,
         default_questionnaire_template_id,
+        default_tax_treatment,
+        default_tax_rate_basis_points,
+        tax_label,
         deposit_type,
         deposit_value,
         deposit_due_days_after_acceptance,
@@ -351,6 +354,41 @@ export async function getCrmCommercialSettings(
           settings
             ?.default_questionnaire_template_id,
         ),
+
+      defaultTaxTreatment:
+        (
+          ["inclusive", "exclusive"].includes(
+            text(
+              settings?.default_tax_treatment,
+            ),
+          )
+            ? text(
+                settings?.default_tax_treatment,
+              )
+            : "none"
+        ) as
+          | "none"
+          | "inclusive"
+          | "exclusive",
+
+      defaultTaxRateBasisPoints:
+        Math.min(
+          10000,
+          Math.max(
+            0,
+            Number(
+              settings
+                ?.default_tax_rate_basis_points
+              || 0,
+            ),
+          ),
+        ),
+
+      taxLabel:
+        text(
+          settings?.tax_label
+          || "Tax",
+        ) || "Tax",
 
       depositType:
         text(
@@ -545,6 +583,74 @@ export async function saveCrmCommercialSettings(
           input
             ?.defaultQuestionnaireTemplateId,
         );
+
+  const defaultTaxTreatment =
+    text(
+      input?.defaultTaxTreatment
+      ?? currentSettings
+        ?.default_tax_treatment
+      ?? "none",
+    );
+
+  if (
+    ![
+      "none",
+      "inclusive",
+      "exclusive",
+    ].includes(
+      defaultTaxTreatment,
+    )
+  ) {
+    throw httpError(
+      "Default tax treatment must be none, inclusive or exclusive.",
+    );
+  }
+
+  const defaultTaxRateBasisPoints =
+    defaultTaxTreatment === "none"
+      ? 0
+      : nonNegativeInteger(
+          input
+            ?.defaultTaxRateBasisPoints,
+          Number(
+            currentSettings
+              ?.default_tax_rate_basis_points
+            || 0,
+          ),
+          "Default tax rate",
+        );
+
+  if (
+    defaultTaxRateBasisPoints
+    > 10000
+  ) {
+    throw httpError(
+      "Default tax rate must be between 0% and 100%.",
+    );
+  }
+
+  const taxLabelInput =
+    input?.taxLabel === undefined
+      ? (
+          currentSettings
+            ?.tax_label
+          ?? "Tax"
+        )
+      : input.taxLabel;
+
+  const taxLabel =
+    text(
+      taxLabelInput,
+    );
+
+  if (
+    !taxLabel
+    || taxLabel.length > 40
+  ) {
+    throw httpError(
+      "Tax label must be between 1 and 40 characters.",
+    );
+  }
 
   const depositType =
     text(
@@ -762,6 +868,22 @@ export async function saveCrmCommercialSettings(
       questionnaireDueDaysBeforeEvent,
       invoiceNotes,
       invoiceTerms,
+    ),
+
+    db.prepare(`
+      UPDATE crm_booking_settings
+      SET
+        default_tax_treatment = ?,
+        default_tax_rate_basis_points = ?,
+        tax_label = ?,
+        updated_at =
+          CURRENT_TIMESTAMP
+      WHERE workspace_id = ?
+    `).bind(
+      defaultTaxTreatment,
+      defaultTaxRateBasisPoints,
+      taxLabel,
+      workspaceId,
     ),
 
     db.prepare(`

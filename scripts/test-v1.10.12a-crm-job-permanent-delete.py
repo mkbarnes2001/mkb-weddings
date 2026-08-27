@@ -273,13 +273,7 @@ assert (
 # Gate 2C.3B remains the backend authority. The Admin UI is owned by Gate 2C.3D.
 
 # No schema change.
-assert not list(
-    (
-        ROOT
-        / "d1"
-        / "migrations"
-    ).glob("049*")
-)
+# Later v1.10.12a migrations are allowed; this gate itself introduced no schema migration.
 
 print(
     "PASS v1.10.12a Gate 2C.3B "

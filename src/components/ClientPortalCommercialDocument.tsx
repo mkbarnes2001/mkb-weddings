@@ -1,6 +1,6 @@
 import { ClientPortalContractSignature } from "./ClientPortalContractSignature";
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, FileText, Printer } from "lucide-react";
+import { CheckCircle2, CreditCard, FileText, Printer } from "lucide-react";
 
 type DocumentKind = "contract" | "invoice";
 
@@ -79,6 +79,7 @@ type PortalInvoice = {
   subtotalAmount: number;
   discountAmount: number;
   taxAmount: number;
+  taxLabel: string;
   totalAmount: number;
   paidAmount: number;
   balanceAmount: number;
@@ -643,9 +644,121 @@ function InvoiceDocument({
 }: {
   invoice: PortalInvoice;
 }) {
+  const [paymentBusy, setPaymentBusy] =
+    useState(false);
+
+  const [paymentError, setPaymentError] =
+    useState("");
+
+  const nextPayment =
+    invoice.schedule.find(
+      (item) =>
+        item.balanceAmount > 0,
+    )
+    || null;
+
+  async function payByCard(
+    scheduleItemId = "",
+  ) {
+    if (paymentBusy) {
+      return;
+    }
+
+    setPaymentBusy(true);
+    setPaymentError("");
+
+    try {
+      const endpoint =
+        portalApiPath(
+          `/api/public/client-portal/invoices/${encodeURIComponent(invoice.id)}/checkout`,
+        );
+
+      const response =
+        await fetch(
+          endpoint,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify({
+                scheduleItemId,
+              }),
+          },
+        );
+
+      const result: any =
+        await response.json()
+          .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          result?.error
+          || "Unable to start card payment.",
+        );
+      }
+
+      const checkoutUrl =
+        String(
+          result?.checkout
+            ?.checkoutUrl
+          || "",
+        );
+
+      if (!checkoutUrl) {
+        throw new Error(
+          "Stripe Checkout URL was not returned.",
+        );
+      }
+
+      window.location.assign(
+        checkoutUrl,
+      );
+
+    } catch (error) {
+      setPaymentError(
+        error instanceof Error
+          ? error.message
+          : "Unable to start card payment.",
+      );
+
+      setPaymentBusy(false);
+    }
+  }
+
   return (
     <article className="client-portal-document client-portal-document--invoice">
       <div className="client-portal-document__actions">
+        {invoice.balanceAmount > 0 ? (
+          <button
+            type="button"
+            disabled={paymentBusy}
+            onClick={() =>
+              void payByCard(
+                nextPayment?.id
+                || "",
+              )
+            }
+          >
+            <CreditCard />
+            {paymentBusy
+              ? "Opening Stripe…"
+              : nextPayment
+                ? `Pay ${money(
+                    nextPayment.balanceAmount,
+                    invoice.currency,
+                  )} by card`
+                : `Pay ${money(
+                    invoice.balanceAmount,
+                    invoice.currency,
+                  )} by card`}
+          </button>
+        ) : null}
+
         <button
           type="button"
           onClick={() => window.print()}
@@ -654,6 +767,12 @@ function InvoiceDocument({
           Print / Save PDF
         </button>
       </div>
+
+      {paymentError ? (
+        <p className="client-portal-document__notice">
+          {paymentError}
+        </p>
+      ) : null}
 
       <header className="client-portal-document__header">
         <div>
@@ -761,7 +880,7 @@ function InvoiceDocument({
 
           {invoice.taxAmount ? (
             <div>
-              <dt>Tax</dt>
+              <dt>{invoice.taxLabel || "Tax"}</dt>
               <dd>
                 {money(
                   invoice.taxAmount,
@@ -838,6 +957,21 @@ function InvoiceDocument({
                           invoice.currency,
                         )} remaining`}
                   </span>
+
+                  {item.balanceAmount > 0 ? (
+                    <button
+                      type="button"
+                      disabled={paymentBusy}
+                      onClick={() =>
+                        void payByCard(
+                          item.id,
+                        )
+                      }
+                    >
+                      <CreditCard />
+                      Pay by card
+                    </button>
+                  ) : null}
                 </div>
               </article>
             ))}

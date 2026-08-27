@@ -17875,3 +17875,705 @@ small {
       minmax(0, 1fr);
   }
 }
+
+
+/* v1.10.12a — Gate 2F Payment setup */
+
+.crm-payment-setup-page {
+  width: 100%;
+  max-width: 1120px;
+}
+
+.crm-payment-setup-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.crm-payment-provider-state {
+  display: grid;
+  grid-template-columns:
+    38px
+    minmax(0, 1fr)
+    auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, .018);
+  padding: 10px;
+}
+
+.crm-payment-provider-state__icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 9px;
+  background: #f1f1f1;
+  color: #666;
+}
+
+.crm-payment-provider-state__icon.success {
+  background:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111) 8%,
+      white
+    );
+  color:
+    var(--admin-module-accent, #111);
+}
+
+.crm-payment-provider-state__icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.crm-payment-provider-state__body {
+  min-width: 0;
+}
+
+.crm-payment-provider-state__body strong,
+.crm-payment-provider-state__body p,
+.crm-payment-provider-state__body small {
+  display: block;
+}
+
+.crm-payment-provider-state__body strong {
+  font-size:
+    calc(
+      10.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-payment-provider-state__body p {
+  margin: 2px 0 0;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  line-height: 1.45;
+}
+
+.crm-payment-provider-state__body small {
+  margin-top: 4px;
+  color: #888;
+  font-size:
+    calc(
+      7.8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-payment-readiness-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.crm-payment-readiness-grid > div {
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  padding: 8px 9px;
+}
+
+.crm-payment-readiness-grid span,
+.crm-payment-provider-meta span {
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      7.8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-payment-readiness-grid strong,
+.crm-payment-provider-meta strong {
+  font-size:
+    calc(
+      9.2px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-payment-provider-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 7px;
+  border-bottom:
+    1px solid var(--admin-border);
+  padding: 2px 1px 8px;
+}
+
+.crm-payment-method-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 10px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  padding: 9px 10px;
+}
+
+.crm-payment-method-toggle > input {
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  accent-color:
+    var(--admin-module-accent, #111);
+}
+
+.crm-payment-method-toggle > span {
+  min-width: 0;
+}
+
+.crm-payment-method-toggle strong,
+.crm-payment-method-toggle small {
+  display: block;
+}
+
+.crm-payment-method-toggle strong {
+  font-size:
+    calc(
+      9.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-payment-method-toggle small {
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  line-height: 1.45;
+}
+
+.crm-payment-provider-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.crm-payment-provider-actions__note {
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-payment-bank-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  gap: 8px 10px;
+  margin-top: 10px;
+  margin-bottom: 9px;
+}
+
+.crm-payment-bank-grid .admin-field {
+  margin: 0;
+}
+
+.crm-payment-bank-grid .admin-input {
+  min-height: 32px;
+}
+
+.crm-payment-security-note {
+  display: grid;
+  grid-template-columns:
+    28px
+    minmax(0, 1fr);
+  gap: 9px;
+  align-items: start;
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111) 14%,
+      white
+    );
+  border-radius: 10px;
+  background:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111) 3%,
+      white
+    );
+  padding: 10px;
+}
+
+.crm-payment-security-note > svg {
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  color:
+    var(--admin-module-accent, #111);
+}
+
+.crm-payment-security-note strong {
+  display: block;
+  font-size:
+    calc(
+      9px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-payment-security-note p {
+  margin: 2px 0 0;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  line-height: 1.5;
+}
+
+.crm-payment-setup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+}
+
+.crm-payment-setup-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #9a5b00;
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-payment-setup-warning svg {
+  width: 13px;
+  height: 13px;
+}
+
+@media (max-width: 760px) {
+  .crm-payment-provider-state {
+    grid-template-columns:
+      34px
+      minmax(0, 1fr);
+  }
+
+  .crm-payment-provider-state
+  > .admin-status {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .crm-payment-provider-state__icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .crm-payment-readiness-grid,
+  .crm-payment-bank-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-payment-provider-actions
+  .admin-button,
+  .crm-payment-setup-actions
+  .admin-button {
+    width: 100%;
+  }
+}
+
+/* v1.10.12a — Gate 2F Payments overview */
+
+.crm-payments-page {
+  width: 100%;
+  max-width: 1320px;
+}
+
+.crm-payments-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.crm-payments-header-actions
+.admin-button svg {
+  width: 13px;
+  height: 13px;
+}
+
+.crm-payments-summary {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+  gap: 8px;
+}
+
+.crm-payments-summary > button {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  padding: 10px 11px;
+  color: var(--admin-text);
+  text-align: left;
+  transition:
+    border-color .15s ease,
+    box-shadow .15s ease,
+    background .15s ease;
+}
+
+.crm-payments-summary > button:hover,
+.crm-payments-summary > button.is-active {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111) 38%,
+      var(--admin-border)
+    );
+}
+
+.crm-payments-summary > button.is-active {
+  background:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111) 4%,
+      white
+    );
+  box-shadow:
+    inset 3px 0 0
+    var(--admin-module-accent, #111);
+}
+
+.crm-payments-summary span {
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  font-weight: 700;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.crm-payments-summary strong {
+  overflow: hidden;
+  font-size:
+    calc(
+      16px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  font-weight: 680;
+  letter-spacing: -.025em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-payments-summary small {
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-payments-toolbar {
+  display: grid;
+  grid-template-columns:
+    minmax(240px, 1fr)
+    minmax(145px, 190px);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.crm-payments-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.crm-payments-search > svg {
+  position: absolute;
+  z-index: 1;
+  left: 10px;
+  width: 13px;
+  height: 13px;
+  color: #888;
+  pointer-events: none;
+}
+
+.crm-payments-search
+.admin-input {
+  min-height: 32px;
+  padding-left: 31px;
+}
+
+.crm-payments-toolbar
+.admin-select {
+  min-height: 32px;
+}
+
+.crm-payments-table-wrap {
+  max-height:
+    calc(100dvh - 315px);
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.crm-payments-table {
+  min-width: 850px;
+}
+
+.crm-payments-table thead {
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  background:
+    var(
+      --admin-module-section-background,
+      #fff
+    );
+}
+
+.crm-payments-table td {
+  vertical-align: middle;
+}
+
+.crm-payments-due,
+.crm-payments-client,
+.crm-payments-job,
+.crm-payments-amount {
+  min-width: 0;
+}
+
+.crm-payments-due strong,
+.crm-payments-client strong,
+.crm-payments-amount strong {
+  display: block;
+  font-size:
+    calc(
+      9.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+.crm-payments-due small,
+.crm-payments-client small,
+.crm-payments-job small,
+.crm-payments-amount small {
+  display: block;
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      7.8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  line-height: 1.35;
+}
+
+.crm-payments-amount {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.crm-payments-action {
+  width: 36px;
+  text-align: right;
+}
+
+.crm-payments-action
+.admin-icon-control {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  min-height: 28px !important;
+  place-items: center;
+}
+
+.crm-payments-action
+.admin-icon-control svg {
+  width: 13px;
+  height: 13px;
+}
+
+.crm-payments-loading {
+  margin: 0;
+  padding: 16px 2px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      9px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
+
+@media (max-width: 900px) {
+  .crm-payments-summary {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+  .crm-payments-table-wrap {
+    max-height: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .crm-payments-summary,
+  .crm-payments-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-payments-header-actions {
+    width: 100%;
+  }
+
+  .crm-payments-header-actions
+  .admin-button {
+    flex: 1 1 auto;
+  }
+}
+
+/* v1.10.12a — Gate 2F compact Commercial settings finishing */
+
+.crm-commercial-choice-row {
+  min-height: 46px;
+  gap: 10px;
+  padding: 8px 10px;
+}
+
+.crm-commercial-empty-row {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  border: 1px dashed var(--admin-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--admin-muted);
+}
+
+.crm-commercial-empty-row svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+
+.crm-payment-presets {
+  gap: 10px;
+}
+
+.crm-payment-presets__list {
+  gap: 5px;
+}
+
+.crm-payment-presets__empty {
+  padding: 10px;
+  text-align: left;
+}
+
+.crm-payment-preset-editor {
+  gap: 8px;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.crm-payment-preset-editor__grid {
+  gap: 7px;
+}
+
+.crm-payment-preset-editor__actions {
+  justify-content: flex-end;
+  gap: 5px;
+}

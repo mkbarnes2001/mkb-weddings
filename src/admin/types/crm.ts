@@ -596,6 +596,7 @@ export type CrmJobCommercialInvoice = {
   subtotalAmount: number;
   discountAmount: number;
   taxAmount: number;
+  taxLabel: string;
   totalAmount: number;
   paidAmount: number;
   balanceAmount: number;
@@ -772,6 +773,7 @@ export type CrmQuoteVersion = {
   discountValue: number;
   taxTreatment: "none" | "inclusive" | "exclusive";
   taxRateBasisPoints: number;
+  taxLabel: string;
   subtotalAmount: number;
   discountAmount: number;
   taxAmount: number;
@@ -1005,6 +1007,12 @@ export type CrmCommercialBookingSettings = {
   autoAssignQuestionnaire: boolean;
   defaultContractTemplateId: string;
   defaultQuestionnaireTemplateId: string;
+  defaultTaxTreatment:
+    | "none"
+    | "inclusive"
+    | "exclusive";
+  defaultTaxRateBasisPoints: number;
+  taxLabel: string;
   depositType:
     | "none"
     | "fixed"
@@ -1043,6 +1051,12 @@ export type CrmCommercialSettingsInput = {
     string;
   defaultQuestionnaireTemplateId?:
     string;
+  defaultTaxTreatment?:
+    | "none"
+    | "inclusive"
+    | "exclusive";
+  defaultTaxRateBasisPoints?: number;
+  taxLabel?: string;
   depositType?:
     | "none"
     | "fixed"
@@ -1216,4 +1230,111 @@ export type CrmQuoteSendInput = {
   body: string;
   bookingPack?: CrmQuoteBookingPackInput;
 
+};
+
+export type CrmPaymentSettings = {
+  workspaceId: string;
+
+  cardPaymentsEnabled: boolean;
+
+  bankTransferEnabled: boolean;
+  bankAccountName: string;
+  bankName: string;
+  bankSortCode: string;
+  bankAccountNumber: string;
+  bankIban: string;
+  bankBic: string;
+  bankTransferInstructions: string;
+
+  stripe: {
+    connectionStatus:
+      | "disconnected"
+      | "pending"
+      | "restricted"
+      | "ready";
+
+    accountId: string;
+
+    accountType:
+      | "standard"
+      | "express"
+      | "custom";
+
+    country: string;
+    defaultCurrency: string;
+
+    detailsSubmitted: boolean;
+    chargesEnabled: boolean;
+    payoutsEnabled: boolean;
+
+    connectedAt: string;
+    lastSyncedAt: string;
+    disconnectedAt: string;
+  };
+
+  updatedAt: string;
+};
+
+export type CrmPaymentOverviewStatus =
+  | "outstanding"
+  | "overdue"
+  | "due_soon"
+  | "paid";
+
+export type CrmPaymentOverviewRow = {
+  id: string;
+
+  invoiceId: string;
+  invoiceReference: string;
+  invoiceStatus: string;
+
+  scheduleItemId: string;
+  scheduleType: string;
+  label: string;
+
+  dueDate: string;
+
+  amount: number;
+  paidAmount: number;
+  outstandingAmount: number;
+
+  status: CrmPaymentOverviewStatus;
+  currency: string;
+
+  lastPaymentAt: string;
+
+  client: {
+    id: string;
+    name: string;
+    email: string;
+  };
+
+  job: {
+    id: string;
+    reference: string;
+    title: string;
+    eventDate: string;
+  };
+};
+
+export type CrmPaymentsOverview = {
+  generatedAt: string;
+
+  summary: {
+    currency: string;
+
+    outstandingAmount: number;
+    outstandingCount: number;
+
+    overdueAmount: number;
+    overdueCount: number;
+
+    dueSoonAmount: number;
+    dueSoonCount: number;
+
+    paidAmount: number;
+    paidCount: number;
+  };
+
+  rows: CrmPaymentOverviewRow[];
 };

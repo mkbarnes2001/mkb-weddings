@@ -31,7 +31,9 @@ def main() -> None:
     assert "WedPlanned Network" not in modules
     assert 'label: "Contracts"' not in modules
     assert 'label: "Invoices"' not in modules
-    assert 'label: "Payments"' not in modules
+    # Payments is now a real WedCRM operational destination.
+    assert 'label: "Payments"' in modules
+    assert 'to: "/admin/crm/payments"' in modules
     assert 'label: "Publishing"' in modules
 
     # Desktop and mobile both use the same resolved module and item source.

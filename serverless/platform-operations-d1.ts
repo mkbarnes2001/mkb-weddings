@@ -404,6 +404,8 @@ const DIRECT_EXPORT_TABLES = [
   "crm_invoice_items",
   "crm_invoice_schedule_items",
   "crm_invoice_payments",
+  "workspace_payment_settings",
+  "crm_invoice_payment_attempts",
   "venues",
   "weddings",
   "images",

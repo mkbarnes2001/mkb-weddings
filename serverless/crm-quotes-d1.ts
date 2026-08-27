@@ -140,6 +140,7 @@ function hydrateVersion(row: any, options: any[] = []) {
     currency: text(row.currency || "GBP"), sentAt: row.sent_at || undefined, viewedAt: row.viewed_at || undefined,
     acceptedAt: row.accepted_at || undefined, declinedAt: row.declined_at || undefined,
     provider: text(row.provider), providerMessageId: text(row.provider_message_id), failureReason: text(row.failure_reason),
+    taxLabel: text(safeJson(row.snapshot_json, {}).taxLabel || "Tax") || "Tax",
     snapshot: safeJson(row.snapshot_json, {}), createdAt: row.created_at, updatedAt: row.updated_at, options,
   };
 }
@@ -305,9 +306,59 @@ export async function createQuote(db: D1Db, actor: QuoteActor, input: any) {
   const reference = quoteReference();
   const quoteCurrency = currency(input?.currency || enquiry.currency || "GBP");
   const quoteTypeValue = quoteType(input?.quoteType);
+  const taxSettings =
+    await db.prepare(`
+      SELECT
+        default_tax_treatment,
+        default_tax_rate_basis_points,
+        tax_label
+      FROM crm_booking_settings
+      WHERE workspace_id = ?
+      LIMIT 1
+    `).bind(
+      actor.workspaceId,
+    ).first();
+
+  const configuredTaxTreatment =
+    text(
+      taxSettings
+        ?.default_tax_treatment,
+    );
+
+  const defaultTaxTreatment =
+    [
+      "inclusive",
+      "exclusive",
+    ].includes(
+      configuredTaxTreatment,
+    )
+      ? configuredTaxTreatment
+      : "none";
+
+  const defaultTaxRateBasisPoints =
+    defaultTaxTreatment === "none"
+      ? 0
+      : Math.min(
+          10000,
+          Math.max(
+            0,
+            Number(
+              taxSettings
+                ?.default_tax_rate_basis_points
+              || 0,
+            ),
+          ),
+        );
+
+  const taxLabel =
+    text(
+      taxSettings?.tax_label
+      || "Tax",
+    ) || "Tax";
+
   await db.batch([
     db.prepare(`INSERT INTO crm_quotes (id, workspace_id, enquiry_id, primary_contact_id, reference, status, quote_type, currency, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'draft', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(quoteId, actor.workspaceId, enquiryId, contact.id, reference, quoteTypeValue, quoteCurrency, text(actor.userId) || null),
-    db.prepare(`INSERT INTO crm_quote_versions (id, workspace_id, quote_id, version_number, status, currency, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, 1, 'draft', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(versionId, actor.workspaceId, quoteId, quoteCurrency, text(actor.userId) || null),
+    db.prepare(`INSERT INTO crm_quote_versions (id, workspace_id, quote_id, version_number, status, tax_treatment, tax_rate_basis_points, currency, snapshot_json, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, 1, 'draft', ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(versionId, actor.workspaceId, quoteId, defaultTaxTreatment, defaultTaxRateBasisPoints, quoteCurrency, JSON.stringify({ taxLabel }), text(actor.userId) || null),
     db.prepare(`UPDATE crm_quotes SET current_version_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`).bind(versionId, quoteId, actor.workspaceId),
   ]);
   await recordActivity(db, actor, actor.workspaceId, "enquiry", enquiryId, "quote.created", `Created quote ${reference}.`, { quoteId, versionId });
@@ -459,7 +510,7 @@ export async function saveQuoteDraft(db: D1Db, actor: QuoteActor, quoteId: strin
         ?.bookingPackDraft,
     );
 
-  const versionSnapshot = { quoteId, versionId: text(version.id), versionNumber: Number(version.version_number || 1), quoteType: quoteTypeValue, options: snapshotOptions, discountType, discountValue, taxTreatment, taxRateBasisPoints: taxRate, currency: quoteCurrency, clientNotes: text(input?.clientNotes), expiresAt: dateOnly(input?.expiresAt) || null, template: input?.templateSnapshot && typeof input.templateSnapshot === "object" ? input.templateSnapshot : null, ...(bookingPackDraft ? { bookingPackDraft } : {}) };
+  const versionSnapshot = { quoteId, versionId: text(version.id), versionNumber: Number(version.version_number || 1), quoteType: quoteTypeValue, options: snapshotOptions, discountType, discountValue, taxTreatment, taxRateBasisPoints: taxRate, taxLabel: text(existingVersionSnapshot?.taxLabel) || "Tax", currency: quoteCurrency, clientNotes: text(input?.clientNotes), expiresAt: dateOnly(input?.expiresAt) || null, template: input?.templateSnapshot && typeof input.templateSnapshot === "object" ? input.templateSnapshot : null, ...(bookingPackDraft ? { bookingPackDraft } : {}) };
   statements.push(db.prepare(`UPDATE crm_quote_versions SET client_notes = ?, internal_notes = ?, expires_at = ?, discount_type = ?, discount_value = ?, tax_treatment = ?, tax_rate_basis_points = ?, subtotal_amount = ?, discount_amount = ?, tax_amount = ?, total_amount = ?, currency = ?, snapshot_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ? AND status = 'draft'`).bind(
     text(input?.clientNotes), text(input?.internalNotes), dateOnly(input?.expiresAt) || null, discountType, discountValue, taxTreatment, taxRate, representative.subtotal, representative.discount, representative.tax, representative.total, quoteCurrency, JSON.stringify(versionSnapshot), version.id, actor.workspaceId,
   ));
@@ -2954,7 +3005,7 @@ async function acceptQuoteCore(db: D1Db, actor: QuoteActor, quoteId: string, inp
   if (!contact) throw httpError("Primary client not found.", 409);
   const acceptedAt = new Date().toISOString();
   const conversionActor = { ...actor, permissions: [...new Set([...(actor.permissions || []), "crm:manage", "crm:read"])] };
-  const quoteSnapshot = { quoteId, reference: text(row.reference), versionId: version.id, versionNumber: version.versionNumber, clientNotes: version.clientNotes, discountType: version.discountType, discountValue: version.discountValue, taxTreatment: version.taxTreatment, taxRateBasisPoints: version.taxRateBasisPoints };
+  const quoteSnapshot = { quoteId, reference: text(row.reference), versionId: version.id, versionNumber: version.versionNumber, clientNotes: version.clientNotes, discountType: version.discountType, discountValue: version.discountValue, taxTreatment: version.taxTreatment, taxRateBasisPoints: version.taxRateBasisPoints, taxLabel: text(version.taxLabel) || "Tax" };
   const conversion = await acceptEnquiry(db, conversionActor, text(row.enquiry_id), {
     valueAmount: calculated.total, packageName: option.name, serviceName: option.serviceType || text(row.service_interest),
     quoteId, quoteVersionId: version.id, quoteReference: text(row.reference), quoteVersionNumber: version.versionNumber,

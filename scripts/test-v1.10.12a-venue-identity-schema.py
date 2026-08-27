@@ -238,7 +238,10 @@ for forbidden in (
 
 
 # ------------------------------------------------------------
-# Fresh canonical schema = 49.
+# Fresh canonical release schema = 51.
+#
+# Venue Identity itself remains the exact historical 48 -> 49
+# migration tested separately below.
 # ------------------------------------------------------------
 
 fresh = sqlite3.connect(
@@ -255,7 +258,7 @@ fresh.executescript(
 
 assert (
     schema_version(fresh)
-    == "49"
+    == "51"
 )
 
 

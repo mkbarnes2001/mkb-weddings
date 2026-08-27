@@ -674,6 +674,12 @@ export async function getPublicInvoice(
     children.payments,
   );
 
+  const booking =
+    json<Record<string, unknown>>(
+      invoice.booking_snapshot_json,
+      {},
+    );
+
   return {
     id: text(invoice.id),
     jobId: text(invoice.job_id),
@@ -686,6 +692,7 @@ export async function getPublicInvoice(
     subtotalAmount: Number(invoice.subtotal_amount || 0),
     discountAmount: Number(invoice.discount_amount || 0),
     taxAmount: Number(invoice.tax_amount || 0),
+    taxLabel: text(booking["taxLabel"]) || "Tax",
     totalAmount: Number(invoice.total_amount || 0),
     paidAmount: financials.paidAmount,
     balanceAmount: financials.balanceAmount,
@@ -697,10 +704,7 @@ export async function getPublicInvoice(
       invoice.client_snapshot_json,
       {},
     ),
-    booking: json<Record<string, unknown>>(
-      invoice.booking_snapshot_json,
-      {},
-    ),
+    booking,
     notes: text(invoice.notes),
     terms: text(invoice.terms),
     issuedAt: text(invoice.issued_at),
@@ -1263,4 +1267,60 @@ export async function signPublicContract(
     workspaceId,
     contractId,
   );
+}
+
+
+export async function getPublicInvoiceCheckoutContext(
+  db: D1Db,
+  request: Request,
+  workspaceId: string,
+  invoiceId: string,
+) {
+  const identity =
+    await publicIdentity(
+      db,
+      request,
+      workspaceId,
+    );
+
+  if (!identity) {
+    throw httpError(
+      "Sign in to pay this invoice.",
+      401,
+    );
+  }
+
+  /*
+   * Reuse the canonical invoice reader so Checkout inherits
+   * the existing invoice-status and active Job-access guards.
+   */
+  const invoice =
+    await getPublicInvoice(
+      db,
+      request,
+      workspaceId,
+      invoiceId,
+    );
+
+  return {
+    identity: {
+      id:
+        text(identity.id),
+
+      email:
+        text(
+          identity.email
+          || identity.emailNormalized
+          || identity.email_normalized,
+        ).toLowerCase(),
+
+      displayName:
+        text(
+          identity.displayName
+          || identity.display_name,
+        ),
+    },
+
+    invoice,
+  };
 }
