@@ -1,4 +1,56 @@
 # MKB Intelligence — Changelog
+
+## v1.10.12a — Booking Journey, CRM Refinement & Connected Payments
+
+- Stable tag: `v1.10.12a-booking-journey-crm-refinement-connected-payments-stable`
+- Final application commit: `e491177719ca6a64526db93d247ed3a68692a7f2`
+- Production schema: **51**
+- Public deployment at release: `2dfc0628-7208-41ed-a962-9cc08f584317`
+- Admin deployment at release: `6c0eb68d-befe-4bf9-86b7-c88eb2e6b6c9`
+
+Release highlights:
+
+- Refined shared Lead and Job wedding workspaces and the Wedding Photography milestone workflow.
+- Added canonical Lead Source continuity.
+- Refined Lead Form field management, public address/Google Places behaviour and workspace-country biasing.
+- Added guarded permanent-delete workflows for Leads and Jobs.
+- Added venue identity schema/runtime continuity.
+- Refined questionnaire builder, supplier taxonomy and CRM presentation.
+- Added connected-payment foundation and workspace-owned Stripe readiness.
+- Added dual Stripe onboarding: hosted account setup plus connect-existing-account OAuth.
+- Added direct-charge Stripe Checkout for WedCRM invoice/payment-schedule obligations.
+- Added verified connected-account webhook settlement with account, workspace, invoice, schedule, amount, currency and PaymentIntent-deduplication guards.
+- Kept the WedPlanned connected-payment webhook isolated from the existing Print Store Stripe webhook.
+- Added workspace commercial tax defaults.
+- Verified live MKB Weddings Stripe connection as ready, Standard, GB, GBP, with charges and payouts enabled.
+- Enabled WedCRM card payments for MKB Weddings.
+- Release sealed with zero live Checkout attempts and zero live Stripe invoice settlement rows.
+- Full v1.10.12a regression sweep passed before release.
+
+## v1.10.x consolidated progression
+
+The v1.10.x development line established and refined:
+
+- WedPlanned product/module information architecture;
+- WedNav as the central business setup/readiness hub;
+- persistent first-run business onboarding;
+- commercial templates and quote/email delivery;
+- payment schedules and professional/client portal refinement;
+- service-specific Wedding Photography Job workflow presentation;
+- booking-journey reliability and CRM UI refinement;
+- configurable Lead Form and source continuity;
+- venue identity continuity;
+- production-ready Stripe-connected client payments;
+- workspace commercial tax defaults.
+
+For exact intermediate implementation chronology, use Git history and the corresponding stable tags.
+
+## Historical changelog
+
+The entries below are retained from earlier releases.
+
+Statements such as "planned for v1.9.3" reflect the plan at that historical release and are superseded by the v1.10.12a state above.
+
 ## v1.9.2 — Workflows and Communication
 - Added migration 030 and workspace-owned workflow templates, versioned Job workflow snapshots, tasks and communication history.
 - Added one editable default client workflow per workspace with booking confirmation, questionnaire, final-details, event-brief and post-event tasks.

@@ -1,5 +1,16 @@
 # Stripe Setup for MKB Intelligence v1.6.1
 
+## Scope note
+
+This document originated with the Print Store / hosted Checkout Stripe integration.
+
+WedCRM connected client payments are a separate Stripe Connect domain documented in `WEDPLANNED-PAYMENTS.md`. The existing Print Store Stripe configuration/webhook boundary must remain isolated from the WedPlanned connected-payment configuration.
+
+WedPlanned platform subscription billing is a third, separate Stripe relationship planned for **v1.10.13a — Subscription Billing & Entitlements**.
+
+Never commit Stripe secret values to this repository or documentation.
+
+
 Use Stripe test mode until the complete Client Gallery payment flow has been verified. Stripe payment and Prodigi fulfilment remain separate: v1.6.1 records a verified payment but never sends an order to a print lab.
 
 ## 1. Apply the database migration

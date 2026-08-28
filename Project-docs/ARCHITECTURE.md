@@ -1,5 +1,100 @@
 # MKB Intelligence — Architecture
 
+## Current stable architecture baseline — v1.10.12a
+
+Stable application baseline:
+
+- release: **v1.10.12a — Booking Journey, CRM Refinement & Connected Payments**
+- stable application commit: `e491177719ca6a64526db93d247ed3a68692a7f2`
+- production schema: **51**
+- durable tenant/business key: `workspace_id`
+
+## Current WedPlanned module boundary
+
+`WedNav → business setup, onboarding, readiness and business-wide administration`
+
+`WedCRM → Leads, Contacts, Jobs, questionnaires, booking/commercial workflow, client portal and client invoice payments`
+
+`WedStudio → website connection, content, publishing and gallery-related website tooling`
+
+`WedStore → commerce`
+
+Configuration remains owned by the relevant specialist module.
+
+WedNav may report readiness and provide Configure links, but it must not create duplicate settings or competing sources of truth.
+
+## Current financial architecture
+
+WedPlanned has three deliberately distinct payment domains.
+
+### Print Store commerce
+
+The legacy Print Store Stripe integration remains isolated behind its own Stripe configuration and webhook boundary.
+
+### Professional client payments — implemented
+
+`client/couple → WedCRM invoice/payment schedule → Stripe Checkout → professional connected Stripe account`
+
+Professionals may either create/setup a Stripe account through hosted Stripe Connect onboarding or connect an existing Stripe account through OAuth.
+
+WedPlanned:
+
+- never asks professionals to provide Stripe secret keys;
+- does not persist professional Stripe credentials;
+- stores only connected-account identity/readiness required to operate the integration;
+- uses direct charges against the connected professional account.
+
+Browser Checkout return URLs are not settlement authority.
+
+Only verified Stripe webhook events may settle an invoice.
+
+Settlement validation includes:
+
+- workspace ownership;
+- invoice ownership;
+- schedule-item ownership;
+- exact connected Stripe account;
+- exact amount;
+- exact currency;
+- PaymentIntent deduplication.
+
+The dedicated connected-payment webhook remains isolated from the existing Print Store Stripe webhook.
+
+See `WEDPLANNED-PAYMENTS.md`.
+
+### WedPlanned platform subscriptions — next release
+
+Planned release:
+
+**v1.10.13a — WedPlanned Subscription Billing & Entitlements**
+
+This is a separate financial relationship:
+
+`professional/business workspace → WedPlanned platform Stripe account → Stripe Billing subscription`
+
+The subscription belongs to the workspace/business rather than an individual professional user.
+
+The required access abstraction is:
+
+`Stripe Price → WedPlanned Plan → Entitlements → Workspace access`
+
+Application access must not be hard-coded directly to Stripe Price IDs.
+
+Subscription state will ultimately be driven by verified Stripe Billing webhook events and WedPlanned internal entitlement resolution.
+
+## Identity and tenant authority
+
+- Professional users authenticate separately from client-portal users.
+- Active professional membership determines access to a workspace.
+- The workspace remains the durable business/tenant boundary.
+- Browser-supplied workspace IDs are not access-control authority.
+- Public tenant resolution uses verified domain ownership where required.
+- Cross-workspace relationships remain guarded by application and database boundaries.
+
+## Historical architecture detail
+
+The sections below document how the architecture evolved. Version-specific current/future statements belong to their historical implementation point unless superseded by the current architecture above.
+
 ## Current architecture
 - Admin: React / Vite
 - Public site: React / Vite
@@ -45,7 +140,7 @@ WedPlanned platform
 The tenant-readiness audit divides the application into:
 - already scoped: workspaces, canonical assets, Client Galleries, Location Intelligence and commerce/fulfilment;
 - controlled migration required: legacy Weddings, Venues, Suppliers, Moments and public collection definitions;
-- planned: professional authentication, Stripe Connect and external-business onboarding.
+- implemented after the v1.8.0 foundation: professional authentication, tenant ownership and Stripe Connect onboarding.
 
 MKB Weddings remains the default and first operating WedPlanned business. Existing single-account Stripe Checkout and Prodigi flows continue unchanged until connected-account ownership is implemented.
 

@@ -1,5 +1,14 @@
 # WedPlanned Legacy Tenant Ownership — v1.8.2
 
+## Current status
+
+This document records the v1.8.2 legacy tenant-ownership migration.
+
+That ownership migration and its cross-tenant enforcement are complete. The current stable application baseline is **v1.10.12a / schema 51**.
+
+The durable tenant key remains `workspace_id`. Current professional authentication, CRM, connected payments and future subscription entitlements build on this same workspace/business boundary.
+
+
 ## Purpose
 v1.8.2 moves the remaining legacy MKB content model behind the WedPlanned business boundary established in v1.8.0 and authenticated in v1.8.1.
 

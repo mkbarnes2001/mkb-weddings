@@ -1,5 +1,14 @@
 # WedPlanned Professional Authentication — v1.8.1
 
+## Current status
+
+This document records the v1.8.1 professional-authentication foundation.
+
+The current stable application baseline is **v1.10.12a / schema 51**. Professional authentication, membership-based tenant context, legacy tenant ownership and Stripe Connect are now implemented in production.
+
+Version-specific migration/deployment commands below are historical release instructions and must not be replayed against current production.
+
+
 ## Purpose
 v1.8.1 replaces implied single-admin access with a professional identity and business-membership boundary. It supports passwordless sign-in, invitation acceptance, role permissions and multi-business switching while preserving MKB Weddings as the only operational tenant until legacy ownership migration is complete.
 
@@ -90,4 +99,4 @@ Future modules will map their own permissions onto these memberships.
 ## Current limitation
 The authentication gate secures API access on the Admin Pages project, including its custom and preview hostnames, but it does not make all legacy records multi-tenant. Weddings, Venues, Suppliers, Moments and public collection definitions still require `workspace_id` backfills and scoped queries.
 
-Do not onboard external businesses or expose marketplace publication until v1.8.2 ownership migration and cross-tenant tests are complete. Stripe Connect follows after that work.
+At v1.8.1, external-business onboarding and marketplace publication were gated on the v1.8.2 ownership migration and cross-tenant tests. Those ownership gates were subsequently completed, and Stripe Connect is implemented in the v1.10.12a production baseline. Marketplace publication remains a future explicit capability.

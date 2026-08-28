@@ -1,9 +1,90 @@
 # MKB Intelligence — Database Notes
 
-Always inspect the actual migration files before assuming a table/column exists.
+Always inspect `d1/schema.sql` and the actual migration files before assuming that a table, column, trigger or index exists.
 
-## Schema version
-Current target schema version: **30**. Read migrations in sequence; migration 027 adds the CRM foundation, migration 028 adds the client portal/questionnaires, migration 029 adds supplier questionnaire review and Wedding linking, and migration 030 adds workflow templates, Job tasks, communication history and lead autoresponders.
+## Current schema baseline
+
+Canonical production schema version: **51**
+
+Stable application baseline: **v1.10.12a — Booking Journey, CRM Refinement & Connected Payments**
+
+- Stable application commit: `e491177719ca6a64526db93d247ed3a68692a7f2`
+- Fresh/bootstrap schema source: `d1/schema.sql`
+- Production upgrades use the relevant sequential migration files.
+
+Historical migrations are not assumed to bootstrap an empty database from migration 001. The canonical fresh-schema definition is `d1/schema.sql`.
+
+## Migration sequence after schema 30
+
+- `031_packages_quotes.sql`
+- `032_platform_administration.sql`
+- `033_platform_style_assets.sql`
+- `034_platform_record_card_colour.sql`
+- `035_platform_branding_assets.sql`
+- `036_platform_surface_wordmarks.sql`
+- `037_admin_appearance_controls.sql`
+- `038_wedplanned_public_appearance.sql`
+- `039_crm_booking_pack_commercial_foundation.sql`
+- `040_external_business_signup_foundation.sql`
+- `041_commercial_templates_email_delivery.sql`
+- `042_wedcrm_lead_workspace_client_journey.sql`
+- `043_living_questionnaires.sql`
+- `044_crm_payment_schedule_presets.sql`
+- `045_crm_configurable_lead_form.sql`
+- `046_admin_header_appearance.sql`
+- `047_admin_action_icons.sql`
+- `048_crm_lead_source_continuity.sql`
+- `049_crm_wedstudio_venue_identity.sql`
+- `050_connected_payments_foundation.sql`
+- `051_crm_tax_defaults.sql`
+
+The filenames above are generated from the repository and provide the authoritative migration sequence from schema 30 through schema 51. Inspect each migration for its exact table, column, index, trigger and seed behaviour.
+
+## Schema 50 — Connected Payments Foundation
+
+Migration 050 establishes the workspace-owned connected-payment state and invoice Checkout-attempt lifecycle used by WedCRM client payments.
+
+Key boundaries include:
+
+- workspace-owned Stripe connection and readiness state;
+- one-use provider connection state;
+- invoice Checkout/payment attempts;
+- direct charges against the professional connected Stripe account;
+- verified webhook settlement;
+- no invoice settlement from browser return URLs.
+
+The connected-payment state is separate from legacy Print Store Stripe state and from future WedPlanned subscription billing.
+
+## Schema 51 — CRM Tax Defaults
+
+Migration 051 adds workspace commercial tax defaults including:
+
+- default tax treatment;
+- default tax rate in basis points;
+- tax label.
+
+Existing workspace booking-setting rows receive safe non-tax defaults.
+
+## Production payment state at v1.10.12a release
+
+For `workspace_mkb_weddings`:
+
+- Stripe connection status: `ready`
+- connected account type: `standard`
+- country: `GB`
+- default currency: `GBP`
+- details submitted: `1`
+- Stripe charges enabled: `1`
+- Stripe payouts enabled: `1`
+- WedCRM card payments enabled: `1`
+- live Stripe Checkout/payment attempts at release: `0`
+- live Stripe invoice settlement rows at release: `0`
+
+See `WEDPLANNED-PAYMENTS.md` for payment-domain architecture.
+
+## Historical schema notes
+
+The sections below retain the earlier schema documentation for migration history. Historical references to an earlier schema as current are superseded by schema 51 above.
 
 ## Schema version 30
 Migration: `030_workflows_communications.sql`

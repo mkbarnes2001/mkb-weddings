@@ -1,6 +1,103 @@
 # MKB Intelligence — Roadmap
 
-## Current CRM release — v1.9.2
+## Current stable release — v1.10.12a
+
+Stable application baseline:
+
+**v1.10.12a — Booking Journey, CRM Refinement & Connected Payments**
+
+- stable tag: `v1.10.12a-booking-journey-crm-refinement-connected-payments-stable`
+- stable application commit: `e491177719ca6a64526db93d247ed3a68692a7f2`
+- production schema: **51**
+- connected client payments production-ready;
+- WedNav setup and readiness architecture established;
+- compact shared Lead and Job workspace direction established;
+- service-specific Wedding Photography milestone workflow established.
+
+## Next planned release — v1.10.13a
+
+### WedPlanned Subscription Billing & Entitlements
+
+Build workspace-owned subscription billing using the WedPlanned platform Stripe account.
+
+The required access chain is:
+
+`Stripe Price → WedPlanned Plan → Entitlements → Workspace access`
+
+Initial scope:
+
+- monthly and annual subscriptions;
+- trials;
+- active, past-due, grace, cancelled and expired states;
+- complimentary/internal access;
+- Stripe Customer per workspace;
+- Stripe Checkout subscription flow;
+- Stripe Customer Portal;
+- dedicated subscription webhook;
+- entitlement-driven module/feature access;
+- support for future grandfathering, promotions, plan migrations and add-ons.
+
+Subscription billing must remain separate from professional connected-account client payments.
+
+## Product direction — Wed Connect
+
+**Wed Connect** is the planned professional-to-professional network within WedPlanned.
+
+Initial use cases:
+
+- request a second shooter;
+- find a stand-in;
+- request associate or support photographers;
+- request event support labour;
+- match requests to professional availability;
+- build professional reputation and recommendation signals.
+
+Wed Connect should reuse verified WedPlanned professional and business identity rather than creating a parallel account system.
+
+## Product direction — Wed Marketplace
+
+**Wed Marketplace** is the planned client-facing marketplace for discovering wedding professionals.
+
+Potential discovery and ranking signals include:
+
+- verified client reviews;
+- recommendations from other wedding professionals;
+- service and category relevance;
+- geography;
+- verified business profile data;
+- future platform reputation signals.
+
+Marketplace publication must always be explicit.
+
+Private CRM, client and internal business data must never become marketplace content implicitly.
+
+## Current module ownership
+
+- **WedNav** — central business setup, onboarding, readiness and business-wide administration.
+- **WedCRM** — Leads, Contacts, Jobs, client portal, questionnaires, booking/commercial workflow and client invoice payments.
+- **WedStudio** — website connection, content, publishing and gallery-related website tooling.
+- **WedStore** — commerce.
+
+WedNav may surface readiness and deep-link to specialist modules, but configuration remains owned by the relevant specialist module.
+
+## Future workflow automation
+
+Service-specific Job milestones may later resolve from the professional category/service and its workflow template.
+
+For photography, WedStudio should eventually provide authoritative events for:
+
+- previews delivered;
+- final gallery delivered.
+
+Those events may automate corresponding WedCRM Job milestones while preserving manual override and audit behaviour.
+
+## Historical roadmap detail
+
+The remaining sections are retained for implementation history and older backlog context.
+
+Any section below describing a release as current or next reflects its historical planning point and is superseded by the roadmap above.
+
+## Historical milestone — v1.9.2 Workflows and Communication
 - Reusable workflow templates with ordered task steps.
 - Immutable Job workflow snapshots and automatic default workflow application for newly accepted bookings.
 - Due dates relative to booking/event date, priorities, progress, overdue and next-task visibility.
@@ -9,10 +106,10 @@
 - Configurable public-lead autoresponders with merge variables.
 - Lead board/list and searchable Job list views.
 
-## Next CRM release
+## Historical planned CRM release
 - **v1.9.3:** services/packages, quotes, contracts, invoices, payment schedules and connected payments.
 
-## Current commercial baseline
+## Historical commercial baseline
 Completed and in production:
 - Workspace / studio ownership foundation
 - Weddings, venues, suppliers, moments, locations and galleries
@@ -126,14 +223,14 @@ Completed and in production:
 - Workspace-scoped structured business data export
 - Staged account/business deletion request and retention safeguards
 
-## Current source — CRM Foundation (v1.9.0)
+## Historical milestone — CRM Foundation (v1.9.0)
 - Verified-domain public lead/enquiry form and Contact-page integration
 - Workspace contacts, enquiry pipeline and activity history
 - Manual enquiry management and accepted/lost workflow
 - Accepted enquiry creates one neutral Job and links/creates the workspace Wedding record
 - CRM permissions, export coverage and cross-workspace relationship triggers
 
-## Then — Client Portal and Questionnaires (v1.9.1)
+## Historical milestone — Client Portal and Questionnaires (v1.9.1)
 - Portal invitations and identity linkage
 - Versioned questionnaire templates/instances/responses
 - Client-entered supplier team with Supplier Master search and approval/merge queue
@@ -143,7 +240,7 @@ Completed and in production:
 - Communication history, outbound client email and public-lead autoresponders
 - Lead and Job list views
 
-## Commercial Workflow and Connected Payments — v1.9.3
+## Historical planned sequence — Commercial Workflow and Connected Payments
 - Services/packages, quotes, contracts and invoices
 - Stripe Connect hosted onboarding and payment webhooks attached to CRM invoices
 - Stripe Billing subscriptions for businesses, separate from couple/client payments

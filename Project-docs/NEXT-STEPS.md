@@ -1,97 +1,168 @@
 # Next Steps
-## Current release candidate — v1.9.2 Workflows and Communication
-1. Run all six schema-30 regression tests and both Vite builds.
-2. Review Lead board/list, Job list, workflow library, workflow builder and expanded Job task/communication panels in WedPlanned Test Business.
-3. Take a production D1 export and Time Travel bookmark.
-4. Apply only `030_workflows_communications.sql` while production code remains on v1.9.1b.
-5. Verify schema 30, all five workflow/communication tables, seeded default workflows and clean foreign keys.
-6. Deploy public/Admin code and apply the default workflow to the existing test Job.
-7. Verify task due dates, completion/reopen, workflow progress, manual task creation and cross-Job task overview.
-8. Log a phone/note communication and send one disposable client email through Resend.
-9. Enable the test-business lead autoresponder temporarily, submit a disposable public enquiry and verify the communication record without exposing MKB data.
-10. Restore test settings and tag only after tenant isolation and live communication checks pass.
 
-## Following CRM release
-- v1.9.3: services/packages, quotes, contracts, invoices, payment schedules and Stripe-connected payments.
+## Current stable baseline
 
-## Current baseline
-The stable production baseline before this source release is **v1.8.3 Platform Operations Foundation**, commit `0385e9e`, with production D1 on schema **26**. Authentication, tenant ownership, second-business isolation, support access, workspace export and staged deletion have passed production validation.
+The verified stable application baseline is **v1.10.12a — Booking Journey, CRM Refinement & Connected Payments**.
 
-## Current source release — v1.9.0 CRM Foundation
-This release advances D1 to schema **27** and establishes the first complete client workflow:
+- Stable tag: `v1.10.12a-booking-journey-crm-refinement-connected-payments-stable`
+- Stable application commit: `e491177719ca6a64526db93d247ed3a68692a7f2`
+- Production schema: **51**
 
-`Public lead form → Contact + Enquiry → Pipeline → Accepted booking → Job → linked/created Wedding`
+The stable tag is immutable and must not be altered when beginning the next release.
 
-Included:
-1. Workspace-owned CRM stages, contacts, enquiries, relationships, Jobs and activity history.
-2. Public `/enquire` form resolved from the verified request domain; browser-supplied workspace IDs are never accepted.
-3. Consent capture, honeypot handling, hashed request-fingerprint rate limiting and optional Resend notification.
-4. Admin CRM pipeline, Contacts, Jobs and lead-form settings.
-5. Manual enquiry creation and detailed enquiry/client editing.
-6. Lost/unavailable workflow with retained history.
-7. Idempotent accepted-booking conversion creating one Job and linking or creating the existing workspace Wedding record.
-8. CRM role permissions, support-mode integration, export coverage and platform audit/activity records.
-9. Database triggers preventing cross-workspace stage/contact/job relationships and unique primary/partner relationship indexes.
-10. Migration `027_crm_foundation.sql`.
+## Next release — v1.10.13a Subscription Billing & Entitlements
 
-## v1.9.0 validation and rollout
-1. Apply the patch through Terminal/`rsync`; never replace the repository folder.
-2. Run:
-   - `python3 scripts/test-legacy-tenant-isolation.py`
-   - `python3 scripts/test-platform-operations.py`
-   - `python3 scripts/test-crm-foundation.py`
-   - `npm run build`
-   - `npm run build:admin`
-   - `git diff --check`
-3. Commit locally, but do not push.
-4. Export production D1 and capture a Time Travel bookmark.
-5. Confirm production schema 26.
-6. Apply migration 027 before deploying code.
-7. Verify schema 27, CRM tables/triggers/indexes and `PRAGMA foreign_key_check`.
-8. Push code and confirm both Pages deployments.
-9. Test first on `workspace_wedplanned_test`:
-   - CRM opens with seven default stages and no MKB records;
-   - manual enquiry/contact creation works;
-   - cross-business known IDs remain unavailable;
-   - accepting a test enquiry creates exactly one Job and one linked Wedding;
-   - accepting it again creates no duplicate;
-   - lost workflow and activity history work;
-   - public lead form is disabled unless explicitly enabled for that business.
-10. Test MKB:
-   - `/enquire` and Contact form resolve MKB from `www.mkbweddings.co.uk`;
-   - one disposable lead appears in CRM and notification delivery behaves as configured;
-   - accepting a disposable test lead creates the Job/Wedding workflow;
-   - remove/archive disposable test records only after validation.
+The next engineering phase adds the second Stripe relationship:
 
-## Next release — v1.9.1 Client Portal and Questionnaires
-- portal invitations and CRM-contact identity linkage;
-- versioned questionnaire templates and immutable sent instances;
-- structured responses and completion tracking;
-- supplier-team questionnaire;
-- Supplier Master search and unknown-supplier approval/merge queue;
-- approved responses update Job/Wedding relationships without allowing clients to overwrite reusable master data.
+`professional/business workspace → WedPlanned platform → recurring Stripe Billing subscription`
 
-## Later releases
-### v1.9.2 Commercial workflow
-- services/packages;
-- quotes and acceptance;
-- contracts/signatures;
-- invoices/payment schedules;
-- tasks, workflow templates and reminders.
+This remains separate from the implemented client-payment relationship:
 
-### v1.9.3 Connected payments
-- Stripe Connect onboarding and account webhooks;
-- invoice/payment webhooks attached to Jobs;
-- business-owned client payments;
-- WedPlanned subscription billing remains a separate Stripe relationship.
+`client/couple → professional connected Stripe account`
 
-## Guardrails
-- `workspaces.id` remains the durable business ownership key.
-- Public CRM workspace resolution comes only from a verified request domain.
-- Professional CRM access comes only from the authenticated active membership/support context.
-- Accepted conversion is idempotent and auditable.
-- The neutral Job is the commercial source of truth; Wedding remains the content/delivery/publishing record.
-- Client-entered questionnaire/supplier data will enter reviewable workflow records, not mutate Venue/Supplier masters directly.
-- Couple payments and WedPlanned SaaS subscriptions remain separate provider relationships.
+### Gate 0 — baseline and architecture inspection
 
-See `WEDPLANNED-CRM.md` for the detailed model.
+1. Start from the latest source on `main`.
+2. Verify the v1.10.12a stable tag and application commit.
+3. Verify production schema remains 51.
+4. Inspect workspace/business ownership, professional authentication, WedNav, existing `workspace_entitlements`, Stripe Connect and payment webhook boundaries.
+5. Inspect the current D1 schema and migration conventions.
+6. Define the subscription, plan and entitlement architecture before modifying source.
+7. Make no production, Stripe or database changes during this inspection.
+
+### Gate 1 — internal plan and subscription model
+
+Design the internal model before writing a migration.
+
+The required abstraction is:
+
+`Stripe Price → WedPlanned Plan → Entitlements → Workspace access`
+
+The design must support:
+
+- workspace-owned subscriptions;
+- durable internal plan identifiers;
+- monthly and annual billing;
+- trials;
+- active state;
+- past-due state;
+- grace periods;
+- cancellation at period end;
+- cancelled and expired states;
+- complimentary/internal access;
+- grandfathered pricing;
+- promotional plans;
+- future add-ons;
+- future plan migrations.
+
+Do not hard-code application access directly to Stripe Price IDs.
+
+Do not create live Stripe Products or Prices during Gate 1.
+
+### Gate 2 — local schema and entitlement resolver
+
+After the model is approved:
+
+1. add only the minimum required D1 migration;
+2. update canonical `d1/schema.sql`;
+3. implement workspace plan/subscription persistence;
+4. implement entitlement resolution;
+5. reconcile with existing `workspace_entitlements` rather than creating competing entitlement state;
+6. add tenant-isolation and permission regression tests;
+7. prove canonical fresh schema locally;
+8. prove the exact upgrade migration locally.
+
+### Gate 3 — Stripe Billing integration
+
+Only after the internal model is stable:
+
+- create or resolve a Stripe Customer per workspace;
+- integrate Stripe Checkout with `mode=subscription`;
+- integrate Stripe Customer Portal;
+- implement a dedicated subscription webhook;
+- persist verified subscription state;
+- keep subscription billing isolated from connected-account client payments;
+- never grant or remove authoritative access solely from a browser success redirect.
+
+### Gate 4 — WedNav billing UI
+
+Business-wide subscription administration belongs under WedNav / business administration.
+
+WedNav should surface:
+
+- current plan;
+- subscription status;
+- trial or grace state;
+- billing interval;
+- renewal or period-end date;
+- manage billing;
+- change or upgrade plan;
+- entitlement/readiness state.
+
+Specialist modules must not duplicate subscription configuration.
+
+### Gate 5 — Stripe sandbox runtime
+
+Before production:
+
+1. create subscription in sandbox;
+2. verify successful Checkout;
+3. verify webhook-driven activation;
+4. verify successful renewal;
+5. verify failed invoice and grace behaviour;
+6. verify cancellation at period end;
+7. verify entitlement transitions;
+8. verify Customer Portal behaviour;
+9. confirm connected client payments remain unaffected.
+
+### Gate 6 — controlled production rollout
+
+Only after local and sandbox gates pass:
+
+1. capture a production D1 rollback point;
+2. apply the exact approved migration;
+3. verify production schema and workspace state;
+4. create/configure live Stripe subscription Products and Prices;
+5. configure the dedicated live subscription webhook;
+6. deploy controlled production code;
+7. verify the production billing path;
+8. push and tag only after production verification.
+
+## Future product roadmap
+
+### Wed Connect
+
+Professional network for:
+
+- second-shooter requests;
+- stand-ins;
+- associates and support photographers;
+- event support labour;
+- availability and request matching;
+- professional reputation and recommendation signals.
+
+### Wed Marketplace
+
+Client-facing professional discovery using:
+
+- professional profiles;
+- service/category and geography;
+- verified client reviews;
+- professional recommendations;
+- ranking and standing signals;
+- future enquiry and booking integration into WedCRM.
+
+Marketplace publication must be explicit. Private CRM, client and internal business data must never become marketplace content implicitly.
+
+## Ongoing architecture guardrails
+
+- Workspace/business remains the durable tenant boundary.
+- Professional membership determines access to a workspace.
+- Client portal identity remains separate from professional identity.
+- WedNav orchestrates setup/readiness while specialist modules own configuration.
+- Client invoice payments and WedPlanned subscriptions remain separate Stripe relationships.
+- Browser redirects are not authoritative settlement or subscription state.
+- Never store professional Stripe secret keys.
+- Do not create unnecessary migrations.
+- Prefer read-only inspection before writes.
+- Keep production changes behind explicit verified gates.

@@ -1,19 +1,107 @@
 # Project State
-## v1.9.2 source state — Workflows and Communication
-- Base: stable v1.9.1b Supplier Questionnaire Integration and Job Workspace (`542303e`, schema 29).
-- Source includes migration 030 and targets schema 30.
-- Workspace-owned workflow templates create immutable Job workflow snapshots and dated task lists.
-- New accepted Jobs receive the active default workflow automatically; existing Jobs can apply a workflow manually.
-- CRM adds task progress, overdue/next-task visibility, manual tasks and task completion/reopen controls.
-- Job communication history supports email, phone, SMS, meeting and internal-note records; outbound email uses the existing Resend boundary.
-- Public lead forms can send configurable acknowledgement emails with merge variables and retain sent/failed history.
-- Lead board/list, Job list and cross-Job task views improve operational visibility without changing tenant authority.
-- Quotes, contracts, invoices, payment schedules and connected payments remain v1.9.3 work.
 
-## Version
-Current release in source: **v1.9.2 — Workflows and Communication**.
-Database schema version: **30**.
-Stable production baseline before this release: **v1.9.1b**, commit `542303e`, schema **29**.
+## Current stable application baseline — v1.10.12a
+
+**v1.10.12a — Booking Journey, CRM Refinement & Connected Payments** is the verified stable application baseline.
+
+- Stable tag: `v1.10.12a-booking-journey-crm-refinement-connected-payments-stable`
+- Final application commit: `e491177719ca6a64526db93d247ed3a68692a7f2`
+- Production schema: **51**
+- Public deployment at release: `2dfc0628-7208-41ed-a962-9cc08f584317`
+- Admin deployment at release: `6c0eb68d-befe-4bf9-86b7-c88eb2e6b6c9`
+- Stable source SHA256: `2e258cbe65631b1a5654e3424de1747ae4865588c42e06b20b434335350013b0`
+- Stable tag, local source and GitHub `main` were aligned at release seal.
+- Production Public and Admin were verified on the exact stable application commit before sealing.
+- The stable tag must not be moved or amended.
+
+A later documentation-only reconciliation may sit on `main`; that does not redefine the immutable v1.10.12a application tag.
+
+## Current product state
+
+WedPlanned now includes:
+
+- neutral workspace/business ownership;
+- professional authentication and membership-based tenant context;
+- cross-tenant ownership enforcement;
+- CRM Leads, Contacts and Jobs;
+- client portal and questionnaires;
+- supplier questionnaire review;
+- workflows, tasks and communication history;
+- commercial templates;
+- quote and invoice workflow;
+- payment schedules;
+- refined shared Lead and Job workspaces;
+- WedNav setup/readiness orchestration;
+- Stripe-connected client payments;
+- workspace commercial tax defaults.
+
+The current photography Job milestone presentation is:
+
+`Lead created → Job accepted → Wedding day → Previews sent → Client photos delivered`
+
+The generic workflow/task capability remains underneath the service-specific presentation.
+
+## Current module ownership
+
+- **WedNav** owns business-wide onboarding, setup orchestration, readiness and business administration.
+- **WedCRM** owns client acquisition, Leads, Contacts, Jobs, questionnaires, booking/commercial configuration, client portal and client invoice payments.
+- **WedStudio** owns website connection, website/content configuration, publishing and gallery-related website tooling.
+- **WedStore** owns commerce.
+
+WedNav must not duplicate specialist configuration. It reports readiness and deep-links to the authoritative module.
+
+## Connected client payments — production ready
+
+The v1.10.12a client-payment architecture is:
+
+`client/couple → WedCRM invoice or instalment → professional connected Stripe account`
+
+For MKB Weddings at release:
+
+- connection status: **ready**
+- connected account model: **Standard**
+- country: **GB**
+- default currency: **GBP**
+- details submitted: **yes**
+- charges enabled: **yes**
+- payouts enabled: **yes**
+- WedCRM card payments enabled: **yes**
+- live payment attempts at release: **0**
+- live Stripe invoice settlement rows at release: **0**
+
+Professionals connect or create Stripe accounts through Stripe Connect. WedPlanned does not request or store professional Stripe secret keys.
+
+Checkout uses direct charges on the professional connected account. Browser return URLs never settle invoices.
+
+Settlement is accepted only from verified Stripe webhook events with connected-account, workspace/invoice, amount, currency, schedule ownership and PaymentIntent deduplication checks.
+
+See `WEDPLANNED-PAYMENTS.md` for the durable payment architecture.
+
+## Next planned release
+
+**v1.10.13a — WedPlanned Subscription Billing & Entitlements**
+
+This creates a separate financial relationship:
+
+`professional/business workspace → WedPlanned → Stripe Billing subscription`
+
+The subscription belongs to the workspace/business rather than an individual user.
+
+The planned access abstraction is:
+
+`Stripe Price → WedPlanned Plan → Entitlements → Workspace access`
+
+The first v1.10.13a gate should design and prove the internal plan, subscription and entitlement model locally before creating live Stripe Products or Prices, modifying production D1 or deploying production code.
+
+## Future product directions
+
+- **Wed Connect** — an intra-professional network for second shooters, stand-ins, associates and support labour.
+- **Wed Marketplace** — client-facing discovery of wedding professionals using client reviews plus professional recommendations and ranking signals.
+- WedStudio delivery events may later automate photography workflow milestones such as previews sent and final gallery delivered.
+
+## Historical project state
+
+The sections below are retained as implementation history. Any statement describing a then-current or then-future release applies to that historical development point and is superseded by the current v1.10.12a state above.
 
 ## CRM Foundation — v1.9.0
 - Adds workspace-owned pipeline stages, CRM contacts, enquiries, contact relationships, neutral Jobs, Job relationships and activity history.
@@ -375,7 +463,7 @@ Adds:
 
 Important boundary: legacy MKB website derivatives remain preview-only. New private-original uploads use dedicated private R2 storage and authorized download delivery; legacy public derivatives are never reclassified as originals.
 
-## Immediate next major module
+## Historical next-major-module note
 Gallery Visitor Identity & Permissions: optional required-email entry, linked-client identities and per-person full-resolution download entitlements, followed by print-store / lab fulfilment foundations.
 
 ## Private Original Upload & Secure Delivery — v1.2.0
@@ -506,4 +594,4 @@ Custom logos are stored in public `MKB_IMAGES` R2 under managed branding keys. P
 ## v1.7.16 — Final Weddings and Venues Repository Polish
 The Weddings and Venues repository interfaces now complete the shared Admin visual pass. Venue cards use a smaller title/location hierarchy; Venue summary visibility, location and status rows are denser. Wedding cards use a borderless text area, summary metadata follows the standard Admin type system, status chips match, action controls are dimensionally uniform and AI-completion labels are reduced.
 
-The next major engineering phase is **WedPlanned v1.8 Platform Foundation**, designed around neutral wedding-business tenants rather than photography studios. It will introduce business ownership, users, memberships, roles, categories, entitlements and tenant-isolation guarantees before Stripe Connect, CRM, bookings and the marketplace are added. Schema remains **22**.
+Historical planning note: the next major engineering phase at that point was **WedPlanned v1.8 Platform Foundation**, designed around neutral wedding-business tenants rather than photography studios. It will introduce business ownership, users, memberships, roles, categories, entitlements and tenant-isolation guarantees before Stripe Connect, CRM, bookings and the marketplace are added. Schema remains **22**.

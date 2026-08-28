@@ -1,5 +1,14 @@
 # WedPlanned Platform Foundation — v1.8.0
 
+## Current status
+
+This document records the original v1.8.0 WedPlanned platform-foundation migration.
+
+The current stable application baseline is **v1.10.12a / schema 51**. Workspace/business ownership, professional authentication, tenant isolation, CRM and Stripe Connect have subsequently been implemented.
+
+Statements below such as “Stripe Connect is not enabled by this migration” remain historically correct for migration 023; they do not describe current platform capability.
+
+
 ## Purpose
 v1.8.0 establishes the neutral commercial ownership model required before external wedding professionals can use the platform.
 

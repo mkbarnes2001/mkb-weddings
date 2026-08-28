@@ -1,5 +1,85 @@
 # WedPlanned CRM Architecture
 
+## Current status — v1.10.12a
+
+WedCRM is the authoritative client-acquisition, booking and client-commercial module within WedPlanned.
+
+The current Wedding Photography Job milestone presentation is:
+
+`Lead created → Job accepted → Wedding day → Previews sent → Client photos delivered`
+
+The generic workflow and task engine remains available beneath service-specific Job presentations.
+
+Current WedCRM capabilities include:
+
+- Leads and pipeline;
+- Contacts;
+- Jobs and linked Wedding context;
+- questionnaires;
+- supplier questionnaire review;
+- client portal;
+- workflows, tasks and communications;
+- commercial templates;
+- quotes;
+- contracts and invoices;
+- payment schedules;
+- commercial tax defaults;
+- connected Stripe client payments.
+
+## Current client-payment boundary
+
+Client payments belong to WedCRM but settle directly to the professional connected Stripe account.
+
+`Client → WedCRM invoice/payment obligation → Stripe Checkout → professional connected Stripe account`
+
+WedCRM never marks an invoice paid from the browser return alone.
+
+Verified Stripe webhook events drive settlement and must satisfy:
+
+- connected-account identity;
+- workspace ownership;
+- invoice ownership;
+- payment-schedule ownership;
+- exact amount;
+- exact currency;
+- PaymentIntent deduplication.
+
+See `WEDPLANNED-PAYMENTS.md`.
+
+## Subscription billing separation
+
+WedPlanned SaaS subscription billing is a separate platform/business relationship.
+
+Planned next release:
+
+**v1.10.13a — WedPlanned Subscription Billing & Entitlements**
+
+Subscription state must not reuse CRM client-payment state.
+
+The intended subscription access model is:
+
+`Stripe Price → WedPlanned Plan → Entitlements → Workspace access`
+
+## WedNav / WedCRM ownership
+
+WedNav owns business setup orchestration and readiness.
+
+WedCRM owns the actual configuration for:
+
+- Lead Form;
+- CRM pipeline and client settings;
+- client portal;
+- booking/commercial settings;
+- client payment-method settings.
+
+WedNav may display readiness and provide Configure links, but it must not duplicate those editing interfaces.
+
+## Historical and detailed CRM architecture
+
+The remaining sections preserve detailed CRM design and release history.
+
+Historical future-state statements are superseded where the current-status sections above state otherwise.
+
 ## Product role
 The CRM is the operational spine of WedPlanned. Galleries, supplier capture, questionnaires, quotes, contracts, invoices, payments and public wedding content should attach to a single client/job lifecycle rather than behaving as separate tools.
 
@@ -10,7 +90,7 @@ The first MKB workflow is:
 The data model must remain useful to venues, planners, florists, bands and other wedding professionals. Therefore the commercial record is a neutral **Job**, while a wedding-specific extension and the existing Wedding record provide wedding content/delivery behaviour.
 
 ## v1.9.0 implementation status
-Implemented in the current source release:
+Implemented in v1.9.0:
 - seven default workspace pipeline stages;
 - reusable CRM contacts and enquiry/contact roles;
 - manual and verified-domain public enquiry capture with workspace currency/default-service settings;
@@ -33,7 +113,7 @@ Implemented after the CRM foundation:
 - direct reusable-contact editing;
 - a strict verified-public-domain requirement for portal email links.
 
-Client answers never directly create or overwrite shared supplier records. Only an authorised professional can approve or merge an unlisted suggestion. Quotes, contracts, invoices, payments and communication history remain separate later releases.
+Client answers never directly create or overwrite shared supplier records. Only an authorised professional can approve or merge an unlisted suggestion. Quotes, contracts, invoices, payments and communication history were added and refined in subsequent releases.
 
 ## v1.9.2 implementation status
 Implemented after the client portal and supplier integration:
@@ -193,7 +273,7 @@ The same supplier may hold more than one wedding role. Wedding-specific role/ord
 - communication history and outbound client email;
 - lead autoresponders and Lead/Job list views.
 
-### v1.9.3 — Commercial Booking and Connected Payments
+### Historical planned v1.9.3 sequence — Commercial Booking and Connected Payments
 - services/packages;
 - quotes and contracts/signatures;
 - invoices/payment schedules;
