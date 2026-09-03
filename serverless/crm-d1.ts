@@ -1195,14 +1195,15 @@ async function getContactsForEnquiry(db: D1Db, workspaceId: string, enquiryId: s
   return (result.results || []).map((row: any) => ({ ...hydrateContact(row), role: text(row.role) }));
 }
 
-export async function getCrmOverview(db: D1Db, actor: CrmActor) {
+export async function getCrmOverview(db: D1Db, actor: CrmActor, includeBookings: boolean) {
   requirePermission(actor, "crm:read");
   await ensureCrmWorkspaceSetup(db, actor.workspaceId);
   const [stageResult, enquiryResult, contactResult, jobResult, settings, schema] = await Promise.all([
     db.prepare(`SELECT * FROM crm_pipeline_stages WHERE workspace_id = ? AND status = 'active' ORDER BY sort_order, name`).bind(actor.workspaceId).all(),
     db.prepare(`${ENQUIRY_SELECT} WHERE e.workspace_id = ? AND e.status <> 'archived' ORDER BY e.created_at DESC`).bind(actor.workspaceId).all(),
     db.prepare(`SELECT * FROM crm_contacts WHERE workspace_id = ? AND status = 'active' ORDER BY updated_at DESC LIMIT 200`).bind(actor.workspaceId).all(),
-    db.prepare(`
+    includeBookings
+      ? db.prepare(`
       SELECT job.*,
         (SELECT COUNT(*) FROM crm_tasks task WHERE task.workspace_id = job.workspace_id AND task.job_id = job.id AND task.status <> 'cancelled') AS task_total,
         (SELECT COUNT(*) FROM crm_tasks task WHERE task.workspace_id = job.workspace_id AND task.job_id = job.id AND task.status = 'completed') AS task_completed,
@@ -1212,7 +1213,8 @@ export async function getCrmOverview(db: D1Db, actor: CrmActor) {
         (SELECT task.due_at FROM crm_tasks task WHERE task.workspace_id = job.workspace_id AND task.job_id = job.id AND task.status = 'pending' ORDER BY CASE WHEN trim(task.due_at) = '' THEN 1 ELSE 0 END, task.due_at, task.created_at LIMIT 1) AS next_task_due_at
       FROM crm_jobs job WHERE job.workspace_id = ? AND job.status <> 'archived'
       ORDER BY CASE WHEN trim(job.event_date) = '' THEN 1 ELSE 0 END, job.event_date, job.created_at DESC LIMIT 200
-    `).bind(actor.workspaceId).all(),
+    `).bind(actor.workspaceId).all()
+      : Promise.resolve({ results: [] }),
     db.prepare(`
       SELECT lead.*, settings.currency AS workspace_currency
       FROM crm_lead_form_settings lead
@@ -2087,7 +2089,7 @@ export async function updateCrmContact(db: D1Db, actor: CrmActor, contactId: str
   return getCrmContact(db, actor, contactId);
 }
 
-export async function saveLeadFormSettings(db: D1Db, actor: CrmActor, input: any) {
+export async function saveLeadFormSettings(db: D1Db, actor: CrmActor, input: any, includeBookings: boolean) {
   requirePermission(actor, "crm:manage");
   const notificationEmail = lower(input?.notificationEmail);
   if (notificationEmail && !validEmail(notificationEmail)) throw httpError("Enter a valid notification email address.");
@@ -2139,7 +2141,7 @@ export async function saveLeadFormSettings(db: D1Db, actor: CrmActor, input: any
       fieldCount: resolvedFields.length,
     },
   });
-  return getCrmOverview(db, actor);
+  return getCrmOverview(db, actor, includeBookings);
 }
 
 export async function getPublicLeadForm(db: D1Db, workspaceId: string) {

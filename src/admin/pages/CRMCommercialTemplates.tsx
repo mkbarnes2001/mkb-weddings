@@ -16,6 +16,7 @@ import {
 import {
   Link,
   useNavigate,
+  useOutletContext,
   useParams,
   } from "react-router-dom";
 import {
@@ -201,14 +202,26 @@ export function CRMCommercialTemplates() {
   const { auth } =
     useProfessionalAuth();
 
+  const { enabledEntitlementKeys = null } =
+    useOutletContext<{
+      enabledEntitlementKeys?: ReadonlySet<string> | null;
+    }>();
+
+  const bookingsEnabled =
+    enabledEntitlementKeys?.has("bookings") === true;
+
   const canManage =
     auth.permissions.includes(
       "crm:manage",
     )
     && auth.accessMode !== "support";
 
-  const [view, setView] =
-    useState<View>("quotes");
+  const [selectedView, setSelectedView] =
+    useState<View | null>(null);
+
+  const view: View =
+    selectedView
+    || (bookingsEnabled ? "quotes" : "emails");
 
   const [
     quoteTemplates,
@@ -282,18 +295,32 @@ export function CRMCommercialTemplates() {
     setError("");
 
     try {
-      const [
-        nextQuoteTemplates,
-        nextEmailTemplates,
-        catalogue,
-      ] = await Promise.all([
-        AdminApiService
-          .getCrmQuoteTemplates(),
-        AdminApiService
-          .getCrmEmailTemplates(),
-        AdminApiService
-          .getCrmQuoteCatalogue(),
-      ]);
+      const nextEmailTemplates =
+        await AdminApiService
+          .getCrmEmailTemplates();
+
+      let nextQuoteTemplates:
+        CrmQuoteTemplate[] = [];
+
+      let catalogue: {
+        packages: CrmPackage[];
+        addons: CrmAddon[];
+      } = {
+        packages: [],
+        addons: [],
+      };
+
+      if (bookingsEnabled) {
+        [
+          nextQuoteTemplates,
+          catalogue,
+        ] = await Promise.all([
+          AdminApiService
+            .getCrmQuoteTemplates(),
+          AdminApiService
+            .getCrmQuoteCatalogue(),
+        ]);
+      }
 
       setQuoteTemplates(
         nextQuoteTemplates,
@@ -407,10 +434,12 @@ export function CRMCommercialTemplates() {
   }
 
   useEffect(() => {
+    setSelectedView(null);
     void load();
   }, [
     auth.workspaceId,
     quoteTemplateRouteId,
+    bookingsEnabled,
   ]);
 
   function newEmailTemplate() {
@@ -815,8 +844,11 @@ export function CRMCommercialTemplates() {
 
   if (quoteTemplateRouteId) {
     if (
-      loading
-      && !quoteTemplates.length
+      enabledEntitlementKeys === null
+      || (
+        loading
+        && !quoteTemplates.length
+      )
     ) {
       return (
         <AdminPage className="crm-quote-template-page">
@@ -1378,23 +1410,25 @@ export function CRMCommercialTemplates() {
         title="Commercial templates"
         description="Build reusable quote and email templates for this business. Templates remain editable while quotes created from them keep immutable snapshots."
         actions={
-          <div className="flex flex-wrap gap-2">
-            <AdminHeaderRouterLink
-              to="/admin/crm/catalogue"
-              className="admin-button admin-button--secondary"
-            >
-              <PackageCheck className="admin-button__icon" />
-              Package catalogue
-            </AdminHeaderRouterLink>
+          bookingsEnabled ? (
+            <div className="flex flex-wrap gap-2">
+              <AdminHeaderRouterLink
+                to="/admin/crm/catalogue"
+                className="admin-button admin-button--secondary"
+              >
+                <PackageCheck className="admin-button__icon" />
+                Package catalogue
+              </AdminHeaderRouterLink>
 
-            <AdminHeaderRouterLink
-              to="/admin/crm/quotes"
-              className="admin-button admin-button--primary"
-            >
-              <FileText className="admin-button__icon" />
-              Open quotes
-            </AdminHeaderRouterLink>
-          </div>
+              <AdminHeaderRouterLink
+                to="/admin/crm/quotes"
+                className="admin-button admin-button--primary"
+              >
+                <FileText className="admin-button__icon" />
+                Open quotes
+              </AdminHeaderRouterLink>
+            </div>
+          ) : undefined
         }
       />
 
@@ -1414,6 +1448,7 @@ export function CRMCommercialTemplates() {
         className="crm-template-type-switcher"
         aria-label="Commercial template type"
       >
+        {bookingsEnabled ? (
         <button
           type="button"
           className={
@@ -1422,7 +1457,7 @@ export function CRMCommercialTemplates() {
               : ""
           }
           onClick={() =>
-            setView("quotes")
+            setSelectedView("quotes")
           }
         >
           <Sparkles />
@@ -1436,6 +1471,8 @@ export function CRMCommercialTemplates() {
           </span>
         </button>
 
+        ) : null}
+
         <button
           type="button"
           className={
@@ -1444,7 +1481,7 @@ export function CRMCommercialTemplates() {
               : ""
           }
           onClick={() =>
-            setView("emails")
+            setSelectedView("emails")
           }
         >
           <Mail />

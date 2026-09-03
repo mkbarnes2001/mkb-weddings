@@ -2,7 +2,6 @@
 """v1.10.4a business-workspace provisioning regression."""
 
 from pathlib import Path
-import json
 import sqlite3
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -130,23 +129,20 @@ def main() -> None:
         (B, EMAIL),
     )
 
-    metadata = json.dumps({
-        "provisionedBy": "platform_admin",
-        "release": "v1.10.4a",
-    })
-
     con.execute(
         """
-        INSERT INTO workspace_entitlements (
-          workspace_id, feature_key, source,
-          enabled, limit_value, metadata_json
+        INSERT INTO workspace_subscriptions (
+          id, workspace_id, plan_id, provider,
+          status, billing_interval, is_current,
+          metadata_json
+        ) VALUES (
+          'subscription_compat_workspace_regression_business',
+          ?, 'plan_compatibility_full_access', 'internal',
+          'complimentary', 'none', 1,
+          '{"release":"v1.10.13a","gate":"2C1","compatibility":true,"provisionedBy":"platform_admin"}'
         )
-        SELECT ?, feature_key, 'manual',
-               1, NULL, ?
-        FROM platform_features
-        WHERE status='active'
         """,
-        (B, metadata),
+        (B,),
     )
 
     con.execute(
@@ -239,18 +235,46 @@ def main() -> None:
         """,
     )[0]
 
-    enabled_features = one(
+    plan_features = one(
+        con,
+        """
+        SELECT COUNT(*)
+        FROM platform_plan_entitlements
+        WHERE plan_id='plan_compatibility_full_access'
+          AND enabled=1
+        """,
+    )[0]
+
+    assert plan_features == active_features
+
+    assert one(
         con,
         """
         SELECT COUNT(*)
         FROM workspace_entitlements
         WHERE workspace_id=?
-          AND enabled=1
         """,
         (B,),
-    )[0]
+    )[0] == 0
 
-    assert enabled_features == active_features
+    subscription = one(
+        con,
+        """
+        SELECT plan_id, provider, status,
+               billing_interval, is_current
+        FROM workspace_subscriptions
+        WHERE workspace_id=?
+        """,
+        (B,),
+    )
+
+    assert tuple(subscription) == (
+        'plan_compatibility_full_access',
+        'internal',
+        'complimentary',
+        'none',
+        1,
+    )
 
     # Provisioning itself does not attach a domain
     # and must not make the business public.
@@ -331,7 +355,9 @@ def main() -> None:
         "provisionBusinessWorkspace",
         "platform.business_workspace.provisioned",
         "await db.batch(statements)",
-        "workspace_entitlements",
+        "workspace_subscriptions",
+        "plan_compatibility_full_access",
+        "complimentary",
         "business_memberships",
         "workspace_memberships",
         "marketplace_status",
@@ -390,7 +416,7 @@ def main() -> None:
         "  owner: staged in professional and compatibility memberships"
     )
     print(
-        "  feature entitlements: provisioned from active platform features"
+        "  feature entitlements: inherited from compatibility Plan"
     )
     print(
         "  invitation email/auth capability: deliberately not created"

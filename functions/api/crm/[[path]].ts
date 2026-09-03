@@ -18,6 +18,7 @@ import {
   sendDraftContractToPortal,
 } from "../../../serverless/crm-commercial-actions-d1";
 import { requireProfessionalContext } from "../../../serverless/platform-auth-d1";
+import { resolveWorkspaceEntitlements } from "../../../serverless/platform-entitlements-d1";
 import {
   createAdminEnquiry,
   getCrmContact,
@@ -142,6 +143,37 @@ async function actorFor(context: any) {
     || await requireProfessionalContext(context.env.MKB_DB, context.request, context.env);
 }
 
+async function bookingsEnabledForActor(
+  db: D1Database,
+  actor: { workspaceId: string },
+) {
+  const resolved = await resolveWorkspaceEntitlements(
+    db,
+    actor.workspaceId,
+  );
+
+  return resolved.byKey.bookings?.enabled === true;
+}
+
+async function commercialSettingsCapabilitiesForActor(
+  db: D1Database,
+  actor: { workspaceId: string },
+) {
+  const resolved = await resolveWorkspaceEntitlements(
+    db,
+    actor.workspaceId,
+  );
+
+  return {
+    contracts:
+      resolved.byKey.contracts?.enabled === true,
+    invoices:
+      resolved.byKey.invoices?.enabled === true,
+    clientPortal:
+      resolved.byKey["client-portal"]?.enabled === true,
+  };
+}
+
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const actor = await actorFor(context);
@@ -194,7 +226,20 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
 
     if (!parts.length) {
-      return Response.json({ ok: true, crm: await getCrmOverview(context.env.MKB_DB, actor) }, {
+      const includeBookings =
+        await bookingsEnabledForActor(
+          context.env.MKB_DB,
+          actor,
+        );
+
+      return Response.json({
+        ok: true,
+        crm: await getCrmOverview(
+          context.env.MKB_DB,
+          actor,
+          includeBookings,
+        ),
+      }, {
         headers: { "Cache-Control": "private, no-store" },
       });
     }
@@ -231,12 +276,19 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       && parts[1] === "settings"
       && parts.length === 2
     ) {
+      const capabilities =
+        await commercialSettingsCapabilitiesForActor(
+          context.env.MKB_DB,
+          actor,
+        );
+
       return Response.json({
         ok: true,
         commercial:
           await getCrmCommercialSettings(
             context.env.MKB_DB,
             actor,
+            capabilities,
           ),
       }, {
         headers: {
@@ -363,7 +415,20 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       });
     }
     if (parts[0] === "workflows" && parts.length === 1) {
-      return Response.json({ ok: true, workflows: await getWorkflowOverview(context.env.MKB_DB, actor) }, {
+      const includeBookings =
+        await bookingsEnabledForActor(
+          context.env.MKB_DB,
+          actor,
+        );
+
+      return Response.json({
+        ok: true,
+        workflows: await getWorkflowOverview(
+          context.env.MKB_DB,
+          actor,
+          includeBookings,
+        ),
+      }, {
         headers: { "Cache-Control": "private, no-store" },
       });
     }
@@ -584,6 +649,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       && parts[1] === "settings"
       && parts.length === 2
     ) {
+      const capabilities =
+        await commercialSettingsCapabilitiesForActor(
+          context.env.MKB_DB,
+          actor,
+        );
+
       return Response.json({
         ok: true,
         commercial:
@@ -591,6 +662,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             context.env.MKB_DB,
             actor,
             body,
+            capabilities,
           ),
       }, {
         headers: {
@@ -664,7 +736,21 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     if (parts[0] === "lead-form") {
-      return Response.json({ ok: true, crm: await saveLeadFormSettings(context.env.MKB_DB, actor, body) });
+      const includeBookings =
+        await bookingsEnabledForActor(
+          context.env.MKB_DB,
+          actor,
+        );
+
+      return Response.json({
+        ok: true,
+        crm: await saveLeadFormSettings(
+          context.env.MKB_DB,
+          actor,
+          body,
+          includeBookings,
+        ),
+      });
     }
     if (parts[0] === "enquiries" && parts[1] && parts[2] === "stage") {
       return Response.json({ ok: true, detail: await moveEnquiryStage(context.env.MKB_DB, actor, parts[1], body?.stageId) });

@@ -4,6 +4,10 @@ import {
   publishWeddingPreviewAssignments,
   saveWeddingPreviewSet,
 } from "../../../serverless/wedding-workspace-d1";
+import {
+  requireWorkspaceEntitlement,
+  resolveWorkspaceEntitlements,
+} from "../../../serverless/platform-entitlements-d1";
 import { resolveAdminWorkspaceId } from "../../../serverless/tenant-context";
 
 type Env = {
@@ -16,12 +20,58 @@ function slug(context: any) {
   return String(context.params.slug || "").trim();
 }
 
+async function scopeWeddingWorkspacePayload(
+  db: D1Database,
+  workspaceId: string,
+  workspace: any,
+) {
+  const resolved = await resolveWorkspaceEntitlements(
+    db,
+    workspaceId,
+  );
+
+  const contentToolsEnabled =
+    resolved.byKey["content-tools"]?.enabled === true;
+
+  const clientGalleriesEnabled =
+    resolved.byKey["client-galleries"]?.enabled === true;
+
+  return {
+    ...workspace,
+    venue: contentToolsEnabled
+      ? workspace.venue
+      : null,
+    moments: contentToolsEnabled
+      ? workspace.moments
+      : [],
+    galleries: contentToolsEnabled
+      ? workspace.galleries
+      : [],
+    clientGalleries: clientGalleriesEnabled
+      ? workspace.clientGalleries
+      : [],
+  };
+}
+
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   if (!adminApiRequestAllowed(context.env as any, context.request)) return notFoundResponse();
   try {
     const workspaceId = await resolveAdminWorkspaceId(context);
-    const workspace = await getWeddingWorkspace(context.env.MKB_DB, slug(context), workspaceId);
-    return Response.json({ ok: true, ...workspace }, { headers: { "Cache-Control": "no-store" } });
+    const workspace = await getWeddingWorkspace(
+      context.env.MKB_DB,
+      slug(context),
+      workspaceId,
+    );
+    const scopedWorkspace =
+      await scopeWeddingWorkspacePayload(
+        context.env.MKB_DB,
+        workspaceId,
+        workspace,
+      );
+    return Response.json(
+      { ok: true, ...scopedWorkspace },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   } catch (error) {
     return errorResponse(error);
   }
@@ -42,10 +92,24 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         Array.isArray(body.assetIds) ? body.assetIds : [],
         workspaceId,
       );
-      return Response.json({ ok: true, ...workspace }, { headers: { "Cache-Control": "no-store" } });
+      const scopedWorkspace =
+        await scopeWeddingWorkspacePayload(
+          context.env.MKB_DB,
+          workspaceId,
+          workspace,
+        );
+      return Response.json(
+        { ok: true, ...scopedWorkspace },
+        { headers: { "Cache-Control": "no-store" } },
+      );
     }
 
     if (action === "publishAssignments") {
+      await requireWorkspaceEntitlement(
+        context.env.MKB_DB,
+        workspaceId,
+        "content-tools",
+      );
       const result = await publishWeddingPreviewAssignments(context.env.MKB_DB, weddingSlug, body, workspaceId);
       return Response.json(result, { headers: { "Cache-Control": "no-store" } });
     }

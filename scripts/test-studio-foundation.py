@@ -20,7 +20,7 @@ def main() -> None:
 
     # Studio is the visible product identity while the persisted Website key remains stable.
     assert 'key: "website", label: "WedStudio", shortLabel: "W.STU"' in modules
-    assert 'entitlementKey: "website_content"' in modules
+    assert 'entitlementKey: "content-tools"' in modules
     assert 'items: studioItems' in modules
     assert 'export type PlatformModuleKey = "crm" | "client-galleries" | "website" | "business";' in platform_types
     assert 'export const PLATFORM_MODULE_KEYS = [' in module_data

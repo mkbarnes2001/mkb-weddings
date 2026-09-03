@@ -2,9 +2,7 @@ import {
   useEffect,
   useMemo,
   useState } from "react";
-import { Link,
-  useLocation,
-  useParams } from "react-router-dom";
+import { Link, useLocation, useOutletContext, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Check,
@@ -117,6 +115,17 @@ function publicGalleryUrl(slug: string, token: string) {
 export function WeddingWorkspace() {
   const { slug = "" } = useParams<{ slug: string }>();
   const location = useLocation();
+  const { enabledEntitlementKeys = null } = useOutletContext<{
+    enabledEntitlementKeys?: ReadonlySet<string> | null;
+  }>();
+  const [workspaceEntitlementKeys, setWorkspaceEntitlementKeys] =
+    useState<Set<string> | null>(null);
+  const effectiveEntitlementKeys =
+    enabledEntitlementKeys ?? workspaceEntitlementKeys;
+  const contentToolsEnabled =
+    effectiveEntitlementKeys?.has("content-tools") === true;
+  const clientGalleriesEnabled =
+    effectiveEntitlementKeys?.has("client-galleries") === true;
   const [workspace, setWorkspace] = useState<WeddingWorkspacePayload | null>(null);
   const [wedding, setWedding] = useState<WeddingDocument | null>(null);
   const [venues, setVenues] = useState<VenueSummary[]>([]);
@@ -162,33 +171,107 @@ export function WeddingWorkspace() {
   const reload = async () => {
     setError("");
     try {
-      const [nextWorkspace, nextWedding, nextVenues, supplierService, nextLocations, nextWorkspaceRecord, nextPlatform] = await Promise.all([
+      const [
+        nextWorkspace,
+        nextWorkspaceRecord,
+        nextPlatform,
+      ] = await Promise.all([
         AdminApiService.getWeddingWorkspace(slug),
-        AdminApiService.getJsonWedding(slug),
-        AdminApiService.listVenues(),
-        SupplierService.load(),
-        AdminApiService.getLocations(),
         AdminApiService.getWorkspace(),
         AdminApiService.getWedPlannedPlatform(),
       ]);
+
+      const nextEntitlementKeys = new Set(
+        (nextPlatform.entitlements || [])
+          .filter((entitlement) => entitlement.enabled)
+          .map((entitlement) => entitlement.key),
+      );
+      const canUseContentTools =
+        nextEntitlementKeys.has("content-tools");
+
+      let nextWedding: WeddingDocument | null = null;
+      let nextVenues: VenueSummary[] = [];
+      let supplierService:
+        Awaited<ReturnType<typeof SupplierService.load>> | null = null;
+      let nextLocations: LocationConfiguration | null = null;
+
+      if (canUseContentTools) {
+        [
+          nextWedding,
+          nextVenues,
+          supplierService,
+          nextLocations,
+        ] = await Promise.all([
+          AdminApiService.getJsonWedding(slug),
+          AdminApiService.listVenues(),
+          SupplierService.load(),
+          AdminApiService.getLocations(),
+        ]);
+      }
+
+      const nextSuppliers =
+        supplierService?.getSuppliersForWedding(slug) || [];
+
+      setWorkspaceEntitlementKeys(nextEntitlementKeys);
       setWorkspace(nextWorkspace);
       setWedding(nextWedding);
-      setVenues(nextVenues.filter((venue) => venue.status !== "archived"));
+      setVenues(
+        nextVenues.filter(
+          (venue) => venue.status !== "archived",
+        ),
+      );
       setLocationConfig(nextLocations);
       setWorkspaceRecord(nextWorkspaceRecord);
-      setSupplierTaxonomy(normaliseSupplierTaxonomy(nextPlatform.supplierTaxonomy?.categories, nextPlatform.supplierTaxonomy?.roles));
-      setVenuePicker(nextWedding.venue || nextWorkspace.wedding.venue || "");
-      setShowVenuePicker(!nextWedding.venueSlug);
+      setSupplierTaxonomy(
+        normaliseSupplierTaxonomy(
+          nextPlatform.supplierTaxonomy?.categories,
+          nextPlatform.supplierTaxonomy?.roles,
+        ),
+      );
+      setVenuePicker(
+        nextWedding?.venue
+          || nextWorkspace.wedding.venue
+          || "",
+      );
+      setShowVenuePicker(
+        Boolean(
+          canUseContentTools
+          && !nextWedding?.venueSlug,
+        ),
+      );
       setNewVenue((current) => ({
         ...current,
-        country: current.country || nextWorkspaceRecord.settings.defaultCountry || "Northern Ireland",
+        country:
+          current.country
+          || nextWorkspaceRecord.settings.defaultCountry
+          || "Northern Ireland",
       }));
-      setMasterSuppliers(supplierService.getMasterSuppliers().filter((supplier) => supplier.status !== "archived"));
-      setSuppliers(supplierService.getSuppliersForWedding(slug));
-      setPreviewIds(nextWorkspace.previewSet.assetIds);
-      setCaption(buildCaption(nextWorkspace, supplierService.getSuppliersForWedding(slug)));
+      setMasterSuppliers(
+        supplierService
+          ? supplierService
+              .getMasterSuppliers()
+              .filter(
+                (supplier) =>
+                  supplier.status !== "archived",
+              )
+          : [],
+      );
+      setSuppliers(nextSuppliers);
+      setPreviewIds(
+        nextWorkspace.previewSet.assetIds,
+      );
+      setCaption(
+        buildCaption(
+          nextWorkspace,
+          nextSuppliers,
+        ),
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to load wedding workspace.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to load wedding workspace.",
+      );
     }
   };
 
@@ -605,7 +688,7 @@ export function WeddingWorkspace() {
   };
 
   const createGallery = async () => {
-    if (!workspace) return;
+    if (!workspace || !clientGalleriesEnabled) return;
     setBusy(true);
     setError("");
     try {
@@ -708,7 +791,7 @@ export function WeddingWorkspace() {
   };
 
   const publishAssignments = async () => {
-    if (!workspace) return;
+    if (!workspace || !contentToolsEnabled) return;
     if (!previewIds.length) {
       setError("Add at least one image to the Preview Set first.");
       return;
@@ -738,16 +821,39 @@ export function WeddingWorkspace() {
     }
   };
 
-  if (!workspace || !wedding) {
+  if (
+    !workspace
+    || (contentToolsEnabled && !wedding)
+  ) {
     return <div className="p-8 text-neutral-500">{error || "Loading Wedding Workspace…"}</div>;
   }
 
   const setupSteps = [
     { label: "Wedding created", done: true },
-    { label: "Venue linked", done: Boolean(workspace.wedding.venueSlug) },
-    { label: `${suppliers.length} supplier${suppliers.length === 1 ? "" : "s"} linked`, done: suppliers.length > 0 },
-    { label: "Client gallery created", done: Boolean(clientGallery) },
-    { label: `${previewIds.length} preview${previewIds.length === 1 ? "" : "s"} selected`, done: previewIds.length > 0 },
+    ...(contentToolsEnabled
+      ? [
+          {
+            label: "Venue linked",
+            done: Boolean(workspace.wedding.venueSlug),
+          },
+          {
+            label: `${suppliers.length} supplier${suppliers.length === 1 ? "" : "s"} linked`,
+            done: suppliers.length > 0,
+          },
+        ]
+      : []),
+    ...(clientGalleriesEnabled
+      ? [
+          {
+            label: "Client gallery created",
+            done: Boolean(clientGallery),
+          },
+        ]
+      : []),
+    {
+      label: `${previewIds.length} preview${previewIds.length === 1 ? "" : "s"} selected`,
+      done: previewIds.length > 0,
+    },
   ];
 
   return (
@@ -786,18 +892,18 @@ export function WeddingWorkspace() {
                 Open CRM Job
               </AdminHeaderRouterLink>
             ) : null}
-            <AdminHeaderRouterLink
+            {contentToolsEnabled ? <AdminHeaderRouterLink
               to={`/admin/weddings/${slug}/content`}
               className="admin-button admin-button--secondary"
             >
               Master content
-            </AdminHeaderRouterLink>
-            <AdminHeaderRouterLink
+            </AdminHeaderRouterLink> : null}
+            {contentToolsEnabled ? <AdminHeaderRouterLink
               to={`/admin/weddings/${slug}/publish`}
               className="admin-button admin-button--primary"
             >
               Publishing
-            </AdminHeaderRouterLink>
+            </AdminHeaderRouterLink> : null}
           </div>
         }
       />
@@ -807,7 +913,7 @@ export function WeddingWorkspace() {
 
       <div className="admin-master-detail admin-master-detail--420 wedding-workspace-layout">
         <main className="admin-master-detail__main wedding-workspace-main">
-          <section className="wedding-workspace-card">
+          {contentToolsEnabled ? <section className="wedding-workspace-card">
             <div className="wedding-workspace-section-header">
               <div>
                 <p className="wedding-workspace-kicker">1 · Wedding setup</p>
@@ -997,9 +1103,9 @@ export function WeddingWorkspace() {
                 ) : null}
               </section>
             </div>
-          </section>
+          </section> : null}
 
-          <section id="preview-upload" className="wedding-workspace-card scroll-mt-5">
+          {clientGalleriesEnabled ? <section id="preview-upload" className="wedding-workspace-card scroll-mt-5">
             <div className="wedding-workspace-section-header">
               <div><p className="wedding-workspace-kicker">2 · Client delivery</p><h2 className="wedding-workspace-section-title">Client gallery & previews</h2><p className="wedding-workspace-section-copy">Upload preview JPEGs once. Private originals and safe web derivatives are created together.</p></div>
             </div>
@@ -1027,17 +1133,17 @@ export function WeddingWorkspace() {
                 <button disabled={busy} onClick={createGallery} className="admin-button admin-button--primary admin-button--sm"><Plus className="admin-button__icon" />Create client gallery</button>
               </div>
             )}
-          </section>
+          </section> : null}
 
           <section className="wedding-workspace-card">
-            <div className="wedding-workspace-section-header"><div><p className="wedding-workspace-kicker">3 · Preview Set</p><h2 className="wedding-workspace-section-title">Wedding Day Previews</h2><p className="wedding-workspace-section-copy">Choose the images you want to use across venue galleries, moments, custom galleries and social posts.</p></div><div className="flex gap-2"><button onClick={() => setPreviewIds(workspace.assets.map((asset) => asset.id))} className="admin-button admin-button--secondary admin-button--sm">Select all</button><button disabled={busy} onClick={savePreviewSet} className="admin-button admin-button--primary admin-button--sm"><Save className="admin-button__icon" />Save Preview Set</button></div></div>
+            <div className="wedding-workspace-section-header"><div><p className="wedding-workspace-kicker">Preview Set</p><h2 className="wedding-workspace-section-title">Wedding Day Previews</h2><p className="wedding-workspace-section-copy">{contentToolsEnabled ? "Choose the images you want to use across venue galleries, moments, custom galleries and social posts." : "Review and maintain the preview images attached to this booked wedding."}</p></div><div className="flex gap-2"><button onClick={() => setPreviewIds(workspace.assets.map((asset) => asset.id))} className="admin-button admin-button--secondary admin-button--sm">Select all</button><button disabled={busy} onClick={savePreviewSet} className="admin-button admin-button--primary admin-button--sm"><Save className="admin-button__icon" />Save Preview Set</button></div></div>
             <div className="mt-5" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px,1fr))", gap: 10 }}>
               {workspace.assets.map((asset) => { const selected = previewIds.includes(asset.id); return <button key={asset.id} onClick={() => setPreviewIds((current) => selected ? current.filter((id) => id !== asset.id) : [...current, asset.id])} className={`relative overflow-hidden rounded-2xl border text-left ${selected ? "border-black ring-2 ring-black/10" : "border-black/10"}`}><img src={asset.thumbSrc || asset.webSrc} alt="" style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", display: "block" }} /><span className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow">{selected ? <Check className="h-4 w-4" /> : null}</span>{asset.hasOriginal ? <span className="absolute left-2 top-2 rounded-full bg-black/80 px-2 py-1 text-[9px] uppercase text-white">Original</span> : null}<span className="block truncate p-2 text-[11px]">{asset.filename}</span></button>; })}
             </div>
             {!workspace.assets.length ? <p className="mt-5 text-sm text-neutral-500">No canonical assets linked to this wedding yet.</p> : null}
           </section>
 
-          <section id="publishing-destinations" className="wedding-workspace-card scroll-mt-5">
+          {contentToolsEnabled ? <section id="publishing-destinations" className="wedding-workspace-card scroll-mt-5">
             <p className="wedding-workspace-kicker">4 · Publishing destinations</p><h2 className="wedding-workspace-section-title">Use previews across the Intelligence platform</h2><p className="wedding-workspace-section-copy">This only adds safe web derivatives to public destinations. Private full-resolution originals remain protected.</p>
             <div className="mt-6 grid gap-6 md:grid-cols-3">
               <div><p className="text-xs uppercase tracking-[0.12em] text-neutral-500">Venue</p><label className="mt-3 flex items-center gap-3"><input type="checkbox" checked={addToVenue} disabled={!workspace.wedding.venueSlug} onChange={(event) => setAddToVenue(event.target.checked)} /><span>{workspace.wedding.venue || "No venue linked"}</span></label></div>
@@ -1045,7 +1151,7 @@ export function WeddingWorkspace() {
               <div><p className="text-xs uppercase tracking-[0.12em] text-neutral-500">Galleries</p><div className="mt-3 space-y-2 max-h-44 overflow-auto">{workspace.galleries.map((gallery) => <label key={gallery.id} className="flex items-center gap-3 text-sm"><input type="checkbox" checked={selectedGalleryIds.includes(gallery.id)} onChange={(event) => setSelectedGalleryIds((current) => event.target.checked ? [...current, gallery.id] : current.filter((id) => id !== gallery.id))} />{gallery.name}</label>)}</div></div>
             </div>
             <button disabled={busy || !previewIds.length} onClick={publishAssignments} className="admin-button admin-button--primary admin-button--sm mt-5 disabled:opacity-40"><Send className="h-4 w-4" />Add {previewIds.length || ""} previews to selected destinations</button>
-          </section>
+          </section> : null}
         </main>
 
         <aside className="admin-summary-panel wedding-workspace-aside">
@@ -1057,8 +1163,8 @@ export function WeddingWorkspace() {
           </section>
 
           <section className="wedding-workspace-aside-card wedding-workspace-summary-card">
-            <div className="space-y-3 text-sm"><Row label="Venue" value={workspace.wedding.venue || "Not linked"} /><Row label="Suppliers" value={String(suppliers.length)} /><Row label="Client gallery" value={clientGallery?.status || "Not created"} /><Row label="Wedding assets" value={String(workspace.assets.length)} /><Row label="Preview Set" value={String(previewAssets.length)} /><Row label="Full-res previews" value={String(previewAssets.filter((asset) => asset.hasOriginal).length)} /></div>
-            {clientGallery ? <Link to={`/admin/client-galleries/${clientGallery.id}`} className="admin-button admin-button--secondary admin-button--sm mt-4 w-full">Manage client gallery</Link> : null}
+            <div className="space-y-3 text-sm"><Row label="Venue" value={workspace.wedding.venue || "Not linked"} />{contentToolsEnabled ? <Row label="Suppliers" value={String(suppliers.length)} /> : null}{clientGalleriesEnabled ? <Row label="Client gallery" value={clientGallery?.status || "Not created"} /> : null}<Row label="Wedding assets" value={String(workspace.assets.length)} /><Row label="Preview Set" value={String(previewAssets.length)} /><Row label="Full-res previews" value={String(previewAssets.filter((asset) => asset.hasOriginal).length)} /></div>
+            {clientGalleriesEnabled && clientGallery ? <Link to={`/admin/client-galleries/${clientGallery.id}`} className="admin-button admin-button--secondary admin-button--sm mt-4 w-full">Manage client gallery</Link> : null}
           </section>
         </aside>
       </div>

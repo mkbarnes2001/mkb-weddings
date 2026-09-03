@@ -8,6 +8,12 @@ type CrmCommercialSettingsActor = {
   permissions?: string[];
 };
 
+export type CrmCommercialSettingsCapabilities = {
+  contracts: boolean;
+  invoices: boolean;
+  clientPortal: boolean;
+};
+
 function text(value: unknown) {
   return String(value ?? "").trim();
 }
@@ -230,6 +236,7 @@ async function recordSettingsAudit(
 export async function getCrmCommercialSettings(
   db: D1Db,
   actor: CrmCommercialSettingsActor,
+  capabilities: CrmCommercialSettingsCapabilities,
 ) {
   requirePermission(
     actor,
@@ -270,90 +277,112 @@ export async function getCrmCommercialSettings(
       workspaceId,
     ).first(),
 
-    db.prepare(`
-      SELECT
-        prefix,
-        next_number,
-        padding,
-        updated_at
-      FROM crm_invoice_sequences
-      WHERE workspace_id = ?
-      LIMIT 1
-    `).bind(
-      workspaceId,
-    ).first(),
+    capabilities.invoices
+      ? db.prepare(`
+          SELECT
+            prefix,
+            next_number,
+            padding,
+            updated_at
+          FROM crm_invoice_sequences
+          WHERE workspace_id = ?
+          LIMIT 1
+        `).bind(
+          workspaceId,
+        ).first()
+      : Promise.resolve(null),
 
-    db.prepare(`
-      SELECT
-        id,
-        name,
-        status
-      FROM crm_contract_templates
-      WHERE workspace_id = ?
-        AND status <> 'archived'
-      ORDER BY
-        CASE status
-          WHEN 'active' THEN 0
-          ELSE 1
-        END,
-        name COLLATE NOCASE
-    `).bind(
-      workspaceId,
-    ).all(),
+    capabilities.contracts
+      ? db.prepare(`
+          SELECT
+            id,
+            name,
+            status
+          FROM crm_contract_templates
+          WHERE workspace_id = ?
+            AND status <> 'archived'
+          ORDER BY
+            CASE status
+              WHEN 'active' THEN 0
+              ELSE 1
+            END,
+            name COLLATE NOCASE
+        `).bind(
+          workspaceId,
+        ).all()
+      : Promise.resolve({ results: [] }),
 
-    db.prepare(`
-      SELECT
-        id,
-        name,
-        status
-      FROM crm_questionnaire_templates
-      WHERE workspace_id = ?
-        AND status <> 'archived'
-      ORDER BY
-        CASE status
-          WHEN 'active' THEN 0
-          ELSE 1
-        END,
-        name COLLATE NOCASE
-    `).bind(
-      workspaceId,
-    ).all(),
+    capabilities.clientPortal
+      ? db.prepare(`
+          SELECT
+            id,
+            name,
+            status
+          FROM crm_questionnaire_templates
+          WHERE workspace_id = ?
+            AND status <> 'archived'
+          ORDER BY
+            CASE status
+              WHEN 'active' THEN 0
+              ELSE 1
+            END,
+            name COLLATE NOCASE
+        `).bind(
+          workspaceId,
+        ).all()
+      : Promise.resolve({ results: [] }),
   ]);
 
   return {
     settings: {
       autoCreateContract:
-        settings
-          ? Number(
-              settings.auto_create_contract,
-            ) === 1
-          : true,
+        capabilities.contracts
+          ? (
+              settings
+                ? Number(
+                    settings.auto_create_contract,
+                  ) === 1
+                : true
+            )
+          : false,
 
       autoCreateInvoice:
-        settings
-          ? Number(
-              settings.auto_create_invoice,
-            ) === 1
-          : true,
+        capabilities.invoices
+          ? (
+              settings
+                ? Number(
+                    settings.auto_create_invoice,
+                  ) === 1
+                : true
+            )
+          : false,
 
       autoAssignQuestionnaire:
-        settings
-          ? Number(
-              settings.auto_assign_questionnaire,
-            ) === 1
+        capabilities.clientPortal
+          ? (
+              settings
+                ? Number(
+                    settings.auto_assign_questionnaire,
+                  ) === 1
+                : false
+            )
           : false,
 
       defaultContractTemplateId:
-        text(
-          settings
-            ?.default_contract_template_id,
-        ),
+        capabilities.contracts
+          ? text(
+              settings
+                ?.default_contract_template_id,
+            )
+          : "",
 
       defaultQuestionnaireTemplateId:
-        text(
-          settings
-            ?.default_questionnaire_template_id,
-        ),
+        capabilities.clientPortal
+          ? text(
+              settings
+                ?.default_questionnaire_template_id,
+            )
+          : "",
 
       defaultTaxTreatment:
         (
@@ -391,50 +420,64 @@ export async function getCrmCommercialSettings(
         ) || "Tax",
 
       depositType:
-        text(
-          settings?.deposit_type
-          || "none",
-        ) as
-          | "none"
-          | "fixed"
-          | "percentage",
+        capabilities.invoices
+          ? text(
+              settings?.deposit_type
+              || "none",
+            ) as
+              | "none"
+              | "fixed"
+              | "percentage"
+          : "none",
 
       depositValue:
-        Number(
-          settings?.deposit_value
-          || 0,
-        ),
+        capabilities.invoices
+          ? Number(
+              settings?.deposit_value
+              || 0,
+            )
+          : 0,
 
       depositDueDaysAfterAcceptance:
-        Number(
-          settings
-            ?.deposit_due_days_after_acceptance
-          || 0,
-        ),
+        capabilities.invoices
+          ? Number(
+              settings
+                ?.deposit_due_days_after_acceptance
+              || 0,
+            )
+          : 0,
 
       finalBalanceDueDaysBeforeEvent:
-        Number(
-          settings
-            ?.final_balance_due_days_before_event
-          ?? 30,
-        ),
+        capabilities.invoices
+          ? Number(
+              settings
+                ?.final_balance_due_days_before_event
+              ?? 30,
+            )
+          : 30,
 
       questionnaireDueDaysBeforeEvent:
-        Number(
-          settings
-            ?.questionnaire_due_days_before_event
-          ?? 60,
-        ),
+        capabilities.clientPortal
+          ? Number(
+              settings
+                ?.questionnaire_due_days_before_event
+              ?? 60,
+            )
+          : 60,
 
       invoiceNotes:
-        text(
-          settings?.invoice_notes,
-        ),
+        capabilities.invoices
+          ? text(
+              settings?.invoice_notes,
+            )
+          : "",
 
       invoiceTerms:
-        text(
-          settings?.invoice_terms,
-        ),
+        capabilities.invoices
+          ? text(
+              settings?.invoice_terms,
+            )
+          : "",
 
       updatedAt:
         text(
@@ -444,36 +487,44 @@ export async function getCrmCommercialSettings(
 
     invoiceSequence: {
       prefix:
-        text(
-          invoiceSequence?.prefix
-          || "INV",
-        ),
+        capabilities.invoices
+          ? text(
+              invoiceSequence?.prefix
+              || "INV",
+            )
+          : "INV",
 
       nextNumber:
-        Math.max(
-          1,
-          Number(
-            invoiceSequence?.next_number
-            || 1,
-          ),
-        ),
+        capabilities.invoices
+          ? Math.max(
+              1,
+              Number(
+                invoiceSequence?.next_number
+                || 1,
+              ),
+            )
+          : 1,
 
       padding:
-        Math.min(
-          12,
-          Math.max(
-            1,
-            Number(
-              invoiceSequence?.padding
-              || 4,
-            ),
-          ),
-        ),
+        capabilities.invoices
+          ? Math.min(
+              12,
+              Math.max(
+                1,
+                Number(
+                  invoiceSequence?.padding
+                  || 4,
+                ),
+              ),
+            )
+          : 4,
 
       updatedAt:
-        text(
-          invoiceSequence?.updated_at,
-        ),
+        capabilities.invoices
+          ? text(
+              invoiceSequence?.updated_at,
+            )
+          : "",
     },
 
     contractTemplates:
@@ -494,6 +545,7 @@ export async function saveCrmCommercialSettings(
   db: D1Db,
   actor: CrmCommercialSettingsActor,
   input: any,
+  capabilities: CrmCommercialSettingsCapabilities,
 ) {
   requirePermission(
     actor,
@@ -517,71 +569,114 @@ export async function saveCrmCommercialSettings(
       workspaceId,
     ).first(),
 
-    db.prepare(`
-      SELECT *
-      FROM crm_invoice_sequences
-      WHERE workspace_id = ?
-      LIMIT 1
-    `).bind(
-      workspaceId,
-    ).first(),
+    capabilities.invoices
+      ? db.prepare(`
+          SELECT *
+          FROM crm_invoice_sequences
+          WHERE workspace_id = ?
+          LIMIT 1
+        `).bind(
+          workspaceId,
+        ).first()
+      : Promise.resolve(null),
   ]);
 
   const autoCreateContract =
-    booleanValue(
-      input?.autoCreateContract,
-      currentSettings
-        ? Number(
-            currentSettings
-              .auto_create_contract,
-          ) === 1
-        : true,
-    );
+    capabilities.contracts
+      ? booleanValue(
+          input?.autoCreateContract,
+          currentSettings
+            ? Number(
+                currentSettings
+                  .auto_create_contract,
+              ) === 1
+            : true,
+        )
+      : (
+          currentSettings
+            ? Number(
+                currentSettings
+                  .auto_create_contract,
+              ) === 1
+            : false
+        );
 
   const autoCreateInvoice =
-    booleanValue(
-      input?.autoCreateInvoice,
-      currentSettings
-        ? Number(
-            currentSettings
-              .auto_create_invoice,
-          ) === 1
-        : true,
-    );
+    capabilities.invoices
+      ? booleanValue(
+          input?.autoCreateInvoice,
+          currentSettings
+            ? Number(
+                currentSettings
+                  .auto_create_invoice,
+              ) === 1
+            : true,
+        )
+      : (
+          currentSettings
+            ? Number(
+                currentSettings
+                  .auto_create_invoice,
+              ) === 1
+            : false
+        );
 
   const autoAssignQuestionnaire =
-    booleanValue(
-      input?.autoAssignQuestionnaire,
-      currentSettings
-        ? Number(
-            currentSettings
-              .auto_assign_questionnaire,
-          ) === 1
-        : false,
-    );
+    capabilities.clientPortal
+      ? booleanValue(
+          input?.autoAssignQuestionnaire,
+          currentSettings
+            ? Number(
+                currentSettings
+                  .auto_assign_questionnaire,
+              ) === 1
+            : false,
+        )
+      : (
+          currentSettings
+            ? Number(
+                currentSettings
+                  .auto_assign_questionnaire,
+              ) === 1
+            : false
+        );
 
   const defaultContractTemplateId =
-    input?.defaultContractTemplateId
-      === undefined
-      ? text(
-          currentSettings
-            ?.default_contract_template_id,
+    capabilities.contracts
+      ? (
+          input?.defaultContractTemplateId
+            === undefined
+            ? text(
+                currentSettings
+                  ?.default_contract_template_id,
+              )
+            : text(
+                input
+                  ?.defaultContractTemplateId,
+              )
         )
       : text(
-          input
-            ?.defaultContractTemplateId,
+          currentSettings
+            ?.default_contract_template_id,
         );
 
   const defaultQuestionnaireTemplateId =
-    input?.defaultQuestionnaireTemplateId
-      === undefined
-      ? text(
-          currentSettings
-            ?.default_questionnaire_template_id,
+    capabilities.clientPortal
+      ? (
+          input?.defaultQuestionnaireTemplateId
+            === undefined
+            ? text(
+                currentSettings
+                  ?.default_questionnaire_template_id,
+              )
+            : text(
+                input
+                  ?.defaultQuestionnaireTemplateId,
+              )
         )
       : text(
-          input
-            ?.defaultQuestionnaireTemplateId,
+          currentSettings
+            ?.default_questionnaire_template_id,
         );
 
   const defaultTaxTreatment =
@@ -654,9 +749,16 @@ export async function saveCrmCommercialSettings(
 
   const depositType =
     text(
-      input?.depositType
-      ?? currentSettings?.deposit_type
-      ?? "none",
+      capabilities.invoices
+        ? (
+            input?.depositType
+            ?? currentSettings?.deposit_type
+            ?? "none"
+          )
+        : (
+            currentSettings?.deposit_type
+            ?? "none"
+          ),
     );
 
   if (
@@ -677,7 +779,9 @@ export async function saveCrmCommercialSettings(
     depositType === "none"
       ? 0
       : nonNegativeInteger(
-          input?.depositValue,
+          capabilities.invoices
+            ? input?.depositValue
+            : undefined,
           Number(
             currentSettings
               ?.deposit_value
@@ -688,8 +792,10 @@ export async function saveCrmCommercialSettings(
 
   const depositDueDaysAfterAcceptance =
     nonNegativeInteger(
-      input
-        ?.depositDueDaysAfterAcceptance,
+      capabilities.invoices
+        ? input
+            ?.depositDueDaysAfterAcceptance
+        : undefined,
       Number(
         currentSettings
           ?.deposit_due_days_after_acceptance
@@ -700,8 +806,10 @@ export async function saveCrmCommercialSettings(
 
   const finalBalanceDueDaysBeforeEvent =
     nonNegativeInteger(
-      input
-        ?.finalBalanceDueDaysBeforeEvent,
+      capabilities.invoices
+        ? input
+            ?.finalBalanceDueDaysBeforeEvent
+        : undefined,
       Number(
         currentSettings
           ?.final_balance_due_days_before_event
@@ -712,8 +820,10 @@ export async function saveCrmCommercialSettings(
 
   const questionnaireDueDaysBeforeEvent =
     nonNegativeInteger(
-      input
-        ?.questionnaireDueDaysBeforeEvent,
+      capabilities.clientPortal
+        ? input
+            ?.questionnaireDueDaysBeforeEvent
+        : undefined,
       Number(
         currentSettings
           ?.questionnaire_due_days_before_event
@@ -724,8 +834,12 @@ export async function saveCrmCommercialSettings(
 
   const invoiceNotes =
     text(
-      input?.invoiceNotes
-      ?? currentSettings?.invoice_notes,
+      capabilities.invoices
+        ? (
+            input?.invoiceNotes
+            ?? currentSettings?.invoice_notes
+          )
+        : currentSettings?.invoice_notes,
     ).slice(
       0,
       5000,
@@ -733,8 +847,12 @@ export async function saveCrmCommercialSettings(
 
   const invoiceTerms =
     text(
-      input?.invoiceTerms
-      ?? currentSettings?.invoice_terms,
+      capabilities.invoices
+        ? (
+            input?.invoiceTerms
+            ?? currentSettings?.invoice_terms
+          )
+        : currentSettings?.invoice_terms,
     ).slice(
       0,
       5000,
@@ -742,13 +860,21 @@ export async function saveCrmCommercialSettings(
 
   const invoicePrefix =
     text(
-      input?.invoicePrefix
-      ?? currentSequence?.prefix
-      ?? "INV",
+      capabilities.invoices
+        ? (
+            input?.invoicePrefix
+            ?? currentSequence?.prefix
+            ?? "INV"
+          )
+        : (
+            currentSequence?.prefix
+            ?? "INV"
+          ),
     );
 
   if (
-    !/^[A-Za-z0-9][A-Za-z0-9_/-]{0,11}$/
+    capabilities.invoices
+    && !/^[A-Za-z0-9][A-Za-z0-9_/-]{0,11}$/
       .test(invoicePrefix)
   ) {
     throw httpError(
@@ -758,7 +884,9 @@ export async function saveCrmCommercialSettings(
 
   const invoicePadding =
     nonNegativeInteger(
-      input?.invoicePadding,
+      capabilities.invoices
+        ? input?.invoicePadding
+        : undefined,
       Number(
         currentSequence?.padding
         || 4,
@@ -767,8 +895,11 @@ export async function saveCrmCommercialSettings(
     );
 
   if (
-    invoicePadding < 1
-    || invoicePadding > 12
+    capabilities.invoices
+    && (
+      invoicePadding < 1
+      || invoicePadding > 12
+    )
   ) {
     throw httpError(
       "Invoice number padding must be between 1 and 12.",
@@ -776,20 +907,24 @@ export async function saveCrmCommercialSettings(
   }
 
   await Promise.all([
-    requireActiveContractTemplate(
-      db,
-      workspaceId,
-      defaultContractTemplateId,
-    ),
+    capabilities.contracts
+      ? requireActiveContractTemplate(
+          db,
+          workspaceId,
+          defaultContractTemplateId,
+        )
+      : Promise.resolve(),
 
-    requireActiveQuestionnaireTemplate(
-      db,
-      workspaceId,
-      defaultQuestionnaireTemplateId,
-    ),
+    capabilities.clientPortal
+      ? requireActiveQuestionnaireTemplate(
+          db,
+          workspaceId,
+          defaultQuestionnaireTemplateId,
+        )
+      : Promise.resolve(),
   ]);
 
-  await db.batch([
+  const writes = [
     db.prepare(`
       INSERT INTO crm_booking_settings (
         workspace_id,
@@ -886,49 +1021,71 @@ export async function saveCrmCommercialSettings(
       workspaceId,
     ),
 
-    db.prepare(`
-      INSERT INTO crm_invoice_sequences (
-        workspace_id,
-        prefix,
-        padding,
-        updated_at
-      ) VALUES (
-        ?,
-        ?,
-        ?,
-        CURRENT_TIMESTAMP
-      )
-      ON CONFLICT(workspace_id)
-      DO UPDATE SET
-        prefix =
-          excluded.prefix,
-        padding =
-          excluded.padding,
-        updated_at =
+  ];
+
+  if (capabilities.invoices) {
+    writes.push(
+      db.prepare(`
+        INSERT INTO crm_invoice_sequences (
+          workspace_id,
+          prefix,
+          padding,
+          updated_at
+        ) VALUES (
+          ?,
+          ?,
+          ?,
           CURRENT_TIMESTAMP
-    `).bind(
-      workspaceId,
-      invoicePrefix,
-      invoicePadding,
-    ),
-  ]);
+        )
+        ON CONFLICT(workspace_id)
+        DO UPDATE SET
+          prefix =
+            excluded.prefix,
+          padding =
+            excluded.padding,
+          updated_at =
+            CURRENT_TIMESTAMP
+      `).bind(
+        workspaceId,
+        invoicePrefix,
+        invoicePadding,
+      ),
+    );
+  }
+
+  await db.batch(writes);
 
   await recordSettingsAudit(
     db,
     actor,
     {
-      autoCreateContract,
-      autoCreateInvoice,
-      autoAssignQuestionnaire,
-      defaultContractTemplateId,
-      defaultQuestionnaireTemplateId,
-      depositType,
-      depositValue,
-      depositDueDaysAfterAcceptance,
-      finalBalanceDueDaysBeforeEvent,
-      questionnaireDueDaysBeforeEvent,
-      invoicePrefix,
-      invoicePadding,
+      defaultTaxTreatment,
+      defaultTaxRateBasisPoints,
+      taxLabel,
+      ...(capabilities.contracts
+        ? {
+            autoCreateContract,
+            defaultContractTemplateId,
+          }
+        : {}),
+      ...(capabilities.invoices
+        ? {
+            autoCreateInvoice,
+            depositType,
+            depositValue,
+            depositDueDaysAfterAcceptance,
+            finalBalanceDueDaysBeforeEvent,
+            invoicePrefix,
+            invoicePadding,
+          }
+        : {}),
+      ...(capabilities.clientPortal
+        ? {
+            autoAssignQuestionnaire,
+            defaultQuestionnaireTemplateId,
+            questionnaireDueDaysBeforeEvent,
+          }
+        : {}),
     },
   );
 
@@ -943,5 +1100,6 @@ export async function saveCrmCommercialSettings(
         ]),
       ],
     },
+    capabilities,
   );
 }

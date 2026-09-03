@@ -820,6 +820,7 @@ export function CRMClientsPanel({
   contacts,
   getPortalState,
   renderActions,
+  showPortalControls = true,
 }: {
   contacts: CRMWorkspaceContact[];
   getPortalState?: (
@@ -828,6 +829,7 @@ export function CRMClientsPanel({
   renderActions?: (
     contact: CRMWorkspaceContact,
   ) => ReactNode;
+  showPortalControls?: boolean;
 }) {
   return (
     <AdminPanel
@@ -891,6 +893,7 @@ export function CRMClientsPanel({
                     </span>
                   ) : null}
 
+                  {showPortalControls ? (
                   <div
                     className={
                       `crm-job-client-portal-state is-${portal.status}`
@@ -904,6 +907,7 @@ export function CRMClientsPanel({
                       Client portal · {portal.label}
                     </small>
                   </div>
+                  ) : null}
                 </div>
 
                 <div className="crm-job-client-actions">
@@ -916,9 +920,11 @@ export function CRMClientsPanel({
                     <User aria-hidden="true" />
                   </Link>
 
-                  {renderActions?.(
+                  {showPortalControls ? (
+renderActions?.(
                     contact,
-                  )}
+                  )
+                  ) : null}
                 </div>
               </article>
             );

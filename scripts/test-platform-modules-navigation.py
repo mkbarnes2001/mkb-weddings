@@ -22,9 +22,9 @@ def main() -> None:
     # Central module architecture is explicit and entitlement-ready without exposing unimplemented commercial placeholders.
     for key, label, entitlement in [
         ('key: "crm"', 'label: "WedCRM"', 'entitlementKey: "crm"'),
-        ('key: "client-galleries"', 'label: "WedStore"', 'entitlementKey: "client_galleries"'),
-        ('key: "website"', 'label: "WedStudio"', 'entitlementKey: "website_content"'),
-        ('key: "business"', 'label: "WedNav"', 'entitlementKey: "business_settings"'),
+        ('key: "client-galleries"', 'label: "WedStore"', 'entitlementKey: "client-galleries"'),
+        ('key: "website"', 'label: "WedStudio"', 'entitlementKey: "content-tools"'),
+        ('key: "business"', 'label: "WedNav"', 'entitlementKey: "business-profile"'),
     ]:
         assert key in modules and label in modules and entitlement in modules
     assert "requiredPermission" in modules
@@ -37,8 +37,9 @@ def main() -> None:
     assert 'label: "Publishing"' in modules
 
     # Desktop and mobile both use the same resolved module and item source.
-    assert "adminModules.map" in layout
-    assert "visibleModuleItems(currentModule, auth.permissions)" in layout
+    assert "visibleModules.map" in layout
+    assert "visibleAdminModules(enabledEntitlementKeys)" in layout
+    assert "visibleModuleItems(currentModule, auth.permissions, enabledEntitlementKeys)" in layout
     assert "resolveAdminNavigationItem" in layout
     assert "admin-module-switcher" in layout
     assert "admin-mobile-module-switcher" in layout
@@ -67,8 +68,16 @@ def main() -> None:
 
     # Existing tabbed tools are deep-linkable, so module navigation never points at a fake page.
     assert ' | "overview";' in crm
-    assert 'setViewState(next && validViews.includes(next) ? next : "pipeline")' in crm
-    assert 'setSearchParams(next === "pipeline" ? {} : { view: next }' in crm
+    # CRM deep links now resolve through the canonical entitlement-aware view boundary.
+    # Valid accessible views remain deep-linkable; unavailable specialist views degrade
+    # to the CRM overview instead of rendering an inaccessible destination.
+    assert "function crmViewEntitled(" in crm
+    assert "const requested =" in crm and ': "pipeline";' in crm
+    assert "const resolved =" in crm and "crmViewEntitled(" in crm
+    assert '? requested' in crm and ': "overview";' in crm
+    assert "setViewState(resolved);" in crm
+    assert 'resolved === "pipeline"' in crm
+    assert "{ view: resolved }" in crm
     assert 'title="CRM overview"' not in crm  # title is resolved through the existing page-title map
     assert 'overview: "WedCRM overview"' in crm
     assert 'eyebrow="WedCRM · Client operations"' in crm

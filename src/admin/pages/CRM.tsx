@@ -2,9 +2,7 @@ import {
   useEffect,
   useMemo,
   useState } from "react";
-import { Link,
-  useNavigate,
-  useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams, useOutletContext } from "react-router-dom";
 import {
   BriefcaseBusiness,
   CalendarDays,
@@ -47,6 +45,27 @@ import type { CrmCommercialSettingsInput, CrmCommercialSettingsPayload, CrmEnqui
 type View = "pipeline" | "contacts" | "jobs" | "schedule" | "questionnaires" | "workflows" | "commercial-settings" | "lead-form" | "overview";
 
 const validViews: View[] = ["overview", "pipeline", "contacts", "jobs", "schedule", "questionnaires", "workflows", "commercial-settings", "lead-form"];
+
+function crmViewEntitled(
+  view: View,
+  enabledEntitlementKeys: ReadonlySet<string> | null,
+) {
+  if (enabledEntitlementKeys === null) return true;
+
+  if (
+    view === "jobs"
+    || view === "schedule"
+    || view === "commercial-settings"
+  ) {
+    return enabledEntitlementKeys.has("bookings");
+  }
+
+  if (view === "questionnaires") {
+    return enabledEntitlementKeys.has("client-portal");
+  }
+
+  return true;
+}
 
 const emptyEnquiry: CrmEnquiryInput = {
   source: "manual",
@@ -449,6 +468,17 @@ function JobRecord({
 
 export function CRM() {
   const { auth } = useProfessionalAuth();
+  const { enabledEntitlementKeys = null } = useOutletContext<{
+    enabledEntitlementKeys?: ReadonlySet<string> | null;
+  }>();
+  const bookingsEnabled =
+    enabledEntitlementKeys?.has("bookings") === true;
+  const contractsEnabled =
+    enabledEntitlementKeys?.has("contracts") === true;
+  const invoicesEnabled =
+    enabledEntitlementKeys?.has("invoices") === true;
+  const clientPortalEnabled =
+    enabledEntitlementKeys?.has("client-portal") === true;
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedView = searchParams.get("view") as View | null;
   const [crm, setCrm] = useState<CrmOverview | null>(null);
@@ -480,12 +510,51 @@ export function CRM() {
   useEffect(() => { void load(); }, [auth.workspaceId]);
   useEffect(() => {
     const next = searchParams.get("view") as View | null;
-    setViewState(next && validViews.includes(next) ? next : "pipeline");
-  }, [searchParams]);
+    const requested =
+      next && validViews.includes(next)
+        ? next
+        : "pipeline";
+    const resolved =
+      crmViewEntitled(
+        requested,
+        enabledEntitlementKeys,
+      )
+        ? requested
+        : "overview";
+
+    setViewState(resolved);
+
+    if (
+      enabledEntitlementKeys !== null
+      && resolved !== requested
+    ) {
+      setSearchParams(
+        { view: resolved },
+        { replace: true },
+      );
+    }
+  }, [
+    enabledEntitlementKeys,
+    searchParams,
+    setSearchParams,
+  ]);
 
   function setView(next: View) {
-    setViewState(next);
-    setSearchParams(next === "pipeline" ? {} : { view: next }, { replace: true });
+    const resolved =
+      crmViewEntitled(
+        next,
+        enabledEntitlementKeys,
+      )
+        ? next
+        : "overview";
+
+    setViewState(resolved);
+    setSearchParams(
+      resolved === "pipeline"
+        ? {}
+        : { view: resolved },
+      { replace: true },
+    );
   }
 
   const filteredContacts = useMemo(() => {
@@ -567,7 +636,7 @@ export function CRM() {
           ? "Dashboard"
           : pageTitle[view]}
         description="A clear operational view of leads, bookings, deadlines and client activity across this workspace."
-        actions={<div className="flex flex-wrap gap-2"><AdminHeaderRouterLink to="/admin/crm/catalogue" className="admin-button admin-button--secondary admin-button--md"><Settings2 className="admin-button__icon" />Catalogue</AdminHeaderRouterLink><AdminHeaderRouterLink to="/admin/crm/quotes" className="admin-button admin-button--secondary admin-button--md"><FileQuestion className="admin-button__icon" />Quotes</AdminHeaderRouterLink>{canManage ? <AdminButton variant="primary" icon={Plus} onClick={() => setShowCreate((current) => !current)}>New enquiry</AdminButton> : null}</div>}
+        actions={<div className="flex flex-wrap gap-2">{bookingsEnabled ? <><AdminHeaderRouterLink to="/admin/crm/catalogue" className="admin-button admin-button--secondary admin-button--md"><Settings2 className="admin-button__icon" />Catalogue</AdminHeaderRouterLink><AdminHeaderRouterLink to="/admin/crm/quotes" className="admin-button admin-button--secondary admin-button--md"><FileQuestion className="admin-button__icon" />Quotes</AdminHeaderRouterLink></> : null}{canManage ? <AdminButton variant="primary" icon={Plus} onClick={() => setShowCreate((current) => !current)}>New enquiry</AdminButton> : null}</div>}
       />
 
       {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
@@ -593,20 +662,22 @@ export function CRM() {
       {view === "overview" ? <div className="grid gap-4">
         <section className="admin-module-metrics">
           <div className="admin-module-metric"><strong>{crm?.stats.open || 0}</strong><span>Open leads</span><small>{crm?.stats.new || 0} new</small></div>
-          <div className="admin-module-metric"><strong>{crm?.stats.jobs || 0}</strong><span>Jobs</span><small>{(crm?.jobs || []).filter((job) => job.status === "booked").length} booked</small></div>
+          {bookingsEnabled ? <div className="admin-module-metric"><strong>{crm?.stats.jobs || 0}</strong><span>Jobs</span><small>{(crm?.jobs || []).filter((job) => job.status === "booked").length} booked</small></div> : null}
           <div className="admin-module-metric"><strong>{crm?.contacts.length || 0}</strong><span>Clients</span><small>Workspace contacts</small></div>
-          <div className="admin-module-metric"><strong>{scheduleItems.length}</strong><span>Upcoming schedule</span><small>Weddings and deadlines</small></div>
+          {bookingsEnabled ? <div className="admin-module-metric"><strong>{scheduleItems.length}</strong><span>Upcoming schedule</span><small>Weddings and deadlines</small></div> : null}
         </section>
         <section className="admin-module-destination-grid">
           <Link to="/admin/crm" className="admin-module-destination"><span className="admin-module-destination__icon"><Target /></span><div><strong>Leads</strong><p>Review new enquiries, pipeline status and next actions.</p><div className="admin-module-destination__meta"><AdminStatus tone="info">{crm?.stats.open || 0} open</AdminStatus></div></div><ExternalLink className="admin-module-destination__arrow" /></Link>
-          <Link to="/admin/crm?view=jobs" className="admin-module-destination"><span className="admin-module-destination__icon"><BriefcaseBusiness /></span><div><strong>Jobs</strong><p>Open booked workspaces, workflows, communications and client portal access.</p><div className="admin-module-destination__meta"><AdminStatus tone="success">{crm?.stats.jobs || 0} jobs</AdminStatus></div></div><ExternalLink className="admin-module-destination__arrow" /></Link>
-          <Link to="/admin/crm/quotes" className="admin-module-destination"><span className="admin-module-destination__icon"><FileQuestion /></span><div><strong>Packages & quotes</strong><p>Manage catalogue packages and send immutable quote versions.</p></div><ExternalLink className="admin-module-destination__arrow" /></Link>
-          <Link to="/admin/crm?view=questionnaires" className="admin-module-destination"><span className="admin-module-destination__icon"><ClipboardList /></span><div><strong>Questionnaires</strong><p>Build templates and track assigned client questionnaires.</p></div><ExternalLink className="admin-module-destination__arrow" /></Link>
+          {bookingsEnabled ? <Link to="/admin/crm?view=jobs" className="admin-module-destination"><span className="admin-module-destination__icon"><BriefcaseBusiness /></span><div><strong>Jobs</strong><p>Open booked workspaces, workflows, communications and client portal access.</p><div className="admin-module-destination__meta"><AdminStatus tone="success">{crm?.stats.jobs || 0} jobs</AdminStatus></div></div><ExternalLink className="admin-module-destination__arrow" /></Link> : null}
+          {bookingsEnabled ? <Link to="/admin/crm/quotes" className="admin-module-destination"><span className="admin-module-destination__icon"><FileQuestion /></span><div><strong>Packages & quotes</strong><p>Manage catalogue packages and send immutable quote versions.</p></div><ExternalLink className="admin-module-destination__arrow" /></Link> : null}
+          {clientPortalEnabled ? <Link to="/admin/crm?view=questionnaires" className="admin-module-destination"><span className="admin-module-destination__icon"><ClipboardList /></span><div><strong>Questionnaires</strong><p>Build templates and track assigned client questionnaires.</p></div><ExternalLink className="admin-module-destination__arrow" /></Link> : null}
         </section>
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(280px,.75fr)]">
+          {bookingsEnabled ? <>
           <AdminPanel title="Upcoming schedule" description="The next weddings and Job deadlines across this workspace." icon={CalendarDays}>
             {!scheduleItems.length ? <AdminEmptyState icon={CalendarDays} title="Nothing scheduled" description="Wedding dates and Job deadlines will appear here." /> : <div className="crm-schedule-list">{scheduleItems.slice(0, 6).map((item) => <Link key={item.id} to={`/admin/crm/jobs/${item.job.id}`} className={`crm-schedule-record crm-schedule-record--${item.type}`}><time dateTime={item.date}><strong>{new Date(`${item.date}T12:00:00`).toLocaleDateString("en-GB", { day: "2-digit" })}</strong><span>{new Date(`${item.date}T12:00:00`).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}</span></time><div><AdminStatus tone={item.type === "wedding" ? "success" : "warning"}>{item.type}</AdminStatus><h3>{item.title}</h3><p>{item.detail}</p></div><ExternalLink /></Link>)}</div>}
           </AdminPanel>
+          </> : null}
           <AdminPanel title="Client operations" description="Communications remain attached to the relevant lead, client or Job record." icon={Mail}>
             <div className="admin-module-guidance"><div><Mail /><span><strong>Communications</strong><small>Send email or record calls, meetings, messages and notes from each Job workspace.</small></span></div><div><Workflow /><span><strong>Workflows</strong><small>Reusable task sequences control operational delivery after booking.</small></span></div><div><UserRound /><span><strong>Client records</strong><small>Contacts retain linked enquiries, Jobs, activity and communication history.</small></span></div></div>
           </AdminPanel>
@@ -642,7 +713,13 @@ export function CRM() {
 
       {view === "questionnaires" ? <QuestionnaireLibrary workspaceId={auth.workspaceId} canManage={canManage} /> : null}
       {view === "workflows" ? <WorkflowLibrary workspaceId={auth.workspaceId} canManage={canManage} /> : null}
-      {view === "commercial-settings" ? <CommercialSettings workspaceId={auth.workspaceId} canManage={canManage && auth.accessMode !== "support"} /> : null}
+      {view === "commercial-settings" ? <CommercialSettings
+        workspaceId={auth.workspaceId}
+        canManage={canManage && auth.accessMode !== "support"}
+        contractsEnabled={contractsEnabled}
+        invoicesEnabled={invoicesEnabled}
+        clientPortalEnabled={clientPortalEnabled}
+      /> : null}
       {view === "lead-form" && crm ? <LeadFormSettings settings={crm.leadForm} saving={saving} canManage={canManage} onSave={saveLeadForm} /> : null}
     </AdminPage>
   );
@@ -651,9 +728,15 @@ export function CRM() {
 function CommercialSettings({
   workspaceId,
   canManage,
+  contractsEnabled,
+  invoicesEnabled,
+  clientPortalEnabled,
 }: {
   workspaceId: string;
   canManage: boolean;
+  contractsEnabled: boolean;
+  invoicesEnabled: boolean;
+  clientPortalEnabled: boolean;
 }) {
   const navigate = useNavigate();
 
@@ -711,6 +794,14 @@ function CommercialSettings({
   useEffect(() => {
     let active = true;
 
+    if (!contractsEnabled) {
+      setContractTemplates([]);
+      setContractTemplatesLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
     setContractTemplatesLoading(true);
 
     AdminApiService
@@ -742,7 +833,7 @@ function CommercialSettings({
     return () => {
       active = false;
     };
-  }, [workspaceId]);
+  }, [workspaceId, contractsEnabled]);
 
   function patchSettings(
     patch: Partial<CrmCommercialSettingsPayload["settings"]>,
@@ -781,7 +872,7 @@ function CommercialSettings({
   }
 
   async function createContractTemplate() {
-    if (!canManage) {
+    if (!canManage || !contractsEnabled) {
       return;
     }
 
@@ -822,40 +913,52 @@ function CommercialSettings({
     if (!payload || !canManage) return;
 
     const input: CrmCommercialSettingsInput = {
-      autoCreateContract:
-        payload.settings.autoCreateContract,
-      autoCreateInvoice:
-        payload.settings.autoCreateInvoice,
-      autoAssignQuestionnaire:
-        payload.settings.autoAssignQuestionnaire,
-      defaultContractTemplateId:
-        payload.settings.defaultContractTemplateId,
-      defaultQuestionnaireTemplateId:
-        payload.settings.defaultQuestionnaireTemplateId,
       defaultTaxTreatment:
         payload.settings.defaultTaxTreatment,
       defaultTaxRateBasisPoints:
         payload.settings.defaultTaxRateBasisPoints,
       taxLabel:
         payload.settings.taxLabel,
-      depositType:
-        payload.settings.depositType,
-      depositValue:
-        payload.settings.depositValue,
-      depositDueDaysAfterAcceptance:
-        payload.settings.depositDueDaysAfterAcceptance,
-      finalBalanceDueDaysBeforeEvent:
-        payload.settings.finalBalanceDueDaysBeforeEvent,
-      questionnaireDueDaysBeforeEvent:
-        payload.settings.questionnaireDueDaysBeforeEvent,
-      invoiceNotes:
-        payload.settings.invoiceNotes,
-      invoiceTerms:
-        payload.settings.invoiceTerms,
-      invoicePrefix:
-        payload.invoiceSequence.prefix,
-      invoicePadding:
-        payload.invoiceSequence.padding,
+      ...(contractsEnabled
+        ? {
+            autoCreateContract:
+              payload.settings.autoCreateContract,
+            defaultContractTemplateId:
+              payload.settings.defaultContractTemplateId,
+          }
+        : {}),
+      ...(invoicesEnabled
+        ? {
+            autoCreateInvoice:
+              payload.settings.autoCreateInvoice,
+            depositType:
+              payload.settings.depositType,
+            depositValue:
+              payload.settings.depositValue,
+            depositDueDaysAfterAcceptance:
+              payload.settings.depositDueDaysAfterAcceptance,
+            finalBalanceDueDaysBeforeEvent:
+              payload.settings.finalBalanceDueDaysBeforeEvent,
+            invoiceNotes:
+              payload.settings.invoiceNotes,
+            invoiceTerms:
+              payload.settings.invoiceTerms,
+            invoicePrefix:
+              payload.invoiceSequence.prefix,
+            invoicePadding:
+              payload.invoiceSequence.padding,
+          }
+        : {}),
+      ...(clientPortalEnabled
+        ? {
+            autoAssignQuestionnaire:
+              payload.settings.autoAssignQuestionnaire,
+            defaultQuestionnaireTemplateId:
+              payload.settings.defaultQuestionnaireTemplateId,
+            questionnaireDueDaysBeforeEvent:
+              payload.settings.questionnaireDueDaysBeforeEvent,
+          }
+        : {}),
     };
 
     setSaving(true);
@@ -933,123 +1036,115 @@ function CommercialSettings({
         </div>
       ) : null}
 
-      <AdminPanel
-        title="Booking automation"
-        icon={Settings2}
+      {(contractsEnabled || invoicesEnabled || clientPortalEnabled) ? (
+        <AdminPanel
+          title="Booking automation"
+          icon={Settings2}
+          compact
+        >
+          <div className="grid gap-2 lg:grid-cols-2">
+            {contractsEnabled ? <>
+              <label className="admin-choice-row crm-commercial-choice-row">
+                <div><strong>Create contract automatically</strong></div>
+                <input
+                  type="checkbox"
+                  checked={payload.settings.autoCreateContract}
+                  disabled={!canManage || saving}
+                  onChange={(event) =>
+                    patchSettings({ autoCreateContract: event.target.checked })
+                  }
+                />
+              </label>
 
-        compact
->
-        <div className="grid gap-2 lg:grid-cols-2">
-          <label className="admin-choice-row crm-commercial-choice-row">
-            <div>
-              <strong>Create contract automatically</strong>
-            </div>
-            <input
-              type="checkbox"
-              checked={payload.settings.autoCreateContract}
-              disabled={!canManage || saving}
-              onChange={(event) =>
-                patchSettings({
-                  autoCreateContract: event.target.checked,
-                })
-              }
-            />
-          </label>
-
-          <AdminField
-            label="Default contract template"
-          >
-            <select
-              className="admin-select"
-              value={
-                payload.settings.defaultContractTemplateId || ""
-              }
-              disabled={!canManage || saving}
-              onChange={(event) =>
-                patchSettings({
-                  defaultContractTemplateId:
-                    event.target.value || null,
-                })
-              }
-            >
-              <option value="">
-                No default contract template
-              </option>
-              {payload.contractTemplates.map((template) => (
-                <option
-                  key={template.id}
-                  value={template.id}
+              <AdminField label="Default contract template">
+                <select
+                  className="admin-select"
+                  value={payload.settings.defaultContractTemplateId || ""}
+                  disabled={!canManage || saving}
+                  onChange={(event) =>
+                    patchSettings({
+                      defaultContractTemplateId: event.target.value || null,
+                    })
+                  }
                 >
-                  {template.name}
-                </option>
-              ))}
-            </select>
-          </AdminField>
+                  <option value="">No default contract template</option>
+                  {payload.contractTemplates.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name}
+                    </option>
+                  ))}
+                </select>
+              </AdminField>
+            </> : null}
 
-          <label className="admin-choice-row crm-commercial-choice-row">
-            <div>
-              <strong>Create invoice automatically</strong>
-            </div>
-            <input
-              type="checkbox"
-              checked={payload.settings.autoCreateInvoice}
-              disabled={!canManage || saving}
-              onChange={(event) =>
-                patchSettings({
-                  autoCreateInvoice: event.target.checked,
-                })
-              }
-            />
-          </label>
+            {invoicesEnabled ? (
+              <label className="admin-choice-row crm-commercial-choice-row">
+                <div><strong>Create invoice automatically</strong></div>
+                <input
+                  type="checkbox"
+                  checked={payload.settings.autoCreateInvoice}
+                  disabled={!canManage || saving}
+                  onChange={(event) =>
+                    patchSettings({ autoCreateInvoice: event.target.checked })
+                  }
+                />
+              </label>
+            ) : null}
 
-          <label className="admin-choice-row crm-commercial-choice-row">
-            <div>
-              <strong>Assign questionnaire automatically</strong>
-            </div>
-            <input
-              type="checkbox"
-              checked={payload.settings.autoAssignQuestionnaire}
-              disabled={!canManage || saving}
-              onChange={(event) =>
-                patchSettings({
-                  autoAssignQuestionnaire: event.target.checked,
-                })
-              }
-            />
-          </label>
+            {clientPortalEnabled ? <>
+              <label className="admin-choice-row crm-commercial-choice-row">
+                <div><strong>Assign questionnaire automatically</strong></div>
+                <input
+                  type="checkbox"
+                  checked={payload.settings.autoAssignQuestionnaire}
+                  disabled={!canManage || saving}
+                  onChange={(event) =>
+                    patchSettings({ autoAssignQuestionnaire: event.target.checked })
+                  }
+                />
+              </label>
 
-          <AdminField
-            label="Default questionnaire"
-          >
-            <select
-              className="admin-select"
-              value={
-                payload.settings.defaultQuestionnaireTemplateId || ""
-              }
-              disabled={!canManage || saving}
-              onChange={(event) =>
-                patchSettings({
-                  defaultQuestionnaireTemplateId:
-                    event.target.value || null,
-                })
-              }
-            >
-              <option value="">
-                No default questionnaire
-              </option>
-              {payload.questionnaireTemplates.map((template) => (
-                <option
-                  key={template.id}
-                  value={template.id}
+              <AdminField label="Default questionnaire">
+                <select
+                  className="admin-select"
+                  value={payload.settings.defaultQuestionnaireTemplateId || ""}
+                  disabled={!canManage || saving}
+                  onChange={(event) =>
+                    patchSettings({
+                      defaultQuestionnaireTemplateId: event.target.value || null,
+                    })
+                  }
                 >
-                  {template.name}
-                </option>
-              ))}
-            </select>
-          </AdminField>
-        </div>
-      </AdminPanel>
+                  <option value="">No default questionnaire</option>
+                  {payload.questionnaireTemplates.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name}
+                    </option>
+                  ))}
+                </select>
+              </AdminField>
 
+              <AdminField label="Questionnaire due before event">
+                <input
+                  className="admin-input"
+                  type="number"
+                  min="0"
+                  value={payload.settings.questionnaireDueDaysBeforeEvent}
+                  disabled={!canManage || saving}
+                  onChange={(event) =>
+                    patchSettings({
+                      questionnaireDueDaysBeforeEvent:
+                        Math.max(0, Number(event.target.value || 0)),
+                    })
+                  }
+                />
+              </AdminField>
+            </> : null}
+          </div>
+        </AdminPanel>
+      ) : null}
+
+      {contractsEnabled ? (
       <AdminPanel
         title="Contract templates"
         icon={FileQuestion}
@@ -1140,9 +1235,11 @@ function CommercialSettings({
           </div>
         )}
       </AdminPanel>
+      ) : null}
 
-      <CrmPaymentSchedulePresets canManage={canManage} />
+      {invoicesEnabled ? <CrmPaymentSchedulePresets canManage={canManage} /> : null}
 
+      {invoicesEnabled ? (
       <AdminPanel
         title="Legacy payment fallback"
         icon={Settings2}
@@ -1267,30 +1364,9 @@ function CommercialSettings({
             />
           </AdminField>
 
-          <AdminField
-            label="Questionnaire due before event"
-          >
-            <input
-              className="admin-input"
-              type="number"
-              min="0"
-              value={
-                payload.settings.questionnaireDueDaysBeforeEvent
-              }
-              disabled={!canManage || saving}
-              onChange={(event) =>
-                patchSettings({
-                  questionnaireDueDaysBeforeEvent:
-                    Math.max(
-                      0,
-                      Number(event.target.value || 0),
-                    ),
-                })
-              }
-            />
-          </AdminField>
         </div>
       </AdminPanel>
+      ) : null}
 
       <AdminPanel
         title="Tax defaults"
@@ -1401,6 +1477,7 @@ function CommercialSettings({
 
       </AdminPanel>
 
+      {invoicesEnabled ? (
       <AdminPanel
         title="Invoice numbering"
         icon={Settings2}
@@ -1465,7 +1542,9 @@ function CommercialSettings({
           </AdminField>
         </div>
       </AdminPanel>
+      ) : null}
 
+      {invoicesEnabled ? (
       <AdminPanel
         title="Invoice wording"
         icon={Settings2}
@@ -1500,6 +1579,7 @@ function CommercialSettings({
           </AdminField>
         </div>
       </AdminPanel>
+      ) : null}
 
       <div className="flex items-center justify-end">
         <AdminIconButton

@@ -1,6 +1,7 @@
 import { getDefaultWorkspaceId, getWorkspace, updateWorkspaceSettings } from "./workspace-d1";
 import { getPlatformModuleConfigurations } from "./platform-module-config-d1";
 import { getPlatformBrandingIdentity } from "./platform-branding-d1";
+import { resolveWorkspaceEntitlements } from "./platform-entitlements-d1";
 
 type D1Db = any;
 
@@ -205,18 +206,6 @@ function hydrateMember(row: any) {
   };
 }
 
-function hydrateEntitlement(row: any) {
-  return {
-    key: text(row.feature_key),
-    name: text(row.name),
-    description: text(row.description),
-    unitLabel: text(row.unit_label),
-    enabled: Number(row.enabled || 0) === 1,
-    source: text(row.source),
-    limit: row.limit_value == null ? null : Number(row.limit_value),
-  };
-}
-
 function cleanStepKeys(value: unknown) {
   const items = Array.isArray(value) ? value : [];
   return Array.from(new Set(items.map(text).filter((key) => ONBOARDING_STEP_KEYS.has(key))));
@@ -350,7 +339,7 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
   const workspace = await getWorkspace(db, workspaceId);
   if (!workspace) throw httpError("Business workspace not found.", 404);
 
-  const [profile, settingsRow, categories, serviceAreas, members, entitlements, auditRows, supplierTaxonomy, moduleConfigurations, platformIdentity, schemaRow] = await Promise.all([
+  const [profile, settingsRow, categories, serviceAreas, members, resolvedAccess, auditRows, supplierTaxonomy, moduleConfigurations, platformIdentity, schemaRow] = await Promise.all([
     db.prepare(`SELECT * FROM business_profiles WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first(),
     db.prepare(`SELECT document_json FROM workspace_settings WHERE workspace_id = ? LIMIT 1`).bind(workspaceId).first(),
     db.prepare(`
@@ -377,17 +366,7 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
       ORDER BY CASE role WHEN 'owner' THEN 0 WHEN 'admin' THEN 1 ELSE 2 END,
                display_name, email
     `).bind(workspaceId).all(),
-    db.prepare(`
-      SELECT pf.feature_key, pf.name, pf.description, pf.unit_label,
-             COALESCE(we.enabled, 0) AS enabled,
-             COALESCE(we.source, 'plan') AS source,
-             we.limit_value
-      FROM platform_features pf
-      LEFT JOIN workspace_entitlements we
-        ON we.feature_key = pf.feature_key AND we.workspace_id = ?
-      WHERE pf.status = 'active'
-      ORDER BY pf.sort_order, pf.name
-    `).bind(workspaceId).all(),
+    resolveWorkspaceEntitlements(db, workspaceId),
     db.prepare(`
       SELECT id, event_type, entity_type, entity_id, summary, created_at
       FROM platform_audit_events
@@ -433,7 +412,15 @@ export async function getPlatformFoundation(db: D1Db, workspaceIdInput?: string)
     categories: (categories.results || []).map(hydrateCategory),
     serviceAreas: (serviceAreas.results || []).map(hydrateServiceArea),
     members: (members.results || []).map(hydrateMember),
-    entitlements: (entitlements.results || []).map(hydrateEntitlement),
+    entitlements: resolvedAccess.entitlements.map((entitlement) => ({
+      key: entitlement.featureKey,
+      name: entitlement.name,
+      description: entitlement.description,
+      unitLabel: entitlement.unitLabel,
+      enabled: entitlement.enabled,
+      source: entitlement.source,
+      limit: entitlement.limit,
+    })),
     supplierTaxonomy,
     moduleConfigurations,
     platformIdentity,

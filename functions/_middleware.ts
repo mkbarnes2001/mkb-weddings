@@ -1,4 +1,6 @@
 import { getProfessionalContext, professionalAuthEnforced } from "../serverless/platform-auth-d1";
+import { requireWorkspaceEntitlement } from "../serverless/platform-entitlements-d1";
+import { professionalApiEntitlementForPath } from "../serverless/platform-entitlement-policy";
 import { resolvePublicWorkspaceId } from "../serverless/tenant-context";
 
 // functions/middleware.ts
@@ -18,13 +20,47 @@ export async function onRequest(context: any) {
   // protects the project's pages.dev/preview hostnames. Do not set this flag on
   // the public Pages project. Tenant-aware handlers resolve the active business
   // from the authenticated professional context rather than browser input.
-  const authExempt = path.startsWith("/api/platform-auth/") || path === "/api/health" || path === "/api/db-health";
+  const authExempt =
+    path.startsWith("/api/platform-auth/")
+    || path === "/api/health"
+    || path === "/api/db-health"
+    // Stripe Billing webhooks are authenticated by the dedicated exact-body
+    // Stripe-Signature verification in their route, not by a professional
+    // browser session. Keep this exemption exact rather than opening the
+    // wider /api/webhooks namespace.
+    || path === "/api/webhooks/wedplanned-billing";
   if (path.startsWith("/api/") && !authExempt && professionalAuthEnforced(context.env as any)) {
     const auth = await getProfessionalContext((context.env as any).MKB_DB, request, context.env as any);
     if (!auth.accessGranted) {
       return Response.json({ error: "Professional sign-in required." }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
     }
     context.data = { ...(context.data || {}), professionalContext: auth };
+
+    const featureKey = professionalApiEntitlementForPath(path);
+
+    if (featureKey) {
+      try {
+        await requireWorkspaceEntitlement(
+          (context.env as any).MKB_DB,
+          auth.workspaceId,
+          featureKey,
+        );
+      } catch (error: any) {
+        return Response.json(
+          {
+            error:
+              error?.message
+              || "This feature is not available for this workspace.",
+          },
+          {
+            status: Number(error?.statusCode || 403),
+            headers: {
+              "Cache-Control": "private, no-store",
+            },
+          },
+        );
+      }
+    }
   }
 
   // Don’t touch static files / assets (IMPORTANT: don’t rewrite JSON requests)

@@ -43,6 +43,7 @@ export type AdminNavigationItem = {
   icon: LucideIcon;
   mobilePrimary?: boolean;
   requiredPermission?: string;
+  requiredEntitlements?: string[];
   match: (pathname: string, params: URLSearchParams) => boolean;
 };
 
@@ -72,26 +73,26 @@ const crmItems: AdminNavigationItem[] = [
   { key: "overview", label: "Overview", to: "/admin/crm?view=overview", icon: Gauge, mobilePrimary: true, match: exactWithQuery("/admin/crm", "view", "overview") },
   { key: "leads", label: "Leads", to: "/admin/crm", icon: Target, mobilePrimary: true, match: (pathname, params) => pathname.startsWith("/admin/crm/enquiries/") || exactWithoutQuery("/admin/crm", "view", ["pipeline"])(pathname, params) },
   { key: "clients", label: "Clients", to: "/admin/crm?view=contacts", icon: UserRound, mobilePrimary: true, match: (pathname, params) => pathname.startsWith("/admin/crm/contacts/") || exactWithQuery("/admin/crm", "view", "contacts")(pathname, params) },
-  { key: "jobs", label: "Jobs", to: "/admin/crm?view=jobs", icon: BriefcaseBusiness, mobilePrimary: true, match: (pathname, params) => pathname.startsWith("/admin/crm/jobs/") || isWeddingWorkspacePath(pathname) || exactWithQuery("/admin/crm", "view", "jobs")(pathname, params) },
-  { key: "schedule", label: "Schedule", to: "/admin/crm?view=schedule", icon: CalendarDays, match: exactWithQuery("/admin/crm", "view", "schedule") },
-  { key: "payments", label: "Payments", to: "/admin/crm/payments", icon: WalletCards, match: exactPath("/admin/crm/payments") },
-  { key: "packages", label: "Packages", to: "/admin/crm/catalogue", icon: Package, match: pathPrefix("/admin/crm/catalogue") },
-  { key: "quotes", label: "Quotes", to: "/admin/crm/quotes", icon: FileQuestion, match: pathPrefix("/admin/crm/quotes") },
+  { key: "jobs", label: "Jobs", to: "/admin/crm?view=jobs", icon: BriefcaseBusiness, mobilePrimary: true, requiredEntitlements: ["bookings"], match: (pathname, params) => pathname.startsWith("/admin/crm/jobs/") || isWeddingWorkspacePath(pathname) || exactWithQuery("/admin/crm", "view", "jobs")(pathname, params) },
+  { key: "schedule", label: "Schedule", to: "/admin/crm?view=schedule", icon: CalendarDays, requiredEntitlements: ["bookings"], match: exactWithQuery("/admin/crm", "view", "schedule") },
+  { key: "payments", label: "Payments", to: "/admin/crm/payments", icon: WalletCards, requiredEntitlements: ["connected-payments"], match: exactPath("/admin/crm/payments") },
+  { key: "packages", label: "Packages", to: "/admin/crm/catalogue", icon: Package, requiredEntitlements: ["bookings"], match: pathPrefix("/admin/crm/catalogue") },
+  { key: "quotes", label: "Quotes", to: "/admin/crm/quotes", icon: FileQuestion, requiredEntitlements: ["bookings"], match: pathPrefix("/admin/crm/quotes") },
   { key: "templates", label: "Templates", to: "/admin/crm/templates", icon: FileText, match: pathPrefix("/admin/crm/templates") },
   { key: "email-settings", label: "Email settings", to: "/admin/crm/email-settings", icon: Mail, match: pathPrefix("/admin/crm/email-settings") },
-  { key: "questionnaires", label: "Questionnaires", to: "/admin/crm?view=questionnaires", icon: ClipboardList, match: (pathname, params) => pathname.startsWith("/admin/crm/questionnaires/") || exactWithQuery("/admin/crm", "view", "questionnaires")(pathname, params) },
+  { key: "questionnaires", label: "Questionnaires", to: "/admin/crm?view=questionnaires", icon: ClipboardList, requiredEntitlements: ["client-portal"], match: (pathname, params) => pathname.startsWith("/admin/crm/questionnaires/") || exactWithQuery("/admin/crm", "view", "questionnaires")(pathname, params) },
   { key: "workflows", label: "Workflows", to: "/admin/crm?view=workflows", icon: Workflow, match: (pathname, params) => pathname.startsWith("/admin/crm/workflows/") || exactWithQuery("/admin/crm", "view", "workflows")(pathname, params) },
-  { key: "commercial-settings", label: "Commercial settings", to: "/admin/crm?view=commercial-settings", icon: Settings, match: (pathname, params) => pathname.startsWith("/admin/crm/contracts/templates/") || exactWithQuery("/admin/crm", "view", "commercial-settings")(pathname, params) },
-  { key: "payment-setup", label: "Payment setup", to: "/admin/crm/payment-setup", icon: CreditCard, match: exactPath("/admin/crm/payment-setup") },
+  { key: "commercial-settings", label: "Commercial settings", to: "/admin/crm?view=commercial-settings", icon: Settings, requiredEntitlements: ["bookings"], match: (pathname, params) => pathname.startsWith("/admin/crm/contracts/templates/") || exactWithQuery("/admin/crm", "view", "commercial-settings")(pathname, params) },
+  { key: "payment-setup", label: "Payment setup", to: "/admin/crm/payment-setup", icon: CreditCard, requiredEntitlements: ["connected-payments"], match: exactPath("/admin/crm/payment-setup") },
   { key: "lead-form", label: "Lead form", to: "/admin/crm?view=lead-form", icon: ClipboardList, match: exactWithQuery("/admin/crm", "view", "lead-form") },
-  { key: "client-portal", label: "Client portal", to: "/admin/settings/client-portal", icon: Palette, mobilePrimary: true, match: pathPrefix("/admin/settings/client-portal") },
+  { key: "client-portal", label: "Client portal", to: "/admin/settings/client-portal", icon: Palette, mobilePrimary: true, requiredEntitlements: ["client-portal"], match: pathPrefix("/admin/settings/client-portal") },
 ];
 
 const clientGalleryItems: AdminNavigationItem[] = [
   { key: "overview", label: "Overview", to: "/admin/client-galleries/overview", icon: Gauge, mobilePrimary: true, match: exactPath("/admin/client-galleries/overview") },
   { key: "galleries", label: "Client galleries", to: "/admin/client-galleries", icon: Images, mobilePrimary: true, match: (pathname) => pathname !== "/admin/client-galleries/overview" && pathPrefix("/admin/client-galleries")(pathname) },
-  { key: "store", label: "Store", to: "/admin/print-store?tab=catalogue", icon: Store, mobilePrimary: true, match: (pathname, params) => pathname === "/admin/print-store" && (params.get("tab") || "catalogue") !== "orders" },
-  { key: "orders", label: "Orders", to: "/admin/print-store?tab=orders", icon: ShoppingBag, mobilePrimary: true, match: exactWithQuery("/admin/print-store", "tab", "orders") },
+  { key: "store", label: "Store", to: "/admin/print-store?tab=catalogue", icon: Store, mobilePrimary: true, requiredEntitlements: ["print-store"], match: (pathname, params) => pathname === "/admin/print-store" && (params.get("tab") || "catalogue") !== "orders" },
+  { key: "orders", label: "Orders", to: "/admin/print-store?tab=orders", icon: ShoppingBag, mobilePrimary: true, requiredEntitlements: ["print-store"], match: exactWithQuery("/admin/print-store", "tab", "orders") },
 ];
 
 const studioItems: AdminNavigationItem[] = [
@@ -115,6 +116,7 @@ const businessItems: AdminNavigationItem[] = [
   { key: "services", label: "Services & areas", to: "/admin/wedplanned?tab=services", icon: MapPinned, match: exactWithQuery("/admin/wedplanned", "tab", "services") },
   { key: "suppliers", label: "Suppliers", to: "/admin/suppliers", icon: Users, mobilePrimary: true, match: pathPrefix("/admin/suppliers") },
   { key: "team", label: "Team members", to: "/admin/wedplanned?tab=team", icon: Users, mobilePrimary: true, match: exactWithQuery("/admin/wedplanned", "tab", "team") },
+  { key: "billing", label: "Plan & billing", to: "/admin/wedplanned?tab=billing", icon: CreditCard, requiredPermission: "billing:read", match: exactWithQuery("/admin/wedplanned", "tab", "billing") },
   { key: "workspace", label: "Domains & workspace", to: "/admin/settings", icon: Settings, match: (pathname) => pathname === "/admin/settings" },
 ];
 
@@ -130,12 +132,12 @@ export const platformAdminItems: AdminNavigationItem[] = [
 ];
 
 export const adminModules: AdminModuleDefinition[] = [
-  // The persisted key remains "business" for entitlement and production configuration compatibility.
-  { key: "business", label: "WedNav", shortLabel: "W.NAV", description: "Business home, profile, team and suppliers", to: "/admin", icon: BriefcaseBusiness, entitlementKey: "business_settings", match: (pathname) => pathname === "/admin" || pathname.startsWith("/admin/business") || pathname.startsWith("/admin/wedplanned") || pathname === "/admin/settings" || pathname.startsWith("/admin/suppliers"), items: businessItems },
+  // The persisted module key remains "business" for production configuration compatibility; entitlementKey is a canonical feature readiness reference.
+  { key: "business", label: "WedNav", shortLabel: "W.NAV", description: "Business home, profile, team and suppliers", to: "/admin", icon: BriefcaseBusiness, entitlementKey: "business-profile", match: (pathname) => pathname === "/admin" || pathname.startsWith("/admin/business") || pathname.startsWith("/admin/wedplanned") || pathname === "/admin/settings" || pathname.startsWith("/admin/suppliers"), items: businessItems },
   { key: "crm", label: "WedCRM", shortLabel: "W.CRM", description: "Client journey, bookings and communications", to: "/admin/crm?view=overview", icon: ContactRound, entitlementKey: "crm", match: (pathname) => pathname.startsWith("/admin/crm") || pathname === "/admin/settings/client-portal" || isWeddingWorkspacePath(pathname), items: crmItems },
-  // The persisted key remains "website" for entitlement and production configuration compatibility.
-  { key: "website", label: "WedStudio", shortLabel: "W.STU", description: "Website, stories, galleries and publishing", to: "/admin/studio", icon: Globe2, entitlementKey: "website_content", match: (pathname) => ["/admin/studio", "/admin/website", "/admin/weddings", "/admin/gallery", "/admin/collections", "/admin/locations", "/admin/moments", "/admin/creative-flash", "/admin/custom-collections", "/admin/venues", "/admin/assets", "/admin/ai", "/admin/seo", "/admin/publishing"].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)), items: studioItems },
-  { key: "client-galleries", label: "WedStore", shortLabel: "W.STO", description: "Client galleries, delivery and commerce", to: "/admin/client-galleries/overview", icon: Images, entitlementKey: "client_galleries", match: (pathname) => pathname.startsWith("/admin/client-galleries") || pathname.startsWith("/admin/print-store"), items: clientGalleryItems },
+  // The persisted module key remains "website" for production configuration compatibility; entitlementKey is a canonical feature readiness reference.
+  { key: "website", label: "WedStudio", shortLabel: "W.STU", description: "Website, stories, galleries and publishing", to: "/admin/studio", icon: Globe2, entitlementKey: "content-tools", match: (pathname) => ["/admin/studio", "/admin/website", "/admin/weddings", "/admin/gallery", "/admin/collections", "/admin/locations", "/admin/moments", "/admin/creative-flash", "/admin/custom-collections", "/admin/venues", "/admin/assets", "/admin/ai", "/admin/seo", "/admin/publishing"].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)), items: studioItems },
+  { key: "client-galleries", label: "WedStore", shortLabel: "W.STO", description: "Client galleries, delivery and commerce", to: "/admin/client-galleries/overview", icon: Images, entitlementKey: "client-galleries", match: (pathname) => pathname.startsWith("/admin/client-galleries") || pathname.startsWith("/admin/print-store"), items: clientGalleryItems },
 ];
 
 export const adminModuleIconOptions = [
@@ -173,13 +175,117 @@ export function resolveAdminModuleIcon(module: AdminModuleDefinition, configurat
   return iconByKey.get(configuration?.iconKey || "") || module.icon;
 }
 
-export function visibleModuleItems(module: AdminModuleDefinition, permissions: string[]) {
-  return module.items.filter((item) => !item.requiredPermission || permissions.includes(item.requiredPermission));
+export function adminModuleEntitled(
+  module: AdminModuleDefinition,
+  enabledEntitlementKeys: ReadonlySet<string> | null = null,
+) {
+  if (module.key === "business" || enabledEntitlementKeys === null) return true;
+  return enabledEntitlementKeys.has(module.entitlementKey);
 }
 
-export function resolveAdminNavigationItem(module: AdminModuleDefinition, pathname: string, search: string, permissions: string[]) {
+export function requiredEntitlementsForAdminPath(
+  pathname: string,
+) {
+  if (isWeddingWorkspacePath(pathname)) {
+    return ["bookings"];
+  }
+
+  if (
+    /^\/admin\/crm\/jobs\/[^/]+\/invoices\/[^/]+$/.test(
+      pathname,
+    )
+  ) {
+    return ["bookings", "invoices"];
+  }
+
+  if (pathname.startsWith("/admin/crm/jobs/")) {
+    return ["bookings"];
+  }
+
+  if (
+    pathname === "/admin/crm/catalogue"
+    || pathname.startsWith("/admin/crm/catalogue/")
+    || pathname === "/admin/crm/quotes"
+    || pathname.startsWith("/admin/crm/quotes/")
+    || pathname.startsWith("/admin/crm/templates/quotes/")
+  ) {
+    return ["bookings"];
+  }
+
+  if (
+    pathname === "/admin/crm/payment-setup"
+    || pathname === "/admin/crm/payments"
+  ) {
+    return ["connected-payments"];
+  }
+
+  if (
+    pathname.startsWith("/admin/crm/questionnaires/")
+    || pathname === "/admin/settings/client-portal"
+    || pathname.startsWith("/admin/settings/client-portal/")
+  ) {
+    return ["client-portal"];
+  }
+
+  if (pathname.startsWith("/admin/crm/contracts/templates/")) {
+    return ["contracts"];
+  }
+
+  if (
+    pathname === "/admin/print-store"
+    || pathname.startsWith("/admin/print-store/")
+  ) {
+    return ["print-store"];
+  }
+
+  return [];
+}
+
+export function adminRouteEntitled(
+  pathname: string,
+  enabledEntitlementKeys: ReadonlySet<string> | null = null,
+) {
+  if (enabledEntitlementKeys === null) return true;
+
+  return requiredEntitlementsForAdminPath(pathname)
+    .every((featureKey) =>
+      enabledEntitlementKeys.has(featureKey),
+    );
+}
+
+export function visibleAdminModules(
+  enabledEntitlementKeys: ReadonlySet<string> | null = null,
+) {
+  return adminModules.filter((module) => adminModuleEntitled(module, enabledEntitlementKeys));
+}
+
+export function visibleModuleItems(
+  module: AdminModuleDefinition,
+  permissions: string[],
+  enabledEntitlementKeys: ReadonlySet<string> | null = null,
+) {
+  if (!adminModuleEntitled(module, enabledEntitlementKeys)) return [];
+
+  return module.items.filter((item) => {
+    if (item.requiredPermission && !permissions.includes(item.requiredPermission)) return false;
+    if (!item.requiredEntitlements?.length || enabledEntitlementKeys === null) return true;
+    return item.requiredEntitlements.every((featureKey) => enabledEntitlementKeys.has(featureKey));
+  });
+}
+
+export function resolveAdminNavigationItem(
+  module: AdminModuleDefinition,
+  pathname: string,
+  search: string,
+  permissions: string[],
+  enabledEntitlementKeys: ReadonlySet<string> | null = null,
+) {
   const params = new URLSearchParams(search);
-  return visibleModuleItems(module, permissions).find((item) => item.match(pathname, params));
+  return visibleModuleItems(
+    module,
+    permissions,
+    enabledEntitlementKeys,
+  ).find((item) => item.match(pathname, params));
 }
 
 export function resolvePlatformAdminNavigationItem(pathname: string, search: string) {

@@ -3,7 +3,7 @@ import {
   useMemo,
   useState,
   type ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import {
   ArrowRight,
   Building2,
@@ -39,16 +39,38 @@ function Destination({ to, icon: Icon, title, description, meta }: { to: string;
 
 export function ClientGalleriesOverview() {
   const { auth } = useProfessionalAuth();
+  const { enabledEntitlementKeys = null } = useOutletContext<{
+    enabledEntitlementKeys?: ReadonlySet<string> | null;
+  }>();
+  const printStoreEnabled = enabledEntitlementKeys?.has("print-store") === true;
   const [galleries, setGalleries] = useState<ClientGalleryListPayload | null>(null);
   const [store, setStore] = useState<PrintStoreAdminPayload | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
     setError("");
-    Promise.all([AdminApiService.listClientGalleries(), AdminApiService.getPrintStore()])
-      .then(([nextGalleries, nextStore]) => { setGalleries(nextGalleries); setStore(nextStore); })
-      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load WedStore overview."));
-  }, [auth.workspaceId]);
+    setStore(null);
+
+    Promise.all([
+      AdminApiService.listClientGalleries(),
+      printStoreEnabled ? AdminApiService.getPrintStore() : Promise.resolve(null),
+    ])
+      .then(([nextGalleries, nextStore]) => {
+        if (!active) return;
+        setGalleries(nextGalleries);
+        setStore(nextStore);
+      })
+      .catch((loadError) => {
+        if (active) {
+          setError(loadError instanceof Error ? loadError.message : "Unable to load WedStore overview.");
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [auth.workspaceId, printStoreEnabled]);
 
   const summary = useMemo(() => {
     const records = galleries?.galleries || [];
@@ -68,7 +90,7 @@ export function ClientGalleriesOverview() {
     <AdminPageHeader
       eyebrow="WedStore · Private delivery"
       title="Dashboard"
-      description="Manage private image delivery, client activity, selections, store configuration and orders without mixing these assets with the public website portfolio."
+      description="Manage private image delivery, client activity and selections. Store and order tools appear when Print Store access is enabled."
       actions={<AdminHeaderRouterLink to="/admin/client-galleries" className="admin-button admin-button--primary admin-button--md"><Images className="admin-button__icon" />Open galleries</AdminHeaderRouterLink>}
     />
     {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
@@ -76,15 +98,15 @@ export function ClientGalleriesOverview() {
       <Metric value={summary.total} label="Client galleries" detail={`${summary.live} live`} />
       <Metric value={summary.images} label="Delivered images" detail="Across private galleries" />
       <Metric value={summary.selections} label="Favourites" detail={`${summary.visitors} visitors`} />
-      <Metric value={summary.orders} label="Store orders" detail={`${summary.activeOrders} active`} />
+      {printStoreEnabled ? <Metric value={summary.orders} label="Store orders" detail={`${summary.activeOrders} active`} /> : null}
     </section>
     <section className="admin-module-destination-grid">
       <Destination to="/admin/client-galleries" icon={Images} title="Client galleries" description="Create galleries, upload originals, control access, manage selections and apply gallery-specific branding." meta={<AdminStatus tone="info">{summary.live} live</AdminStatus>} />
-      <Destination to="/admin/print-store?tab=catalogue" icon={Store} title="Store" description="Manage products and price lists used by enabled client galleries." meta={<AdminStatus tone="neutral">{store?.products.filter((product) => product.status === "active").length || 0} active products</AdminStatus>} />
-      <Destination to="/admin/print-store?tab=orders" icon={ShoppingBag} title="Orders" description="Review payment, approve fulfilment and manage Prodigi submissions." meta={<AdminStatus tone={summary.activeOrders ? "warning" : "success"}>{summary.activeOrders} active</AdminStatus>} />
+      {printStoreEnabled ? <Destination to="/admin/print-store?tab=catalogue" icon={Store} title="Store" description="Manage products and price lists used by enabled client galleries." meta={<AdminStatus tone="neutral">{store?.products.filter((product) => product.status === "active").length || 0} active products</AdminStatus>} /> : null}
+      {printStoreEnabled ? <Destination to="/admin/print-store?tab=orders" icon={ShoppingBag} title="Orders" description="Review payment, approve fulfilment and manage Prodigi submissions." meta={<AdminStatus tone={summary.activeOrders ? "warning" : "success"}>{summary.activeOrders} active</AdminStatus>} /> : null}
     </section>
     <AdminPanel title="How this module is organised" description="Private client delivery remains separate from WedStudio.">
-      <div className="admin-module-guidance"><div><LockKeyhole /><span><strong>Gallery settings and branding</strong><small>Open an individual gallery to manage privacy, downloads, selections, albums, branding and store assignment.</small></span></div><div><CheckCircle2 /><span><strong>Client selections</strong><small>Favourites and formal selection requests remain attached to the gallery and its verified client identities.</small></span></div><div><Globe2 /><span><strong>Public portfolio content</strong><small>Website galleries, venues, moments and wedding stories are managed in WedStudio.</small></span></div></div>
+      <div className="admin-module-guidance"><div><LockKeyhole /><span><strong>Gallery settings and branding</strong><small>Open an individual gallery to manage privacy, downloads, selections and albums.</small></span></div><div><CheckCircle2 /><span><strong>Client selections</strong><small>Favourites and formal selection requests remain attached to the gallery and its verified client identities.</small></span></div><div><Globe2 /><span><strong>Public portfolio content</strong><small>Website galleries, venues, moments and wedding stories are managed in WedStudio.</small></span></div></div>
     </AdminPanel>
   </AdminPage>;
 }
@@ -211,11 +233,11 @@ export function BusinessOverview() {
       <Destination to="/admin/wedplanned?tab=team" icon={Users} title="Team members" description="Invite people and manage workspace-scoped roles and access." meta={<AdminStatus tone="success">{activeMembers.length} active</AdminStatus>} />
       <Destination to="/admin/settings" icon={Settings} title="Domains & workspace" description="Workspace name, website details, currency, timezone and verified domains." meta={<AdminStatus tone="info">{verifiedDomains.length} verified</AdminStatus>} />
     </section>
-    <AdminPanel title="Your WedPlanned products" description="WedNav is the business home. Open the specialist product when you need to manage clients, content or commerce.">
+    <AdminPanel title="Your WedPlanned products" description="WedNav is the business home. Open the specialist products included in this workspace.">
       <div className="admin-module-destination-grid">
-        <Destination to="/admin/crm?view=overview" icon={Users} title="WedCRM" description="Manage enquiries, clients, Jobs, workflows, quotes, questionnaires and Client Portal activity." />
-        <Destination to="/admin/studio" icon={Globe2} title="WedStudio" description="Manage the website, public galleries, wedding stories, locations, content, SEO and publishing." />
-        <Destination to="/admin/client-galleries/overview" icon={Store} title="WedStore" description="Manage private client delivery, gallery commerce, orders and fulfilment." />
+        {(!platform || platform.entitlements.some((item) => item.key === "crm" && item.enabled)) ? <Destination to="/admin/crm?view=overview" icon={Users} title="WedCRM" description="Manage enquiries, clients, Jobs, workflows, quotes, questionnaires and Client Portal activity." /> : null}
+        {(!platform || platform.entitlements.some((item) => item.key === "content-tools" && item.enabled)) ? <Destination to="/admin/studio" icon={Globe2} title="WedStudio" description="Manage the website, public galleries, wedding stories, locations, content, SEO and publishing." /> : null}
+        {(!platform || platform.entitlements.some((item) => item.key === "client-galleries" && item.enabled)) ? <Destination to="/admin/client-galleries/overview" icon={Store} title="WedStore" description="Manage private client delivery and optional gallery commerce." /> : null}
       </div>
     </AdminPanel>
     <AdminPanel title="Isolation boundary" description="Business configuration is workspace-owned and does not grant cross-workspace access.">

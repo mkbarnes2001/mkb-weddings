@@ -238,6 +238,52 @@ export type PlatformAdministrationPayload = {
   recentAudit: Array<WedPlannedAuditEvent & { actorEmail: string }>;
 };
 
+export type WorkspaceSubscriptionBillingOverview = {
+  workspaceId: string;
+  resolvedAt: string;
+  accessState: "full" | "grace" | "recovery";
+  plan: {
+    id: string;
+    key: string;
+    name: string;
+    description: string;
+    type: "commercial" | "internal" | "promotional";
+    public: boolean;
+  } | null;
+  subscription: {
+    id: string;
+    planId: string;
+    planKey: string;
+    planName: string;
+    provider: "stripe" | "internal";
+    status: "trialing" | "active" | "past_due" | "cancelled" | "expired" | "complimentary";
+    billingInterval: "none" | "month" | "year";
+    currentPeriodStart: string | null;
+    currentPeriodEnd: string | null;
+    trialStart: string | null;
+    trialEnd: string | null;
+    cancelAtPeriodEnd: boolean;
+    cancelAt: string | null;
+    cancelledAt: string | null;
+    endedAt: string | null;
+    pastDueSince: string | null;
+    graceExpiresAt: string | null;
+  } | null;
+  price: {
+    id: string;
+    billingInterval: "month" | "year";
+    intervalCount: number;
+    currency: string;
+    unitAmountMinor: number;
+    status: "draft" | "active" | "grandfathered" | "retired";
+  } | null;
+  customer: {
+    provider: "stripe";
+    configured: boolean;
+    lastSyncedAt: string | null;
+  } | null;
+};
+
 export type WedPlannedPlatformPayload = {
   schemaVersion: number;
   brand: {

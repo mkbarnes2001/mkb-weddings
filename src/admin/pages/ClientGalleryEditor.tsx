@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useOutletContext, useParams, useSearchParams } from "react-router-dom";
 import {
   Activity,
   ArrowLeft,
@@ -84,9 +84,15 @@ type WorkspaceTab = "photos" | "activity" | "access" | "branding" | "store" | "s
 
 export function ClientGalleryEditor() {
   const { id = "" } = useParams<{ id: string }>();
+  const { enabledEntitlementKeys = null } = useOutletContext<{
+    enabledEntitlementKeys?: ReadonlySet<string> | null;
+  }>();
+  const printStoreEnabled = enabledEntitlementKeys?.has("print-store") === true;
+  const contentToolsEnabled = enabledEntitlementKeys?.has("content-tools") === true;
   const [searchParams, setSearchParams] = useSearchParams();
   const rawTab = searchParams.get("tab");
-  const activeTab: WorkspaceTab = rawTab === "activity" || rawTab === "access" || rawTab === "branding" || rawTab === "store" || rawTab === "settings" ? rawTab : "photos";
+  const requestedTab: WorkspaceTab = rawTab === "activity" || rawTab === "access" || rawTab === "branding" || rawTab === "store" || rawTab === "settings" ? rawTab : "photos";
+  const activeTab: WorkspaceTab = requestedTab === "store" && !printStoreEnabled ? "settings" : requestedTab;
   const [detail, setDetail] = useState<ClientGalleryDetailPayload | null>(null);
   const [draft, setDraft] = useState<Partial<ClientGalleryRecord> & { pin?: string }>({});
   const [assetSearch, setAssetSearch] = useState("");
@@ -127,6 +133,11 @@ export function ClientGalleryEditor() {
   };
 
   const loadStore = async () => {
+    if (!printStoreEnabled) {
+      setStoreData(null);
+      setStoreDraft(null);
+      return;
+    }
     setError("");
     try {
       const next = await AdminApiService.getClientGalleryStore(id);
@@ -138,7 +149,15 @@ export function ClientGalleryEditor() {
   };
 
   useEffect(() => { load(); }, [id]);
-  useEffect(() => { if (activeTab === "store") loadStore(); }, [id, activeTab]);
+  useEffect(() => {
+    if (activeTab === "store" && printStoreEnabled) loadStore();
+  }, [id, activeTab, printStoreEnabled]);
+  useEffect(() => {
+    if (!printStoreEnabled) {
+      setStoreData(null);
+      setStoreDraft(null);
+    }
+  }, [printStoreEnabled]);
   useEffect(() => { setSelectedAssets(new Set()); setOpenPhotoMenuId(""); setDraggedAssetId(""); setDragOverAssetId(""); }, [activeAlbumId, activeTab]);
   useEffect(() => {
     const close = (event: MouseEvent) => {
@@ -181,8 +200,9 @@ export function ClientGalleryEditor() {
   }, [detail?.assets, detail?.gallery.sortMode, activeAlbumId, photoSearch]);
 
   const setTab = (tab: WorkspaceTab) => {
+    const nextTab = tab === "store" && !printStoreEnabled ? "settings" : tab;
     const next = new URLSearchParams(searchParams);
-    if (tab === "photos") next.delete("tab"); else next.set("tab", tab);
+    if (nextTab === "photos") next.delete("tab"); else next.set("tab", nextTab);
     setSearchParams(next);
   };
 
@@ -318,6 +338,7 @@ export function ClientGalleryEditor() {
   };
 
   const searchAssets = async () => {
+    if (!contentToolsEnabled) return;
     setBusy(true); setError("");
     try {
       const result = await AdminApiService.getAssetLibrary({ q: assetSearch.trim(), wedding: draft.weddingSlug || undefined, limit: 60 });
@@ -371,7 +392,7 @@ export function ClientGalleryEditor() {
   };
 
   const saveStoreSettings = async () => {
-    if (!storeDraft) return;
+    if (!storeDraft || !printStoreEnabled) return;
     setBusy(true); setError(""); setMessage("");
     try {
       const next = await AdminApiService.updateClientGalleryStore(id, storeDraft);
@@ -409,8 +430,10 @@ export function ClientGalleryEditor() {
   const settingsTabs: Array<{ key: Extract<WorkspaceTab, "settings" | "access" | "store">; label: string; description: string; icon: typeof Settings }> = [
     { key: "settings", label: "General", description: "Identity, status and wedding details", icon: Settings },
     { key: "access", label: "Access & privacy", description: "Email, PIN, downloads and contacts", icon: ShieldCheck },
-    { key: "store", label: "Shopping cart / store", description: "Products, pricing and client ordering", icon: ShoppingBag },
   ];
+  if (printStoreEnabled) {
+    settingsTabs.push({ key: "store", label: "Shopping cart / store", description: "Products, pricing and client ordering", icon: ShoppingBag });
+  }
   const isSettingsArea = activeTab === "settings" || activeTab === "access" || activeTab === "store";
   const primaryTab = isSettingsArea ? "settings" : activeTab;
   const primaryTabs: Array<{ key: "photos" | "activity" | "settings" | "branding"; label: string; icon: typeof Images }> = [
@@ -1301,7 +1324,7 @@ export function ClientGalleryEditor() {
                 >
                   <ImagePlus style={{ width: 13, height: 13 }} /> Import
                 </button>
-                <details className="client-gallery-photo-toolbar__library" style={{ position: "relative" }}>
+                {contentToolsEnabled ? <details className="client-gallery-photo-toolbar__library" style={{ position: "relative" }}>
                   <summary
                     title="Add from Asset Library"
                     className="list-none cursor-pointer"
@@ -1313,7 +1336,7 @@ export function ClientGalleryEditor() {
                     <div className="flex gap-2"><input value={assetSearch} onChange={(e) => setAssetSearch(e.target.value)} placeholder="Search filename, caption or alt…" className="min-w-0 flex-1 rounded-lg border border-black/15 px-3 py-2 text-sm" /><button onClick={searchAssets} disabled={busy} className="rounded-lg border border-black px-4 py-2 text-sm">Search</button></div>
                     {assetResults.length ? <div className="mt-3" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))", gap: 8 }}>{assetResults.map((asset) => <button key={asset.id} onClick={() => mutateAssets({ action: "add", assetIds: [asset.id] }, "Image added.")} className="text-left rounded-lg border border-black/10 overflow-hidden"><img src={asset.files.thumb || asset.files.web} alt="" style={{ width: "100%", height: 80, objectFit: "cover" }} /><span className="block p-2 text-[10px] truncate">+ {asset.filename}</span></button>)}</div> : null}
                   </div>
-                </details>
+                </details> : null}
                 <label className="client-gallery-photo-toolbar__sort" title="Choose gallery photo order" style={{ height: 32, minWidth: 0, border: "1px solid rgba(0,0,0,.15)", borderRadius: 8, background: "#fff", padding: "0 8px", display: "flex", alignItems: "center", gap: 4 }}>
                   <ArrowUpDown style={{ width: 13, height: 13, color: "#a3a3a3", flex: "0 0 auto" }} />
                   <select value={gallery.sortMode} onChange={(event) => setPhotoSortMode(event.target.value as "custom" | "capture_time" | "filename")} disabled={busy} style={{ minWidth: 0, width: "100%", border: 0, background: "transparent", outline: "none", fontSize: 10 }}>
@@ -1587,7 +1610,7 @@ export function ClientGalleryEditor() {
             <aside className="rounded-2xl border border-black/10 overflow-hidden" style={{ background: brandingDraft.backgroundColor, color: brandingDraft.textColor, position: 'sticky', top: 20 }}><div className="px-5 py-4 flex items-center gap-3" style={{ background: brandingDraft.surfaceColor, borderBottom: `1px solid ${brandingDraft.textColor}22` }}>{brandingDraft.logoMode !== 'hidden' && (brandingDraft.logoMode === 'custom' ? brandingDraft.customLogoUrl : brandingDraft.workspaceLogoUrl) ? <img src={brandingDraft.logoMode === 'custom' ? brandingDraft.customLogoUrl : brandingDraft.workspaceLogoUrl} alt="" style={{ maxHeight: 34, maxWidth: 150, objectFit: 'contain' }} /> : null}{brandingDraft.showStudioName ? <strong className="text-sm">{brandingDraft.businessName}</strong> : null}</div><div style={{ aspectRatio: '16/9', background: '#ddd', overflow: 'hidden' }}>{gallery.coverWeb || gallery.coverThumb ? <img src={gallery.coverWeb || gallery.coverThumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : null}</div><div className="p-6 text-center"><p className="text-[10px] uppercase tracking-[.22em]" style={{ opacity: .62 }}>Private gallery</p><h4 className="mt-2" style={{ fontFamily: headingFontFamily(brandingDraft.headingFont), fontSize: 30, fontWeight: 500 }}>{gallery.title}</h4><p className="mt-2 text-sm" style={{ opacity: .7 }}>{gallery.intro || 'Your wedding photographs, privately delivered.'}</p><div className="mt-5 flex items-center justify-center gap-2"><span className="rounded-lg px-4 py-2 text-sm" style={{ background: brandingDraft.accentColor, color: contrastText(brandingDraft.accentColor) }}>All Photos</span><span className="rounded-lg border px-4 py-2 text-sm" style={{ borderColor: `${brandingDraft.textColor}33`, background: brandingDraft.surfaceColor }}>Ceremony</span></div></div></aside>
           </section> : null}
 
-          {activeTab === "store" ? <section className="client-gallery-settings-column mt-5">
+          {activeTab === "store" && printStoreEnabled ? <section className="client-gallery-settings-column mt-5">
             <div className="rounded-2xl border border-black/10 bg-white p-5">
               <div className="flex items-center gap-2"><ShoppingBag className="h-5 w-5" /><h3 className="text-xl font-semibold">Gallery Print Store</h3></div>
               <p className="mt-2 text-sm text-neutral-600">Enable product ordering for this gallery using a workspace price list. Client orders are captured for payment and photographer approval before lab fulfilment.</p>

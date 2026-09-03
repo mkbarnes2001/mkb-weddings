@@ -196,19 +196,23 @@ async function templateRows(db: D1Db, workspaceId: string) {
   return (templates.results || []).map((row: any) => hydrateTemplate(row, byTemplate.get(text(row.id)) || []));
 }
 
-export async function getWorkflowOverview(db: D1Db, actor: WorkflowActor) {
+export async function getWorkflowOverview(db: D1Db, actor: WorkflowActor, includeBookings: boolean) {
   requirePermission(actor, "crm:read");
   const [templates, tasks, jobs] = await Promise.all([
     templateRows(db, actor.workspaceId),
-    db.prepare(`
+    includeBookings
+      ? db.prepare(`
       SELECT task.* FROM crm_tasks task
       WHERE task.workspace_id = ? AND task.status <> 'cancelled'
       ORDER BY CASE WHEN task.status = 'pending' THEN 0 ELSE 1 END,
                CASE WHEN trim(task.due_at) = '' THEN 1 ELSE 0 END,
                task.due_at, task.created_at DESC
       LIMIT 300
-    `).bind(actor.workspaceId).all(),
-    db.prepare(`SELECT id, reference, title, event_date FROM crm_jobs WHERE workspace_id = ? AND status <> 'archived' ORDER BY event_date, created_at DESC`).bind(actor.workspaceId).all(),
+    `).bind(actor.workspaceId).all()
+      : Promise.resolve({ results: [] }),
+    includeBookings
+      ? db.prepare(`SELECT id, reference, title, event_date FROM crm_jobs WHERE workspace_id = ? AND status <> 'archived' ORDER BY event_date, created_at DESC`).bind(actor.workspaceId).all()
+      : Promise.resolve({ results: [] }),
   ]);
   return {
     templates,

@@ -1,3 +1,4 @@
+import { resolveWorkspaceEntitlements } from "./platform-entitlements-d1";
 type D1Db = any;
 
 export type BookingPackActor = {
@@ -1925,6 +1926,38 @@ function settingsWithFrozenBookingPack(
   };
 }
 
+type JobBookingCapabilities = {
+  contracts: boolean;
+  invoices: boolean;
+  clientPortal: boolean;
+};
+
+async function jobBookingCapabilities(
+  db: D1Db,
+  workspaceId: string,
+): Promise<JobBookingCapabilities> {
+  const resolved =
+    await resolveWorkspaceEntitlements(
+      db,
+      workspaceId,
+    );
+
+  return {
+    contracts:
+      resolved.byKey.contracts?.enabled
+      === true,
+
+    invoices:
+      resolved.byKey.invoices?.enabled
+      === true,
+
+    clientPortal:
+      resolved.byKey["client-portal"]?.enabled
+      === true,
+  };
+}
+
+
 export async function ensureBookingPackForAcceptedQuote(
   db: D1Db,
   actor: BookingPackActor,
@@ -1999,13 +2032,21 @@ export async function ensureBookingPackForAcceptedQuote(
         )
       : liveSettings;
 
-  const portalAccess =
-    await activePortalAccess(
+  const capabilities =
+    await jobBookingCapabilities(
       db,
       workspaceId,
-      jobId,
-      text(source.contact.id),
     );
+
+  const portalAccess =
+    capabilities.clientPortal
+      ? await activePortalAccess(
+          db,
+          workspaceId,
+          jobId,
+          text(source.contact.id),
+        )
+      : null;
 
   const hasPortalAccess =
     Boolean(portalAccess);
@@ -2036,34 +2077,40 @@ export async function ensureBookingPackForAcceptedQuote(
   };
 
   const invoice =
-    await ensureInvoice(
-      db,
-      actor,
-      settings,
-      source,
-      snapshots,
-      hasPortalAccess,
-    );
+    capabilities.invoices
+      ? await ensureInvoice(
+          db,
+          actor,
+          settings,
+          source,
+          snapshots,
+          hasPortalAccess,
+        )
+      : null;
 
   const contract =
-    await ensureContract(
-      db,
-      actor,
-      settings,
-      source,
-      snapshots,
-      invoice,
-      hasPortalAccess,
-    );
+    capabilities.contracts
+      ? await ensureContract(
+          db,
+          actor,
+          settings,
+          source,
+          snapshots,
+          invoice,
+          hasPortalAccess,
+        )
+      : null;
 
   const questionnaire =
-    await ensureQuestionnaire(
-      db,
-      actor,
-      settings,
-      source,
-      hasPortalAccess,
-    );
+    capabilities.clientPortal
+      ? await ensureQuestionnaire(
+          db,
+          actor,
+          settings,
+          source,
+          hasPortalAccess,
+        )
+      : null;
 
   await recordBookingPackActivity(
     db,
@@ -2137,6 +2184,12 @@ export async function getJobCommercialWorkspace(
     throw commercialHttpError("Job ID is required.");
   }
 
+  const capabilities =
+    await jobBookingCapabilities(
+      db,
+      workspaceId,
+    );
+
   const job = await db.prepare(`
     SELECT *
     FROM crm_jobs
@@ -2151,21 +2204,25 @@ export async function getJobCommercialWorkspace(
   const quoteId = commercialText(job.quote_id);
 
   const [invoice, contract, acceptance, quoteRow] = await Promise.all([
-    db.prepare(`
-      SELECT *
-      FROM crm_invoices
-      WHERE workspace_id = ? AND job_id = ?
-      ORDER BY created_at DESC
-      LIMIT 1
-    `).bind(workspaceId, jobId).first(),
+    capabilities.invoices
+      ? db.prepare(`
+          SELECT *
+          FROM crm_invoices
+          WHERE workspace_id = ? AND job_id = ?
+          ORDER BY created_at DESC
+          LIMIT 1
+        `).bind(workspaceId, jobId).first()
+      : Promise.resolve(null),
 
-    db.prepare(`
-      SELECT *
-      FROM crm_contracts
-      WHERE workspace_id = ? AND job_id = ?
-      ORDER BY created_at DESC
-      LIMIT 1
-    `).bind(workspaceId, jobId).first(),
+    capabilities.contracts
+      ? db.prepare(`
+          SELECT *
+          FROM crm_contracts
+          WHERE workspace_id = ? AND job_id = ?
+          ORDER BY created_at DESC
+          LIMIT 1
+        `).bind(workspaceId, jobId).first()
+      : Promise.resolve(null),
 
     quoteId
       ? db.prepare(`

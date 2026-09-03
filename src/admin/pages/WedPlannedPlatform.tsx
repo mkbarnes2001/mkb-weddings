@@ -5,6 +5,8 @@ import {
   Building2,
   ChevronDown,
   Copy,
+  CreditCard,
+  ExternalLink,
   Globe2,
   MapPinned,
   MailCheck,
@@ -31,13 +33,14 @@ import type {
   WedPlannedMember,
   WedPlannedPlatformPayload,
   WedPlannedServiceArea,
+  WorkspaceSubscriptionBillingOverview,
 } from "../types/platform";
 
-type TabKey = "business" | "services" | "team";
+type TabKey = "business" | "services" | "team" | "billing";
 
 function initialTab(): TabKey {
   const value = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("tab") : "";
-  return value === "services" || value === "team" ? value : "business";
+  return value === "services" || value === "team" || value === "billing" ? value : "business";
 }
 
 const emptyArea: Partial<WedPlannedServiceArea> = {
@@ -106,11 +109,37 @@ function FieldSelect({ value, onChange, children }: {
 }
 
 
+function billingLabel(value: string) {
+  return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function billingDate(value: string | null | undefined) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(date);
+}
+
+function billingPrice(billing: WorkspaceSubscriptionBillingOverview | null) {
+  if (!billing?.price) return "—";
+  const formatter = new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: billing.price.currency || "GBP",
+    maximumFractionDigits: 2,
+  });
+  return `${formatter.format(billing.price.unitAmountMinor / 100)} / ${billing.price.billingInterval === "year" ? "year" : "month"}`;
+}
+
+
 export function WedPlannedPlatform() {
   const { auth } = useProfessionalAuth();
   const [searchParams] = useSearchParams();
   const [platform, setPlatform] = useState<WedPlannedPlatformPayload | null>(null);
   const [business, setBusiness] = useState<WedPlannedBusiness | null>(null);
+  const [billing, setBilling] = useState<WorkspaceSubscriptionBillingOverview | null>(null);
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingError, setBillingError] = useState("");
+  const [billingPortalLoading, setBillingPortalLoading] = useState(false);
   const [tab, setTabState] = useState<TabKey>(initialTab);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -125,10 +154,12 @@ export function WedPlannedPlatform() {
   const canEditBusiness = auth.permissions.includes("business:update");
   const canEditServices = auth.permissions.includes("services:update");
   const canManageMembers = auth.permissions.includes("members:manage");
+  const canReadBilling = auth.permissions.includes("billing:read");
+  const canManageBilling = auth.permissions.includes("billing:manage");
 
   useEffect(() => {
     const requested = searchParams.get("tab");
-    const next: TabKey = requested === "services" || requested === "team" ? requested : "business";
+    const next: TabKey = requested === "services" || requested === "team" || requested === "billing" ? requested : "business";
     setTabState(next);
   }, [searchParams]);
 
@@ -146,6 +177,43 @@ export function WedPlannedPlatform() {
       .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load WedPlanned foundation."))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (!canReadBilling || tab !== "billing" || billing || billingLoading) return;
+    setBillingLoading(true);
+    setBillingError("");
+    AdminApiService.getWedPlannedBilling()
+      .then(setBilling)
+      .catch((loadError) => setBillingError(loadError instanceof Error ? loadError.message : "Unable to load subscription billing."))
+      .finally(() => setBillingLoading(false));
+  }, [billing, billingLoading, canReadBilling, tab]);
+
+  async function openBillingPortal() {
+    if (billingPortalLoading) return;
+
+    setBillingPortalLoading(true);
+    setBillingError("");
+
+    try {
+      const portal = await AdminApiService.createWedPlannedBillingPortal();
+
+      if (!portal.url.startsWith("https://billing.stripe.com/")) {
+        throw new Error(
+          "Stripe did not return a valid billing-management URL.",
+        );
+      }
+
+      window.location.assign(portal.url);
+    } catch (portalError) {
+      setBillingError(
+        portalError instanceof Error
+          ? portalError.message
+          : "Unable to open subscription billing.",
+      );
+    } finally {
+      setBillingPortalLoading(false);
+    }
+  }
 
   const categoryGroups = useMemo(() => {
     const groups = new Map<string, WedPlannedPlatformPayload["categories"]>();
@@ -267,26 +335,28 @@ export function WedPlannedPlatform() {
         }
       />
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
-          <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2eee7]"><Building2 size={17} /></span>
-            <div><p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">Business profile</p><p className="text-sm font-semibold">{business.publicName}</p></div>
+      {tab !== "billing" ? (
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2eee7]"><Building2 size={17} /></span>
+              <div><p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">Business profile</p><p className="text-sm font-semibold">{business.publicName}</p></div>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2eee7]"><BriefcaseBusiness size={17} /></span>
+              <div><p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">Categories</p><p className="text-sm font-semibold">{selectedCategories.length} selected</p></div>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2eee7]"><Users size={17} /></span>
+              <div><p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">Team members</p><p className="text-sm font-semibold">{platform.members.filter((item) => item.status === "active").length} active</p></div>
+            </div>
           </div>
         </div>
-        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
-          <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2eee7]"><BriefcaseBusiness size={17} /></span>
-            <div><p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">Categories</p><p className="text-sm font-semibold">{selectedCategories.length} selected</p></div>
-          </div>
-        </div>
-        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/[0.06]">
-          <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2eee7]"><Users size={17} /></span>
-            <div><p className="text-[10px] uppercase tracking-[0.14em] text-neutral-500">Team members</p><p className="text-sm font-semibold">{platform.members.filter((item) => item.status === "active").length} active</p></div>
-          </div>
-        </div>
-      </div>
+      ) : null}
 
       {message ? <div className="rounded-xl bg-emerald-50 px-4 py-3 text-xs text-emerald-800">{message}</div> : null}
       {error ? <div className="rounded-xl bg-red-50 px-4 py-3 text-xs text-red-800">{error}</div> : null}
@@ -333,7 +403,7 @@ export function WedPlannedPlatform() {
               <dl className="space-y-3 text-xs">
                 <div className="flex justify-between gap-4"><dt className="text-neutral-500">Workspace</dt><dd className="text-right font-medium">{business.workspaceSlug}</dd></div>
                 <div className="flex justify-between gap-4"><dt className="text-neutral-500">Status</dt><dd className="text-right font-medium">{business.workspaceStatus}</dd></div>
-                <div className="flex justify-between gap-4"><dt className="text-neutral-500">Plan</dt><dd className="text-right font-medium">{business.plan}</dd></div>
+                <div className="flex justify-between gap-4"><dt className="text-neutral-500">Workspace tier</dt><dd className="text-right font-medium">{business.plan}</dd></div>
                 <div className="flex justify-between gap-4"><dt className="text-neutral-500">Onboarding</dt><dd className="text-right font-medium">{business.onboardingStatus}</dd></div>
                 <div className="flex justify-between gap-4"><dt className="text-neutral-500">Marketplace</dt><dd className="text-right font-medium">{business.marketplaceStatus}</dd></div>
               </dl>
@@ -344,6 +414,78 @@ export function WedPlannedPlatform() {
             </AdminPanel>
           </div>
         </div>
+      ) : null}
+
+      {tab === "billing" ? (
+        !canReadBilling ? (
+          <div className="rounded-xl bg-red-50 px-4 py-3 text-xs text-red-800">You do not have permission to view subscription billing.</div>
+        ) : billingLoading && !billing ? (
+          <div className="rounded-xl bg-white px-4 py-5 text-sm text-neutral-500 shadow-sm ring-1 ring-black/[0.06]">Loading plan and billing…</div>
+        ) : billingError ? (
+          <div className="rounded-xl bg-red-50 px-4 py-3 text-xs text-red-800">{billingError}</div>
+        ) : billing ? (
+          <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-black/[0.06]">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Current plan</p>
+                <p className="mt-1 truncate text-sm font-semibold text-neutral-900">{billing.plan?.name || "No plan"}</p>
+              </div>
+              <div className="rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-black/[0.06]">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Subscription</p>
+                <p className="mt-1 text-sm font-semibold text-neutral-900">{billingLabel(billing.subscription?.status || "none")}</p>
+              </div>
+              <div className="rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-black/[0.06]">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Billing</p>
+                <p className="mt-1 text-sm font-semibold text-neutral-900">{billing.subscription?.billingInterval === "none" ? "Complimentary" : billingPrice(billing)}</p>
+              </div>
+              <div className="rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-black/[0.06]">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Access</p>
+                <p className="mt-1 text-sm font-semibold text-neutral-900">{billingLabel(billing.accessState)}</p>
+              </div>
+            </div>
+
+            <AdminPanel
+              title="Billing details"
+              icon={CreditCard}
+              compact
+              actions={(
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="text-neutral-500">Workspace access</span>
+                    <span className="font-semibold text-neutral-900">{billingLabel(billing.accessState)}</span>
+                  </div>
+                  {canManageBilling
+                    && billing.customer?.configured
+                    && billing.subscription?.provider === "stripe" ? (
+                    <AdminButton
+                      variant="secondary"
+                      icon={ExternalLink}
+                      onClick={() => void openBillingPortal()}
+                      disabled={billingPortalLoading}
+                    >
+                      {billingPortalLoading ? "Opening…" : "Manage billing"}
+                    </AdminButton>
+                  ) : null}
+                </div>
+              )}
+            >
+              <dl className="grid gap-x-8 gap-y-3 text-xs sm:grid-cols-2 xl:grid-cols-3">
+                <div className="min-w-0"><dt className="text-neutral-500">Interval</dt><dd className="mt-0.5 truncate font-semibold text-neutral-900">{billing.subscription?.billingInterval === "none" ? "None" : billingLabel(billing.subscription?.billingInterval || "none")}</dd></div>
+                <div className="min-w-0"><dt className="text-neutral-500">Period end</dt><dd className="mt-0.5 truncate font-semibold text-neutral-900">{billingDate(billing.subscription?.currentPeriodEnd)}</dd></div>
+                <div className="min-w-0"><dt className="text-neutral-500">Billing account</dt><dd className="mt-0.5 truncate font-semibold text-neutral-900">{billing.customer?.configured ? "Configured" : "Not configured"}</dd></div>
+                {billing.subscription?.trialEnd ? (
+                  <div className="min-w-0"><dt className="text-neutral-500">Trial ends</dt><dd className="mt-0.5 truncate font-semibold text-neutral-900">{billingDate(billing.subscription.trialEnd)}</dd></div>
+                ) : null}
+                {billing.subscription?.graceExpiresAt ? (
+                  <div className="min-w-0"><dt className="text-neutral-500">Grace ends</dt><dd className="mt-0.5 truncate font-semibold text-neutral-900">{billingDate(billing.subscription.graceExpiresAt)}</dd></div>
+                ) : null}
+                {billing.subscription?.cancelAtPeriodEnd ? (
+                  <div className="min-w-0"><dt className="text-neutral-500">Cancellation</dt><dd className="mt-0.5 truncate font-semibold text-neutral-900">At period end ({billingDate(billing.subscription.currentPeriodEnd)})</dd></div>
+                ) : null}
+              </dl>
+            </AdminPanel>
+          </div>
+        ) : null
       ) : null}
 
       {tab === "services" ? (

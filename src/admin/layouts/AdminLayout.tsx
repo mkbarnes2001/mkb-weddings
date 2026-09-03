@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ArrowLeft, Building2, Check, ChevronDown, LogOut, Menu, ShieldCheck, X } from "lucide-react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Navigate, Outlet, useLocation } from "react-router-dom";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminModuleWordmark } from "../components/ui/AdminUI";
 import { AdminApiService } from "../services/AdminApiService";
 import type { PlatformBrandingIdentity, PlatformModuleConfiguration } from "../types/platform";
 import {
   adminModules,
+  adminModuleEntitled,
+  adminRouteEntitled,
   defaultAdminModuleConfigurations,
   isAdminNavigationItemActive,
   isWeddingWorkspacePath,
@@ -16,6 +18,7 @@ import {
   resolveAdminModuleIcon,
   resolveAdminNavigationItem,
   resolvePlatformAdminNavigationItem,
+  visibleAdminModules,
   visibleModuleItems,
 } from "../navigation/adminModules";
 
@@ -156,15 +159,30 @@ export function AdminLayout() {
     useState<PlatformBrandingIdentity>(DEFAULT_PLATFORM_IDENTITY);
   const workspaceMenuRef = useRef<HTMLDivElement | null>(null);
   const [moduleConfigurations, setModuleConfigurations] = useState<PlatformModuleConfiguration[]>(defaultAdminModuleConfigurations);
+  const [enabledEntitlementKeys, setEnabledEntitlementKeys] = useState<Set<string> | null>(null);
   const isPlatformRoute = location.pathname === "/admin/platform" || location.pathname.startsWith("/admin/platform/");
   const currentModule = resolveAdminModule(location.pathname);
   const currentAppearance = resolveAdminModuleAppearance(currentModule.key, moduleConfigurations);
   const CurrentModuleIcon = resolveAdminModuleIcon(currentModule, currentAppearance);
-  const normalModuleItems = visibleModuleItems(currentModule, auth.permissions);
+  const visibleModules = visibleAdminModules(enabledEntitlementKeys);
+  const routeEntitled =
+    isPlatformRoute
+    || enabledEntitlementKeys === null
+    || (
+      adminModuleEntitled(
+        currentModule,
+        enabledEntitlementKeys,
+      )
+      && adminRouteEntitled(
+        location.pathname,
+        enabledEntitlementKeys,
+      )
+    );
+  const normalModuleItems = visibleModuleItems(currentModule, auth.permissions, enabledEntitlementKeys);
   const navItems = isPlatformRoute ? platformAdminItems : normalModuleItems;
   const currentItem = isPlatformRoute
     ? resolvePlatformAdminNavigationItem(location.pathname, location.search)
-    : resolveAdminNavigationItem(currentModule, location.pathname, location.search, auth.permissions);
+    : resolveAdminNavigationItem(currentModule, location.pathname, location.search, auth.permissions, enabledEntitlementKeys);
   const currentSectionLabel = isWeddingWorkspacePath(location.pathname) ? "Wedding Workspace" : currentItem?.label || "Detail";
   const currentContextLabel = isPlatformRoute ? "Platform administration" : currentModule.label;
   const ContextIcon = isPlatformRoute ? ShieldCheck : CurrentModuleIcon;
@@ -189,6 +207,7 @@ export function AdminLayout() {
 
   useEffect(() => {
     let active = true;
+    setEnabledEntitlementKeys(null);
 
     AdminApiService.getWedPlannedPlatform()
       .then((platform) => {
@@ -202,6 +221,13 @@ export function AdminLayout() {
           platform.platformIdentity || DEFAULT_PLATFORM_IDENTITY,
         );
         setWorkspaceLogoUrl(platform.business.logoUrl || "");
+        setEnabledEntitlementKeys(
+          new Set(
+            (platform.entitlements || [])
+              .filter((entitlement) => entitlement.enabled)
+              .map((entitlement) => entitlement.key),
+          ),
+        );
       })
       .catch(() => {
         if (!active) return;
@@ -209,6 +235,7 @@ export function AdminLayout() {
         setModuleConfigurations(defaultAdminModuleConfigurations);
         setPlatformIdentity(DEFAULT_PLATFORM_IDENTITY);
         setWorkspaceLogoUrl("");
+        setEnabledEntitlementKeys(null);
       });
 
     return () => {
@@ -576,7 +603,7 @@ export function AdminLayout() {
           {!isPlatformRoute ? <div className="admin-module-switcher-wrap border-b border-white/10 p-3">
             <p className="admin-sidebar-section-label">Modules</p>
             <div className="admin-module-switcher" aria-label="Application modules">
-              {adminModules.map((module) => {
+              {visibleModules.map((module) => {
                 const appearance = resolveAdminModuleAppearance(module.key, moduleConfigurations);
                 const Icon = resolveAdminModuleIcon(module, appearance);
                 const active = module.key === currentModule.key;
@@ -624,17 +651,25 @@ export function AdminLayout() {
           </header>
 
           <main className="admin-main-content">
-            <Outlet
-              context={{
-                moduleAppearance: currentAppearance,
-                moduleLabel: currentModule.label,
-                platformIdentity,
-                isPlatformRoute,
-              }}
-            />
+            {routeEntitled ? (
+              <Outlet
+                context={{
+                  moduleAppearance: currentAppearance,
+                  moduleLabel: currentModule.label,
+                  platformIdentity,
+                  isPlatformRoute,
+                  enabledEntitlementKeys,
+                }}
+              />
+            ) : (
+              <Navigate
+                to="/admin/wedplanned"
+                replace
+              />
+            )}
           </main>
 
-          {mobileMoreOpen ? <div className="admin-mobile-more" role="dialog" aria-modal="true" aria-label="Admin navigation"><button className="admin-mobile-more__backdrop" type="button" onClick={() => setMobileMoreOpen(false)} aria-label="Close menu"></button><section><header><div><strong>{currentContextLabel}</strong><span>{isPlatformRoute ? `${platformIdentity.platformName} platform` : auth.businessName}</span></div><button type="button" onClick={() => setMobileMoreOpen(false)} aria-label="Close menu"><X /></button></header>{!isPlatformRoute ? <div className="admin-mobile-module-switcher">{adminModules.map((module) => { const appearance = resolveAdminModuleAppearance(module.key, moduleConfigurations); const Icon = resolveAdminModuleIcon(module, appearance); const active = module.key === currentModule.key; return <Link key={module.key} to={module.to} onClick={() => setMobileMoreOpen(false)} className={active ? "active" : ""} style={{ "--module-link-accent": appearance.accentColor } as CSSProperties}><ModuleGlyph configuration={appearance} Icon={Icon} /><ModuleIdentityWordmark configuration={appearance} label={module.shortLabel} compact /></Link>; })}</div> : null}<nav>{navItems.map((item) => { const Icon = item.icon; const active = isAdminNavigationItemActive(item, location.pathname, location.search); return <Link key={item.key} to={item.to} onClick={() => setMobileMoreOpen(false)} className={active ? "active" : ""}><Icon /><span>{item.label}</span></Link>; })}</nav><footer className="admin-mobile-control-footer">{isPlatformAdmin ? <Link to={isPlatformRoute ? "/admin" : "/admin/platform"} onClick={() => setMobileMoreOpen(false)}><ShieldCheck />{isPlatformRoute ? "Business workspace" : "Platform administration"}</Link> : null}{auth.authenticated ? <div className="admin-mobile-control-footer__user"><span><strong>{auth.displayName || auth.email}</strong><small>{userType}</small></span><button type="button" onClick={() => void signOut()} title="Sign out" aria-label="Sign out"><LogOut /></button></div> : null}</footer></section></div> : null}
+          {mobileMoreOpen ? <div className="admin-mobile-more" role="dialog" aria-modal="true" aria-label="Admin navigation"><button className="admin-mobile-more__backdrop" type="button" onClick={() => setMobileMoreOpen(false)} aria-label="Close menu"></button><section><header><div><strong>{currentContextLabel}</strong><span>{isPlatformRoute ? `${platformIdentity.platformName} platform` : auth.businessName}</span></div><button type="button" onClick={() => setMobileMoreOpen(false)} aria-label="Close menu"><X /></button></header>{!isPlatformRoute ? <div className="admin-mobile-module-switcher">{visibleModules.map((module) => { const appearance = resolveAdminModuleAppearance(module.key, moduleConfigurations); const Icon = resolveAdminModuleIcon(module, appearance); const active = module.key === currentModule.key; return <Link key={module.key} to={module.to} onClick={() => setMobileMoreOpen(false)} className={active ? "active" : ""} style={{ "--module-link-accent": appearance.accentColor } as CSSProperties}><ModuleGlyph configuration={appearance} Icon={Icon} /><ModuleIdentityWordmark configuration={appearance} label={module.shortLabel} compact /></Link>; })}</div> : null}<nav>{navItems.map((item) => { const Icon = item.icon; const active = isAdminNavigationItemActive(item, location.pathname, location.search); return <Link key={item.key} to={item.to} onClick={() => setMobileMoreOpen(false)} className={active ? "active" : ""}><Icon /><span>{item.label}</span></Link>; })}</nav><footer className="admin-mobile-control-footer">{isPlatformAdmin ? <Link to={isPlatformRoute ? "/admin" : "/admin/platform"} onClick={() => setMobileMoreOpen(false)}><ShieldCheck />{isPlatformRoute ? "Business workspace" : "Platform administration"}</Link> : null}{auth.authenticated ? <div className="admin-mobile-control-footer__user"><span><strong>{auth.displayName || auth.email}</strong><small>{userType}</small></span><button type="button" onClick={() => void signOut()} title="Sign out" aria-label="Sign out"><LogOut /></button></div> : null}</footer></section></div> : null}
 
           <nav className="admin-mobile-bottom-nav" aria-label={`${currentContextLabel} primary navigation`}>
             {mobileItems.map((item) => { const Icon = item.icon; const active = isAdminNavigationItemActive(item, location.pathname, location.search); return <Link key={item.key} to={item.to} className={active ? "active" : ""}><Icon /><span>{item.label}</span></Link>; })}

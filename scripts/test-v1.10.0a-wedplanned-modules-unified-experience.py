@@ -38,9 +38,9 @@ def main() -> None:
     # New visible identities retain established persistence and entitlement keys.
     for key, label, entitlement in [
         ('key: "crm"', 'label: "WedCRM"', 'entitlementKey: "crm"'),
-        ('key: "client-galleries"', 'label: "WedStore"', 'entitlementKey: "client_galleries"'),
-        ('key: "website"', 'label: "WedStudio"', 'entitlementKey: "website_content"'),
-        ('key: "business"', 'label: "WedNav"', 'entitlementKey: "business_settings"'),
+        ('key: "client-galleries"', 'label: "WedStore"', 'entitlementKey: "client-galleries"'),
+        ('key: "website"', 'label: "WedStudio"', 'entitlementKey: "content-tools"'),
+        ('key: "business"', 'label: "WedNav"', 'entitlementKey: "business-profile"'),
     ]:
         assert key in modules and label in modules and entitlement in modules
 

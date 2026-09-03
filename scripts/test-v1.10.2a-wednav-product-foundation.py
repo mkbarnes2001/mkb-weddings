@@ -27,10 +27,10 @@ def main() -> None:
 
     # Visible product suite is concise while persistence keys stay unchanged.
     for key, label, short_label, entitlement in [
-        ('key: "business"', 'label: "WedNav"', 'shortLabel: "W.NAV"', 'entitlementKey: "business_settings"'),
+        ('key: "business"', 'label: "WedNav"', 'shortLabel: "W.NAV"', 'entitlementKey: "business-profile"'),
         ('key: "crm"', 'label: "WedCRM"', 'shortLabel: "W.CRM"', 'entitlementKey: "crm"'),
-        ('key: "website"', 'label: "WedStudio"', 'shortLabel: "W.STU"', 'entitlementKey: "website_content"'),
-        ('key: "client-galleries"', 'label: "WedStore"', 'shortLabel: "W.STO"', 'entitlementKey: "client_galleries"'),
+        ('key: "website"', 'label: "WedStudio"', 'shortLabel: "W.STU"', 'entitlementKey: "content-tools"'),
+        ('key: "client-galleries"', 'label: "WedStore"', 'shortLabel: "W.STO"', 'entitlementKey: "client-galleries"'),
     ]:
         assert key in modules
         assert label in modules

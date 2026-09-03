@@ -397,12 +397,11 @@ async function provisionBusinessWorkspaceFoundation(
   const starterQuoteEmailTemplateId =
     `crm_email_template_${crypto.randomUUID()}`;
 
-  const entitlementMetadata = JSON.stringify({
+  const subscriptionMetadata = JSON.stringify({
+    release: "v1.10.13a",
+    gate: "2C1",
+    compatibility: true,
     provisionedBy: provisioningSource,
-    release:
-      provisioningSource === "verified_signup"
-        ? "v1.10.7a"
-        : "v1.10.4a",
   });
 
   const workspaceDocument = provisioningSource === "verified_signup"
@@ -611,31 +610,38 @@ async function provisionBusinessWorkspaceFoundation(
       ownerStatus,
     ),
 
+    // New workspaces inherit the hidden compatibility Plan instead of
+    // receiving blanket workspace-level manual grants. This keeps the
+    // pre-billing experience access-neutral while ensuring future
+    // subscription lifecycle state can become authoritative.
     db.prepare(`
-      INSERT INTO workspace_entitlements (
+      INSERT INTO workspace_subscriptions (
+        id,
         workspace_id,
-        feature_key,
-        source,
-        enabled,
-        limit_value,
+        plan_id,
+        provider,
+        status,
+        billing_interval,
+        is_current,
         metadata_json,
         created_at,
         updated_at
-      )
-      SELECT
+      ) VALUES (
         ?,
-        feature_key,
-        'manual',
+        ?,
+        'plan_compatibility_full_access',
+        'internal',
+        'complimentary',
+        'none',
         1,
-        NULL,
         ?,
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
-      FROM platform_features
-      WHERE status = 'active'
+      )
     `).bind(
+      `subscription_compat_${workspaceId}`,
       workspaceId,
-      entitlementMetadata,
+      subscriptionMetadata,
     ),
 
     // Generic WedCRM commercial foundation for a new business.

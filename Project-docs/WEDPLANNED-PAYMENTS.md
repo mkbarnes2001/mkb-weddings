@@ -161,3 +161,69 @@ Payments and subscriptions are workspace-owned business capabilities.
 - WedCRM owns client invoice and payment configuration.
 - WedStore owns commerce configuration.
 - No module should duplicate another module payment settings.
+
+### v1.10.13a Gate 2C2 — billing read and permission boundary
+
+WedPlanned subscription administration now has dedicated workspace permissions before Stripe Billing runtime is enabled:
+
+- owner/admin: `billing:read` and `billing:manage`;
+- finance: `billing:read`;
+- manager/content/staff/viewer: no subscription-billing permission;
+- support access: no subscription-billing permission, including manage-scoped support grants.
+
+The GET-only `/api/platform-billing` endpoint resolves the authenticated workspace server-side and returns only internal Plan/subscription/access state, a non-sensitive internal Price summary when present, and whether a platform Stripe Customer identity has been configured. Stripe Customer, Price and Subscription identifiers are not returned to the browser.
+
+This gate is deliberately read-only. No Checkout, Customer Portal, Stripe API call, webhook, provider event ledger or subscription mutation exists yet. The WedPlanned platform-subscription boundary remains separate from WedCRM connected-account client payments and from the Print Store payment flow. Schema remains 52.
+
+### v1.10.13a Gate 2C3 — WedNav Plan & Billing read-only UI
+
+WedNav includes a permission-scoped `Plan & billing` destination that reads `/api/platform-billing`. Owners/admins and finance users can view current internal Plan, subscription status, billing interval, period/trial/grace dates, cancellation state, access state, price summary and whether a platform Stripe Customer identity is configured.
+
+The UI is deliberately read-only. No `billing:manage` action, Stripe Checkout, Customer Portal, plan-change control or provider identifier is exposed in this gate. WedCRM Payment Setup remains exclusively responsible for professional connected-account client payments. Schema remains 52.
+
+### v1.10.13a Gate 2D1 — subscription billing write ledger foundation
+
+Schema 53 establishes the write-side operational ledgers before any Stripe Billing API is enabled:
+
+- `workspace_subscription_checkout_attempts` records a server-approved workspace subscription Checkout intention and immutable internal Price snapshot.
+- `subscription_provider_events` is the separate Stripe Billing event deduplication/audit boundary for events that a later webhook route has already signature-verified.
+
+The new service boundary is `serverless/platform-subscription-billing-write-d1.ts`. It performs D1-only state preparation and event recording. Gate 2D1 has no subscription Checkout endpoint, no Customer Portal endpoint, no subscription webhook route and no Stripe network call. It does not reuse `crm_invoice_payment_attempts`, `crm_invoice_payments`, `workspace_payment_settings` or `commerce_payment_events`.
+
+Raw Stripe webhook payloads, cards and payment-method details are not persisted. Only provider identifiers required for verified lifecycle reconciliation plus a SHA-256 payload hash may enter the subscription event ledger.
+
+Checkout-attempt state is never subscription authority. Browser redirects remain presentation-only; later verified Stripe Billing events must be the authority for `workspace_subscriptions` lifecycle changes and entitlement/access resolution.
+
+### v1.10.13a Gate 2D2 — platform Stripe Customer + subscription Checkout foundation
+
+WedPlanned platform-subscription Checkout now has a dedicated Stripe Billing service and POST boundary, still separate from professional connected-account payments.
+
+`Authenticated billing manager → internal WedPlanned Plan Price → workspace_subscription_checkout_attempts → WedPlanned platform Stripe Customer → Stripe Checkout (mode=subscription)`
+
+The browser may provide only the internal Plan Price ID. The server resolves the Stripe Product/Price mapping and authenticated workspace, rejects unavailable/private Prices and prevents a second Checkout when the workspace already has a current Stripe subscription in `trialing`, `active` or `past_due` state.
+
+A Stripe Customer is owned one-to-one by the workspace and created idempotently only when `workspace_billing_customers` has no provider Customer ID. Only the Customer identifier and non-sensitive sync metadata are persisted; no card or payment-method data is stored.
+
+Checkout uses the WedPlanned platform Stripe account directly and never sends `Stripe-Account`. Session and resulting Subscription metadata carry the internal workspace, Checkout-attempt, Plan and Plan-Price references needed for later verified webhook reconciliation. The browser receives only the internal attempt ID, hosted Checkout URL and expiry.
+
+Gate 2D2 remains deliberately non-authoritative for subscription state. Success/cancel redirects do not activate a Plan, `workspace_subscriptions` is not mutated, and no subscription webhook or Customer Portal exists yet. The dedicated live-enable latch remains off by default, so local/mock and Stripe test mode must be proven before any live billing configuration is allowed. Schema remains 53.
+
+### v1.10.13a Gate 2D2D — subscription Checkout retry hardening
+
+Repeated requests for the same active workspace, internal Plan Price and requesting professional reuse the existing `created`/`open` `workspace_subscription_checkout_attempts` row. The Stripe Checkout call therefore reuses the same server-owned idempotency key. If the attempt is already `open`, Stripe must return the same Checkout Session ID; the service returns that hosted Session without rebinding the D1 row or creating another attempt. A mismatched provider Session is rejected.
+
+An already-open attempt is not marked failed merely because a later browser retry experiences a transient Stripe request error. Customer reuse remains workspace-owned, browser returns remain non-authoritative, and no subscription access/lifecycle state is changed by this retry path. Schema remains 53.
+
+### v1.10.13a Gate 2D4 — verified platform-subscription webhook authority
+
+The dedicated WedPlanned subscription webhook is `/api/webhooks/wedplanned-billing`. It is not the existing `/api/webhooks/wedplanned-stripe` connected-account invoice-payment webhook and does not use the Print Store webhook secret. Subscription webhook verification uses `WEDPLANNED_BILLING_STRIPE_WEBHOOK_SECRET` and exact raw-body `Stripe-Signature` verification before the event reaches `serverless/platform-subscription-billing-webhook-d1.ts`.
+
+Supported verified events are `checkout.session.completed`, `checkout.session.expired`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid` and `invoice.payment_failed`. Checkout events reconcile the operational attempt only. `customer.subscription.*` events are the authority that may replace the compatibility assignment with the Stripe-backed WedPlanned Plan after Customer/workspace ownership, internal Plan Price mapping, provider Price identity and Checkout metadata have been validated.
+
+Every verified event is deduplicated through `subscription_provider_events`. Only routing identifiers, processing state and the SHA-256 hash of the exact verified payload are persisted; raw webhook JSON, card details and payment-method data are not stored. Failed processing can be retried under the same Stripe event ID, while processed/ignored duplicates are no-ops. Stale provider events are ignored so older delivery order cannot regress a newer subscription state.
+
+Real Stripe test-mode delivery confirmed that `invoice.paid` can arrive before `customer.subscription.created`. A verified invoice for a known WedPlanned Customer whose Stripe Subscription row is not available yet is therefore treated as transient (`invoice_subscription_pending`) rather than permanently ignored. The webhook returns a retryable non-2xx response, records the event as failed, and the subsequent verified subscription event reconciles any such pending invoice events from the provider-event ledger without storing raw webhook JSON. `customer.subscription.created` alone does not make an earlier deferred invoice stale; later subscription updates/deletion or newer invoice events still retain ordering protection.
+
+Payment failure does not immediately remove access. `invoice.payment_failed` moves an eligible Stripe subscription to `past_due` and establishes the existing grace deadline or a configurable new deadline using `WEDPLANNED_BILLING_GRACE_DAYS` (seven days by default). Further failures do not roll the deadline forward. `invoice.paid` clears the failure/grace state for an eligible subscription. Connected-account Stripe events are ignored by this platform-subscription webhook.
+
+Schema remains 53. No Customer Portal, live subscription billing configuration, connected-client-payment mutation or Print Store payment mutation is introduced by Gate 2D4.

@@ -1,8 +1,5 @@
-import {
-  useEffect,
-  useMemo,
-  useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useParams, useOutletContext } from "react-router-dom";
 import {
   ArrowLeft,
   BookOpen,
@@ -1337,6 +1334,21 @@ export function CRMJob() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const { auth } = useProfessionalAuth();
+  const { enabledEntitlementKeys = null } =
+    useOutletContext<{
+      enabledEntitlementKeys?: ReadonlySet<string> | null;
+    }>();
+
+  const clientPortalEnabled =
+    enabledEntitlementKeys?.has("client-portal") === true;
+  const clientGalleriesEnabled =
+    enabledEntitlementKeys?.has("client-galleries") === true;
+  const contentToolsEnabled =
+    enabledEntitlementKeys?.has("content-tools") === true;
+  const contractsEnabled =
+    enabledEntitlementKeys?.has("contracts") === true;
+  const invoicesEnabled =
+    enabledEntitlementKeys?.has("invoices") === true;
   const [workspace, setWorkspace] = useState<CrmJobWorkspace | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -1404,7 +1416,8 @@ export function CRMJob() {
   const canManage = auth.permissions.includes("crm:manage");
   const canManageCommercial = canManage && auth.accessMode !== "support";
   const canEditQuestionnaires =
-    canManage
+    clientPortalEnabled
+    && canManage
     && auth.accessMode !== "support";
 
   async function load() {
@@ -1463,28 +1476,52 @@ export function CRMJob() {
 
   useEffect(() => { void load(); }, [id, auth.workspaceId]);
 
-  const activeAccessByContact = useMemo(() => new Map((workspace?.portalAccess || []).filter((item) => item.status === "active").map((item) => [item.contactId, item])), [workspace?.portalAccess]);
+  const activeAccessByContact = useMemo(
+    () =>
+      new Map(
+        (
+          clientPortalEnabled
+            ? (workspace?.portalAccess || [])
+            : []
+        )
+          .filter((item) => item.status === "active")
+          .map((item) => [item.contactId, item]),
+      ),
+    [clientPortalEnabled, workspace?.portalAccess],
+  );
+
   const questionnaireFiles = useMemo(
     () =>
-      (workspace?.questionnaires || [])
-        .flatMap((item) =>
-          item.files.map((file) => ({
-            ...file,
-            questionnaireId: item.id,
-            questionnaireTitle: item.title,
-          })),
-        ),
-    [workspace?.questionnaires],
+      clientPortalEnabled
+        ? (workspace?.questionnaires || [])
+            .flatMap((item) =>
+              item.files.map((file) => ({
+                ...file,
+                questionnaireId: item.id,
+                questionnaireTitle: item.title,
+              })),
+            )
+        : [],
+    [clientPortalEnabled, workspace?.questionnaires],
   );
 
   const jobFiles =
-    workspace?.files || [];
+    clientPortalEnabled
+      ? (workspace?.files || [])
+      : [];
 
   const allFileCount =
     questionnaireFiles.length
     + jobFiles.length;
-  const pendingSubmissions = useMemo(() => (workspace?.supplierSubmissions || []).filter((item) => item.status === "pending"), [workspace?.supplierSubmissions]);
 
+  const pendingSubmissions = useMemo(
+    () =>
+      clientPortalEnabled
+        ? (workspace?.supplierSubmissions || [])
+            .filter((item) => item.status === "pending")
+        : [],
+    [clientPortalEnabled, workspace?.supplierSubmissions],
+  );
 
   async function saveWeddingDetails(
     input: {
@@ -2211,8 +2248,16 @@ export function CRMJob() {
   const portal = portalState(workspace);
   const lifecycle = workspace.lifecycle;
   const commercial = workspace.commercial;
-  const commercialInvoice = commercial.invoice;
-  const commercialContract = commercial.contract;
+
+  const commercialInvoice =
+    invoicesEnabled
+      ? commercial.invoice
+      : null;
+
+  const commercialContract =
+    contractsEnabled
+      ? commercial.contract
+      : null;
 
   const contractPreview =
     commercialContract
@@ -2222,11 +2267,27 @@ export function CRMJob() {
       : [];
 
   const commercialQuote = commercial.quote;
-  const bookingQuestionnaire = workspace.questionnaires.find((item) => item.status !== "completed")
-    || workspace.questionnaires[0]
-    || null;
-  const primaryGallery = lifecycle.primaryClientGallery;
-  const storyLabel = lifecycle.story.state === "not_started" ? "not started" : lifecycle.story.state;
+
+  const bookingQuestionnaire =
+    clientPortalEnabled
+      ? (
+          workspace.questionnaires.find(
+            (item) => item.status !== "completed",
+          )
+          || workspace.questionnaires[0]
+          || null
+        )
+      : null;
+
+  const primaryGallery =
+    clientGalleriesEnabled
+      ? lifecycle.primaryClientGallery
+      : null;
+
+  const storyLabel =
+    lifecycle.story.state === "not_started"
+      ? "not started"
+      : lifecycle.story.state;
 
   return (
     <AdminPage className="crm-job-operations-page">
@@ -2359,6 +2420,7 @@ export function CRMJob() {
 
         <div className="crm-job-primary-grid__clients">
 <div id="job-clients" className="scroll-mt-5 crm-job-top-clients"><CRMClientsPanel
+            showPortalControls={clientPortalEnabled}
             contacts={
               workspace.contacts
             }
@@ -2485,7 +2547,8 @@ export function CRMJob() {
         }
       >
         <div className="crm-commercial-grid crm-job-commercial-summary-list crm-booking-summary-list">
-          {commercialInvoice ? (
+          {invoicesEnabled ? (
+commercialInvoice ? (
             <div className="crm-commercial-summary-row crm-commercial-card--link crm-booking-summary-row">
               <div className="crm-commercial-summary-row__copy crm-booking-summary-row__copy">
                 <div className="crm-booking-summary-row__heading">
@@ -2574,8 +2637,10 @@ export function CRMJob() {
 
               <span className="crm-booking-summary-row__action-spacer" />
             </div>
-          )}
+          )
+          ) : null}
 
+          {contractsEnabled ? (
           <div className="crm-commercial-summary-row crm-booking-summary-row">
             <div className="crm-commercial-summary-row__copy crm-booking-summary-row__copy">
               <div className="crm-booking-summary-row__heading">
@@ -2636,7 +2701,8 @@ export function CRMJob() {
                 <span className="crm-booking-summary-row__action-spacer" />
               )}
 
-              {commercialContract?.status === "draft" ? (
+              {commercialContract?.status === "draft"
+              && clientPortalEnabled ? (
                 portal.status === "not_invited" ? (
                   <span
                     className="crm-booking-summary-row__action-spacer is-disabled"
@@ -2662,7 +2728,9 @@ export function CRMJob() {
               ) : null}
             </div>
           </div>
+          ) : null}
 
+          {clientPortalEnabled ? (
           <div className="crm-commercial-summary-row crm-commercial-card--link crm-booking-summary-row">
             <div className="crm-commercial-summary-row__copy crm-booking-summary-row__copy">
               <div className="crm-booking-summary-row__heading">
@@ -2713,6 +2781,7 @@ export function CRMJob() {
               <ExternalLink aria-hidden="true" />
             </a>
           </div>
+          ) : null}
 
           {commercialQuote ? (
             <div className="crm-commercial-summary-row crm-commercial-card--link crm-booking-summary-row">
@@ -2853,6 +2922,7 @@ export function CRMJob() {
             )}
           </div>
 
+          {clientGalleriesEnabled ? (
           <div className="crm-delivery-summary-row">
             <strong>
               Client Gallery
@@ -2899,7 +2969,9 @@ export function CRMJob() {
               />
             )}
           </div>
+          ) : null}
 
+          {contentToolsEnabled ? (
           <div className="crm-delivery-summary-row">
             <strong>
               Wedding Story
@@ -2942,7 +3014,9 @@ export function CRMJob() {
               <span className="crm-delivery-summary-action-spacer" />
             )}
           </div>
+          ) : null}
 
+          {contentToolsEnabled ? (
           <div className="crm-delivery-summary-row">
             <strong>
               Website galleries
@@ -2969,6 +3043,7 @@ export function CRMJob() {
               <span className="crm-delivery-summary-action-spacer" />
             )}
           </div>
+          ) : null}
         </div>
       </AdminPanel>
         </div>
@@ -3048,6 +3123,7 @@ export function CRMJob() {
         <div className="crm-job-operations-column">
 
 
+          {clientPortalEnabled ? (
           <div
             id="job-questionnaires"
             className="scroll-mt-5"
@@ -3196,6 +3272,7 @@ export function CRMJob() {
               </div>
             </AdminAccordion>
           </div>
+          ) : null}
 
           <AdminAccordion
             title="Supplier team"
@@ -3636,6 +3713,7 @@ export function CRMJob() {
             )}
           </AdminAccordion>
 
+          {clientPortalEnabled ? (
           <AdminAccordion
             title="Files"
             icon={FolderOpen}
@@ -3822,6 +3900,7 @@ export function CRMJob() {
               />
             ) : null}
           </AdminAccordion>
+          ) : null}
 
           <AdminAccordion title="Notes and activity" icon={MessageSquareText} summary={<AdminStatus tone="neutral">{workspace.activities.length} events</AdminStatus>}>
             {workspace.enquiry?.notes ? <div className="crm-job-note"><strong>{workspace.enquiry.reference}</strong><p>{workspace.enquiry.notes}</p><small>{workspace.enquiry.source}{workspace.enquiry.campaign ? ` · ${workspace.enquiry.campaign}` : ""} · {dateLabel(workspace.enquiry.createdAt)}</small></div> : <p className="text-[10px] text-neutral-500">No enquiry notes recorded.</p>}
@@ -4037,7 +4116,9 @@ export function CRMJob() {
         </div>
       ) : null}
 
-      {contractPreviewOpen && commercialContract ? (
+      {contractsEnabled
+      && contractPreviewOpen
+      && commercialContract ? (
         <div
           className="crm-job-contract-preview"
           role="presentation"

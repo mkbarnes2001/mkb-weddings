@@ -541,3 +541,36 @@ Questionnaire templates are reusable workspace records. Each assignment copies t
 Questionnaire attachments are private R2 objects referenced by `crm_questionnaire_files`. The 10 MB upload route validates active workspace/Job/contact access. Business exports include file metadata but redact `storage_key`; portal invitation token hashes are also redacted.
 
 Migration triggers reject cross-workspace template, Job, contact, response and file relationships. A starter Pre-wedding Questionnaire template is seeded per existing workspace. Schema version advances from 27 to **28**.
+
+## Schema 52 — v1.10.13a Gate 2A subscription foundation
+
+Schema 52 adds the internal WedPlanned subscription/access model without activating Stripe Billing:
+
+- `platform_plans` — stable internal WedPlanned plans, independent of provider Price IDs.
+- `platform_plan_entitlements` — base feature grants and limits by internal plan.
+- `platform_plan_prices` — provider Product/Price mapping to internal plans; empty until a later Stripe Billing gate.
+- `workspace_billing_customers` — workspace-owned platform billing Customer identity; empty in Gate 2A.
+- `workspace_subscriptions` — workspace-owned current/historical plan assignment and subscription lifecycle state.
+
+`workspace_entitlements` is preserved unchanged as the workspace-specific override layer. It is not replaced by a competing entitlement system.
+
+Existing workspaces are assigned the hidden `compatibility-full-access` internal plan with `complimentary` status. That plan mirrors the current active `platform_features` catalogue so schema 52 is access-neutral while the resolver is introduced. Existing `workspace_entitlements` rows and the legacy `workspaces.plan` field are preserved unchanged.
+
+No live or test Stripe Customer, Product, Price, Subscription, card or secret value is created or stored by migration 052.
+
+### v1.10.13a Gate 2C1 — provisioning behavior on schema 52
+
+No migration is added in Gate 2C1. For workspaces created after schema 52, the provisioner inserts one current `workspace_subscriptions` row using provider `internal`, status `complimentary`, billing interval `none`, and plan `plan_compatibility_full_access`. It no longer materialises every active platform feature into `workspace_entitlements`. The existing table remains the workspace-specific override layer and existing rows remain untouched. Stripe customer and price tables remain empty until the later Stripe Billing integration gate.
+
+## Schema 53 — v1.10.13a Gate 2D1 subscription billing write ledger foundation
+
+Migration: `053_wedplanned_subscription_billing_write_foundation.sql`
+
+Adds two operational tables for the WedPlanned platform-subscription domain:
+
+- `workspace_subscription_checkout_attempts` — workspace-owned subscription Checkout intentions. Rows snapshot the internal Plan/Price selection, currency, unit amount, billing interval/count, server-generated idempotency key, provider Checkout identity when later available, lifecycle state and failure/expiry timestamps.
+- `subscription_provider_events` — dedicated provider-event idempotency/audit ledger for future verified Stripe Billing webhooks. Rows store provider event/type, live/test mode, non-secret provider routing identifiers, optional resolved workspace/subscription/attempt links, processing state and a SHA-256 payload hash. Raw provider payload JSON and card/payment-method data are not stored.
+
+Schema 53 does not create a Stripe Customer, Product, Price, Checkout Session or Subscription. Existing `workspace_subscriptions`, `workspace_billing_customers`, WedCRM connected-payment tables and Print Store payment-event tables are unchanged by the migration. Both new tables are empty immediately after migration.
+
+The Checkout attempt ledger is operational state only. Browser returns and Checkout-attempt completion cannot grant application access; authoritative workspace subscription/access state remains in `workspace_subscriptions` and may only be changed by later verified billing lifecycle processing.

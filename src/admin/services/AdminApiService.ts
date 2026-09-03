@@ -38,7 +38,8 @@ import type { PlatformAdministrationPayload,
   WedPlannedBusiness,
   WedPlannedMember,
   WedPlannedOperationsPayload,
-  WedPlannedServiceArea } from "../types/platform";
+  WedPlannedServiceArea,
+  WorkspaceSubscriptionBillingOverview } from "../types/platform";
 import type { CrmAddon,
   CrmContactDetail,
   CrmEnquiryDetail,
@@ -1197,6 +1198,22 @@ export class AdminApiService {
   static async getWedPlannedPlatform() {
     const result = await request<{ ok: true; platform: WedPlannedPlatformPayload; auth: ProfessionalAuthState }>("/api/platform");
     return result.platform;
+  }
+
+  static async getWedPlannedBilling() {
+    const result = await request<{ ok: true; billing: WorkspaceSubscriptionBillingOverview; auth: ProfessionalAuthState }>("/api/platform-billing");
+    return result.billing;
+  }
+
+  static async createWedPlannedBillingPortal() {
+    const result = await request<{
+      ok: true;
+      portal: { url: string };
+    }>("/api/platform-billing/portal", {
+      method: "POST",
+      body: "{}",
+    });
+    return result.portal;
   }
 
   static async mutateWedPlannedPlatform(payload: Record<string, unknown>) {
