@@ -791,6 +791,31 @@ export type CrmQuoteVersion = {
   updatedAt: string;
 };
 
+export type CrmQuoteAcceptance = {
+  id: string;
+  optionId: string;
+  acceptedAt: string;
+  totalAmount: number;
+  currency: string;
+
+  selectedPackage: {
+    id?: string;
+    packageId?: string | null;
+    name?: string;
+    [key: string]: unknown;
+  };
+
+  selectedAddons: Array<{
+    id?: string;
+    addonId?: string;
+    name?: string;
+    quantity?: number;
+    unitPriceAmount?: number;
+    lineTotalAmount?: number;
+    [key: string]: unknown;
+  }>;
+};
+
 export type CrmQuote = {
   id: string;
   enquiryId: string;
@@ -811,6 +836,7 @@ export type CrmQuote = {
   serviceInterest: string;
   currentVersion: CrmQuoteVersion | null;
   versions: CrmQuoteVersion[];
+  acceptance: CrmQuoteAcceptance | null;
   createdAt: string;
   updatedAt: string;
 };

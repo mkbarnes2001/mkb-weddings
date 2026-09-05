@@ -10,7 +10,8 @@ export type ProfessionalClientAction =
   | "questionnaire_updated"
   | "questionnaire_completed"
   | "questionnaire_updated_after_completion"
-  | "contract_signed";
+  | "contract_signed"
+  | "payment_received";
 
 type D1Db = any;
 
@@ -21,6 +22,14 @@ type NotificationInput = {
   documentTitle: string;
   clientName: string;
   clientEmail: string;
+  invoiceReference?: string;
+  receiptReference?: string;
+  amount?: number;
+  currency?: string;
+  balanceAmount?: number;
+  paidAt?: string;
+  idempotencyKey?: string;
+  prepareRequest?: (transport: string, body: string, accountIdentity: string) => Promise<string>;
 };
 
 function text(value: unknown) {
@@ -53,6 +62,42 @@ function normaliseHostname(value: unknown) {
     .replace(/\/$/, "");
 }
 
+function moneyLabel(
+  amountInput: unknown,
+  currencyInput: unknown,
+) {
+  const amount = Number(amountInput || 0);
+  const currency = text(currencyInput || "GBP").toUpperCase();
+
+  try {
+    return new Intl.NumberFormat(
+      "en-GB",
+      {
+        style: "currency",
+        currency,
+      },
+    ).format(amount / 100);
+  } catch {
+    return `${currency} ${(amount / 100).toFixed(2)}`;
+  }
+}
+
+function dateTimeLabel(value: unknown) {
+  const date = new Date(text(value));
+
+  if (Number.isNaN(date.getTime())) {
+    return text(value) || "—";
+  }
+
+  return new Intl.DateTimeFormat(
+    "en-GB",
+    {
+      dateStyle: "long",
+      timeStyle: "short",
+    },
+  ).format(date);
+}
+
 const ACTION_COPY: Record<
   ProfessionalClientAction,
   {
@@ -82,6 +127,12 @@ const ACTION_COPY: Record<
     verb: "signed",
     description:
       "A client electronic signature was recorded against the contract.",
+  },
+
+  payment_received: {
+    verb: "made a payment for",
+    description:
+      "A verified client payment was recorded against the invoice.",
   },
 };
 
@@ -276,7 +327,10 @@ export async function sendProfessionalClientActionNotification(
         input.action
         === "contract_signed"
           ? "Contract"
-          : "Questionnaire"
+          : input.action
+            === "payment_received"
+            ? text(input.invoiceReference || "Invoice")
+            : "Questionnaire"
       ),
     );
 
@@ -296,7 +350,34 @@ export async function sendProfessionalClientActionNotification(
     ACTION_COPY[input.action];
 
   const heading =
-    `${clientName} ${copy.verb} ${documentTitle}`;
+    input.action
+    === "payment_received"
+      ? `Payment received from ${clientName}`
+      : `${clientName} ${copy.verb} ${documentTitle}`;
+
+  const invoiceReference =
+    text(
+      input.invoiceReference
+      || documentTitle,
+    );
+
+  const receiptReference =
+    text(input.receiptReference);
+
+  const amountLabel =
+    moneyLabel(
+      input.amount,
+      input.currency,
+    );
+
+  const balanceLabel =
+    moneyLabel(
+      input.balanceAmount,
+      input.currency,
+    );
+
+  const paidAtLabel =
+    dateTimeLabel(input.paidAt);
 
   const adminHostname =
     normaliseHostname(
@@ -311,11 +392,19 @@ export async function sendProfessionalClientActionNotification(
       : "";
 
   const subject =
-    `${businessName}: ${heading}`
-      .slice(
-        0,
-        240,
-      );
+    (
+      input.action
+      === "payment_received"
+        ? `${businessName}: ${amountLabel} payment received${
+            invoiceReference
+              ? ` · ${invoiceReference}`
+              : ""
+          }`
+        : `${businessName}: ${heading}`
+    ).slice(
+      0,
+      240,
+    );
 
   const safeBusiness =
     escapeHtml(businessName);
@@ -338,6 +427,83 @@ export async function sendProfessionalClientActionNotification(
   const safeJobUrl =
     escapeHtml(jobUrl);
 
+  const paymentDetailsHtml =
+    input.action
+    === "payment_received"
+      ? `<div style="margin:18px 0;padding:16px;border:1px solid #e3e0da;border-radius:10px;background:#faf9f7">`
+        + `<strong style="font-size:18px">${escapeHtml(amountLabel)}</strong>`
+        + `${invoiceReference ? `<br><span style="font-size:13px;color:#666">Invoice ${escapeHtml(invoiceReference)}</span>` : ""}`
+        + `${receiptReference ? `<br><span style="font-size:13px;color:#666">Receipt ${escapeHtml(receiptReference)}</span>` : ""}`
+        + `<br><span style="font-size:13px;color:#666">Received ${escapeHtml(paidAtLabel)}</span>`
+        + `<br><span style="font-size:13px;color:#666">Remaining balance ${escapeHtml(balanceLabel)}</span>`
+        + `</div>`
+      : "";
+
+  const paymentDetailsText =
+    input.action
+    === "payment_received"
+      ? `Amount received: ${amountLabel}\n`
+        + `${invoiceReference ? `Invoice: ${invoiceReference}\n` : ""}`
+        + `${receiptReference ? `Receipt: ${receiptReference}\n` : ""}`
+        + `Received: ${paidAtLabel}\n`
+        + `Remaining balance: ${balanceLabel}\n\n`
+      : "";
+
+  const candidateBody = JSON.stringify({
+  from:
+    `${fromName} <${fromEmail}>`,
+
+  to: [
+    recipient,
+  ],
+
+  subject,
+
+  html:
+    `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#151515;max-width:580px;margin:auto">`
+    + `<p style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#6b6b6b">WedPlanned · Client activity</p>`
+    + `<h1 style="font-size:25px;font-weight:600">${safeHeading}</h1>`
+    + `<p>${safeDescription}</p>`
+    + paymentDetailsHtml
+    + `<div style="margin:24px 0;padding:16px;border:1px solid #e3e0da;border-radius:10px;background:#faf9f7">`
+    + `<strong>${safeJobTitle}</strong>`
+    + `${safeJobReference ? `<br><span style="font-size:13px;color:#666">${safeJobReference}</span>` : ""}`
+    + `${safeClientEmail ? `<br><span style="font-size:13px;color:#666">${safeClientEmail}</span>` : ""}`
+    + `</div>`
+    + (
+      safeJobUrl
+        ? `<p style="margin:28px 0"><a href="${safeJobUrl}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px">Open Job in WedCRM</a></p>`
+        : ""
+    )
+    + `<p style="font-size:12px;color:#777">This notification was sent to ${escapeHtml(recipient)} using the business CRM notification setting.</p>`
+    + `</div>`,
+
+  text:
+    `WedPlanned · Client activity\n\n`
+    + `${heading}\n\n`
+    + `${copy.description}\n\n`
+    + paymentDetailsText
+    + `${jobTitle}`
+    + (
+      jobReference
+        ? ` · ${jobReference}`
+        : ""
+    )
+    + (
+      clientEmail
+        ? `\n${clientEmail}`
+        : ""
+    )
+    + (
+      jobUrl
+        ? `\n\nOpen Job in WedCRM:\n${jobUrl}`
+        : ""
+    ),
+});
+  const requestBody = input.prepareRequest
+    ? await input.prepareRequest("resend", candidateBody, apiKey)
+    : candidateBody;
+
   const response =
     await fetch(
       "https://api.resend.com/emails",
@@ -345,6 +511,7 @@ export async function sendProfessionalClientActionNotification(
         method: "POST",
 
         headers: {
+          ...(input.idempotencyKey ? { "Idempotency-Key": input.idempotencyKey } : {}),
           Authorization:
             `Bearer ${apiKey}`,
 
@@ -352,55 +519,7 @@ export async function sendProfessionalClientActionNotification(
             "application/json",
         },
 
-        body: JSON.stringify({
-          from:
-            `${fromName} <${fromEmail}>`,
-
-          to: [
-            recipient,
-          ],
-
-          subject,
-
-          html:
-            `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#151515;max-width:580px;margin:auto">`
-            + `<p style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#6b6b6b">WedPlanned · Client activity</p>`
-            + `<h1 style="font-size:25px;font-weight:600">${safeHeading}</h1>`
-            + `<p>${safeDescription}</p>`
-            + `<div style="margin:24px 0;padding:16px;border:1px solid #e3e0da;border-radius:10px;background:#faf9f7">`
-            + `<strong>${safeJobTitle}</strong>`
-            + `${safeJobReference ? `<br><span style="font-size:13px;color:#666">${safeJobReference}</span>` : ""}`
-            + `${safeClientEmail ? `<br><span style="font-size:13px;color:#666">${safeClientEmail}</span>` : ""}`
-            + `</div>`
-            + (
-              safeJobUrl
-                ? `<p style="margin:28px 0"><a href="${safeJobUrl}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px">Open Job in WedCRM</a></p>`
-                : ""
-            )
-            + `<p style="font-size:12px;color:#777">This notification was sent to ${escapeHtml(recipient)} using the business CRM notification setting.</p>`
-            + `</div>`,
-
-          text:
-            `WedPlanned · Client activity\n\n`
-            + `${heading}\n\n`
-            + `${copy.description}\n\n`
-            + `${jobTitle}`
-            + (
-              jobReference
-                ? ` · ${jobReference}`
-                : ""
-            )
-            + (
-              clientEmail
-                ? `\n${clientEmail}`
-                : ""
-            )
-            + (
-              jobUrl
-                ? `\n\nOpen Job in WedCRM:\n${jobUrl}`
-                : ""
-            ),
-        }),
+        body: requestBody,
       },
     );
 

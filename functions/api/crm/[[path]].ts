@@ -1,3 +1,4 @@
+import { resolveReceiptReview } from "../../../serverless/crm-payment-receipts-d1";
 import {
   archiveCrmContractTemplate,
   createCrmContractTemplate,
@@ -43,6 +44,7 @@ import {
 
 import {
   approveSupplierSubmission,
+  reapproveSupplierSubmission,
   archiveQuestionnaireTemplate,
   assignQuestionnaire,
   createQuestionnaireTemplate,
@@ -53,6 +55,7 @@ import {
   getQuestionnaireTemplate,
   inviteJobClient,
   rejectSupplierSubmission,
+  changeJobSupplierLink,
   revokeJobClientAccess,
   saveQuestionnaireInstanceAdmin,
   saveQuestionnaireTemplate,
@@ -902,6 +905,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (parts[0] === "jobs" && parts[1] && parts[2] === "revoke") {
       return Response.json({ ok: true, workspace: await revokeJobClientAccess(context.env.MKB_DB, actor, parts[1], String(body?.identityId || "")) });
     }
+    if (parts[0] === "jobs" && parts[1] && parts[2] === "supplier-link" && parts.length === 3) {
+      return Response.json({ ok: true, workspace: await changeJobSupplierLink(context.env.MKB_DB, actor, parts[1], body) });
+    }
+    if (parts[0] === "jobs" && parts[1] && parts[2] === "supplier-submissions" && parts[3] && parts[4] === "reapprove") {
+      return Response.json({ ok: true, workspace: await reapproveSupplierSubmission(context.env.MKB_DB, actor, parts[1], parts[3], body) });
+    }
     if (parts[0] === "jobs" && parts[1] && parts[2] === "supplier-submissions" && parts[3] && parts[4] === "approve") {
       return Response.json({ ok: true, workspace: await approveSupplierSubmission(context.env.MKB_DB, actor, parts[1], parts[3], body) });
     }
@@ -921,6 +930,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (parts[0] === "jobs" && parts[1] && parts[2] === "tasks" && parts.length === 3) {
       await createJobTask(context.env.MKB_DB, actor, parts[1], body);
       return Response.json({ ok: true, workspace: await getCrmJobWorkspace(context.env.MKB_DB, actor, parts[1]) }, { status: 201 });
+    }
+    if (parts[0] === "jobs" && parts[1] && parts[2] === "communications" && parts[3] && parts[4] === "resolve-receipt" && parts.length === 5) {
+      await resolveReceiptReview(context.env.MKB_DB, actor, parts[1], parts[3], body);
+      return Response.json({ok: true, workspace: await getCrmJobWorkspace(context.env.MKB_DB, actor, parts[1])});
     }
     if (parts[0] === "jobs" && parts[1] && parts[2] === "communications" && parts[3] === "send") {
       await sendJobEmail(context.env.MKB_DB, context.env, actor, parts[1], body);

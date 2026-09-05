@@ -315,9 +315,9 @@ assert (
 )
 
 
-assert not list(
-    (ROOT / "d1/migrations").glob("050*")
-)
+# This historical v1.10.11a UI compatibility gate introduced no
+# migration itself. Later release migrations, including 050+, are
+# valid and must not cause this historical regression to fail.
 
 
 print(

@@ -1,3 +1,4 @@
+import { captureSupplierContext, commitSupplierContext } from "./wedding-d1";
 import {
   sendProfessionalClientActionNotification,
   type ProfessionalNotificationEnv,
@@ -306,34 +307,49 @@ function hydrateSupplierSubmission(row: any) {
   };
 }
 
-async function linkSupplierToWedding(db: D1Db, workspaceId: string, weddingSlug: string, supplierId: string, roleInput: string) {
+async function linkSupplierToWedding(db: D1Db, workspaceId: string, weddingSlug: string, supplierId: string, roleInput: string, allowWithdrawn = false, pending?: any[], newSupplier?: any) {
   const role = text(roleInput) || "Supplier";
   if (!weddingSlug || !supplierId) return false;
   const [wedding, supplier] = await Promise.all([
     db.prepare(`SELECT slug FROM weddings WHERE slug = ? AND workspace_id = ? LIMIT 1`).bind(weddingSlug, workspaceId).first(),
-    db.prepare(`SELECT * FROM suppliers WHERE id = ? AND workspace_id = ? AND status <> 'archived' LIMIT 1`).bind(supplierId, workspaceId).first(),
+    newSupplier || db.prepare(`SELECT * FROM suppliers WHERE id = ? AND workspace_id = ? AND status <> 'archived' LIMIT 1`).bind(supplierId, workspaceId).first(),
   ]);
   if (!wedding || !supplier) return false;
+  if (!allowWithdrawn) {
+    const withdrawn = await db.prepare(`SELECT 1 FROM crm_supplier_submissions retired
+      WHERE retired.workspace_id = ? AND retired.wedding_slug = ? AND retired.resolved_supplier_id = ? AND retired.role = ? AND retired.status = 'rejected'
+        AND NOT EXISTS (SELECT 1 FROM crm_supplier_submissions active
+          WHERE active.workspace_id = retired.workspace_id AND active.wedding_slug = retired.wedding_slug
+            AND active.resolved_supplier_id = retired.resolved_supplier_id AND active.role = retired.role
+            AND active.status IN ('approved', 'linked')) LIMIT 1`)
+      .bind(workspaceId, weddingSlug, supplierId, role).first();
+    if (withdrawn) return false;
+  }
   const existing = await db.prepare(`
     SELECT 1 FROM wedding_supplier_links
     WHERE wedding_slug = ? AND workspace_id = ? AND supplier_id = ? AND role = ? LIMIT 1
   `).bind(weddingSlug, workspaceId, supplierId, role).first();
   if (existing) return true;
-  const orderRow = await db.prepare(`
-    SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order
-    FROM wedding_supplier_links WHERE wedding_slug = ? AND workspace_id = ?
-  `).bind(weddingSlug, workspaceId).first();
-  const sortOrder = Number(orderRow?.next_order || 1);
-  await db.batch([
-    db.prepare(`
-      INSERT INTO wedding_supplier_links (wedding_slug, workspace_id, supplier_id, role, sort_order)
-      VALUES (?, ?, ?, ?, ?)
-    `).bind(weddingSlug, workspaceId, supplierId, role, sortOrder),
-    db.prepare(`
-      INSERT OR IGNORE INTO wedding_suppliers (wedding_slug, workspace_id, sort_order, role, name, website, instagram)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).bind(weddingSlug, workspaceId, sortOrder, role, text(supplier.name), text(supplier.website), text(supplier.instagram)),
-  ]);
+  const statements = [
+    db.prepare(`INSERT INTO wedding_supplier_links (wedding_slug, workspace_id, supplier_id, role, sort_order)
+      SELECT ?, ?, ?, ?, COALESCE(MAX(sort_order), 0) + 1 FROM wedding_supplier_links
+      WHERE wedding_slug = ? AND workspace_id = ?
+      HAVING NOT EXISTS (SELECT 1 FROM wedding_supplier_links WHERE wedding_slug = ? AND workspace_id = ? AND supplier_id = ? AND role = ?)`)
+      .bind(weddingSlug, workspaceId, supplierId, role, weddingSlug, workspaceId, weddingSlug, workspaceId, supplierId, role),
+    db.prepare(`INSERT OR IGNORE INTO wedding_suppliers (wedding_slug, workspace_id, sort_order, role, name, website, instagram)
+      SELECT wedding_slug, workspace_id, sort_order, role, ?, ?, ? FROM wedding_supplier_links
+      WHERE wedding_slug = ? AND workspace_id = ? AND supplier_id = ? AND role = ?`)
+      .bind(text(supplier.name), text(supplier.website), text(supplier.instagram), weddingSlug, workspaceId, supplierId, role),
+    db.prepare(`UPDATE weddings SET document_json = json_set(
+      CASE WHEN json_valid(document_json) THEN document_json ELSE '{}' END, '$.suppliers',
+      json_insert(CASE WHEN json_type(document_json, '$.suppliers') = 'array' THEN json_extract(document_json, '$.suppliers') ELSE '[]' END, '$[#]', json(?)))
+      WHERE workspace_id = ? AND slug = ? AND NOT EXISTS (
+        SELECT 1 FROM json_each(CASE WHEN json_valid(document_json) THEN document_json ELSE '{}' END, '$.suppliers')
+        WHERE json_extract(value, '$.supplierId') = ? AND json_extract(value, '$.role') = ?)`)
+      .bind(JSON.stringify({ supplierId, role, name: supplier.name, website: supplier.website, instagram: supplier.instagram }), workspaceId, weddingSlug, supplierId, role),
+  ];
+  if (pending) pending.push(...statements);
+  else await db.batch(statements);
   return true;
 }
 
@@ -353,14 +369,41 @@ function supplierAnswers(value: unknown) {
   })).filter((item) => item.supplierId || item.name);
 }
 
-async function syncSupplierAnswers(db: D1Db, workspaceId: string, row: any, fields: QuestionnaireField[], responses: Record<string, unknown>) {
+async function syncSupplierAnswers(db: D1Db, workspaceId: string, row: any, fields: QuestionnaireField[], responses: Record<string, unknown>, previousResponses: Record<string, unknown> = {}, prefix: any[] = []) {
   const supplierFields = fields.filter((field) => field.type === "supplier");
+  const context = await captureSupplierContext(db, workspaceId, text(row.wedding_slug));
+  const statements: any[] = [...prefix];
   for (const field of supplierFields) {
     const answers = supplierAnswers(responses[field.id]);
-    await db.prepare(`DELETE FROM crm_supplier_submissions WHERE workspace_id = ? AND instance_id = ? AND field_key = ?`)
-      .bind(workspaceId, text(row.id), field.id).run();
+    // Keep reviewed source records even when a later answer changes or disappears.
+    // Negative indexes retain history outside the current answer positions.
+    const previousAnswers = supplierAnswers(previousResponses[field.id]);
+    const reviewed = await db.prepare(`
+      SELECT * FROM crm_supplier_submissions
+      WHERE workspace_id = ? AND instance_id = ? AND field_key = ? AND status <> 'pending'
+      ORDER BY response_index
+    `).bind(workspaceId, text(row.id), field.id).all();
+    const records: any[] = reviewed.results || [];
+    const remaining = records.filter((record) => Number(record.response_index) >= 0);
+    let historyIndex = Math.min(0, ...records.map((record) => Number(record.response_index))) - 1;
+    statements.push(
+      db.prepare(`DELETE FROM crm_supplier_submissions WHERE workspace_id = ? AND instance_id = ? AND field_key = ? AND status = 'pending'`)
+        .bind(workspaceId, text(row.id), field.id),
+    );
+    for (const record of remaining) {
+      statements.push(db.prepare(`UPDATE crm_supplier_submissions SET response_index = ? WHERE id = ? AND workspace_id = ?`)
+        .bind(historyIndex--, record.id, workspaceId));
+    }
     for (let index = 0; index < answers.length; index += 1) {
       const answer = answers[index];
+      const retainedIndex = remaining.findIndex((record) =>
+        JSON.stringify(previousAnswers[Number(record.response_index)]) === JSON.stringify(answer));
+      if (retainedIndex >= 0) {
+        const [record] = remaining.splice(retainedIndex, 1);
+        statements.push(db.prepare(`UPDATE crm_supplier_submissions SET response_index = ? WHERE id = ? AND workspace_id = ?`)
+          .bind(index, record.id, workspaceId));
+        continue;
+      }
       const role = answer.role || field.supplierRole || field.supplierCategory || "Supplier";
       let status = "pending";
       let resolvedSupplierId = "";
@@ -370,9 +413,9 @@ async function syncSupplierAnswers(db: D1Db, workspaceId: string, row: any, fiel
         if (!supplier || supplier.status === "archived") throw httpError(`Choose a valid supplier for ${field.label}.`, 400);
         supplierName = supplier.name;
         resolvedSupplierId = supplier.id;
-        status = await linkSupplierToWedding(db, workspaceId, text(row.wedding_slug), supplier.id, role) ? "linked" : "pending";
+        status = await linkSupplierToWedding(db, workspaceId, text(row.wedding_slug), supplier.id, role, false, statements) ? "linked" : "pending";
       }
-      await db.prepare(`
+      statements.push(db.prepare(`
         INSERT INTO crm_supplier_submissions (
           id, workspace_id, job_id, wedding_slug, instance_id, field_key, response_index, contact_id,
           role, supplier_id, proposed_name, proposed_website, proposed_instagram, proposed_email,
@@ -383,8 +426,39 @@ async function syncSupplierAnswers(db: D1Db, workspaceId: string, row: any, fiel
         text(row.id), field.id, index, text(row.assigned_contact_id) || null, role,
         answer.mode === "existing" ? answer.supplierId : null, supplierName, answer.website, answer.instagram,
         answer.email, answer.phone, answer.location, answer.county, status, resolvedSupplierId || null,
-      ).run();
+      ));
     }
+  }
+  await commitSupplierContext(db, context, statements);
+}
+
+const questionnaireSaveSql = `SELECT json_array(
+  (SELECT json_array(q.status, q.schema_json, q.updated_at, job.wedding_slug, job.status)
+    FROM crm_questionnaire_instances q JOIN crm_jobs job ON job.id = q.job_id AND job.workspace_id = q.workspace_id
+    WHERE q.workspace_id = ?1 AND q.id = ?2),
+  (SELECT json_group_array(json_array(field_key, value_json)) FROM
+    (SELECT field_key, value_json FROM crm_questionnaire_responses WHERE workspace_id = ?1 AND instance_id = ?2 ORDER BY field_key))
+) AS token`;
+
+async function captureQuestionnaireSave(db: D1Db, workspaceId: string, instanceId: string) {
+  return (await db.prepare(questionnaireSaveSql).bind(workspaceId, instanceId).first()).token as string;
+}
+
+async function commitQuestionnaireAnswers(db: D1Db, workspaceId: string, row: any, fields: QuestionnaireField[],
+  merged: Record<string, unknown>, previousResponses: Record<string, unknown>, statements: any[], checkpoint: string, synchronise: boolean) {
+  const guard = db.prepare(`SELECT CASE WHEN (${questionnaireSaveSql}) = ?3 THEN 1 ELSE json('questionnaire_save_conflict') END`)
+    .bind(workspaceId, row.id, checkpoint);
+  try {
+    if (synchronise) {
+      await syncSupplierAnswers(db, workspaceId, row, fields, merged, previousResponses, [guard, ...statements]);
+    } else {
+      await db.batch([guard, ...statements]);
+    }
+  } catch (error) {
+    if (await captureQuestionnaireSave(db, workspaceId, row.id) !== checkpoint) {
+      throw httpError("Questionnaire changed while saving. Reload and review the answers before retrying.", 409);
+    }
+    throw error;
   }
 }
 
@@ -1267,11 +1341,49 @@ export async function inviteJobClient(db: D1Db, env: EmailEnv, actor: PortalActo
 
 export async function approveSupplierSubmission(db: D1Db, actor: PortalActor, jobId: string, submissionId: string, input: any) {
   requirePermission(actor, "crm:manage");
+  if (actor.accessMode === "support") throw httpError("Support sessions cannot approve supplier links.", 403);
+  const jobContext = await db.prepare(`SELECT wedding_slug FROM crm_jobs WHERE id = ? AND workspace_id = ?`).bind(jobId, actor.workspaceId).first();
+  const context = await captureSupplierContext(db, actor.workspaceId, text(jobContext?.wedding_slug));
+  const statements: any[] = [];
+
   const row = await db.prepare(`
     SELECT * FROM crm_supplier_submissions
     WHERE id = ? AND job_id = ? AND workspace_id = ? AND status = 'pending' LIMIT 1
   `).bind(submissionId, jobId, actor.workspaceId).first();
   if (!row) throw httpError("Pending supplier suggestion not found.", 404);
+
+  // v1.10.14a — approval is valid only when the suggestion can
+  // resolve to the Job's Wedding. Validate that relationship before
+  // creating/merging a Supplier Master record so a missing Wedding
+  // cannot silently create another orphaned supplier.
+  const weddingSlug = text(row.wedding_slug);
+  if (!weddingSlug) {
+    throw httpError(
+      "This supplier suggestion is not linked to a Wedding.",
+      409,
+    );
+  }
+
+  if (weddingSlug !== text(jobContext?.wedding_slug)) throw httpError("The Job Wedding has changed. Reload before approving.", 409);
+
+  const linkedWedding = await db.prepare(`
+    SELECT slug
+    FROM weddings
+    WHERE slug = ?
+      AND workspace_id = ?
+    LIMIT 1
+  `).bind(
+    weddingSlug,
+    actor.workspaceId,
+  ).first();
+
+  if (!linkedWedding) {
+    throw httpError(
+      "The linked Wedding could not be found. Check the Job Wedding and try again.",
+      409,
+    );
+  }
+
   let supplier: any = null;
   const mergeSupplierId = text(input?.supplierId);
   if (mergeSupplierId) {
@@ -1288,15 +1400,180 @@ export async function approveSupplierSubmission(db: D1Db, actor: PortalActor, jo
       phone: text(input?.phone || row.proposed_phone),
       location: text(input?.location || row.proposed_location),
       county: text(input?.county || row.proposed_county),
-    }, actor.workspaceId);
+    }, actor.workspaceId, statements);
   }
-  const linked = await linkSupplierToWedding(db, actor.workspaceId, text(row.wedding_slug), supplier.id, text(input?.role || row.role));
-  await db.prepare(`
+  const linked = await linkSupplierToWedding(
+    db,
+    actor.workspaceId,
+    weddingSlug,
+    supplier.id,
+    text(input?.role || row.role),
+    true,
+    statements,
+    mergeSupplierId ? undefined : supplier,
+  );
+
+  if (!linked) {
+    throw httpError(
+      "Supplier approval could not be linked to the Wedding. Check the Wedding and try again.",
+      409,
+    );
+  }
+
+  statements.push(db.prepare(`
     UPDATE crm_supplier_submissions SET status = 'approved', resolved_supplier_id = ?, role = ?,
       review_notes = ?, reviewed_by_user_id = ?, reviewed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
     WHERE id = ? AND workspace_id = ?
-  `).bind(supplier.id, text(input?.role || row.role) || "Supplier", text(input?.reviewNotes), text(actor.userId) || null, submissionId, actor.workspaceId).run();
-  await recordJobActivity(db, actor, actor.workspaceId, jobId, "supplier.approved", `${linked ? "Linked" : "Approved"} ${supplier.name} as ${text(input?.role || row.role) || "Supplier"}.`, { submissionId, supplierId: supplier.id, weddingSlug: text(row.wedding_slug) });
+  `).bind(supplier.id, text(input?.role || row.role) || "Supplier", text(input?.reviewNotes), text(actor.userId) || null, submissionId, actor.workspaceId));
+  await commitSupplierContext(db, context, statements);
+  await recordJobActivity(
+    db,
+    actor,
+    actor.workspaceId,
+    jobId,
+    "supplier.approved",
+    `Linked ${supplier.name} as ${text(input?.role || row.role) || "Supplier"}.`,
+    {
+      submissionId,
+      supplierId: supplier.id,
+      weddingSlug,
+    },
+  );
+  return getCrmJobWorkspace(db, actor, jobId);
+}
+
+export async function changeJobSupplierLink(db: D1Db, actor: PortalActor, jobId: string, input: any) {
+  requirePermission(actor, "crm:manage");
+  if (actor.accessMode === "support") throw httpError("Support sessions cannot change supplier links.", 403);
+  const reason = text(input?.reason);
+  const supplierId = text(input?.supplierId);
+  const role = text(input?.role);
+  const action = text(input?.action);
+  if (!reason || reason.length > 2000 || !supplierId || !role || !["unlink", "reassign"].includes(action)) {
+    throw httpError("Choose an action and provide a reason (up to 2,000 characters).", 400);
+  }
+  const job = await db.prepare(`SELECT wedding_slug FROM crm_jobs WHERE id = ? AND workspace_id = ? AND status <> 'archived'`)
+    .bind(jobId, actor.workspaceId).first();
+  const weddingSlug = text(job?.wedding_slug);
+  if (!weddingSlug) throw httpError("Job Wedding not found.", 404);
+  const context = await captureSupplierContext(db, actor.workspaceId, weddingSlug);
+  const wedding = await db.prepare(`SELECT document_json FROM weddings WHERE slug = ? AND workspace_id = ?`)
+    .bind(weddingSlug, actor.workspaceId).first();
+  const oldSupplier = await getMasterSupplier(db, supplierId, actor.workspaceId);
+  const link = await db.prepare(`SELECT sort_order FROM wedding_supplier_links WHERE wedding_slug = ? AND workspace_id = ? AND supplier_id = ? AND role = ?`)
+    .bind(weddingSlug, actor.workspaceId, supplierId, role).first();
+  if (!wedding || !oldSupplier || !link) throw httpError("Supplier link not found. Reload the Job.", 404);
+  const sources = await db.prepare(`SELECT * FROM crm_supplier_submissions
+    WHERE workspace_id = ? AND wedding_slug = ? AND resolved_supplier_id = ? AND role = ? AND status IN ('approved', 'linked')`)
+    .bind(actor.workspaceId, weddingSlug, supplierId, role).all();
+  const records: any[] = sources.results || [];
+  if (!records.length) throw httpError("This is an editorial supplier. Manage it in the Wedding supplier editor.", 409);
+  if (records.some((row) => row.job_id !== jobId)) throw httpError("Another Job also owns this supplier link. Review that Job before changing it.", 409);
+  const replacementRole = text(input?.replacementRole);
+  const replacement = action === "reassign" ? await getMasterSupplier(db, text(input?.replacementSupplierId), actor.workspaceId) : null;
+  if (action === "reassign" && (!replacement || replacement.status === "archived" || !replacementRole || replacementRole.length > 120)) {
+    throw httpError("Choose an active Supplier Master record and a replacement Wedding role.", 400);
+  }
+  if (replacement?.id === supplierId && replacementRole === role) throw httpError("Choose a different supplier or role.", 400);
+  const statements: any[] = [];
+  // Original review identity, reviewer, date and notes are retained. Rejected
+  // resolved records also prevent stale draft snapshots from restoring the link.
+  for (const row of records) {
+    if (replacement) {
+      const history = await db.prepare(`SELECT COALESCE(MIN(response_index), 0) AS minimum FROM crm_supplier_submissions WHERE workspace_id = ? AND instance_id = ? AND field_key = ?`)
+        .bind(actor.workspaceId, row.instance_id, row.field_key).first();
+      const historyIndex = Math.min(0, Number(history?.minimum || 0)) - 1 - records.indexOf(row);
+      statements.push(db.prepare(`UPDATE crm_supplier_submissions SET response_index = ?, status = 'rejected', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`)
+        .bind(historyIndex, row.id, actor.workspaceId));
+      const next: Record<string, any> = { ...row, id: `crm_supplier_submission_${crypto.randomUUID()}`, resolved_supplier_id: replacement.id,
+        role: replacementRole, status: "approved", review_notes: reason, reviewed_by_user_id: text(actor.userId) || null,
+        reviewed_at: new Date().toISOString(), created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+      const columns = Object.keys(next);
+      statements.push(db.prepare(`INSERT INTO crm_supplier_submissions (${columns.join(", ")}) VALUES (${columns.map(() => "?").join(", ")})`)
+        .bind(...columns.map((column) => next[column])));
+    } else {
+      statements.push(db.prepare(`UPDATE crm_supplier_submissions SET status = 'rejected', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`)
+        .bind(row.id, actor.workspaceId));
+    }
+  }
+  statements.push(
+    db.prepare(`DELETE FROM wedding_suppliers WHERE wedding_slug = ? AND workspace_id = ? AND sort_order = ? AND role = ?`)
+      .bind(weddingSlug, actor.workspaceId, link.sort_order, role),
+    db.prepare(`DELETE FROM wedding_supplier_links WHERE wedding_slug = ? AND workspace_id = ? AND supplier_id = ? AND role = ?`)
+      .bind(weddingSlug, actor.workspaceId, supplierId, role),
+  );
+  if (replacement) {
+    const existing = await db.prepare(`SELECT 1 FROM wedding_supplier_links WHERE wedding_slug = ? AND workspace_id = ? AND supplier_id = ? AND role = ?`)
+      .bind(weddingSlug, actor.workspaceId, replacement.id, replacementRole).first();
+    if (!existing) {
+      const order = await db.prepare(`SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM wedding_supplier_links WHERE wedding_slug = ? AND workspace_id = ?`)
+        .bind(weddingSlug, actor.workspaceId).first();
+      statements.push(
+        db.prepare(`INSERT INTO wedding_supplier_links (wedding_slug, workspace_id, supplier_id, role, sort_order) VALUES (?, ?, ?, ?, ?)`)
+          .bind(weddingSlug, actor.workspaceId, replacement.id, replacementRole, order.next_order),
+        db.prepare(`INSERT INTO wedding_suppliers (wedding_slug, workspace_id, sort_order, role, name, website, instagram) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+          .bind(weddingSlug, actor.workspaceId, order.next_order, replacementRole, replacement.name, replacement.website, replacement.instagram),
+      );
+    }
+  }
+  const document = json(wedding.document_json, {} as any);
+  const sameName = (value: unknown) => text(value).toLowerCase().replace(/\s+/g, " ");
+  document.suppliers = (Array.isArray(document.suppliers) ? document.suppliers : []).filter((row: any) =>
+    !(text(row.role || row.category) === role && (text(row.supplierId || row.id)
+      ? text(row.supplierId || row.id) === supplierId : sameName(row.name) === sameName(oldSupplier.name))));
+  if (replacement && !document.suppliers.some((row: any) => text(row.supplierId || row.id) === replacement.id && text(row.role) === replacementRole)) {
+    document.suppliers.push({ supplierId: replacement.id, name: replacement.name, role: replacementRole, website: replacement.website, instagram: replacement.instagram });
+  }
+  statements.push(
+    db.prepare(`UPDATE weddings SET document_json = ?, updated_at = CURRENT_TIMESTAMP WHERE slug = ? AND workspace_id = ?`)
+      .bind(JSON.stringify(document), weddingSlug, actor.workspaceId),
+    db.prepare(`INSERT INTO crm_activities (id, workspace_id, entity_type, entity_id, event_type, summary, actor_user_id, actor_email, metadata_json, created_at)
+      VALUES (?, ?, 'job', ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`)
+      .bind(`crm_activity_${crypto.randomUUID()}`, actor.workspaceId, jobId, `supplier.${action === "unlink" ? "unlinked" : "reassigned"}`,
+        `${action === "unlink" ? "Unlinked" : "Reassigned"} ${oldSupplier.name} as ${role}. ${reason}`, text(actor.userId) || null, text(actor.email),
+        JSON.stringify({ weddingSlug, supplierId, role, reason, replacementSupplierId: replacement?.id || null, replacementRole: replacement ? replacementRole : null, previousReviews: records })),
+  );
+  await commitSupplierContext(db, context, statements);
+  return getCrmJobWorkspace(db, actor, jobId);
+}
+
+export async function reapproveSupplierSubmission(db: D1Db, actor: PortalActor, jobId: string, submissionId: string, input: any) {
+  requirePermission(actor, "crm:manage");
+  if (actor.accessMode === "support") throw httpError("Support sessions cannot reapprove supplier links.", 403);
+  const reason = text(input?.reason);
+  if (!reason || reason.length > 2000) throw httpError("Provide a reason for reapproval (up to 2,000 characters).", 400);
+  const job = await db.prepare(`SELECT wedding_slug FROM crm_jobs WHERE id = ? AND workspace_id = ? AND status <> 'archived'`)
+    .bind(jobId, actor.workspaceId).first();
+  if (!job?.wedding_slug) throw httpError("Job Wedding not found.", 404);
+  const context = await captureSupplierContext(db, actor.workspaceId, job.wedding_slug);
+  const row = await db.prepare(`SELECT * FROM crm_supplier_submissions WHERE id = ? AND job_id = ? AND workspace_id = ?
+    AND wedding_slug = ? AND status = 'rejected' AND resolved_supplier_id IS NOT NULL`)
+    .bind(submissionId, jobId, actor.workspaceId, job.wedding_slug).first();
+  if (!row) throw httpError("Withdrawn supplier review not found.", 404);
+  const supplier = await getMasterSupplier(db, row.resolved_supplier_id, actor.workspaceId);
+  if (!supplier || supplier.status === "archived") throw httpError("The original Supplier Master record must be active before reapproval.", 409);
+  const active = await db.prepare(`SELECT 1 FROM crm_supplier_submissions WHERE workspace_id = ? AND wedding_slug = ?
+    AND resolved_supplier_id = ? AND role = ? AND status IN ('approved', 'linked') LIMIT 1`)
+    .bind(actor.workspaceId, job.wedding_slug, supplier.id, row.role).first();
+  if (active) throw httpError("This supplier and role are already approved. Reload the Job.", 409);
+  const minimum = await db.prepare(`SELECT COALESCE(MIN(response_index), 0) AS minimum FROM crm_supplier_submissions
+    WHERE workspace_id = ? AND instance_id = ? AND field_key = ?`).bind(actor.workspaceId, row.instance_id, row.field_key).first();
+  const now = new Date().toISOString();
+  const next: Record<string, any> = { ...row, id: `crm_supplier_submission_${crypto.randomUUID()}`,
+    response_index: Math.min(0, Number(minimum?.minimum || 0)) - 1, status: "approved", review_notes: reason,
+    reviewed_by_user_id: text(actor.userId) || null, reviewed_at: now, created_at: now, updated_at: now };
+  const columns = Object.keys(next);
+  const statements: any[] = [];
+  if (!await linkSupplierToWedding(db, actor.workspaceId, job.wedding_slug, supplier.id, row.role, true, statements)) {
+    throw httpError("The linked Wedding could not be found.", 409);
+  }
+  statements.push(db.prepare(`INSERT INTO crm_supplier_submissions (${columns.join(", ")}) VALUES (${columns.map(() => "?").join(", ")})`)
+    .bind(...columns.map(column => next[column])));
+  statements.push(db.prepare(`INSERT INTO crm_activities (id, workspace_id, entity_type, entity_id, event_type, summary, actor_user_id, actor_email, metadata_json, created_at)
+    VALUES (?, ?, 'job', ?, 'supplier.reapproved', ?, ?, ?, ?, CURRENT_TIMESTAMP)`)
+    .bind(`crm_activity_${crypto.randomUUID()}`, actor.workspaceId, jobId, `Reapproved ${supplier.name} as ${row.role}. ${reason}`,
+      text(actor.userId) || null, text(actor.email), JSON.stringify({ submissionId, newSubmissionId: next.id, reason, previousReview: row })));
+  await commitSupplierContext(db, context, statements);
   return getCrmJobWorkspace(db, actor, jobId);
 }
 
@@ -1722,6 +1999,7 @@ export async function savePublicQuestionnaire(
   input: any,
   env: ProfessionalNotificationEnv = {},
 ) {
+  const checkpoint = await captureQuestionnaireSave(db, workspaceId, instanceId);
   const { identity, row } = await authorisedPublicInstance(db, request, workspaceId, instanceId);
   const fields = sanitiseSchema(row.schema_json);
   const allowed = new Set(fields.filter((field) => !["heading", "description", "file"].includes(field.type)).map((field) => field.id));
@@ -1759,7 +2037,8 @@ export async function savePublicQuestionnaire(
       identity.id,
     ));
   }
-  const merged = { ...(await instanceResponses(db, workspaceId, instanceId)), ...responses };
+  const previousResponses = await instanceResponses(db, workspaceId, instanceId);
+  const merged = { ...previousResponses, ...responses };
   const submit = Boolean(input?.submit);
   const files = submit ? await instanceFiles(db, workspaceId, instanceId) : [];
   const missing = submit ? validateSubmission(fields, merged, files) : [];
@@ -1816,20 +2095,8 @@ export async function savePublicQuestionnaire(
     instanceId,
     workspaceId,
   ));
-  await db.batch(statements);
-  if (
-    submit
-    || text(row.status)
-      === "completed"
-  ) {
-    await syncSupplierAnswers(
-      db,
-      workspaceId,
-      row,
-      fields,
-      merged,
-    );
-  }
+  await commitQuestionnaireAnswers(db, workspaceId, row, fields, merged, previousResponses,
+    statements, checkpoint, submit || text(row.status) === "completed");
 
   if (
     submit
@@ -2803,13 +3070,16 @@ export async function saveQuestionnaireInstanceAdmin(
   const instanceId =
     text(instanceIdInput);
 
+  const checkpoint = await captureQuestionnaireSave(db, actor.workspaceId, instanceId);
+
   const row =
     await db.prepare(`
-      SELECT *
-      FROM crm_questionnaire_instances
-      WHERE id = ?
-        AND workspace_id = ?
-        AND status <> 'archived'
+      SELECT qi.*, job.wedding_slug
+      FROM crm_questionnaire_instances qi
+      JOIN crm_jobs job ON job.id = qi.job_id AND job.workspace_id = qi.workspace_id
+      WHERE qi.id = ?
+        AND qi.workspace_id = ?
+        AND qi.status <> 'archived'
       LIMIT 1
     `).bind(
       instanceId,
@@ -2904,16 +3174,8 @@ export async function saveQuestionnaireInstanceAdmin(
     );
   }
 
-  const merged = {
-    ...(
-      await instanceResponses(
-        db,
-        actor.workspaceId,
-        instanceId,
-      )
-    ),
-    ...responses,
-  };
+  const previousResponses = await instanceResponses(db, actor.workspaceId, instanceId);
+  const merged = { ...previousResponses, ...responses };
 
   const complete =
     Boolean(
@@ -3000,23 +3262,8 @@ export async function saveQuestionnaireInstanceAdmin(
     ),
   );
 
-  await db.batch(
-    statements,
-  );
-
-  if (
-    complete
-    || text(row.status)
-      === "completed"
-  ) {
-    await syncSupplierAnswers(
-      db,
-      actor.workspaceId,
-      row,
-      fields,
-      merged,
-    );
-  }
+  await commitQuestionnaireAnswers(db, actor.workspaceId, row, fields, merged, previousResponses,
+    statements, checkpoint, complete || text(row.status) === "completed");
 
   const newlyCompleted =
     complete

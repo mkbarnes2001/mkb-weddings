@@ -1784,6 +1784,36 @@ export function CRMJob() {
     } finally { setSaving(false); }
   }
 
+  async function resolveReceipt(communicationId: string, form: FormData) {
+    setSaving(true); setError(""); setMessage("");
+    try {
+      setWorkspace(await AdminApiService.resolveCrmReceiptReview(id, communicationId, {
+        outcome: String(form.get("outcome") || ""), reason: String(form.get("reason") || ""),
+      }));
+      setMessage("Receipt review resolved and recorded. No email was sent.");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Unable to resolve receipt review.");
+    } finally { setSaving(false); }
+  }
+
+  async function changeSupplierLink(supplierId: string, role: string, action: string, form: FormData) {
+    setSaving(true);
+    setError("");
+    setMessage("");
+    try {
+      setWorkspace(await AdminApiService.changeCrmJobSupplierLink(id, {
+        supplierId, role, action, reason: String(form.get("reason") || ""),
+        replacementSupplierId: String(form.get("replacementSupplierId") || ""),
+        replacementRole: String(form.get("replacementRole") || ""),
+      }));
+      setMessage(action === "unlink" ? "Supplier unlinked. Review history has been preserved." : "Supplier reassigned. Review history has been preserved.");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Unable to change supplier link.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function approveSupplier(
     submission: CrmSupplierSubmission,
   ) {
@@ -1874,6 +1904,16 @@ export function CRMJob() {
     }
   }
 
+
+  async function reapproveSupplier(submission: CrmSupplierSubmission, reason: string) {
+    setSaving(true); setError(""); setMessage("");
+    try {
+      setWorkspace(await AdminApiService.reapproveCrmSupplierSubmission(id, submission.id, reason));
+      setMessage("Supplier reapproved and linked to the Wedding. The withdrawn review has been kept.");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Unable to reapprove supplier.");
+    } finally { setSaving(false); }
+  }
 
   async function rejectSupplier(submission: CrmSupplierSubmission) {
     if (!window.confirm(`Reject ${submission.name || "this supplier suggestion"}?`)) return;
@@ -2245,6 +2285,11 @@ export function CRMJob() {
   const deliveryComplete =
     deliveryTask?.status === "completed";
   const packageSnapshot = (job.packageSnapshot || {}) as any;
+  const selectedBookingAddons = (
+    Array.isArray(job.addonsSnapshot)
+      ? job.addonsSnapshot
+      : []
+  ) as Array<Record<string, any>>;
   const portal = portalState(workspace);
   const lifecycle = workspace.lifecycle;
   const commercial = workspace.commercial;
@@ -2308,7 +2353,7 @@ export function CRMJob() {
             {job.quoteId ? (
               <AdminHeaderRouterLink
                 className="admin-icon-control"
-                to={`/admin/crm/quotes/${job.quoteId}`}
+                to={`/admin/crm/quotes/${job.quoteId}?jobId=${encodeURIComponent(job.id)}`}
                 aria-label="Open quote"
                 title="Open quote"
               >
@@ -2819,7 +2864,7 @@ commercialInvoice ? (
 
               <Link
                 className="admin-icon-control crm-commercial-card__open crm-booking-summary-row__action"
-                to={`/admin/crm/quotes/${commercialQuote.id}`}
+                to={`/admin/crm/quotes/${commercialQuote.id}?jobId=${encodeURIComponent(job.id)}`}
                 aria-label={`Open accepted quote ${commercialQuote.reference}`}
                 title="Open accepted quote"
               >
@@ -2860,6 +2905,19 @@ commercialInvoice ? (
         title="Wedding delivery and content"
         icon={LayoutDashboard}
         className="crm-wedding-lifecycle-panel crm-delivery-summary-panel"
+        actions={contentToolsEnabled ? (
+          lifecycle.wedding.exists ? (
+            <AdminHeaderRouterLink
+              className="admin-button admin-button--secondary admin-button--sm"
+              to={`/admin/weddings/${lifecycle.wedding.slug}/content`}
+              aria-label="Open in WedStudio"
+              title="Open in WedStudio"
+            >
+              <Globe2 className="admin-button__icon" aria-hidden="true" />
+              Open in WedStudio
+            </AdminHeaderRouterLink>
+          ) : undefined
+        ) : undefined}
       >
         <div className="crm-delivery-summary-list">
           <div className="crm-delivery-summary-row">
@@ -3103,20 +3161,74 @@ commercialInvoice ? (
 
                 <Link
                   className="admin-icon-control crm-job-quote-compact__action"
-                  to={`/admin/crm/quotes/${job.quoteId}`}
+                  to={`/admin/crm/quotes/${job.quoteId}?jobId=${encodeURIComponent(job.id)}`}
                   aria-label="Open accepted quote"
                   title="Open accepted quote"
                 >
                   <Eye aria-hidden="true" />
                 </Link>
               </article>
+
+              {selectedBookingAddons.length ? (
+                <div className="crm-job-selected-addons">
+                  <span className="crm-job-selected-addons__label">
+                    Selected add-ons
+                  </span>
+
+                  {selectedBookingAddons.map(
+                    (addon, index) => (
+                      <article
+                        key={
+                          String(
+                            addon.id
+                            || addon.addonId
+                            || addon.name
+                            || index
+                          )
+                        }
+                        className="crm-job-selected-addon"
+                      >
+                        <div>
+                          <strong>
+                            {String(
+                              addon.name
+                              || "Booked add-on"
+                            )}
+                          </strong>
+
+                          <small>
+                            {Number(
+                              addon.quantity
+                              || 1
+                            ) > 1
+                              ? `Quantity ${Number(
+                                  addon.quantity
+                                  || 1
+                                )}`
+                              : "Included in accepted booking"}
+                          </small>
+                        </div>
+
+                        <AdminStatus tone="success">
+                          Selected
+                        </AdminStatus>
+                      </article>
+                    ),
+                  )}
+                </div>
+              ) : null}
             </AdminAccordion>
           ) : null}
 
 
           <AdminAccordion title="Communication" icon={MessageCircle} summary={<AdminStatus tone="neutral">{workspace.communications.length} records</AdminStatus>}>
             {canManage ? <div className="crm-communication-compose"><div className="grid gap-3 md:grid-cols-3"><AdminField label="Channel"><select className="admin-select" value={communicationDraft.channel} onChange={(event) => setCommunicationDraft((current) => ({ ...current, channel: event.target.value, direction: event.target.value === "note" ? "internal" : current.direction }))}><option value="note">Internal note</option><option value="email">Email</option><option value="phone">Phone call</option><option value="sms">Message / SMS</option><option value="meeting">Meeting</option></select></AdminField><AdminField label="Direction"><select className="admin-select" value={communicationDraft.direction} onChange={(event) => setCommunicationDraft((current) => ({ ...current, direction: event.target.value }))}><option value="internal">Internal</option><option value="outbound">Outbound</option><option value="inbound">Inbound</option></select></AdminField><AdminField label="Client"><select className="admin-select" value={communicationDraft.contactId} onChange={(event) => setCommunicationDraft((current) => ({ ...current, contactId: event.target.value }))}><option value="">No specific contact</option>{workspace.contacts.map((contact) => <option key={contact.id} value={contact.id}>{contact.displayName}</option>)}</select></AdminField></div><AdminField label="Subject"><input className="admin-input" value={communicationDraft.subject} onChange={(event) => setCommunicationDraft((current) => ({ ...current, subject: event.target.value }))} placeholder="Optional for calls and notes" /></AdminField><AdminField label="Message / notes"><textarea className="admin-textarea min-h-28" value={communicationDraft.body} onChange={(event) => setCommunicationDraft((current) => ({ ...current, body: event.target.value }))} /></AdminField><div className="flex flex-wrap gap-2"><AdminButton icon={MessageSquareText} disabled={saving || (!communicationDraft.body.trim() && !communicationDraft.subject.trim())} onClick={() => void saveCommunication(false)}>Log communication</AdminButton><AdminButton variant="primary" icon={Mail} disabled={saving || !communicationDraft.contactId || !communicationDraft.subject.trim() || !communicationDraft.body.trim()} onClick={() => void saveCommunication(true)}>Send email</AdminButton></div></div> : null}
-            {!workspace.communications.length ? <AdminEmptyState icon={MessageCircle} title="No communication recorded" description="Emails and logged contact history will appear here." /> : <div className="crm-communication-list">{workspace.communications.map((item) => <article key={item.id}><div className="crm-communication-list__icon">{item.channel === "email" ? <Mail /> : item.channel === "phone" ? <Phone /> : item.channel === "meeting" ? <Users /> : <MessageSquareText />}</div><div><div className="flex flex-wrap items-center gap-2"><strong>{item.subject || item.channel.replace(/_/g, " ")}</strong><AdminStatus tone={item.status === "failed" ? "danger" : item.status === "sent" ? "success" : "neutral"}>{item.status}</AdminStatus><AdminStatus tone="info">{item.direction}</AdminStatus></div><p>{item.body}</p><small>{item.contactName || item.contactEmail || "Internal"} · {dateLabel(item.occurredAt)}{item.actorEmail ? ` · ${item.actorEmail}` : ""}</small></div></article>)}</div>}
+            {!workspace.communications.length ? <AdminEmptyState icon={MessageCircle} title="No communication recorded" description="Emails and logged contact history will appear here." /> : <div className="crm-communication-list">{workspace.communications.map((item) => <article key={item.id}><div className="crm-communication-list__icon">{item.channel === "email" ? <Mail /> : item.channel === "phone" ? <Phone /> : item.channel === "meeting" ? <Users /> : <MessageSquareText />}</div><div><div className="flex flex-wrap items-center gap-2"><strong>{item.subject || item.channel.replace(/_/g, " ")}</strong><AdminStatus tone={item.status === "failed" ? "danger" : item.status === "sent" ? "success" : "neutral"}>{item.status === "failed" && item.metadata?._receiptReviewRequired ? "Needs review" : item.status}</AdminStatus><AdminStatus tone="info">{item.direction}</AdminStatus></div><p>{item.body}</p>{item.metadata?._receiptResolution ? <p>Receipt review resolved. See Notes and activity for the recorded outcome and reason.</p> : null}{item.failureReason ? <p role="status">{item.failureReason}</p> : null}{item.status === "failed" && item.metadata?._receiptReviewRequired ? <div><p>Check delivery with your email provider before sending another copy.</p>{canManage ? <details><summary>Resolve receipt review</summary><form onSubmit={(event) => { event.preventDefault(); void resolveReceipt(item.id, new FormData(event.currentTarget)); }}>
+                <label>Review outcome<select name="outcome" required disabled={saving}><option value="">Choose an outcome</option><option value="confirmed_delivered">Confirmed delivered</option><option value="do_not_resend">Do not resend</option></select></label>
+                <label>Delivery evidence or reason<textarea name="reason" required maxLength={2000} disabled={saving} /></label>
+                <p>This records your decision and closes automatic retries for this receipt. It does not send an email.</p>
+                <AdminButton type="submit" disabled={saving}>Record resolution</AdminButton>
+              </form></details> : null}</div> : null}<small>{item.contactName || item.contactEmail || "Internal"} · {dateLabel(item.occurredAt)}{item.actorEmail ? ` · ${item.actorEmail}` : ""}</small></div></article>)}</div>}
           </AdminAccordion>
         </div>
 
@@ -3678,6 +3790,40 @@ commercialInvoice ? (
               </div>
             ) : null}
 
+            {clientPortalEnabled && workspace.supplierSubmissions.some((item) => item.status !== "pending") ? (
+              <details className="crm-supplier-review">
+                <summary>Supplier review history</summary>
+                {workspace.supplierSubmissions.filter((item) => item.status !== "pending").map((submission) => (
+                  <article key={submission.id} className="crm-supplier-review__item">
+                    <strong>{submission.name || "Supplier"}</strong>
+                    {submission.resolvedSupplierId ? <p>Resolved supplier: {workspace.supplierDirectory.find((item) => item.id === submission.resolvedSupplierId)?.name || "Supplier record unavailable"}</p> : null}
+                    <div className="crm-supplier-review__meta">
+                      <AdminStatus tone="neutral">{submission.status === "rejected" && submission.resolvedSupplierId ? "Withdrawn" : submission.status}</AdminStatus>
+                      <span>{submission.role}</span>
+                      {submission.responseIndex < 0 ? <span>Previous questionnaire answer</span> : null}
+                    </div>
+                    <p>{workspace.questionnaires.find((item) => item.id === submission.instanceId)?.title || "Questionnaire"}</p>
+                    {submission.reviewNotes ? <p>{submission.reviewNotes}</p> : null}
+                    {submission.reviewedAt ? <p>Reviewed {new Date(submission.reviewedAt.includes("T") ? submission.reviewedAt : submission.reviewedAt.replace(" ", "T") + "Z").toLocaleString()}</p> : null}
+                    {canManage && submission.status === "rejected" && submission.resolvedSupplierId && !workspace.supplierSubmissions.some((item) =>
+                      ["approved", "linked"].includes(item.status) && item.resolvedSupplierId === submission.resolvedSupplierId && item.role === submission.role) ? (
+                      <details>
+                        <summary>Reapprove supplier</summary>
+                        <form onSubmit={(event) => {
+                          event.preventDefault();
+                          void reapproveSupplier(submission, String(new FormData(event.currentTarget).get("reason") || ""));
+                        }}>
+                          <p>Restore this supplier with the original role. The withdrawn review will remain in history.</p>
+                          <label>Reason for reapproval<input name="reason" required maxLength={2000} disabled={saving} /></label>
+                          <AdminButton type="submit" disabled={saving}>Reapprove and link supplier</AdminButton>
+                        </form>
+                      </details>
+                    ) : null}
+                  </article>
+                ))}
+              </details>
+            ) : null}
+
             {!workspace.linkedSuppliers.length ? (
               <AdminEmptyState
                 icon={Store}
@@ -3706,6 +3852,34 @@ commercialInvoice ? (
                       <AdminStatus tone="success">
                         linked
                       </AdminStatus>
+                      {canManage && workspace.supplierSubmissions.some((source) =>
+                        source.resolvedSupplierId === supplier.id && source.role === supplier.role && ["approved", "linked"].includes(source.status)
+                      ) ? (
+                        <details>
+                          <summary>Change link</summary>
+                          <form onSubmit={(event) => {
+                            event.preventDefault();
+                            const action = (event.nativeEvent as SubmitEvent).submitter?.getAttribute("value") || "";
+                            void changeSupplierLink(supplier.id, supplier.role, action, new FormData(event.currentTarget));
+                          }}>
+                            <p>Unlink this supplier, or replace the supplier and role. Original reviews remain in history.</p>
+                            <AdminField label="Reason for change">
+                              <input name="reason" className="admin-input" required maxLength={2000} disabled={saving} />
+                            </AdminField>
+                            <AdminField label="Replacement supplier (for reassignment)">
+                              <select name="replacementSupplierId" className="admin-input" disabled={saving} defaultValue="">
+                                <option value="">Choose Supplier Master record…</option>
+                                {workspace.supplierDirectory.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                              </select>
+                            </AdminField>
+                            <AdminField label="Replacement role">
+                              <input name="replacementRole" className="admin-input" maxLength={120} defaultValue={supplier.role} disabled={saving} />
+                            </AdminField>
+                            <button type="submit" value="unlink" className="admin-button admin-button--danger" disabled={saving}>Unlink supplier</button>
+                            <button type="submit" value="reassign" className="admin-button admin-button--secondary" disabled={saving}>Reassign supplier</button>
+                          </form>
+                        </details>
+                      ) : null}
                     </article>
                   ),
                 )}

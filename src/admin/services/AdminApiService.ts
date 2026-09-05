@@ -2469,6 +2469,27 @@ export class AdminApiService {
     return result.workspace;
   }
 
+  static async reapproveCrmSupplierSubmission(jobId: string, submissionId: string, reason: string) {
+    const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/supplier-submissions/${encodeURIComponent(submissionId)}/reapprove`, {
+      method: "POST", body: JSON.stringify({ reason }),
+    });
+    return result.workspace;
+  }
+
+  static async resolveCrmReceiptReview(jobId: string, communicationId: string, input: Record<string, unknown>) {
+    const result = await request<{ok: true; workspace: CrmJobWorkspace}>(`/api/crm/jobs/${encodeURIComponent(jobId)}/communications/${encodeURIComponent(communicationId)}/resolve-receipt`, {
+      method: "POST", body: JSON.stringify(input),
+    });
+    return result.workspace;
+  }
+
+  static async changeCrmJobSupplierLink(jobId: string, input: Record<string, unknown>) {
+    const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/supplier-link`, {
+      method: "POST", body: JSON.stringify(input),
+    });
+    return result.workspace;
+  }
+
   static async rejectCrmSupplierSubmission(jobId: string, submissionId: string, reviewNotes = "") {
     const result = await request<{ ok: true; workspace: CrmJobWorkspace }>(`/api/crm/jobs/${encodeURIComponent(jobId)}/supplier-submissions/${encodeURIComponent(submissionId)}/reject`, {
       method: "POST",

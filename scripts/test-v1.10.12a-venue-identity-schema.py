@@ -238,7 +238,8 @@ for forbidden in (
 
 
 # ------------------------------------------------------------
-# Fresh canonical release schema = 51.
+# Fresh canonical release schema was 51 when this historical
+# gate shipped. Later additive release schemas are valid.
 #
 # Venue Identity itself remains the exact historical 48 -> 49
 # migration tested separately below.
@@ -256,9 +257,13 @@ fresh.executescript(
     schema
 )
 
-assert (
+fresh_schema_version = int(
     schema_version(fresh)
-    == "51"
+)
+
+assert (
+    fresh_schema_version
+    >= 51
 )
 
 

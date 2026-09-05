@@ -28,6 +28,8 @@ export type CrmEmailDeliveryInput = {
   body: string;
   businessName?: string;
   trackingPixelUrl?: string;
+  idempotencyKey?: string;
+  prepareRequest?: (transport: string, body: string, accountIdentity: string) => Promise<string>;
 };
 
 export type CrmEmailDeliveryResult = {
@@ -574,6 +576,8 @@ async function sendManagedEmail(
     subject: string;
     body: string;
     trackingPixelUrl?: string;
+    idempotencyKey?: string;
+    prepareRequest?: (transport: string, body: string, accountIdentity: string) => Promise<string>;
   },
 ) {
   const apiKey =
@@ -593,41 +597,47 @@ async function sendManagedEmail(
     );
   }
 
+  const candidateBody = JSON.stringify({
+  from:
+    `${safeHeader(input.fromName || "WedPlanned")} <${lower(input.fromEmail)}>`,
+  to: [
+    lower(input.to),
+  ],
+  subject:
+    safeHeader(
+      input.subject,
+    ),
+  html:
+    `<div style="font-family:Arial,sans-serif;line-height:1.65;color:#181818;max-width:620px;margin:auto">${htmlFromText(input.body)}</div>${trackingPixelHtml(input.trackingPixelUrl)}`,
+  text:
+    input.body,
+  ...(input.replyToEmail
+    ? {
+        reply_to:
+          lower(
+            input.replyToEmail,
+          ),
+      }
+    : {}),
+});
+  const requestBody = input.prepareRequest
+    ? await input.prepareRequest("resend", candidateBody, apiKey)
+    : candidateBody;
+
   const response =
     await fetch(
       "https://api.resend.com/emails",
       {
         method: "POST",
         headers: {
+          ...(input.idempotencyKey ? { "Idempotency-Key": input.idempotencyKey } : {}),
           Authorization:
             `Bearer ${apiKey}`,
           "Content-Type":
             "application/json",
         },
         body:
-          JSON.stringify({
-            from:
-              `${safeHeader(input.fromName || "WedPlanned")} <${lower(input.fromEmail)}>`,
-            to: [
-              lower(input.to),
-            ],
-            subject:
-              safeHeader(
-                input.subject,
-              ),
-            html:
-              `<div style="font-family:Arial,sans-serif;line-height:1.65;color:#181818;max-width:620px;margin:auto">${htmlFromText(input.body)}</div>${trackingPixelHtml(input.trackingPixelUrl)}`,
-            text:
-              input.body,
-            ...(input.replyToEmail
-              ? {
-                  reply_to:
-                    lower(
-                      input.replyToEmail,
-                    ),
-                }
-              : {}),
-          }),
+          requestBody,
       },
     );
 
@@ -1628,6 +1638,7 @@ export async function sendCrmEmail(
     readiness.deliveryMode
     === "google"
   ) {
+    await input.prepareRequest?.("gmail", JSON.stringify({ to, subject, body, fromEmail: readiness.fromEmail }), readiness.fromEmail);
     const providerMessageId =
       await sendGoogleEmail(
         db,
@@ -1666,6 +1677,7 @@ export async function sendCrmEmail(
     readiness.deliveryMode
     === "smtp"
   ) {
+    await input.prepareRequest?.("smtp", JSON.stringify({ to, subject, body, fromEmail: readiness.fromEmail }), `${readiness.smtpHost}/${readiness.smtpUsername}`);
     const providerMessageId =
       await sendSmtpEmail(
         db,
@@ -1722,6 +1734,8 @@ export async function sendCrmEmail(
     await sendManagedEmail(
       env,
       {
+        idempotencyKey: input.idempotencyKey,
+        prepareRequest: input.prepareRequest,
         to,
         fromName:
           readiness.fromName,

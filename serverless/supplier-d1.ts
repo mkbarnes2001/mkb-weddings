@@ -134,13 +134,13 @@ export async function findMasterSupplierByName(db: D1Db, name: string, workspace
   return row ? hydrate(row) : null;
 }
 
-export async function createMasterSupplier(db: D1Db, incoming: MasterSupplierInput, workspaceId: string) {
+export async function createMasterSupplier(db: D1Db, incoming: MasterSupplierInput, workspaceId: string, pending?: any[]) {
   const supplier = cleanSupplier(incoming);
   const duplicate = await findMasterSupplierByName(db, supplier.name, workspaceId);
   if (duplicate) {
     throw httpError("A supplier with this name already exists.", 409, [duplicate.name]);
   }
-  await db.prepare(`
+  const insert = db.prepare(`
     INSERT INTO suppliers (
       id, workspace_id, name, display_name, category, website, instagram, email, phone,
       location, county, description, notes, status, created_at, updated_at
@@ -149,7 +149,9 @@ export async function createMasterSupplier(db: D1Db, incoming: MasterSupplierInp
     supplier.id, workspaceId, supplier.name, supplier.displayName, supplier.category,
     supplier.website, supplier.instagram, supplier.email, supplier.phone,
     supplier.location, supplier.county, supplier.description, supplier.notes, supplier.status,
-  ).run();
+  );
+  if (pending) { pending.push(insert); return supplier; }
+  await insert.run();
   return getMasterSupplier(db, supplier.id, workspaceId);
 }
 

@@ -29,6 +29,7 @@ import {
   Link,
   useNavigate,
   useParams,
+  useSearchParams,
 } from "react-router-dom";
 import {
   AdminButton,
@@ -46,6 +47,9 @@ import {
 import {
   AdminApiService,
 } from "../services/AdminApiService";
+import {
+  CRMRecordBackLink,
+} from "../components/crm/CRMRecordBackLink";
 import type {
   CrmAddon,
   CrmPackage,
@@ -190,6 +194,9 @@ export function CRMQuote() {
 
   const navigate =
     useNavigate();
+
+  const [searchParams] =
+    useSearchParams();
 
   const { auth } =
     useProfessionalAuth();
@@ -1003,6 +1010,30 @@ export function CRMQuote() {
     }
   }
 
+  const acceptedOptionId =
+    quote?.acceptance?.optionId || "";
+
+  const acceptedAddonIds =
+    useMemo(
+      () =>
+        new Set(
+          (
+            quote?.acceptance
+              ?.selectedAddons
+            || []
+          )
+            .map(
+              (addon) =>
+                String(
+                  addon.addonId
+                  || "",
+                ),
+            )
+            .filter(Boolean),
+        ),
+      [quote?.acceptance],
+    );
+
   function payloadForSave() {
     const addonIds = [
       ...new Set([
@@ -1349,6 +1380,15 @@ export function CRMQuote() {
   const version =
     quote.currentVersion;
 
+  const requestedJobId =
+    searchParams.get("jobId") || "";
+
+  const contextualJobId =
+    requestedJobId
+    && quote.acceptedJobId === requestedJobId
+      ? requestedJobId
+      : "";
+
   return (
     <AdminPage>
       <AdminPageHeader
@@ -1361,6 +1401,12 @@ export function CRMQuote() {
         ].join(" · ")}
         actions={
           <div className="crm-quote-header-actions">
+            <CRMRecordBackLink
+              jobId={contextualJobId}
+              fallbackTo="/admin/crm/quotes"
+              fallbackLabel="Back to Quotes"
+            />
+
             {editable ? (
               <div className="crm-quote-template-apply">
                 <select
@@ -1633,11 +1679,18 @@ export function CRMQuote() {
                       key={
                         option.tempId
                       }
-                      className={
+                      className={[
+                        "crm-quote-package-card",
                         option.recommended
-                          ? "crm-quote-package-card crm-quote-package-card--recommended"
-                          : "crm-quote-package-card"
-                      }
+                          ? "crm-quote-package-card--recommended"
+                          : "",
+                        quote.status === "accepted"
+                          && option.id === acceptedOptionId
+                          ? "crm-quote-package-card--selected"
+                          : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
                     >
                       <div
                         className={
@@ -1671,7 +1724,12 @@ export function CRMQuote() {
                           </strong>
                         </div>
 
-                        {option.recommended ? (
+                        {quote.status === "accepted"
+                        && option.id === acceptedOptionId ? (
+                          <AdminStatus tone="success">
+                            Selected
+                          </AdminStatus>
+                        ) : option.recommended ? (
                           <AdminStatus tone="info">
                             Recommended
                           </AdminStatus>
@@ -2236,13 +2294,21 @@ export function CRMQuote() {
                       addon.requirement
                       === "mandatory";
 
+                    const acceptedSelected =
+                      quote.status === "accepted"
+                      && acceptedAddonIds.has(
+                        addon.id,
+                      );
+
                     const selected =
-                      mandatory
-                      || draft
-                        .globalAddonIds
-                        .includes(
-                          addon.id,
-                        );
+                      quote.status === "accepted"
+                        ? acceptedSelected
+                        : mandatory
+                          || draft
+                            .globalAddonIds
+                            .includes(
+                              addon.id,
+                            );
 
                     const eligiblePackages =
                       addon
@@ -2330,9 +2396,18 @@ export function CRMQuote() {
                         </span>
 
                         <span className="crm-quote-addon-grid__body">
-                          <strong>
-                            {addon.name}
-                          </strong>
+                          <span className="crm-quote-addon-grid__title">
+                            <strong>
+                              {addon.name}
+                            </strong>
+
+                            {quote.status === "accepted"
+                            && acceptedSelected ? (
+                              <AdminStatus tone="success">
+                                Selected
+                              </AdminStatus>
+                            ) : null}
+                          </span>
 
                           <small>
                             {addon.description

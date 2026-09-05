@@ -2716,6 +2716,30 @@ function stripeInvoiceEventCurrency(
 }
 
 
+function invoicePaymentReceiptReference(
+  invoiceReferenceInput: unknown,
+  paymentIdInput: unknown,
+) {
+  const invoiceReference =
+    text(invoiceReferenceInput)
+      .replace(/[^a-z0-9]+/gi, "")
+      .toUpperCase()
+      .slice(-14)
+    || "INVOICE";
+
+  const paymentReference =
+    text(paymentIdInput)
+      .replace(/^crm_invoice_payment_/i, "")
+      .replace(/[^a-z0-9]+/gi, "")
+      .toUpperCase()
+      .slice(0, 8)
+    || "PAYMENT";
+
+  return `RCT-${invoiceReference}-${paymentReference}`
+    .slice(0, 80);
+}
+
+
 export async function processStripeInvoicePaymentEvent(
   db: D1Db,
   event: any,
@@ -3156,7 +3180,10 @@ export async function processStripeInvoicePaymentEvent(
    */
   const existingPayment =
     await db.prepare(`
-      SELECT id
+      SELECT
+        id,
+        reference,
+        metadata_json
       FROM crm_invoice_payments
       WHERE workspace_id = ?
         AND provider = 'stripe'
@@ -3211,10 +3238,18 @@ export async function processStripeInvoicePaymentEvent(
       duplicate: true,
       ignored: false,
       attemptId,
+      workspaceId,
       invoiceId,
       paymentId:
         text(
           existingPayment.id,
+        ),
+      receiptReference:
+        text(
+          parseInvoiceAttemptMetadata(
+            existingPayment.metadata_json,
+          ).receiptReference
+          || existingPayment.reference,
         ),
     };
   }
@@ -3312,6 +3347,12 @@ export async function processStripeInvoicePaymentEvent(
   const paidAt =
     new Date().toISOString();
 
+  const receiptReference =
+    invoicePaymentReceiptReference(
+      invoice.reference,
+      paymentId,
+    );
+
   const paymentMetadata = {
     source:
       "stripe_connect_checkout",
@@ -3333,6 +3374,8 @@ export async function processStripeInvoicePaymentEvent(
       resolvedPaymentIntentId,
 
     scheduleItemId,
+
+    receiptReference,
   };
 
   /*
@@ -3398,7 +3441,7 @@ export async function processStripeInvoicePaymentEvent(
       expectedAmount,
       expectedCurrency,
 
-      checkoutId,
+      receiptReference,
       resolvedPaymentIntentId,
 
       paidAt,
@@ -3680,7 +3723,10 @@ export async function processStripeInvoicePaymentEvent(
   if (inserted !== 1) {
     const repeated =
       await db.prepare(`
-        SELECT id
+        SELECT
+          id,
+          reference,
+          metadata_json
         FROM crm_invoice_payments
         WHERE workspace_id = ?
           AND provider = 'stripe'
@@ -3697,10 +3743,18 @@ export async function processStripeInvoicePaymentEvent(
         duplicate: true,
         ignored: false,
         attemptId,
+        workspaceId,
         invoiceId,
         paymentId:
           text(
             repeated.id,
+          ),
+        receiptReference:
+          text(
+            parseInvoiceAttemptMetadata(
+              repeated.metadata_json,
+            ).receiptReference
+            || repeated.reference,
           ),
       };
     }
@@ -3716,8 +3770,15 @@ export async function processStripeInvoicePaymentEvent(
     duplicate: false,
     ignored: false,
     attemptId,
+    workspaceId,
     invoiceId,
+    jobId:
+      text(invoice.job_id),
+    invoiceReference:
+      text(invoice.reference),
     paymentId,
+    receiptReference,
+    paidAt,
     amount:
       expectedAmount,
     currency:

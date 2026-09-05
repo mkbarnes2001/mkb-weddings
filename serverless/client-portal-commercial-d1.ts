@@ -80,6 +80,46 @@ function signedPaymentAmount(row: any) {
     : absolute;
 }
 
+function paymentReceiptReference(
+  row: any,
+  invoiceReferenceInput: unknown,
+) {
+  const metadata = json<Record<string, unknown>>(
+    row?.metadata_json,
+    {},
+  );
+
+  const stored = text(
+    metadata["receiptReference"],
+  );
+
+  if (stored) return stored;
+
+  const existing = text(row?.reference);
+
+  if (/^RCT-/i.test(existing)) {
+    return existing;
+  }
+
+  const invoiceReference =
+    text(invoiceReferenceInput)
+      .replace(/[^a-z0-9]+/gi, "")
+      .toUpperCase()
+      .slice(-14)
+    || "INVOICE";
+
+  const paymentReference =
+    text(row?.id)
+      .replace(/^crm_invoice_payment_/i, "")
+      .replace(/[^a-z0-9]+/gi, "")
+      .toUpperCase()
+      .slice(0, 8)
+    || "PAYMENT";
+
+  return `RCT-${invoiceReference}-${paymentReference}`
+    .slice(0, 80);
+}
+
 function allocateSchedule(scheduleRows: any[], paymentRows: any[]) {
   const today = new Date().toISOString().slice(0, 10);
 
@@ -270,9 +310,11 @@ async function invoiceChildren(
         currency,
         method,
         reference,
+        provider,
         notes,
         paid_at,
-        created_at
+        created_at,
+        metadata_json
       FROM crm_invoice_payments
       WHERE workspace_id = ?
         AND invoice_id = ?
@@ -674,6 +716,41 @@ export async function getPublicInvoice(
     children.payments,
   );
 
+  let runningNetPaid = 0;
+
+  const paymentHistory =
+    children.payments.map((row: any) => {
+      runningNetPaid += signedPaymentAmount(row);
+
+      const paidToDate = Math.max(
+        0,
+        runningNetPaid,
+      );
+
+      return {
+        id: text(row.id),
+        scheduleItemId: text(row.schedule_item_id),
+        paymentType: text(row.payment_type),
+        amount: signedPaymentAmount(row),
+        currency: text(row.currency || invoice.currency || "GBP"),
+        method: text(row.method),
+        reference: text(row.reference),
+        receiptReference:
+          paymentReceiptReference(
+            row,
+            invoice.reference,
+          ),
+        paidToDate,
+        balanceAfter: Math.max(
+          0,
+          Number(invoice.total_amount || 0)
+            - paidToDate,
+        ),
+        notes: text(row.notes),
+        paidAt: text(row.paid_at),
+      };
+    });
+
   const booking =
     json<Record<string, unknown>>(
       invoice.booking_snapshot_json,
@@ -724,17 +801,7 @@ export async function getPublicInvoice(
 
     schedule: financials.schedule,
 
-    payments: children.payments.map((row: any) => ({
-      id: text(row.id),
-      scheduleItemId: text(row.schedule_item_id),
-      paymentType: text(row.payment_type),
-      amount: signedPaymentAmount(row),
-      currency: text(row.currency || invoice.currency || "GBP"),
-      method: text(row.method),
-      reference: text(row.reference),
-      notes: text(row.notes),
-      paidAt: text(row.paid_at),
-    })),
+    payments: paymentHistory,
   };
 }
 

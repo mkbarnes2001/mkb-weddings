@@ -284,7 +284,55 @@ export async function getQuote(db: D1Db, actor: QuoteActor, quoteId: string) {
   const versions = await db.prepare(`SELECT id FROM crm_quote_versions WHERE workspace_id = ? AND quote_id = ? ORDER BY version_number DESC`).bind(actor.workspaceId, quoteId).all();
   const hydratedVersions = [];
   for (const version of versions.results || []) hydratedVersions.push(await fullVersion(db, actor.workspaceId, text(version.id)));
-  return hydrateQuote(row, hydratedVersions.find((item: any) => item?.id === text(row.current_version_id)) || null, hydratedVersions.filter(Boolean));
+
+  // v1.10.14a — Admin uses the same immutable acceptance snapshot
+  // that already drives the booked Job and public Client Portal.
+  const acceptanceRow = text(row.accepted_version_id)
+    ? await db.prepare(`
+        SELECT *
+        FROM crm_quote_acceptances
+        WHERE workspace_id = ?
+          AND quote_id = ?
+        LIMIT 1
+      `).bind(
+        actor.workspaceId,
+        quoteId,
+      ).first()
+    : null;
+
+  const quote = hydrateQuote(
+    row,
+    hydratedVersions.find(
+      (item: any) =>
+        item?.id === text(row.current_version_id),
+    ) || null,
+    hydratedVersions.filter(Boolean),
+  );
+
+  return {
+    ...quote,
+    acceptance: acceptanceRow
+      ? {
+          id: text(acceptanceRow.id),
+          optionId: text(acceptanceRow.option_id),
+          acceptedAt: acceptanceRow.accepted_at || "",
+          totalAmount: Number(
+            acceptanceRow.total_amount || 0,
+          ),
+          currency: text(
+            acceptanceRow.currency || quote.currency,
+          ),
+          selectedPackage: safeJson(
+            acceptanceRow.selected_package_snapshot_json,
+            {},
+          ),
+          selectedAddons: safeJson(
+            acceptanceRow.selected_addons_snapshot_json,
+            [],
+          ),
+        }
+      : null,
+  };
 }
 
 async function primaryContactForEnquiry(db: D1Db, workspaceId: string, enquiryId: string) {

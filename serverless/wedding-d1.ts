@@ -205,7 +205,41 @@ function factsFromStoryRows(rows: any[]) {
   return facts;
 }
 
-async function replaceSuppliers(db: D1Db, slug: string, suppliers: any[], workspaceId: string) {
+// Capture before reading supplier context; assert again inside the write batch.
+// SQLite evaluates only the selected CASE arm. Invalid JSON aborts the entire
+// D1 transaction on conflict, without adding a lock table or schema migration.
+const supplierContextSql = `SELECT json_array(
+  (SELECT document_json FROM weddings WHERE workspace_id = ?1 AND slug = ?2),
+  (SELECT json_group_array(json_array(id, status, wedding_slug)) FROM
+    (SELECT id, status, wedding_slug FROM crm_jobs WHERE workspace_id = ?1 AND wedding_slug = ?2 ORDER BY id)),
+  (SELECT json_group_array(json_array(id, status, resolved_supplier_id, role, response_index, review_notes, updated_at)) FROM
+    (SELECT * FROM crm_supplier_submissions WHERE workspace_id = ?1 AND wedding_slug = ?2 ORDER BY id)),
+  (SELECT json_group_array(json_array(supplier_id, role, sort_order)) FROM
+    (SELECT * FROM wedding_supplier_links WHERE workspace_id = ?1 AND wedding_slug = ?2 ORDER BY supplier_id, role)),
+  (SELECT json_group_array(json_array(sort_order, role, name, website, instagram)) FROM
+    (SELECT * FROM wedding_suppliers WHERE workspace_id = ?1 AND wedding_slug = ?2 ORDER BY sort_order, role, name))
+) AS token`;
+
+export async function captureSupplierContext(db: D1Db, workspaceId: string, slug: string) {
+  const row = await db.prepare(supplierContextSql).bind(workspaceId, slug).first();
+  return { workspaceId, slug, token: row.token as string };
+}
+
+export async function commitSupplierContext(db: D1Db, context: Awaited<ReturnType<typeof captureSupplierContext>>, statements: any[]) {
+  const guard = db.prepare(`SELECT CASE WHEN (${supplierContextSql}) = ?3 THEN 1 ELSE json('supplier_context_conflict') END`)
+    .bind(context.workspaceId, context.slug, context.token);
+  try {
+    await db.batch([guard, ...statements]);
+  } catch (error) {
+    const current = await captureSupplierContext(db, context.workspaceId, context.slug);
+    if (current.token !== context.token) throw httpError("Supplier context changed while saving. Reload and review the current Wedding team before retrying.", 409);
+    throw error;
+  }
+}
+
+async function replaceSuppliers(db: D1Db, slug: string, suppliers: any[], workspaceId: string, context?: Awaited<ReturnType<typeof captureSupplierContext>>, prefix: any[] = []) {
+  context ||= await captureSupplierContext(db, workspaceId, slug);
+  const sourceSlug = context.slug;
   const cleanRows: any[] = [];
 
   for (const supplier of suppliers || []) {
@@ -223,6 +257,18 @@ async function replaceSuppliers(db: D1Db, slug: string, suppliers: any[], worksp
       location: clean.location,
       county: clean.county,
     }, workspaceId);
+    // A withdrawn resolved review is an explicit unlink, not an editorial omission.
+    const withdrawn = master && await db.prepare(`
+      SELECT 1 FROM crm_supplier_submissions retired
+      WHERE retired.workspace_id = ? AND retired.wedding_slug = ? AND retired.resolved_supplier_id = ?
+        AND retired.role = ? AND retired.status = 'rejected'
+        AND NOT EXISTS (SELECT 1 FROM crm_supplier_submissions active
+          WHERE active.workspace_id = retired.workspace_id AND active.wedding_slug = retired.wedding_slug
+            AND active.resolved_supplier_id = retired.resolved_supplier_id AND active.role = retired.role
+            AND active.status IN ('approved', 'linked'))
+      LIMIT 1
+    `).bind(workspaceId, sourceSlug, master.id, clean.role || master.category || "Supplier").first();
+    if (withdrawn) continue;
     cleanRows.push({
       ...clean,
       supplierId: master?.id || clean.supplierId,
@@ -233,7 +279,25 @@ async function replaceSuppliers(db: D1Db, slug: string, suppliers: any[], worksp
     });
   }
 
+  // Questionnaire review is an independent source of Wedding membership.
+  // An editorial row replacement (including an older JSON snapshot) must not
+  // remove that membership. Retain the reviewed role and resolved identity.
+  const workflow = await db.prepare(`
+    SELECT DISTINCT s.id AS supplierId, submission.role, s.name, s.website, s.instagram,
+           s.email, s.phone, s.location, s.county
+    FROM crm_supplier_submissions submission
+    JOIN suppliers s ON s.id = submission.resolved_supplier_id AND s.workspace_id = submission.workspace_id
+    WHERE submission.wedding_slug = ? AND submission.workspace_id = ?
+      AND submission.status IN ('approved', 'linked')
+  `).bind(sourceSlug, workspaceId).all();
+  for (const supplier of workflow.results || []) {
+    if (!cleanRows.some((row) => row.supplierId === supplier.supplierId && row.role === supplier.role)) {
+      cleanRows.push(cleanSupplier(supplier));
+    }
+  }
+
   const statements: any[] = [
+    ...prefix,
     db.prepare(`DELETE FROM wedding_suppliers WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
     db.prepare(`DELETE FROM wedding_supplier_links WHERE wedding_slug = ? AND workspace_id = ?`).bind(slug, workspaceId),
   ];
@@ -258,7 +322,17 @@ async function replaceSuppliers(db: D1Db, slug: string, suppliers: any[], worksp
     }
   });
 
-  await runBatches(db, statements);
+  // Keep the draft snapshot consistent with the retained source memberships.
+  statements.push(db.prepare(`
+    UPDATE weddings SET document_json = json_set(
+      CASE WHEN json_valid(document_json) THEN document_json ELSE '{}' END,
+      '$.suppliers', json(?)
+    ), updated_at = CURRENT_TIMESTAMP
+    WHERE slug = ? AND workspace_id = ?
+  `).bind(JSON.stringify(cleanRows.map(({ email, phone, location, county, ...supplier }) => supplier)), slug, workspaceId));
+
+  // The delete/reinsert pair must commit together, even with many suppliers.
+  await commitSupplierContext(db, context, statements);
   return cleanRows;
 }
 
@@ -311,6 +385,7 @@ export async function createAdminWedding(db: D1Db, incoming: any, workspaceId: s
 }
 
 export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: any, workspaceId: string) {
+  const context = await captureSupplierContext(db, workspaceId, routeSlug);
   const row = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(routeSlug, workspaceId).first();
   if (!row) throw httpError("Wedding not found.", 404);
 
@@ -336,6 +411,7 @@ export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: 
       db.prepare(`UPDATE client_galleries SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
       db.prepare(`UPDATE wedding_preview_sets SET wedding_slug = ? WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
       db.prepare(`UPDATE crm_jobs SET wedding_slug = ?, updated_at = CURRENT_TIMESTAMP WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
+      db.prepare(`UPDATE crm_supplier_submissions SET wedding_slug = ?, updated_at = CURRENT_TIMESTAMP WHERE wedding_slug = ? AND workspace_id = ?`).bind(wedding.slug, routeSlug, workspaceId),
     );
   }
 
@@ -377,8 +453,33 @@ export async function updateAdminWedding(db: D1Db, routeSlug: string, incoming: 
     ),
   );
 
-  await runBatches(db, statements);
-  await replaceSuppliers(db, wedding.slug, wedding.suppliers || [], workspaceId);
+  // v1.10.14a — a linked Wedding is the canonical delivery
+  // record for venue/date once it exists. Keep the CRM Job summary
+  // synchronised after every legitimate Wedding edit, not only when
+  // the Wedding slug changes.
+  statements.push(
+    db.prepare(`
+      UPDATE crm_jobs
+      SET
+        event_date = ?,
+        venue_text = ?,
+        venue_slug = ?,
+        venue_id = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE wedding_slug = ?
+        AND workspace_id = ?
+        AND status <> 'archived'
+    `).bind(
+      wedding.weddingDate,
+      wedding.venue,
+      wedding.venueSlug,
+      wedding.venueId,
+      wedding.slug,
+      workspaceId,
+    ),
+  );
+
+  await replaceSuppliers(db, wedding.slug, wedding.suppliers || [], workspaceId, context, statements);
   return getAdminWedding(db, wedding.slug, workspaceId);
 }
 
@@ -714,6 +815,7 @@ export async function listAdminSuppliers(db: D1Db, workspaceId: string) {
 }
 
 export async function saveWeddingSuppliers(db: D1Db, slug: string, rows: any[], workspaceId: string) {
+  const context = await captureSupplierContext(db, workspaceId, slug);
   const weddingRow = await db.prepare(`SELECT * FROM weddings WHERE slug = ? AND workspace_id = ?`).bind(slug, workspaceId).first();
   if (!weddingRow) throw httpError("Wedding not found.", 404);
 
@@ -731,20 +833,40 @@ export async function saveWeddingSuppliers(db: D1Db, slug: string, rows: any[], 
   });
   if (validation.length) throw httpError("Supplier validation failed.", 400, validation);
 
-  const savedSuppliers = await replaceSuppliers(db, slug, suppliers, workspaceId);
+  // Explicit supplier-list edits must not report a removal that source protection
+  // will silently undo. Reject before creating masters or writing any rows.
+  const workflow = await db.prepare(`
+    SELECT DISTINCT submission.resolved_supplier_id, submission.role, s.name
+    FROM crm_supplier_submissions submission
+    JOIN suppliers s ON s.id = submission.resolved_supplier_id AND s.workspace_id = submission.workspace_id
+    WHERE submission.wedding_slug = ? AND submission.workspace_id = ?
+      AND submission.status IN ('approved', 'linked')
+  `).bind(slug, workspaceId).all();
+  const normaliseName = (value: unknown) => text(value).toLowerCase().replace(/\s+/g, " ");
+  const omitted = (workflow.results || []).some((source: any) => !suppliers.some((supplier) =>
+    supplier.role === source.role && (supplier.supplierId
+      ? supplier.supplierId === source.resolved_supplier_id
+      : normaliseName(supplier.name) === normaliseName(source.name))));
+  if (omitted) {
+    throw httpError("Questionnaire-linked suppliers cannot be removed or reassigned here. Their Wedding links have been kept. Use Change link in the Job supplier team.", 409);
+  }
 
-  const document = json(weddingRow.document_json, {} as any);
-  const nextDocument = {
-    ...document,
-    suppliers: savedSuppliers.map(({ supplierId, email, phone, location, county, ...supplier }) => supplier),
-    updatedAt: new Date().toISOString(),
-  };
+  const withdrawn = await db.prepare(`
+    SELECT DISTINCT retired.resolved_supplier_id, retired.role, s.name
+    FROM crm_supplier_submissions retired
+    JOIN suppliers s ON s.id = retired.resolved_supplier_id AND s.workspace_id = retired.workspace_id
+    WHERE retired.workspace_id = ? AND retired.wedding_slug = ? AND retired.status = 'rejected'
+      AND NOT EXISTS (SELECT 1 FROM crm_supplier_submissions active
+        WHERE active.workspace_id = retired.workspace_id AND active.wedding_slug = retired.wedding_slug
+          AND active.resolved_supplier_id = retired.resolved_supplier_id AND active.role = retired.role
+          AND active.status IN ('approved', 'linked'))
+  `).bind(workspaceId, slug).all();
+  if ((withdrawn.results || []).some((source: any) => suppliers.some((supplier) => supplier.role === source.role &&
+    (supplier.supplierId ? supplier.supplierId === source.resolved_supplier_id : normaliseName(supplier.name) === normaliseName(source.name))))) {
+    throw httpError("This supplier link was withdrawn. It needs professional reapproval in the Job before it can be added again.", 409);
+  }
 
-  await db.prepare(`
-    UPDATE weddings
-    SET document_json = ?, updated_at = CURRENT_TIMESTAMP
-    WHERE slug = ? AND workspace_id = ?
-  `).bind(JSON.stringify(nextDocument), slug, workspaceId).run();
+  const savedSuppliers = await replaceSuppliers(db, slug, suppliers, workspaceId, context);
 
   return {
     ok: true,

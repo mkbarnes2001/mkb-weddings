@@ -8,6 +8,7 @@ Current contract:
 """
 
 from pathlib import Path
+import sqlite3
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -181,9 +182,13 @@ for token in [
     assert token in server, token
 
 
-assert not list(
-    (ROOT / "d1/migrations").glob("050*")
-)
+# Supplier compatibility uses the established v1.10.14a schema baseline.
+with sqlite3.connect(":memory:") as db:
+    db.executescript(read("d1/schema.sql"))
+    assert db.execute(
+        "SELECT value FROM schema_meta WHERE key = 'schema_version'"
+    ).fetchone()[0] == "53"
+assert not list((ROOT / "d1/migrations").glob("054*"))
 
 
 print(

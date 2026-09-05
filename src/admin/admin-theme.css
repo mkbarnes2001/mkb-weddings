@@ -7554,6 +7554,23 @@ h3 {
     0 3px 14px rgba(0,0,0,.035);
 }
 
+.crm-quote-package-card--selected {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--admin-module-accent, #111) 58%,
+      white
+    );
+  box-shadow:
+    inset 0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--admin-module-accent, #111) 24%,
+        transparent
+      ),
+    0 3px 14px rgba(0,0,0,.035);
+}
+
 .crm-quote-package-card__header {
   display: flex;
   min-height: 36px;
@@ -7785,6 +7802,18 @@ h3 {
 .crm-quote-addon-grid__price strong,
 .crm-quote-addon-grid__price small {
   display: block;
+}
+
+.crm-quote-addon-grid__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.crm-quote-addon-grid__title
+.admin-status {
+  flex: 0 0 auto;
 }
 
 .crm-quote-addon-grid__body strong {
@@ -14643,6 +14672,81 @@ small {
   min-height: 30px !important;
 }
 
+
+.crm-job-selected-addons {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+  border-top: 1px solid var(--admin-border);
+  padding-top: 10px;
+}
+
+.crm-job-selected-addons__label {
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      7.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.crm-job-selected-addon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background:
+    var(
+      --admin-module-record-background,
+      #fff
+    );
+  padding: 8px 10px;
+}
+
+.crm-job-selected-addon > div {
+  min-width: 0;
+}
+
+.crm-job-selected-addon strong,
+.crm-job-selected-addon small {
+  display: block;
+}
+
+.crm-job-selected-addon strong {
+  overflow: hidden;
+  color: #262626;
+  font-size:
+    calc(
+      9.5px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-job-selected-addon small {
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size:
+    calc(
+      8px
+      * var(
+        --admin-font-scale-effective,
+        1
+      )
+    );
+}
 
 /* Job Questionnaire is now read-only. */
 .crm-job-questionnaire-readonly {

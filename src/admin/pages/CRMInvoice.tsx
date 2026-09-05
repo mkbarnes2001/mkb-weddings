@@ -31,6 +31,9 @@ import {
 import {
   AdminApiService,
 } from "../services/AdminApiService";
+import {
+  CRMRecordBackLink,
+} from "../components/crm/CRMRecordBackLink";
 
 import type {
   CrmJobWorkspace,
@@ -249,6 +252,13 @@ export function CRMInvoice() {
           job.venueText
             || "Venue TBC",
         ].join(" · ")}
+        actions={
+          <CRMRecordBackLink
+            jobId={job.id}
+            fallbackTo="/admin/crm?view=jobs"
+            fallbackLabel="Back to Jobs"
+          />
+        }
         meta={
           <AdminStatus
             tone={

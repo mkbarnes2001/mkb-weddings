@@ -6,8 +6,13 @@ import {
   verifyStripeWebhook,
 } from "../../../serverless/stripe-payments";
 
+import {
+  deliverInvoicePaymentReceiptNotifications,
+  type InvoicePaymentReceiptEnv,
+} from "../../../serverless/crm-payment-receipts-d1";
 
-type Env = {
+
+type Env = InvoicePaymentReceiptEnv & {
   MKB_DB: D1Database;
 
   WEDPLANNED_STRIPE_WEBHOOK_SECRET?: string;
@@ -63,10 +68,39 @@ PagesFunction<Env> = async (
         event,
       );
 
+    /*
+     * Financial settlement remains authoritative and idempotent in
+     * crm_invoice_payments. Delivery is attempted only when that
+     * verified settlement resolves a real payment. Duplicate Stripe
+     * events safely re-enter the deterministic communication outbox
+     * so a previously failed notification can retry without re-sending
+     * one already marked sent.
+     */
+    const settlement: any = result;
+
+    const notifications =
+      settlement?.workspaceId
+      && settlement?.paymentId
+      && !settlement?.rejected
+        ? await deliverInvoicePaymentReceiptNotifications(
+            context.env.MKB_DB,
+            context.env,
+            {
+              workspaceId:
+                settlement.workspaceId,
+              paymentId:
+                settlement.paymentId,
+              attemptId:
+                settlement.attemptId,
+            },
+          )
+        : null;
+
     return Response.json(
       {
         received: true,
         ...result,
+        notifications,
       },
       {
         headers: {

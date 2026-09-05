@@ -63,6 +63,9 @@ type InvoicePayment = {
   currency: string;
   method: string;
   reference: string;
+  receiptReference: string;
+  paidToDate: number;
+  balanceAfter: number;
   notes: string;
   paidAt: string;
 };
@@ -650,6 +653,16 @@ function InvoiceDocument({
   const [paymentError, setPaymentError] =
     useState("");
 
+  const [receiptPaymentId, setReceiptPaymentId] =
+    useState("");
+
+  const receiptPayment =
+    invoice.payments.find(
+      (payment) =>
+        payment.id === receiptPaymentId,
+    )
+    || null;
+
   const nextPayment =
     invoice.schedule.find(
       (item) =>
@@ -731,7 +744,17 @@ function InvoiceDocument({
   }
 
   return (
-    <article className="client-portal-document client-portal-document--invoice">
+    <article
+      className={[
+        "client-portal-document",
+        "client-portal-document--invoice",
+        receiptPayment
+          ? "client-portal-document--receipt-open"
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div className="client-portal-document__actions">
         {invoice.balanceAmount > 0 ? (
           <button
@@ -993,14 +1016,14 @@ function InvoiceDocument({
                       : "Payment"}
                   </strong>
                   <span>
-                    {payment.method.replace(/_/g, " ")}
-                    {payment.reference
-                      ? ` · ${payment.reference}`
+                    {labelKey(payment.method)}
+                    {payment.receiptReference
+                      ? ` · ${payment.receiptReference}`
                       : ""}
                   </span>
                 </div>
 
-                <div>
+                <div className="client-portal-payment-history__amount">
                   <strong>
                     {money(
                       payment.amount,
@@ -1008,10 +1031,148 @@ function InvoiceDocument({
                     )}
                   </strong>
                   <span>{dateLabel(payment.paidAt)}</span>
+
+                  <button
+                    type="button"
+                    className="client-portal-payment-history__receipt"
+                    onClick={() =>
+                      setReceiptPaymentId(
+                        payment.id,
+                      )
+                    }
+                  >
+                    <FileText />
+                    Receipt
+                  </button>
                 </div>
               </article>
             ))}
           </div>
+        </section>
+      ) : null}
+
+      {receiptPayment ? (
+        <section
+          className="client-portal-payment-receipt"
+          aria-label={`Payment receipt ${receiptPayment.receiptReference}`}
+        >
+          <div className="client-portal-payment-receipt__actions">
+            <button
+              type="button"
+              onClick={() =>
+                setReceiptPaymentId("")
+              }
+            >
+              Back to invoice
+            </button>
+
+            <button
+              type="button"
+              onClick={() => window.print()}
+            >
+              <Printer />
+              Print / Save PDF
+            </button>
+          </div>
+
+          <header className="client-portal-payment-receipt__header">
+            <div>
+              <span>
+                {receiptPayment.paymentType === "refund"
+                  ? "Refund receipt"
+                  : "Payment receipt"}
+              </span>
+              <h2>{receiptPayment.receiptReference}</h2>
+              <p>{dateLabel(receiptPayment.paidAt)}</p>
+            </div>
+
+            <strong>
+              {receiptPayment.paymentType === "refund"
+                ? "Refunded"
+                : "Paid"}
+            </strong>
+          </header>
+
+          <div className="client-portal-payment-receipt__parties">
+            <div>
+              <span>From</span>
+              <strong>
+                {snapshotPrimitive(
+                  invoice.business,
+                  [
+                    "businessName",
+                    "publicName",
+                    "legalName",
+                  ],
+                ) || "WedPlanned business"}
+              </strong>
+            </div>
+
+            <div>
+              <span>Received from</span>
+              <strong>
+                {snapshotPrimitive(
+                  invoice.client,
+                  [
+                    "displayName",
+                    "name",
+                    "email",
+                  ],
+                ) || "Client"}
+              </strong>
+            </div>
+          </div>
+
+          <dl className="client-portal-payment-receipt__details">
+            <div>
+              <dt>Invoice</dt>
+              <dd>{invoice.reference}</dd>
+            </div>
+
+            <div>
+              <dt>Payment method</dt>
+              <dd>{labelKey(receiptPayment.method)}</dd>
+            </div>
+
+            <div>
+              <dt>
+                {receiptPayment.paymentType === "refund"
+                  ? "Amount refunded"
+                  : "Amount received"}
+              </dt>
+              <dd>
+                {money(
+                  receiptPayment.amount,
+                  receiptPayment.currency,
+                )}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Total paid to date</dt>
+              <dd>
+                {money(
+                  receiptPayment.paidToDate,
+                  receiptPayment.currency,
+                )}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Remaining balance</dt>
+              <dd>
+                {money(
+                  receiptPayment.balanceAfter,
+                  receiptPayment.currency,
+                )}
+              </dd>
+            </div>
+          </dl>
+
+          <p className="client-portal-payment-receipt__note">
+            This receipt confirms that the payment above was recorded
+            against invoice {invoice.reference}.
+          </p>
         </section>
       ) : null}
 
