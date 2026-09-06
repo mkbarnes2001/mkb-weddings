@@ -1,6 +1,6 @@
 # Online booking and Calendar
 
-Latest gate: **v1.10.15a release preparation, 6 September 2026**. Schema 54 promotes the tested storage proposal; booking setup and Calendar are being released with public booking closed until provider acceptance. See [release record](RELEASE-v1.10.15a.md). Earlier schema-53/no-054 statements below describe completed local gates, not this release. Stripe retained; PayPal deferred.
+Latest gate: **v1.10.15a production deployment PASS, 6 September 2026**. Schema 54 is live; booking setup and Calendar are released with public booking closed until provider acceptance. See [release record](RELEASE-v1.10.15a.md). Earlier schema-53/no-054 statements below describe completed local gates, not this release. Stripe retained; PayPal deferred.
 
 ## Agreed scope
 

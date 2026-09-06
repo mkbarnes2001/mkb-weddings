@@ -1,6 +1,6 @@
 # v1.10.15a — CRM, Studio and booking setup
 
-Release preparation: 6 September 2026. The user authorised releasing all accumulated updates. Production deployment and verification are pending until the release outcome is recorded below.
+Released 6 September 2026. The user authorised releasing all accumulated updates. Production migration, application deployments and smoke verification are complete; the public-booking activation boundary below remains in effect.
 
 ## Included
 
@@ -37,4 +37,16 @@ Staging acceptance using real Google and Apple accounts, Stripe test Connect hos
 
 ## Outcome
 
-Pending production migration, deployment and smoke checks.
+**PASS — production release with public booking closed.**
+
+Application commit: `d26b89f737e95a6bbffec4a38a2ec4f08b6c8bd1`. All 182 reviewed release paths were committed; all 153 paths from the initial checkpoint were preserved. A documentation-only seal records the final outcome without changing application assets.
+
+- Admin: `19a2a3a7-ea37-403e-9f55-675732cdadb4` — https://admin.mkbweddings.co.uk
+- Public website: `047fdbbe-344e-4587-afc4-b1ca13081f8c` — https://www.mkbweddings.co.uk
+- Both are successful production deployments of the application commit above.
+- Production schema is 54. Wedding (20), Supplier (53), Wedding link (65), Job (12) and Invoice (9) counts are unchanged from preflight. New booking tables contain no synthetic data.
+- Live pages, application assets, booking-shell routes and API binding health pass. Anonymous professional APIs remain protected; public booking returns the intended unavailable response on both hosts. The deployed Admin asset includes the new setup, sharing, dashboard and gallery interfaces.
+- The existing live browser session was signed out, so no authenticated production edit was performed and no sign-in email was sent. The setup response was additionally exercised read-only against the migrated production backup; the local browser verifies the Setup only and disabled publication controls.
+- Existing environment variables, secrets, resource bindings, preview configuration and compatibility settings were preserved. The separate WedPlanned marketing site has no changes in this release and was not redeployed.
+
+Stable tag: `v1.10.15a-admin-studio-booking-setup-stable`, pointing to the application commit. A verified source archive and restricted production backup are retained in the ignored release evidence directory. Next gate remains provider acceptance and public-booking activation.
