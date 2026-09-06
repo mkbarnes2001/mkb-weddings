@@ -1,3 +1,5 @@
+import { StudioBackLink } from "../components/ui/StudioUI";
+import { AdminActionLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -51,16 +53,17 @@ export function VenueDetail() {
 
   if (!venue) {
     return (
-      <section className="rounded-[28px] border border-black/10 bg-white p-8">
-        <h1 className="font-serif text-3xl">Venue not found</h1>
+      <section className="admin-surface-card border border-black/10 bg-white">
+        <h1 className="admin-section-title ">Venue not found</h1>
         <p className="mt-3 text-neutral-600">{error}</p>
       </section>
     );
   }
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
+        backLink={<StudioBackLink to="/admin/venues" label="Back to Venues" />}
         title="Venue details"
         meta={
           <div className="flex flex-wrap items-center gap-2">
@@ -84,7 +87,7 @@ export function VenueDetail() {
         actions={
           <div className="flex flex-wrap gap-2">
             {venue.links.website ? (
-              <a
+              <AdminActionLink
                 href={venue.links.website}
                 target="_blank"
                 rel="noreferrer"
@@ -92,11 +95,11 @@ export function VenueDetail() {
               >
                 <ExternalLink className="admin-button__icon" />
                 Website
-              </a>
+              </AdminActionLink>
             ) : null}
 
             {venue.links.instagram ? (
-              <a
+              <AdminActionLink
                 href={normaliseInstagramUrl(
                   venue.links.instagram,
                 )}
@@ -106,11 +109,11 @@ export function VenueDetail() {
               >
                 <Instagram className="admin-button__icon" />
                 Instagram
-              </a>
+              </AdminActionLink>
             ) : null}
 
             {venue.links.googleMaps ? (
-              <a
+              <AdminActionLink
                 href={venue.links.googleMaps}
                 target="_blank"
                 rel="noreferrer"
@@ -118,7 +121,7 @@ export function VenueDetail() {
               >
                 <MapPin className="admin-button__icon" />
                 Map
-              </a>
+              </AdminActionLink>
             ) : null}
           </div>
         }
@@ -171,16 +174,13 @@ export function VenueDetail() {
       </section>
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-[28px] border border-black/10 bg-white/80 p-7">
+        <div className="admin-surface-card border border-black/10 bg-white/80">
           <div className="mb-6 flex items-center gap-3">
             <div className="rounded-2xl bg-black p-3 text-white">
               <CalendarDays className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-3xl">Recent weddings</h2>
-              <p className="text-sm text-neutral-500">
-                JSON weddings linked to this venue.
-              </p>
+              <h2 className="admin-section-title ">Recent weddings</h2>
             </div>
           </div>
 
@@ -211,12 +211,12 @@ export function VenueDetail() {
           )}
         </div>
 
-        <div className="rounded-[28px] border border-black/10 bg-white/80 p-7">
+        <div className="admin-surface-card border border-black/10 bg-white/80">
           <div className="mb-6 flex items-center gap-3">
             <div className="rounded-2xl bg-black p-3 text-white">
               <ImageIcon className="h-5 w-5" />
             </div>
-            <h2 className="font-serif text-3xl">Venue notes</h2>
+            <h2 className="admin-section-title ">Venue notes</h2>
           </div>
 
           <Note label="Portrait locations" value={venue.notes.portraitLocations} />
@@ -258,7 +258,7 @@ function Metric({
   capitalize?: boolean;
 }) {
   return (
-    <div className="rounded-[28px] border border-black/10 bg-white/80 p-6">
+    <div className="admin-surface-card border border-black/10 bg-white/80">
       <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
         {label}
       </p>
@@ -313,7 +313,7 @@ function ControlCard({
       <div className="rounded-2xl bg-black p-3 text-white">
         <Icon className="h-5 w-5" />
       </div>
-      <h2 className="mt-5 font-serif text-3xl">{title}</h2>
+      <h2 className="admin-section-title mt-5">{title}</h2>
       <p className="mt-3 leading-relaxed text-neutral-600">
         {description}
       </p>
@@ -322,7 +322,7 @@ function ControlCard({
 
   if (disabled) {
     return (
-      <div className="rounded-[28px] border border-black/10 bg-neutral-100/70 p-7 opacity-65">
+      <div className="admin-surface-card border border-black/10 bg-neutral-100/70 opacity-65">
         {content}
       </div>
     );
@@ -331,7 +331,7 @@ function ControlCard({
   return (
     <Link
       to={to}
-      className="rounded-[28px] border border-black/10 bg-white/80 p-7 transition hover:-translate-y-0.5 hover:bg-white"
+      className="admin-surface-card border border-black/10 bg-white/80 transition hover:-translate-y-0.5 hover:bg-white"
     >
       {content}
     </Link>

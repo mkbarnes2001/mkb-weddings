@@ -52,8 +52,6 @@ def main() -> None:
         'label="Website connection"',
         'label="Wedding stories"',
         'label="Public galleries"',
-        'label="Venues and locations"',
-        'label="Moments and collections"',
         'label="Asset library"',
         'label="AI content"',
         'label="SEO readiness"',

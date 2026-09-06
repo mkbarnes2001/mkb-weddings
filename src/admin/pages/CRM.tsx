@@ -1,3 +1,6 @@
+import { AdminActionButton, AdminActionLink, AdminActionRouterLink } from "../components/ui/AdminActionControl";
+import { CRMDashboard } from "../components/CRMDashboard";
+import { CRMRecordBackLink } from "../components/crm/CRMRecordBackLink";
 import {
   useEffect,
   useMemo,
@@ -21,9 +24,7 @@ import {
   Save,
   Search,
   Settings2,
-  Target,
   UserRound,
-  Users,
   Workflow,
   } from "lucide-react";
 import {
@@ -35,12 +36,11 @@ import {
   AdminPageHeader,
   AdminPanel,
   AdminStatus,
-  AdminHeaderRouterLink,
 } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
 import { CrmPaymentSchedulePresets } from "../components/CrmPaymentSchedulePresets";
-import type { CrmCommercialSettingsInput, CrmCommercialSettingsPayload, CrmEnquiry, CrmEnquiryInput, CrmJob, CrmLeadFormSettings, CrmOverview, CrmWorkflowOverview, QuestionnaireOverview, CrmContractTemplate, CrmLeadFormField, CrmLeadFormFieldType } from "../types/crm";
+import type { CrmCommercialSettingsInput, CrmCommercialSettingsPayload, CrmEnquiry, CrmEnquiryInput, CrmJob, CrmLeadFormSettings, CrmOverview, CrmWorkflowOverview, QuestionnaireOverview, CrmLeadFormField, CrmLeadFormFieldType } from "../types/crm";
 
 type View = "pipeline" | "contacts" | "jobs" | "schedule" | "questionnaires" | "workflows" | "commercial-settings" | "lead-form" | "overview";
 
@@ -431,35 +431,35 @@ function JobRecord({
         className="crm-job-record-actions"
         aria-label={`Actions for ${job.title}`}
       >
-        <Link
+        <AdminActionRouterLink
           className="admin-icon-control"
           to={`/admin/crm/jobs/${job.id}`}
           aria-label={`Open Job ${job.title}`}
           title="Open Job"
         >
           <ExternalLink aria-hidden="true" />
-        </Link>
+        </AdminActionRouterLink>
 
         {job.weddingSlug ? (
-          <Link
+          <AdminActionRouterLink
             className="admin-icon-control"
             to={`/admin/weddings/${job.weddingSlug}/workspace`}
             aria-label={`Open Wedding Workspace for ${job.title}`}
             title="Open Wedding Workspace"
           >
             <LayoutDashboard aria-hidden="true" />
-          </Link>
+          </AdminActionRouterLink>
         ) : null}
 
         {job.quoteId ? (
-          <Link
+          <AdminActionRouterLink
             className="admin-icon-control"
             to={`/admin/crm/quotes/${job.quoteId}`}
             aria-label={`Open quote for ${job.title}`}
             title="Open quote"
           >
             <FileQuestion aria-hidden="true" />
-          </Link>
+          </AdminActionRouterLink>
         ) : null}
       </div>
     </article>
@@ -622,7 +622,7 @@ export function CRM() {
     contacts: "Clients",
     jobs: "Jobs overview",
     schedule: "Schedule",
-    questionnaires: "Questionnaires",
+    questionnaires: "Questionnaire templates",
     workflows: "Workflows",
     "commercial-settings": "Commercial settings",
     "lead-form": "Lead form",
@@ -632,11 +632,12 @@ export function CRM() {
     <AdminPage className="crm-operations-page">
       <AdminPageHeader
         eyebrow="WedCRM · Client operations"
+        backLink={view === "questionnaires" && bookingsEnabled && crm?.jobs.some(job => job.id === searchParams.get("jobId"))
+          ? <CRMRecordBackLink jobId={searchParams.get("jobId")} fallbackTo="/admin/crm?view=jobs" fallbackLabel="Back to Jobs" /> : undefined}
         title={view === "overview"
           ? "Dashboard"
           : pageTitle[view]}
-        description="A clear operational view of leads, bookings, deadlines and client activity across this workspace."
-        actions={<div className="flex flex-wrap gap-2">{bookingsEnabled ? <><AdminHeaderRouterLink to="/admin/crm/catalogue" className="admin-button admin-button--secondary admin-button--md"><Settings2 className="admin-button__icon" />Catalogue</AdminHeaderRouterLink><AdminHeaderRouterLink to="/admin/crm/quotes" className="admin-button admin-button--secondary admin-button--md"><FileQuestion className="admin-button__icon" />Quotes</AdminHeaderRouterLink></> : null}{canManage ? <AdminButton variant="primary" icon={Plus} onClick={() => setShowCreate((current) => !current)}>New enquiry</AdminButton> : null}</div>}
+        actions={canManage && ["overview", "pipeline", "contacts"].includes(view) ? <AdminButton variant="primary" icon={Plus} onClick={() => setShowCreate((current) => !current)}>New enquiry</AdminButton> : undefined}
       />
 
       {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
@@ -659,30 +660,7 @@ export function CRM() {
         </AdminPanel>
       ) : null}
 
-      {view === "overview" ? <div className="grid gap-4">
-        <section className="admin-module-metrics">
-          <div className="admin-module-metric"><strong>{crm?.stats.open || 0}</strong><span>Open leads</span><small>{crm?.stats.new || 0} new</small></div>
-          {bookingsEnabled ? <div className="admin-module-metric"><strong>{crm?.stats.jobs || 0}</strong><span>Jobs</span><small>{(crm?.jobs || []).filter((job) => job.status === "booked").length} booked</small></div> : null}
-          <div className="admin-module-metric"><strong>{crm?.contacts.length || 0}</strong><span>Clients</span><small>Workspace contacts</small></div>
-          {bookingsEnabled ? <div className="admin-module-metric"><strong>{scheduleItems.length}</strong><span>Upcoming schedule</span><small>Weddings and deadlines</small></div> : null}
-        </section>
-        <section className="admin-module-destination-grid">
-          <Link to="/admin/crm" className="admin-module-destination"><span className="admin-module-destination__icon"><Target /></span><div><strong>Leads</strong><p>Review new enquiries, pipeline status and next actions.</p><div className="admin-module-destination__meta"><AdminStatus tone="info">{crm?.stats.open || 0} open</AdminStatus></div></div><ExternalLink className="admin-module-destination__arrow" /></Link>
-          {bookingsEnabled ? <Link to="/admin/crm?view=jobs" className="admin-module-destination"><span className="admin-module-destination__icon"><BriefcaseBusiness /></span><div><strong>Jobs</strong><p>Open booked workspaces, workflows, communications and client portal access.</p><div className="admin-module-destination__meta"><AdminStatus tone="success">{crm?.stats.jobs || 0} jobs</AdminStatus></div></div><ExternalLink className="admin-module-destination__arrow" /></Link> : null}
-          {bookingsEnabled ? <Link to="/admin/crm/quotes" className="admin-module-destination"><span className="admin-module-destination__icon"><FileQuestion /></span><div><strong>Packages & quotes</strong><p>Manage catalogue packages and send immutable quote versions.</p></div><ExternalLink className="admin-module-destination__arrow" /></Link> : null}
-          {clientPortalEnabled ? <Link to="/admin/crm?view=questionnaires" className="admin-module-destination"><span className="admin-module-destination__icon"><ClipboardList /></span><div><strong>Questionnaires</strong><p>Build templates and track assigned client questionnaires.</p></div><ExternalLink className="admin-module-destination__arrow" /></Link> : null}
-        </section>
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(280px,.75fr)]">
-          {bookingsEnabled ? <>
-          <AdminPanel title="Upcoming schedule" description="The next weddings and Job deadlines across this workspace." icon={CalendarDays}>
-            {!scheduleItems.length ? <AdminEmptyState icon={CalendarDays} title="Nothing scheduled" description="Wedding dates and Job deadlines will appear here." /> : <div className="crm-schedule-list">{scheduleItems.slice(0, 6).map((item) => <Link key={item.id} to={`/admin/crm/jobs/${item.job.id}`} className={`crm-schedule-record crm-schedule-record--${item.type}`}><time dateTime={item.date}><strong>{new Date(`${item.date}T12:00:00`).toLocaleDateString("en-GB", { day: "2-digit" })}</strong><span>{new Date(`${item.date}T12:00:00`).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}</span></time><div><AdminStatus tone={item.type === "wedding" ? "success" : "warning"}>{item.type}</AdminStatus><h3>{item.title}</h3><p>{item.detail}</p></div><ExternalLink /></Link>)}</div>}
-          </AdminPanel>
-          </> : null}
-          <AdminPanel title="Client operations" description="Communications remain attached to the relevant lead, client or Job record." icon={Mail}>
-            <div className="admin-module-guidance"><div><Mail /><span><strong>Communications</strong><small>Send email or record calls, meetings, messages and notes from each Job workspace.</small></span></div><div><Workflow /><span><strong>Workflows</strong><small>Reusable task sequences control operational delivery after booking.</small></span></div><div><UserRound /><span><strong>Client records</strong><small>Contacts retain linked enquiries, Jobs, activity and communication history.</small></span></div></div>
-          </AdminPanel>
-        </div>
-      </div> : null}
+      {view === "overview" && crm ? <CRMDashboard key={auth.workspaceId} crm={crm} workspaceId={auth.workspaceId} /> : null}
 
       {view === "pipeline" ? <div className="grid gap-4">
         <div className="crm-operations-toolbar">
@@ -738,25 +716,7 @@ function CommercialSettings({
   invoicesEnabled: boolean;
   clientPortalEnabled: boolean;
 }) {
-  const navigate = useNavigate();
-
-  const [payload, setPayload] =
-    useState<CrmCommercialSettingsPayload | null>(null);
-
-  const [
-    contractTemplates,
-    setContractTemplates,
-  ] = useState<CrmContractTemplate[]>([]);
-
-  const [
-    contractTemplatesLoading,
-    setContractTemplatesLoading,
-  ] = useState(true);
-
-  const [
-    creatingContractTemplate,
-    setCreatingContractTemplate,
-  ] = useState(false);
+  const [payload, setPayload] = useState<CrmCommercialSettingsPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -790,50 +750,6 @@ function CommercialSettings({
       active = false;
     };
   }, [workspaceId]);
-
-  useEffect(() => {
-    let active = true;
-
-    if (!contractsEnabled) {
-      setContractTemplates([]);
-      setContractTemplatesLoading(false);
-      return () => {
-        active = false;
-      };
-    }
-
-    setContractTemplatesLoading(true);
-
-    AdminApiService
-      .listCrmContractTemplates()
-      .then((templates) => {
-        if (active) {
-          setContractTemplates(
-            templates,
-          );
-        }
-      })
-      .catch((loadError) => {
-        if (active) {
-          setError(
-            loadError instanceof Error
-              ? loadError.message
-              : "Unable to load contract templates.",
-          );
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setContractTemplatesLoading(
-            false,
-          );
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [workspaceId, contractsEnabled]);
 
   function patchSettings(
     patch: Partial<CrmCommercialSettingsPayload["settings"]>,
@@ -869,44 +785,6 @@ function CommercialSettings({
     );
     setMessage("");
     setError("");
-  }
-
-  async function createContractTemplate() {
-    if (!canManage || !contractsEnabled) {
-      return;
-    }
-
-    setCreatingContractTemplate(
-      true,
-    );
-    setError("");
-    setMessage("");
-
-    try {
-      const template =
-        await AdminApiService
-          .createCrmContractTemplate({
-            name:
-              "New contract template",
-            description: "",
-            status: "archived",
-            sections: [],
-          });
-
-      navigate(
-        `/admin/crm/contracts/templates/${template.id}`,
-      );
-    } catch (createError) {
-      setError(
-        createError instanceof Error
-          ? createError.message
-          : "Unable to create contract template.",
-      );
-    } finally {
-      setCreatingContractTemplate(
-        false,
-      );
-    }
   }
 
   async function save() {
@@ -1142,99 +1020,6 @@ function CommercialSettings({
             </> : null}
           </div>
         </AdminPanel>
-      ) : null}
-
-      {contractsEnabled ? (
-      <AdminPanel
-        title="Contract templates"
-        icon={FileQuestion}
-        actions={
-          canManage ? (
-            <AdminIconButton
-              icon={Plus}
-              label="New contract template"
-              disabled={
-                creatingContractTemplate
-              }
-              onClick={() =>
-                void createContractTemplate()
-              }
-            />
-          ) : undefined
-        }
-
-        compact
->
-        {contractTemplatesLoading ? (
-          <p className="text-[10px] text-neutral-500">
-            Loading contract templates…
-          </p>
-        ) : !contractTemplates.length ? (
-          <div className="crm-commercial-empty-row">
-            <FileQuestion aria-hidden="true" />
-            <span>No contract templates</span>
-          </div>
-        ) : (
-          <div className="questionnaire-template-grid">
-            {contractTemplates.map(
-              (template) => (
-                <Link
-                  key={template.id}
-                  to={
-                    `/admin/crm/contracts/templates/${template.id}`
-                  }
-                  className="questionnaire-template-card"
-                >
-                  <div>
-                    <strong>
-                      {template.name}
-                    </strong>
-
-                    <p>
-                      {template.description
-                        || "No description"}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <AdminStatus
-                      tone={
-                        template.status
-                          === "active"
-                          ? "success"
-                          : "neutral"
-                      }
-                    >
-                      {template.status
-                        === "active"
-                        ? "active"
-                        : "inactive"}
-                    </AdminStatus>
-
-                    {payload.settings
-                      .defaultContractTemplateId
-                      === template.id ? (
-                      <AdminStatus tone="success">
-                        default
-                      </AdminStatus>
-                    ) : null}
-
-                    <AdminStatus tone="info">
-                      {template.sections.length}
-                      {" "}
-                      section
-                      {template.sections.length
-                        === 1
-                        ? ""
-                        : "s"}
-                    </AdminStatus>
-                  </div>
-                </Link>
-              ),
-            )}
-          </div>
-        )}
-      </AdminPanel>
       ) : null}
 
       {invoicesEnabled ? <CrmPaymentSchedulePresets canManage={canManage} /> : null}
@@ -1853,7 +1638,7 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
         description="Control the enquiry page, confirmation email and the exact questions prospective clients complete."
         icon={Settings2}
         actions={
-          <a
+          <AdminActionLink
             href="/enquire"
             target="_blank"
             rel="noreferrer"
@@ -1861,7 +1646,7 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
           >
             <ExternalLink className="admin-button__icon" />
             Preview form
-          </a>
+          </AdminActionLink>
         }
       >
           <div className="crm-lead-form-settings">
@@ -2020,10 +1805,6 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
                   <strong>
                     Acknowledgement email
                   </strong>
-
-                  <small>
-                    Subject and confirmation message
-                  </small>
                 </span>
 
                 <span
@@ -2090,10 +1871,6 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
                   <strong>
                     Confirmation & privacy
                   </strong>
-
-                  <small>
-                    Thank-you message and consent text
-                  </small>
                 </span>
 
                 <span>
@@ -2412,7 +2189,7 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
                         </button>
 
                         <div className="crm-lead-form-builder-field__actions">
-                          <button
+                          <AdminActionButton
                             type="button"
                             className="admin-icon-control"
                             disabled={
@@ -2430,9 +2207,9 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
                             title="Move up"
                           >
                             ↑
-                          </button>
+                          </AdminActionButton>
 
-                          <button
+                          <AdminActionButton
                             type="button"
                             className="admin-icon-control"
                             disabled={
@@ -2451,10 +2228,10 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
                             title="Move down"
                           >
                             ↓
-                          </button>
+                          </AdminActionButton>
 
                           {!field.locked ? (
-                            <button
+                            <AdminActionButton
                               type="button"
                               className="admin-icon-control admin-icon-control--danger"
                               disabled={
@@ -2478,7 +2255,7 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
                               title="Remove field"
                             >
                               ×
-                            </button>
+                            </AdminActionButton>
                           ) : null}
                         </div>
                       </div>
@@ -2694,7 +2471,7 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
                                             }}
                                           />
 
-                                          <button
+                                          <AdminActionButton
                                             type="button"
                                             className="admin-icon-control admin-icon-control--danger"
                                             disabled={
@@ -2724,7 +2501,7 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
                                             }
                                           >
                                             ×
-                                          </button>
+                                          </AdminActionButton>
                                         </div>
                                       ),
                                     )}
@@ -2904,7 +2681,7 @@ function LeadFormSettings({ settings, saving, canManage, onSave }: { settings: C
   );
 }
 
-function QuestionnaireLibrary({ workspaceId, canManage }: { workspaceId: string; canManage: boolean }) {
+export function QuestionnaireLibrary({ workspaceId, canManage }: { workspaceId: string; canManage: boolean }) {
   const navigate = useNavigate();
   const [overview, setOverview] = useState<QuestionnaireOverview | null>(null);
   const [loading, setLoading] = useState(true);
@@ -2936,14 +2713,12 @@ function QuestionnaireLibrary({ workspaceId, canManage }: { workspaceId: string;
       <AdminPanel title="Questionnaire templates" description="Build reusable forms, then assign a versioned copy to an accepted Job." icon={FileQuestion} actions={canManage ? <AdminButton variant="primary" size="sm" icon={Plus} disabled={saving} onClick={() => void createTemplate()}>New template</AdminButton> : undefined}>
         {loading ? <p className="text-[10px] text-neutral-500">Loading questionnaires…</p> : !overview?.templates.length ? <AdminEmptyState icon={FileQuestion} title="No questionnaire templates" description="Create a reusable questionnaire for your client workflow." /> : <div className="questionnaire-template-grid">{overview.templates.map((template) => <Link key={template.id} to={`/admin/crm/questionnaires/${template.id}`} className="questionnaire-template-card"><div><strong>{template.name}</strong><p>{template.description || "No description"}</p></div><div className="flex gap-2"><AdminStatus tone={template.status === "active" ? "success" : "neutral"}>{template.status}</AdminStatus><AdminStatus tone="info">{template.fields.length} fields</AdminStatus></div></Link>)}</div>}
       </AdminPanel>
-      <AdminPanel title="Assigned questionnaires" description="Questionnaires assigned to Jobs appear here for quick progress review." icon={ClipboardList}>
-        {!overview?.instances.length ? <AdminEmptyState icon={ClipboardList} title="No assigned questionnaires" description="Open an accepted Job to assign a template and invite the client." /> : <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Questionnaire</th><th>Job</th><th>Client</th><th>Status</th><th>Updated</th></tr></thead><tbody>{overview.instances.map((item) => <tr key={item.id}><td><strong>{item.title}</strong></td><td><Link className="admin-inline-link" to={`/admin/crm/jobs/${item.jobId}`}>{item.jobTitle || item.jobReference || "Open Job"}</Link></td><td>{item.assignedContactName || "Any portal client"}</td><td><AdminStatus tone={item.status === "completed" ? "success" : item.status === "in_progress" || item.status === "opened" ? "info" : item.status === "sent" ? "warning" : "neutral"}>{item.status.replace(/_/g, " ")}</AdminStatus></td><td>{dateLabel(item.updatedAt.slice(0,10))}</td></tr>)}</tbody></table></div>}
-      </AdminPanel>
+
     </div>
   );
 }
 
-function WorkflowLibrary({ workspaceId, canManage }: { workspaceId: string; canManage: boolean }) {
+export function WorkflowLibrary({ workspaceId, canManage, templatesOnly = false }: { workspaceId: string; canManage: boolean; templatesOnly?: boolean }) {
   const navigate = useNavigate();
   const [overview, setOverview] = useState<CrmWorkflowOverview | null>(null);
   const [loading, setLoading] = useState(true);
@@ -2976,8 +2751,10 @@ function WorkflowLibrary({ workspaceId, canManage }: { workspaceId: string; canM
     <AdminPanel title="Workflow templates" description="Build reusable task sequences. The default template is applied automatically when an enquiry becomes a Job." icon={Workflow} actions={canManage ? <AdminButton variant="primary" size="sm" icon={Plus} disabled={saving} onClick={() => void createTemplate()}>New workflow</AdminButton> : undefined}>
       {loading ? <p className="text-[10px] text-neutral-500">Loading workflows…</p> : !overview?.templates.length ? <AdminEmptyState icon={Workflow} title="No workflow templates" description="Create a workflow to automate the first Job task list." /> : <div className="questionnaire-template-grid">{overview.templates.map((template) => <Link key={template.id} to={`/admin/crm/workflows/${template.id}`} className="questionnaire-template-card"><div><strong>{template.name}</strong><p>{template.description || "No description"}</p></div><div className="flex flex-wrap gap-2"><AdminStatus tone={template.status === "active" ? "success" : "neutral"}>{template.status}</AdminStatus>{template.default ? <AdminStatus tone="success">default</AdminStatus> : null}<AdminStatus tone="info">{template.steps.length} tasks</AdminStatus></div></Link>)}</div>}
     </AdminPanel>
+    {!templatesOnly ? (
     <AdminPanel title="Task overview" description="Pending tasks across all Jobs, ordered by due date." icon={Clock3} actions={<div className="flex gap-2"><AdminStatus tone="warning">{pendingTasks.length} pending</AdminStatus>{overdue.length ? <AdminStatus tone="danger">{overdue.length} overdue</AdminStatus> : null}</div>}>
       {!pendingTasks.length ? <AdminEmptyState icon={CheckCircle2} title="No pending tasks" description="New Job workflows and manually created tasks will appear here." /> : <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Due</th><th>Task</th><th>Job</th><th>Type</th><th>Priority</th></tr></thead><tbody>{pendingTasks.slice(0, 200).map((task) => { const job = jobById.get(task.jobId); const isOverdue = Boolean(task.dueAt && task.dueAt < new Date().toISOString().slice(0, 10)); return <tr key={task.id}><td><AdminStatus tone={isOverdue ? "danger" : task.dueAt ? "warning" : "neutral"}>{task.dueAt ? dateLabel(task.dueAt) : "No date"}</AdminStatus></td><td><strong>{task.title}</strong><div className="text-[10px] text-neutral-500">{task.description}</div></td><td>{job ? <Link className="admin-inline-link" to={`/admin/crm/jobs/${job.id}`}>{job.title}</Link> : "—"}</td><td>{task.taskType}</td><td>{task.priority}</td></tr>; })}</tbody></table></div>}
     </AdminPanel>
+    ) : null}
   </div>;
 }

@@ -158,10 +158,10 @@ version = db.execute(
 ).fetchone()[0]
 db.close()
 
-require(str(version) == "53", f"Wedding Workspace UI gate changed schema: {version}")
+require(str(version) == "54", f"Wedding Workspace UI gate changed schema: {version}")
 require(
-    not list((ROOT / "d1/migrations").glob("054_*.sql")),
-    "Wedding Workspace UI gate must not add migration 054",
+    not list((ROOT / "d1/migrations").glob("055_*.sql")),
+    "Wedding Workspace UI gate must not add migration 055",
 )
 
 print("PASS v1.10.13a Gate 2F2D-B3A2 Wedding Workspace entitlement-aware UI")
@@ -172,4 +172,4 @@ print("  Studio setup/header/publishing surfaces require content-tools: verified
 print("  Preview Set remains bookings-owned: verified")
 print("  bookings-only rendering no longer requires the Studio wedding document: verified")
 print("  B3A1 server payload/publish authority preserved: verified")
-print("  schema remains 53: verified")
+print("  schema is 54: verified")

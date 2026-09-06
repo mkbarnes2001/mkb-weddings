@@ -2179,6 +2179,12 @@ export class AdminApiService {
     return result.template;
   }
 
+  static async getCrmDashboard(from: string, to: string, jobType = "") {
+    const params = new URLSearchParams({ from, to, jobType });
+    const result = await request<{ ok: true; dashboard: import("../../../shared/crm-dashboard").DashboardData }>(`/api/crm/dashboard?${params}`);
+    return result.dashboard;
+  }
+
   static async getCrmPaymentsOverview() {
     const result =
       await request<{
@@ -2587,6 +2593,17 @@ export class AdminApiService {
       body: JSON.stringify({ workspace }),
     });
     return result.workspace;
+  }
+
+  static async uploadPackageImage(file: File) {
+    if (file.size > 2 * 1024 * 1024) throw new Error("Choose an image of 2 MB or smaller.");
+    const prepared = await prepareImageUpload(file);
+    const form = new FormData();
+    form.set("file", new File([prepared.full], "package.webp", { type: "image/webp" }));
+    const response = await fetch(`${API_BASE}/api/crm/catalogue/images`, { method: "POST", credentials: "include", body: form });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `Image upload failed (${response.status}).`);
+    return result.asset as { url: string; storageKey: string };
   }
 
   static async uploadPortalAsset(kind: "logo" | "banner", file: File) {

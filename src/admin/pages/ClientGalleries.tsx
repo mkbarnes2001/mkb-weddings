@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionLink, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Copy, ExternalLink, Images, LockKeyhole, Mail, Plus, RefreshCcw } from "lucide-react";
@@ -61,7 +62,7 @@ export function ClientGalleries() {
         eyebrow="Private delivery"
         title="Client Galleries"
         description="Create secure client-facing galleries from canonical assets, private originals and persistent client identities."
-        actions={<button onClick={load} className="admin-button admin-button--secondary"><RefreshCcw className="admin-button__icon" />Refresh</button>}
+        actions={<AdminActionButton onClick={load} className="admin-button admin-button--secondary"><RefreshCcw className="admin-button__icon" />Refresh</AdminActionButton>}
       />
 
       <AdminPanel title="New client gallery" description="Link a wedding to import its existing assets automatically." icon={Plus} compact>
@@ -82,9 +83,9 @@ export function ClientGalleries() {
             onChange={(event) => setGallerySlug(event.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""))}
             placeholder="Custom slug (optional)"
           />
-          <button disabled={busy} onClick={create} className="admin-button admin-button--primary">
+          <AdminActionButton disabled={busy} onClick={create} className="admin-button admin-button--primary">
             {busy ? "Creating…" : "Create gallery"}
-          </button>
+          </AdminActionButton>
         </div>
         {weddingSlug ? <p className="mt-2 text-[10px] text-neutral-500">Wedding assets will be imported automatically into the new gallery.</p> : null}
         {error ? <p className="mt-3 text-[11px] text-red-700">{error}</p> : null}
@@ -117,9 +118,9 @@ export function ClientGalleries() {
                   <span>{gallery.visitorCount || 0}<small>Visitors</small></span>
                 </div>
                 <div className="admin-client-gallery-card__actions">
-                  <Link to={`/admin/client-galleries/${gallery.id}`} className="admin-button admin-button--primary admin-button--sm">Manage</Link>
-                  <button onClick={() => navigator.clipboard?.writeText(shareUrl)} className="admin-button admin-button--secondary admin-button--sm"><Copy className="admin-button__icon" />Copy link</button>
-                  {gallery.status === "live" ? <a href={shareUrl} target="_blank" rel="noreferrer" className="admin-button admin-button--secondary admin-button--sm"><ExternalLink className="admin-button__icon" />Open</a> : null}
+                  <AdminActionRouterLink to={`/admin/client-galleries/${gallery.id}`} className="admin-button admin-button--primary admin-button--sm">Manage</AdminActionRouterLink>
+                  <AdminActionButton onClick={() => navigator.clipboard?.writeText(shareUrl)} className="admin-button admin-button--secondary admin-button--sm"><Copy className="admin-button__icon" />Copy link</AdminActionButton>
+                  {gallery.status === "live" ? <AdminActionLink href={shareUrl} target="_blank" rel="noreferrer" className="admin-button admin-button--secondary admin-button--sm"><ExternalLink className="admin-button__icon" />Open</AdminActionLink> : null}
                 </div>
               </div>
             </article>

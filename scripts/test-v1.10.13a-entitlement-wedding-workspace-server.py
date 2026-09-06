@@ -96,10 +96,10 @@ version = db.execute(
 ).fetchone()[0]
 db.close()
 
-require(str(version) == "53", f"Wedding Workspace server gate changed schema: {version}")
+require(str(version) == "54", f"Wedding Workspace server gate changed schema: {version}")
 require(
-    not list((ROOT / "d1/migrations").glob("054_*.sql")),
-    "Wedding Workspace server gate must not add migration 054",
+    not list((ROOT / "d1/migrations").glob("055_*.sql")),
+    "Wedding Workspace server gate must not add migration 055",
 )
 
 print("PASS v1.10.13a Gate 2F2D-B3A1 Wedding Workspace server entitlement boundary")
@@ -109,4 +109,4 @@ print("  Client Gallery payloads are client-galleries-scoped: verified")
 print("  GET and savePreviewSet responses use canonical payload scoping: verified")
 print("  publishAssignments explicitly requires content-tools: verified")
 print("  canonical middleware/resolver authority preserved: verified")
-print("  schema remains 53: verified")
+print("  schema is 54: verified")

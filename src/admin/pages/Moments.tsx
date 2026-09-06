@@ -1,20 +1,14 @@
+import { AdminActionButton, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  AlertCircle,
-  CheckCircle2,
-  GripVertical,
-  Images,
-  Plus,
-  Save,
-  Trash2,
-} from "lucide-react";
-import { AdminButton, AdminPageHeader } from "../components/ui/AdminUI";
+import { GripVertical, Images, Plus, Save, Trash2 } from "lucide-react";
+import { AdminButton, AdminPageHeader, AdminPanel, AdminField, AdminStatus, AdminEmptyState } from "../components/ui/AdminUI";
 import { AdminApiService } from "../services/AdminApiService";
 import type {
   MomentRecord,
   MomentRepositoryDocument,
 } from "../types/moment";
+
+import { StudioBackLink, StudioThumbnail, StudioToggle } from "../components/ui/StudioUI";
 
 function slugify(value: string) {
   return value
@@ -25,9 +19,15 @@ function slugify(value: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+export function applyMomentChanges(moments: MomentRecord[], updater: (rows: MomentRecord[]) => MomentRecord[]) {
+  return updater([...moments].sort((a, b) => a.sortOrder - b.sortOrder))
+    .map((moment, index) => ({...moment, sortOrder: index + 1}));
+}
+
 export function Moments() {
   const [document, setDocument] =
     useState<MomentRepositoryDocument | null>(null);
+  const [selectedId, setSelectedId] = useState("");
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -122,10 +122,7 @@ export function Moments() {
       current
         ? {
             ...current,
-            moments: updater(current.moments).map((moment, index) => ({
-              ...moment,
-              sortOrder: index + 1,
-            })),
+            moments: applyMomentChanges(current.moments, updater),
           }
         : current,
     );
@@ -162,6 +159,7 @@ export function Moments() {
         status: "active",
       },
     ]);
+    setSelectedId(id);
   }
 
   function archiveMoment(id: string) {
@@ -240,210 +238,37 @@ export function Moments() {
     );
   }
 
-  return (
-    <div className="space-y-7">
-      <AdminPageHeader
-        title="Moments"
-        description="Create, rename, reorder or archive moment categories and control which cards appear publicly."
-        meta={
-          <div className="flex flex-wrap items-center gap-2">
-            <span>{document.moments.length} categories</span>
-          </div>
-        }
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <AdminButton
-              type="button"
-              variant="secondary"
-              size="sm"
-              icon={Plus}
-              onClick={addMoment}
-            >
-              Add moment
-            </AdminButton>
-
-            <AdminButton
-              type="button"
-              variant="primary"
-              size="sm"
-              icon={Save}
-              onClick={save}
-              disabled={saving || !dirty}
-            >
-              {saving
-                ? "Saving…"
-                : dirty
-                  ? "Save moments"
-                  : "Saved"}
-            </AdminButton>
-          </div>
-        }
-      />
-
-      {message ? (
-        <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4" />
-            {message}
-          </div>
-        </section>
-      ) : null}
-
-      {error ? (
-        <section className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
-            {error}
-          </div>
-        </section>
-      ) : null}
-
-      <section className="rounded-[24px] border border-black/10 bg-white/80 p-5 text-sm leading-relaxed text-neutral-600">
-        Every photography workspace starts with a Moments gallery, but the taxonomy is not fixed. These categories define how this workspace organises and presents wedding-day moments.
-      </section>
-
-      <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {sortedMoments.map((moment) => (
-          <article
-            key={moment.id}
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={() => handleDrop(moment.id)}
-            className={`rounded-[20px] border border-black/15 bg-white p-4 shadow-[0_10px_30px_rgba(0,0,0,0.04)] ${
-              moment.status === "archived" ? "opacity-55" : ""
-            }`}
-          >
-            {heroImages[moment.slug] ? (
-              <div className="mb-3 overflow-hidden rounded-[14px] bg-neutral-100" style={{ aspectRatio: "16 / 9" }}>
-                <img
-                  src={heroImages[moment.slug].thumbSrc || heroImages[moment.slug].fullSrc}
-                  alt={heroImages[moment.slug].alt || `${moment.name} hero`}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            ) : (
-              <div
-                className="mb-3 rounded-[14px] border border-black/5 bg-neutral-100"
-                style={{ aspectRatio: "16 / 9" }}
-                aria-label={`${moment.name} has no hero image selected`}
-              />
-            )}
-            <div className="grid grid-cols-1 gap-3">
-              <div
-                draggable
-                onDragStart={() => setDraggedId(moment.id)}
-                onDragEnd={() => setDraggedId(null)}
-                className="flex cursor-grab items-center justify-center gap-1.5 rounded-lg border border-black/10 bg-[#f7f6f3] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500 active:cursor-grabbing"
-                title="Drag to reorder"
-              >
-                <GripVertical className="h-3.5 w-3.5" />
-                Drag to reorder
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <label>
-                  <span className="mb-1.5 block text-[9px] font-medium uppercase tracking-[0.14em] text-neutral-500">
-                    Name
-                  </span>
-                  <input
-                    value={moment.name}
-                    onChange={(event) => {
-                      const name = event.target.value;
-                      updateMoment(moment.id, {
-                        name,
-                        slug: slugify(name),
-                      });
-                    }}
-                    className="w-full rounded-xl border border-black/10 px-3 py-2 text-xs"
-                  />
-                </label>
-
-                <label>
-                  <span className="mb-1.5 block text-[9px] font-medium uppercase tracking-[0.14em] text-neutral-500">
-                    Slug
-                  </span>
-                  <input
-                    value={moment.slug}
-                    onChange={(event) =>
-                      updateMoment(moment.id, {
-                        slug: slugify(event.target.value),
-                      })
-                    }
-                    className="w-full rounded-xl border border-black/10 px-3 py-2 font-mono text-[11px]"
-                  />
-                </label>
-              </div>
-
-              <div className="space-y-2">
-                <label className="flex items-center justify-between gap-3 rounded-xl border border-black/10 px-3 py-2.5">
-                  <span className="text-xs">Available for image assignment</span>
-                  <input
-                    type="checkbox"
-                    checked={moment.availableForAssignment}
-                    onChange={(event) =>
-                      updateMoment(moment.id, {
-                        availableForAssignment: event.target.checked,
-                      })
-                    }
-                  />
-                </label>
-
-                <label className="flex items-center justify-between gap-3 rounded-xl border border-black/10 px-3 py-2.5">
-                  <span className="text-xs">
-                    Show card on Moments gallery
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={moment.showOnMomentsLanding}
-                    onChange={(event) =>
-                      updateMoment(moment.id, {
-                        showOnMomentsLanding: event.target.checked,
-                      })
-                    }
-                  />
-                </label>
-              </div>
-
-              <div className="flex flex-col gap-1.5 sm:flex-row">
-                {moment.status === "active" ? (
-                  <Link
-                    to={`/admin/moments/${encodeURIComponent(moment.slug)}/gallery`}
-                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-black px-3 py-2 text-[10px] font-medium text-white"
-                  >
-                    <Images className="h-4 w-4" />
-                    Manage gallery
-                  </Link>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={() => archiveMoment(moment.id)}
-                  disabled={moment.status === "archived"}
-                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-[10px] font-medium text-red-700 disabled:opacity-40"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Archive
-                </button>
-              </div>
-            </div>
-
-
-            <label className="mt-3 block">
-              <span className="mb-1.5 block text-[9px] font-medium uppercase tracking-[0.14em] text-neutral-500">
-                Description
-              </span>
-              <textarea
-                value={moment.description}
-                onChange={(event) =>
-                  updateMoment(moment.id, {
-                    description: event.target.value,
-                  })
-                }
-                rows={3}
-                className="w-full rounded-xl border border-black/10 px-3 py-2 text-xs"
-              />
-            </label>
-          </article>
-        ))}
-      </section>
-    </div>
-  );
+  const selected = sortedMoments.find(moment => moment.id === selectedId) || sortedMoments[0];
+  return <div className="admin-page studio-page">
+    <AdminPageHeader title="Moments" backLink={<StudioBackLink />} meta={<span>{sortedMoments.length} moments</span>}
+      actions={<><AdminButton icon={Plus} onClick={addMoment}>Add moment</AdminButton><AdminButton variant="primary" icon={Save} onClick={save} disabled={saving || !dirty}>{saving ? "Saving…" : dirty ? "Save moments" : "Saved"}</AdminButton></>} />
+    {message ? <div className="admin-alert admin-alert--success" role="status">Moments saved.</div> : null}
+    {error ? <div className="admin-alert admin-alert--error" role="alert">{error}</div> : null}
+    {!selected ? <AdminEmptyState icon={Images} title="No moments yet" /> : <div className="studio-workspace">
+      <div className="studio-record-list" aria-label="Moments">
+        {sortedMoments.map(moment => <article className={`studio-record-row ${selected.id === moment.id ? "is-selected" : ""}`} key={moment.id} onDragOver={event => event.preventDefault()} onDrop={() => handleDrop(moment.id)}>
+          <span className="studio-drag" draggable title="Drag to reorder" onDragStart={() => setDraggedId(moment.id)} onDragEnd={() => setDraggedId(null)}><GripVertical aria-hidden="true" /></span>
+          <button type="button" className="studio-record-choice" aria-pressed={selected.id === moment.id} onClick={() => setSelectedId(moment.id)}>
+            <StudioThumbnail src={heroImages[moment.slug]?.thumbSrc} />
+            <span><strong>{moment.name || "Untitled moment"}</strong><small>{moment.status === "archived" ? "Archived" : moment.showOnMomentsLanding ? "Visible" : "Hidden"}</small></span>
+          </button>
+        </article>)}
+      </div>
+      <AdminPanel title={selected.name || "Moment details"} actions={<>
+        {selected.status === "active" ? <AdminActionRouterLink to={`/admin/moments/${encodeURIComponent(selected.slug)}/gallery`} className="admin-button admin-button--secondary" aria-label="Manage moment images"><Images /></AdminActionRouterLink> : null}
+        <AdminActionButton onClick={() => archiveMoment(selected.id)} disabled={selected.status === "archived"} className="admin-button admin-button--secondary" aria-label="Archive moment"><Trash2 /></AdminActionButton>
+      </>}>
+        <div className="studio-form-grid">
+          <AdminField label="Name"><input className="admin-input" value={selected.name} onChange={event => updateMoment(selected.id, {name: event.target.value, slug: slugify(event.target.value)})} /></AdminField>
+          <AdminField label="Slug"><input className="admin-input" value={selected.slug} onChange={event => updateMoment(selected.id, {slug: slugify(event.target.value)})} /></AdminField>
+          <AdminField label="Description" className="studio-span-all"><textarea className="admin-textarea" rows={3} value={selected.description} onChange={event => updateMoment(selected.id, {description: event.target.value})} /></AdminField>
+        </div>
+        <div className="studio-options">
+          <StudioToggle checked={selected.availableForAssignment} onChange={event => updateMoment(selected.id, {availableForAssignment: event.target.checked})}>Available for image assignment</StudioToggle>
+          <StudioToggle checked={selected.showOnMomentsLanding} onChange={event => updateMoment(selected.id, {showOnMomentsLanding: event.target.checked})}>Show in Moments gallery</StudioToggle>
+          {selected.status === "archived" ? <AdminStatus>Archived</AdminStatus> : null}
+        </div>
+      </AdminPanel>
+    </div>}
+  </div>;
 }

@@ -1,16 +1,12 @@
+import { AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  AlertCircle,
-  Archive,
-  CheckCircle2,
-  Images,
-  Plus,
-  Save,
-} from "lucide-react";
+import { Archive, ArrowRight, Images, Plus, Save, Zap } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 import { AdminApiService } from "../services/AdminApiService";
 import type { CustomCollection } from "../types/customCollection";
-import { AdminPageHeader } from "../components/ui/AdminUI";
+import { AdminPageHeader, AdminPanel, AdminField, AdminButton, AdminEmptyState } from "../components/ui/AdminUI";
+
+import { StudioBackLink, StudioThumbnail, StudioToggle } from "../components/ui/StudioUI";
 
 function slugify(value: string) {
   return value
@@ -22,13 +18,24 @@ function slugify(value: string) {
 }
 
 export function CustomCollections() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [collections, setCollections] = useState<CustomCollection[]>([]);
   const [routeSlugs, setRouteSlugs] = useState<Record<string, string>>({});
+  const [selectedId, setSelectedId] = useState("");
+  const showCreate = searchParams.get("new") === "gallery";
+  const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
   const [savingSlug, setSavingSlug] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  function setShowCreate(open: boolean) {
+    const next = new URLSearchParams(searchParams);
+    if (open) next.set("new", "gallery");
+    else next.delete("new");
+    setSearchParams(next, {replace: true});
+  }
 
   async function load() {
     try {
@@ -36,7 +43,9 @@ export function CustomCollections() {
       const loaded = await AdminApiService.listCustomCollections();
       setCollections(loaded);
       setRouteSlugs(Object.fromEntries(loaded.map((collection) => [collection.id, collection.slug])));
+      setLoading(false);
     } catch (loadError) {
+      setLoading(false);
       setError(
         loadError instanceof Error
           ? loadError.message
@@ -66,7 +75,7 @@ export function CustomCollections() {
 
   async function createCollection() {
     const name = newName.trim();
-    if (!name) return;
+    if (!name || creating || loading) return;
     setCreating(true);
     setMessage("");
     setError("");
@@ -80,6 +89,8 @@ export function CustomCollections() {
       });
       setCollections((current) => [...current, collection]);
       setRouteSlugs((current) => ({ ...current, [collection.id]: collection.slug }));
+      setSelectedId(collection.id);
+      setShowCreate(false);
       setNewName("");
       setMessage(`${collection.name} created. Add images before making it public.`);
     } catch (createError) {
@@ -138,256 +149,44 @@ export function CustomCollections() {
     }
   }
 
-  return (
-    <div className="space-y-7">
-      <AdminPageHeader
-        title="Custom collections"
-        description="Create and configure photographer galleries. Images are referenced rather than duplicated."
-        meta={
-          <div className="flex flex-wrap items-center gap-2">
-            <span>{sorted.length} galleries</span>
-          </div>
-        }
-      />
-
-      {message ? (
-        <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4" />
-            {message}
-          </div>
-        </section>
-      ) : null}
-
-      {error ? (
-        <section className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
-            {error}
-          </div>
-        </section>
-      ) : null}
-
-      <section className="rounded-[28px] border border-black/10 bg-white/85 p-6">
-        <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
-          Add gallery
-        </p>
-        <div className="mt-4 flex flex-col gap-3 md:flex-row">
-          <input
-            value={newName}
-            onChange={(event) => setNewName(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") void createCollection();
-            }}
-            placeholder="For example: Beach Weddings"
-            className="min-w-0 flex-1 rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-          />
-          <button
-            type="button"
-            onClick={() => void createCollection()}
-            disabled={creating || !newName.trim()}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"
-          >
-            <Plus className="h-4 w-4" />
-            {creating ? "Creating…" : "Create gallery"}
-          </button>
+  const selected = sorted.find(collection => collection.id === selectedId) || sorted[0];
+  return <div className="admin-page studio-page">
+    <AdminPageHeader title="Collections" backLink={<StudioBackLink />} meta={<span>{sorted.length + 1} galleries</span>}
+      actions={<AdminButton icon={Plus} data-admin-action="create" onClick={() => setShowCreate(!showCreate)} aria-expanded={showCreate} aria-controls="studio-add-gallery">Add gallery</AdminButton>} />
+    {message ? <div className="admin-alert admin-alert--success" role="status">{message}</div> : null}
+    {error ? <div className="admin-alert admin-alert--error" role="alert">{error}</div> : null}
+    {showCreate ? <AdminPanel title="Add gallery"><form id="studio-add-gallery" className="studio-create-row" onSubmit={event => {event.preventDefault(); void createCollection();}}>
+      <AdminField label="Gallery name"><input className="admin-input" autoFocus value={newName} onChange={event => setNewName(event.target.value)} /></AdminField>
+      <AdminButton type="submit" icon={Plus} variant="primary" disabled={loading || creating || !newName.trim()}>{creating ? "Creating…" : "Create gallery"}</AdminButton>
+    </form></AdminPanel> : null}
+    {loading ? <p role="status">Loading collections…</p> : <div className="studio-workspace">
+      <div className="studio-record-list" aria-label="Collections">
+        <Link to="/admin/creative-flash" className="studio-record-choice studio-record-row" aria-label="Open Creative Flash gallery">
+          <span className="studio-thumbnail"><Zap aria-hidden="true" /></span><span><strong>Creative Flash</strong></span><ArrowRight className="studio-destination__arrow" aria-hidden="true" />
+        </Link>
+        {sorted.map(collection => <button key={collection.id} type="button" className={`studio-record-choice studio-record-row ${selected?.id === collection.id ? "is-selected" : ""}`} aria-pressed={selected?.id === collection.id} onClick={() => setSelectedId(collection.id)}>
+        <StudioThumbnail src={collection.heroImage?.thumbSrc || collection.heroImage?.fullSrc} />
+        <span><strong>{collection.name || "Untitled collection"}</strong><small>{collection.visibleImageCount} images · {collection.status}</small></span>
+      </button>)}</div>
+      {selected ? <AdminPanel title={selected.name || "Gallery details"} actions={<>
+        <AdminActionRouterLink to={`/admin/custom-collections/${encodeURIComponent(routeSlugs[selected.id] || selected.slug)}/gallery`} className="admin-button admin-button--secondary" aria-label="Manage gallery images"><Images /></AdminActionRouterLink>
+        <AdminButton icon={Archive} onClick={() => void archiveCollection(selected)} disabled={selected.status === "archived" || savingSlug === selected.id}>Archive gallery</AdminButton>
+        <AdminButton data-admin-action="save" icon={Save} variant="primary" onClick={() => void saveCollection(selected)} disabled={savingSlug === selected.id}>{savingSlug === selected.id ? "Saving…" : "Save gallery"}</AdminButton>
+      </>}>
+        <div className="studio-form-grid">
+          <AdminField label="Name"><input className="admin-input" value={selected.name} onChange={event => patch(selected.id, {name: event.target.value})} /></AdminField>
+          <AdminField label="Slug"><input className="admin-input" value={selected.slug} onChange={event => patch(selected.id, {slug: slugify(event.target.value)})} /></AdminField>
+          <AdminField label="Description" className="studio-span-all"><textarea className="admin-textarea" rows={3} value={selected.description} onChange={event => patch(selected.id, {description: event.target.value})} /></AdminField>
+          <AdminField label="Status"><select className="admin-select" value={selected.status} onChange={event => patch(selected.id, {status: event.target.value as CustomCollection["status"]})}><option value="draft">Draft</option><option value="active">Active</option><option value="archived">Archived</option></select></AdminField>
+          <AdminField label="Landing order"><input className="admin-input" type="number" min={1} value={selected.sortOrder} onChange={event => patch(selected.id, {sortOrder: Number(event.target.value || 0)})} /></AdminField>
         </div>
-      </section>
-
-      <section className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        {sorted.map((collection) => (
-          <article
-            key={collection.id}
-            className={`overflow-hidden rounded-[24px] border border-black/10 bg-white/85 ${
-              collection.status === "archived" ? "opacity-55" : ""
-            }`}
-          >
-            {collection.heroImage ? (
-              <div style={{ aspectRatio: "16 / 9", overflow: "hidden", background: "#f5f5f5" }}>
-                <img
-                  src={collection.heroImage.thumbSrc || collection.heroImage.fullSrc}
-                  alt={collection.heroImage.alt || `${collection.name} gallery hero`}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            ) : (
-              <div
-                className="flex items-center justify-center bg-neutral-100 text-sm text-neutral-400"
-                style={{ aspectRatio: "16 / 9" }}
-              >
-                Select a hero in Manage gallery
-              </div>
-            )}
-
-            <div className="space-y-4 p-5">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <label>
-                  <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">
-                    Name
-                  </span>
-                  <input
-                    value={collection.name}
-                    onChange={(event) => {
-                      const name = event.target.value;
-                      patch(collection.id, { name, slug: slugify(name) });
-                    }}
-                    className="w-full rounded-2xl border border-black/10 px-4 py-3 text-sm"
-                  />
-                </label>
-                <label>
-                  <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">
-                    Slug
-                  </span>
-                  <input
-                    value={collection.slug}
-                    onChange={(event) => patch(collection.id, { slug: slugify(event.target.value) })}
-                    className="w-full rounded-2xl border border-black/10 px-4 py-3 font-mono text-sm"
-                  />
-                </label>
-              </div>
-
-              <label className="block">
-                <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">
-                  Description
-                </span>
-                <textarea
-                  value={collection.description}
-                  onChange={(event) => patch(collection.id, { description: event.target.value })}
-                  rows={3}
-                  className="w-full rounded-2xl border border-black/10 px-4 py-3 text-sm"
-                />
-              </label>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <label>
-                  <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">
-                    Status
-                  </span>
-                  <select
-                    value={collection.status}
-                    onChange={(event) =>
-                      patch(collection.id, {
-                        status: event.target.value as CustomCollection["status"],
-                      })
-                    }
-                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="active">Active</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </label>
-                <label>
-                  <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">
-                    Landing order
-                  </span>
-                  <input
-                    type="number"
-                    min={1}
-                    value={collection.sortOrder}
-                    onChange={(event) =>
-                      patch(collection.id, { sortOrder: Number(event.target.value || 0) })
-                    }
-                    className="w-full rounded-2xl border border-black/10 px-4 py-3 text-sm"
-                  />
-                </label>
-              </div>
-
-              <label className="flex items-center justify-between gap-4 rounded-2xl border border-black/10 p-4">
-                <span className="text-sm">Show card on main Gallery landing</span>
-                <input
-                  type="checkbox"
-                  checked={collection.showOnLanding}
-                  onChange={(event) =>
-                    patch(collection.id, { showOnLanding: event.target.checked })
-                  }
-                />
-              </label>
-
-              <details className="rounded-2xl border border-black/10 p-4">
-                <summary className="cursor-pointer text-sm font-medium">SEO fields</summary>
-                <div className="mt-4 space-y-4">
-                  <label className="block">
-                    <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">
-                      SEO title
-                    </span>
-                    <input
-                      value={collection.seoTitle}
-                      onChange={(event) => patch(collection.id, { seoTitle: event.target.value })}
-                      className="w-full rounded-2xl border border-black/10 px-4 py-3 text-sm"
-                    />
-                  </label>
-                  <label className="block">
-                    <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-neutral-500">
-                      SEO description
-                    </span>
-                    <textarea
-                      value={collection.seoDescription}
-                      onChange={(event) =>
-                        patch(collection.id, { seoDescription: event.target.value })
-                      }
-                      rows={3}
-                      className="w-full rounded-2xl border border-black/10 px-4 py-3 text-sm"
-                    />
-                  </label>
-                </div>
-              </details>
-
-              <div className="grid grid-cols-3 gap-3 rounded-2xl bg-neutral-100 p-3 text-center">
-                <div>
-                  <p className="text-xs text-neutral-500">Selected</p>
-                  <p className="mt-1 text-xl">{collection.imageCount}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-neutral-500">Visible</p>
-                  <p className="mt-1 text-xl">{collection.visibleImageCount}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-neutral-500">Public</p>
-                  <p className="mt-1 text-sm font-medium">
-                    {collection.status === "active" ? "Yes" : "No"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2 md:flex-row">
-                <Link
-                  to={`/admin/custom-collections/${encodeURIComponent(collection.slug)}/gallery`}
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm text-white"
-                >
-                  <Images className="h-4 w-4" />
-                  Manage gallery
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => void saveCollection(collection)}
-                  disabled={savingSlug === collection.id}
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-black/10 px-4 py-2.5 text-sm disabled:opacity-40"
-                >
-                  <Save className="h-4 w-4" />
-                  {savingSlug === collection.id ? "Saving…" : "Save details"}
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => void archiveCollection(collection)}
-                disabled={collection.status === "archived" || savingSlug === collection.id}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-red-200 px-4 py-2.5 text-sm text-red-700 disabled:opacity-40"
-              >
-                <Archive className="h-4 w-4" />
-                Archive gallery
-              </button>
-            </div>
-          </article>
-        ))}
-      </section>
-
-      {!sorted.length ? (
-        <section className="rounded-[28px] border border-dashed border-black/15 bg-white/60 p-12 text-center text-neutral-500">
-          No photographer galleries yet. Create the first one above.
-        </section>
-      ) : null}
-    </div>
-  );
+        <div className="studio-options"><StudioToggle checked={selected.showOnLanding} onChange={event => patch(selected.id, {showOnLanding: event.target.checked})}>Show on gallery page</StudioToggle></div>
+        <details className="studio-disclosure"><summary>Search appearance</summary><div className="studio-form-grid">
+          <AdminField label="SEO title" className="studio-span-all"><input className="admin-input" value={selected.seoTitle} onChange={event => patch(selected.id, {seoTitle: event.target.value})} /></AdminField>
+          <AdminField label="SEO description" className="studio-span-all"><textarea className="admin-textarea" rows={3} value={selected.seoDescription} onChange={event => patch(selected.id, {seoDescription: event.target.value})} /></AdminField>
+        </div></details>
+        <p className="studio-meta">{selected.imageCount} selected images · {selected.visibleImageCount} visible</p>
+      </AdminPanel> : <AdminEmptyState icon={Images} title="Add your first gallery" />}
+    </div>}
+  </div>;
 }

@@ -328,7 +328,7 @@ type CommunicationClaimInput = {
 };
 
 
-async function claimCommunication(db: D1Db, input: CommunicationClaimInput) {
+export async function claimCommunication(db: D1Db, input: CommunicationClaimInput) {
   const leaseToken = crypto.randomUUID();
   const metadata: Record<string, any> = { ...input.metadata, _receiptVersion: 1, _receiptLease: leaseToken };
   const inserted = await db.prepare(`
@@ -379,7 +379,7 @@ async function claimCommunication(db: D1Db, input: CommunicationClaimInput) {
 
 // Called immediately before transport delivery. Persist exact bytes and a hash
 // of the transport credential identity; never persist an API key or password.
-function prepareReceiptRequest(db: D1Db, workspaceId: string, id: string, leaseToken: string) {
+export function prepareReceiptRequest(db: D1Db, workspaceId: string, id: string, leaseToken: string) {
   return async (transport: string, body: string, accountIdentity: string) => {
     const row = await db.prepare(`SELECT metadata_json FROM crm_communications WHERE id = ? AND workspace_id = ?
       AND status = 'draft' AND json_extract(metadata_json, '$._receiptLease') = ?`)
@@ -408,7 +408,7 @@ function prepareReceiptRequest(db: D1Db, workspaceId: string, id: string, leaseT
 }
 
 
-async function markCommunicationSent(
+export async function markCommunicationSent(
   db: D1Db,
   input: {
     id: string;
@@ -445,7 +445,7 @@ async function markCommunicationSent(
 }
 
 
-async function markCommunicationFailed(
+export async function markCommunicationFailed(
   db: D1Db,
   input: {
     id: string;

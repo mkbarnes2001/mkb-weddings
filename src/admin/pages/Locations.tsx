@@ -1,12 +1,15 @@
+import { AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { CheckCircle2, MapPinned, Plus, Save, SlidersHorizontal } from "lucide-react";
+import { Plus, Save, SlidersHorizontal } from "lucide-react";
 import {
   AdminApiService,
   type LocationArea,
   type LocationTypeDefinition,
   type LocationVenueOption,
 } from "../services/AdminApiService";
-import { AdminPage, AdminPageHeader } from "../components/ui/AdminUI";
+import { AdminPage, AdminPageHeader, AdminPanel, AdminField, AdminTabs, AdminTab, AdminButton } from "../components/ui/AdminUI";
+
+import { StudioBackLink, StudioToggle } from "../components/ui/StudioUI";
 
 function slugify(value: string) {
   return value
@@ -22,6 +25,7 @@ function titleCase(value: string) {
 }
 
 export function Locations() {
+  const [tab, setTab] = useState("areas");
   const [types, setTypes] = useState<LocationTypeDefinition[]>([]);
   const [locations, setLocations] = useState<LocationArea[]>([]);
   const [venues, setVenues] = useState<LocationVenueOption[]>([]);
@@ -56,7 +60,6 @@ export function Locations() {
     [types],
   );
   const enabledTypes = sortedTypes.filter((type) => type.enabled);
-  const galleryTypes = sortedTypes.filter((type) => type.enabled && type.galleryEligible);
   const sortedLocations = useMemo(
     () => [...locations].sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name)),
     [locations],
@@ -155,140 +158,32 @@ export function Locations() {
     }
   }
 
-  return (
-    <AdminPage>
-      <AdminPageHeader
-        eyebrow="Location intelligence"
-        title="Locations"
-        description="Define the geographic structure used across venues, intelligence and dynamic public galleries for this workspace."
-        actions={<button type="button" onClick={() => void save()} disabled={saving} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : "Save locations"}</button>}
-      />
-
-      {error ? <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div> : null}
-      {message ? (
-        <div className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
-          <CheckCircle2 className="h-4 w-4" /> {message}
-        </div>
-      ) : null}
-
-      {loading ? (
-        <div className="rounded-[28px] border border-black/10 bg-white p-8 text-neutral-500">Loading locations…</div>
-      ) : (
-        <>
-          <section className="rounded-[28px] border border-black/10 bg-white/85 p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Workspace taxonomy</p>
-                <h2 className="mt-2 font-serif text-3xl">Location types</h2>
-                <p className="mt-2 max-w-3xl text-sm text-neutral-600">
-                  Enable the types this photography business uses. Mark any type that should be available as a source for a dynamic public Location Gallery.
-                </p>
-              </div>
-              <button type="button" onClick={addType} className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm">
-                <Plus className="h-4 w-4" /> Add custom type
-              </button>
-            </div>
-
-            <div className="mt-6" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "14px" }}>
-              {sortedTypes.map((type) => (
-                <article key={type.id} className="rounded-2xl border border-black/10 bg-white p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <input
-                        value={type.label}
-                        onChange={(event) => updateType(type.id, { label: event.target.value })}
-                        className="w-full border-0 bg-transparent p-0 font-serif text-xl outline-none"
-                      />
-                      <input
-                        value={type.pluralLabel}
-                        onChange={(event) => updateType(type.id, { pluralLabel: event.target.value })}
-                        className="mt-1 w-full border-0 bg-transparent p-0 text-xs text-neutral-500 outline-none"
-                      />
-                    </div>
-                    {type.system ? <span className="rounded-full bg-neutral-100 px-2 py-1 text-[10px] text-neutral-500">Standard</span> : null}
-                  </div>
-                  <p className="mt-3 text-xs text-neutral-400">Key: {type.key}</p>
-                  <div className="mt-4 space-y-2">
-                    <label className="flex items-center justify-between gap-3 rounded-xl border border-black/10 px-3 py-2 text-sm">
-                      <span>Available for locations</span>
-                      <input type="checkbox" checked={type.enabled} onChange={(event) => updateType(type.id, { enabled: event.target.checked })} />
-                    </label>
-                    <label className="flex items-center justify-between gap-3 rounded-xl border border-black/10 px-3 py-2 text-sm">
-                      <span>Can power a gallery</span>
-                      <input
-                        type="checkbox"
-                        checked={type.galleryEligible}
-                        disabled={!type.enabled}
-                        onChange={(event) => updateType(type.id, { galleryEligible: event.target.checked })}
-                      />
-                    </label>
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            <div className="mt-5 rounded-2xl bg-neutral-100 p-4 text-sm text-neutral-600">
-              {enabledTypes.length} location types enabled · {galleryTypes.length} available to Gallery Management.
-            </div>
-          </section>
-
-          <section className="rounded-[28px] border border-black/10 bg-white/85 p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div>
-                <h2 className="font-serif text-3xl">Location areas</h2>
-                <p className="mt-2 text-sm text-neutral-600">{publicCount} public-ready · {activeCount} active · {locations.length} total</p>
-              </div>
-              <button type="button" onClick={addLocation} className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white">
-                <Plus className="h-4 w-4" /> Add location
-              </button>
-            </div>
-
-            <div className="mt-6" style={{ display: "grid", gridTemplateColumns: "minmax(240px, 0.8fr) minmax(0, 1.7fr)", gap: "20px" }}>
-              <div className="overflow-hidden rounded-2xl border border-black/10 bg-white">
-                {sortedLocations.map((location) => {
-                  const type = types.find((item) => item.key === location.areaType);
-                  return (
-                    <button
-                      key={location.id}
-                      type="button"
-                      onClick={() => setSelectedId(location.id)}
-                      className={`block w-full border-b border-black/5 p-4 text-left last:border-b-0 ${selectedId === location.id ? "bg-neutral-100" : "bg-white"}`}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <strong className="text-sm">{location.name}</strong>
-                        <span className="text-xs text-neutral-500">{type?.label || titleCase(location.areaType)}</span>
-                      </div>
-                      <div className="mt-1 text-xs text-neutral-500">{location.venueSlugs.length} venues · {location.status === "active" && location.showOnLanding ? "public-ready" : "hidden"}</div>
-                    </button>
-                  );
-                })}
-                {!locations.length ? <div className="p-5 text-sm text-neutral-500">No locations yet.</div> : null}
-              </div>
-
-              <div className="rounded-2xl border border-black/10 bg-white p-5">
-                {selected ? (
-                  <LocationEditor location={selected} locations={locations} types={types} venues={venues} onChange={updateSelected} />
-                ) : (
-                  <div className="flex min-h-[240px] items-center justify-center text-center text-neutral-500">
-                    <div><MapPinned className="mx-auto mb-3 h-7 w-7" />Select a location or add a new one.</div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-        </>
-      )}
-    </AdminPage>
-  );
+  return <AdminPage className="studio-page">
+    <AdminPageHeader title="Locations" backLink={<StudioBackLink />} meta={<span>{activeCount} active · {publicCount} visible</span>}
+      actions={<><AdminActionRouterLink to="/admin/gallery/locations" aria-label="Location gallery settings" className="admin-button admin-button--secondary"><SlidersHorizontal /></AdminActionRouterLink><AdminButton data-admin-action="save" icon={Save} variant="primary" onClick={() => void save()} disabled={saving}>{saving ? "Saving…" : "Save locations"}</AdminButton></>} />
+    {error ? <div className="admin-alert admin-alert--error" role="alert">{error}</div> : null}
+    {message ? <div className="admin-alert admin-alert--success" role="status">{message}</div> : null}
+    <AdminTabs><AdminTab active={tab === "areas"} onClick={() => setTab("areas")}>Locations</AdminTab><AdminTab active={tab === "types"} onClick={() => setTab("types")}>Location types</AdminTab></AdminTabs>
+    {loading ? <p role="status">Loading locations…</p> : tab === "types" ? <AdminPanel title="Location types" actions={<AdminButton icon={Plus} onClick={addType}>Add location type</AdminButton>}>
+      <div className="studio-type-list">{sortedTypes.map(type => <article key={type.id} className="studio-type-row">
+        <AdminField label="Name"><input className="admin-input" value={type.label} onChange={event => updateType(type.id, {label: event.target.value})} /></AdminField>
+        <AdminField label="Plural name"><input className="admin-input" value={type.pluralLabel} onChange={event => updateType(type.id, {pluralLabel: event.target.value})} /></AdminField>
+        <div className="studio-options"><StudioToggle checked={type.enabled} onChange={event => updateType(type.id, {enabled: event.target.checked})}>Available</StudioToggle><StudioToggle checked={type.galleryEligible} disabled={!type.enabled} onChange={event => updateType(type.id, {galleryEligible: event.target.checked})}>Use for galleries</StudioToggle></div>
+      </article>)}</div>
+    </AdminPanel> : <>
+      <div className="studio-section-bar"><h2>Location areas</h2><AdminButton icon={Plus} onClick={addLocation}>Add location</AdminButton></div>
+      <div className="studio-workspace">
+        <div className="studio-record-list" aria-label="Locations">{sortedLocations.map(location => <button key={location.id} type="button" className={`studio-record-choice studio-record-row ${selectedId === location.id ? "is-selected" : ""}`} aria-pressed={selectedId === location.id} onClick={() => setSelectedId(location.id)}>
+          <span><strong>{location.name}</strong><small>{types.find(type => type.key === location.areaType)?.label || titleCase(location.areaType)} · {location.venueSlugs.length} venues</small></span>
+        </button>)}{!locations.length ? <p className="studio-empty">No locations yet.</p> : null}</div>
+        <AdminPanel title={selected?.name || "Location details"}>{selected ? <LocationEditor location={selected} locations={locations} types={types} venues={venues} onChange={updateSelected} /> : <p className="studio-empty">Select a location or add a new one.</p>}</AdminPanel>
+      </div>
+    </>}
+  </AdminPage>;
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label className="block text-sm">
-      <span className="mb-2 block text-xs uppercase tracking-[0.12em] text-neutral-500">{label}</span>
-      {children}
-    </label>
-  );
+function Field({label, children}: {label: string; children: ReactNode}) {
+  return <AdminField label={label}>{children}</AdminField>;
 }
 
 function LocationEditor({
@@ -308,18 +203,8 @@ function LocationEditor({
 
   return (
     <div>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.15em] text-neutral-500">Location details</p>
-          <h3 className="mt-1 font-serif text-2xl">{location.name}</h3>
-        </div>
-        <label className="flex items-center gap-2 rounded-full border border-black/10 px-3 py-2 text-sm">
-          <input type="checkbox" checked={location.showOnLanding} onChange={(event) => onChange({ showOnLanding: event.target.checked })} />
-          Public-ready
-        </label>
-      </div>
-
-      <div className="mt-5" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "14px" }}>
+      <div className="studio-options studio-options--first"><StudioToggle checked={location.showOnLanding} onChange={event => onChange({showOnLanding: event.target.checked})}>Show in gallery</StudioToggle></div>
+      <div className="studio-form-grid">
         <Field label="Name">
           <input
             value={location.name}
@@ -363,14 +248,17 @@ function LocationEditor({
         </Field>
       </div>
 
-      <div className="mt-5 grid gap-4">
+      <details className="studio-disclosure"><summary>Gallery appearance</summary><div className="studio-form-grid studio-form-grid--single">
         <Field label="Hero image URL"><input value={location.heroImageUrl} onChange={(event) => onChange({ heroImageUrl: event.target.value })} className="w-full rounded-xl border border-black/10 px-3 py-2" /></Field>
         <Field label="SEO title"><input value={location.seoTitle} onChange={(event) => onChange({ seoTitle: event.target.value })} className="w-full rounded-xl border border-black/10 px-3 py-2" /></Field>
         <Field label="SEO description"><textarea rows={2} value={location.seoDescription} onChange={(event) => onChange({ seoDescription: event.target.value })} className="w-full rounded-xl border border-black/10 px-3 py-2" /></Field>
         <Field label="Intro"><textarea rows={3} value={location.intro} onChange={(event) => onChange({ intro: event.target.value })} className="w-full rounded-xl border border-black/10 px-3 py-2" /></Field>
+      </div></details>
+      <div className="studio-form-grid studio-form-grid--single">
         <Field label="Venues in this location">
           <select
             multiple
+            aria-label="Venues in this location"
             value={location.venueSlugs}
             onChange={(event) => onChange({ venueSlugs: Array.from(event.currentTarget.selectedOptions, (option: HTMLOptionElement) => option.value) })}
             className="w-full rounded-xl border border-black/10 px-3 py-2"
@@ -382,10 +270,7 @@ function LocationEditor({
         </Field>
       </div>
 
-      <div className="mt-5 flex items-start gap-3 rounded-2xl bg-neutral-100 p-4 text-sm text-neutral-600">
-        <SlidersHorizontal className="mt-0.5 h-4 w-4 shrink-0" />
-        Public gallery titles, source type, route, hero and SEO are configured separately in Gallery Management.
-      </div>
+
     </div>
   );
 }

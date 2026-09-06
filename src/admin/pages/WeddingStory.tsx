@@ -45,8 +45,8 @@ export function WeddingStory() {
 
   if (!story || !wedding) {
     return (
-      <div className="rounded-[28px] border border-black/10 bg-white p-8">
-        <h1 className="text-3xl font-serif mb-4">Story not found</h1>
+      <div className="admin-surface-card border border-black/10 bg-white">
+        <h1 className="admin-section-title mb-4">Story not found</h1>
         <Link to="/admin/weddings" className="underline underline-offset-4">
           Back to weddings
         </Link>
@@ -65,7 +65,7 @@ export function WeddingStory() {
     .filter(Boolean).length;
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
         title="Story"
         meta={
@@ -88,38 +88,35 @@ export function WeddingStory() {
       />
 
       <section className="grid grid-cols-1 lg:grid-cols-4 gap-5">
-        <div className="rounded-[28px] border border-black/10 bg-white/75 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+        <div className="admin-surface-card border border-black/10 bg-white/75">
           <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-3">Paragraphs</p>
-          <p className="text-5xl font-serif">{story.paragraphs.length}</p>
+          <p className="admin-metric-value ">{story.paragraphs.length}</p>
         </div>
 
-        <div className="rounded-[28px] border border-black/10 bg-white/75 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+        <div className="admin-surface-card border border-black/10 bg-white/75">
           <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-3">Word count</p>
-          <p className="text-5xl font-serif">{wordCount}</p>
+          <p className="admin-metric-value ">{wordCount}</p>
         </div>
 
-        <div className="rounded-[28px] border border-black/10 bg-white/75 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+        <div className="admin-surface-card border border-black/10 bg-white/75">
           <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-3">Facts</p>
-          <p className="text-5xl font-serif">{story.facts.length}</p>
+          <p className="admin-metric-value ">{story.facts.length}</p>
         </div>
 
-        <div className="rounded-[28px] border border-black/10 bg-white/75 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+        <div className="admin-surface-card border border-black/10 bg-white/75">
           <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-3">Story suppliers</p>
-          <p className="text-5xl font-serif">{story.supplierCountFromStory}</p>
+          <p className="admin-metric-value ">{story.supplierCountFromStory}</p>
         </div>
       </section>
 
       <section className="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-5">
-        <article className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+        <article className="admin-surface-card border border-black/10 bg-white/75">
           <div className="flex items-center gap-3 mb-6">
             <div className="rounded-2xl bg-black text-white p-3">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-3xl font-serif">Story text</h2>
-              <p className="text-sm text-neutral-500">
-                Preview including saved admin overrides.
-              </p>
+              <h2 className="admin-section-title ">Story text</h2>
             </div>
           </div>
 
@@ -133,7 +130,7 @@ export function WeddingStory() {
           {story.intro ? (
             <div className="mb-8">
               <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-2">Intro</p>
-              <p className="text-lg font-serif leading-relaxed text-neutral-800">{story.intro}</p>
+              <p className="admin-metric-value text-lg leading-relaxed text-neutral-800">{story.intro}</p>
             </div>
           ) : null}
 
@@ -150,12 +147,12 @@ export function WeddingStory() {
         </article>
 
         <aside className="space-y-5">
-          <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+          <section className="admin-surface-card border border-black/10 bg-white/75">
             <div className="flex items-center gap-3 mb-6">
               <div className="rounded-2xl bg-black text-white p-3">
                 <ListChecks className="w-5 h-5" />
               </div>
-              <h2 className="text-3xl font-serif">Facts</h2>
+              <h2 className="admin-section-title ">Facts</h2>
             </div>
 
             {story.facts.length > 0 ? (
@@ -174,12 +171,12 @@ export function WeddingStory() {
             )}
           </section>
 
-          <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+          <section className="admin-surface-card border border-black/10 bg-white/75">
             <div className="flex items-center gap-3 mb-6">
               <div className="rounded-2xl bg-black text-white p-3">
                 <FileText className="w-5 h-5" />
               </div>
-              <h2 className="text-3xl font-serif">AI readiness</h2>
+              <h2 className="admin-section-title ">AI readiness</h2>
             </div>
 
             <div className="space-y-6">

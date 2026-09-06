@@ -145,18 +145,10 @@ email = (
 )
 
 
-for label in [
-    "Catalogue",
-    "Quotes",
-]:
-    assert label in crm
-
-assert (
-    crm.count(
-        "<AdminHeaderRouterLink"
-    )
-    >= 2
-)
+# CRM navigation now has a complete Templates hub in Settings and record-scoped quotes.
+assert "New enquiry" in crm
+assert "<CRMDashboard" in crm
+assert 'to: "/admin/crm/templates"' in (ROOT / "src/admin/navigation/adminSettings.ts").read_text()
 
 assert "Email templates" in email
 
@@ -195,7 +187,7 @@ print(
 )
 
 print(
-    "  non-header Router Links remain unchanged"
+    "  ordinary navigation remains labelled; action links use shared square controls"
 )
 
 print(

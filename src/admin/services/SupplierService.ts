@@ -30,6 +30,9 @@ export type MasterSupplier = {
   description: string;
   notes: string;
   status: "active" | "archived" | string;
+  qualityState?: "needs_review" | "needs_details" | "complete";
+  missingDetails?: string[];
+  pendingReviewCount?: number;
   linkedWeddingCount: number;
   linkedWeddings: Array<{
     slug: string;

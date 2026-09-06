@@ -6,7 +6,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {build} from 'esbuild';
 const root = new URL('../', import.meta.url);
 const source = readFileSync(new URL('serverless/crm-payment-receipts-d1.ts',root),'utf8');
-const claim = source.slice(source.indexOf('async function claimCommunication('),source.indexOf('\nasync function markCommunicationSent('));
+const claim = source.slice(source.indexOf('async function claimCommunication('),source.indexOf('\nexport async function markCommunicationSent('));
 const orchestration = source.slice(source.indexOf('export async function deliverInvoicePaymentReceiptNotifications('));
 const notificationError = source.slice(source.indexOf('function notificationError('),source.indexOf('\nasync function paymentContext('));
 const contents = `
@@ -95,7 +95,7 @@ async function sendProfessionalClientActionNotification(db:any,env:any,input:any
  return {sent:true,provider:'resend',providerMessageId:'synthetic-professional'};
 }
 ${deliveryFunctions}
-export {claimCommunication,prepareReceiptRequest,markCommunicationSent,markCommunicationFailed,deliverClientReceipt,deliverProfessionalNotification};
+export {claimCommunication,deliverClientReceipt,deliverProfessionalNotification};
 `;
 const lifecycleCompiled=await build({stdin:{contents:lifecycleCode,loader:'ts'},write:false,bundle:true,format:'esm',platform:'node'});
 const lifecycle=await import(`data:text/javascript;base64,${Buffer.from(lifecycleCompiled.outputFiles[0].text).toString('base64')}`);

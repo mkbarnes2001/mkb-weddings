@@ -17,8 +17,8 @@ page = read(
 app = read(
     "src/admin/app/AdminApp.tsx"
 )
-nav = read(
-    "src/admin/navigation/adminModules.ts"
+settings = read(
+    "src/admin/navigation/adminSettings.ts"
 )
 quotes = read(
     "src/admin/pages/CRMQuotes.tsx"
@@ -33,7 +33,7 @@ css = read(
     "src/admin/admin-theme.css"
 )
 
-# Dedicated WedCRM destination.
+# Templates belongs to WedCRM Settings, with separate quote and email pages.
 assert (
     "export function CRMCommercialTemplates"
     in page
@@ -42,18 +42,10 @@ assert (
     'path="crm/templates"'
     in app
 )
-assert (
-    "<CRMCommercialTemplates />"
-    in app
-)
-assert (
-    'key: "templates"'
-    in nav
-)
-assert (
-    'to: "/admin/crm/templates"'
-    in nav
-)
+assert '<CRMTemplates />' in app
+assert '<CRMCommercialTemplates templateType="quotes" />' in app
+assert '<CRMCommercialTemplates templateType="emails" />' in app
+assert 'to: "/admin/crm/templates"' in settings
 
 # Quote and email template APIs are actually consumed.
 # Normalise whitespace so multiline method chaining does
@@ -83,10 +75,15 @@ assert (
 assert "togglePackage(" in page
 assert "toggleAddon(" in page
 assert "recommendPackage(" in page
-assert (
-    "They are not repeated beneath every package"
-    in page
-)
+# Guidance is removed; editable content and labelled choices remain.
+for helper in [
+    "They are not repeated beneath every package",
+    "Configure reusable quote defaults",
+    "Build reusable quote and email templates",
+]:
+    assert helper not in page, helper
+assert 'aria-label={`Include ${item.name}`}' in page
+assert 'aria-pressed={recommended}' in page
 
 # Core Studio-Ninja-like functions are represented
 # using the WedPlanned design system.
@@ -113,21 +110,20 @@ assert (
     in quotes
 )
 assert (
-    "selectedTemplateId"
+    "setTemplateId"
     in quotes
 )
 assert (
-    "Create from template"
+    'label="Quote template"'
     in quotes
 )
 assert (
-    "AdminApiService.createCrmQuote(enquiryId, templateId)"
+    "AdminApiService.createCrmQuote(enquiryId, templateId, quoteType)"
     in quotes
 )
-assert (
-    'to="/admin/crm/templates"'
-    in quotes
-)
+assert '<Navigate to="/admin/crm" replace />' in quotes
+assert 'AdminApiService.getCrmEnquiry(enquiryId)' in quotes
+assert 'template.status === "active" && template.quoteType === quoteType' in quotes
 
 # Enquiry Create quote no longer bypasses template choice.
 # Check the behaviour inside createQuote rather than requiring

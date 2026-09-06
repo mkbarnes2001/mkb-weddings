@@ -199,7 +199,7 @@ version = con.execute(
     "WHERE key='schema_version'"
 ).fetchone()[0]
 require(
-    str(version) == "53",
+    str(version) == "54",
     f"B3C1 changed schema version: {version}",
 )
 require(
@@ -213,10 +213,10 @@ con.close()
 require(
     not list(
         (ROOT / "d1/migrations").glob(
-            "054_*.sql"
+            "055_*.sql"
         )
     ),
-    "B3C1 must not add migration 054",
+    "B3C1 must not add migration 055",
 )
 
 print(
@@ -247,5 +247,5 @@ print(
     "  specialist API route ownership and middleware authority preserved: verified"
 )
 print(
-    "  schema remains 53: verified"
+    "  schema is 54: verified"
 )

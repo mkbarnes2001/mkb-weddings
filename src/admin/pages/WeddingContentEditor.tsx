@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
@@ -316,15 +317,15 @@ export function WeddingContentEditor() {
 
   if (!wedding) {
     return (
-      <section className="rounded-[28px] border border-black/10 bg-white p-8">
-        <h1 className="font-serif text-3xl">Wedding JSON not found</h1>
+      <section className="admin-surface-card border border-black/10 bg-white">
+        <h1 className="admin-section-title ">Wedding JSON not found</h1>
         <p className="mt-3 text-neutral-600">{error}</p>
-        <Link
+        <AdminActionRouterLink
           to="/admin/weddings"
           className="mt-6 inline-flex underline underline-offset-4"
         >
           Back to weddings
-        </Link>
+        </AdminActionRouterLink>
       </section>
     );
   }
@@ -333,7 +334,7 @@ export function WeddingContentEditor() {
   const seo = (wedding.seo || {}) as WeddingSeoRecord;
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
         title="Master content"
         meta={
@@ -347,7 +348,7 @@ export function WeddingContentEditor() {
           </div>
         }
         actions={
-          <button
+          <AdminActionButton
             type="button"
             onClick={saveWedding}
             disabled={
@@ -359,7 +360,7 @@ export function WeddingContentEditor() {
           >
             <Save className="admin-button__icon" />
             {saving ? "Saving…" : "Save wedding"}
-          </button>
+          </AdminActionButton>
         }
       />
 
@@ -456,13 +457,13 @@ export function WeddingContentEditor() {
                 The same supplier can be added more than once when they have different roles.
               </p>
             </div>
-            <Link
+            <AdminActionRouterLink
               to={`/admin/weddings/${slug}/suppliers/edit`}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
+              className="admin-button admin-button--secondary inline-flex items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
             >
               <Users className="h-4 w-4" />
               Full supplier editor
-            </Link>
+            </AdminActionRouterLink>
           </div>
 
           {supplierMessage ? (
@@ -490,15 +491,15 @@ export function WeddingContentEditor() {
                       {row.instagram ? ` · @${String(row.instagram).replace(/^@/, "")}` : ""}
                     </p>
                   </div>
-                  <button
+                  <AdminActionButton
                     type="button"
                     onClick={() => removeSupplier(index)}
                     disabled={supplierSaving}
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-red-200 bg-white px-4 py-2 text-sm text-red-700 disabled:opacity-40"
+                    className="admin-button admin-button--secondary inline-flex items-center justify-center gap-2 rounded-full border border-red-200 bg-white px-4 py-2 text-sm text-red-700 disabled:opacity-40"
                   >
                     <X className="h-4 w-4" />
                     Remove
-                  </button>
+                  </AdminActionButton>
                 </div>
               ))
             ) : (
@@ -508,7 +509,7 @@ export function WeddingContentEditor() {
             )}
           </div>
 
-          <div className="rounded-[24px] border border-black/10 bg-white p-5">
+          <div className="admin-surface-card border border-black/10 bg-white">
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] lg:items-end">
               <label className="block">
                 <span className="mb-2 block text-xs uppercase tracking-[0.16em] text-neutral-500">
@@ -554,11 +555,11 @@ export function WeddingContentEditor() {
                 />
               </label>
 
-              <button
+              <AdminActionButton
                 type="button"
                 onClick={() => selectedSupplier && addSupplier(selectedSupplier)}
                 disabled={!selectedSupplier || supplierSaving}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"
+                className="admin-button admin-button--primary inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"
               >
                 <Plus className="h-4 w-4" />
                 {supplierSaving
@@ -566,7 +567,7 @@ export function WeddingContentEditor() {
                   : selectedSupplier && weddingSuppliers.some((row) => row.supplierId === selectedSupplier.id)
                     ? "Add another role"
                     : "Add supplier"}
-              </button>
+              </AdminActionButton>
             </div>
             <p className="mt-3 text-xs text-neutral-500">
               Suppliers already assigned remain selectable only when you need to add a second role for the same wedding.
@@ -600,14 +601,14 @@ export function WeddingContentEditor() {
                   <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
                     Paragraph {index + 1}
                   </p>
-                  <button
+                  <AdminActionButton
                     type="button"
                     onClick={() => removeParagraph(index)}
                     className="inline-flex items-center gap-2 text-sm text-red-700"
                   >
                     <Trash2 className="h-4 w-4" />
                     Remove
-                  </button>
+                  </AdminActionButton>
                 </div>
                 <textarea
                   value={paragraph}
@@ -620,14 +621,14 @@ export function WeddingContentEditor() {
               </div>
             ))}
 
-            <button
+            <AdminActionButton
               type="button"
               onClick={addParagraph}
-              className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm"
+              className="admin-button admin-button--secondary inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm"
             >
               <Plus className="h-4 w-4" />
               Add paragraph
-            </button>
+            </AdminActionButton>
           </div>
         </div>
       </EditorSection>
@@ -705,11 +706,11 @@ function EditorSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.04)] md:p-8">
+    <section className="admin-surface-card border border-black/10 bg-white/80 md:p-8">
       <p className="text-xs uppercase tracking-[0.22em] text-neutral-500">
         {eyebrow}
       </p>
-      <h2 className="mt-2 mb-7 font-serif text-3xl">{title}</h2>
+      <h2 className="admin-section-title mt-2 mb-7">{title}</h2>
       {children}
     </section>
   );
@@ -764,7 +765,7 @@ function TextAreaField({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         rows={rows}
-        className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm leading-relaxed outline-none focus:border-black/30"
+        className="admin-input"
       />
     </label>
   );
@@ -789,7 +790,7 @@ function SelectField({
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-black/30"
+        className="admin-input"
       >
         {options.map(([optionValue, optionLabel]) => (
           <option key={optionValue} value={optionValue}>

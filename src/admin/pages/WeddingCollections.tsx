@@ -29,15 +29,15 @@ export function WeddingCollections() {
 
   if (!wedding) {
     return (
-      <div className="rounded-[28px] border border-black/10 bg-white p-8">
-        <h1 className="text-3xl font-serif mb-4">Wedding not found</h1>
+      <div className="admin-surface-card border border-black/10 bg-white">
+        <h1 className="admin-section-title mb-4">Wedding not found</h1>
         <Link to="/admin/weddings" className="underline underline-offset-4">Back to weddings</Link>
       </div>
     );
   }
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
         title="Collections"
         meta={
@@ -56,7 +56,7 @@ export function WeddingCollections() {
         {collections.map((collection) => (
           <article
             key={collection.id}
-            className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]"
+            className="admin-surface-card border border-black/10 bg-white/75"
           >
             <div className="flex items-start justify-between gap-4 mb-6">
               <div className="rounded-2xl bg-black text-white p-3">
@@ -68,26 +68,18 @@ export function WeddingCollections() {
             </div>
 
             <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-3">{collection.type}</p>
-            <h2 className="text-3xl font-serif mb-3">{collection.name}</h2>
+            <h2 className="admin-section-title mb-3">{collection.name}</h2>
             <p className="text-sm text-neutral-600 leading-relaxed">{collection.description}</p>
 
             <div className="mt-6 pt-6 border-t border-black/5">
               <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-2">Images</p>
-              <p className="text-5xl font-serif">{collection.imageCount}</p>
+              <p className="admin-metric-value ">{collection.imageCount}</p>
               <p className="text-xs text-neutral-400 mt-3">{collection.source}</p>
             </div>
           </article>
         ))}
       </section>
 
-      <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
-        <h2 className="text-3xl font-serif mb-4">Collection model</h2>
-        <p className="text-neutral-600 max-w-3xl leading-relaxed">
-          Each uploaded image belongs to one wedding and can be assigned to multiple destinations:
-          the optional wedding story, the linked venue gallery, moments and future portfolio or social
-          collections. The same R2 asset and AI metadata are reused without duplicating the image.
-        </p>
-      </section>
     </div>
   );
 }

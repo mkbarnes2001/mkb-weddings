@@ -401,7 +401,7 @@ export function CRMEmailSettings() {
         actions={
           <div className="flex flex-wrap gap-2">
             <AdminHeaderRouterLink
-              to="/admin/crm/templates"
+              to="/admin/crm/templates/emails"
               className="admin-button admin-button--secondary"
             >
               <Mail className="admin-button__icon" />

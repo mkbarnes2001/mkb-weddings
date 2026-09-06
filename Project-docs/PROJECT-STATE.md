@@ -1,5 +1,9 @@
 # Project State
 
+## Current release preparation — v1.10.15a
+
+The complete CRM/Studio candidate and booking setup are prepared for release. Canonical schema is **54**; production promotion and deployment are pending final verification. Public client booking and new provider/email activation remain closed. See [v1.10.15a release record](RELEASE-v1.10.15a.md). Earlier version-specific sections below are historical.
+
 ## Current stable application baseline — v1.10.12a
 
 **v1.10.12a — Booking Journey, CRM Refinement & Connected Payments** is the verified stable application baseline.

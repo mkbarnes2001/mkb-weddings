@@ -19,8 +19,8 @@ MIGRATED = {
     "ClientGalleryReview.tsx": "Gallery review",
     "CreativeFlashGallery.tsx": "Creative Flash",
     "CustomCollectionGallery.tsx": "Collection gallery",
-    "CustomCollections.tsx": "Custom collections",
-    "LocationGallerySettings.tsx": "Location Gallery",
+    "CustomCollections.tsx": "Collections",
+    "LocationGallerySettings.tsx": "Location gallery settings",
     "MomentGallery.tsx": "Moment gallery",
     "Moments.tsx": "Moments",
     "NewVenue.tsx": "New venue",
@@ -43,6 +43,13 @@ def main() -> None:
 
         assert "AdminPageHeader" in text, filename
         assert f'title="{title}"' in text, filename
+
+    # Studio's Gallery hub owns its lists; nested editors return to their parent.
+    for filename in ["CustomCollections.tsx", "Moments.tsx", "CustomCollectionGallery.tsx",
+                     "MomentGallery.tsx", "LocationGallerySettings.tsx", "NewVenue.tsx",
+                     "VenueContentEditor.tsx", "VenueDetail.tsx", "VenueGallery.tsx",
+                     "VenueUpload.tsx", "CreativeFlashGallery.tsx"]:
+        assert "backLink={<StudioBackLink" in read(filename), filename
 
     images = read("WeddingImages.tsx")
     assert "Save all changes" in images
@@ -148,7 +155,7 @@ def main() -> None:
 
     print("PASS legacy Admin header migration — all live legacy pages")
     print("  migrated live legacy pages: 25")
-    print("  redundant header back navigation removed: verified")
+    print("  shared headers and contextual Studio return navigation: verified")
     print("  record summaries retained: verified")
     print("  operational actions retained: verified")
     print("  new-wedding success state: verified")

@@ -1,3 +1,4 @@
+import { AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -437,12 +438,12 @@ export function BusinessOnboarding() {
           title="Workspace already established"
           description="Existing workspaces remain unchanged and can continue using the normal WedNav business settings."
         >
-          <Link
+          <AdminActionRouterLink
             to="/admin"
             className="admin-button admin-button--primary admin-button--md"
           >
             Return to WedNav
-          </Link>
+          </AdminActionRouterLink>
         </AdminPanel>
       </AdminPage>
     );
@@ -464,12 +465,12 @@ export function BusinessOnboarding() {
           title="Your workspace is ready"
           icon={CheckCircle2}
         >
-          <Link
+          <AdminActionRouterLink
             to="/admin"
             className="admin-button admin-button--primary admin-button--md"
           >
             Open WedNav
-          </Link>
+          </AdminActionRouterLink>
         </AdminPanel>
       </AdminPage>
     );

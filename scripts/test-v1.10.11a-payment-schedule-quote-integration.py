@@ -61,7 +61,7 @@ assert db.execute(
     FROM schema_meta
     WHERE key='schema_version'
     """
-).fetchone()[0] == "47"
+).fetchone()[0] == "54"
 
 assert not db.execute(
     "PRAGMA foreign_key_check"

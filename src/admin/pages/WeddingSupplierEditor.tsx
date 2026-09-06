@@ -1,3 +1,4 @@
+import { AdminActionButton } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -177,8 +178,8 @@ export function WeddingSupplierEditor() {
 
   if (!wedding) {
     return (
-      <div className="rounded-[28px] border border-black/10 bg-white p-8">
-        <h1 className="text-3xl font-serif mb-4">
+      <div className="admin-surface-card border border-black/10 bg-white">
+        <h1 className="admin-section-title mb-4">
           Wedding not found
         </h1>
         <Link
@@ -192,7 +193,7 @@ export function WeddingSupplierEditor() {
   }
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
         title="Supplier editor"
         meta={
@@ -220,21 +221,21 @@ export function WeddingSupplierEditor() {
           return (
             <article
               key={`${index}-${row.name}`}
-              className="rounded-[28px] border border-black/10 bg-white/75 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.04)]"
+              className="admin-surface-card border border-black/10 bg-white/75"
             >
               <div className="flex items-start justify-between gap-4 mb-5">
                 <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
                   Supplier {index + 1}
                 </p>
 
-                <button
+                <AdminActionButton
                   type="button"
                   onClick={() => deleteRow(index)}
                   className="rounded-full border border-red-200 p-2 text-red-600 hover:bg-red-50"
                   aria-label="Delete supplier"
                 >
                   <Trash2 className="w-4 h-4" />
-                </button>
+                </AdminActionButton>
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
@@ -248,7 +249,7 @@ export function WeddingSupplierEditor() {
                       updateRow(index, { role: event.target.value })
                     }
                     placeholder="Venue, Florist, Band..."
-                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-black/30"
+                    className="admin-input"
                   />
                 </label>
 
@@ -283,7 +284,7 @@ export function WeddingSupplierEditor() {
                       })
                     }
                     placeholder="https://..."
-                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-black/30"
+                    className="admin-input"
                   />
                 </label>
 
@@ -299,7 +300,7 @@ export function WeddingSupplierEditor() {
                       })
                     }
                     placeholder="supplierhandle"
-                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-black/30"
+                    className="admin-input"
                   />
                 </label>
               </div>
@@ -317,30 +318,30 @@ export function WeddingSupplierEditor() {
       </section>
 
       <div className="flex flex-wrap gap-3">
-        <button
+        <AdminActionButton
           type="button"
           onClick={addRow}
-          className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm hover:bg-neutral-50"
+          className="admin-button admin-button--secondary inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm hover:bg-neutral-50"
         >
           <Plus className="w-4 h-4" />
           Add supplier
-        </button>
+        </AdminActionButton>
 
-        <button
+        <AdminActionButton
           type="button"
           onClick={saveSuppliers}
           disabled={
             saving || !apiOnline || allValidationErrors.length > 0
           }
-          className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="admin-button admin-button--primary inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Save className="w-4 h-4" />
           {saving ? "Saving..." : "Save suppliers"}
-        </button>
+        </AdminActionButton>
       </div>
 
       {saveResult ? (
-        <section className="rounded-[24px] border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">
+        <section className="admin-surface-card border border-emerald-200 bg-emerald-50 text-emerald-900">
           <div className="flex items-start gap-3">
             <CheckCircle2 className="w-5 h-5 mt-0.5" />
             <div>
@@ -358,7 +359,7 @@ export function WeddingSupplierEditor() {
       ) : null}
 
       {saveError ? (
-        <section className="rounded-[24px] border border-red-200 bg-red-50 p-5 text-red-900">
+        <section className="admin-surface-card border border-red-200 bg-red-50 text-red-900">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 mt-0.5" />
             <p>{saveError}</p>
@@ -366,23 +367,20 @@ export function WeddingSupplierEditor() {
         </section>
       ) : null}
 
-      <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+      <section className="admin-surface-card border border-black/10 bg-white/75">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
           <div>
-            <h2 className="text-3xl font-serif">Portable supplier export</h2>
-            <p className="text-sm text-neutral-500 mt-1">
-              Optional export for backup or external use. D1 remains the live source of truth.
-            </p>
+            <h2 className="admin-section-title ">Portable supplier export</h2>
           </div>
 
-          <button
+          <AdminActionButton
             type="button"
             onClick={copyCsv}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm hover:bg-neutral-50"
+            className="admin-button admin-button--secondary inline-flex items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm hover:bg-neutral-50"
           >
             <Copy className="w-4 h-4" />
             {copied ? "Copied" : "Copy export"}
-          </button>
+          </AdminActionButton>
         </div>
 
         <pre className="max-h-[420px] overflow-auto rounded-2xl bg-[#111111] p-5 text-xs text-white/80">
@@ -390,11 +388,11 @@ export function WeddingSupplierEditor() {
         </pre>
       </section>
 
-      <section className="rounded-[28px] border border-blue-200 bg-blue-50 p-7 text-blue-950">
+      <section className="admin-surface-card border border-blue-200 bg-blue-50 text-blue-950">
         <div className="flex items-start gap-4">
           <Search className="w-6 h-6 mt-1" />
           <div>
-            <h2 className="text-2xl font-serif mb-2">
+            <h2 className="admin-section-title mb-2">
               External AI supplier search
             </h2>
             <p className="text-sm leading-relaxed">

@@ -3254,28 +3254,21 @@ export async function processStripeInvoicePaymentEvent(
     };
   }
 
-  const invoice: any =
-    await db.prepare(`
-      SELECT
-        id,
-        job_id,
-        reference,
-        status,
-        total_amount,
-        currency
-      FROM crm_invoices
-      WHERE id = ?
-        AND workspace_id = ?
-        AND status IN (
-          'issued',
-          'part_paid',
-          'paid'
-        )
-      LIMIT 1
-    `).bind(
-      invoiceId,
-      workspaceId,
-    ).first();
+  // A signed payment may arrive after an online reservation has expired.
+  // Only our saved booking attempt can reopen its own voided invoice; provider
+  // metadata alone cannot select or reopen a different commercial document.
+  const bookingAttempt = parseInvoiceAttemptMetadata(attempt.metadata_json);
+  const lateBooking = bookingAttempt.source === "online_booking"
+    && text(bookingAttempt.calendarEventId).startsWith("ob_")
+    && text(bookingAttempt.jobId).startsWith("obj_");
+  const invoice: any = await db.prepare(`
+    SELECT id, job_id, reference, status, total_amount, currency
+    FROM crm_invoices WHERE id = ? AND workspace_id = ?
+    AND (status IN ('issued','part_paid','paid') OR
+      (status = 'void' AND ? = 1 AND source_id = ? AND job_id = ?))
+    LIMIT 1
+  `).bind(invoiceId, workspaceId, lateBooking ? 1 : 0,
+    text(bookingAttempt.calendarEventId), text(bookingAttempt.jobId)).first();
 
   if (!invoice) {
     return {
@@ -3699,8 +3692,15 @@ export async function processStripeInvoicePaymentEvent(
       workspaceId,
     );
 
+  const reopenBookingInvoice = lateBooking && invoice.status === "void" ? [
+    db.prepare(`UPDATE crm_invoices SET status='issued',voided_at=NULL,
+      updated_at=CURRENT_TIMESTAMP WHERE id=? AND workspace_id=? AND status='void'
+      AND source_id=? AND job_id=?`).bind(invoiceId,workspaceId,
+        text(bookingAttempt.calendarEventId),text(bookingAttempt.jobId)),
+  ] : [];
   const results =
     await db.batch([
+      ...reopenBookingInvoice,
       insertPayment,
       updateInvoice,
       updateAttempt,
@@ -3709,7 +3709,7 @@ export async function processStripeInvoicePaymentEvent(
 
   const inserted =
     Number(
-      results?.[0]
+      results?.[reopenBookingInvoice.length]
         ?.meta
         ?.changes
       || 0,

@@ -241,7 +241,7 @@ db.executescript(schema)
 version = db.execute(
     "SELECT value FROM schema_meta WHERE key='schema_version'"
 ).fetchone()[0]
-require(str(version) == "53", f"B3C2 changed schema: {version}")
+require(str(version) == "54", f"B3C2 changed schema: {version}")
 require(
     not db.execute("PRAGMA foreign_key_check").fetchall(),
     "schema foreign-key check failed",
@@ -249,8 +249,8 @@ require(
 db.close()
 
 require(
-    not list((ROOT / "d1/migrations").glob("054_*.sql")),
-    "B3C2 must not add migration 054",
+    not list((ROOT / "d1/migrations").glob("055_*.sql")),
+    "B3C2 must not add migration 055",
 )
 
 print(
@@ -284,4 +284,4 @@ print(
 print(
     "  B3C1 server/middleware authority and nested invoice route guard are preserved: verified"
 )
-print("  schema remains 53: verified")
+print("  schema is 54: verified")

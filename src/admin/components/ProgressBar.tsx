@@ -5,12 +5,12 @@ export function ProgressBar({ label, done, total }: { label: string; done: numbe
 
   return (
     <div>
-      <div className="mb-1.5 flex justify-between text-[10px] text-neutral-600">
+      <div className="admin-progress-label">
         <span>{label}</span>
         <span>{done}/{total} · {pct}%</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-black/5">
-        <div className="h-full rounded-full bg-black transition-all" style={{ width: `${pct}%` }} />
+      <div className="admin-progress-track" role="progressbar" aria-label={label} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+        <div className="admin-progress-fill" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );

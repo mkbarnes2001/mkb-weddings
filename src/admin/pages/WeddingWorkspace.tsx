@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionLabel, AdminActionLink, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import {
   useEffect,
   useMemo,
@@ -918,7 +919,6 @@ export function WeddingWorkspace() {
               <div>
                 <p className="wedding-workspace-kicker">1 · Wedding setup</p>
                 <h2 className="wedding-workspace-section-title">Wedding setup</h2>
-                <p className="wedding-workspace-section-copy max-w-2xl">Link the venue first, then build the supplier team. Each section is managed independently without leaving this wedding.</p>
               </div>
               <Link to={`/admin/weddings/${slug}/content`} className="text-sm underline underline-offset-4">Edit full wedding record</Link>
             </div>
@@ -939,8 +939,8 @@ export function WeddingWorkspace() {
                     </div>
                   </div>
                   <div className="wedding-workspace-venue-actions">
-                    {selectedVenue ? <button type="button" onClick={() => setShowVenuePicker((value) => !value)} className="admin-button admin-button--secondary admin-button--sm">{showVenuePicker ? "Close" : "Change venue"}</button> : null}
-                    <button type="button" onClick={() => { setShowNewVenue((value) => !value); setShowVenuePicker(true); }} className="admin-button admin-button--secondary admin-button--sm">{showNewVenue ? "Cancel new venue" : "New venue"}</button>
+                    {selectedVenue ? <AdminActionButton type="button" onClick={() => setShowVenuePicker((value) => !value)} className="admin-button admin-button--secondary admin-button--sm">{showVenuePicker ? "Close" : "Change venue"}</AdminActionButton> : null}
+                    <AdminActionButton type="button" onClick={() => { setShowNewVenue((value) => !value); setShowVenuePicker(true); }} className="admin-button admin-button--secondary admin-button--sm">{showNewVenue ? "Cancel new venue" : "New venue"}</AdminActionButton>
                   </div>
                 </div>
 
@@ -962,8 +962,8 @@ export function WeddingWorkspace() {
                       </datalist>
                     </div>
                     <div className="flex shrink-0 flex-wrap gap-2 self-end">
-                      {selectedVenue ? <button type="button" disabled={busy} onClick={() => saveVenue("")} className="admin-button admin-button--ghost admin-button--sm">Clear link</button> : null}
-                      <button type="button" disabled={busy} onClick={linkVenueFromPicker} className="admin-button admin-button--primary admin-button--sm">Link venue</button>
+                      {selectedVenue ? <AdminActionButton type="button" disabled={busy} onClick={() => saveVenue("")} className="admin-button admin-button--ghost admin-button--sm">Clear link</AdminActionButton> : null}
+                      <AdminActionButton type="button" disabled={busy} onClick={linkVenueFromPicker} className="admin-button admin-button--primary admin-button--sm">Link venue</AdminActionButton>
                     </div>
                   </div>
                 ) : null}
@@ -973,7 +973,6 @@ export function WeddingWorkspace() {
                     <div className="flex items-start justify-between gap-4 flex-wrap">
                       <div>
                         <h3 className="text-base" style={{ fontWeight: 600 }}>Create a new venue</h3>
-                        <p className="mt-1 text-xs text-neutral-500">Quick-create the essentials now. Full venue intelligence can be completed later.</p>
                       </div>
                     </div>
 
@@ -981,7 +980,7 @@ export function WeddingWorkspace() {
                       <label className="text-xs uppercase tracking-[0.12em] text-neutral-500">Venue directory search</label>
                       <div className="mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
                         <input value={venueDirectoryQuery} onChange={(event) => setVenueDirectoryQuery(event.target.value)} placeholder="Search by venue name and location…" className="rounded-xl border border-black/15 bg-white px-3 py-3" />
-                        <button type="button" disabled={venueDirectoryBusy} onClick={searchVenueDirectory} className="admin-action-secondary">{venueDirectoryBusy ? "Searching…" : "Search directory"}</button>
+                        <AdminActionButton type="button" disabled={venueDirectoryBusy} onClick={searchVenueDirectory} className="admin-action-secondary">{venueDirectoryBusy ? "Searching…" : "Search directory"}</AdminActionButton>
                       </div>
                       {venueDirectoryConfigured === false ? <p className="mt-2 text-xs text-neutral-500">External venue lookup is optional and not configured on this workspace yet. Your own venue database and manual create remain available.</p> : null}
                       {venueDirectoryResults.length ? <div className="mt-3 space-y-2">{venueDirectoryResults.map((venue) => <button key={venue.id} type="button" onClick={() => useDiscoveredVenue(venue)} className="w-full rounded-xl border border-black/10 bg-white p-3 text-left"><strong className="block text-sm">{venue.name}</strong><span className="mt-1 block text-xs text-neutral-500">{venue.formattedAddress}</span><span className="mt-1 block text-[11px] uppercase tracking-[0.08em] text-neutral-400">Google Places</span></button>)}</div> : null}
@@ -1007,7 +1006,7 @@ export function WeddingWorkspace() {
                     </div>
                     <p className="mt-3 text-xs text-neutral-500">Country is globally searchable. County and other geography remain workspace-configurable, so studios in other regions can use states, provinces, regions or destinations instead.</p>
                     {possibleVenueMatches.length ? <div className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-950"><strong>Possible existing venue:</strong><div className="mt-2 flex flex-wrap gap-2">{possibleVenueMatches.map((venue) => <button key={venue.slug} type="button" onClick={() => { setShowNewVenue(false); setVenuePicker(venue.name); void saveVenue(venue.slug); }} className="admin-action-secondary">Use {venue.name}</button>)}</div></div> : null}
-                    <button type="button" disabled={busy || !newVenue.name.trim()} onClick={createAndLinkVenue} className="admin-action-primary mt-4"><Plus className="h-4 w-4" />Create & link venue</button>
+                    <AdminActionButton type="button" disabled={busy || !newVenue.name.trim()} onClick={createAndLinkVenue} className="admin-action-primary mt-4"><Plus className="h-4 w-4" />Create & link venue</AdminActionButton>
                   </div>
                 ) : null}
               </section>
@@ -1021,7 +1020,7 @@ export function WeddingWorkspace() {
                       <p className="mt-1 text-xs text-neutral-500">Use controlled categories and Wedding roles to keep reporting consistent.</p>
                     </div>
                   </div>
-                  <button type="button" onClick={() => setShowNewSupplier((value) => !value)} className="admin-button admin-button--secondary admin-button--sm">{showNewSupplier ? "Cancel" : "New supplier"}</button>
+                  <AdminActionButton type="button" onClick={() => setShowNewSupplier((value) => !value)} className="admin-button admin-button--secondary admin-button--sm">{showNewSupplier ? "Cancel" : "New supplier"}</AdminActionButton>
                 </div>
 
                 {suppliers.length ? (
@@ -1033,7 +1032,7 @@ export function WeddingWorkspace() {
                           <span className="mt-0.5 block truncate text-xs text-neutral-500">{configuredSupplierCategory(row.category || "", supplierTaxonomy.categories) || row.category || "Uncategorised"}</span>
                         </div>
                         <span className="wedding-workspace-role-tag">{configuredWeddingRole(row.role || "", supplierTaxonomy.roles) || row.role || "Other Supplier"}</span>
-                        <button type="button" title={`Remove ${row.name}`} aria-label={`Remove ${row.name}`} disabled={busy} onClick={() => removeSupplier(index)} className="admin-icon-button"><X className="h-4 w-4" /></button>
+                        <AdminActionButton type="button" title={`Remove ${row.name}`} aria-label={`Remove ${row.name}`} disabled={busy} onClick={() => removeSupplier(index)} className="admin-icon-button"><X className="h-4 w-4" /></AdminActionButton>
                       </div>
                     ))}
                   </div>
@@ -1065,7 +1064,7 @@ export function WeddingWorkspace() {
                       />
                     ) : null}
                   </div>
-                  {selectedSupplier ? <button disabled={busy} onClick={addSupplier} className="admin-button admin-button--primary admin-button--sm"><Plus className="admin-button__icon" />Add supplier</button> : null}
+                  {selectedSupplier ? <AdminActionButton disabled={busy} onClick={addSupplier} className="admin-button admin-button--primary admin-button--sm"><Plus className="admin-button__icon" />Add supplier</AdminActionButton> : null}
                 </div>
 
                 {showNewSupplier ? (
@@ -1098,7 +1097,7 @@ export function WeddingWorkspace() {
                       <label className="wedding-workspace-field sm:col-span-2"><span>Website</span><input value={newSupplier.website} onChange={(event) => setNewSupplier((current) => ({ ...current, website: event.target.value }))} placeholder="https://…" className="admin-input" /></label>
                     </div>
                     {possibleSupplierMatches.length ? <div className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-950"><strong>Possible existing supplier:</strong><div className="mt-2 flex flex-wrap gap-2">{possibleSupplierMatches.map((supplier) => <button key={supplier.id} type="button" onClick={() => { setSelectedSupplierId(supplier.id); setSupplierRole(configuredWeddingRole(newSupplier.role, supplierTaxonomy.roles) || defaultWeddingRoleForCategory(supplier.category, supplierTaxonomy.categories, supplierTaxonomy.roles)); setShowNewSupplier(false); }} className="admin-button admin-button--secondary admin-button--sm">Use {supplier.displayName || supplier.name}</button>)}</div></div> : null}
-                    <button type="button" disabled={busy || !newSupplier.name.trim()} onClick={createAndLinkSupplier} className="admin-button admin-button--primary admin-button--sm mt-4"><Plus className="admin-button__icon" />Create & link supplier</button>
+                    <AdminActionButton type="button" disabled={busy || !newSupplier.name.trim()} onClick={createAndLinkSupplier} className="admin-button admin-button--primary admin-button--sm mt-4"><Plus className="admin-button__icon" />Create & link supplier</AdminActionButton>
                   </div>
                 ) : null}
               </section>
@@ -1107,7 +1106,7 @@ export function WeddingWorkspace() {
 
           {clientGalleriesEnabled ? <section id="preview-upload" className="wedding-workspace-card scroll-mt-5">
             <div className="wedding-workspace-section-header">
-              <div><p className="wedding-workspace-kicker">2 · Client delivery</p><h2 className="wedding-workspace-section-title">Client gallery & previews</h2><p className="wedding-workspace-section-copy">Upload preview JPEGs once. Private originals and safe web derivatives are created together.</p></div>
+              <div><p className="wedding-workspace-kicker">2 · Client delivery</p><h2 className="wedding-workspace-section-title">Client gallery & previews</h2></div>
             </div>
 
             {clientGallery ? (
@@ -1118,25 +1117,25 @@ export function WeddingWorkspace() {
                     <p className="mt-1 truncate text-xs text-neutral-500">{clientGallery.clientEmail || "Client email not set"} · {workspace.assets.length} Wedding asset{workspace.assets.length === 1 ? "" : "s"}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Link to={`/admin/client-galleries/${clientGallery.id}`} className="admin-button admin-button--secondary admin-button--sm">Manage gallery</Link>
-                    {clientGallery.status === "live" ? <a href={publicGalleryUrl(clientGallery.slug, clientGallery.accessToken)} target="_blank" rel="noreferrer" className="admin-button admin-button--secondary admin-button--sm"><ExternalLink className="admin-button__icon" />Open gallery</a> : null}
-                    <label className="admin-button admin-button--primary admin-button--sm cursor-pointer"><UploadCloud className="admin-button__icon" />Add preview JPEGs<input type="file" multiple accept="image/jpeg,.jpg,.jpeg" onChange={(event) => { addOriginalFiles(event.target.files); event.currentTarget.value = ""; }} style={{ display: "none" }} /></label>
+                    <AdminActionRouterLink to={`/admin/client-galleries/${clientGallery.id}`} className="admin-button admin-button--secondary admin-button--sm">Manage gallery</AdminActionRouterLink>
+                    {clientGallery.status === "live" ? <AdminActionLink href={publicGalleryUrl(clientGallery.slug, clientGallery.accessToken)} target="_blank" rel="noreferrer" className="admin-button admin-button--secondary admin-button--sm"><ExternalLink className="admin-button__icon" />Open gallery</AdminActionLink> : null}
+                    <AdminActionLabel className="admin-button admin-button--primary admin-button--sm cursor-pointer"><UploadCloud className="admin-button__icon" />Add preview JPEGs<input type="file" multiple accept="image/jpeg,.jpg,.jpeg" onChange={(event) => { addOriginalFiles(event.target.files); event.currentTarget.value = ""; }} style={{ display: "none" }} /></AdminActionLabel>
                   </div>
                 </div>
                 <p className="mt-2 text-[11px] text-neutral-500">Selected files are added automatically to the Wedding Day Preview Set.</p>
-                {uploads.length ? <div className="mt-4 space-y-2">{uploads.map((item) => <div key={item.id} className="rounded-xl border border-black/10 bg-neutral-50 p-3 grid grid-cols-[minmax(0,1fr)_54px_32px] gap-3 items-center"><div className="min-w-0"><div className="flex items-center gap-2">{item.status === "done" ? <CheckCircle2 className="h-4 w-4 text-green-700" /> : item.status === "error" ? <X className="h-4 w-4 text-red-700" /> : item.status === "uploading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4 text-neutral-400" />}<span className="truncate text-xs">{item.file.name}</span></div><div className="mt-2 h-1 rounded-full bg-neutral-200 overflow-hidden"><div className="h-full bg-black" style={{ width: `${item.progress}%` }} /></div><p className="mt-1 text-[10px] text-neutral-500">{item.error || item.stage}</p></div><span className="text-[10px] text-right">{item.progress}%</span>{item.status === "error" ? <button onClick={() => updateUpload(item.id, { status: "queued", progress: 0, stage: "Ready", error: "" })}><RefreshCw className="h-4 w-4" /></button> : <button disabled={uploading || item.status === "uploading"} onClick={() => setUploads((current) => current.filter((upload) => upload.id !== item.id))}><Trash2 className="h-4 w-4" /></button>}</div>)}</div> : null}
-                {uploads.length ? <div className="mt-3 flex justify-end"><button disabled={uploading || !queuedCount} onClick={uploadQueued} className="admin-button admin-button--primary admin-button--sm disabled:opacity-40">{uploading ? "Uploading…" : `Upload ${queuedCount || ""} preview${queuedCount === 1 ? "" : "s"}`}</button></div> : null}
+                {uploads.length ? <div className="mt-4 space-y-2">{uploads.map((item) => <div key={item.id} className="rounded-xl border border-black/10 bg-neutral-50 p-3 grid grid-cols-[minmax(0,1fr)_54px_32px] gap-3 items-center"><div className="min-w-0"><div className="flex items-center gap-2">{item.status === "done" ? <CheckCircle2 className="h-4 w-4 text-green-700" /> : item.status === "error" ? <X className="h-4 w-4 text-red-700" /> : item.status === "uploading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4 text-neutral-400" />}<span className="truncate text-xs">{item.file.name}</span></div><div className="mt-2 h-1 rounded-full bg-neutral-200 overflow-hidden"><div className="h-full bg-black" style={{ width: `${item.progress}%` }} /></div><p className="mt-1 text-[10px] text-neutral-500">{item.error || item.stage}</p></div><span className="text-[10px] text-right">{item.progress}%</span>{item.status === "error" ? <AdminActionButton aria-label="Retry upload" onClick={() => updateUpload(item.id, { status: "queued", progress: 0, stage: "Ready", error: "" })}><RefreshCw className="h-4 w-4" /></AdminActionButton> : <AdminActionButton aria-label="Remove" disabled={uploading || item.status === "uploading"} onClick={() => setUploads((current) => current.filter((upload) => upload.id !== item.id))}><Trash2 className="h-4 w-4" /></AdminActionButton>}</div>)}</div> : null}
+                {uploads.length ? <div className="mt-3 flex justify-end"><AdminActionButton disabled={uploading || !queuedCount} onClick={uploadQueued} className="admin-button admin-button--primary admin-button--sm disabled:opacity-40">{uploading ? "Uploading…" : `Upload ${queuedCount || ""} preview${queuedCount === 1 ? "" : "s"}`}</AdminActionButton></div> : null}
               </>
             ) : (
               <div className="wedding-workspace-gallery-summary">
                 <div><strong className="text-sm">No client gallery yet</strong><p className="mt-1 text-xs text-neutral-500">Create the linked private gallery before uploading previews.</p></div>
-                <button disabled={busy} onClick={createGallery} className="admin-button admin-button--primary admin-button--sm"><Plus className="admin-button__icon" />Create client gallery</button>
+                <AdminActionButton disabled={busy} onClick={createGallery} className="admin-button admin-button--primary admin-button--sm"><Plus className="admin-button__icon" />Create client gallery</AdminActionButton>
               </div>
             )}
           </section> : null}
 
           <section className="wedding-workspace-card">
-            <div className="wedding-workspace-section-header"><div><p className="wedding-workspace-kicker">Preview Set</p><h2 className="wedding-workspace-section-title">Wedding Day Previews</h2><p className="wedding-workspace-section-copy">{contentToolsEnabled ? "Choose the images you want to use across venue galleries, moments, custom galleries and social posts." : "Review and maintain the preview images attached to this booked wedding."}</p></div><div className="flex gap-2"><button onClick={() => setPreviewIds(workspace.assets.map((asset) => asset.id))} className="admin-button admin-button--secondary admin-button--sm">Select all</button><button disabled={busy} onClick={savePreviewSet} className="admin-button admin-button--primary admin-button--sm"><Save className="admin-button__icon" />Save Preview Set</button></div></div>
+            <div className="wedding-workspace-section-header"><div><p className="wedding-workspace-kicker">Preview Set</p><h2 className="wedding-workspace-section-title">Wedding Day Previews</h2></div><div className="flex gap-2"><AdminActionButton onClick={() => setPreviewIds(workspace.assets.map((asset) => asset.id))} className="admin-button admin-button--secondary admin-button--sm">Select all</AdminActionButton><AdminActionButton disabled={busy} onClick={savePreviewSet} className="admin-button admin-button--primary admin-button--sm"><Save className="admin-button__icon" />Save Preview Set</AdminActionButton></div></div>
             <div className="mt-5" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px,1fr))", gap: 10 }}>
               {workspace.assets.map((asset) => { const selected = previewIds.includes(asset.id); return <button key={asset.id} onClick={() => setPreviewIds((current) => selected ? current.filter((id) => id !== asset.id) : [...current, asset.id])} className={`relative overflow-hidden rounded-2xl border text-left ${selected ? "border-black ring-2 ring-black/10" : "border-black/10"}`}><img src={asset.thumbSrc || asset.webSrc} alt="" style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", display: "block" }} /><span className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow">{selected ? <Check className="h-4 w-4" /> : null}</span>{asset.hasOriginal ? <span className="absolute left-2 top-2 rounded-full bg-black/80 px-2 py-1 text-[9px] uppercase text-white">Original</span> : null}<span className="block truncate p-2 text-[11px]">{asset.filename}</span></button>; })}
             </div>
@@ -1144,13 +1143,13 @@ export function WeddingWorkspace() {
           </section>
 
           {contentToolsEnabled ? <section id="publishing-destinations" className="wedding-workspace-card scroll-mt-5">
-            <p className="wedding-workspace-kicker">4 · Publishing destinations</p><h2 className="wedding-workspace-section-title">Use previews across the Intelligence platform</h2><p className="wedding-workspace-section-copy">This only adds safe web derivatives to public destinations. Private full-resolution originals remain protected.</p>
+            <p className="wedding-workspace-kicker">4 · Publishing destinations</p><h2 className="wedding-workspace-section-title">Use previews across the Intelligence platform</h2>
             <div className="mt-6 grid gap-6 md:grid-cols-3">
               <div><p className="text-xs uppercase tracking-[0.12em] text-neutral-500">Venue</p><label className="mt-3 flex items-center gap-3"><input type="checkbox" checked={addToVenue} disabled={!workspace.wedding.venueSlug} onChange={(event) => setAddToVenue(event.target.checked)} /><span>{workspace.wedding.venue || "No venue linked"}</span></label></div>
               <div><p className="text-xs uppercase tracking-[0.12em] text-neutral-500">Moments</p><div className="mt-3 space-y-2 max-h-44 overflow-auto">{workspace.moments.map((moment) => <label key={moment.id} className="flex items-center gap-3 text-sm"><input type="checkbox" checked={selectedMomentIds.includes(moment.id)} onChange={(event) => setSelectedMomentIds((current) => event.target.checked ? [...current, moment.id] : current.filter((id) => id !== moment.id))} />{moment.name}</label>)}</div></div>
               <div><p className="text-xs uppercase tracking-[0.12em] text-neutral-500">Galleries</p><div className="mt-3 space-y-2 max-h-44 overflow-auto">{workspace.galleries.map((gallery) => <label key={gallery.id} className="flex items-center gap-3 text-sm"><input type="checkbox" checked={selectedGalleryIds.includes(gallery.id)} onChange={(event) => setSelectedGalleryIds((current) => event.target.checked ? [...current, gallery.id] : current.filter((id) => id !== gallery.id))} />{gallery.name}</label>)}</div></div>
             </div>
-            <button disabled={busy || !previewIds.length} onClick={publishAssignments} className="admin-button admin-button--primary admin-button--sm mt-5 disabled:opacity-40"><Send className="h-4 w-4" />Add {previewIds.length || ""} previews to selected destinations</button>
+            <AdminActionButton disabled={busy || !previewIds.length} onClick={publishAssignments} className="admin-button admin-button--primary admin-button--sm mt-5 disabled:opacity-40"><Send className="h-4 w-4" />Add {previewIds.length || ""} previews to selected destinations</AdminActionButton>
           </section> : null}
         </main>
 
@@ -1159,12 +1158,12 @@ export function WeddingWorkspace() {
             <div className="flex items-center gap-3"><Instagram className="h-5 w-5" /><div><p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Social</p><h2 className="text-base" style={{ fontWeight: 600 }}>Instagram preview post</h2></div></div>
             <p className="mt-3 text-[11px] leading-relaxed text-neutral-600">Generated from the wedding, venue and reusable supplier records. Edit freely before copying.</p>
             <textarea value={caption} onChange={(event) => setCaption(event.target.value)} rows={14} className="wedding-workspace-caption" />
-            <div className="mt-3 flex gap-2"><button onClick={regenerateCaption} className="admin-button admin-button--secondary admin-button--sm">Regenerate</button><button onClick={async () => { await navigator.clipboard?.writeText(caption); setMessage("Instagram caption copied."); }} className="admin-button admin-button--primary admin-button--sm"><Clipboard className="h-4 w-4" />Copy caption</button></div>
+            <div className="mt-3 flex gap-2"><AdminActionButton onClick={regenerateCaption} className="admin-button admin-button--secondary admin-button--sm">Regenerate</AdminActionButton><AdminActionButton onClick={async () => { await navigator.clipboard?.writeText(caption); setMessage("Instagram caption copied."); }} className="admin-button admin-button--primary admin-button--sm"><Clipboard className="h-4 w-4" />Copy caption</AdminActionButton></div>
           </section>
 
           <section className="wedding-workspace-aside-card wedding-workspace-summary-card">
             <div className="space-y-3 text-sm"><Row label="Venue" value={workspace.wedding.venue || "Not linked"} />{contentToolsEnabled ? <Row label="Suppliers" value={String(suppliers.length)} /> : null}{clientGalleriesEnabled ? <Row label="Client gallery" value={clientGallery?.status || "Not created"} /> : null}<Row label="Wedding assets" value={String(workspace.assets.length)} /><Row label="Preview Set" value={String(previewAssets.length)} /><Row label="Full-res previews" value={String(previewAssets.filter((asset) => asset.hasOriginal).length)} /></div>
-            {clientGalleriesEnabled && clientGallery ? <Link to={`/admin/client-galleries/${clientGallery.id}`} className="admin-button admin-button--secondary admin-button--sm mt-4 w-full">Manage client gallery</Link> : null}
+            {clientGalleriesEnabled && clientGallery ? <AdminActionRouterLink to={`/admin/client-galleries/${clientGallery.id}`} className="admin-button admin-button--secondary admin-button--sm mt-4 w-full">Manage client gallery</AdminActionRouterLink> : null}
           </section>
         </aside>
       </div>

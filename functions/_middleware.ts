@@ -28,7 +28,10 @@ export async function onRequest(context: any) {
     // Stripe-Signature verification in their route, not by a professional
     // browser session. Keep this exemption exact rather than opening the
     // wider /api/webhooks namespace.
-    || path === "/api/webhooks/wedplanned-billing";
+    || path === "/api/webhooks/wedplanned-billing"
+    || path === "/api/webhooks/wedplanned-stripe"
+    // Public booking routes authenticate receipt actions by a scoped capability.
+    || /^\/api\/online-booking\/[a-z0-9][a-z0-9-]{2,79}(?:\/(?:slots|reserve|status|checkout|invoice))?\/?$/.test(path);
   if (path.startsWith("/api/") && !authExempt && professionalAuthEnforced(context.env as any)) {
     const auth = await getProfessionalContext((context.env as any).MKB_DB, request, context.env as any);
     if (!auth.accessGranted) {

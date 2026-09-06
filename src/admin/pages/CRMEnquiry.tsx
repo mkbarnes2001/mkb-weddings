@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionLabel, AdminActionLink, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import {
   useEffect,
   useMemo,
@@ -1317,14 +1318,14 @@ export function CRMEnquiry() {
                   </span>
 
                   {detail.job ? (
-                    <Link
+                    <AdminActionRouterLink
                       className="admin-icon-control crm-commercial-card__open crm-booking-summary-row__action"
                       to={`/admin/crm/jobs/${detail.job.id}/invoices/${invoice.id}`}
                       aria-label={`Open invoice ${invoice.reference}`}
                       title="Open invoice"
                     >
                       <ExternalLink aria-hidden="true" />
-                    </Link>
+                    </AdminActionRouterLink>
                   ) : (
                     <span className="crm-commercial-summary-action-spacer crm-booking-summary-row__action-spacer" />
                   )}
@@ -1449,14 +1450,14 @@ export function CRMEnquiry() {
                     : "Not assigned"}
                 </span>
 
-                <a
+                <AdminActionLink
                   className="admin-icon-control crm-commercial-card__open crm-booking-summary-row__action"
                   href="#lead-questionnaires"
                   aria-label="Open Questionnaire section"
                   title="Open questionnaire"
                 >
                   <ExternalLink aria-hidden="true" />
-                </a>
+                </AdminActionLink>
               </article>
 
               {journeyQuote ? (
@@ -1502,14 +1503,14 @@ export function CRMEnquiry() {
                     )}
                   </span>
 
-                  <Link
+                  <AdminActionRouterLink
                     className="admin-icon-control crm-commercial-card__open crm-booking-summary-row__action"
                     to={`/admin/crm/quotes/${journeyQuote.id}`}
                     aria-label={`Open quote ${journeyQuote.reference}`}
                     title="Open quote"
                   >
                     <ExternalLink aria-hidden="true" />
-                  </Link>
+                  </AdminActionRouterLink>
                 </article>
               ) : (
                 <article className="crm-booking-summary-row">
@@ -1568,14 +1569,14 @@ export function CRMEnquiry() {
                 </span>
 
                 {leadLifecycle?.wedding.exists ? (
-                  <Link
+                  <AdminActionRouterLink
                     className="admin-icon-control crm-delivery-summary-action"
                     to={`/admin/weddings/${leadLifecycle.wedding.slug}/workspace`}
                     aria-label="Open Wedding Workspace"
                     title="Open Wedding Workspace"
                   >
                     <ExternalLink aria-hidden="true" />
-                  </Link>
+                  </AdminActionRouterLink>
                 ) : (
                   <span className="crm-delivery-summary-action-spacer" />
                 )}
@@ -1595,14 +1596,14 @@ export function CRMEnquiry() {
                 </span>
 
                 {leadLifecycle?.wedding.exists ? (
-                  <Link
+                  <AdminActionRouterLink
                     className="admin-icon-control crm-delivery-summary-action"
                     to={`/admin/weddings/${leadLifecycle.wedding.slug}/workspace#preview-upload`}
                     aria-label="Manage Wedding assets"
                     title="Manage Wedding assets"
                   >
                     <ExternalLink aria-hidden="true" />
-                  </Link>
+                  </AdminActionRouterLink>
                 ) : (
                   <span className="crm-delivery-summary-action-spacer" />
                 )}
@@ -1624,18 +1625,18 @@ export function CRMEnquiry() {
                 </span>
 
                 {leadPrimaryGallery ? (
-                  <Link
+                  <AdminActionRouterLink
                     className="admin-icon-control crm-delivery-summary-action"
                     to={`/admin/client-galleries/${leadPrimaryGallery.id}`}
                     aria-label="Open Client Gallery"
                     title="Open Client Gallery"
                   >
                     <ExternalLink aria-hidden="true" />
-                  </Link>
+                  </AdminActionRouterLink>
                 ) : detail.job
                   && leadLifecycle?.wedding.exists
                   && canManage ? (
-                  <button
+                  <AdminActionButton
                     type="button"
                     className="admin-icon-control crm-delivery-summary-action"
                     disabled={saving}
@@ -1646,7 +1647,7 @@ export function CRMEnquiry() {
                     title="Create Client Gallery"
                   >
                     <Plus aria-hidden="true" />
-                  </button>
+                  </AdminActionButton>
                 ) : (
                   <span className="crm-delivery-summary-action-spacer" />
                 )}
@@ -1664,7 +1665,7 @@ export function CRMEnquiry() {
                 </span>
 
                 {leadLifecycle?.wedding.exists ? (
-                  <Link
+                  <AdminActionRouterLink
                     className="admin-icon-control crm-delivery-summary-action"
                     to={`/admin/weddings/${leadLifecycle.wedding.slug}/content`}
                     aria-label={
@@ -1684,7 +1685,7 @@ export function CRMEnquiry() {
                       === "not_started"
                       ? <Plus aria-hidden="true" />
                       : <ExternalLink aria-hidden="true" />}
-                  </Link>
+                  </AdminActionRouterLink>
                 ) : (
                   <span className="crm-delivery-summary-action-spacer" />
                 )}
@@ -1704,14 +1705,14 @@ export function CRMEnquiry() {
                 </span>
 
                 {leadLifecycle?.wedding.exists ? (
-                  <Link
+                  <AdminActionRouterLink
                     className="admin-icon-control crm-delivery-summary-action"
                     to={`/admin/weddings/${leadLifecycle.wedding.slug}/workspace#publishing-destinations`}
                     aria-label="Manage Website galleries"
                     title="Manage Website galleries"
                   >
                     <ExternalLink aria-hidden="true" />
-                  </Link>
+                  </AdminActionRouterLink>
                 ) : (
                   <span className="crm-delivery-summary-action-spacer" />
                 )}
@@ -1815,14 +1816,14 @@ export function CRMEnquiry() {
                           )}
                         </strong>
 
-                        <Link
+                        <AdminActionRouterLink
                           className="admin-icon-control crm-lead-quote-row__action"
                           to={`/admin/crm/quotes/${quote.id}`}
                           aria-label={`Open quote ${quote.reference}`}
                           title="Open quote"
                         >
                           <ExternalLink aria-hidden="true" />
-                        </Link>
+                        </AdminActionRouterLink>
                       </article>
                     ),
                   )}
@@ -2039,7 +2040,7 @@ export function CRMEnquiry() {
                     </span>
                   </div>
 
-                  <label className="admin-button admin-button--primary admin-button--sm">
+                  <AdminActionLabel className="admin-button admin-button--primary admin-button--sm">
                     <Plus className="admin-button__icon" />
                     {saving
                       ? "Working…"
@@ -2059,7 +2060,7 @@ export function CRMEnquiry() {
                           "";
                       }}
                     />
-                  </label>
+                  </AdminActionLabel>
                 </div>
               ) : null}
 
@@ -2371,7 +2372,7 @@ export function CRMEnquiry() {
                 </p>
               </div>
 
-              <button
+              <AdminActionButton
                 type="button"
                 className="admin-icon-control"
                 aria-label="Close delete dialog"
@@ -2382,7 +2383,7 @@ export function CRMEnquiry() {
                 }
               >
                 <X aria-hidden="true" />
-              </button>
+              </AdminActionButton>
             </header>
 
             {deleteBusy

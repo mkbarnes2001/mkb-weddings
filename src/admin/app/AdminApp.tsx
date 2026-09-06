@@ -1,3 +1,9 @@
+import { CRMOnlineBooking } from "../pages/CRMOnlineBooking";
+import { CRMCalendar } from "../pages/CRMCalendar";
+import { CRMTemplateLibrary } from "../pages/CRMTemplateLibrary";
+import { CRMTemplates } from "../pages/CRMTemplates";
+import { CRMContractTemplates } from "../pages/CRMContractTemplates";
+import { WorkspaceSettings } from "../pages/WorkspaceSettings";
 import { Navigate, Routes, Route, useParams } from "react-router-dom";
 import { AdminLayout } from "../layouts/AdminLayout";
 import { Dashboard, PublishingOverview, WebsiteOverview } from "../pages/Dashboard";
@@ -32,6 +38,7 @@ import { WeddingCollections } from "../pages/WeddingCollections";
 import { Suppliers } from "../pages/Suppliers";
 import { AICentre } from "../pages/AICentre";
 import { Collections } from "../pages/Collections";
+import { StudioGalleries } from "../pages/StudioGalleries";
 import { SEOCentre } from "../pages/SEOCentre";
 import { Settings } from "../pages/Settings";
 import { ClientPortalSettings } from "../pages/ClientPortalSettings";
@@ -87,8 +94,16 @@ export function AdminApp() {
         <Route path="crm/catalogue/addons/:id" element={<CRMCatalogue />} />
         <Route path="crm/quotes" element={<CRMQuotes />} />
         <Route path="crm/quotes/:id" element={<CRMQuote />} />
-        <Route path="crm/templates" element={<CRMCommercialTemplates />} />
-        <Route path="crm/templates/quotes/:id" element={<CRMCommercialTemplates />} />
+        <Route path="crm/calendar" element={<CRMCalendar />} />
+        <Route path="crm/online-booking" element={<CRMOnlineBooking />} />
+        <Route path="crm/settings" element={<Settings module="crm" />} />
+        <Route path="crm/templates/questionnaires" element={<CRMTemplateLibrary type="questionnaires" />} />
+        <Route path="crm/templates/workflows" element={<CRMTemplateLibrary type="workflows" />} />
+        <Route path="crm/templates" element={<CRMTemplates />} />
+        <Route path="crm/templates/quotes" element={<CRMCommercialTemplates templateType="quotes" />} />
+        <Route path="crm/templates/emails" element={<CRMCommercialTemplates templateType="emails" />} />
+        <Route path="crm/templates/contracts" element={<CRMContractTemplates />} />
+        <Route path="crm/templates/quotes/:id" element={<CRMCommercialTemplates templateType="quotes" />} />
         <Route path="crm/email-settings" element={<CRMEmailSettings />} />
         <Route path="crm/payment-setup" element={<CRMPaymentSetup />} />
         <Route path="crm/payments" element={<CRMPayments />} />
@@ -122,7 +137,8 @@ export function AdminApp() {
           path="weddings/:slug/collections"
           element={<WeddingCollections />}
         />
-        <Route path="gallery" element={<Collections />} />
+        <Route path="gallery" element={<StudioGalleries />} />
+        <Route path="gallery/settings" element={<Collections />} />
         <Route path="gallery/locations" element={<LocationGallerySettingsPage />} />
         <Route path="locations" element={<Locations />} />
         <Route path="moments" element={<Moments />} />
@@ -130,7 +146,7 @@ export function AdminApp() {
         <Route path="creative-flash" element={<CreativeFlashGallery />} />
         <Route path="custom-collections" element={<CustomCollections />} />
         <Route path="custom-collections/:slug/gallery" element={<CustomCollectionGallery />} />
-        <Route path="collections" element={<Collections />} />
+        <Route path="collections" element={<Navigate to="/admin/gallery" replace />} />
         <Route path="venues" element={<Venues />} />
         <Route path="venues/new" element={<NewVenue />} />
         <Route path="venues/migrate" element={<VenueMigration />} />
@@ -154,6 +170,7 @@ export function AdminApp() {
           <Route path="publishing" element={<PublishingOverview />} />
         <Route path="settings/client-portal" element={<ClientPortalSettings />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="settings/workspace" element={<WorkspaceSettings />} />
       </Route>
     </Routes>
   );

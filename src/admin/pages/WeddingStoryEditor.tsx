@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -301,13 +302,13 @@ export function WeddingStoryEditor() {
 
   return (
     <div className="space-y-7">
-      <Link
+      <AdminActionRouterLink
         to={`/admin/weddings/${wedding.slug}/story`}
         className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to story
-      </Link>
+      </AdminActionRouterLink>
 
       <section className="rounded-[32px] bg-black text-white p-8 md:p-10">
         <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-6">
@@ -383,19 +384,16 @@ export function WeddingStoryEditor() {
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
             <h2 className="text-3xl font-serif">Paragraphs</h2>
-            <p className="text-sm text-neutral-500 mt-1">
-              Add, delete and reorder the main story body.
-            </p>
           </div>
 
-          <button
+          <AdminActionButton
             type="button"
             onClick={addParagraph}
             className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
           >
             <Plus className="w-4 h-4" />
             Add paragraph
-          </button>
+          </AdminActionButton>
         </div>
 
         <div className="space-y-4">
@@ -410,29 +408,29 @@ export function WeddingStoryEditor() {
                 </p>
 
                 <div className="flex gap-2">
-                  <button
+                  <AdminActionButton aria-label="Move up"
                     type="button"
                     onClick={() => moveParagraph(index, -1)}
                     disabled={index === 0}
                     className="rounded-full border border-black/10 p-2 disabled:opacity-30"
                   >
                     <ArrowUp className="w-4 h-4" />
-                  </button>
-                  <button
+                  </AdminActionButton>
+                  <AdminActionButton aria-label="Move down"
                     type="button"
                     onClick={() => moveParagraph(index, 1)}
                     disabled={index === story.paragraphs.length - 1}
                     className="rounded-full border border-black/10 p-2 disabled:opacity-30"
                   >
                     <ArrowDown className="w-4 h-4" />
-                  </button>
-                  <button
+                  </AdminActionButton>
+                  <AdminActionButton aria-label="Remove"
                     type="button"
                     onClick={() => deleteParagraph(index)}
                     className="rounded-full border border-red-200 p-2 text-red-600"
                   >
                     <Trash2 className="w-4 h-4" />
-                  </button>
+                  </AdminActionButton>
                 </div>
               </div>
 
@@ -453,19 +451,16 @@ export function WeddingStoryEditor() {
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
             <h2 className="text-3xl font-serif">Facts</h2>
-            <p className="text-sm text-neutral-500 mt-1">
-              Structured wedding information shown on the story page.
-            </p>
           </div>
 
-          <button
+          <AdminActionButton
             type="button"
             onClick={addFact}
             className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
           >
             <Plus className="w-4 h-4" />
             Add fact
-          </button>
+          </AdminActionButton>
         </div>
 
         <div className="space-y-3">
@@ -490,13 +485,13 @@ export function WeddingStoryEditor() {
                 placeholder="Value"
                 className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
               />
-              <button
+              <AdminActionButton aria-label="Remove"
                 type="button"
                 onClick={() => deleteFact(index)}
                 className="rounded-full border border-red-200 p-3 text-red-600"
               >
                 <Trash2 className="w-4 h-4" />
-              </button>
+              </AdminActionButton>
             </div>
           ))}
         </div>
@@ -511,7 +506,7 @@ export function WeddingStoryEditor() {
       ) : null}
 
       <div className="flex flex-wrap gap-3">
-        <button
+        <AdminActionButton
           type="button"
           onClick={saveStory}
           disabled={
@@ -521,14 +516,14 @@ export function WeddingStoryEditor() {
         >
           <Save className="w-4 h-4" />
           {saving ? "Saving..." : "Save story"}
-        </button>
+        </AdminActionButton>
 
-        <Link
+        <AdminActionRouterLink
           to={`/admin/weddings/${wedding.slug}/story`}
           className="inline-flex items-center rounded-full border border-black/10 bg-white px-5 py-3 text-sm"
         >
           Preview
-        </Link>
+        </AdminActionRouterLink>
       </div>
 
       {saveResult ? (

@@ -82,7 +82,7 @@ def main() -> None:
     assert 'overview: "WedCRM overview"' in crm
     assert 'eyebrow="WedCRM · Client operations"' in crm
     assert '? "Dashboard"' in crm
-    assert 'Communications remain attached to the relevant lead, client or Job record.' in crm
+    # Section helper copy was removed in the approved CRM layout sweep.
     assert 'useSearchParams' in store and 'const validTabs: Tab[] = ["catalogue", "pricing", "orders"]' in store
     assert 'setSearchParams(next === "catalogue" ? {} : { tab: next }' in store
     assert 'useSearchParams' in platform and 'searchParams.get("tab")' in platform

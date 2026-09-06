@@ -144,10 +144,10 @@ version = db.execute(
 ).fetchone()[0]
 db.close()
 
-require(str(version) == "53", f"provider duplicate guard unexpectedly changed schema: {version}")
+require(str(version) == "54", f"provider duplicate guard unexpectedly changed schema: {version}")
 require(
-    not list((ROOT / "d1/migrations").glob("054_*.sql")),
-    "provider duplicate guard must not add migration 054",
+    not list((ROOT / "d1/migrations").glob("055_*.sql")),
+    "provider duplicate guard must not add migration 055",
 )
 
 print("PASS v1.10.13a Gate 2E2B provider-side duplicate subscription guard")
@@ -159,4 +159,4 @@ print("  incomplete/trialing/active/past_due/unpaid/paused states block duplicat
 print("  canceled/incomplete_expired terminal states permit recovery Checkout: verified")
 print("  provider guard executes before any Checkout ledger write: verified")
 print("  browser Checkout response remains provider-ID redacted: verified")
-print("  schema remains 53: verified")
+print("  schema is 54: verified")

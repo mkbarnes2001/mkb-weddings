@@ -1,3 +1,4 @@
+import { AdminActionButton } from "./ui/AdminActionControl";
 import { X } from "lucide-react";
 import type { WeddingImage } from "../types/wedding";
 
@@ -18,14 +19,14 @@ export function ImageMetadataPanel({
           <h2 className="font-serif text-2xl mt-1">Metadata</h2>
         </div>
 
-        <button
+        <AdminActionButton
           type="button"
           onClick={onClose}
           className="rounded-full border border-black/10 p-2 hover:bg-neutral-50"
           aria-label="Close image panel"
         >
           <X className="w-5 h-5" />
-        </button>
+        </AdminActionButton>
       </div>
 
       <div className="p-5 space-y-6">

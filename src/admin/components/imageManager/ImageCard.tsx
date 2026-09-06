@@ -1,3 +1,4 @@
+import { AdminActionButton } from "../ui/AdminActionControl";
 import {
   Check,
   EyeOff,
@@ -92,7 +93,7 @@ export function ImageCard({
           }}
         />
 
-        <button
+        <AdminActionButton
           type="button"
           onClick={(event) => {
             event.preventDefault();
@@ -121,7 +122,7 @@ export function ImageCard({
           aria-label={selected ? "Deselect image" : "Select image"}
         >
           <Check size={18} />
-        </button>
+        </AdminActionButton>
 
         <div
           draggable
@@ -243,7 +244,7 @@ export function ImageCard({
           }}
         >
           {[1, 2, 3, 4, 5].map((rating) => (
-            <button
+            <AdminActionButton
               key={rating}
               type="button"
               onClick={(event) => {
@@ -269,7 +270,7 @@ export function ImageCard({
                 fill={rating <= image.rating ? "#111111" : "none"}
                 color={rating <= image.rating ? "#111111" : "#a3a3a3"}
               />
-            </button>
+            </AdminActionButton>
           ))}
         </div>
 

@@ -1,3 +1,4 @@
+import { AdminActionLink } from "../components/ui/AdminActionControl";
 import {
   useEffect,
   useMemo,
@@ -13,8 +14,6 @@ import {
   FileText,
   Globe2,
   Images,
-  Layers3,
-  MapPinned,
   Save,
   Sparkles,
   } from "lucide-react";
@@ -221,7 +220,16 @@ function escapeHtml(value: string) {
     .replace(/>/g, "&gt;");
 }
 
-function websiteEmbedCode(workspace: WorkspaceRecord) {
+export function websiteGalleriesEnabled(settings: WorkspaceSettings) {
+  // Older workspaces could enable the gallery link through any of these choices.
+  return settings.websiteConnectionGalleries || settings.websiteConnectionVenues || settings.websiteConnectionMoments;
+}
+
+export function withWebsiteGalleries(settings: WorkspaceSettings, enabled: boolean): WorkspaceSettings {
+  return {...settings, websiteConnectionGalleries: enabled, websiteConnectionVenues: enabled, websiteConnectionMoments: enabled};
+}
+
+export function websiteEmbedCode(workspace: WorkspaceRecord) {
   const settings = workspace.settings;
   const origin = publicContentOrigin(workspace);
 
@@ -230,11 +238,7 @@ function websiteEmbedCode(workspace: WorkspaceRecord) {
     label: string;
   }> = [];
 
-  if (
-    settings.websiteConnectionGalleries
-    || settings.websiteConnectionVenues
-    || settings.websiteConnectionMoments
-  ) {
+  if (websiteGalleriesEnabled(settings)) {
     links.push({
       href: `${origin}/galleries`,
       label: "View our galleries",
@@ -256,10 +260,8 @@ function websiteEmbedCode(workspace: WorkspaceRecord) {
   }
 
   const content = [
-    settings.websiteConnectionGalleries ? "galleries" : "",
+    websiteGalleriesEnabled(settings) ? "galleries" : "",
     settings.websiteConnectionStories ? "stories" : "",
-    settings.websiteConnectionVenues ? "venues" : "",
-    settings.websiteConnectionMoments ? "moments" : "",
   ].filter(Boolean).join(",");
 
   return [
@@ -326,7 +328,7 @@ export function Dashboard() {
       title="Dashboard"
       description="Monitor website connectivity, content readiness, galleries, assets, metadata, SEO and publishing from one operational dashboard."
       actions={websiteUrl
-        ? <a href={websiteUrl} target="_blank" rel="noreferrer" className="admin-button admin-button--primary admin-button--md"><Globe2 className="admin-button__icon" />Open website</a>
+        ? <AdminActionLink href={websiteUrl} target="_blank" rel="noreferrer" className="admin-button admin-button--primary admin-button--md"><Globe2 className="admin-button__icon" />Open website</AdminActionLink>
         : <AdminHeaderRouterLink to="/admin/website" className="admin-button admin-button--primary admin-button--md"><Globe2 className="admin-button__icon" />Configure website</AdminHeaderRouterLink>}
     />
 
@@ -362,22 +364,6 @@ export function Dashboard() {
         value={`${stats.galleryImageCount} images`}
         detail="Venue, moment and collection content"
         tone="info"
-      />
-
-      <StudioSnapshot
-        to="/admin/venues"
-        icon={MapPinned}
-        label="Venues and locations"
-        value="Editorial content"
-        detail="Pages, galleries and location assignments"
-      />
-
-      <StudioSnapshot
-        to="/admin/moments"
-        icon={Layers3}
-        label="Moments and collections"
-        value="Curated content"
-        detail="Reusable portfolio groupings"
       />
 
       <StudioSnapshot
@@ -550,7 +536,7 @@ export function WebsiteOverview() {
       title="Website"
       description="Configure how WedPlanned galleries and wedding stories connect to WordPress, Squarespace or a custom HTML website."
       actions={websiteUrl
-        ? <a href={websiteUrl} target="_blank" rel="noreferrer" className="admin-button admin-button--primary admin-button--md"><Globe2 className="admin-button__icon" />Open website</a>
+        ? <AdminActionLink href={websiteUrl} target="_blank" rel="noreferrer" className="admin-button admin-button--primary admin-button--md"><Globe2 className="admin-button__icon" />Open website</AdminActionLink>
         : null}
     />
 
@@ -605,13 +591,15 @@ export function WebsiteOverview() {
             <label>
               <input
                 type="checkbox"
-                checked={settings.websiteConnectionGalleries}
-                onChange={(event) => update(
-                  "websiteConnectionGalleries",
-                  event.target.checked,
-                )}
+                checked={websiteGalleriesEnabled(settings)}
+                onChange={(event) => {
+                  const enabled = event.target.checked;
+                  setWorkspace(current => current ? {...current, settings: withWebsiteGalleries(current.settings, enabled)} : current);
+                  setMessage("");
+                  setSaveError("");
+                }}
               />
-              <span><strong>Galleries</strong><small>Public portfolio and gallery links</small></span>
+              <span><strong>Galleries</strong></span>
             </label>
 
             <label>
@@ -623,31 +611,7 @@ export function WebsiteOverview() {
                   event.target.checked,
                 )}
               />
-              <span><strong>Wedding stories</strong><small>Published blog and story links</small></span>
-            </label>
-
-            <label>
-              <input
-                type="checkbox"
-                checked={settings.websiteConnectionVenues}
-                onChange={(event) => update(
-                  "websiteConnectionVenues",
-                  event.target.checked,
-                )}
-              />
-              <span><strong>Venues</strong><small>Venue content within public galleries</small></span>
-            </label>
-
-            <label>
-              <input
-                type="checkbox"
-                checked={settings.websiteConnectionMoments}
-                onChange={(event) => update(
-                  "websiteConnectionMoments",
-                  event.target.checked,
-                )}
-              />
-              <span><strong>Moments and collections</strong><small>Curated content within public galleries</small></span>
+              <span><strong>Wedding stories</strong></span>
             </label>
           </div>
 
@@ -714,15 +678,8 @@ export function WebsiteOverview() {
         to="/admin/gallery"
         icon={Images}
         title="Galleries"
-        description="Control public venue, moment, location, creative-flash and collection content."
+        description="Create and organise your public galleries."
         status={`${stats.galleryImageCount} images`}
-      />
-
-      <Destination
-        to="/admin/venues"
-        icon={MapPinned}
-        title="Venues"
-        description="Maintain venue pages, public galleries, locations and editorial content."
       />
 
       <Destination

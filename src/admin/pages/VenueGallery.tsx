@@ -1,3 +1,5 @@
+import { StudioBackLink } from "../components/ui/StudioUI";
+import { AdminActionButton } from "../components/ui/AdminActionControl";
 import {
   useEffect,
   useMemo,
@@ -867,16 +869,17 @@ export function VenueGallery() {
 
   if (!venue) {
     return (
-      <section className="rounded-[28px] border border-black/10 bg-white p-8">
-        <h1 className="font-serif text-3xl">Venue not found</h1>
+      <section className="admin-surface-card border border-black/10 bg-white">
+        <h1 className="admin-section-title ">Venue not found</h1>
         <p className="mt-3 text-neutral-600">{error}</p>
       </section>
     );
   }
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
+        backLink={<StudioBackLink to={`/admin/venues/${slug}`} label="Back to Venue" />}
         title="Venue gallery"
         description="Manage venue gallery membership, order and publishing."
         meta={
@@ -907,7 +910,7 @@ export function VenueGallery() {
               Manage moments
             </AdminHeaderRouterLink>
 
-            <button
+            <AdminActionButton
               type="button"
               onClick={publishVenue}
               disabled={publishing || saving}
@@ -917,9 +920,9 @@ export function VenueGallery() {
               {publishing
                 ? "Publishing…"
                 : "Publish venue"}
-            </button>
+            </AdminActionButton>
 
-            <button
+            <AdminActionButton
               type="button"
               onClick={saveGallery}
               disabled={saving || !dirty}
@@ -931,7 +934,7 @@ export function VenueGallery() {
                 : dirty
                   ? "Save gallery"
                   : "Saved"}
-            </button>
+            </AdminActionButton>
           </div>
         }
       />
@@ -988,7 +991,7 @@ export function VenueGallery() {
         <section className="flex flex-wrap items-center gap-2 rounded-xl border border-black/10 bg-white/90 p-3 shadow-sm">
           <strong className="mr-1 text-[11px]">{selectedIds.size} selected</strong>
 
-          <button
+          <AdminActionButton
             type="button"
             onClick={() => {
               const selectedItems = items.filter((item) => selectedIds.has(item.assetId));
@@ -1000,7 +1003,7 @@ export function VenueGallery() {
             {items.filter((item) => selectedIds.has(item.assetId)).every((item) => item.included)
               ? "Hide from venue gallery"
               : "Show on venue gallery"}
-          </button>
+          </AdminActionButton>
 
           <select
             value=""
@@ -1023,21 +1026,21 @@ export function VenueGallery() {
             <option value="__clear__">Clear moment assignments</option>
           </select>
 
-          <button
+          <AdminActionButton
             type="button"
             onClick={() => setSelectedIds(new Set())}
             className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 text-[10px] font-medium"
           >
             <X className="h-3.5 w-3.5" />
             Clear
-          </button>
+          </AdminActionButton>
         </section>
       ) : null}
 
       {!assets.length ? (
         <section className="rounded-[28px] border border-black/10 bg-white/80 p-10 text-center">
           <ImageIcon className="mx-auto h-10 w-10 text-neutral-400" />
-          <h2 className="mt-4 font-serif text-3xl">
+          <h2 className="admin-section-title mt-4">
             No linked wedding images
           </h2>
           <p className="mt-3 text-neutral-500">
@@ -1116,7 +1119,7 @@ export function VenueGallery() {
                       }}
                     />
 
-                    <button
+                    <AdminActionButton aria-label="Select image"
                       type="button"
                       onClick={(event) => {
                         event.preventDefault();
@@ -1141,7 +1144,7 @@ export function VenueGallery() {
                       }}
                     >
                       <Check size={18} />
-                    </button>
+                    </AdminActionButton>
 
                     <div
                       draggable
@@ -1252,7 +1255,7 @@ export function VenueGallery() {
                     Image actions
                   </p>
 
-                  <button
+                  <AdminActionButton
                     type="button"
                     onClick={
                       removeActiveFromVenueGallery
@@ -1265,10 +1268,10 @@ export function VenueGallery() {
                   >
                     <Unlink className="h-4 w-4" />
                     Remove from venue gallery
-                  </button>
+                  </AdminActionButton>
 
                   {activeAsset.weddingSlug ? (
-                    <button
+                    <AdminActionButton
                       type="button"
                       onClick={deleteActivePermanently}
                       disabled={deleting}
@@ -1276,7 +1279,7 @@ export function VenueGallery() {
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       {deleting ? "Deleting…" : "Delete image permanently"}
-                    </button>
+                    </AdminActionButton>
                   ) : null}
                 </div>
 
@@ -1409,15 +1412,15 @@ export function VenueGallery() {
                   </div>
                 </details>
 
-                <button
+                <AdminActionButton
                   type="button"
                   onClick={() => setHero(activeItem.assetId)}
                   className="h-7 w-full rounded-md bg-black px-2.5 text-[9px] font-medium text-white"
                 >
                   Set as venue hero
-                </button>
+                </AdminActionButton>
 
-                <button
+                <AdminActionButton
                   type="button"
                   onClick={async () => {
                     try {
@@ -1430,9 +1433,9 @@ export function VenueGallery() {
                   className="h-7 w-full rounded-md border border-black/15 bg-white px-2.5 text-[9px] font-medium text-black"
                 >
                   Set as Gallery by Venue master hero
-                </button>
+                </AdminActionButton>
 
-                <button
+                <AdminActionButton
                   type="button"
                   onClick={async () => {
                     try {
@@ -1445,7 +1448,7 @@ export function VenueGallery() {
                   className="h-7 w-full rounded-md bg-black px-2.5 text-[9px] font-medium text-white"
                 >
                   Set as main Gallery landing hero
-                </button>
+                </AdminActionButton>
 
                 <div>
                   <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-neutral-500">

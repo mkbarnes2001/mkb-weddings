@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Execute the actual supplier functions against a fresh, isolated schema-53 SQLite DB.
+// Execute the actual supplier functions against a fresh, isolated schema-54 SQLite DB.
 // Only permission/activity/workspace rendering collaborators are stubbed for approval.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -44,7 +44,7 @@ const sql = new DatabaseSync(':memory:');
 sql.exec('PRAGMA foreign_keys=OFF');
 sql.exec(read('d1/schema.sql'));
 sql.exec('PRAGMA foreign_keys=ON');
-assert.equal(sql.prepare("SELECT value FROM schema_meta WHERE key='schema_version'").get().value, '53');
+assert.equal(sql.prepare("SELECT value FROM schema_meta WHERE key='schema_version'").get().value, '54');
 const db = {
   prepare(query) {
     const stmt = {args: [], bind(...args) { this.args = args; return this; },
@@ -98,6 +98,24 @@ await assert.rejects(api.saveWeddingSuppliers(db,'wedding-a',[],A),{statusCode:4
 await api.saveWeddingSuppliers(db,'wedding-a',await api.getWeddingSuppliers(db,'wedding-a',A),A);
 assert.equal(links().length,1);
 assert.equal(sql.prepare('SELECT count(*) n FROM wedding_suppliers WHERE workspace_id=?').get(A).n,1);
+// Historical approvals can predate the fix and have lost both link representations.
+// Re-saving the exact reviewed supplier set restores membership without reapproval.
+const historicSource = {...submissions()[0]};
+const masterCount = sql.prepare('SELECT count(*) n FROM suppliers').get().n;
+sql.prepare('DELETE FROM wedding_supplier_links WHERE workspace_id=? AND wedding_slug=?').run(A,'wedding-a');
+sql.prepare('DELETE FROM wedding_suppliers WHERE workspace_id=? AND wedding_slug=?').run(A,'wedding-a');
+sql.prepare("UPDATE weddings SET document_json=json_set(document_json,'$.suppliers',json('[]')) WHERE workspace_id=? AND slug=?").run(A,'wedding-a');
+assert.equal((await api.getMasterSupplier(db,supplierId,A)).linkedWeddingCount,0);
+const repairRows = [{supplierId, name:'Renamed supplier', role:'Floral design'}];
+await api.saveWeddingSuppliers(db,'wedding-a',repairRows,A);
+await api.saveWeddingSuppliers(db,'wedding-a',repairRows,A);
+assert.equal((await api.getMasterSupplier(db,supplierId,A)).linkedWeddingCount,1);
+assert.equal(links().length,1);
+assert.equal(sql.prepare('SELECT count(*) n FROM wedding_suppliers WHERE workspace_id=?').get(A).n,1);
+assert.equal((await api.getAdminWedding(db,'wedding-a',A)).suppliers[0].supplierId,supplierId);
+assert.equal(sql.prepare('SELECT count(*) n FROM suppliers').get().n,masterCount);
+assert.deepEqual({...submissions()[0]},historicSource);
+console.log('PASS: historical missing links restored idempotently; master identity and approval source unchanged');
 // Unchanged/resorted responses retain identity, professional role, notes and timestamps.
 await api.syncSupplierAnswers(db,A,row,fields,answers,answers);
 assert.deepEqual({...submissions()[0]}, {...approved});
@@ -152,7 +170,7 @@ await assert.rejects(api.saveWeddingSuppliers(db,'renamed-wedding',await api.get
 assert.deepEqual(links(),beforeLinks);
 sql.exec('DROP TRIGGER fail_links');
 assert.deepEqual(sql.prepare('PRAGMA foreign_key_check').all(),[]);
-console.log('PASS Gate 2D1: actual source + schema 53; create/merge, stale Wedding save, supplier replace, master edit, resync/reorder/change, source history, slug continuity, tenant isolation, missing-Wedding guard, atomic rebuild rollback.');
+console.log('PASS Gate 2D1: actual source + schema 54; create/merge, stale Wedding save, supplier replace, master edit, resync/reorder/change, source history, slug continuity, tenant isolation, missing-Wedding guard, atomic rebuild rollback.');
 
 // Gate 2D3: explicit unlink/reassignment with source history and atomic audit.
 const originalLinks = links();

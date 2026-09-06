@@ -94,10 +94,10 @@ version = db.execute(
 ).fetchone()[0]
 db.close()
 
-require(str(version) == "53", f"Client Gallery capability gate changed schema: {version}")
+require(str(version) == "54", f"Client Gallery capability gate changed schema: {version}")
 require(
-    not list((ROOT / "d1/migrations").glob("054_*.sql")),
-    "Client Gallery capability gate must not add migration 054",
+    not list((ROOT / "d1/migrations").glob("055_*.sql")),
+    "Client Gallery capability gate must not add migration 055",
 )
 
 print("PASS v1.10.13a Gate 2F2D-B2 entitlement-aware Client Gallery Editor")
@@ -107,4 +107,4 @@ print("  direct ?tab=store degrades to General settings when unavailable: verifi
 print("  Asset Library search/control require content-tools: verified")
 print("  Client Gallery core operations remain available: verified")
 print("  server-side optional capability enforcement preserved: verified")
-print("  schema remains 53: verified")
+print("  schema is 54: verified")

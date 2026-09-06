@@ -140,10 +140,10 @@ version = db.execute(
 ).fetchone()[0]
 db.close()
 
-require(str(version) == "53", f"CRM composite server gate changed schema: {version}")
+require(str(version) == "54", f"CRM composite server gate changed schema: {version}")
 require(
-    not list((ROOT / "d1/migrations").glob("054_*.sql")),
-    "CRM composite server gate must not add migration 054",
+    not list((ROOT / "d1/migrations").glob("055_*.sql")),
+    "CRM composite server gate must not add migration 055",
 )
 
 print("PASS v1.10.13a Gate 2F2D-B3B1 CRM composite server entitlement scoping")
@@ -154,4 +154,4 @@ print("  workflow task/job operational payload is suppressed without bookings: v
 print("  lead-form write refresh cannot re-expose booking data: verified")
 print("  canonical resolver drives composite booking inclusion: verified")
 print("  job-specific middleware booking enforcement remains authoritative: verified")
-print("  schema remains 53: verified")
+print("  schema is 54: verified")

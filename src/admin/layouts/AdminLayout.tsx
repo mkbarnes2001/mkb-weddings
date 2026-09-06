@@ -1,3 +1,4 @@
+import { AdminActionTooltips } from "../components/ui/AdminActionTooltips";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ArrowLeft, Building2, Check, ChevronDown, LogOut, Menu, ShieldCheck, X } from "lucide-react";
 import { Link, Navigate, Outlet, useLocation } from "react-router-dom";
@@ -650,7 +651,8 @@ export function AdminLayout() {
             </div>
           </header>
 
-          <main className="admin-main-content">
+          <AdminActionTooltips />
+          <main className={`admin-main-content${currentModule.key === "website" ? " admin-main-content--studio" : ""}`}>
             {routeEntitled ? (
               <Outlet
                 context={{

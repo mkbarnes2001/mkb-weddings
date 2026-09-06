@@ -83,9 +83,9 @@ for forbidden in ("crm_invoice_payment_attempts", "crm_invoice_payments", "works
 con = sqlite3.connect(":memory:")
 con.executescript(schema)
 version = con.execute("SELECT value FROM schema_meta WHERE key='schema_version'").fetchone()[0]
-require(str(version) == "53", f"Customer Portal unexpectedly changed schema: {version}")
+require(str(version) == "54", f"Customer Portal unexpectedly changed schema: {version}")
 con.close()
-require(not list((ROOT / "d1/migrations").glob("054_*.sql")), "Customer Portal must not add migration 054")
+require(not list((ROOT / "d1/migrations").glob("055_*.sql")), "Customer Portal must not add migration 055")
 
 print("PASS v1.10.13a Gate 2E1B Stripe Customer Portal foundation")
 print("  dedicated portal enablement latch + shared test/live safety: verified")
@@ -96,4 +96,4 @@ print("  hosted URL-only browser response: verified")
 print("  WedNav permission/configuration-scoped Manage billing action: verified")
 print("  provider identifiers remain server-side: verified")
 print("  connected client-payment and Print Store boundaries remain isolated: verified")
-print("  schema remains 53: verified")
+print("  schema is 54: verified")

@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import {
   useEffect,
   useState,
@@ -190,7 +191,7 @@ function emailTemplateInput(
   };
 }
 
-export function CRMCommercialTemplates() {
+export function CRMCommercialTemplates({ templateType }: { templateType: View }) {
 
   const {
     id: quoteTemplateRouteId,
@@ -216,12 +217,7 @@ export function CRMCommercialTemplates() {
     )
     && auth.accessMode !== "support";
 
-  const [selectedView, setSelectedView] =
-    useState<View | null>(null);
-
-  const view: View =
-    selectedView
-    || (bookingsEnabled ? "quotes" : "emails");
+  const view = templateType;
 
   const [
     quoteTemplates,
@@ -295,9 +291,8 @@ export function CRMCommercialTemplates() {
     setError("");
 
     try {
-      const nextEmailTemplates =
-        await AdminApiService
-          .getCrmEmailTemplates();
+      const nextEmailTemplates = templateType === "emails"
+        ? await AdminApiService.getCrmEmailTemplates() : [];
 
       let nextQuoteTemplates:
         CrmQuoteTemplate[] = [];
@@ -310,7 +305,7 @@ export function CRMCommercialTemplates() {
         addons: [],
       };
 
-      if (bookingsEnabled) {
+      if (bookingsEnabled && templateType === "quotes") {
         [
           nextQuoteTemplates,
           catalogue,
@@ -434,12 +429,12 @@ export function CRMCommercialTemplates() {
   }
 
   useEffect(() => {
-    setSelectedView(null);
     void load();
   }, [
     auth.workspaceId,
     quoteTemplateRouteId,
     bookingsEnabled,
+    templateType,
   ]);
 
   function newEmailTemplate() {
@@ -706,7 +701,7 @@ export function CRMCommercialTemplates() {
       );
 
       navigate(
-        "/admin/crm/templates",
+        "/admin/crm/templates/quotes",
         {
           replace: true,
         },
@@ -876,7 +871,6 @@ export function CRMCommercialTemplates() {
                   || "Quote template"
                 )
           }
-          description="Configure reusable quote defaults, package choices and additional options. Quotes created from this template keep independent immutable snapshots."
         />
 
         {error ? (
@@ -898,12 +892,12 @@ export function CRMCommercialTemplates() {
               title="Quote template unavailable"
               description="This template could not be found in the current workspace."
               action={
-                <Link
-                  to="/admin/crm/templates"
+                <AdminActionRouterLink
+                  to="/admin/crm/templates/quotes"
                   className="admin-button admin-button--primary admin-button--sm"
                 >
                   Back to quote templates
-                </Link>
+                </AdminActionRouterLink>
               }
             />
           </AdminPanel>
@@ -915,7 +909,7 @@ export function CRMCommercialTemplates() {
                   ? "Edit quote template"
                   : "New quote template"
               }
-              description="The package catalogue remains the source. This template controls which choices appear together on a new quote."
+              className="crm-quote-template-editor"
               icon={FileText}
               actions={
                 canManage ? (
@@ -1056,7 +1050,6 @@ export function CRMCommercialTemplates() {
 
               <AdminField
                 label="Description"
-                help="Internal description to help your team choose the correct template."
               >
                 <textarea
                   className="admin-textarea min-h-20"
@@ -1082,7 +1075,6 @@ export function CRMCommercialTemplates() {
 
               <AdminField
                 label="Client introduction"
-                help="Shown at the start of quotes created from this template."
               >
                 <textarea
                   className="admin-textarea min-h-28"
@@ -1103,21 +1095,11 @@ export function CRMCommercialTemplates() {
                       }),
                     )
                   }
-                  placeholder="Thanks for getting in touch. Choose the package that best fits your wedding day."
                 />
               </AdminField>
 
               <div className="grid gap-3 md:grid-cols-2">
-                <label className="admin-choice-row">
-                  <div>
-                    <strong>
-                      Default quote template
-                    </strong>
-                    <p>
-                      Preselect this template when creating a new quote.
-                    </p>
-                  </div>
-
+                <label className="admin-checkbox-row">
                   <input
                     type="checkbox"
                     disabled={
@@ -1142,18 +1124,10 @@ export function CRMCommercialTemplates() {
                       )
                     }
                   />
+                  <span>Default quote template</span>
                 </label>
 
-                <label className="admin-choice-row">
-                  <div>
-                    <strong>
-                      Create invoice after acceptance
-                    </strong>
-                    <p>
-                      Keep automatic invoice creation enabled for bookings made from this template.
-                    </p>
-                  </div>
-
+                <label className="admin-checkbox-row">
                   <input
                     type="checkbox"
                     disabled={!canManage}
@@ -1174,27 +1148,26 @@ export function CRMCommercialTemplates() {
                       )
                     }
                   />
+                  <span>Create invoice after acceptance</span>
                 </label>
               </div>
             </AdminPanel>
 
             <AdminPanel
               title="Package choices"
-              description="Choose every package the client should be able to compare. One package may be highlighted as recommended."
               icon={PackageCheck}
             >
               {!activePackages.length ? (
                 <AdminEmptyState
                   icon={PackageCheck}
                   title="No catalogue packages"
-                  description="Create packages in the catalogue before building a quote template."
                   action={
-                    <Link
+                    <AdminActionRouterLink
                       to="/admin/crm/catalogue"
                       className="admin-button admin-button--primary admin-button--sm"
                     >
                       Open catalogue
-                    </Link>
+                    </AdminActionRouterLink>
                   }
                 />
               ) : (
@@ -1242,6 +1215,7 @@ export function CRMCommercialTemplates() {
                             <label>
                               <input
                                 type="checkbox"
+                                aria-label={`Include ${item.name}`}
                                 disabled={!canManage}
                                 checked={
                                   selected
@@ -1264,11 +1238,6 @@ export function CRMCommercialTemplates() {
                               </span>
                             </label>
 
-                            {recommended ? (
-                              <AdminStatus tone="info">
-                                Recommended
-                              </AdminStatus>
-                            ) : null}
                           </header>
 
                           <div>
@@ -1293,8 +1262,10 @@ export function CRMCommercialTemplates() {
                           </div>
 
                           {selected ? (
-                            <button
+                            <AdminActionButton
                               type="button"
+                              aria-pressed={recommended}
+                              aria-label={`Recommend ${item.name}`}
                               className={
                                 recommended
                                   ? "crm-template-recommend active"
@@ -1309,9 +1280,9 @@ export function CRMCommercialTemplates() {
                             >
                               <Check />
                               {recommended
-                                ? "Recommended package"
-                                : "Mark as recommended"}
-                            </button>
+                                ? "Recommended"
+                                : "Recommend"}
+                            </AdminActionButton>
                           ) : null}
                         </article>
                       );
@@ -1323,14 +1294,12 @@ export function CRMCommercialTemplates() {
 
             <AdminPanel
               title="Additional options"
-              description="Extras are configured once for the quote template. They are not repeated beneath every package in this editor."
               icon={Plus}
             >
               {!activeAddons.length ? (
                 <AdminEmptyState
                   icon={Plus}
                   title="No additional options"
-                  description="Create add-ons in the package catalogue before adding them to a template."
                 />
               ) : (
                 <div className="crm-template-addon-grid">
@@ -1407,10 +1376,9 @@ export function CRMCommercialTemplates() {
   return (
     <AdminPage>
       <AdminPageHeader
-        title="Commercial templates"
-        description="Build reusable quote and email templates for this business. Templates remain editable while quotes created from them keep immutable snapshots."
+        title={view === "quotes" ? "Quote templates" : "Email templates"}
         actions={
-          bookingsEnabled ? (
+          bookingsEnabled && view === "quotes" ? (
             <div className="flex flex-wrap gap-2">
               <AdminHeaderRouterLink
                 to="/admin/crm/catalogue"
@@ -1418,14 +1386,6 @@ export function CRMCommercialTemplates() {
               >
                 <PackageCheck className="admin-button__icon" />
                 Package catalogue
-              </AdminHeaderRouterLink>
-
-              <AdminHeaderRouterLink
-                to="/admin/crm/quotes"
-                className="admin-button admin-button--primary"
-              >
-                <FileText className="admin-button__icon" />
-                Open quotes
               </AdminHeaderRouterLink>
             </div>
           ) : undefined
@@ -1444,58 +1404,6 @@ export function CRMCommercialTemplates() {
         </div>
       ) : null}
 
-      <div
-        className="crm-template-type-switcher"
-        aria-label="Commercial template type"
-      >
-        {bookingsEnabled ? (
-        <button
-          type="button"
-          className={
-            view === "quotes"
-              ? "active"
-              : ""
-          }
-          onClick={() =>
-            setSelectedView("quotes")
-          }
-        >
-          <Sparkles />
-          <span>
-            <strong>
-              Quote templates
-            </strong>
-            <small>
-              Packages, extras and quote defaults
-            </small>
-          </span>
-        </button>
-
-        ) : null}
-
-        <button
-          type="button"
-          className={
-            view === "emails"
-              ? "active"
-              : ""
-          }
-          onClick={() =>
-            setSelectedView("emails")
-          }
-        >
-          <Mail />
-          <span>
-            <strong>
-              Email templates
-            </strong>
-            <small>
-              Reusable client messages
-            </small>
-          </span>
-        </button>
-      </div>
-
       {view === "quotes" ? (
         <AdminPanel
           title="Quote templates"
@@ -1504,13 +1412,13 @@ export function CRMCommercialTemplates() {
           className="crm-template-list-page"
           actions={
             canManage ? (
-              <Link
+              <AdminActionRouterLink
                 to="/admin/crm/templates/quotes/new"
                 className="admin-button admin-button--primary admin-button--sm"
               >
                 <Plus className="admin-button__icon" />
                 New template
-              </Link>
+              </AdminActionRouterLink>
             ) : undefined
           }
         >
@@ -1518,15 +1426,14 @@ export function CRMCommercialTemplates() {
             <AdminEmptyState
               icon={Sparkles}
               title="No quote templates"
-              description="Create a reusable quote template, then configure its packages and additional options on the template editor."
               action={
                 canManage ? (
-                  <Link
+                  <AdminActionRouterLink
                     to="/admin/crm/templates/quotes/new"
                     className="admin-button admin-button--primary admin-button--sm"
                   >
                     Create quote template
-                  </Link>
+                  </AdminActionRouterLink>
                 ) : undefined
               }
             />
@@ -1677,7 +1584,7 @@ export function CRMCommercialTemplates() {
                 ? "Edit email template"
                 : "New email template"
             }
-            description="Reusable content is independent from the mail provider. Delivery settings will decide whether the message uses WedPlanned, Google or SMTP."
+            className="crm-email-template-editor"
             icon={Mail}
             actions={
               canManage ? (
@@ -1846,7 +1753,6 @@ export function CRMCommercialTemplates() {
 
             <AdminField
               label="Message"
-              help="Merge-field controls and rich formatting will be added to the sending workflow. Plain text remains the safe fallback."
             >
               <textarea
                 className="admin-textarea crm-template-email-body"

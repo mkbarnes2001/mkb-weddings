@@ -1,4 +1,7 @@
-import { Link as RouterLink, useOutletContext } from "react-router-dom";
+import { AdminActionButton, AdminActionLink } from "./AdminActionControl";
+import { ArrowLeft } from "lucide-react";
+import { settingsReturnLink } from "../../navigation/adminSettings";
+import { Link as RouterLink, useOutletContext, useLocation } from "react-router-dom";
 import type {
   PlatformBrandingIdentity,
   PlatformModuleConfiguration,
@@ -686,7 +689,7 @@ export function AdminHeaderRouterLink({
       label,
     );
 
-  const Icon =
+  const Icon = /^(back|return)\b/i.test(label) ? ArrowLeft :
     resolveAdminActionIcon(
       actionKey,
       platformIdentity?.adminActionIcons || {},
@@ -744,6 +747,7 @@ export function AdminHeaderRouterLink({
 
 export function AdminPageHeader({
   eyebrow,
+  backLink,
   title,
   description,
   actions,
@@ -751,6 +755,7 @@ export function AdminPageHeader({
   className = "",
 }: {
   eyebrow?: ReactNode;
+  backLink?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
@@ -768,10 +773,11 @@ export function AdminPageHeader({
       )
     : null;
 
-  const backControl =
-    eyebrow && typeof eyebrow !== "string"
-      ? eyebrow
-      : null;
+  const location = useLocation();
+  const settingsReturn = settingsReturnLink(location.pathname, location.search);
+  const backControl = backLink || (settingsReturn
+    ? <AdminHeaderRouterLink to={settingsReturn.to} className="admin-icon-control" aria-label={settingsReturn.label} title={settingsReturn.label}><ArrowLeft aria-hidden="true" /></AdminHeaderRouterLink>
+    : eyebrow && typeof eyebrow !== "string" ? eyebrow : null);
 
   return (
     <header className={cx("admin-page-header", className)}>
@@ -780,13 +786,14 @@ export function AdminPageHeader({
       </div>
 
       <div className="admin-page-header__content">
-        {backControl ? (
-          <div className="admin-page-header__back">
-            {backControl}
-          </div>
-        ) : null}
-
-        <h1 className="admin-page-title">{title}</h1>
+        <div className="admin-page-header__title-row">
+          {backControl ? (
+            <div className="admin-page-header__back">
+              {backControl}
+            </div>
+          ) : null}
+          <h1 className="admin-page-title">{title}</h1>
+        </div>
 
         {description ? (
           <p className="admin-page-description">
@@ -812,7 +819,6 @@ export function AdminPageHeader({
 
 export function AdminPanel({
   title,
-  description,
   icon: Icon,
   actions,
   children,
@@ -829,7 +835,7 @@ export function AdminPanel({
 }) {
   return (
     <section className={cx("admin-panel", compact && "admin-panel--compact", className)}>
-      {title || description || Icon || actions ? (
+      {title || Icon || actions ? (
         <div className="admin-panel__header">
           <div className="admin-panel__heading">
             {Icon ? (
@@ -839,7 +845,6 @@ export function AdminPanel({
             ) : null}
             <div>
               {title ? <h2 className="admin-panel__title">{title}</h2> : null}
-              {description ? <p className="admin-panel__description">{description}</p> : null}
             </div>
           </div>
           {actions ? <div className="admin-panel__actions">{actions}</div> : null}
@@ -867,13 +872,14 @@ export function AdminButton({
   icon?: LucideIcon;
 }) {
   return (
-    <button
+    <AdminActionButton
       {...props}
+      icon={Icon}
       className={cx("admin-button", `admin-button--${variant}`, `admin-button--${size}`, className)}
     >
       {Icon ? <Icon className="admin-button__icon" aria-hidden="true" /> : null}
       {children}
-    </button>
+    </AdminActionButton>
   );
 }
 
@@ -890,13 +896,14 @@ export function AdminLinkButton({
   icon?: LucideIcon;
 }) {
   return (
-    <a
+    <AdminActionLink
       {...props}
+      icon={Icon}
       className={cx("admin-button", `admin-button--${variant}`, `admin-button--${size}`, className)}
     >
       {Icon ? <Icon className="admin-button__icon" aria-hidden="true" /> : null}
       {children}
-    </a>
+    </AdminActionLink>
   );
 }
 
@@ -914,15 +921,16 @@ export function AdminIconButton({
   floatingTooltip?: boolean;
 }) {
   return (
-    <button
+    <AdminActionButton
       {...props}
+      icon={Icon}
       type={props.type || "button"}
       aria-label={label}
       title={floatingTooltip ? props.title : props.title || label}
       className={cx("admin-icon-control", `admin-icon-control--${variant}`, className)}
     >
       <Icon aria-hidden="true" />
-    </button>
+    </AdminActionButton>
   );
 }
 
@@ -997,7 +1005,6 @@ export function AdminEmptyState({
 
 export function AdminAccordion({
   title,
-  description,
   icon: Icon,
   summary,
   children,
@@ -1017,7 +1024,7 @@ export function AdminAccordion({
       <summary className="admin-accordion__summary">
         <span className="admin-accordion__heading">
           {Icon ? <span className="admin-accordion__icon" aria-hidden="true"><Icon /></span> : null}
-          <span><strong>{title}</strong>{description ? <small>{description}</small> : null}</span>
+          <span><strong>{title}</strong></span>
         </span>
         <span className="admin-accordion__meta">{summary}<span className="admin-accordion__chevron" aria-hidden="true"></span></span>
       </summary>

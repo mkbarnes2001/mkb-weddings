@@ -1,3 +1,4 @@
+import { AdminActionLink } from "./ui/AdminActionControl";
 import {
   useEffect,
   useMemo,
@@ -1242,13 +1243,13 @@ export function PublicSiteAppearanceEditor({
               />
             </div>
 
-            <a
+            <AdminActionLink
               href="/admin/platform?section=assets"
               className="admin-button admin-button--secondary admin-button--sm"
             >
               Manage platform artwork
               <ExternalLink className="admin-button__icon" />
-            </a>
+            </AdminActionLink>
           </ControlGroup>
 
           <ControlGroup
@@ -1860,7 +1861,7 @@ export function PublicSiteAppearanceEditor({
               </div>
             </div>
 
-            <a
+            <AdminActionLink
               href="https://wedplanned.com/"
               target="_blank"
               rel="noreferrer"
@@ -1868,7 +1869,7 @@ export function PublicSiteAppearanceEditor({
             >
               Open live WedPlanned site
               <ExternalLink className="admin-button__icon" />
-            </a>
+            </AdminActionLink>
           </AdminPanel>
 
           <AdminPanel

@@ -1,3 +1,5 @@
+import { StudioBackLink } from "../components/ui/StudioUI";
+import { AdminActionButton, AdminActionLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -389,7 +391,7 @@ export function MomentGallery() {
 
   if (!moment || !document) {
     return (
-      <div className="rounded-[28px] border border-black/10 bg-white p-8 text-neutral-600">
+      <div className="admin-surface-card border border-black/10 bg-white text-neutral-600">
         {error || "Loading moment gallery…"}
       </div>
     );
@@ -398,8 +400,9 @@ export function MomentGallery() {
   const selectedKeys = [...selected];
 
   return (
-    <div className="space-y-6">
+    <div className="admin-page admin-refined-page space-y-6">
       <AdminPageHeader
+        backLink={<StudioBackLink to="/admin/moments" label="Back to Moments" />}
         title="Moment gallery"
         description="Drag photographs to set the exact gallery order and control visibility."
         meta={
@@ -415,7 +418,7 @@ export function MomentGallery() {
         }
         actions={
           <div className="flex flex-wrap gap-2">
-            <a
+            <AdminActionLink
               href={`https://www.mkbweddings.co.uk/gallery/moment/${encodeURIComponent(
                 moment.slug,
               )}`}
@@ -424,9 +427,9 @@ export function MomentGallery() {
               className="admin-button admin-button--secondary"
             >
               View live gallery
-            </a>
+            </AdminActionLink>
 
-            <button
+            <AdminActionButton
               type="button"
               onClick={save}
               disabled={saving || !dirty}
@@ -438,7 +441,7 @@ export function MomentGallery() {
                 : dirty
                   ? "Save gallery"
                   : "Saved"}
-            </button>
+            </AdminActionButton>
           </div>
         }
       />
@@ -462,7 +465,7 @@ export function MomentGallery() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search filename, venue or wedding…"
-              className="w-full rounded-full border border-black/10 bg-white py-2.5 pl-11 pr-4 text-sm"
+              className="admin-button admin-button--secondary w-full rounded-full border border-black/10 bg-white py-2.5 pl-11 pr-4 text-sm"
             />
           </div>
 
@@ -498,14 +501,14 @@ export function MomentGallery() {
             <span className="text-xs text-neutral-500">
               Drag the grip on any selected image to move the whole selection.
             </span>
-            <button
+            <AdminActionButton
               type="button"
               onClick={clearSelection}
-              className="ml-auto inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
+              className="admin-button admin-button--secondary ml-auto inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
             >
               <X className="h-4 w-4" />
               Clear
-            </button>
+            </AdminActionButton>
           </div>
         ) : null}
       </section>
@@ -597,7 +600,7 @@ export function MomentGallery() {
                       }}
                     />
 
-                    <button
+                    <AdminActionButton aria-label="Select image"
                       type="button"
                       onClick={(event) => {
                         event.preventDefault();
@@ -623,7 +626,7 @@ export function MomentGallery() {
                       }}
                     >
                       <Check className="h-4 w-4" />
-                    </button>
+                    </AdminActionButton>
 
                     <div
                       draggable
@@ -737,7 +740,7 @@ export function MomentGallery() {
                   </p>
                 </div>
 
-                <button
+                <AdminActionButton
                   type="button"
                   onClick={() =>
                     hiddenIds.has(activeImage.assetKey)
@@ -752,7 +755,7 @@ export function MomentGallery() {
                     <EyeOff className="h-4 w-4" />
                   )}
                   {hiddenIds.has(activeImage.assetKey) ? "Show in gallery" : "Hide from gallery"}
-                </button>
+                </AdminActionButton>
 
                 <div className="border-t border-black/10 pt-4">
                   <p className="mb-3 text-xs uppercase tracking-[0.16em] text-neutral-500">
@@ -855,7 +858,7 @@ export function MomentGallery() {
                   )}
                 </div>
 
-                <button
+                <AdminActionButton
                   type="button"
                   onClick={() => {
                     showImages([activeImage.assetKey]);
@@ -871,9 +874,9 @@ export function MomentGallery() {
                   moment.heroImageId === activeImage.imageId
                     ? "Hero + moment card image set"
                     : "Set as hero + moment card"}
-                </button>
+                </AdminActionButton>
 
-                <button
+                <AdminActionButton
                   type="button"
                   onClick={async () => {
                     try {
@@ -883,13 +886,13 @@ export function MomentGallery() {
                       setError(heroError instanceof Error ? heroError.message : "Unable to set Gallery by Moments master hero.");
                     }
                   }}
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm text-white"
+                  className="admin-button admin-button--primary flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm text-white"
                 >
                   <Star className="h-4 w-4" />
                   Set as Gallery by Moments master hero
-                </button>
+                </AdminActionButton>
 
-                <button
+                <AdminActionButton
                   type="button"
                   onClick={async () => {
                     try {
@@ -903,7 +906,7 @@ export function MomentGallery() {
                 >
                   <Star className="h-4 w-4" />
                   Set as main Gallery landing hero
-                </button>
+                </AdminActionButton>
 
 
 
@@ -956,7 +959,7 @@ function Stat({ label, value }: { label: string; value: number }) {
 
 function Badge({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded-full bg-black/75 px-2 py-1 text-[9px] font-medium text-white backdrop-blur">
+    <span className="admin-button admin-button--primary rounded-full bg-black/75 px-2 py-1 text-[9px] font-medium text-white backdrop-blur">
       {children}
     </span>
   );
@@ -972,13 +975,13 @@ function BatchButton({
   label: string;
 }) {
   return (
-    <button
+    <AdminActionButton
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
+      className="admin-button admin-button--secondary inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
     >
       <Icon className="h-4 w-4" />
       {label}
-    </button>
+    </AdminActionButton>
   );
 }

@@ -1,3 +1,5 @@
+import { StudioBackLink } from "../components/ui/StudioUI";
+import { AdminActionButton, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
@@ -242,8 +244,9 @@ export function VenueUpload() {
   }
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
+        backLink={<StudioBackLink to={`/admin/venues/${slug}/gallery`} label="Back to Venue gallery" />}
         title="Image upload"
         description="Upload finished JPEG, PNG or WebP images to the selected venue wedding."
         meta={
@@ -294,7 +297,7 @@ export function VenueUpload() {
         </section>
       ) : null}
 
-      <section className="rounded-[28px] border border-black/10 bg-white/85 p-7">
+      <section className="admin-surface-card border border-black/10 bg-white/85">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <label className="block flex-1">
             <span className="mb-2 block text-xs uppercase tracking-[0.16em] text-neutral-500">
@@ -325,17 +328,17 @@ export function VenueUpload() {
             </p>
           </label>
 
-          <Link
+          <AdminActionRouterLink
             to={`/admin/weddings/new?venueSlug=${encodeURIComponent(
               slug || "",
             )}&returnTo=${encodeURIComponent(
               `/admin/venues/${slug}/upload`,
             )}`}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm"
+            className="admin-button admin-button--secondary inline-flex items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm"
           >
             <Plus className="h-4 w-4" />
             Create wedding
-          </Link>
+          </AdminActionRouterLink>
         </div>
 
         {selectedWedding ? (
@@ -349,7 +352,7 @@ export function VenueUpload() {
 
       <label className={`flex min-h-[240px] flex-col items-center justify-center rounded-[28px] border-2 border-dashed p-8 text-center ${weddingSlug ? "cursor-pointer border-black/15 bg-white/70" : "cursor-not-allowed border-black/10 bg-neutral-100 opacity-60"}`}>
         <ImagePlus className="h-10 w-10 text-neutral-400" />
-        <h2 className="mt-4 font-serif text-3xl">
+        <h2 className="admin-section-title mt-4">
           Choose finished images
         </h2>
         <p className="mt-2 text-sm text-neutral-500">
@@ -366,10 +369,10 @@ export function VenueUpload() {
       </label>
 
       {files.length ? (
-        <section className="rounded-[28px] border border-black/10 bg-white/85 p-6">
+        <section className="admin-surface-card border border-black/10 bg-white/85">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="font-serif text-3xl">
+              <h2 className="admin-section-title ">
                 Upload queue
               </h2>
               <p className="mt-1 text-sm text-neutral-500">
@@ -377,11 +380,11 @@ export function VenueUpload() {
               </p>
             </div>
 
-            <button
+            <AdminActionButton
               type="button"
               onClick={uploadAll}
               disabled={uploading || queuedCount === 0 || !weddingSlug}
-              className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"
+              className="admin-button admin-button--primary inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"
             >
               {uploading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -391,7 +394,7 @@ export function VenueUpload() {
               {uploading
                 ? "Uploading…"
                 : `Upload ${queuedCount} images`}
-            </button>
+            </AdminActionButton>
           </div>
 
           <div className="space-y-3">
@@ -420,7 +423,7 @@ export function VenueUpload() {
                   {item.status === "uploading" ? (
                     <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-neutral-100">
                       <div
-                        className="h-full rounded-full bg-black transition-all"
+                        className="admin-button admin-button--primary h-full rounded-full bg-black transition-all"
                         style={{ width: `${item.progress}%` }}
                       />
                     </div>
@@ -432,20 +435,21 @@ export function VenueUpload() {
                   ) : null}
                 </div>
 
-                <button
+                <AdminActionButton
                   type="button"
+                  aria-label={`Remove ${item.file.name} from upload queue`}
                   onClick={() => removeFile(item.id)}
                   disabled={item.status === "uploading"}
                   className="rounded-full border border-black/10 p-2 disabled:opacity-40"
                 >
                   <X className="h-4 w-4" />
-                </button>
+                </AdminActionButton>
               </article>
             ))}
           </div>
 
           {files.every((item) => item.status === "done") ? (
-            <button
+            <AdminActionButton
               type="button"
               onClick={() =>
                 navigate(`/admin/venues/${slug}/gallery`)
@@ -453,7 +457,7 @@ export function VenueUpload() {
               className="mt-6 rounded-full border border-black/10 px-5 py-3 text-sm"
             >
               Return to venue gallery
-            </button>
+            </AdminActionButton>
           ) : null}
         </section>
       ) : null}

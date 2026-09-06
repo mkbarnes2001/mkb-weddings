@@ -54,9 +54,9 @@ for token in expected_tokens:
     require(token in modules, f"navigation entitlement mapping missing: {token}")
 
 require(
-    'key: "templates", label: "Templates", to: "/admin/crm/templates", icon: FileText, match:'
+    'key: "templates", label: "Templates", settingsOnly: true, to: "/admin/crm/templates", icon: FileText, match:'
     in modules,
-    "CRM Templates should remain visible as a CRM composite surface",
+    "CRM Templates must remain registered as a CRM composite destination in Settings",
 )
 
 require(
@@ -104,10 +104,10 @@ version = db.execute(
 ).fetchone()[0]
 db.close()
 
-require(str(version) == "53", f"navigation gate unexpectedly changed schema: {version}")
+require(str(version) == "54", f"navigation gate unexpectedly changed schema: {version}")
 require(
-    not list((ROOT / "d1/migrations").glob("054_*.sql")),
-    "navigation gate must not add migration 054",
+    not list((ROOT / "d1/migrations").glob("055_*.sql")),
+    "navigation gate must not add migration 055",
 )
 
 print("PASS v1.10.13a Gate 2F2C entitlement-aware navigation shell")
@@ -118,4 +118,4 @@ print("  desktop/mobile module switchers share filtered modules: verified")
 print("  sidebar/mobile bottom navigation share filtered items: verified")
 print("  billing remains permission-controlled in WedNav: verified")
 print("  server-side API entitlement enforcement remains authoritative: verified")
-print("  schema remains 53: verified")
+print("  schema is 54: verified")

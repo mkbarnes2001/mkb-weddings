@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionLabel, AdminActionLink, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useOutletContext } from "react-router-dom";
 import {
@@ -1031,7 +1032,7 @@ function ProfessionalSupplierRows({
                   </small>
                 </label>
 
-                <button
+                <AdminActionButton
                   type="button"
                   className="supplier-questionnaire-remove"
                   disabled={
@@ -1046,7 +1047,7 @@ function ProfessionalSupplierRows({
                   }
                 >
                   <X />
-                </button>
+                </AdminActionButton>
               </div>
             );
           },
@@ -2649,14 +2650,14 @@ commercialInvoice ? (
                 )}
               </span>
 
-              <Link
+              <AdminActionRouterLink
                 className="admin-icon-control crm-commercial-card__open crm-booking-summary-row__action"
                 to={`/admin/crm/jobs/${job.id}/invoices/${commercialInvoice.id}`}
                 aria-label={`Open invoice ${commercialInvoice.reference}`}
                 title="Open invoice"
               >
                 <ExternalLink aria-hidden="true" />
-              </Link>
+              </AdminActionRouterLink>
             </div>
           ) : (
             <div className="crm-commercial-summary-row crm-booking-summary-row">
@@ -2817,14 +2818,14 @@ commercialInvoice ? (
                 : "Not assigned"}
             </span>
 
-            <a
+            <AdminActionLink
               className="admin-icon-control crm-commercial-card__open crm-booking-summary-row__action"
               href="#job-questionnaires"
               aria-label="Open Questionnaire management"
               title="Open questionnaire"
             >
               <ExternalLink aria-hidden="true" />
-            </a>
+            </AdminActionLink>
           </div>
           ) : null}
 
@@ -2862,14 +2863,14 @@ commercialInvoice ? (
                 Accepted
               </span>
 
-              <Link
+              <AdminActionRouterLink
                 className="admin-icon-control crm-commercial-card__open crm-booking-summary-row__action"
                 to={`/admin/crm/quotes/${commercialQuote.id}?jobId=${encodeURIComponent(job.id)}`}
                 aria-label={`Open accepted quote ${commercialQuote.reference}`}
                 title="Open accepted quote"
               >
                 <ExternalLink aria-hidden="true" />
-              </Link>
+              </AdminActionRouterLink>
             </div>
           ) : (
             <div className="crm-commercial-summary-row crm-booking-summary-row">
@@ -2940,14 +2941,14 @@ commercialInvoice ? (
             </span>
 
             {lifecycle.wedding.exists ? (
-              <Link
+              <AdminActionRouterLink
                 className="admin-icon-control crm-wedding-lifecycle-action crm-delivery-summary-action"
                 to={`/admin/weddings/${lifecycle.wedding.slug}/workspace`}
                 aria-label="Open Wedding Workspace"
                 title="Open Wedding Workspace"
               >
                 <ExternalLink aria-hidden="true" />
-              </Link>
+              </AdminActionRouterLink>
             ) : (
               <span className="crm-delivery-summary-action-spacer" />
             )}
@@ -2967,14 +2968,14 @@ commercialInvoice ? (
             </span>
 
             {lifecycle.wedding.exists ? (
-              <Link
+              <AdminActionRouterLink
                 className="admin-icon-control crm-wedding-lifecycle-action crm-delivery-summary-action"
                 to={`/admin/weddings/${lifecycle.wedding.slug}/workspace#preview-upload`}
                 aria-label="Manage Wedding assets"
                 title="Manage Wedding assets"
               >
                 <ExternalLink aria-hidden="true" />
-              </Link>
+              </AdminActionRouterLink>
             ) : (
               <span className="crm-delivery-summary-action-spacer" />
             )}
@@ -3001,14 +3002,14 @@ commercialInvoice ? (
             </span>
 
             {primaryGallery ? (
-              <Link
+              <AdminActionRouterLink
                 className="admin-icon-control crm-wedding-lifecycle-action crm-delivery-summary-action"
                 to={`/admin/client-galleries/${primaryGallery.id}`}
                 aria-label="Open Client Gallery"
                 title="Open Client Gallery"
               >
                 <ExternalLink aria-hidden="true" />
-              </Link>
+              </AdminActionRouterLink>
             ) : (
               <AdminIconButton
                 icon={Plus}
@@ -3048,7 +3049,7 @@ commercialInvoice ? (
             </span>
 
             {lifecycle.wedding.exists ? (
-              <Link
+              <AdminActionRouterLink
                 className="admin-icon-control crm-wedding-lifecycle-action crm-delivery-summary-action"
                 to={`/admin/weddings/${lifecycle.wedding.slug}/content`}
                 aria-label={
@@ -3067,7 +3068,7 @@ commercialInvoice ? (
                 ) : (
                   <ExternalLink aria-hidden="true" />
                 )}
-              </Link>
+              </AdminActionRouterLink>
             ) : (
               <span className="crm-delivery-summary-action-spacer" />
             )}
@@ -3089,14 +3090,14 @@ commercialInvoice ? (
             </span>
 
             {lifecycle.wedding.exists ? (
-              <Link
+              <AdminActionRouterLink
                 className="admin-icon-control crm-wedding-lifecycle-action crm-delivery-summary-action"
                 to={`/admin/weddings/${lifecycle.wedding.slug}/workspace#publishing-destinations`}
                 aria-label="Manage Website galleries"
                 title="Manage Website galleries"
               >
                 <ExternalLink aria-hidden="true" />
-              </Link>
+              </AdminActionRouterLink>
             ) : (
               <span className="crm-delivery-summary-action-spacer" />
             )}
@@ -3159,14 +3160,14 @@ commercialInvoice ? (
                   )}
                 </strong>
 
-                <Link
+                <AdminActionRouterLink
                   className="admin-icon-control crm-job-quote-compact__action"
                   to={`/admin/crm/quotes/${job.quoteId}?jobId=${encodeURIComponent(job.id)}`}
                   aria-label="Open accepted quote"
                   title="Open accepted quote"
                 >
                   <Eye aria-hidden="true" />
-                </Link>
+                </AdminActionRouterLink>
               </article>
 
               {selectedBookingAddons.length ? (
@@ -3251,16 +3252,16 @@ commercialInvoice ? (
             >
               <div className="crm-job-questionnaire-readonly">
                 <div className="crm-job-questionnaire-readonly__toolbar">
-                  <Link
+                  <AdminActionRouterLink
                     className="admin-button admin-button--secondary admin-button--sm"
-                    to="/admin/crm?view=questionnaires"
+                    to={`/admin/crm?view=questionnaires&jobId=${encodeURIComponent(workspace.job.id)}`}
                   >
                     <ExternalLink
                       className="admin-button__icon"
                       aria-hidden="true"
                     />
                     Open Questionnaires
-                  </Link>
+                  </AdminActionRouterLink>
                 </div>
 
                 {!workspace.questionnaires.length ? (
@@ -3875,8 +3876,8 @@ commercialInvoice ? (
                             <AdminField label="Replacement role">
                               <input name="replacementRole" className="admin-input" maxLength={120} defaultValue={supplier.role} disabled={saving} />
                             </AdminField>
-                            <button type="submit" value="unlink" className="admin-button admin-button--danger" disabled={saving}>Unlink supplier</button>
-                            <button type="submit" value="reassign" className="admin-button admin-button--secondary" disabled={saving}>Reassign supplier</button>
+                            <AdminActionButton type="submit" value="unlink" className="admin-button admin-button--danger" disabled={saving}>Unlink supplier</AdminActionButton>
+                            <AdminActionButton type="submit" value="reassign" className="admin-button admin-button--secondary" disabled={saving}>Reassign supplier</AdminActionButton>
                           </form>
                         </details>
                       ) : null}
@@ -3908,7 +3909,7 @@ commercialInvoice ? (
                   </p>
                 </div>
 
-                <label className="admin-button admin-button--primary admin-button--sm">
+                <AdminActionLabel className="admin-button admin-button--primary admin-button--sm">
                   <Plus className="admin-button__icon" />
                   {saving ? "Working…" : "Upload file"}
                   <input
@@ -3926,7 +3927,7 @@ commercialInvoice ? (
                         "";
                     }}
                   />
-                </label>
+                </AdminActionLabel>
               </div>
             ) : null}
 
@@ -3935,9 +3936,6 @@ commercialInvoice ? (
                 <header>
                   <div>
                     <strong>Planning files</strong>
-                    <span>
-                      Shared through the secure Client Portal
-                    </span>
                   </div>
 
                   <AdminStatus tone="info">
@@ -3987,7 +3985,7 @@ commercialInvoice ? (
                       </a>
 
                       {canManage ? (
-                        <button
+                        <AdminActionButton
                           type="button"
                           className="crm-job-file-record__remove"
                           aria-label={`Remove ${file.filename}`}
@@ -4001,7 +3999,7 @@ commercialInvoice ? (
                           }
                         >
                           <Trash2 />
-                        </button>
+                        </AdminActionButton>
                       ) : null}
                     </article>
                   ))}
@@ -4014,9 +4012,6 @@ commercialInvoice ? (
                 <header>
                   <div>
                     <strong>Questionnaire attachments</strong>
-                    <span>
-                      Files submitted through questionnaire fields
-                    </span>
                   </div>
 
                   <AdminStatus tone="neutral">
@@ -4172,7 +4167,7 @@ commercialInvoice ? (
                 </p>
               </div>
 
-              <button
+              <AdminActionButton
                 type="button"
                 className="admin-icon-control"
                 aria-label="Close permanent deletion dialog"
@@ -4183,7 +4178,7 @@ commercialInvoice ? (
                 }
               >
                 <X aria-hidden="true" />
-              </button>
+              </AdminActionButton>
             </header>
 
             <div className="crm-delete-preflight">

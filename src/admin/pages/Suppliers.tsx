@@ -1,3 +1,5 @@
+import { AdminActionButton } from "../components/ui/AdminActionControl";
+import { supplierQuality, supplierQualityLabels } from "../../../shared/supplier-quality";
 import { useEffect, useMemo, useState } from "react";
 import {
   Archive,
@@ -36,6 +38,7 @@ export function Suppliers() {
   const [suppliers, setSuppliers] = useState<MasterSupplier[]>([]);
   const [categories, setCategories] = useState<string[]>([...SUPPLIER_CATEGORY_OPTIONS]);
   const [query, setQuery] = useState("");
+  const [qualityFilter, setQualityFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [sortKey, setSortKey] = useState<SortKey>("supplier");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
@@ -90,7 +93,8 @@ export function Suppliers() {
         supplier.name, supplier.displayName, supplier.category, category, supplier.website,
         supplier.instagram, supplier.email, supplier.location, supplier.county,
       ].some((value) => String(value || "").toLowerCase().includes(q));
-      return matchesCategory && matchesQuery;
+      const quality = supplierQuality(supplier, supplier.pendingReviewCount);
+      return matchesCategory && matchesQuery && (qualityFilter === "all" || quality.qualityState === qualityFilter);
     });
 
     return rows.sort((left, right) => {
@@ -105,7 +109,7 @@ export function Suppliers() {
         : leftName.localeCompare(rightName, undefined, { sensitivity: "base" });
       return sortDirection === "asc" ? comparison : -comparison;
     });
-  }, [suppliers, query, categoryFilter, sortKey, sortDirection, categories]);
+  }, [suppliers, query, categoryFilter, sortKey, sortDirection, categories, qualityFilter]);
 
   function selectSupplier(supplier: MasterSupplier) {
     setActiveId(supplier.id);
@@ -189,7 +193,7 @@ export function Suppliers() {
         eyebrow="Supplier master database"
         title="Suppliers"
         description="Create each supplier once, reuse it across weddings and use the shared WedPlanned category taxonomy."
-        actions={<button type="button" onClick={newSupplier} className="admin-button admin-button--primary"><Plus className="admin-button__icon" />New supplier</button>}
+        actions={<AdminActionButton type="button" onClick={newSupplier} className="admin-button admin-button--primary"><Plus className="admin-button__icon" />New supplier</AdminActionButton>}
       />
 
       <section className="admin-stat-grid">
@@ -208,6 +212,7 @@ export function Suppliers() {
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" />
               <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, category, county or Instagram..." className="h-[34px] w-full border border-black/10 bg-white pl-9 pr-3 text-[11px]" />
             </div>
+            <label className="admin-supplier-category-select"><span>Details</span><select aria-label="Filter supplier quality" value={qualityFilter} onChange={event => setQualityFilter(event.target.value)}><option value="all">All suppliers</option>{Object.entries(supplierQualityLabels).map(([value, label]) => <option key={value} value={value}>{label} ({suppliers.filter(item => supplierQuality(item, item.pendingReviewCount).qualityState === value).length})</option>)}</select></label>
             <label className="admin-supplier-category-select">
               <span>Category</span>
               <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} aria-label="Filter suppliers by category">
@@ -223,7 +228,7 @@ export function Suppliers() {
             <div className="admin-supplier-table__header">
               <button type="button" onClick={() => changeSort("supplier")} aria-pressed={sortKey === "supplier"}><span>Supplier</span>{sortKey === "supplier" ? <SortIcon /> : null}</button>
               <button type="button" onClick={() => changeSort("category")} aria-pressed={sortKey === "category"}><span>Category / location</span>{sortKey === "category" ? <SortIcon /> : null}</button>
-              <span>Status</span><span>Weddings</span>
+              <span>Details</span><span>Weddings</span>
             </div>
             {filtered.length ? filtered.map((supplier) => {
               const category = configuredSupplierCategory(supplier.category, categories) || supplier.category || "Uncategorised";
@@ -241,7 +246,7 @@ export function Suppliers() {
                     <button type="button" onClick={(event) => { event.stopPropagation(); setCategoryFilter(category); }} title={`Show only ${category}`}>{category}</button>
                     {supplier.county ? ` · ${supplier.county}` : supplier.location ? ` · ${supplier.location}` : ""}
                   </span>
-                  <span className={`admin-supplier-row__status ${supplier.status === "archived" ? "is-archived" : ""}`}>{supplier.status}</span>
+                  <span className={`admin-supplier-row__status ${supplier.status === "archived" ? "is-archived" : ""}`}>{supplier.status === "archived" ? "Archived" : supplierQualityLabels[supplierQuality(supplier, supplier.pendingReviewCount).qualityState]}</span>
                   <span className="admin-supplier-row__count">{supplier.linkedWeddingCount}</span>
                 </div>
               );
@@ -257,6 +262,11 @@ export function Suppliers() {
                 <h2 className="mt-1.5 break-words text-[19px] font-semibold leading-[1.15] tracking-[-0.025em]">{draft.id ? draft.name : "New supplier"}</h2>
               </div>
 
+              <div className="admin-supplier-quality" role="status">
+                <strong>{supplierQualityLabels[supplierQuality(draft, draft.pendingReviewCount).qualityState]}</strong>
+                {Boolean(draft.pendingReviewCount) ? <p>{draft.pendingReviewCount} client suggestion(s) await review in the linked Job. Saving supplier details does not approve suggestions.</p> : null}
+                {supplierQuality(draft).missingDetails.length ? <p>Add: {supplierQuality(draft).missingDetails.join(" · ")}.</p> : <p>Core details are present. This does not indicate independent business verification.</p>}
+              </div>
               <div className="admin-quiet-form">
                 <Field label="Business name" value={draft.name} onChange={(value) => patch({ name: value, displayName: draft.displayName || value })} />
                 <Field label="Display name" value={draft.displayName} onChange={(value) => patch({ displayName: value })} />
@@ -279,8 +289,8 @@ export function Suppliers() {
                 <Area label="Internal notes" value={draft.notes} onChange={(value) => patch({ notes: value })} />
               </div>
 
-              <button type="button" onClick={save} disabled={saving} className="admin-button admin-button--primary w-full">{saving ? "Saving…" : draft.id ? "Save supplier" : "Create supplier"}</button>
-              {draft.id && draft.status !== "archived" ? <button type="button" onClick={archive} disabled={saving} className="admin-button admin-button--danger w-full"><Archive className="admin-button__icon" />Archive supplier</button> : null}
+              <AdminActionButton type="button" onClick={save} disabled={saving} className="admin-button admin-button--primary w-full">{saving ? "Saving…" : draft.id ? "Save supplier" : "Create supplier"}</AdminActionButton>
+              {draft.id && draft.status !== "archived" ? <AdminActionButton type="button" onClick={archive} disabled={saving} className="admin-button admin-button--danger w-full"><Archive className="admin-button__icon" />Archive supplier</AdminActionButton> : null}
 
               {draft.id ? <div className="rounded-xl bg-neutral-50 p-3"><div className="mb-2 flex items-center gap-2"><Users className="h-3.5 w-3.5 text-neutral-400" strokeWidth={1.6} /><p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-neutral-500">Linked weddings ({draft.linkedWeddingCount})</p></div>{draft.linkedWeddings.length ? <div className="space-y-1.5">{draft.linkedWeddings.map((wedding) => <a key={`${wedding.slug}-${wedding.role}`} href={`/admin/weddings/${wedding.slug}/suppliers`} className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 text-[10px] hover:bg-neutral-100"><span className="min-w-0"><strong className="block truncate font-medium">{wedding.couple || wedding.title}</strong><span className="mt-0.5 block truncate text-[9px] text-neutral-500">{wedding.role}{wedding.weddingDate ? ` · ${wedding.weddingDate}` : ""}</span></span><ExternalLink className="h-3.5 w-3.5 shrink-0 text-neutral-400" strokeWidth={1.6} /></a>)}</div> : <p className="text-[10px] text-neutral-500">Not linked to a wedding yet.</p>}</div> : null}
             </div>

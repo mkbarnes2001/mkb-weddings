@@ -42,6 +42,8 @@ function crmParts(path: string) {
 function crmEntitlement(path: string): ProfessionalFeatureKey {
   const parts = crmParts(path);
 
+  if (parts[0] === "calendar" || parts[0] === "online-booking") return "bookings";
+
   if (parts[0] === "payments") {
     return "connected-payments";
   }

@@ -1,3 +1,4 @@
+import { packagePresentation } from "../shared/package-presentation";
 import { ensureBookingPackForAcceptedQuote } from "./crm-booking-pack-d1";
 import { getAuthenticatedClientIdentity } from "./client-auth-d1";
 import { acceptEnquiry } from "./crm-d1";
@@ -125,6 +126,7 @@ function hydrateOption(row: any, items: any[] = [], addons: any[] = []) {
     coverageMinutes: row.coverage_minutes == null ? null : Number(row.coverage_minutes), deliverables: safeJson(row.deliverables_json, []),
     includedItems: safeJson(row.included_items_json, []), clientNotes: text(row.client_notes), recommended: Boolean(row.recommended),
     displayOrder: Number(row.display_order || 0), imageUrl: text(row.image_url),
+    imagePresentation: packagePresentation(safeJson(row.package_snapshot_json, {}).imagePresentation),
     packageSnapshot: safeJson(row.package_snapshot_json, {}),
     items, addons,
   };
@@ -169,15 +171,16 @@ async function audit(db: D1Db, actor: QuoteActor, eventType: string, entityType:
 
 export async function getQuoteCatalogue(db: D1Db, actor: QuoteActor) {
   requirePermission(actor, "crm:read");
-  const [packageRows, addonRows, linkRows] = await Promise.all([
+  const [packageRows, addonRows, linkRows, settingsRow] = await Promise.all([
     db.prepare(`SELECT * FROM crm_packages WHERE workspace_id = ? ORDER BY status = 'archived', display_order, name COLLATE NOCASE`).bind(actor.workspaceId).all(),
     db.prepare(`SELECT * FROM crm_addons WHERE workspace_id = ? ORDER BY status = 'archived', display_order, name COLLATE NOCASE`).bind(actor.workspaceId).all(),
     db.prepare(`SELECT package_id, addon_id FROM crm_package_addons WHERE workspace_id = ?`).bind(actor.workspaceId).all(),
+    db.prepare(`SELECT document_json FROM workspace_settings WHERE workspace_id = ?`).bind(actor.workspaceId).first(),
   ]);
   const links = new Map<string, string[]>();
   for (const row of linkRows.results || []) links.set(text(row.package_id), [...(links.get(text(row.package_id)) || []), text(row.addon_id)]);
   return {
-    packages: (packageRows.results || []).map((row: any) => hydratePackage(row, links.get(text(row.id)) || [])),
+    packages: (packageRows.results || []).map((row: any) => ({ ...hydratePackage(row, links.get(text(row.id)) || []), imagePresentation: packagePresentation(safeJson(settingsRow?.document_json, {}).crmPackagePresentation?.[row.id]) })),
     addons: (addonRows.results || []).map(hydrateAddon),
   };
 }
@@ -204,6 +207,12 @@ export async function savePackage(db: D1Db, actor: QuoteActor, packageIdInput: u
     const addon = await db.prepare(`SELECT id FROM crm_addons WHERE id = ? AND workspace_id = ?`).bind(addonId, actor.workspaceId).first();
     if (!addon) throw httpError("One selected add-on does not belong to this business.", 409);
     statements.push(db.prepare(`INSERT INTO crm_package_addons (workspace_id, package_id, addon_id) VALUES (?, ?, ?)`).bind(actor.workspaceId, packageId, addonId));
+  }
+  if (input?.imagePresentation !== undefined) {
+    const path = '$.crmPackagePresentation.' + JSON.stringify(packageId);
+    statements.push(db.prepare(`INSERT INTO workspace_settings (workspace_id, document_json) VALUES (?, json_set('{}', ?, json(?)))
+      ON CONFLICT(workspace_id) DO UPDATE SET document_json = json_set(CASE WHEN json_valid(workspace_settings.document_json) THEN workspace_settings.document_json ELSE '{}' END, ?, json(?)), updated_at = CURRENT_TIMESTAMP`)
+      .bind(actor.workspaceId, path, JSON.stringify(packagePresentation(input.imagePresentation)), path, JSON.stringify(packagePresentation(input.imagePresentation))));
   }
   await db.batch(statements);
   await audit(db, actor, row ? "crm.package.updated" : "crm.package.created", "crm_package", packageId, `${row ? "Updated" : "Created"} package ${name}.`, { status });
@@ -466,6 +475,8 @@ export async function saveQuoteDraft(db: D1Db, actor: QuoteActor, quoteId: strin
     db.prepare(`DELETE FROM crm_quote_option_items WHERE workspace_id = ? AND version_id = ?`).bind(actor.workspaceId, version.id),
     db.prepare(`DELETE FROM crm_quote_options WHERE workspace_id = ? AND version_id = ?`).bind(actor.workspaceId, version.id),
   ];
+  const imageSettings = await db.prepare(`SELECT document_json FROM workspace_settings WHERE workspace_id = ?`).bind(actor.workspaceId).first();
+  const packageImages = safeJson(imageSettings?.document_json, {}).crmPackagePresentation || {};
   const snapshotOptions: any[] = [];
   let lowestSubtotal: number | null = null;
   for (let index = 0; index < options.length; index += 1) {
@@ -490,6 +501,7 @@ export async function saveQuoteDraft(db: D1Db, actor: QuoteActor, quoteId: strin
       deliverables: list(inputOption.deliverables ?? safeJson(catalogue?.deliverables_json, [])), includedItems: list(inputOption.includedItems ?? safeJson(catalogue?.included_items_json, [])),
       clientNotes: text(inputOption.clientNotes ?? catalogue?.client_notes),
       imageUrl: text(inputOption.imageUrl ?? catalogue?.image_url),
+      imagePresentation: packagePresentation(inputOption.imagePresentation ?? packageImages[packageId]),
       recommended: Boolean(inputOption.recommended ?? catalogue?.recommended), displayOrder: integer(inputOption.displayOrder, (index + 1) * 10),
     };
     statements.push(db.prepare(`INSERT INTO crm_quote_options (id, workspace_id, version_id, package_id, option_type, name, description, service_type, internal_code, base_price_amount, currency, coverage_minutes, deliverables_json, included_items_json, client_notes, image_url, recommended, display_order, package_snapshot_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(

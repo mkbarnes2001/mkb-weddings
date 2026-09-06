@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionLink } from "../components/ui/AdminActionControl";
 import {
   useEffect,
   useMemo,
@@ -34,6 +35,7 @@ export function WeddingDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(true);
   const [weddings, setWeddings] = useState<WeddingRecord[]>([]);
   const [supplierCount, setSupplierCount] = useState(0);
   const [recordError, setRecordError] = useState("");
@@ -42,15 +44,17 @@ export function WeddingDetail() {
   const [deleteConfirm, setDeleteConfirm] = useState("");
 
   useEffect(() => {
+    setLoading(true);
     WeddingService.load().then((service) =>
       setWeddings(service.getWeddings()),
-    );
+    ).catch(error => setRecordError(error instanceof Error ? error.message : "Unable to load wedding."))
+      .finally(() => setLoading(false));
 
     SupplierService.load().then((service) =>
       setSupplierCount(
         service.getSupplierCountForWedding(slug || ""),
       ),
-    );
+    ).catch(error => setRecordError(error instanceof Error ? error.message : "Unable to load suppliers."));
   }, [slug]);
 
   const wedding = useMemo(
@@ -58,7 +62,7 @@ export function WeddingDetail() {
     [weddings, slug],
   );
 
-  if (!weddings.length) {
+  if (loading) {
     return (
       <div className="text-neutral-500">
         Loading wedding…
@@ -68,9 +72,9 @@ export function WeddingDetail() {
 
   if (!wedding) {
     return (
-      <div className="rounded-[28px] border border-black/10 bg-white p-8">
-        <h1 className="mb-4 font-serif text-3xl">
-          Wedding not found
+      <div className="admin-surface-card border border-black/10 bg-white">
+        <h1 className="admin-section-title mb-4">
+          {recordError || "Wedding not found"}
         </h1>
         <Link
           to="/admin/weddings"
@@ -115,7 +119,7 @@ export function WeddingDetail() {
   }
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       {recordError ? <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{recordError}</div> : null}
 
       <AdminPageHeader
@@ -167,14 +171,14 @@ export function WeddingDetail() {
               Publish
             </AdminHeaderRouterLink>
 
-            <a
+            <AdminActionLink
               href={`/blog/${wedding.slug}`}
               target="_blank"
               rel="noreferrer"
               className="admin-button admin-button--secondary"
             >
               Open story
-            </a>
+            </AdminActionLink>
           </div>
         }
       />
@@ -209,7 +213,6 @@ export function WeddingDetail() {
           title="Content"
           description="Edit the master wedding record, story, facts, status and SEO."
           disabled={!isManagedWedding}
-          badge="D1 master"
         />
 
         <ManagementCard
@@ -238,7 +241,6 @@ export function WeddingDetail() {
           icon={BookOpen}
           title="Wedding story"
           description="Review and edit the wedding story stored in D1."
-          badge="D1"
         />
 
         <ManagementCard
@@ -249,19 +251,15 @@ export function WeddingDetail() {
         />
       </section>
 
-      <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+      <section className="admin-surface-card border border-black/10 bg-white/75">
         <div className="mb-7 flex items-center gap-3">
           <div className="rounded-2xl bg-black p-3 text-white">
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="font-serif text-3xl">
+            <h2 className="admin-section-title ">
               Metadata completeness
             </h2>
-            <p className="text-sm text-neutral-500">
-              Tags, alt text and captions currently available for
-              this wedding.
-            </p>
           </div>
         </div>
 
@@ -284,31 +282,15 @@ export function WeddingDetail() {
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
-        <div className="flex items-start gap-3">
-          <div className="rounded-2xl bg-black p-3 text-white">
-            <SearchCheck className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="font-serif text-3xl">
-              Migration status
-            </h2>
-            <p className="mt-3 max-w-3xl leading-relaxed text-neutral-600">
-              {isManagedWedding
-                ? "This wedding is stored in D1 and managed through the production Intelligence admin."
-                : "This wedding is stored in D1."}
-            </p>
-          </div>
-        </div>
-      </section>
 
-      <section className="rounded-[28px] border border-red-100 bg-white p-7">
+
+      <section className="admin-surface-card border border-red-100 bg-white">
         <p className="text-xs uppercase tracking-[0.14em] text-red-600">Record actions</p>
         <h2 className="mt-2 text-2xl font-semibold">Archive or delete this wedding</h2>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-neutral-600">Archive for normal removal from active work. Permanent deletion removes only the wedding record and wedding-specific relationships; canonical assets, private originals, master venues and suppliers are preserved.</p>
         <div className="mt-5 flex flex-wrap gap-2">
-          <button type="button" disabled={recordBusy || wedding.publicationStatus === "archived"} onClick={archiveWedding} className="admin-action-secondary"><Archive className="h-4 w-4" />{wedding.publicationStatus === "archived" ? "Archived" : "Archive wedding"}</button>
-          <button type="button" disabled={recordBusy} onClick={() => { setDeleteOpen(true); setDeleteConfirm(""); setRecordError(""); }} className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-[10px] border border-red-700 bg-red-700 px-4 font-semibold text-white"><Trash2 className="h-4 w-4" />Delete permanently</button>
+          <AdminActionButton type="button" disabled={recordBusy || wedding.publicationStatus === "archived"} onClick={archiveWedding} className="admin-action-secondary"><Archive className="h-4 w-4" />{wedding.publicationStatus === "archived" ? "Archived" : "Archive wedding"}</AdminActionButton>
+          <AdminActionButton type="button" disabled={recordBusy} onClick={() => { setDeleteOpen(true); setDeleteConfirm(""); setRecordError(""); }} className="admin-button admin-button--danger"><Trash2 className="h-4 w-4" />Delete permanently</AdminActionButton>
         </div>
       </section>
 
@@ -317,14 +299,14 @@ export function WeddingDetail() {
           <div className="w-full max-w-lg rounded-[22px] bg-white p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div><p className="text-xs uppercase tracking-[0.14em] text-red-600">Permanent deletion</p><h2 id="detail-delete-title" className="mt-2 text-2xl font-semibold">Delete {wedding.couple}?</h2></div>
-              <button type="button" onClick={() => setDeleteOpen(false)} className="admin-icon-button" aria-label="Close delete dialog"><X className="h-4 w-4" /></button>
+              <AdminActionButton type="button" onClick={() => setDeleteOpen(false)} className="admin-icon-button" aria-label="Close delete dialog"><X className="h-4 w-4" /></AdminActionButton>
             </div>
             <p className="mt-4 rounded-xl border border-red-100 bg-red-50 p-4 text-sm leading-relaxed text-red-900">A live Client Gallery blocks permanent deletion until it is archived. Non-live galleries and all image assets remain preserved.</p>
             <label className="mt-5 block text-sm font-medium">Type <strong>DELETE</strong> to confirm</label>
             <input autoFocus value={deleteConfirm} onChange={(event) => setDeleteConfirm(event.target.value)} className="mt-2 w-full rounded-xl border border-black/15 px-3 py-3" placeholder="DELETE" />
             <div className="mt-5 flex justify-end gap-2">
-              <button type="button" onClick={() => setDeleteOpen(false)} className="admin-action-secondary">Cancel</button>
-              <button type="button" disabled={recordBusy || deleteConfirm !== "DELETE"} onClick={permanentlyDeleteWedding} className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-[10px] border border-red-700 bg-red-700 px-4 font-semibold text-white disabled:opacity-40"><Trash2 className="h-4 w-4" />{recordBusy ? "Deleting…" : "Permanently delete"}</button>
+              <AdminActionButton type="button" onClick={() => setDeleteOpen(false)} className="admin-action-secondary">Cancel</AdminActionButton>
+              <AdminActionButton type="button" disabled={recordBusy || deleteConfirm !== "DELETE"} onClick={permanentlyDeleteWedding} className="admin-button admin-button--danger"><Trash2 className="h-4 w-4" />{recordBusy ? "Deleting…" : "Permanently delete"}</AdminActionButton>
             </div>
           </div>
         </div>
@@ -343,11 +325,11 @@ function MetricCard({
   description: string;
 }) {
   return (
-    <div className="rounded-[28px] border border-black/10 bg-white/75 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+    <div className="admin-surface-card border border-black/10 bg-white/75">
       <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neutral-500">
         {label}
       </p>
-      <p className="font-serif text-5xl">
+      <p className="admin-metric-value ">
         {value}
       </p>
       <p className="mt-3 text-sm text-neutral-500">
@@ -386,7 +368,7 @@ function ManagementCard({
         ) : null}
       </div>
 
-      <h2 className="font-serif text-3xl">
+      <h2 className="admin-section-title ">
         {title}
       </h2>
 
@@ -398,7 +380,7 @@ function ManagementCard({
 
   if (disabled) {
     return (
-      <div className="rounded-[28px] border border-black/10 bg-neutral-100/70 p-7 opacity-65">
+      <div className="admin-surface-card border border-black/10 bg-neutral-100/70 opacity-65">
         {content}
       </div>
     );
@@ -407,7 +389,7 @@ function ManagementCard({
   return (
     <Link
       to={to}
-      className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)] transition hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_22px_70px_rgba(0,0,0,0.08)]"
+      className="admin-surface-card border border-black/10 bg-white/75 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_22px_70px_rgba(0,0,0,0.08)]"
     >
       {content}
     </Link>

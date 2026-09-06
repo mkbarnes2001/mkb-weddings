@@ -1,3 +1,4 @@
+import { supplierQuality } from "../shared/supplier-quality";
 type D1Db = any;
 
 function text(value: unknown) {
@@ -87,6 +88,8 @@ function hydrate(row: any, weddings: any[] = []) {
       role: text(wedding.role),
       sortOrder: Number(wedding.sort_order || 0),
     })),
+    ...supplierQuality(row, Number(row.pending_review_count || 0)),
+    pendingReviewCount: Number(row.pending_review_count || 0),
     createdAt: row.created_at || undefined,
     updatedAt: row.updated_at || undefined,
   };
@@ -94,7 +97,10 @@ function hydrate(row: any, weddings: any[] = []) {
 
 export async function listMasterSuppliers(db: D1Db, includeArchived = true, workspaceId: string) {
   const supplierResult = await db.prepare(`
-    SELECT * FROM suppliers
+    SELECT suppliers.*, (SELECT COUNT(*) FROM crm_supplier_submissions submission
+      WHERE submission.workspace_id = suppliers.workspace_id AND submission.status = 'pending'
+        AND (submission.supplier_id = suppliers.id OR submission.resolved_supplier_id = suppliers.id)) AS pending_review_count
+    FROM suppliers
     WHERE workspace_id = ? ${includeArchived ? "" : "AND status <> 'archived'"}
     ORDER BY status = 'archived' ASC, name COLLATE NOCASE ASC
   `).bind(workspaceId).all();
@@ -113,7 +119,10 @@ export async function listMasterSuppliers(db: D1Db, includeArchived = true, work
 }
 
 export async function getMasterSupplier(db: D1Db, id: string, workspaceId: string) {
-  const row = await db.prepare(`SELECT * FROM suppliers WHERE id = ? AND workspace_id = ?`).bind(id, workspaceId).first();
+  const row = await db.prepare(`SELECT suppliers.*, (SELECT COUNT(*) FROM crm_supplier_submissions submission
+    WHERE submission.workspace_id = suppliers.workspace_id AND submission.status = 'pending'
+      AND (submission.supplier_id = suppliers.id OR submission.resolved_supplier_id = suppliers.id)) AS pending_review_count
+    FROM suppliers WHERE id = ? AND workspace_id = ?`).bind(id, workspaceId).first();
   if (!row) return null;
   const links = await db.prepare(`
     SELECT l.supplier_id, l.wedding_slug, l.role, l.sort_order,

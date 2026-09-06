@@ -159,9 +159,19 @@ assert (
 # interception of React Router Link.
 assert "Email templates" in email_settings
 assert "<AdminHeaderRouterLink" in email_settings
-assert "Catalogue" in crm_page
-assert "Quotes" in crm_page
-assert crm_page.count("<AdminHeaderRouterLink") >= 2
+# Catalogue/templates now live under CRM Settings; the former global Quote register is removed.
+assert "New enquiry" in crm_page
+assert "<CRMDashboard" in crm_page
+assert 'to: "/admin/crm/templates"' in (ROOT / "src/admin/navigation/adminSettings.ts").read_text()
+
+controls = (ROOT / "src/admin/components/ui/AdminActionControl.tsx").read_text()
+tooltips = (ROOT / "src/admin/components/ui/AdminActionTooltips.tsx").read_text()
+assert 'data-admin-tooltip={action.tooltip}' in controls
+assert 'aria-label={action.label}' in controls
+assert 'createPortal' in tooltips
+assert '"pointerover"' in tooltips and '"focusin"' in tooltips
+assert 'event.key === "Escape"' in tooltips
+assert '--admin-action-square: 32px' in css
 
 # Even historic header links without source icons are supported:
 # the runtime now synthesises a semantic icon.
@@ -215,7 +225,7 @@ print(
 )
 
 print(
-    "  ordinary page-content buttons: unchanged"
+    "  page-content actions share compact icons and floating labels"
 )
 
 print(

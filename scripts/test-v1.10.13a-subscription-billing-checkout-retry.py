@@ -69,9 +69,9 @@ require("Gate 2D2D" in payments, "payments retry note missing")
 require("Gate 2D2D" in architecture, "architecture retry note missing")
 
 # No schema change for retry hardening.
-require("'53'" in schema or '"53"' in schema, "canonical schema 53 missing")
-require(not list((ROOT / "d1/migrations").glob("054_*.sql")),
-        "retry hardening must not add migration 054")
+require("'54'" in schema or '"54"' in schema, "canonical schema 54 missing")
+require(not list((ROOT / "d1/migrations").glob("055_*.sql")),
+        "retry hardening must not add migration 055")
 
 print("PASS v1.10.13a Gate 2D2D subscription Checkout retry hardening")
 print("  existing created/open attempt reuse contract: verified")
@@ -81,4 +81,4 @@ print("  open retry skips duplicate D1 provider binding: verified")
 print("  transient retry failure preserves open attempt: verified")
 print("  browser Checkout remains non-authoritative: verified")
 print("  platform-account / connected-payment separation preserved: verified")
-print("  schema remains 53: verified")
+print("  schema is 54: verified")

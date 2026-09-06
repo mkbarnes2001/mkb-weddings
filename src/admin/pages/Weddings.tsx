@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import {
   useEffect,
   useMemo,
@@ -199,7 +200,7 @@ export function Weddings() {
         description="New booked weddings originate in CRM Jobs. Website story records appear here only after the wedding date, so future bookings do not create Website placeholders."
         actions={<>
           <AdminHeaderRouterLink to="/admin/weddings/new" className="admin-button admin-button--secondary"><Plus className="admin-button__icon" />Add standalone story</AdminHeaderRouterLink>
-          <button type="button" onClick={saveLayout} disabled={!dirty || saving} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : dirty ? "Save order" : "Saved"}</button>
+          <AdminActionButton type="button" onClick={saveLayout} disabled={!dirty || saving} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : dirty ? "Save order" : "Saved"}</AdminActionButton>
         </>}
       />
 
@@ -210,7 +211,7 @@ export function Weddings() {
 
       <AdminToolbar>
         <div className="relative min-w-[220px] flex-1"><Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search couples, venues or stories..." className="h-[34px] w-full border border-black/10 bg-white pl-9 pr-3 text-[11px]" /></div>
-        <div className="flex flex-wrap gap-1.5">{(["all", "draft", "published", "archived"] as StatusFilter[]).map((status) => <button key={status} type="button" onClick={() => setStatusFilter(status)} className={`admin-button admin-button--sm ${statusFilter === status ? "admin-button--primary" : "admin-button--secondary"}`}>{status}</button>)}</div>
+        <div className="flex flex-wrap gap-1.5">{(["all", "draft", "published", "archived"] as StatusFilter[]).map((status) => <AdminActionButton key={status} type="button" onClick={() => setStatusFilter(status)} className={`admin-button admin-button--sm ${statusFilter === status ? "admin-button--primary" : "admin-button--secondary"}`}>{status}</AdminActionButton>)}</div>
       </AdminToolbar>
 
       <section className="admin-master-detail admin-master-detail--360">
@@ -234,7 +235,7 @@ export function Weddings() {
                   <p className="admin-wedding-card__title line-clamp-2">{wedding.couple}</p>
                   <div className="admin-wedding-card__footer">
                     <span className={`admin-wedding-card__status ${publicationTextClass(wedding.publicationStatus)}`}>{wedding.publicationStatus}</span>
-                    <Link to={`/admin/weddings/${wedding.slug}/workspace`} onClick={(event) => event.stopPropagation()} aria-label={`Open ${wedding.couple} workspace`} title="Open Wedding Workspace" className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-black/10 bg-white text-neutral-500 hover:border-black/20 hover:text-neutral-900"><LayoutDashboard className="h-3.5 w-3.5" strokeWidth={1.6} /></Link>
+                    <AdminActionRouterLink to={`/admin/weddings/${wedding.slug}/workspace`} onClick={(event) => event.stopPropagation()} aria-label={`Open ${wedding.couple} workspace`} title="Open Wedding Workspace" className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-black/10 bg-white text-neutral-500 hover:border-black/20 hover:text-neutral-900"><LayoutDashboard className="h-3.5 w-3.5" strokeWidth={1.6} /></AdminActionRouterLink>
                   </div>
                 </div>
               </article>
@@ -272,14 +273,14 @@ export function Weddings() {
             <div className="admin-wedding-status-row"><StatusBadge status={active.status} /><span className={`admin-status ${publicationToneClass(active.publicationStatus)}`}>{active.publicationStatus}</span></div>
 
             <div className="admin-wedding-action-panel" aria-label="Wedding actions">
-              <Link to={`/admin/weddings/${active.slug}/workspace`} className="admin-button admin-button--primary admin-wedding-workspace-button"><LayoutDashboard className="admin-button__icon" strokeWidth={1.6} />Open Wedding Workspace</Link>
+              <AdminActionRouterLink to={`/admin/weddings/${active.slug}/workspace`} className="admin-button admin-button--primary admin-wedding-workspace-button"><LayoutDashboard className="admin-button__icon" strokeWidth={1.6} />Open Wedding Workspace</AdminActionRouterLink>
               <div className="admin-summary-action-grid admin-wedding-action-grid">
-                <Link to={`/admin/weddings/${active.slug}/story`} className="admin-button admin-button--secondary admin-button--sm"><FileText className="admin-button__icon" strokeWidth={1.6} />Story</Link>
-                <Link to={`/admin/weddings/${active.slug}/images`} className="admin-button admin-button--secondary admin-button--sm"><ImageIcon className="admin-button__icon" strokeWidth={1.6} />Images</Link>
-                <Link to={`/admin/weddings/${active.slug}/suppliers`} className="admin-button admin-button--secondary admin-button--sm"><Users className="admin-button__icon" strokeWidth={1.6} />Suppliers</Link>
-                <Link to={`/admin/weddings/${active.slug}/publish`} className="admin-button admin-button--secondary admin-button--sm"><Upload className="admin-button__icon" strokeWidth={1.6} />Publish</Link>
-                <button type="button" disabled={destructiveBusy || active.publicationStatus === "archived"} onClick={() => archiveWedding(active)} className="admin-button admin-button--secondary admin-button--sm"><Archive className="admin-button__icon" strokeWidth={1.6} />{active.publicationStatus === "archived" ? "Archived" : "Archive"}</button>
-                <button type="button" disabled={destructiveBusy} onClick={() => { setDeleteTarget(active); setDeleteConfirm(""); setError(""); }} className="admin-button admin-button--danger admin-button--sm"><Trash2 className="admin-button__icon" strokeWidth={1.6} />Delete</button>
+                <AdminActionRouterLink to={`/admin/weddings/${active.slug}/story`} className="admin-button admin-button--secondary admin-button--sm"><FileText className="admin-button__icon" strokeWidth={1.6} />Story</AdminActionRouterLink>
+                <AdminActionRouterLink to={`/admin/weddings/${active.slug}/images`} className="admin-button admin-button--secondary admin-button--sm"><ImageIcon className="admin-button__icon" strokeWidth={1.6} />Images</AdminActionRouterLink>
+                <AdminActionRouterLink to={`/admin/weddings/${active.slug}/suppliers`} className="admin-button admin-button--secondary admin-button--sm"><Users className="admin-button__icon" strokeWidth={1.6} />Suppliers</AdminActionRouterLink>
+                <AdminActionRouterLink to={`/admin/weddings/${active.slug}/publish`} className="admin-button admin-button--secondary admin-button--sm"><Upload className="admin-button__icon" strokeWidth={1.6} />Publish</AdminActionRouterLink>
+                <AdminActionButton type="button" disabled={destructiveBusy || active.publicationStatus === "archived"} onClick={() => archiveWedding(active)} className="admin-button admin-button--secondary admin-button--sm"><Archive className="admin-button__icon" strokeWidth={1.6} />{active.publicationStatus === "archived" ? "Archived" : "Archive"}</AdminActionButton>
+                <AdminActionButton type="button" disabled={destructiveBusy} onClick={() => { setDeleteTarget(active); setDeleteConfirm(""); setError(""); }} className="admin-button admin-button--danger admin-button--sm"><Trash2 className="admin-button__icon" strokeWidth={1.6} />Delete</AdminActionButton>
               </div>
             </div>
 
@@ -300,7 +301,7 @@ export function Weddings() {
                 <p className="text-xs uppercase tracking-[0.14em] text-red-600">Permanent deletion</p>
                 <h2 id="delete-wedding-title" className="mt-2 text-2xl font-semibold">Delete {deleteTarget.couple}?</h2>
               </div>
-              <button type="button" onClick={() => { setDeleteTarget(null); setDeleteConfirm(""); }} className="admin-icon-button" aria-label="Close delete dialog"><X className="h-4 w-4" /></button>
+              <AdminActionButton type="button" onClick={() => { setDeleteTarget(null); setDeleteConfirm(""); }} className="admin-icon-button" aria-label="Close delete dialog"><X className="h-4 w-4" /></AdminActionButton>
             </div>
             <div className="mt-4 rounded-xl border border-red-100 bg-red-50 p-4 text-sm leading-relaxed text-red-900">
               This permanently removes the wedding record, wedding-specific supplier links, preview sets, story links and wedding assignments. Canonical assets, private originals, master venues, master suppliers and non-live Client Galleries are preserved. A live Client Gallery will block deletion until it is archived.
@@ -308,8 +309,8 @@ export function Weddings() {
             <label className="mt-5 block text-sm font-medium">Type <strong>DELETE</strong> to confirm</label>
             <input autoFocus value={deleteConfirm} onChange={(event) => setDeleteConfirm(event.target.value)} className="mt-2 w-full rounded-xl border border-black/15 px-3 py-3" placeholder="DELETE" />
             <div className="mt-5 flex justify-end gap-2">
-              <button type="button" onClick={() => { setDeleteTarget(null); setDeleteConfirm(""); }} className="admin-action-secondary">Cancel</button>
-              <button type="button" disabled={destructiveBusy || deleteConfirm !== "DELETE"} onClick={deleteWedding} className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-[10px] border border-red-700 bg-red-700 px-4 font-semibold text-white disabled:opacity-40"><Trash2 className="h-4 w-4" />{destructiveBusy ? "Deleting…" : "Permanently delete wedding"}</button>
+              <AdminActionButton type="button" onClick={() => { setDeleteTarget(null); setDeleteConfirm(""); }} className="admin-action-secondary">Cancel</AdminActionButton>
+              <AdminActionButton type="button" disabled={destructiveBusy || deleteConfirm !== "DELETE"} onClick={deleteWedding} className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-[10px] border border-red-700 bg-red-700 px-4 font-semibold text-white disabled:opacity-40"><Trash2 className="h-4 w-4" />{destructiveBusy ? "Deleting…" : "Permanently delete wedding"}</AdminActionButton>
             </div>
           </div>
         </div>

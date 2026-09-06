@@ -1,3 +1,4 @@
+import { AdminActionButton } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -546,7 +547,7 @@ export function WedPlannedPlatform() {
               {platform.categories.filter((category) => selectedCategories.includes(category.key)).map((category) => (
                 <span key={category.key} className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium ${primaryCategory === category.key ? "bg-black text-white" : "bg-[#f2eee7] text-neutral-700"}`}>
                   {category.name}
-                  <button
+                  <AdminActionButton
                     type="button"
                     onClick={() => {
                       const next = selectedCategories.filter((key) => key !== category.key);
@@ -557,7 +558,7 @@ export function WedPlannedPlatform() {
                     aria-label={`Remove ${category.name}`}
                   >
                     <X size={10} />
-                  </button>
+                  </AdminActionButton>
                 </span>
               ))}
               {!selectedCategories.length ? <span className="text-[10px] text-neutral-400">No services selected.</span> : null}
@@ -574,7 +575,7 @@ export function WedPlannedPlatform() {
                 <span key={area.id} className="inline-flex items-center gap-2 rounded-full bg-[#f2eee7] px-3 py-1.5 text-[10px] font-medium text-neutral-700">
                   <span>{area.label}</span>
                   <span className="text-neutral-400">{area.areaType}</span>
-                  <button type="button" disabled={!canEditServices} onClick={() => run(() => AdminApiService.archiveWedPlannedServiceArea(area.id), "Service area removed.")} className="rounded-full p-0.5 text-neutral-400 hover:bg-white hover:text-red-600" aria-label={`Remove ${area.label}`}><X size={11} /></button>
+                  <AdminActionButton type="button" disabled={!canEditServices} onClick={() => run(() => AdminApiService.archiveWedPlannedServiceArea(area.id), "Service area removed.")} className="rounded-full p-0.5 text-neutral-400 hover:bg-white hover:text-red-600" aria-label={`Remove ${area.label}`}><X size={11} /></AdminActionButton>
                 </span>
               )) : <span className="text-xs text-neutral-500">No service areas selected.</span>}
             </div>
@@ -620,7 +621,7 @@ export function WedPlannedPlatform() {
                   <div className="min-w-0"><p className="truncate text-xs font-semibold">{teamMember.displayName || teamMember.email}</p><p className="mt-1 truncate text-[10px] text-neutral-500">{teamMember.email}{teamMember.jobTitle ? ` · ${teamMember.jobTitle}` : ""}</p></div>
                   <select disabled={!canManageMembers} value={teamMember.role} onChange={(event) => run(() => AdminApiService.updateWedPlannedMember({ ...teamMember, role: event.target.value as WedPlannedMember["role"] }), "Team role updated.")} className="admin-select text-xs"><option value="owner">Owner</option><option value="admin">Admin</option><option value="manager">Manager</option><option value="content">Content</option><option value="finance">Finance</option><option value="staff">Staff</option><option value="viewer">Viewer</option></select>
                   <AdminStatus tone={teamMember.status === "active" ? "success" : "warning"}>{teamMember.status}</AdminStatus>
-                  <button type="button" disabled={!canManageMembers} onClick={() => run(() => AdminApiService.updateWedPlannedMember({ ...teamMember, status: "disabled" }), "Team member disabled.")} className="rounded-lg p-2 text-neutral-400 hover:bg-white hover:text-red-600" aria-label={`Disable ${teamMember.email}`}><Trash2 size={14} /></button>
+                  <AdminActionButton type="button" disabled={!canManageMembers} onClick={() => run(() => AdminApiService.updateWedPlannedMember({ ...teamMember, status: "disabled" }), "Team member disabled.")} className="rounded-lg p-2 text-neutral-400 hover:bg-white hover:text-red-600" aria-label={`Disable ${teamMember.email}`}><Trash2 size={14} /></AdminActionButton>
                 </div>
               )) : <p className="text-xs text-neutral-500">No team memberships have been added.</p>}
             </div>
@@ -638,7 +639,7 @@ export function WedPlannedPlatform() {
                   <div className="flex items-center gap-2 font-semibold"><MailCheck size={14} />{lastInvitation.delivery === "sent" ? "Invitation email sent" : "Manual invitation link ready"}</div>
                   <p className="mt-1 text-[10px] leading-4 opacity-75">Expires {new Date(lastInvitation.expiresAt).toLocaleString("en-GB")}.</p>
                   {lastInvitation.delivery === "manual" ? (
-                    <button type="button" onClick={() => lastInvitation.invitationUrl && navigator.clipboard?.writeText(lastInvitation.invitationUrl)} className="mt-2 inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-[10px] font-semibold text-black ring-1 ring-black/10"><Copy size={12} /> Copy secure invitation link</button>
+                    <AdminActionButton type="button" onClick={() => lastInvitation.invitationUrl && navigator.clipboard?.writeText(lastInvitation.invitationUrl)} className="mt-2 inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-[10px] font-semibold text-black ring-1 ring-black/10"><Copy size={12} /> Copy secure invitation link</AdminActionButton>
                   ) : null}
                 </div>
               ) : null}

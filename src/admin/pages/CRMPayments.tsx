@@ -1,3 +1,4 @@
+import { AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import {
   useEffect,
   useMemo,
@@ -635,7 +636,7 @@ export function CRMPayments() {
                       </td>
 
                       <td className="crm-payments-action">
-                        <Link
+                        <AdminActionRouterLink
                           className="admin-icon-control"
                           to={
                             `/admin/crm/jobs/${
@@ -654,7 +655,7 @@ export function CRMPayments() {
                           title="Open invoice"
                         >
                           <ExternalLink />
-                        </Link>
+                        </AdminActionRouterLink>
                       </td>
                     </tr>
                   ),

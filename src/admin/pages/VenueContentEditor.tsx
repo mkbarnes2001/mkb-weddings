@@ -1,3 +1,5 @@
+import { StudioBackLink } from "../components/ui/StudioUI";
+import { AdminActionButton } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
@@ -109,16 +111,17 @@ export function VenueContentEditor() {
 
   if (!venue) {
     return (
-      <section className="rounded-[28px] border border-black/10 bg-white p-8">
-        <h1 className="font-serif text-3xl">Venue not found</h1>
+      <section className="admin-surface-card border border-black/10 bg-white">
+        <h1 className="admin-section-title ">Venue not found</h1>
         <p className="mt-3 text-neutral-600">{error}</p>
       </section>
     );
   }
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
+        backLink={<StudioBackLink to={`/admin/venues/${slug}`} label="Back to Venue" />}
         title="Venue content"
         meta={
           <div className="flex flex-wrap items-center gap-2">
@@ -136,7 +139,7 @@ export function VenueContentEditor() {
           </div>
         }
         actions={
-          <button
+          <AdminActionButton
             type="button"
             onClick={save}
             disabled={
@@ -152,7 +155,7 @@ export function VenueContentEditor() {
               : dirty
                 ? "Save venue"
                 : "Saved"}
-          </button>
+          </AdminActionButton>
         }
       />
 
@@ -581,8 +584,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[28px] border border-black/10 bg-white/80 p-7">
-      <h2 className="mb-6 font-serif text-3xl">{title}</h2>
+    <section className="admin-surface-card border border-black/10 bg-white/80">
+      <h2 className="admin-section-title mb-6">{title}</h2>
       {children}
     </section>
   );
@@ -635,7 +638,7 @@ function TextArea({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         rows={rows}
-        className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm leading-relaxed outline-none focus:border-black/30"
+        className="admin-input"
       />
     </label>
   );

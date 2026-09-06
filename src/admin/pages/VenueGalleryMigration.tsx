@@ -1,3 +1,5 @@
+import { StudioBackLink } from "../components/ui/StudioUI";
+import { AdminActionButton } from "../components/ui/AdminActionControl";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -77,8 +79,9 @@ export function VenueGalleryMigration() {
   }
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
+        backLink={<StudioBackLink to="/admin/venues" label="Back to Venues" />}
         title="Gallery migration"
         description="Adopt venue gallery images already stored in Cloudflare R2 without uploading or copying files."
         meta={
@@ -91,7 +94,7 @@ export function VenueGalleryMigration() {
               <span>{preview.readyRows} ready</span>
             </div>
           ) : (
-            <span>Reading migration source</span>
+            <span>{loading ? "Reading migration source" : "Source unavailable"}</span>
           )
         }
       />
@@ -106,7 +109,7 @@ export function VenueGalleryMigration() {
       ) : null}
 
       {result ? (
-        <section className="rounded-[24px] border border-emerald-200 bg-emerald-50 p-5 text-emerald-950">
+        <section className="admin-surface-card border border-emerald-200 bg-emerald-50 text-emerald-950">
           <div className="flex items-center gap-2 font-medium">
             <CheckCircle2 className="h-5 w-5" />
             Gallery migration complete
@@ -124,7 +127,7 @@ export function VenueGalleryMigration() {
         </section>
       ) : null}
 
-      {loading || !preview ? (
+      {!loading && !preview ? <p role="status">The migration source could not be loaded. <AdminActionButton type="button" className="admin-button admin-button--secondary" onClick={() => void loadPreview()}>Try again</AdminActionButton></p> : loading || !preview ? (
         <section className="rounded-[28px] border border-black/10 bg-white/80 p-10 text-center">
           <Loader2 className="mx-auto h-7 w-7 animate-spin" />
           <p className="mt-4 text-neutral-500">
@@ -145,10 +148,10 @@ export function VenueGalleryMigration() {
             />
           </section>
 
-          <section className="rounded-[28px] border border-black/10 bg-white/85 p-7">
+          <section className="admin-surface-card border border-black/10 bg-white/85">
             <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
               <div className="max-w-3xl">
-                <h2 className="font-serif text-3xl">
+                <h2 className="admin-section-title ">
                   Migration method
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-neutral-600">
@@ -164,7 +167,7 @@ export function VenueGalleryMigration() {
                   onChange={(event) =>
                     setMode(event.target.value as MigrationMode)
                   }
-                  className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm"
+                  className="admin-button admin-button--secondary rounded-full border border-black/10 bg-white px-5 py-3 text-sm"
                 >
                   <option value="refresh">
                     Refresh imported CSV galleries
@@ -174,11 +177,11 @@ export function VenueGalleryMigration() {
                   </option>
                 </select>
 
-                <button
+                <AdminActionButton
                   type="button"
                   onClick={runMigration}
                   disabled={running || preview.matchedVenues === 0}
-                  className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"
+                  className="admin-button admin-button--primary inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"
                 >
                   {running ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -186,9 +189,9 @@ export function VenueGalleryMigration() {
                     <Database className="h-4 w-4" />
                   )}
                   {running ? "Importing…" : "Import venue galleries"}
-                </button>
+                </AdminActionButton>
 
-                <button
+                <AdminActionButton
                   type="button"
                   onClick={loadPreview}
                   disabled={loading || running}
@@ -196,7 +199,7 @@ export function VenueGalleryMigration() {
                 >
                   <RefreshCw className="h-4 w-4" />
                   Refresh preview
-                </button>
+                </AdminActionButton>
               </div>
             </div>
 
@@ -214,10 +217,10 @@ export function VenueGalleryMigration() {
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-black/10 bg-white/85 p-7">
+          <section className="admin-surface-card border border-black/10 bg-white/85">
             <div className="mb-5 flex items-center gap-3">
               <Images className="h-5 w-5" />
-              <h2 className="font-serif text-3xl">
+              <h2 className="admin-section-title ">
                 Matched venue galleries
               </h2>
             </div>
@@ -271,8 +274,8 @@ export function VenueGalleryMigration() {
           </section>
 
           {preview.unmatchedVenues.length ? (
-            <section className="rounded-[28px] border border-amber-200 bg-amber-50 p-7">
-              <h2 className="font-serif text-3xl text-amber-950">
+            <section className="admin-surface-card border border-amber-200 bg-amber-50">
+              <h2 className="admin-section-title text-amber-950">
                 Unmatched venue names
               </h2>
               <p className="mt-2 text-sm text-amber-900">
@@ -323,7 +326,7 @@ function Metric({
       <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">
         {label}
       </p>
-      <p className="mt-2 font-serif text-4xl">{value}</p>
+      <p className="admin-metric-value mt-2">{value}</p>
     </div>
   );
 }

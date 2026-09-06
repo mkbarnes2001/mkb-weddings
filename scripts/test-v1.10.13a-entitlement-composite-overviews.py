@@ -72,10 +72,10 @@ version = db.execute(
 ).fetchone()[0]
 db.close()
 
-require(str(version) == "53", f"overview gate changed schema: {version}")
+require(str(version) == "54", f"overview gate changed schema: {version}")
 require(
-    not list((ROOT / "d1/migrations").glob("054_*.sql")),
-    "overview gate must not add migration 054",
+    not list((ROOT / "d1/migrations").glob("055_*.sql")),
+    "overview gate must not add migration 055",
 )
 
 print("PASS v1.10.13a Gate 2F2D-B1 entitlement-aware composite overviews")
@@ -84,4 +84,4 @@ print("  WedStore client-galleries-only dashboard degradation: verified")
 print("  Print Store calls/metrics/destinations are conditional: verified")
 print("  WedNav specialist product cards reflect entitlements: verified")
 print("  server-side API entitlement authority preserved: verified")
-print("  schema remains 53: verified")
+print("  schema is 54: verified")

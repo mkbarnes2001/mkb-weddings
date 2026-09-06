@@ -1,3 +1,5 @@
+import { StudioBackLink } from "../components/ui/StudioUI";
+import { AdminActionButton, AdminActionLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -360,7 +362,7 @@ export function CustomCollectionGallery() {
 
   if (!collection) {
     return (
-      <div className="rounded-[28px] border border-black/10 bg-white p-8 text-neutral-600">
+      <div className="admin-surface-card border border-black/10 bg-white text-neutral-600">
         {error || "Loading collection gallery…"}
       </div>
     );
@@ -369,8 +371,9 @@ export function CustomCollectionGallery() {
   const selectedKeys = [...selected];
 
   return (
-    <div className="space-y-6">
+    <div className="admin-page admin-refined-page space-y-6">
       <AdminPageHeader
+        backLink={<StudioBackLink to="/admin/custom-collections" label="Back to Collections" />}
         title="Collection gallery"
         description="Add images, curate their exact order, hide individual photographs and choose the gallery hero."
         meta={
@@ -387,7 +390,7 @@ export function CustomCollectionGallery() {
         actions={
           <div className="flex flex-wrap gap-2">
             {collection.status === "active" ? (
-              <a
+              <AdminActionLink
                 href={`https://www.mkbweddings.co.uk/gallery/collection/${encodeURIComponent(
                   collection.slug,
                 )}`}
@@ -396,10 +399,10 @@ export function CustomCollectionGallery() {
                 className="admin-button admin-button--secondary"
               >
                 View live gallery
-              </a>
+              </AdminActionLink>
             ) : null}
 
-            <button
+            <AdminActionButton
               type="button"
               onClick={() => void save()}
               disabled={saving || !dirty}
@@ -411,7 +414,7 @@ export function CustomCollectionGallery() {
                 : dirty
                   ? "Save gallery"
                   : "Saved"}
-            </button>
+            </AdminActionButton>
           </div>
         }
       />
@@ -435,7 +438,7 @@ export function CustomCollectionGallery() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search filename, venue or wedding…"
-              className="w-full rounded-full border border-black/10 bg-white py-2.5 pl-11 pr-4 text-sm"
+              className="admin-button admin-button--secondary w-full rounded-full border border-black/10 bg-white py-2.5 pl-11 pr-4 text-sm"
             />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -473,13 +476,14 @@ export function CustomCollectionGallery() {
             <span className="text-xs text-neutral-500">
               Included selections can be dragged together using any selected grip.
             </span>
-            <button
+            <AdminActionButton
               type="button"
+              aria-label="Clear selection"
               onClick={() => setSelected(new Set())}
-              className="ml-auto rounded-full border border-black/10 bg-white p-2"
+              className="admin-button admin-button--secondary ml-auto rounded-full border border-black/10 bg-white p-2"
             >
               <X className="h-4 w-4" />
-            </button>
+            </AdminActionButton>
           </div>
         ) : null}
       </section>
@@ -535,7 +539,7 @@ export function CustomCollectionGallery() {
                   }}
                 >
                   <SafeImage image={image} className="h-full w-full object-cover" />
-                  <button
+                  <AdminActionButton aria-label="Select image"
                     type="button"
                     onClick={(event) => {
                       event.stopPropagation();
@@ -558,7 +562,7 @@ export function CustomCollectionGallery() {
                     }}
                   >
                     <Check size={16} />
-                  </button>
+                  </AdminActionButton>
                   {image.included ? (
                     <div
                       draggable
@@ -659,7 +663,7 @@ export function CustomCollectionGallery() {
                 )}
               </div>
 
-              <button
+              <AdminActionButton
                 type="button"
                 disabled={!activeImage.included}
                 onClick={() => setHidden([activeImage.assetKey], !activeImage.hidden)}
@@ -671,9 +675,9 @@ export function CustomCollectionGallery() {
                   <EyeOff className="h-4 w-4" />
                 )}
                 {activeImage.hidden ? "Show in gallery" : "Hide from gallery"}
-              </button>
+              </AdminActionButton>
 
-              <button
+              <AdminActionButton
                 type="button"
                 onClick={() => {
                   includeKeys([activeImage.assetKey]);
@@ -681,14 +685,14 @@ export function CustomCollectionGallery() {
                   setCollection({ ...collection, heroAssetKey: activeImage.assetKey });
                   markDirty();
                 }}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm text-white"
+                className="admin-button admin-button--primary flex w-full items-center justify-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm text-white"
               >
                 <Star className="h-4 w-4" />
                 {collection.heroAssetKey === activeImage.assetKey ||
                 collection.heroAssetKey === activeImage.imageId
                   ? "Gallery hero set"
                   : "Set as gallery hero + card"}
-              </button>
+              </AdminActionButton>
 
               <div className="rounded-2xl bg-neutral-100 p-3 text-xs leading-5 text-neutral-600">
                 The hero is also used for this collection’s card on the main Gallery landing page.
@@ -712,7 +716,7 @@ function Stat({ label, value }: { label: string; value: number }) {
 
 function Badge({ children }: { children: ReactNode }) {
   return (
-    <span className="rounded-full bg-black px-2 py-1 text-[9px] text-white">
+    <span className="admin-button admin-button--primary rounded-full bg-black px-2 py-1 text-[9px] text-white">
       {children}
     </span>
   );
@@ -720,13 +724,13 @@ function Badge({ children }: { children: ReactNode }) {
 
 function BatchButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <button
+    <AdminActionButton
       type="button"
       onClick={onClick}
-      className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
+      className="admin-button admin-button--secondary rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
     >
       {label}
-    </button>
+    </AdminActionButton>
   );
 }
 

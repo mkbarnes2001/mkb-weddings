@@ -1,3 +1,4 @@
+import { AdminActionButton } from "./ui/AdminActionControl";
 import {
   EyeOff,
   Image as ImageIcon,
@@ -29,23 +30,23 @@ export function ImageInspectorPanel({
 }) {
   if (!image) {
     return (
-      <aside
+      <aside className="admin-image-inspector"
         style={{
           position: "sticky",
           top: "112px",
-          width: "420px",
+          width: "100%",
           minHeight: "260px",
           background: "#ffffff",
           border: "1px solid rgba(0,0,0,0.12)",
-          borderRadius: "28px",
-          padding: "24px",
+          borderRadius: "12px",
+          padding: "16px",
           boxSizing: "border-box",
         }}
       >
         <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
           Image inspector
         </p>
-        <h2 className="mt-3 font-serif text-3xl">Select an image</h2>
+        <h2 className="admin-section-title">Select an image</h2>
         <p className="mt-3 text-sm text-neutral-500">
           Click an image in the grid to view and edit it.
         </p>
@@ -65,17 +66,17 @@ export function ImageInspectorPanel({
   }
 
   return (
-    <aside
+    <aside className="admin-image-inspector"
       style={{
         position: "sticky",
         top: "112px",
-        width: "420px",
+        width: "100%",
         maxHeight: "calc(100vh - 128px)",
         overflowY: "auto",
         background: "#ffffff",
         border: "1px solid rgba(0,0,0,0.12)",
-        borderRadius: "28px",
-        boxShadow: "0 18px 60px rgba(0,0,0,0.08)",
+        borderRadius: "12px",
+        boxShadow: "none",
         boxSizing: "border-box",
       }}
     >
@@ -85,7 +86,7 @@ export function ImageInspectorPanel({
             <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
               Image Manager
             </p>
-            <h2 className="mt-1 font-serif text-2xl">Image inspector</h2>
+            <h2 className="admin-section-title">Image inspector</h2>
           </div>
 
           {dirty ? (
@@ -119,7 +120,7 @@ export function ImageInspectorPanel({
 
           <div className="flex gap-2">
             {[1, 2, 3, 4, 5].map((rating) => (
-              <button
+              <AdminActionButton
                 key={rating}
                 type="button"
                 onClick={() =>
@@ -138,13 +139,13 @@ export function ImageInspectorPanel({
                       : "text-neutral-300"
                   }`}
                 />
-              </button>
+              </AdminActionButton>
             ))}
           </div>
         </section>
 
         <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <button
+          <AdminActionButton
             type="button"
             onClick={() =>
               onChange({
@@ -169,9 +170,9 @@ export function ImageInspectorPanel({
                 Use this image as the wedding cover.
               </p>
             </div>
-          </button>
+          </AdminActionButton>
 
-          <button
+          <AdminActionButton
             type="button"
             onClick={() =>
               onChange({
@@ -192,7 +193,7 @@ export function ImageInspectorPanel({
                 Hide this image from published collections.
               </p>
             </div>
-          </button>
+          </AdminActionButton>
         </section>
 
         <section>
@@ -261,7 +262,7 @@ export function ImageInspectorPanel({
           )}
         </section>
 
-        <button
+        <AdminActionButton
           type="button"
           onClick={onSave}
           disabled={saving || !dirty}
@@ -269,7 +270,7 @@ export function ImageInspectorPanel({
         >
           <Save className="h-4 w-4" />
           {saving ? "Saving..." : dirty ? "Save all changes" : "Saved"}
-        </button>
+        </AdminActionButton>
       </div>
     </aside>
   );

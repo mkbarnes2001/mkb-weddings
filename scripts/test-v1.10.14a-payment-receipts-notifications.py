@@ -170,7 +170,7 @@ db.executescript(schema)
 version = db.execute(
     "SELECT value FROM schema_meta WHERE key='schema_version'"
 ).fetchone()[0]
-assert str(version) == "53", version
+assert str(version) == "54", version
 assert not db.execute("PRAGMA foreign_key_check").fetchall()
 
 columns = {
@@ -190,7 +190,7 @@ for column in (
 
 db.close()
 
-assert not list((ROOT / "d1/migrations").glob("054_*.sql"))
+assert not list((ROOT / "d1/migrations").glob("055_*.sql"))
 
 
 print("PASS v1.10.14a payment receipts and notifications")
@@ -202,4 +202,4 @@ print("  duplicate/retry delivery contract: verified")
 print("  Client Portal receipt view and print/PDF: verified")
 print("  provider identifiers remain server-side: verified")
 print("  browser Checkout cannot settle or notify: verified")
-print("  schema remains 53; migration 054 absent: verified")
+print("  schema is 54; migration 055 absent: verified")

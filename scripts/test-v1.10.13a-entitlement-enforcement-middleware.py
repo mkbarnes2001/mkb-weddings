@@ -158,10 +158,10 @@ version = db.execute(
 ).fetchone()[0]
 db.close()
 
-require(str(version) == "53", f"middleware gate unexpectedly changed schema: {version}")
+require(str(version) == "54", f"middleware gate unexpectedly changed schema: {version}")
 require(
-    not list((ROOT / "d1/migrations").glob("054_*.sql")),
-    "middleware gate must not add migration 054",
+    not list((ROOT / "d1/migrations").glob("055_*.sql")),
+    "middleware gate must not add migration 055",
 )
 
 print("PASS v1.10.13a Gate 2F1D professional API entitlement middleware")
@@ -172,4 +172,4 @@ print("  controlled provider-ID-redacted 403 boundary: verified")
 print("  WedNav/auth/billing/public/webhook recovery policy preserved: verified")
 print("  exact subscription webhook auth exemption preserved: verified")
 print("  workspace override + recovery semantics remain resolver-owned: verified")
-print("  schema remains 53: verified")
+print("  schema is 54: verified")

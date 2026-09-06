@@ -1,3 +1,5 @@
+import { PackageImage } from "./PackageImage";
+import { packagePresentation, type PackagePresentation } from "../../shared/package-presentation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Helmet } from "react-helmet-async";
@@ -133,7 +135,7 @@ type PortalJob = {
 
 
 type PortalQuoteAddon = { id: string; addonId: string; name: string; description: string; unitPriceAmount: number; currency: string; minimumQuantity: number; maximumQuantity: number; defaultQuantity: number; requirement: "optional" | "recommended" | "mandatory"; displayOrder: number };
-type PortalQuoteOption = { id: string; name: string; description: string; serviceType: string; basePriceAmount: number; currency: string; coverageMinutes: number | null; deliverables: string[]; includedItems: string[]; clientNotes: string; recommended: boolean; items: Array<{ id: string; name: string; quantity: number; unitPriceAmount: number }>; addons: PortalQuoteAddon[] };
+type PortalQuoteOption = { imageUrl?: string; imagePresentation?: PackagePresentation; id: string; name: string; description: string; serviceType: string; basePriceAmount: number; currency: string; coverageMinutes: number | null; deliverables: string[]; includedItems: string[]; clientNotes: string; recommended: boolean; items: Array<{ id: string; name: string; quantity: number; unitPriceAmount: number }>; addons: PortalQuoteAddon[] };
 type PortalQuoteAcceptance = { optionId: string; acceptedAt: string; subtotalAmount: number; discountAmount: number; taxAmount: number; totalAmount: number; currency: string; selectedPackage: Record<string, unknown>; selectedAddons: Array<PortalQuoteAddon & { quantity: number; lineTotalAmount: number }> };
 type PortalQuote = { id: string; reference: string; status: string; quoteType: "pick_and_choose" | "fixed"; clientName: string; partnerName: string; eventDate: string; venueText: string; acceptedJobId: string; acceptance?: PortalQuoteAcceptance | null; currentVersion: { id: string; versionNumber: number; status: string; expiresAt: string; clientNotes: string; discountType: "none" | "fixed" | "percentage"; discountValue: number; taxTreatment: "none" | "inclusive" | "exclusive"; taxRateBasisPoints: number; taxLabel: string; currency: string; options: PortalQuoteOption[] } };
 type PortalQuoteSummary = { id: string; reference: string; status: string; eventDate: string; venueText: string; acceptedJobId: string; updatedAt: string };
@@ -1981,9 +1983,12 @@ export function ClientPortal() {
 
                     <h2>{option.name}</h2>
 
+                    {option.imageUrl && packagePresentation(option.imagePresentation).placement === "above" ? <PackageImage url={option.imageUrl} presentation={option.imagePresentation} /> : null}
                     {option.description ? (
                       <p>{option.description}</p>
                     ) : null}
+
+                    {option.imageUrl && packagePresentation(option.imagePresentation).placement === "below" ? <PackageImage url={option.imageUrl} presentation={option.imagePresentation} /> : null}
 
                     <strong>
                       {money(

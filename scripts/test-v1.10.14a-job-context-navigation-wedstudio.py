@@ -50,15 +50,12 @@ require(
     "bare accepted commercial Quote link remains",
 )
 
-# A generic Quote-list open stays generic and therefore falls back to Quotes.
-require(
-    'to={`/admin/crm/quotes/${quote.id}`}' in quotes,
-    "generic Quotes register destination changed unexpectedly",
-)
-require(
-    "?jobId=" not in quotes,
-    "generic Quotes register should not invent Job context",
-)
+# Quotes are accessed from a Lead or Job; the old global register is gone.
+require('Quote register' not in quotes, "global Quotes register returned")
+require('<Navigate to="/admin/crm" replace />' in quotes, "unscoped Quotes route must return to Leads")
+require('getCrmEnquiry(enquiryId)' in quotes, "quote creator must load its owning Lead")
+require('getCrmQuoteOverview' not in quotes, "quote creator must not load the workspace register")
+require('"?jobId="' not in quotes, "Lead quote creation should not invent Job context")
 
 # Query context is not trusted blindly: it must match authoritative acceptedJobId.
 for token in (
@@ -67,8 +64,8 @@ for token in (
     "quote.acceptedJobId === requestedJobId",
     "<CRMRecordBackLink",
     "jobId={contextualJobId}",
-    'fallbackTo="/admin/crm/quotes"',
-    'fallbackLabel="Back to Quotes"',
+    'fallbackTo={`/admin/crm/enquiries/${encodeURIComponent(quote.enquiryId)}`}',
+    'fallbackLabel="Back to Lead"',
 ):
     require(token in quote, f"Quote contextual return missing {token}")
 
@@ -118,28 +115,28 @@ require(
     "Wedding Workspace lost its CRM Job return boundary",
 )
 
-# Source-only gate: schema 53 and no migration 054.
+# Source-only gate: schema 54 and no migration 055.
 db = sqlite3.connect(":memory:")
 db.executescript(schema)
 version = db.execute(
     "SELECT value FROM schema_meta WHERE key='schema_version'"
 ).fetchone()[0]
-require(str(version) == "53", f"Gate 2C1 changed schema: {version}")
+require(str(version) == "54", f"Gate 2C1 changed schema: {version}")
 require(
     not db.execute("PRAGMA foreign_key_check").fetchall(),
     "schema foreign-key check failed",
 )
 db.close()
 require(
-    not list((ROOT / "d1/migrations").glob("054_*.sql")),
-    "Gate 2C1 must not add migration 054",
+    not list((ROOT / "d1/migrations").glob("055_*.sql")),
+    "Gate 2C1 must not add migration 055",
 )
 
 print("PASS v1.10.14a Job context navigation + WedStudio handoff")
 print("  shared deterministic CRM record back control: verified")
 print("  Job-origin Quote return context: verified")
-print("  generic Quote return destination: verified")
+print("  Lead Quote return destination: verified")
 print("  nested Invoice Back to Job: verified")
 print("  Job delivery panel WedStudio handoff: verified")
 print("  operational Wedding Workspace bookings boundary preserved: verified")
-print("  schema remains 53; migration 054 absent: verified")
+print("  schema is 54; migration 055 absent: verified")

@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { useEffect, useState } from "react";
 import { Bot, CheckCircle2, Copy, Sparkles, Terminal, Wand2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -24,21 +25,20 @@ function CommandCard({
   }
 
   return (
-    <div className="rounded-[24px] border border-black/10 bg-white/75 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.035)]">
+    <div className="admin-surface-card border border-black/10 bg-white/75">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h3 className="text-xl font-serif">{title}</h3>
-          <p className="text-sm text-neutral-500 mt-1">{description}</p>
+          <h3 className="admin-section-title ">{title}</h3>
         </div>
 
-        <button
+        <AdminActionButton
           type="button"
           onClick={copyCommand}
-          className="rounded-full border border-black/10 p-2 hover:bg-white"
+          className="admin-button admin-button--secondary rounded-full border border-black/10 p-2 hover:bg-white"
           aria-label={`Copy ${title} command`}
         >
           <Copy className="w-4 h-4" />
-        </button>
+        </AdminActionButton>
       </div>
 
       <div className="rounded-2xl bg-[#f5f3ef] border border-black/5 p-4">
@@ -58,9 +58,9 @@ function StatBox({
   detail?: string;
 }) {
   return (
-    <div className="rounded-[24px] border border-black/10 bg-white/75 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.035)]">
+    <div className="admin-surface-card border border-black/10 bg-white/75">
       <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-3">{label}</p>
-      <p className="text-4xl font-serif">{value}</p>
+      <p className="admin-metric-value ">{value}</p>
       {detail ? <p className="text-sm text-neutral-500 mt-2">{detail}</p> : null}
     </div>
   );
@@ -69,9 +69,13 @@ function StatBox({
 export function AICentre() {
   const [report, setReport] = useState<AiStatusReport | null>(null);
 
+  const [loadError, setLoadError] = useState("");
+
   useEffect(() => {
-    new AIStatusService().getReport().then(setReport);
+    new AIStatusService().getReport().then(setReport).catch(error => setLoadError(error instanceof Error ? error.message : "Unable to load this page."));
   }, []);
+
+  if (loadError) return <AdminPage><AdminPageHeader title="Image intelligence" /><p role="alert">{loadError}</p></AdminPage>;
 
   if (!report) return <div className="text-neutral-500">Loading AI Centre…</div>;
 
@@ -81,7 +85,7 @@ export function AICentre() {
     report.blog.missingCaptions === 0;
 
   return (
-    <AdminPage>
+    <AdminPage className="admin-refined-page">
       <AdminPageHeader
         eyebrow="AI Centre"
         title="Image intelligence"
@@ -99,14 +103,13 @@ export function AICentre() {
       </section>
 
       <section className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        <div className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+        <div className="admin-surface-card border border-black/10 bg-white/75">
           <div className="flex items-center gap-3 mb-7">
             <div className="rounded-2xl bg-black text-white p-3">
               <Bot className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-3xl font-serif">Blog AI health</h2>
-              <p className="text-sm text-neutral-500">Blog image metadata coverage.</p>
+              <h2 className="admin-section-title ">Blog AI health</h2>
             </div>
           </div>
 
@@ -117,14 +120,13 @@ export function AICentre() {
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+        <div className="admin-surface-card border border-black/10 bg-white/75">
           <div className="flex items-center gap-3 mb-7">
             <div className="rounded-2xl bg-black text-white p-3">
               <Wand2 className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-3xl font-serif">Gallery AI health</h2>
-              <p className="text-sm text-neutral-500">Main gallery metadata coverage.</p>
+              <h2 className="admin-section-title ">Gallery AI health</h2>
             </div>
           </div>
 
@@ -136,14 +138,13 @@ export function AICentre() {
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+      <section className="admin-surface-card border border-black/10 bg-white/75">
         <div className="flex items-center gap-3 mb-6">
           <div className="rounded-2xl bg-black text-white p-3">
             <Terminal className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-3xl font-serif">AI commands</h2>
-            <p className="text-sm text-neutral-500">Temporary bridge until these actions run directly from the UI.</p>
+            <h2 className="admin-section-title ">AI commands</h2>
           </div>
         </div>
 
@@ -171,8 +172,8 @@ export function AICentre() {
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
-        <h2 className="text-3xl font-serif mb-6">Wedding AI status</h2>
+      <section className="admin-surface-card border border-black/10 bg-white/75">
+        <h2 className="admin-section-title mb-6">Wedding AI status</h2>
 
         <div className="divide-y divide-black/5">
           {report.weddings.map((wedding) => (
@@ -181,7 +182,7 @@ export function AICentre() {
                 <div className="mb-2">
                   <StatusBadge status={wedding.status} />
                 </div>
-                <h3 className="text-xl font-serif">{wedding.title}</h3>
+                <h3 className="admin-section-title ">{wedding.title}</h3>
                 <p className="text-sm text-neutral-500">{wedding.imageCount} images</p>
               </div>
 
@@ -194,12 +195,12 @@ export function AICentre() {
                 <ProgressBar label="Alt" done={wedding.altComplete} total={wedding.imageCount} />
               </div>
 
-              <Link
+              <AdminActionRouterLink
                 to={`/admin/weddings/${wedding.slug}`}
-                className="rounded-full bg-black text-white px-5 py-2.5 text-sm hover:bg-black/90"
+                className="admin-button admin-button--primary rounded-full bg-black text-white px-5 py-2.5 text-sm hover:bg-black/90"
               >
                 Open
-              </Link>
+              </AdminActionRouterLink>
             </div>
           ))}
         </div>

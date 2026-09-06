@@ -1,5 +1,9 @@
 # MKB Intelligence — Database Notes
 
+## Current release preparation — v1.10.15a
+
+The complete CRM/Studio candidate and booking setup are prepared for release. Canonical schema is **54**; production promotion and deployment are pending final verification. Public client booking and new provider/email activation remain closed. See [v1.10.15a release record](RELEASE-v1.10.15a.md). Earlier version-specific sections below are historical.
+
 Always inspect `d1/schema.sql` and the actual migration files before assuming that a table, column, trigger or index exists.
 
 ## Current schema baseline

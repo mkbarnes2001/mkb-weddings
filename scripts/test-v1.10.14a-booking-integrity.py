@@ -261,7 +261,7 @@ for token in (
 
 
 # ------------------------------------------------------------
-# Schema remains v1.10.13a schema 53; no migration 054.
+# Schema remains v1.10.13a schema 54; no migration 055.
 # ------------------------------------------------------------
 
 db = sqlite3.connect(":memory:")
@@ -275,7 +275,7 @@ version = db.execute(
     """
 ).fetchone()[0]
 
-assert str(version) == "53", version
+assert str(version) == "54", version
 
 assert not db.execute(
     "PRAGMA foreign_key_check"
@@ -289,7 +289,7 @@ assert not list(
         / "d1"
         / "migrations"
     ).glob(
-        "054_*.sql"
+        "055_*.sql"
     )
 )
 
@@ -319,9 +319,9 @@ print(
 )
 
 print(
-    "  schema: 53"
+    "  schema: 54"
 )
 
 print(
-    "  migration 054: absent"
+    "  migration 055: absent"
 )

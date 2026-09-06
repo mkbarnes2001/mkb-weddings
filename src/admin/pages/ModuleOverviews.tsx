@@ -1,3 +1,4 @@
+import { AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import {
   useEffect,
   useMemo,
@@ -151,13 +152,13 @@ export function BusinessOverview() {
             : "Complete the essential business details so WedPlanned can tailor this workspace to how you operate."
         }
         actions={
-          <Link
+          <AdminActionRouterLink
             to="/admin/onboarding"
             className="admin-button admin-button--primary admin-button--md"
           >
             <CheckCircle2 className="admin-button__icon" />
             {onboarding.state === "deferred" ? "Resume setup" : "Continue setup"}
-          </Link>
+          </AdminActionRouterLink>
         }
       >
         <div className="flex flex-wrap items-center justify-between gap-3">

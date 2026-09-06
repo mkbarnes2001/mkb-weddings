@@ -1,3 +1,4 @@
+import { AdminActionButton } from "./AdminActionControl";
 import { useEffect, useId, useMemo, useState } from "react";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 
@@ -116,9 +117,9 @@ export function AdminSearchSelect({
             }}
           />
           {allowClear && value ? (
-            <button type="button" className="admin-search-select__clear" aria-label={`Clear ${label}`} onMouseDown={(event) => event.preventDefault()} onClick={() => { onChange(""); setQuery(""); setOpen(true); }}>
+            <AdminActionButton type="button" className="admin-search-select__clear" aria-label={`Clear ${label}`} onMouseDown={(event) => event.preventDefault()} onClick={() => { onChange(""); setQuery(""); setOpen(true); }}>
               <X aria-hidden="true" />
-            </button>
+            </AdminActionButton>
           ) : <ChevronDown aria-hidden="true" className="admin-search-select__chevron" />}
         </div>
         {open ? (

@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, Copy, Download, ExternalLink, Heart, ImageOff, Loader2 } from "lucide-react";
@@ -171,32 +172,32 @@ export function ClientGalleryReview() {
         }
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <button
+            <AdminActionButton
               onClick={copyFilenames}
               disabled={!review.assets.length}
               className="admin-button admin-button--secondary"
             >
               <Copy className="admin-button__icon" />
               Copy filenames
-            </button>
+            </AdminActionButton>
 
-            <button
+            <AdminActionButton
               onClick={downloadCsv}
               disabled={!review.assets.length}
               className="admin-button admin-button--secondary"
             >
               <Download className="admin-button__icon" />
               CSV
-            </button>
+            </AdminActionButton>
 
             {originalCount ? (
-              <a
+              <AdminActionLink
                 href={bulkUrl}
                 className="admin-button admin-button--primary"
               >
                 <Download className="admin-button__icon" />
                 Download all originals
-              </a>
+              </AdminActionLink>
             ) : null}
           </div>
         }
@@ -243,14 +244,14 @@ export function ClientGalleryReview() {
                 ) : <ImageOff className="h-6 w-6 text-neutral-300" style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)" }} />}
                 <div style={{ position: "absolute", right: 8, top: 8, display: "flex", gap: 6 }}>
                   {asset.webSrc ? (
-                    <a href={asset.webSrc} target="_blank" rel="noreferrer" title="View larger preview" className="rounded-lg bg-white/95 border border-black/10 p-2 shadow-sm">
+                    <AdminActionLink href={asset.webSrc} target="_blank" rel="noreferrer" title="View larger preview" className="rounded-lg bg-white/95 border border-black/10 p-2 shadow-sm">
                       <ExternalLink className="h-4 w-4" />
-                    </a>
+                    </AdminActionLink>
                   ) : null}
                   {asset.hasOriginal ? (
-                    <a href={AdminApiService.clientGalleryOriginalDownloadUrl(id, asset.assetId)} title="Download full-resolution original" className="rounded-lg bg-black text-white p-2 shadow-sm">
+                    <AdminActionLink href={AdminApiService.clientGalleryOriginalDownloadUrl(id, asset.assetId)} title="Download full-resolution original" className="rounded-lg bg-black text-white p-2 shadow-sm">
                       <Download className="h-4 w-4" />
-                    </a>
+                    </AdminActionLink>
                   ) : null}
                 </div>
               </div>

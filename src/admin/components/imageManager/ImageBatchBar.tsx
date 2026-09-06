@@ -1,3 +1,4 @@
+import { AdminActionButton } from "../ui/AdminActionControl";
 import {
   Eye,
   EyeOff,
@@ -48,23 +49,23 @@ export function ImageBatchBar({
           ))}
         </div>
 
-        <button
+        <AdminActionButton
           type="button"
           onClick={onHide}
           className="inline-flex items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm"
         >
           <EyeOff className="h-4 w-4" />
           Hide
-        </button>
+        </AdminActionButton>
 
-        <button
+        <AdminActionButton
           type="button"
           onClick={onShow}
           className="inline-flex items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm"
         >
           <Eye className="h-4 w-4" />
           Show
-        </button>
+        </AdminActionButton>
 
         <div className="flex flex-wrap items-center gap-2">
           <Layers3 className="h-4 w-4 text-neutral-500" />
@@ -80,14 +81,14 @@ export function ImageBatchBar({
           ))}
         </div>
 
-        <button
+        <AdminActionButton
           type="button"
           onClick={onClear}
           className="ml-auto inline-flex items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm"
         >
           <X className="h-4 w-4" />
           Clear
-        </button>
+        </AdminActionButton>
       </div>
     </section>
   );

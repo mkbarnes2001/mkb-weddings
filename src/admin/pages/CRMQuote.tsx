@@ -1,3 +1,6 @@
+import { AdminActionButton, AdminActionRouterLink } from "../components/ui/AdminActionControl";
+import { PackageImage } from "../../components/PackageImage";
+import { packagePresentation } from "../../../shared/package-presentation";
 import {
   useEffect,
   useMemo,
@@ -552,6 +555,7 @@ export function CRMQuote() {
               item.clientNotes,
             imageUrl:
               item.imageUrl,
+            imagePresentation: item.imagePresentation,
             recommended:
               item.recommended,
             displayOrder:
@@ -1393,6 +1397,13 @@ export function CRMQuote() {
     <AdminPage>
       <AdminPageHeader
         className="crm-quote-page-header"
+        backLink={
+          <CRMRecordBackLink
+            jobId={contextualJobId}
+            fallbackTo={`/admin/crm/enquiries/${encodeURIComponent(quote.enquiryId)}`}
+            fallbackLabel="Back to Lead"
+          />
+        }
         title={quote.reference}
         description={[
           quote.clientName,
@@ -1401,12 +1412,6 @@ export function CRMQuote() {
         ].join(" · ")}
         actions={
           <div className="crm-quote-header-actions">
-            <CRMRecordBackLink
-              jobId={contextualJobId}
-              fallbackTo="/admin/crm/quotes"
-              fallbackLabel="Back to Quotes"
-            />
-
             {editable ? (
               <div className="crm-quote-template-apply">
                 <select
@@ -1535,7 +1540,7 @@ export function CRMQuote() {
         </div>
       ) : null}
 
-      <div className="crm-quote-workspace">
+      <div className={`crm-quote-workspace${quote.acceptedJobId || (version && ["sent", "viewed"].includes(version.status) && canManage) ? "" : " crm-quote-workspace--single-column"}`}>
         <main className="crm-quote-workspace__main">
           <AdminPanel
             title={
@@ -1692,23 +1697,7 @@ export function CRMQuote() {
                         .filter(Boolean)
                         .join(" ")}
                     >
-                      <div
-                        className={
-                          option.imageUrl
-                            ? "crm-quote-package-card__image"
-                            : "crm-quote-package-card__image crm-quote-package-card__image--empty"
-                        }
-                      >
-                        {option.imageUrl ? (
-                          <img
-                            src={option.imageUrl}
-                            alt=""
-                            loading="lazy"
-                          />
-                        ) : (
-                          <PackageCheck />
-                        )}
-                      </div>
+                      {option.imageUrl && packagePresentation(option.imagePresentation).placement === "above" ? <PackageImage url={option.imageUrl} presentation={option.imagePresentation} /> : null}
 
                       <header className="crm-quote-package-card__header">
                         <div>
@@ -1758,6 +1747,7 @@ export function CRMQuote() {
                         {option.description
                           || "No package description."}
                       </p>
+                      {option.imageUrl && packagePresentation(option.imagePresentation).placement === "below" ? <PackageImage url={option.imageUrl} presentation={option.imagePresentation} /> : null}
 
                       {(option
                         .includedItems
@@ -2248,7 +2238,7 @@ export function CRMQuote() {
                                     />
 
                                     {editable ? (
-                                      <button
+                                      <AdminActionButton
                                         type="button"
                                         onClick={() =>
                                           removeItem(
@@ -2259,7 +2249,7 @@ export function CRMQuote() {
                                         aria-label="Remove line item"
                                       >
                                         <Trash2 />
-                                      </button>
+                                      </AdminActionButton>
                                     ) : null}
                                   </div>
                                 ),
@@ -3207,13 +3197,13 @@ export function CRMQuote() {
               icon={ExternalLink}
               compact
             >
-              <Link
+              <AdminActionRouterLink
                 className="admin-button admin-button--primary"
                 to={`/admin/crm/jobs/${quote.acceptedJobId}`}
               >
                 <ExternalLink className="admin-button__icon" />
                 Open Job
-              </Link>
+              </AdminActionRouterLink>
             </AdminPanel>
           ) : null}
         </aside>
@@ -3259,7 +3249,7 @@ export function CRMQuote() {
                 </p>
               </div>
 
-              <button
+              <AdminActionButton
                 type="button"
                 aria-label="Close email preview"
                 disabled={saving}
@@ -3268,7 +3258,7 @@ export function CRMQuote() {
                 }
               >
                 ×
-              </button>
+              </AdminActionButton>
             </header>
 
             <div className="crm-quote-send-dialog__content">
@@ -3615,13 +3605,13 @@ export function CRMQuote() {
                 </div>
 
                 {!sendPreview.deliveryReady ? (
-                  <Link
+                  <AdminActionRouterLink
                     to="/admin/crm/email-settings"
                     className="admin-button admin-button--secondary admin-button--md"
                   >
                     <Mail className="admin-button__icon" />
                     Email settings
-                  </Link>
+                  </AdminActionRouterLink>
                 ) : null}
               </aside>
             </div>

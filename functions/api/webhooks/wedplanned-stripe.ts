@@ -1,6 +1,9 @@
+import {deliverBookingConfirmations} from "../../../serverless/crm-booking-confirmations";
 import {
   processStripeInvoicePaymentEvent,
 } from "../../../serverless/crm-connected-payments-d1";
+import { reconcileBookingPayments } from "../../../serverless/crm-online-booking-d1";
+import { syncConnectedCalendars } from "../../../serverless/crm-calendar-providers";
 
 import {
   verifyStripeWebhook,
@@ -14,6 +17,7 @@ import {
 
 type Env = InvoicePaymentReceiptEnv & {
   MKB_DB: D1Database;
+  CRM_ONLINE_BOOKING_ENABLED?: string;
 
   WEDPLANNED_STRIPE_WEBHOOK_SECRET?: string;
 
@@ -77,6 +81,11 @@ PagesFunction<Env> = async (
      * one already marked sent.
      */
     const settlement: any = result;
+
+    if (context.env.CRM_ONLINE_BOOKING_ENABLED === "true" && settlement?.workspaceId && settlement?.paymentId && !settlement?.rejected) {
+      await reconcileBookingPayments(context.env.MKB_DB, context.env, settlement.workspaceId, settlement.invoiceId);
+      context.waitUntil(Promise.all([syncConnectedCalendars(context.env.MKB_DB, context.env, settlement.workspaceId),deliverBookingConfirmations(context.env.MKB_DB,context.env,settlement.workspaceId)]));
+    }
 
     const notifications =
       settlement?.workspaceId

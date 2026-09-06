@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { PublicSiteAppearanceEditor } from "../components/PublicSiteAppearanceEditor";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -382,13 +383,13 @@ function PlatformOptionalColourControl({
         />
 
         {value ? (
-          <button
+          <AdminActionButton
             type="button"
             className="platform-colour-reset"
             onClick={() => onChange("")}
           >
             Default
-          </button>
+          </AdminActionButton>
         ) : null}
       </div>
     </AdminField>
@@ -968,14 +969,14 @@ export function PlatformAdmin() {
                 <div><dt>Domains</dt><dd>{workspace.verifiedDomainCount} verified / {workspace.domainCount}</dd></div>
                 <div><dt>Marketplace</dt><dd>{workspace.marketplaceSlug || "Not configured"}</dd></div>
               </dl>
-              <Link
+              <AdminActionRouterLink
                 to={`/admin/platform?section=operations&workspaceId=${encodeURIComponent(workspace.id)}`}
                 onClick={() => setSelectedWorkspaceId(workspace.id)}
                 className="admin-button admin-button--secondary admin-button--sm"
               >
                 <ShieldCheck className="admin-button__icon" />
                 Open operations
-              </Link>
+              </AdminActionRouterLink>
             </article>
           ))}
         </div>
@@ -983,10 +984,10 @@ export function PlatformAdmin() {
     </div> : null}
 
     {section === "taxonomy" ? <section className="supplier-taxonomy-manager">
-      <header className="supplier-taxonomy-manager__header"><div><p className="admin-eyebrow">Platform-owned canonical options</p><h2>Supplier categories & Wedding roles</h2><p>Business workspaces may select these options but cannot add, rename, reorder or remove them.</p></div><div className="flex flex-wrap gap-2"><button type="button" onClick={() => { setSupplierCategories([...SUPPLIER_CATEGORY_OPTIONS]); setSupplierRoles([...DEFAULT_SUPPLIER_ROLE_DEFINITIONS]); }} className="admin-button admin-button--secondary admin-button--sm"><RotateCcw className="admin-button__icon" />Restore defaults</button><button type="button" disabled={saving} onClick={saveSupplierTaxonomy} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : "Save platform taxonomy"}</button></div></header>
+      <header className="supplier-taxonomy-manager__header"><div><p className="admin-eyebrow">Platform-owned canonical options</p><h2>Supplier categories & Wedding roles</h2></div><div className="flex flex-wrap gap-2"><AdminActionButton type="button" onClick={() => { setSupplierCategories([...SUPPLIER_CATEGORY_OPTIONS]); setSupplierRoles([...DEFAULT_SUPPLIER_ROLE_DEFINITIONS]); }} className="admin-button admin-button--secondary admin-button--sm"><RotateCcw className="admin-button__icon" />Restore defaults</AdminActionButton><AdminActionButton type="button" disabled={saving} onClick={saveSupplierTaxonomy} className="admin-button admin-button--primary"><Save className="admin-button__icon" />{saving ? "Saving…" : "Save platform taxonomy"}</AdminActionButton></div></header>
       <div className="supplier-taxonomy-manager__grid">
-        <section className="supplier-taxonomy-list-card"><div className="supplier-taxonomy-list-card__heading"><div><strong>Supplier categories</strong><span>{supplierCategories.length} platform options</span></div><button type="button" onClick={() => setSupplierCategories((current) => [...current, `New category ${current.length + 1}`])} className="admin-button admin-button--secondary admin-button--sm"><Plus className="admin-button__icon" />Add category</button></div><div className="supplier-taxonomy-list">{supplierCategories.map((category, index) => <div key={`${index}-${category}`} className="supplier-taxonomy-row"><input value={category} onChange={(event) => updateSupplierCategory(index, event.target.value)} aria-label={`Platform supplier category ${index + 1}`} /><div className="supplier-taxonomy-row__actions"><button type="button" disabled={index === 0} onClick={() => moveSupplierCategory(index, -1)} title="Move up"><ChevronUp /></button><button type="button" disabled={index === supplierCategories.length - 1} onClick={() => moveSupplierCategory(index, 1)} title="Move down"><ChevronDown /></button><button type="button" disabled={supplierCategories.length <= 1} onClick={() => removeSupplierCategory(index)} title="Remove category"><Trash2 /></button></div></div>)}</div></section>
-        <section className="supplier-taxonomy-list-card"><div className="supplier-taxonomy-list-card__heading"><div><strong>Wedding roles</strong><span>{supplierRoles.length} platform options</span></div><button type="button" onClick={() => setSupplierRoles((current) => [...current, { name: `New role ${current.length + 1}`, category: supplierCategories[0] || "Other" }])} className="admin-button admin-button--secondary admin-button--sm"><Plus className="admin-button__icon" />Add role</button></div><div className="supplier-taxonomy-list">{supplierRoles.map((role, index) => <div key={`${index}-${role.name}`} className="supplier-taxonomy-row supplier-taxonomy-row--role"><input value={role.name} onChange={(event) => setSupplierRoles((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item))} aria-label={`Platform Wedding role ${index + 1}`} /><select value={role.category} onChange={(event) => setSupplierRoles((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, category: event.target.value } : item))}>{supplierCategories.map((category) => <option key={category} value={category}>{category}</option>)}</select><div className="supplier-taxonomy-row__actions"><button type="button" disabled={index === 0} onClick={() => moveSupplierRole(index, -1)} title="Move up"><ChevronUp /></button><button type="button" disabled={index === supplierRoles.length - 1} onClick={() => moveSupplierRole(index, 1)} title="Move down"><ChevronDown /></button><button type="button" disabled={supplierRoles.length <= 1} onClick={() => setSupplierRoles((current) => current.filter((_, itemIndex) => itemIndex !== index))} title="Remove role"><Trash2 /></button></div></div>)}</div></section>
+        <section className="supplier-taxonomy-list-card"><div className="supplier-taxonomy-list-card__heading"><div><strong>Supplier categories</strong><span>{supplierCategories.length} platform options</span></div><AdminActionButton type="button" onClick={() => setSupplierCategories((current) => [...current, `New category ${current.length + 1}`])} className="admin-button admin-button--secondary admin-button--sm"><Plus className="admin-button__icon" />Add category</AdminActionButton></div><div className="supplier-taxonomy-list">{supplierCategories.map((category, index) => <div key={`${index}-${category}`} className="supplier-taxonomy-row"><input value={category} onChange={(event) => updateSupplierCategory(index, event.target.value)} aria-label={`Platform supplier category ${index + 1}`} /><div className="supplier-taxonomy-row__actions"><AdminActionButton type="button" disabled={index === 0} onClick={() => moveSupplierCategory(index, -1)} title="Move up"><ChevronUp /></AdminActionButton><AdminActionButton type="button" disabled={index === supplierCategories.length - 1} onClick={() => moveSupplierCategory(index, 1)} title="Move down"><ChevronDown /></AdminActionButton><AdminActionButton type="button" disabled={supplierCategories.length <= 1} onClick={() => removeSupplierCategory(index)} title="Remove category"><Trash2 /></AdminActionButton></div></div>)}</div></section>
+        <section className="supplier-taxonomy-list-card"><div className="supplier-taxonomy-list-card__heading"><div><strong>Wedding roles</strong><span>{supplierRoles.length} platform options</span></div><AdminActionButton type="button" onClick={() => setSupplierRoles((current) => [...current, { name: `New role ${current.length + 1}`, category: supplierCategories[0] || "Other" }])} className="admin-button admin-button--secondary admin-button--sm"><Plus className="admin-button__icon" />Add role</AdminActionButton></div><div className="supplier-taxonomy-list">{supplierRoles.map((role, index) => <div key={`${index}-${role.name}`} className="supplier-taxonomy-row supplier-taxonomy-row--role"><input value={role.name} onChange={(event) => setSupplierRoles((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item))} aria-label={`Platform Wedding role ${index + 1}`} /><select value={role.category} onChange={(event) => setSupplierRoles((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, category: event.target.value } : item))}>{supplierCategories.map((category) => <option key={category} value={category}>{category}</option>)}</select><div className="supplier-taxonomy-row__actions"><AdminActionButton type="button" disabled={index === 0} onClick={() => moveSupplierRole(index, -1)} title="Move up"><ChevronUp /></AdminActionButton><AdminActionButton type="button" disabled={index === supplierRoles.length - 1} onClick={() => moveSupplierRole(index, 1)} title="Move down"><ChevronDown /></AdminActionButton><AdminActionButton type="button" disabled={supplierRoles.length <= 1} onClick={() => setSupplierRoles((current) => current.filter((_, itemIndex) => itemIndex !== index))} title="Remove role"><Trash2 /></AdminActionButton></div></div>)}</div></section>
       </div>
     </section> : null}
 
@@ -996,7 +997,6 @@ export function PlatformAdmin() {
           <div>
             <p className="admin-eyebrow">Global platform presentation</p>
             <h2>Branding &amp; modules</h2>
-            <p>Assign uploaded artwork and control the shared visual system used across every WedPlanned business.</p>
           </div>
           <AdminStatus tone={brandingDirty ? "warning" : "success"}>
             {brandingDirty
@@ -1006,13 +1006,13 @@ export function PlatformAdmin() {
         </div>
 
         <div className="platform-branding-editor__actions">
-          <Link
+          <AdminActionRouterLink
             to="/admin/platform?section=assets"
             className="admin-button admin-button--secondary"
           >
             <Images className="admin-button__icon" />
             Manage assets
-          </Link>
+          </AdminActionRouterLink>
 
           <AdminButton
             variant="secondary"
@@ -2243,7 +2243,7 @@ export function PlatformAdmin() {
         </div>
       </AdminPanel>
       <AdminPanel title="WedPlanned asset library" description="Platform-owned artwork for desktop wordmarks, compact mobile identities and module icons. Assigned assets cannot be deleted." icon={Images} actions={<AdminStatus tone="info">{platformAdmin.brandAssets.length} assets</AdminStatus>}>
-        {platformAdmin.brandAssets.length ? <div className="platform-brand-asset-grid">{platformAdmin.brandAssets.map((asset) => <article key={asset.id} className="platform-brand-asset-card"><div className="platform-brand-asset-card__preview"><img src={asset.url} alt="" /></div><div className="platform-brand-asset-card__body"><div><strong>{asset.name}</strong><span>{asset.assetType} · {(asset.sizeBytes / 1024).toFixed(0)} KB</span></div><button type="button" className="admin-icon-control admin-icon-control--danger" onClick={() => deleteBrandAsset(asset.id, asset.name)} disabled={saving} title="Delete asset" aria-label={`Delete ${asset.name}`}><Trash2 /></button></div></article>)}</div> : <div className="admin-empty-state"><span className="admin-empty-state__icon"><Images /></span><h3>No platform brand assets</h3><p>Upload a logo or icon above, then assign it to a module from Module configuration.</p></div>}
+        {platformAdmin.brandAssets.length ? <div className="platform-brand-asset-grid">{platformAdmin.brandAssets.map((asset) => <article key={asset.id} className="platform-brand-asset-card"><div className="platform-brand-asset-card__preview"><img src={asset.url} alt="" /></div><div className="platform-brand-asset-card__body"><div><strong>{asset.name}</strong><span>{asset.assetType} · {(asset.sizeBytes / 1024).toFixed(0)} KB</span></div><AdminActionButton type="button" className="admin-icon-control admin-icon-control--danger" onClick={() => deleteBrandAsset(asset.id, asset.name)} disabled={saving} title="Delete asset" aria-label={`Delete ${asset.name}`}><Trash2 /></AdminActionButton></div></article>)}</div> : <div className="admin-empty-state"><span className="admin-empty-state__icon"><Images /></span><h3>No platform brand assets</h3><p>Upload a logo or icon above, then assign it to a module from Module configuration.</p></div>}
       </AdminPanel>
     </div> : null}
 

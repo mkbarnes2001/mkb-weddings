@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -25,9 +26,9 @@ function StatBox({
   detail?: string;
 }) {
   return (
-    <div className="rounded-[24px] border border-black/10 bg-white/75 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.035)]">
+    <div className="admin-surface-card border border-black/10 bg-white/75">
       <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-3">{label}</p>
-      <p className="text-4xl font-serif">{value}</p>
+      <p className="admin-metric-value ">{value}</p>
       {detail ? <p className="text-sm text-neutral-500 mt-2">{detail}</p> : null}
     </div>
   );
@@ -51,21 +52,20 @@ function CommandCard({
   }
 
   return (
-    <div className="rounded-[24px] border border-black/10 bg-white/75 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.035)]">
+    <div className="admin-surface-card border border-black/10 bg-white/75">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h3 className="text-xl font-serif">{title}</h3>
-          <p className="text-sm text-neutral-500 mt-1">{description}</p>
+          <h3 className="admin-section-title ">{title}</h3>
         </div>
 
-        <button
+        <AdminActionButton
           type="button"
           onClick={copyCommand}
-          className="rounded-full border border-black/10 p-2 hover:bg-white"
+          className="admin-button admin-button--secondary rounded-full border border-black/10 p-2 hover:bg-white"
           aria-label={`Copy ${title} command`}
         >
           <Copy className="w-4 h-4" />
-        </button>
+        </AdminActionButton>
       </div>
 
       <div className="rounded-2xl bg-[#f5f3ef] border border-black/5 p-4">
@@ -87,7 +87,7 @@ function SeoStatusRow({ wedding }: { wedding: WeddingSeoStatus }) {
       <div>
         <div className="flex items-center gap-3 mb-2">
           {icon}
-          <h3 className="text-xl font-serif">{wedding.title}</h3>
+          <h3 className="admin-section-title ">{wedding.title}</h3>
         </div>
         <p className="text-sm text-neutral-500">{wedding.venue}</p>
         <p className="text-xs text-neutral-400 mt-1">{wedding.route}</p>
@@ -114,12 +114,12 @@ function SeoStatusRow({ wedding }: { wedding: WeddingSeoStatus }) {
       </div>
 
       <div className="flex xl:justify-end">
-        <Link
+        <AdminActionRouterLink
           to={`/admin/weddings/${wedding.slug}/publish`}
-          className="rounded-full bg-black text-white px-5 py-2.5 text-sm hover:bg-black/90"
+          className="admin-button admin-button--primary rounded-full bg-black text-white px-5 py-2.5 text-sm hover:bg-black/90"
         >
           Open
-        </Link>
+        </AdminActionRouterLink>
       </div>
     </div>
   );
@@ -128,9 +128,13 @@ function SeoStatusRow({ wedding }: { wedding: WeddingSeoStatus }) {
 export function SEOCentre() {
   const [report, setReport] = useState<SeoReport | null>(null);
 
+  const [loadError, setLoadError] = useState("");
+
   useEffect(() => {
-    new SEOService().getReport().then(setReport);
+    new SEOService().getReport().then(setReport).catch(error => setLoadError(error instanceof Error ? error.message : "Unable to load this page."));
   }, []);
+
+  if (loadError) return <AdminPage><AdminPageHeader title="Search visibility" /><p role="alert">{loadError}</p></AdminPage>;
 
   if (!report) return <div className="text-neutral-500">Loading SEO Centre…</div>;
 
@@ -139,7 +143,7 @@ export function SEOCentre() {
     report.galleryImageCount > 0 && report.galleryAltComplete === report.galleryImageCount;
 
   return (
-    <AdminPage>
+    <AdminPage className="admin-refined-page">
       <AdminPageHeader
         eyebrow="SEO Centre"
         title="Search visibility"
@@ -157,13 +161,13 @@ export function SEOCentre() {
       </section>
 
       <section className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        <div className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+        <div className="admin-surface-card border border-black/10 bg-white/75">
           <div className="flex items-center gap-3 mb-7">
             <div className="rounded-2xl bg-black text-white p-3">
               <ImageIcon className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-3xl font-serif">Blog image SEO</h2>
+              <h2 className="admin-section-title ">Blog image SEO</h2>
               <p className="text-sm text-neutral-500">Alt text and caption coverage for blog images.</p>
             </div>
           </div>
@@ -174,14 +178,13 @@ export function SEOCentre() {
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+        <div className="admin-surface-card border border-black/10 bg-white/75">
           <div className="flex items-center gap-3 mb-7">
             <div className="rounded-2xl bg-black text-white p-3">
               <Globe2 className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-3xl font-serif">Main gallery SEO</h2>
-              <p className="text-sm text-neutral-500">AI metadata coverage for website gallery images.</p>
+              <h2 className="admin-section-title ">Main gallery SEO</h2>
             </div>
           </div>
 
@@ -191,14 +194,13 @@ export function SEOCentre() {
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+      <section className="admin-surface-card border border-black/10 bg-white/75">
         <div className="flex items-center gap-3 mb-6">
           <div className="rounded-2xl bg-black text-white p-3">
             <ListChecks className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-3xl font-serif">SEO checklist by wedding</h2>
-            <p className="text-sm text-neutral-500">Blog route, image metadata and publishing readiness.</p>
+            <h2 className="admin-section-title ">SEO checklist by wedding</h2>
           </div>
         </div>
 
@@ -209,14 +211,13 @@ export function SEOCentre() {
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+      <section className="admin-surface-card border border-black/10 bg-white/75">
         <div className="flex items-center gap-3 mb-6">
           <div className="rounded-2xl bg-black text-white p-3">
             <Map className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-3xl font-serif">SEO commands</h2>
-            <p className="text-sm text-neutral-500">Temporary bridge until SEO actions run directly from the UI.</p>
+            <h2 className="admin-section-title ">SEO commands</h2>
           </div>
         </div>
 
@@ -239,12 +240,12 @@ export function SEOCentre() {
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+      <section className="admin-surface-card border border-black/10 bg-white/75">
         <div className="flex items-center gap-3 mb-4">
           <div className="rounded-2xl bg-black text-white p-3">
             <FileSearch className="w-5 h-5" />
           </div>
-          <h2 className="text-3xl font-serif">Next SEO upgrade</h2>
+          <h2 className="admin-section-title ">Next SEO upgrade</h2>
         </div>
         <p className="text-neutral-600 max-w-3xl leading-relaxed">
           The next version should inspect generated sitemap files, structured data, duplicate titles,

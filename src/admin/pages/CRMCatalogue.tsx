@@ -1,3 +1,5 @@
+import { AdminActionRouterLink } from "../components/ui/AdminActionControl";
+import { PackageImageEditor } from "../components/PackageImageEditor";
 import {
   useEffect,
   useMemo,
@@ -6,8 +8,7 @@ import { ArrowLeft,
   Boxes,
   PackagePlus,
   Plus,
-  Save,
-  Sparkles } from "lucide-react";
+  Save } from "lucide-react";
 import {
   Link,
   useLocation,
@@ -23,7 +24,6 @@ import { AdminButton,
   AdminStatus,
   AdminTab,
   AdminTabs,
-  AdminHeaderRouterLink,
 } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 import { AdminApiService } from "../services/AdminApiService";
@@ -68,12 +68,13 @@ export function CRMCatalogue() {
       : undefined;
 
   const { auth } = useProfessionalAuth();
-  const canManage = auth.permissions.includes("crm:manage");
+  const canManage = auth.permissions.includes("crm:manage") && auth.accessMode !== "support";
   const [view, setView] = useState<View>("packages");
   const [packages, setPackages] = useState<CrmPackage[]>([]);
   const [addons, setAddons] = useState<CrmAddon[]>([]);
   const [packageDraft, setPackageDraft] = useState<Partial<CrmPackage>>(emptyPackage);
   const [addonDraft, setAddonDraft] = useState<Partial<CrmAddon>>(emptyAddon);
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -179,6 +180,7 @@ export function CRMCatalogue() {
   const selectedPackageAddonNames = useMemo(() => new Map(addons.map((addon) => [addon.id, addon.name])), [addons]);
 
   async function savePackage() {
+    if (!canManage || uploading || saving) return;
     const creating =
       !packageDraft.id;
 
@@ -309,12 +311,12 @@ export function CRMCatalogue() {
               title="Package unavailable"
               description="This package could not be found in the current workspace."
               action={
-                <Link
+                <AdminActionRouterLink
                   to="/admin/crm/catalogue"
                   className="admin-button admin-button--primary admin-button--sm"
                 >
                   Back to packages
-                </Link>
+                </AdminActionRouterLink>
               }
             />
           </AdminPanel>
@@ -327,14 +329,14 @@ export function CRMCatalogue() {
           <AdminField label="Price"><input className="admin-input" type="number" min="0" step="0.01" disabled={!canManage} value={(packageDraft.priceAmount || 0) / 100} onChange={(event) => setPackageDraft((current) => ({ ...current, priceAmount: Math.round(Number(event.target.value || 0) * 100) }))} /></AdminField>
           <AdminField label="Currency"><input className="admin-input" maxLength={3} disabled={!canManage} value={packageDraft.currency || "GBP"} onChange={(event) => setPackageDraft((current) => ({ ...current, currency: event.target.value.toUpperCase().slice(0, 3) }))} /></AdminField>
           <AdminField label="Coverage minutes"><input className="admin-input" type="number" min="0" disabled={!canManage} value={packageDraft.coverageMinutes ?? ""} onChange={(event) => setPackageDraft((current) => ({ ...current, coverageMinutes: event.target.value ? Number(event.target.value) : null }))} /></AdminField>
-          <AdminField label="Image URL (optional)"><input className="admin-input" type="url" disabled={!canManage} value={packageDraft.imageUrl || ""} onChange={(event) => setPackageDraft((current) => ({ ...current, imageUrl: event.target.value }))} /></AdminField>
           <AdminField label="Display order"><input className="admin-input" type="number" disabled={!canManage} value={packageDraft.displayOrder || 0} onChange={(event) => setPackageDraft((current) => ({ ...current, displayOrder: Number(event.target.value || 0) }))} /></AdminField>
           <AdminField label="State"><select className="admin-select" disabled={!canManage} value={packageDraft.status || "active"} onChange={(event) => setPackageDraft((current) => ({ ...current, status: event.target.value as CrmPackage["status"] }))}><option value="active">Active</option><option value="hidden">Hidden</option><option value="archived">Archived</option></select></AdminField>
-          <AdminField label="Recommended"><label className="admin-check-row"><input type="checkbox" disabled={!canManage} checked={Boolean(packageDraft.recommended)} onChange={(event) => setPackageDraft((current) => ({ ...current, recommended: event.target.checked }))} /><span>Show recommended badge</span></label></AdminField>
+          <label className="admin-checkbox-row"><input type="checkbox" disabled={!canManage} checked={Boolean(packageDraft.recommended)} onChange={(event) => setPackageDraft((current) => ({ ...current, recommended: event.target.checked }))} /><span>Recommended package</span></label>
         </div>
+        <PackageImageEditor key={packageRouteId} value={packageDraft} disabled={!canManage || saving || uploading} onBusyChange={setUploading} onChange={patch => setPackageDraft(current => ({ ...current, ...patch }))} />
         <div className="mt-3 grid gap-3 md:grid-cols-2"><AdminField label="Description"><textarea className="admin-textarea min-h-24" disabled={!canManage} value={packageDraft.description || ""} onChange={(event) => setPackageDraft((current) => ({ ...current, description: event.target.value }))} /></AdminField><AdminField label="Client-facing notes"><textarea className="admin-textarea min-h-24" disabled={!canManage} value={packageDraft.clientNotes || ""} onChange={(event) => setPackageDraft((current) => ({ ...current, clientNotes: event.target.value }))} /></AdminField><AdminField label="Included items" help="One item per line"><textarea className="admin-textarea min-h-28" disabled={!canManage} value={lines(packageDraft.includedItems)} onChange={(event) => setPackageDraft((current) => ({ ...current, includedItems: splitLines(event.target.value) }))} /></AdminField><AdminField label="Deliverables" help="One deliverable per line"><textarea className="admin-textarea min-h-28" disabled={!canManage} value={lines(packageDraft.deliverables)} onChange={(event) => setPackageDraft((current) => ({ ...current, deliverables: splitLines(event.target.value) }))} /></AdminField></div>
-        <AdminField label="Available selected add-ons" help="Add-ons set to Available for all packages do not need selecting here."><div className="crm-checkbox-grid">{addons.filter((addon) => addon.status !== "archived").map((addon) => <label key={addon.id}><input type="checkbox" disabled={!canManage} checked={(packageDraft.addonIds || []).includes(addon.id)} onChange={(event) => setPackageDraft((current) => ({ ...current, addonIds: event.target.checked ? [...(current.addonIds || []), addon.id] : (current.addonIds || []).filter((id) => id !== addon.id) }))} /><span>{addon.name}<small>{money(addon.priceAmount, addon.currency)} · {addon.requirement}</small></span></label>)}</div></AdminField>
-        <div className="mt-4"><AdminButton variant="primary" icon={Save} disabled={!canManage || saving || !packageDraft.name?.trim()} onClick={() => void savePackage()}>Save package</AdminButton></div>
+        <fieldset className="admin-field crm-package-addons"><legend className="admin-field__label">Available add-ons</legend><div className="crm-checkbox-grid">{addons.filter((addon) => addon.status !== "archived").map((addon) => <label key={addon.id}><input type="checkbox" disabled={!canManage} checked={(packageDraft.addonIds || []).includes(addon.id)} onChange={(event) => setPackageDraft((current) => ({ ...current, addonIds: event.target.checked ? [...(current.addonIds || []), addon.id] : (current.addonIds || []).filter((id) => id !== addon.id) }))} /><span>{addon.name}<small>{money(addon.priceAmount, addon.currency)} · {addon.requirement}</small></span></label>)}</div><p className="admin-field__help">Add-ons available for all packages are included automatically.</p></fieldset>
+        <div className="mt-4"><AdminButton variant="primary" icon={Save} disabled={!canManage || saving || uploading || !packageDraft.name?.trim()} onClick={() => void savePackage()}>Save package</AdminButton></div>
       </AdminPanel>
         )}
       </AdminPage>
@@ -382,12 +384,12 @@ export function CRMCatalogue() {
               title="Add-on unavailable"
               description="This add-on could not be found in the current workspace."
               action={
-                <Link
+                <AdminActionRouterLink
                   to="/admin/crm/catalogue/addons"
                   className="admin-button admin-button--primary admin-button--sm"
                 >
                   Back to add-ons
-                </Link>
+                </AdminActionRouterLink>
               }
             />
           </AdminPanel>
@@ -404,7 +406,7 @@ export function CRMCatalogue() {
 
 
   return <AdminPage>
-    <AdminPageHeader title="Package catalogue" description="Workspace-owned packages and add-ons used to create immutable quote snapshots." actions={<AdminHeaderRouterLink className="admin-button admin-button--primary" to="/admin/crm/quotes"><Sparkles className="admin-button__icon" />Open quotes</AdminHeaderRouterLink>} />
+    <AdminPageHeader title="Package catalogue" description="Workspace-owned packages and add-ons used to create immutable quote snapshots." />
     {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
     {message ? <div className="admin-alert admin-alert--success">{message}</div> : null}
     <AdminTabs>
@@ -439,13 +441,13 @@ export function CRMCatalogue() {
         className="crm-package-list-page"
         actions={
           canManage ? (
-            <Link
+            <AdminActionRouterLink
               to="/admin/crm/catalogue/packages/new"
               className="admin-button admin-button--primary admin-button--sm"
             >
               <PackagePlus className="admin-button__icon" />
               New package
-            </Link>
+            </AdminActionRouterLink>
           ) : undefined
         }
       >
@@ -456,12 +458,12 @@ export function CRMCatalogue() {
             description="Create the first reusable package for this workspace."
             action={
               canManage ? (
-                <Link
+                <AdminActionRouterLink
                   to="/admin/crm/catalogue/packages/new"
                   className="admin-button admin-button--primary admin-button--sm"
                 >
                   Create package
-                </Link>
+                </AdminActionRouterLink>
               ) : undefined
             }
           />
@@ -539,13 +541,13 @@ export function CRMCatalogue() {
         className="crm-addon-list-page"
         actions={
           canManage ? (
-            <Link
+            <AdminActionRouterLink
               to="/admin/crm/catalogue/addons/new"
               className="admin-button admin-button--primary admin-button--sm"
             >
               <Plus className="admin-button__icon" />
               New add-on
-            </Link>
+            </AdminActionRouterLink>
           ) : undefined
         }
       >
@@ -556,12 +558,12 @@ export function CRMCatalogue() {
             description="Create optional, recommended or mandatory quote extras."
             action={
               canManage ? (
-                <Link
+                <AdminActionRouterLink
                   to="/admin/crm/catalogue/addons/new"
                   className="admin-button admin-button--primary admin-button--sm"
                 >
                   Create add-on
-                </Link>
+                </AdminActionRouterLink>
               ) : undefined
             }
           />

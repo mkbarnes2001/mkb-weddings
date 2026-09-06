@@ -60,34 +60,12 @@ require(
     "CRM requested/set view paths do not consistently use entitlement resolver",
 )
 
-require(
-    'actions={<div className="flex flex-wrap gap-2">{bookingsEnabled ? <>' in page,
-    "catalogue/quote header actions are not bookings-aware",
-)
-require(
-    '{bookingsEnabled ? <div className="admin-module-metric"><strong>{crm?.stats.jobs || 0}</strong>' in page,
-    "Jobs metric is not bookings-aware",
-)
-require(
-    '{bookingsEnabled ? <div className="admin-module-metric"><strong>{scheduleItems.length}</strong>' in page,
-    "schedule metric is not bookings-aware",
-)
-require(
-    '{bookingsEnabled ? <Link to="/admin/crm?view=jobs"' in page,
-    "Jobs overview destination is not bookings-aware",
-)
-require(
-    '{bookingsEnabled ? <Link to="/admin/crm/quotes"' in page,
-    "quote overview destination is not bookings-aware",
-)
-require(
-    '{clientPortalEnabled ? <Link to="/admin/crm?view=questionnaires"' in page,
-    "questionnaire overview destination is not client-portal-aware",
-)
-require(
-    '{bookingsEnabled ? <>\n          <AdminPanel title="Upcoming schedule"' in page,
-    "overview schedule panel is not bookings-aware",
-)
+dashboard = read("src/admin/components/CRMDashboard.tsx")
+require("<CRMDashboard" in page, "CRM does not use the capability-aware dashboard")
+require(dashboard.count("data?.capabilities.bookings ? <TableCard") == 2, "upcoming Jobs and tasks are not bookings-aware")
+require("data?.capabilities.payments ? <TableCard" in dashboard, "outstanding payments are not capability-aware")
+require('to="/admin/crm/quotes"' not in dashboard, "global quote register was reintroduced")
+require('AdminApiService.getCrmDashboard(' in dashboard, "dashboard does not use its scoped server summary")
 
 require(
     "CRM job query/payload/stats are suppressed without bookings" in server_test,
@@ -105,17 +83,17 @@ version = db.execute(
 ).fetchone()[0]
 db.close()
 
-require(str(version) == "53", f"CRM main UI gate changed schema: {version}")
+require(str(version) == "54", f"CRM main UI gate changed schema: {version}")
 require(
-    not list((ROOT / "d1/migrations").glob("054_*.sql")),
-    "CRM main UI gate must not add migration 054",
+    not list((ROOT / "d1/migrations").glob("055_*.sql")),
+    "CRM main UI gate must not add migration 055",
 )
 
 print("PASS v1.10.13a Gate 2F2D-B3B2A CRM main entitlement-aware UI")
 print("  Jobs/Schedule/Commercial Settings direct views degrade without bookings: verified")
 print("  Questionnaires direct view degrades without client-portal: verified")
-print("  catalogue/quote actions and booking metrics/destinations are conditional: verified")
-print("  questionnaire destination is client-portal conditional: verified")
+print("  dashboard booking/payment metrics and destinations are conditional: verified")
+print("  questionnaire direct view is client-portal conditional: verified")
 print("  upcoming operational schedule is bookings conditional: verified")
 print("  B3B1 server payload authority remains active: verified")
-print("  schema remains 53: verified")
+print("  schema is 54: verified")

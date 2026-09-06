@@ -192,7 +192,7 @@ for forbidden in (
 con = sqlite3.connect(":memory:")
 con.executescript(schema)
 version = con.execute("SELECT value FROM schema_meta WHERE key='schema_version'").fetchone()[0]
-require(version == "53", f"subscription webhook unexpectedly changed schema: {version}")
+require(version == "54", f"subscription webhook unexpectedly changed schema: {version}")
 for table in (
     "workspace_subscriptions",
     "workspace_subscription_checkout_attempts",
@@ -200,7 +200,7 @@ for table in (
 ):
     require(con.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone()[0] == 1, table)
 con.close()
-require(not list((ROOT / "d1/migrations").glob("054_*.sql")), "Gate 2D4 must not add migration 054")
+require(not list((ROOT / "d1/migrations").glob("055_*.sql")), "Gate 2D4 must not add migration 055")
 
 # Write service supports idempotent operational transitions required by the processor.
 for token in (
@@ -229,4 +229,4 @@ print("  subscription Customer / workspace / Price / Plan ownership guards: veri
 print("  verified subscription events can authoritatively switch current Plan: verified")
 print("  failed-payment grace + invoice recovery lifecycle: verified")
 print("  connected client-payment and Print Store ledgers remain isolated: verified")
-print("  schema remains 53 with no raw provider payload storage: verified")
+print("  schema is 54 with no raw provider payload storage: verified")

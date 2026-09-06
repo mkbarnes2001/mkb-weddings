@@ -1,3 +1,4 @@
+import { AdminActionButton } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, ChevronDown, ChevronUp, Eye, GripVertical, ListPlus, Save, Trash2 } from "lucide-react";
@@ -407,7 +408,6 @@ export function CRMQuestionnaireTemplate() {
     <AdminPage>
       <AdminPageHeader
         title={template.name}
-        description="Build a reusable questionnaire. Assigned questionnaires keep a versioned snapshot, so later template changes do not alter what a client received."
         actions={canManage ? <div className="flex gap-2"><AdminButton variant="danger" size="sm" icon={Trash2} onClick={() => void archive()} disabled={saving}>Archive</AdminButton><AdminButton variant="primary" icon={Save} onClick={() => void save()} disabled={saving}>Save template</AdminButton></div> : undefined}
         meta={<div className="flex gap-2"><AdminStatus tone={template.status === "active" ? "success" : "neutral"}>{template.status}</AdminStatus><AdminStatus tone="info">{fieldCount} fields</AdminStatus><AdminStatus tone="warning">{requiredCount} required</AdminStatus><AdminStatus tone="neutral">version {template.version}</AdminStatus></div>}
       />
@@ -636,7 +636,7 @@ export function CRMQuestionnaireTemplate() {
                             </button>
 
                             <div className="questionnaire-builder-field__actions">
-                              <button
+                              <AdminActionButton
                                 type="button"
                                 className="admin-icon-control"
                                 disabled={
@@ -656,9 +656,9 @@ export function CRMQuestionnaireTemplate() {
                                 <ChevronUp
                                   aria-hidden="true"
                                 />
-                              </button>
+                              </AdminActionButton>
 
-                              <button
+                              <AdminActionButton
                                 type="button"
                                 className="admin-icon-control"
                                 disabled={
@@ -682,9 +682,9 @@ export function CRMQuestionnaireTemplate() {
                                 <ChevronDown
                                   aria-hidden="true"
                                 />
-                              </button>
+                              </AdminActionButton>
 
-                              <button
+                              <AdminActionButton
                                 type="button"
                                 className="admin-icon-control questionnaire-builder-field__remove"
                                 disabled={
@@ -727,7 +727,7 @@ export function CRMQuestionnaireTemplate() {
                                 <Trash2
                                   aria-hidden="true"
                                 />
-                              </button>
+                              </AdminActionButton>
                             </div>
                           </div>
 

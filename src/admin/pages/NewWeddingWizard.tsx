@@ -1,3 +1,4 @@
+import { AdminActionButton } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -179,7 +180,7 @@ export function NewWeddingWizard() {
 
   if (createdSlug) {
     return (
-      <div className="space-y-7">
+      <div className="admin-page admin-refined-page space-y-7">
         <AdminPageHeader
           title="Wedding created"
           meta={
@@ -194,7 +195,7 @@ export function NewWeddingWizard() {
           }
           actions={
             <div className="flex flex-wrap gap-2">
-              <button
+              <AdminActionButton
                 type="button"
                 onClick={() =>
                   navigate(
@@ -204,9 +205,9 @@ export function NewWeddingWizard() {
                 className="admin-button admin-button--primary"
               >
                 Open Wedding Workspace
-              </button>
+              </AdminActionButton>
 
-              <button
+              <AdminActionButton
                 type="button"
                 onClick={() => {
                   setCreatedSlug("");
@@ -226,12 +227,12 @@ export function NewWeddingWizard() {
                 className="admin-button admin-button--secondary"
               >
                 Create another
-              </button>
+              </AdminActionButton>
             </div>
           }
         />
 
-        <section className="rounded-[28px] border border-black/10 bg-white/75 p-7">
+        <section className="admin-surface-card border border-black/10 bg-white/75">
           <p className="text-sm text-neutral-600">
             The wedding record has been created directly in D1
             and is ready in the Wedding Workspace.
@@ -242,7 +243,7 @@ export function NewWeddingWizard() {
   }
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
         title="New wedding"
         meta={
@@ -273,11 +274,11 @@ export function NewWeddingWizard() {
       />
 
       {originVenue ? (
-        <section className="rounded-[24px] border border-emerald-200 bg-emerald-50 p-5">
+        <section className="admin-surface-card border border-emerald-200 bg-emerald-50">
           <p className="text-xs uppercase tracking-[0.16em] text-emerald-700">
             Venue preselected
           </p>
-          <p className="mt-2 font-serif text-3xl text-emerald-950">
+          <p className="admin-metric-value mt-2 text-emerald-950">
             {originVenue.name}
           </p>
           <p className="mt-2 text-sm text-emerald-800">
@@ -302,19 +303,16 @@ export function NewWeddingWizard() {
             <p className="text-xs uppercase tracking-[0.18em]">
               Step {index + 1}
             </p>
-            <p className="mt-2 font-serif text-xl">{label}</p>
+            <p className="admin-metric-value mt-2">{label}</p>
           </div>
         ))}
       </section>
 
-      <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+      <section className="admin-surface-card border border-black/10 bg-white/75">
         {step === 0 ? (
           <div className="space-y-5">
             <div>
-              <h2 className="font-serif text-3xl">Who is getting married?</h2>
-              <p className="mt-1 text-sm text-neutral-500">
-                Use the names exactly as they should appear on the site.
-              </p>
+              <h2 className="admin-section-title ">Who is getting married?</h2>
             </div>
 
             <label className="block">
@@ -325,7 +323,7 @@ export function NewWeddingWizard() {
                 value={draft.couple}
                 onChange={(event) => updateCouple(event.target.value)}
                 placeholder="Dave & Siobhan"
-                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-black/30"
+                className="admin-input"
               />
             </label>
           </div>
@@ -334,10 +332,7 @@ export function NewWeddingWizard() {
         {step === 1 ? (
           <div className="space-y-5">
             <div>
-              <h2 className="font-serif text-3xl">Choose the venue</h2>
-              <p className="mt-1 text-sm text-neutral-500">
-                Existing venues are suggested from your website data.
-              </p>
+              <h2 className="admin-section-title ">Choose the venue</h2>
             </div>
 
             <label className="block">
@@ -356,10 +351,7 @@ export function NewWeddingWizard() {
         {step === 2 ? (
           <div className="space-y-5">
             <div>
-              <h2 className="font-serif text-3xl">Wedding details</h2>
-              <p className="mt-1 text-sm text-neutral-500">
-                These values can be edited later.
-              </p>
+              <h2 className="admin-section-title ">Wedding details</h2>
             </div>
 
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -422,10 +414,7 @@ export function NewWeddingWizard() {
         {step === 3 ? (
           <div className="space-y-6">
             <div>
-              <h2 className="font-serif text-3xl">Review and create</h2>
-              <p className="mt-1 text-sm text-neutral-500">
-                The initial record is deliberately created as a draft.
-              </p>
+              <h2 className="admin-section-title ">Review and create</h2>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -465,7 +454,7 @@ export function NewWeddingWizard() {
       </section>
 
       {saveError ? (
-        <section className="rounded-[24px] border border-red-200 bg-red-50 p-5 text-red-900">
+        <section className="admin-surface-card border border-red-200 bg-red-50 text-red-900">
           <div className="flex items-start gap-3">
             <AlertCircle className="mt-0.5 h-5 w-5" />
             <p>{saveError}</p>
@@ -474,29 +463,29 @@ export function NewWeddingWizard() {
       ) : null}
 
       <div className="flex flex-wrap justify-between gap-3">
-        <button
+        <AdminActionButton
           type="button"
           onClick={() => setStep((current) => Math.max(0, current - 1))}
           disabled={step === 0}
-          className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm disabled:opacity-30"
+          className="admin-button admin-button--secondary inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm disabled:opacity-30"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
-        </button>
+        </AdminActionButton>
 
         {step < steps.length - 1 ? (
-          <button
+          <AdminActionButton
             type="button"
             onClick={() =>
               setStep((current) => Math.min(steps.length - 1, current + 1))
             }
-            className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white"
+            className="admin-button admin-button--primary inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white"
           >
             Continue
             <ArrowRight className="h-4 w-4" />
-          </button>
+          </AdminActionButton>
         ) : (
-          <button
+          <AdminActionButton
             type="button"
             onClick={createWedding}
             disabled={
@@ -504,7 +493,7 @@ export function NewWeddingWizard() {
               !apiOnline ||
               validationErrors.length > 0
             }
-            className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:cursor-not-allowed disabled:opacity-40"
+            className="admin-button admin-button--primary inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:cursor-not-allowed disabled:opacity-40"
           >
             {saving ? (
               <Save className="h-4 w-4" />
@@ -512,7 +501,7 @@ export function NewWeddingWizard() {
               <FilePlus2 className="h-4 w-4" />
             )}
             {saving ? "Creating..." : "Create wedding"}
-          </button>
+          </AdminActionButton>
         )}
       </div>
     </div>

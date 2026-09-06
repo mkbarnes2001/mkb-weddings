@@ -1,3 +1,4 @@
+import type { PackagePresentation } from "../../../shared/package-presentation";
 export type CrmStage = {
   id: string;
   key: string;
@@ -691,6 +692,7 @@ export type CrmPackage = {
   recommended: boolean;
   status: "active" | "hidden" | "archived";
   imageUrl: string;
+  imagePresentation?: PackagePresentation;
   addonIds: string[];
   createdAt: string;
   updatedAt: string;
@@ -754,6 +756,7 @@ export type CrmQuoteOption = {
   includedItems: string[];
   clientNotes: string;
   imageUrl: string;
+  imagePresentation?: PackagePresentation;
   recommended: boolean;
   displayOrder: number;
   items: CrmQuoteItem[];

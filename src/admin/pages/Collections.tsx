@@ -1,29 +1,16 @@
+import { StudioAddGalleryLink, StudioBackLink, StudioThumbnail, StudioToggle } from "../components/ui/StudioUI";
+import { AdminActionLink, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  AlertCircle,
-  CheckCircle2,
-  ExternalLink,
-  GripVertical,
-  Images,
-  Layers3,
-  MapPin,
-  Plus,
-  Save,
-  Search,
-  Settings2,
-  Sparkles,
-  Tags,
-  Zap,
-} from "lucide-react";
+
+import { ExternalLink, GripVertical, Images, Save, Search } from "lucide-react";
 import { weddingStories } from "../../data/weddingStories";
 import { CollectionService } from "../services/CollectionService";
-import { AdminApiService, type LocationArea, type LocationGallerySettings } from "../services/AdminApiService";
+import { AdminApiService, type LocationGallerySettings } from "../services/AdminApiService";
 import type { ImageCollection } from "../types/collection";
 import type { CustomCollection } from "../types/customCollection";
-import type { MomentRepositoryDocument } from "../types/moment";
-import type { VenueSummary } from "../types/venue";
-import { AdminPage, AdminPageHeader } from "../components/ui/AdminUI";
+
+
+import { AdminPage, AdminPageHeader, AdminPanel, AdminStatus, AdminButton } from "../components/ui/AdminUI";
 import { useProfessionalAuth } from "../auth/ProfessionalAuth";
 
 type PublicImage = {
@@ -70,15 +57,6 @@ const DEFAULT_LOCATION_SETTINGS: LocationGallerySettings = {
 };
 
 
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 function unique(values: string[]) {
   return [...new Set(values.filter(Boolean))];
 }
@@ -112,32 +90,16 @@ function normaliseLandingOrder(saved: string[], collections: CustomCollection[])
   return unique([...withMissing, ...CORE_KEYS]).filter((key) => valid.has(key));
 }
 
-function statusClasses(status: ImageCollection["status"]) {
-  if (status === "active") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (status === "planned") return "bg-neutral-100 text-neutral-600 border-neutral-200";
-  return "bg-amber-50 text-amber-700 border-amber-200";
-}
-
-function customStatusClasses(status: CustomCollection["status"]) {
-  if (status === "active") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (status === "archived") return "bg-neutral-100 text-neutral-500 border-neutral-200";
-  return "bg-amber-50 text-amber-700 border-amber-200";
-}
-
 function imageSource(image: PublicImage | null | undefined) {
   return image?.thumbSrc || image?.fullSrc || "";
 }
 
 export function Collections() {
-  const navigate = useNavigate();
   const { auth } = useProfessionalAuth();
   const isMkbWorkspace = auth.workspaceId === "workspace_mkb_weddings";
   const [legacyCollections, setLegacyCollections] = useState<ImageCollection[]>([]);
   const [customCollections, setCustomCollections] = useState<CustomCollection[]>([]);
-  const [moments, setMoments] = useState<MomentRepositoryDocument | null>(null);
-  const [venues, setVenues] = useState<VenueSummary[]>([]);
   const [locationSettings, setLocationSettings] = useState<LocationGallerySettings>(DEFAULT_LOCATION_SETTINGS);
-  const [locationAreas, setLocationAreas] = useState<LocationArea[]>([]);
   const [creativeImages, setCreativeImages] = useState<any[]>([]);
   const [creativeSettings, setCreativeSettings] = useState({
     heroImageId: "",
@@ -153,9 +115,6 @@ export function Collections() {
   const [hiddenCoreCards, setHiddenCoreCards] = useState<string[]>([]);
   const [landingDirty, setLandingDirty] = useState(false);
   const [draggedLandingKey, setDraggedLandingKey] = useState<string | null>(null);
-  const [newName, setNewName] = useState("");
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState("");
   const [savingLanding, setSavingLanding] = useState(false);
   const [savingCollectionId, setSavingCollectionId] = useState("");
   const [query, setQuery] = useState("");
@@ -168,11 +127,9 @@ export function Collections() {
     setLoading(true);
     setError("");
 
-    const [customResult, momentsResult, venuesResult, locationResult, creativeResult, landingResult, heroResult, workspaceResult] =
+    const [customResult, locationResult, creativeResult, landingResult, heroResult, workspaceResult] =
       await Promise.allSettled([
         AdminApiService.listCustomCollections(),
-        AdminApiService.getMoments(),
-        AdminApiService.listVenues(),
         AdminApiService.getLocations(),
         AdminApiService.getCreativeFlashGallery(),
         AdminApiService.getGalleryLandingSettings(),
@@ -187,11 +144,8 @@ export function Collections() {
 
     const loadedCustom = customResult.status === "fulfilled" ? customResult.value : [];
     setCustomCollections(loadedCustom);
-    if (momentsResult.status === "fulfilled") setMoments(momentsResult.value);
-    if (venuesResult.status === "fulfilled") setVenues(venuesResult.value);
     if (locationResult.status === "fulfilled") {
       setLocationSettings(locationResult.value.settings || DEFAULT_LOCATION_SETTINGS);
-      setLocationAreas(locationResult.value.locations || []);
     }
     if (creativeResult.status === "fulfilled") {
       setCreativeImages(creativeResult.value.images || []);
@@ -226,7 +180,7 @@ export function Collections() {
     setHiddenCoreCards(landingSettings.hiddenCards.filter((key) => CORE_KEYS.includes(key)));
     setLandingDirty(false);
 
-    const failed = [customResult, momentsResult, venuesResult, locationResult, creativeResult, landingResult, workspaceResult].filter(
+    const failed = [customResult, locationResult, creativeResult, landingResult, workspaceResult].filter(
       (result) => result.status === "rejected",
     );
     if (failed.length) {
@@ -255,23 +209,6 @@ export function Collections() {
       ) || creativeImages.find((image) => !hidden.has(image.assetKey)) || null
     );
   }, [creativeImages, creativeSettings]);
-
-  const visibleCreativeCount = useMemo(() => {
-    const hidden = new Set(creativeSettings.hiddenImageIds || []);
-    return creativeImages.filter((image) => !hidden.has(image.assetKey)).length;
-  }, [creativeImages, creativeSettings.hiddenImageIds]);
-
-  const activeMoments = useMemo(
-    () => (moments?.moments || []).filter((moment) => moment.status === "active"),
-    [moments],
-  );
-  const publicMoments = activeMoments.filter((moment) => moment.showOnMomentsLanding);
-  const activeVenues = venues.filter((venue) => venue.status !== "archived");
-  const publishedVenues = venues.filter((venue) => venue.status === "published");
-  const activeLocations = locationAreas.filter(
-    (location) => location.status === "active" && location.areaType === locationSettings.groupingLevel,
-  );
-  const publicLocations = activeLocations.filter((location) => location.showOnLanding);
 
   const landingCards = useMemo<LandingCard[]>(() => {
     const customCards = customCollections
@@ -413,35 +350,6 @@ export function Collections() {
     }
   }
 
-  async function createCollection() {
-    const name = newName.trim();
-    if (!name || creating) return;
-    setCreating(true);
-    setMessage("");
-    setError("");
-    setCreateError("");
-    try {
-      const collection = await AdminApiService.createCustomCollection({
-        name,
-        slug: slugify(name),
-        description: "",
-        status: "draft",
-        showOnLanding: false,
-      });
-      setNewName("");
-      // Creation now has a dedicated API route and immediately opens the new gallery.
-      // This avoids silent failures on the long Gallery Management page and gives
-      // the photographer an obvious next step: configure images, hero and publishing.
-      navigate(`/admin/custom-collections/${encodeURIComponent(collection.slug)}/gallery`);
-    } catch (caught) {
-      const text = caught instanceof Error ? caught.message : "Unable to create gallery.";
-      setCreateError(text);
-      setError(text);
-    } finally {
-      setCreating(false);
-    }
-  }
-
   const storyBySlug = useMemo(
     () => new Map(weddingStories.map((story) => [story.slug, story])),
     [],
@@ -466,513 +374,32 @@ export function Collections() {
 
   const galleryOrigin = publicOrigin ? `${publicOrigin}/gallery` : "";
 
-  return (
-    <AdminPage>
-      <AdminPageHeader
-        eyebrow="Gallery management"
-        title="Galleries"
-        description="Manage default dynamic galleries, landing-card order and photographer-created galleries from one workspace."
-        actions={galleryOrigin ? <a href={galleryOrigin} target="_blank" rel="noreferrer" className="admin-button admin-button--secondary"><ExternalLink className="admin-button__icon" />View live gallery</a> : null}
-      />
-
-      {message ? (
-        <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4" />
-            {message}
-          </div>
-        </section>
-      ) : null}
-
-      {error ? (
-        <section className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
-            {error}
-          </div>
-        </section>
-      ) : null}
-
-      {loading ? (
-        <section className="rounded-[28px] border border-black/10 bg-white/80 p-8 text-neutral-500">
-          Loading gallery management…
-        </section>
-      ) : (
-        <>
-          <section className="overflow-hidden rounded-[28px] border border-black/10 bg-white/85">
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "minmax(0, 1.3fr) minmax(320px, 0.7fr)",
-                gap: "0",
-              }}
-            >
-              <div
-                style={{
-                  minHeight: "320px",
-                  position: "relative",
-                  background: "#eeeeeb",
-                  overflow: "hidden",
-                }}
-              >
-                {imageSource(masterHeroes.landing) ? (
-                  <img
-                    src={imageSource(masterHeroes.landing)}
-                    alt={masterHeroes.landing?.alt || "Main Gallery landing hero"}
-                    style={{ width: "100%", height: "100%", minHeight: "320px", objectFit: "cover" }}
-                  />
-                ) : (
-                  <div className="flex h-full min-h-[320px] items-center justify-center text-neutral-400">
-                    No master Gallery landing hero selected
-                  </div>
-                )}
-              </div>
-              <div className="p-7">
-                <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Gallery landing</p>
-                <h2 className="mt-2 font-serif text-3xl">Master landing page</h2>
-                <p className="mt-3 text-sm leading-relaxed text-neutral-600">
-                  Reorder and hide the cards shown on the public Gallery landing below.
-                </p>
-                <div className="mt-5 rounded-2xl bg-neutral-100 p-4 text-sm text-neutral-600">
-                  {landingCards.filter(isLandingCardVisible).length} cards currently visible on the Gallery landing.
-                </div>
-                {galleryOrigin ? (
-                  <a
-                    href={galleryOrigin}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-5 inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Open Gallery landing
-                  </a>
-                ) : null}
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Default galleries</p>
-                <h2 className="mt-2 font-serif text-4xl">Built-in gallery types</h2>
-                <p className="mt-2 text-sm text-neutral-600">
-                  Every workspace starts with Venues and Moments. The optional Location Gallery can be powered by any location type enabled in Admin → Locations.
-                </p>
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "20px" }}>
-              <CoreGalleryCard
-                title="Venues"
-                description="A dynamic gallery generated from venue records and venue image assignments."
-                image={imageSource(masterHeroes.venue)}
-                icon={MapPin}
-                stats={`${publishedVenues.length} published · ${activeVenues.length} managed`}
-                manageTo="/admin/venues"
-                liveHref={galleryOrigin ? `${galleryOrigin}/venues` : ""}
-                badge="Default gallery"
-              />
-              <CoreGalleryCard
-                title="Moments"
-                description="A dynamic gallery whose moment categories can be created, renamed, reordered and archived."
-                image={imageSource(masterHeroes.moments)}
-                icon={Tags}
-                stats={`${publicMoments.length} public cards · ${activeMoments.length} active moments`}
-                manageTo="/admin/moments"
-                liveHref={galleryOrigin ? `${galleryOrigin}/moments` : ""}
-                badge="Default gallery"
-              />
-              <CoreGalleryCard
-                title={locationSettings.landingTitle || "Locations"}
-                description={`A dynamic gallery currently powered by ${locationSettings.pluralLabel || "Locations"}. Change its source type, title and route independently from Location Intelligence.`}
-                image={locationSettings.heroImageUrl || (isMkbWorkspace ? MKB_LOCATION_FALLBACK_HERO : "")}
-                icon={MapPin}
-                stats={`${publicLocations.length} public · ${activeLocations.length} active · ${locationSettings.enabled ? "enabled" : "disabled"}`}
-                manageTo="/admin/gallery/locations"
-                liveHref={publicOrigin ? `${publicOrigin}${locationSettings.publicBasePath || "/gallery/locations"}` : ""}
-                badge="Optional dynamic"
-              />
-            </div>
-          </section>
-
-          <section className="rounded-[28px] border border-black/10 bg-white/85 p-6">
-            <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Gallery landing cards</p>
-                <h2 className="mt-2 font-serif text-3xl">Order & visibility</h2>
-                <p className="mt-2 text-sm text-neutral-600">
-                  Drag cards into the order you want on /gallery. Any card can be hidden without deleting its underlying content.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => void saveLandingLayout()}
-                disabled={savingLanding || !landingDirty}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"
-              >
-                <Save className="h-4 w-4" />
-                {savingLanding ? "Saving…" : landingDirty ? "Save landing layout" : "Layout saved"}
-              </button>
-            </div>
-
-            <div className="mt-6 space-y-3">
-              {landingCards.map((card, index) => {
-                const visible = isLandingCardVisible(card);
-                const collection = card.custom;
-                return (
-                  <article
-                    key={card.key}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={() => dropLandingCard(card.key)}
-                    className="flex flex-col gap-4 rounded-2xl border border-black/10 bg-white p-3 md:flex-row md:items-center"
-                  >
-                    <div
-                      draggable
-                      onDragStart={() => setDraggedLandingKey(card.key)}
-                      onDragEnd={() => setDraggedLandingKey(null)}
-                      className="cursor-grab rounded-full border border-black/10 bg-white p-3"
-                      title="Drag to reorder"
-                    >
-                      <GripVertical className="h-5 w-5" />
-                    </div>
-                    <div
-                      className="overflow-hidden rounded-xl bg-neutral-100"
-                      style={{ width: "110px", height: "78px", flex: "0 0 auto" }}
-                    >
-                      {card.image ? (
-                        <img src={card.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      ) : null}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <strong className="font-medium">{index + 1}. {card.title}</strong>
-                        {collection ? (
-                          <>
-                            <span className="rounded-full border border-black/10 bg-neutral-50 px-2 py-1 text-xs text-neutral-500">
-                              gallery
-                            </span>
-                            <span className={`rounded-full border px-2 py-1 text-xs ${customStatusClasses(collection.status)}`}>
-                              {collection.status}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="rounded-full border border-black/10 bg-neutral-50 px-2 py-1 text-xs text-neutral-500">
-                            {card.key === "venues" || card.key === "moments"
-                              ? "default"
-                              : card.key === "county"
-                                ? "dynamic"
-                                : card.key === "creative-flash"
-                                  ? "gallery"
-                                  : "site"}
-                          </span>
-                        )}
-                      </div>
-                      <p className="mt-1 text-sm text-neutral-500">{card.description}</p>
-                    </div>
-                    <label className="flex items-center justify-between gap-4 rounded-full border border-black/10 px-4 py-2 text-sm">
-                      <span>{visible ? "Visible" : collection?.showOnLanding && collection.status !== "active" ? "Waiting for Active" : "Hidden"}</span>
-                      <input
-                        type="checkbox"
-                        checked={collection ? collection.showOnLanding : visible}
-                        disabled={savingCollectionId === collection?.id || collection?.status === "archived" || (card.key === "county" && !locationSettings.enabled)}
-                        onChange={(event) => {
-                          if (collection) void toggleCustomLanding(collection, event.target.checked);
-                          else toggleCoreLandingCard(card.key, event.target.checked);
-                        }}
-                      />
-                    </label>
-                  </article>
-                );
-              })}
-            </div>
-          </section>
-
-          <section>
-            <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">Photographer galleries</p>
-                <h2 className="mt-2 font-serif text-4xl">Your galleries</h2>
-                <p className="mt-2 max-w-2xl text-sm text-neutral-600">
-                  Creative Flash and any galleries you create here are photographer-defined rather than built into the platform.
-                </p>
-              </div>
-              <Link
-                to="/admin/custom-collections"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-5 py-3 text-sm"
-              >
-                <Settings2 className="h-4 w-4" />
-                Gallery settings
-              </Link>
-            </div>
-
-            <div className="mb-5 rounded-[24px] border border-black/10 bg-white/85 p-5">
-              <div className="flex flex-col gap-3 md:flex-row">
-                <input
-                  value={newName}
-                  onChange={(event) => setNewName(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") void createCollection();
-                  }}
-                  placeholder="New gallery name, e.g. Beach Weddings"
-                  className="min-w-0 flex-1 rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm"
-                />
-                <button
-                  type="button"
-                  onClick={() => void createCollection()}
-                  disabled={creating || !newName.trim()}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm text-white disabled:opacity-40"
-                >
-                  <Plus className="h-4 w-4" />
-                  {creating ? "Creating…" : "Add gallery"}
-                </button>
-              </div>
-              {createError ? (
-                <div className="mt-3 flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>{createError}</span>
-                </div>
-              ) : null}
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "20px" }}>
-              <CoreGalleryCard
-                title="Creative Flash"
-                description="A photographer-defined gallery with exact order, visibility and hero control."
-                image={creativeHero?.thumbSrc || creativeHero?.fullSrc || ""}
-                icon={Zap}
-                stats={`${visibleCreativeCount} visible · ${creativeImages.length} assigned`}
-                manageTo="/admin/creative-flash"
-                liveHref={galleryOrigin ? `${galleryOrigin}/creative-flash` : ""}
-                badge="Gallery"
-              />
-              {[...customCollections]
-                .sort((a, b) => a.sortOrder - b.sortOrder)
-                .map((collection) => (
-                  <article
-                    key={collection.id}
-                    className={`overflow-hidden rounded-[24px] border border-black/10 bg-white/85 ${
-                      collection.status === "archived" ? "opacity-55" : ""
-                    }`}
-                  >
-                    <div style={{ aspectRatio: "16 / 9", background: "#f3f3f1", overflow: "hidden" }}>
-                      {collection.heroImage ? (
-                        <img
-                          src={collection.heroImage.thumbSrc || collection.heroImage.fullSrc}
-                          alt={collection.heroImage.alt || `${collection.name} hero`}
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-sm text-neutral-400">
-                          Set a hero in Manage gallery
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-5">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-serif text-2xl">{collection.name}</h3>
-                            <span className="rounded-full border border-black/10 bg-neutral-50 px-2 py-1 text-xs text-neutral-500">
-                              Gallery
-                            </span>
-                            <span className={`rounded-full border px-2 py-1 text-xs ${customStatusClasses(collection.status)}`}>
-                              {collection.status}
-                            </span>
-                          </div>
-                          <p className="mt-2 text-sm text-neutral-600">
-                            {collection.description || "No description yet."}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 grid grid-cols-3 gap-3 rounded-2xl bg-neutral-100 p-3 text-center">
-                        <div>
-                          <p className="text-xs text-neutral-500">Selected</p>
-                          <p className="mt-1 text-xl">{collection.imageCount}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-neutral-500">Visible</p>
-                          <p className="mt-1 text-xl">{collection.visibleImageCount}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-neutral-500">Landing</p>
-                          <p className="mt-1 text-sm font-medium">
-                            {collection.status === "active" && collection.showOnLanding ? "Shown" : "Hidden"}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {collection.status !== "archived" ? (
-                          <Link
-                            to={`/admin/custom-collections/${encodeURIComponent(collection.slug)}/gallery`}
-                            className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm text-white"
-                          >
-                            <Images className="h-4 w-4" />
-                            Manage gallery
-                          </Link>
-                        ) : null}
-                        <Link
-                          to="/admin/custom-collections"
-                          className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
-                        >
-                          <Settings2 className="h-4 w-4" />
-                          Edit settings
-                        </Link>
-                        {collection.status === "active" && galleryOrigin ? (
-                          <a
-                            href={`${galleryOrigin}/collection/${encodeURIComponent(collection.slug)}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                            View live
-                          </a>
-                        ) : null}
-                      </div>
-                    </div>
-                  </article>
-                ))}
-            </div>
-          </section>
-
-          <details className="rounded-[28px] border border-black/10 bg-white/75 p-6">
-            <summary className="cursor-pointer list-none">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center gap-3">
-                  <Layers3 className="h-5 w-5" />
-                  <div>
-                    <h2 className="font-serif text-2xl">Wedding publishing collections</h2>
-                    <p className="mt-1 text-sm text-neutral-500">
-                      Existing wedding-specific sets used by the publishing workflow. These remain separate from public galleries.
-                    </p>
-                  </div>
-                </div>
-                <span className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm">
-                  {legacyCollections.length} collections
-                </span>
-              </div>
-            </summary>
-
-            <div className="mt-6">
-              <div className="relative mb-5 w-full md:max-w-md">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search wedding collections..."
-                  className="w-full rounded-2xl border border-black/10 bg-white py-3 pl-11 pr-4 text-sm"
-                />
-              </div>
-
-              <div className="divide-y divide-black/5 overflow-hidden rounded-2xl border border-black/10 bg-white">
-                {filteredLegacyCollections.map((collection) => {
-                  const story = storyBySlug.get(collection.weddingSlug);
-                  return (
-                    <div
-                      key={collection.id}
-                      className="grid grid-cols-1 gap-4 p-5 xl:grid-cols-[1fr_1fr_120px_auto] xl:items-center"
-                    >
-                      <div>
-                        <div className="mb-2 flex flex-wrap items-center gap-2">
-                          <span className={`inline-flex rounded-full border px-3 py-1 text-xs ${statusClasses(collection.status)}`}>
-                            {collection.status}
-                          </span>
-                          <span className="text-xs text-neutral-500">{collection.type}</span>
-                        </div>
-                        <h3 className="font-serif text-xl">{collection.name}</h3>
-                      </div>
-                      <div>
-                        <p className="text-sm text-neutral-800">{story?.title || collection.weddingSlug}</p>
-                        <p className="mt-1 text-sm text-neutral-500">{story?.venue}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.14em] text-neutral-500">Images</p>
-                        <p className="mt-1 text-2xl font-serif">{collection.imageCount}</p>
-                      </div>
-                      <Link
-                        to={`/admin/weddings/${collection.weddingSlug}/collections`}
-                        className="rounded-full bg-black px-4 py-2 text-center text-sm text-white"
-                      >
-                        Open
-                      </Link>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </details>
-        </>
-      )}
-    </AdminPage>
-  );
-}
-
-function CoreGalleryCard({
-  title,
-  description,
-  image,
-  icon: Icon,
-  stats,
-  manageTo,
-  liveHref,
-  badge,
-}: {
-  title: string;
-  description: string;
-  image: string;
-  icon: typeof Images;
-  stats: string;
-  manageTo: string;
-  liveHref?: string;
-  badge?: string;
-}) {
-  return (
-    <article className="overflow-hidden rounded-[24px] border border-black/10 bg-white/85">
-      <div style={{ aspectRatio: "16 / 9", background: "#f3f3f1", overflow: "hidden" }}>
-        {image ? (
-          <img src={image} alt={`${title} hero`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        ) : (
-          <div className="flex h-full items-center justify-center text-neutral-400">
-            <Sparkles className="h-7 w-7" />
-          </div>
-        )}
-      </div>
-      <div className="p-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <Icon className="h-5 w-5" />
-          <h3 className="font-serif text-2xl">{title}</h3>
-          {badge ? (
-            <span className="rounded-full border border-black/10 bg-neutral-50 px-2 py-1 text-xs text-neutral-500">
-              {badge}
-            </span>
-          ) : null}
-        </div>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-600">{description}</p>
-        <p className="mt-3 text-xs text-neutral-500">{stats}</p>
-        <div className="mt-5 flex flex-wrap gap-2">
-          <Link
-            to={manageTo}
-            className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm text-white"
-          >
-            <Settings2 className="h-4 w-4" />
-            Manage
-          </Link>
-          {liveHref ? (
-            <a
-              href={liveHref}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
-            >
-              <ExternalLink className="h-4 w-4" />
-              View live
-            </a>
-          ) : null}
-        </div>
-      </div>
-    </article>
-  );
+  return <AdminPage className="studio-page">
+    <AdminPageHeader title="Gallery organiser" backLink={<StudioBackLink />} meta={<span>{landingCards.filter(isLandingCardVisible).length} visible cards</span>}
+      actions={<><StudioAddGalleryLink />{galleryOrigin ? <AdminActionLink href={galleryOrigin} target="_blank" rel="noreferrer" className="admin-button admin-button--secondary" aria-label="View live gallery"><ExternalLink /></AdminActionLink> : null}</>} />
+    {message ? <div className="admin-alert admin-alert--success" role="status">{message}</div> : null}
+    {error ? <div className="admin-alert admin-alert--error" role="alert">{error}</div> : null}
+    {loading ? <p role="status">Loading gallery settings…</p> : <>
+      <AdminPanel title="Order & visibility" actions={<AdminButton data-admin-action="save" icon={Save} variant="primary" onClick={() => void saveLandingLayout()} disabled={savingLanding || !landingDirty}>{savingLanding ? "Saving…" : landingDirty ? "Save layout" : "Layout saved"}</AdminButton>}>
+        <div className="studio-landing-list">{landingCards.map(card => {
+          const visible = isLandingCardVisible(card), collection = card.custom;
+          return <article key={card.key} className="studio-landing-row" onDragOver={event => event.preventDefault()} onDrop={() => dropLandingCard(card.key)}>
+            <span className="studio-drag" draggable title="Drag to reorder" onDragStart={() => setDraggedLandingKey(card.key)} onDragEnd={() => setDraggedLandingKey(null)}><GripVertical aria-hidden="true" /></span>
+            <StudioThumbnail src={card.image} />
+            <div className="studio-landing-name"><strong>{card.title}</strong>{collection && collection.status !== "active" ? <AdminStatus>{collection.status}</AdminStatus> : null}</div>
+            <StudioToggle aria-label={`Show ${card.title}`} checked={collection ? collection.showOnLanding : visible} disabled={savingCollectionId === collection?.id || collection?.status === "archived" || (card.key === "county" && !locationSettings.enabled)} onChange={event => {if (collection) void toggleCustomLanding(collection, event.target.checked); else toggleCoreLandingCard(card.key, event.target.checked);}}>{visible ? "Visible" : collection?.showOnLanding && collection.status !== "active" ? "Pending activation" : "Hidden"}</StudioToggle>
+          </article>;
+        })}</div>
+      </AdminPanel>
+      {imageSource(masterHeroes.landing) ? <AdminPanel title="Landing image"><img className="studio-landing-preview" src={imageSource(masterHeroes.landing)} alt={masterHeroes.landing?.alt || "Gallery landing image"} /></AdminPanel> : null}
+      {legacyCollections.length ? <details className="studio-disclosure studio-disclosure--panel"><summary>Wedding publishing collections <span className="studio-meta">{legacyCollections.length}</span></summary>
+        <div className="studio-search"><Search aria-hidden="true" /><input className="admin-input" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search wedding collections" aria-label="Search wedding collections" /></div>
+        <div className="studio-legacy-list">{filteredLegacyCollections.map(collection => <div key={collection.id} className="studio-legacy-row">
+          <div><strong>{collection.name}</strong><small>{storyBySlug.get(collection.weddingSlug)?.title || collection.weddingSlug}</small></div>
+          <span className="studio-meta">{collection.imageCount} images</span><AdminStatus>{collection.status}</AdminStatus>
+          <AdminActionRouterLink to={`/admin/weddings/${collection.weddingSlug}/collections`} className="admin-button admin-button--secondary" aria-label={`Open ${collection.name}`}><Images /></AdminActionRouterLink>
+        </div>)}</div>
+      </details> : null}
+    </>}
+  </AdminPage>;
 }

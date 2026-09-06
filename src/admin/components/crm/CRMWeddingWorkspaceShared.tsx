@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionRouterLink } from "../ui/AdminActionControl";
 import {
   useState,
   useEffect,
@@ -210,7 +211,7 @@ export function CRMWeddingWorkflowPanel({
           }
         >
           {previewToggleAvailable ? (
-            <button
+            <AdminActionButton
               type="button"
               className={
                 `crm-wedding-workflow__toggle ${
@@ -243,7 +244,7 @@ export function CRMWeddingWorkflowPanel({
               {previewsComplete
                 ? <Check />
                 : null}
-            </button>
+            </AdminActionButton>
           ) : (
             <span
               className="crm-wedding-workflow__marker"
@@ -285,7 +286,7 @@ export function CRMWeddingWorkflowPanel({
           }
         >
           {deliveryToggleAvailable ? (
-            <button
+            <AdminActionButton
               type="button"
               className={
                 `crm-wedding-workflow__toggle ${
@@ -318,7 +319,7 @@ export function CRMWeddingWorkflowPanel({
               {deliveryComplete
                 ? <Check />
                 : null}
-            </button>
+            </AdminActionButton>
           ) : (
             <span
               className="crm-wedding-workflow__marker"
@@ -911,14 +912,14 @@ export function CRMClientsPanel({
                 </div>
 
                 <div className="crm-job-client-actions">
-                  <Link
+                  <AdminActionRouterLink
                     className="admin-icon-control crm-job-client-icon-action"
                     to={`/admin/crm/contacts/${contact.id}`}
                     aria-label={`Edit ${contact.displayName}`}
                     title="Edit client"
                   >
                     <User aria-hidden="true" />
-                  </Link>
+                  </AdminActionRouterLink>
 
                   {showPortalControls ? (
 renderActions?.(

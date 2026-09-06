@@ -1,3 +1,4 @@
+import { AdminActionButton, AdminActionLabel, AdminActionLink } from "../components/ui/AdminActionControl";
 import {
   useCallback,
   useEffect,
@@ -53,7 +54,7 @@ function CheckRow({
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-3">
-          <h3 className="font-serif text-xl">
+          <h3 className="admin-section-title ">
             {check.label}
           </h3>
 
@@ -177,8 +178,8 @@ export function WeddingPublish() {
 
   if (!preview) {
     return (
-      <div className="rounded-[28px] border border-black/10 bg-white p-8">
-        <h1 className="text-3xl font-serif mb-4">
+      <div className="admin-surface-card border border-black/10 bg-white">
+        <h1 className="admin-section-title mb-4">
           Publish report not found
         </h1>
 
@@ -203,7 +204,7 @@ export function WeddingPublish() {
     preview.storyStatus === "published";
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
         title="Publishing"
         meta={
@@ -234,7 +235,7 @@ export function WeddingPublish() {
         }
         actions={
           isCurrentlyLive ? (
-            <a
+            <AdminActionLink
               href={`/blog/${wedding.slug}`}
               target="_blank"
               rel="noreferrer"
@@ -242,12 +243,12 @@ export function WeddingPublish() {
             >
               Open public story
               <ExternalLink className="admin-button__icon" />
-            </a>
+            </AdminActionLink>
           ) : undefined
         }
       />
 
-      <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+      <section className="admin-surface-card border border-black/10 bg-white/75">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
           <div className="flex items-start gap-4">
             <div className="rounded-2xl bg-black text-white p-3">
@@ -259,7 +260,7 @@ export function WeddingPublish() {
             </div>
 
             <div>
-              <h2 className="text-3xl font-serif">
+              <h2 className="admin-section-title ">
                 Display wedding story
               </h2>
 
@@ -272,7 +273,7 @@ export function WeddingPublish() {
             </div>
           </div>
 
-          <label className="inline-flex items-center gap-3 rounded-full border border-black/10 bg-white px-5 py-3 cursor-pointer">
+          <AdminActionLabel className="admin-button admin-button--secondary inline-flex items-center gap-3 rounded-full border border-black/10 bg-white px-5 py-3 cursor-pointer">
             <input
               type="checkbox"
               checked={storyEnabled}
@@ -289,7 +290,7 @@ export function WeddingPublish() {
             <span className="text-sm font-medium">
               Show on Wedding Stories page
             </span>
-          </label>
+          </AdminActionLabel>
         </div>
 
         {!storyEnabled ? (
@@ -304,48 +305,48 @@ export function WeddingPublish() {
       </section>
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="rounded-[28px] border border-black/10 bg-white/75 p-6">
+        <div className="admin-surface-card border border-black/10 bg-white/75">
           <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-3">
             Required
           </p>
 
-          <p className="text-5xl font-serif">
+          <p className="admin-metric-value ">
             {preview.requiredPassed}/
             {preview.requiredTotal}
           </p>
         </div>
 
-        <div className="rounded-[28px] border border-black/10 bg-white/75 p-6">
+        <div className="admin-surface-card border border-black/10 bg-white/75">
           <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-3">
             Recommended
           </p>
 
-          <p className="text-5xl font-serif">
+          <p className="admin-metric-value ">
             {preview.recommendedPassed}/
             {preview.recommendedTotal}
           </p>
         </div>
 
-        <div className="rounded-[28px] border border-black/10 bg-white/75 p-6">
+        <div className="admin-surface-card border border-black/10 bg-white/75">
           <p className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-3">
             Blog images
           </p>
 
-          <p className="text-5xl font-serif">
+          <p className="admin-metric-value ">
             {preview.imageCount}
           </p>
         </div>
       </section>
 
       {storyEnabled ? (
-        <section className="rounded-[28px] border border-black/10 bg-white/75 p-7 shadow-[0_18px_60px_rgba(0,0,0,0.04)]">
+        <section className="admin-surface-card border border-black/10 bg-white/75">
           <div className="flex items-center gap-3 mb-6">
             <div className="rounded-2xl bg-black text-white p-3">
               <ClipboardCheck className="w-5 h-5" />
             </div>
 
             <div>
-              <h2 className="text-3xl font-serif">
+              <h2 className="admin-section-title ">
                 Publish checklist
               </h2>
 
@@ -369,7 +370,7 @@ export function WeddingPublish() {
       ) : null}
 
       {error ? (
-        <section className="rounded-[24px] border border-red-200 bg-red-50 p-5 text-red-900">
+        <section className="admin-surface-card border border-red-200 bg-red-50 text-red-900">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 mt-0.5" />
             <p>{error}</p>
@@ -378,7 +379,7 @@ export function WeddingPublish() {
       ) : null}
 
       {result ? (
-        <section className="rounded-[24px] border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">
+        <section className="admin-surface-card border border-emerald-200 bg-emerald-50 text-emerald-900">
           <div className="flex items-start gap-3">
             <CheckCircle2 className="w-5 h-5 mt-0.5" />
 
@@ -406,13 +407,13 @@ export function WeddingPublish() {
       ) : null}
 
       <div className="flex flex-wrap gap-3">
-        <button
+        <AdminActionButton
           type="button"
           onClick={publishChanges}
           disabled={
             publishing || !canPublish
           }
-          className="inline-flex items-center gap-2 rounded-full bg-black px-6 py-3 text-sm text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="admin-button admin-button--primary inline-flex items-center gap-2 rounded-full bg-black px-6 py-3 text-sm text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {publishing ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -429,7 +430,7 @@ export function WeddingPublish() {
               : isCurrentlyLive
                 ? "Remove story from live site"
                 : "Save as private wedding"}
-        </button>
+        </AdminActionButton>
 
         {storyEnabled &&
         !canPublish ? (

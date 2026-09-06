@@ -121,16 +121,16 @@ for forbidden in (
 # gates may add those features while this Checkout contract remains unchanged.
 require("Change plan" not in ui and "Upgrade plan" not in ui, "Gate 2D2 Checkout foundation must not expose plan-change UI")
 
-# Canonical schema remains 53; Gate 2D2 is source/runtime only.
+# Canonical schema is 54; Gate 2D2 is source/runtime only.
 con = sqlite3.connect(":memory:")
 con.executescript(schema)
 version = con.execute("SELECT value FROM schema_meta WHERE key='schema_version'").fetchone()[0]
-require(version == "53", f"Gate 2D2 unexpectedly changed schema: {version}")
+require(version == "54", f"Gate 2D2 unexpectedly changed schema: {version}")
 require(con.execute("SELECT COUNT(*) FROM platform_plan_prices").fetchone()[0] == 0, "Gate 2D2 must not seed a Stripe Price")
 require(con.execute("SELECT COUNT(*) FROM workspace_billing_customers").fetchone()[0] == 0, "Gate 2D2 must not seed a Stripe Customer")
 con.close()
 
-require(not list((ROOT / "d1/migrations").glob("054_*.sql")), "Gate 2D2 must not add migration 054")
+require(not list((ROOT / "d1/migrations").glob("055_*.sql")), "Gate 2D2 must not add migration 055")
 require("Gate 2D2" in architecture, "architecture Gate 2D2 note missing")
 require("Gate 2D2" in payments, "payments Gate 2D2 note missing")
 
@@ -153,4 +153,4 @@ print("  billing:manage authenticated workspace boundary: verified")
 print("  Checkout attempt idempotency / provider binding: verified")
 print("  browser return remains non-authoritative: verified")
 print("  connected-payment and Print Store boundaries remain isolated: verified")
-print("  schema remains 53 and no provider objects are seeded: verified")
+print("  schema is 54 and no provider objects are seeded: verified")

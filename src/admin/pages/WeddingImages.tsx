@@ -1,3 +1,4 @@
+import { AdminActionButton } from "../components/ui/AdminActionControl";
 import {
   useEffect,
   useMemo,
@@ -299,8 +300,8 @@ export function WeddingImages() {
 
   if (!wedding) {
     return (
-      <div className="rounded-[28px] border border-black/10 bg-white p-8">
-        <h1 className="mb-4 font-serif text-3xl">
+      <div className="admin-surface-card border border-black/10 bg-white">
+        <h1 className="admin-section-title mb-4">
           Wedding not found
         </h1>
         <Link
@@ -314,7 +315,7 @@ export function WeddingImages() {
   }
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
         title="Images"
         meta={
@@ -331,7 +332,7 @@ export function WeddingImages() {
           </div>
         }
         actions={
-          <button
+          <AdminActionButton
             type="button"
             onClick={saveImages}
             disabled={saving || !dirty}
@@ -343,7 +344,7 @@ export function WeddingImages() {
               : dirty
                 ? "Save all changes"
                 : "Saved"}
-          </button>
+          </AdminActionButton>
         }
       />
 
@@ -363,14 +364,14 @@ export function WeddingImages() {
           <span className="text-sm text-neutral-500">
             Drag the white grip on any selected image to move the group.
           </span>
-          <button
+          <AdminActionButton
             type="button"
             onClick={() => setSelectedIds(new Set())}
             className="ml-auto inline-flex items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm"
           >
             <X className="h-4 w-4" />
             Clear selection
-          </button>
+          </AdminActionButton>
         </section>
       ) : null}
 
@@ -392,15 +393,7 @@ export function WeddingImages() {
         </section>
       ) : null}
 
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            "minmax(0, 1fr) 420px",
-          gap: "24px",
-          alignItems: "start",
-        }}
-      >
+      <section className="admin-image-editor-grid">
         <ImageGrid
           images={filteredImages}
           activeId={activeId}

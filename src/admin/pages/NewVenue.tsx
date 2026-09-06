@@ -1,3 +1,5 @@
+import { StudioBackLink } from "../components/ui/StudioUI";
+import { AdminActionButton } from "../components/ui/AdminActionControl";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AlertCircle, ArrowLeft, Save } from "lucide-react";
@@ -53,8 +55,9 @@ export function NewVenue() {
   }
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
+        backLink={<StudioBackLink to="/admin/venues" label="Back to Venues" />}
         title="New venue"
         description="Create a new venue repository record."
         meta={
@@ -68,7 +71,7 @@ export function NewVenue() {
           </div>
         }
         actions={
-          <button
+          <AdminActionButton
             type="button"
             onClick={createVenue}
             disabled={saving}
@@ -76,7 +79,7 @@ export function NewVenue() {
           >
             <Save className="admin-button__icon" />
             {saving ? "Creating…" : "Create venue"}
-          </button>
+          </AdminActionButton>
         }
       />
 
@@ -86,7 +89,7 @@ export function NewVenue() {
         </section>
       ) : null}
 
-      <section className="rounded-[28px] border border-black/10 bg-white/80 p-7">
+      <section className="admin-surface-card border border-black/10 bg-white/80">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           <Field label="Venue name" value={name} onChange={(value) => { setName(value); if (!slug) setSlug(slugify(value)); }} />
           <Field label="Slug" value={slug} onChange={(value) => setSlug(slugify(value))} mono />

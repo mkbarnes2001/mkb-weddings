@@ -66,7 +66,7 @@ export function CRMContact() {
   if (!detail) return <AdminPage><div className="admin-alert admin-alert--error">{error || "Contact not found."}</div></AdminPage>;
 
   return (
-    <AdminPage>
+    <AdminPage className="crm-contact-page">
       <AdminPageHeader
         title={detail.contact.displayName || "Contact"}
         description="One reusable client record shared by enquiries, Jobs and client portal access."
@@ -77,8 +77,8 @@ export function CRMContact() {
       {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
       {message ? <div className="admin-alert admin-alert--success">{message}</div> : null}
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="grid gap-5">
+      <div className="crm-contact-layout">
+        <div className="crm-contact-stack">
           <AdminPanel title="Client details" description="Email changes are checked for duplicate CRM contacts and conflicting client portal identities." icon={UserRound}>
             <div className="grid gap-4 md:grid-cols-2">
               <AdminField label="First name"><input className="admin-input" value={form.firstName} disabled={!canManage} onChange={(event) => setForm((current) => ({ ...current, firstName: event.target.value }))} /></AdminField>
@@ -100,7 +100,7 @@ export function CRMContact() {
           </AdminPanel>
         </div>
 
-        <aside className="grid content-start gap-5">
+        <aside className="crm-contact-stack">
           <AdminPanel title="Contact record" icon={UserRound} compact>
             <dl className="admin-compact-details"><div><dt>Source</dt><dd>{detail.contact.source || "manual"}</dd></div><div><dt>Privacy consent</dt><dd>{dateLabel(detail.contact.privacyConsentAt)}</dd></div><div><dt>Created</dt><dd>{dateLabel(detail.contact.createdAt)}</dd></div><div><dt>Updated</dt><dd>{dateLabel(detail.contact.updatedAt)}</dd></div></dl>
           </AdminPanel>

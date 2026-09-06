@@ -1,3 +1,5 @@
+import { StudioBackLink } from "../components/ui/StudioUI";
+import { AdminActionButton, AdminActionRouterLink } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -341,8 +343,9 @@ export function VenueMigration() {
   }
 
   return (
-    <div className="space-y-7">
+    <div className="admin-page admin-refined-page space-y-7">
       <AdminPageHeader
+        backLink={<StudioBackLink to="/admin/venues" label="Back to Venues" />}
         title="Venue migration"
         description="Preview and import venue records from the existing CSV source."
         meta={
@@ -357,7 +360,7 @@ export function VenueMigration() {
           </div>
         }
         actions={
-          <button
+          <AdminActionButton
             type="button"
             onClick={runMigration}
             disabled={running || summary.ready === 0}
@@ -371,7 +374,7 @@ export function VenueMigration() {
             {running
               ? "Importing…"
               : `Import ${summary.ready} venues`}
-          </button>
+          </AdminActionButton>
         }
       />
 
@@ -385,7 +388,7 @@ export function VenueMigration() {
       ) : null}
 
       {results ? (
-        <section className="rounded-[24px] border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">
+        <section className="admin-surface-card border border-emerald-200 bg-emerald-50 text-emerald-900">
           <div className="flex items-center gap-2 font-medium">
             <CheckCircle2 className="h-5 w-5" />
             Migration complete
@@ -401,12 +404,12 @@ export function VenueMigration() {
               ))}
             </div>
           ) : null}
-          <Link
+          <AdminActionRouterLink
             to="/admin/venues"
-            className="mt-5 inline-flex rounded-full bg-black px-5 py-3 text-sm text-white"
+            className="admin-button admin-button--primary mt-5 inline-flex rounded-full bg-black px-5 py-3 text-sm text-white"
           >
             View venues
-          </Link>
+          </AdminActionRouterLink>
         </section>
       ) : null}
 
@@ -417,20 +420,17 @@ export function VenueMigration() {
         <Metric label="Invalid" value={summary.invalid} />
       </section>
 
-      <section className="rounded-[28px] border border-black/10 bg-white/80 p-6">
+      <section className="admin-surface-card border border-black/10 bg-white/80">
         <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="font-serif text-3xl">
+            <h2 className="admin-section-title ">
               Migration preview
             </h2>
-            <p className="mt-2 text-sm text-neutral-500">
-              Review the detected name, location and status before importing.
-            </p>
           </div>
 
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="admin-table-scroll">
           <table className="w-full min-w-[760px] border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-black/10 text-xs uppercase tracking-[0.14em] text-neutral-500">
@@ -502,11 +502,11 @@ function Metric({
   value: number;
 }) {
   return (
-    <div className="rounded-[24px] border border-black/10 bg-white/80 p-5">
+    <div className="admin-surface-card border border-black/10 bg-white/80">
       <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">
         {label}
       </p>
-      <p className="mt-2 font-serif text-4xl">{value}</p>
+      <p className="admin-metric-value mt-2">{value}</p>
     </div>
   );
 }

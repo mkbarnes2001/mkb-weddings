@@ -1,3 +1,4 @@
+import { settingsReturnLink } from "./adminSettings";
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
@@ -42,6 +43,7 @@ export type AdminNavigationItem = {
   to: string;
   icon: LucideIcon;
   mobilePrimary?: boolean;
+  settingsOnly?: boolean;
   requiredPermission?: string;
   requiredEntitlements?: string[];
   match: (pathname: string, params: URLSearchParams) => boolean;
@@ -71,21 +73,25 @@ const exactWithoutQuery = (path: string, key: string, fallbackValues: string[] =
 
 const crmItems: AdminNavigationItem[] = [
   { key: "overview", label: "Overview", to: "/admin/crm?view=overview", icon: Gauge, mobilePrimary: true, match: exactWithQuery("/admin/crm", "view", "overview") },
-  { key: "leads", label: "Leads", to: "/admin/crm", icon: Target, mobilePrimary: true, match: (pathname, params) => pathname.startsWith("/admin/crm/enquiries/") || exactWithoutQuery("/admin/crm", "view", ["pipeline"])(pathname, params) },
+  { key: "leads", label: "Leads", to: "/admin/crm", icon: Target, mobilePrimary: true, match: (pathname, params) => pathname.startsWith("/admin/crm/enquiries/") || (pathPrefix("/admin/crm/quotes")(pathname) && !params.get("jobId")) || exactWithoutQuery("/admin/crm", "view", ["pipeline"])(pathname, params) },
   { key: "clients", label: "Clients", to: "/admin/crm?view=contacts", icon: UserRound, mobilePrimary: true, match: (pathname, params) => pathname.startsWith("/admin/crm/contacts/") || exactWithQuery("/admin/crm", "view", "contacts")(pathname, params) },
-  { key: "jobs", label: "Jobs", to: "/admin/crm?view=jobs", icon: BriefcaseBusiness, mobilePrimary: true, requiredEntitlements: ["bookings"], match: (pathname, params) => pathname.startsWith("/admin/crm/jobs/") || isWeddingWorkspacePath(pathname) || exactWithQuery("/admin/crm", "view", "jobs")(pathname, params) },
-  { key: "schedule", label: "Schedule", to: "/admin/crm?view=schedule", icon: CalendarDays, requiredEntitlements: ["bookings"], match: exactWithQuery("/admin/crm", "view", "schedule") },
+  { key: "jobs", label: "Jobs", to: "/admin/crm?view=jobs", icon: BriefcaseBusiness, mobilePrimary: true, requiredEntitlements: ["bookings"], match: (pathname, params) => pathname.startsWith("/admin/crm/jobs/") || (pathPrefix("/admin/crm/quotes")(pathname) && Boolean(params.get("jobId"))) || isWeddingWorkspacePath(pathname) || exactWithQuery("/admin/crm", "view", "jobs")(pathname, params) },
+  { key: "schedule", label: "Calendar", to: "/admin/crm/calendar", icon: CalendarDays, requiredEntitlements: ["bookings"], match: (pathname, params) => pathname === "/admin/crm/calendar" || exactWithQuery("/admin/crm", "view", "schedule")(pathname, params) },
   { key: "payments", label: "Payments", to: "/admin/crm/payments", icon: WalletCards, requiredEntitlements: ["connected-payments"], match: exactPath("/admin/crm/payments") },
-  { key: "packages", label: "Packages", to: "/admin/crm/catalogue", icon: Package, requiredEntitlements: ["bookings"], match: pathPrefix("/admin/crm/catalogue") },
-  { key: "quotes", label: "Quotes", to: "/admin/crm/quotes", icon: FileQuestion, requiredEntitlements: ["bookings"], match: pathPrefix("/admin/crm/quotes") },
-  { key: "templates", label: "Templates", to: "/admin/crm/templates", icon: FileText, match: pathPrefix("/admin/crm/templates") },
-  { key: "email-settings", label: "Email settings", to: "/admin/crm/email-settings", icon: Mail, match: pathPrefix("/admin/crm/email-settings") },
+  { key: "packages", label: "Packages", settingsOnly: true, to: "/admin/crm/catalogue", icon: Package, requiredEntitlements: ["bookings"], match: pathPrefix("/admin/crm/catalogue") },
+  { key: "templates", label: "Templates", settingsOnly: true, to: "/admin/crm/templates", icon: FileText, match: pathPrefix("/admin/crm/templates") },
+  { key: "email-settings", label: "Email settings", settingsOnly: true, to: "/admin/crm/email-settings", icon: Mail, match: pathPrefix("/admin/crm/email-settings") },
   { key: "questionnaires", label: "Questionnaires", to: "/admin/crm?view=questionnaires", icon: ClipboardList, requiredEntitlements: ["client-portal"], match: (pathname, params) => pathname.startsWith("/admin/crm/questionnaires/") || exactWithQuery("/admin/crm", "view", "questionnaires")(pathname, params) },
-  { key: "workflows", label: "Workflows", to: "/admin/crm?view=workflows", icon: Workflow, match: (pathname, params) => pathname.startsWith("/admin/crm/workflows/") || exactWithQuery("/admin/crm", "view", "workflows")(pathname, params) },
-  { key: "commercial-settings", label: "Commercial settings", to: "/admin/crm?view=commercial-settings", icon: Settings, requiredEntitlements: ["bookings"], match: (pathname, params) => pathname.startsWith("/admin/crm/contracts/templates/") || exactWithQuery("/admin/crm", "view", "commercial-settings")(pathname, params) },
-  { key: "payment-setup", label: "Payment setup", to: "/admin/crm/payment-setup", icon: CreditCard, requiredEntitlements: ["connected-payments"], match: exactPath("/admin/crm/payment-setup") },
-  { key: "lead-form", label: "Lead form", to: "/admin/crm?view=lead-form", icon: ClipboardList, match: exactWithQuery("/admin/crm", "view", "lead-form") },
-  { key: "client-portal", label: "Client portal", to: "/admin/settings/client-portal", icon: Palette, mobilePrimary: true, requiredEntitlements: ["client-portal"], match: pathPrefix("/admin/settings/client-portal") },
+  { key: "workflows", label: "Workflows", settingsOnly: true, to: "/admin/crm?view=workflows", icon: Workflow, match: (pathname, params) => pathname.startsWith("/admin/crm/workflows/") || exactWithQuery("/admin/crm", "view", "workflows")(pathname, params) },
+  { key: "commercial-settings", label: "Commercial settings", settingsOnly: true, to: "/admin/crm?view=commercial-settings", icon: Settings, requiredEntitlements: ["bookings"], match: (pathname, params) => pathname.startsWith("/admin/crm/contracts/templates/") || exactWithQuery("/admin/crm", "view", "commercial-settings")(pathname, params) },
+  { key: "payment-setup", label: "Payment setup", settingsOnly: true, to: "/admin/crm/payment-setup", icon: CreditCard, requiredEntitlements: ["connected-payments"], match: exactPath("/admin/crm/payment-setup") },
+  { key: "lead-form", label: "Lead form", settingsOnly: true, to: "/admin/crm?view=lead-form", icon: ClipboardList, match: exactWithQuery("/admin/crm", "view", "lead-form") },
+  { key: "client-portal", label: "Client portal", settingsOnly: true, to: "/admin/settings/client-portal", icon: Palette, mobilePrimary: true, requiredEntitlements: ["client-portal"], match: pathPrefix("/admin/settings/client-portal") },
+  { key: "settings", label: "Settings", to: "/admin/crm/settings", icon: Settings, match: (pathname, params) => pathname === "/admin/crm/settings" || (
+    !pathname.startsWith("/admin/crm/questionnaires/")
+    && !(pathname === "/admin/crm" && params.get("view") === "questionnaires")
+    && settingsReturnLink(pathname, params.toString())?.to.startsWith("/admin/crm") === true
+  ) },
 ];
 
 const clientGalleryItems: AdminNavigationItem[] = [
@@ -93,31 +99,30 @@ const clientGalleryItems: AdminNavigationItem[] = [
   { key: "galleries", label: "Client galleries", to: "/admin/client-galleries", icon: Images, mobilePrimary: true, match: (pathname) => pathname !== "/admin/client-galleries/overview" && pathPrefix("/admin/client-galleries")(pathname) },
   { key: "store", label: "Store", to: "/admin/print-store?tab=catalogue", icon: Store, mobilePrimary: true, requiredEntitlements: ["print-store"], match: (pathname, params) => pathname === "/admin/print-store" && (params.get("tab") || "catalogue") !== "orders" },
   { key: "orders", label: "Orders", to: "/admin/print-store?tab=orders", icon: ShoppingBag, mobilePrimary: true, requiredEntitlements: ["print-store"], match: exactWithQuery("/admin/print-store", "tab", "orders") },
+  { key: "settings", label: "Settings", to: "/admin/settings", icon: Settings, match: pathPrefix("/admin/settings") },
 ];
 
 const studioItems: AdminNavigationItem[] = [
   { key: "overview", label: "Overview", to: "/admin/studio", icon: Gauge, mobilePrimary: true, match: exactPath("/admin/studio") },
   { key: "website", label: "Website", to: "/admin/website", icon: Globe2, mobilePrimary: true, match: exactPath("/admin/website") },
   { key: "weddings", label: "Wedding stories", to: "/admin/weddings", icon: FileText, mobilePrimary: true, match: pathPrefix("/admin/weddings") },
-  { key: "galleries", label: "Galleries", to: "/admin/gallery", icon: Images, mobilePrimary: true, match: (pathname) => pathname === "/admin/gallery" || pathname.startsWith("/admin/gallery/") || pathname === "/admin/collections" },
-  { key: "venues", label: "Venues", to: "/admin/venues", icon: Globe2, mobilePrimary: true, match: pathPrefix("/admin/venues") },
-  { key: "locations", label: "Locations", to: "/admin/locations", icon: MapPinned, match: pathPrefix("/admin/locations") },
-  { key: "moments", label: "Moments", to: "/admin/moments", icon: Layers3, match: (pathname) => pathPrefix("/admin/moments")(pathname) || pathPrefix("/admin/creative-flash")(pathname) },
-  { key: "collections", label: "Collections", to: "/admin/custom-collections", icon: LockKeyhole, match: pathPrefix("/admin/custom-collections") },
+  { key: "galleries", label: "Galleries", to: "/admin/gallery", icon: Images, mobilePrimary: true, match: (pathname) => ["/admin/gallery", "/admin/collections", "/admin/venues", "/admin/locations", "/admin/moments", "/admin/creative-flash", "/admin/custom-collections"].some(path => pathPrefix(path)(pathname)) },
   { key: "assets", label: "Asset library", to: "/admin/assets", icon: Database, match: pathPrefix("/admin/assets") },
   { key: "ai", label: "AI content", to: "/admin/ai", icon: Bot, match: pathPrefix("/admin/ai") },
   { key: "seo", label: "SEO", to: "/admin/seo", icon: BarChart3, match: pathPrefix("/admin/seo") },
   { key: "publishing", label: "Publishing", to: "/admin/publishing", icon: Sparkles, match: pathPrefix("/admin/publishing") },
+  { key: "settings", label: "Settings", to: "/admin/settings", icon: Settings, match: pathPrefix("/admin/settings") },
 ];
 
 const businessItems: AdminNavigationItem[] = [
   { key: "overview", label: "Overview", to: "/admin", icon: Gauge, mobilePrimary: true, match: (pathname) => pathname === "/admin" || pathname === "/admin/business" },
-  { key: "profile", label: "Business profile", to: "/admin/wedplanned?tab=business", icon: Building2, mobilePrimary: true, match: (pathname, params) => pathname === "/admin/wedplanned" && (params.get("tab") || "business") === "business" },
-  { key: "services", label: "Services & areas", to: "/admin/wedplanned?tab=services", icon: MapPinned, match: exactWithQuery("/admin/wedplanned", "tab", "services") },
+  { key: "profile", label: "Business profile", settingsOnly: true, to: "/admin/wedplanned?tab=business", icon: Building2, mobilePrimary: true, match: (pathname, params) => pathname === "/admin/wedplanned" && (params.get("tab") || "business") === "business" },
+  { key: "services", label: "Services & areas", settingsOnly: true, to: "/admin/wedplanned?tab=services", icon: MapPinned, match: exactWithQuery("/admin/wedplanned", "tab", "services") },
   { key: "suppliers", label: "Suppliers", to: "/admin/suppliers", icon: Users, mobilePrimary: true, match: pathPrefix("/admin/suppliers") },
-  { key: "team", label: "Team members", to: "/admin/wedplanned?tab=team", icon: Users, mobilePrimary: true, match: exactWithQuery("/admin/wedplanned", "tab", "team") },
-  { key: "billing", label: "Plan & billing", to: "/admin/wedplanned?tab=billing", icon: CreditCard, requiredPermission: "billing:read", match: exactWithQuery("/admin/wedplanned", "tab", "billing") },
-  { key: "workspace", label: "Domains & workspace", to: "/admin/settings", icon: Settings, match: (pathname) => pathname === "/admin/settings" },
+  { key: "team", label: "Team members", settingsOnly: true, to: "/admin/wedplanned?tab=team", icon: Users, mobilePrimary: true, match: exactWithQuery("/admin/wedplanned", "tab", "team") },
+  { key: "billing", label: "Plan & billing", settingsOnly: true, to: "/admin/wedplanned?tab=billing", icon: CreditCard, requiredPermission: "billing:read", match: exactWithQuery("/admin/wedplanned", "tab", "billing") },
+  { key: "workspace", label: "Settings", settingsOnly: true, to: "/admin/settings", icon: Settings, match: (pathname) => pathname === "/admin/settings" },
+  { key: "settings", label: "Settings", to: "/admin/settings", icon: Settings, match: pathPrefix("/admin/settings") },
 ];
 
 export const platformAdminItems: AdminNavigationItem[] = [
@@ -133,7 +138,7 @@ export const platformAdminItems: AdminNavigationItem[] = [
 
 export const adminModules: AdminModuleDefinition[] = [
   // The persisted module key remains "business" for production configuration compatibility; entitlementKey is a canonical feature readiness reference.
-  { key: "business", label: "WedNav", shortLabel: "W.NAV", description: "Business home, profile, team and suppliers", to: "/admin", icon: BriefcaseBusiness, entitlementKey: "business-profile", match: (pathname) => pathname === "/admin" || pathname.startsWith("/admin/business") || pathname.startsWith("/admin/wedplanned") || pathname === "/admin/settings" || pathname.startsWith("/admin/suppliers"), items: businessItems },
+  { key: "business", label: "WedNav", shortLabel: "W.NAV", description: "Business home, profile, team and suppliers", to: "/admin", icon: BriefcaseBusiness, entitlementKey: "business-profile", match: (pathname) => pathname === "/admin" || pathname.startsWith("/admin/business") || pathname.startsWith("/admin/wedplanned") || (pathname === "/admin/settings" || pathname === "/admin/settings/workspace") || pathname.startsWith("/admin/suppliers"), items: businessItems },
   { key: "crm", label: "WedCRM", shortLabel: "W.CRM", description: "Client journey, bookings and communications", to: "/admin/crm?view=overview", icon: ContactRound, entitlementKey: "crm", match: (pathname) => pathname.startsWith("/admin/crm") || pathname === "/admin/settings/client-portal" || isWeddingWorkspacePath(pathname), items: crmItems },
   // The persisted module key remains "website" for production configuration compatibility; entitlementKey is a canonical feature readiness reference.
   { key: "website", label: "WedStudio", shortLabel: "W.STU", description: "Website, stories, galleries and publishing", to: "/admin/studio", icon: Globe2, entitlementKey: "content-tools", match: (pathname) => ["/admin/studio", "/admin/website", "/admin/weddings", "/admin/gallery", "/admin/collections", "/admin/locations", "/admin/moments", "/admin/creative-flash", "/admin/custom-collections", "/admin/venues", "/admin/assets", "/admin/ai", "/admin/seo", "/admin/publishing"].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)), items: studioItems },
@@ -203,10 +208,13 @@ export function requiredEntitlementsForAdminPath(
   }
 
   if (
-    pathname === "/admin/crm/catalogue"
+    pathname === "/admin/crm/calendar"
+    || pathname === "/admin/crm/online-booking"
+    || pathname === "/admin/crm/catalogue"
     || pathname.startsWith("/admin/crm/catalogue/")
     || pathname === "/admin/crm/quotes"
     || pathname.startsWith("/admin/crm/quotes/")
+    || pathname === "/admin/crm/templates/quotes"
     || pathname.startsWith("/admin/crm/templates/quotes/")
   ) {
     return ["bookings"];
@@ -221,13 +229,14 @@ export function requiredEntitlementsForAdminPath(
 
   if (
     pathname.startsWith("/admin/crm/questionnaires/")
+    || pathname === "/admin/crm/templates/questionnaires"
     || pathname === "/admin/settings/client-portal"
     || pathname.startsWith("/admin/settings/client-portal/")
   ) {
     return ["client-portal"];
   }
 
-  if (pathname.startsWith("/admin/crm/contracts/templates/")) {
+  if (pathname === "/admin/crm/templates/contracts" || pathname.startsWith("/admin/crm/contracts/templates/")) {
     return ["contracts"];
   }
 
@@ -267,6 +276,7 @@ export function visibleModuleItems(
   if (!adminModuleEntitled(module, enabledEntitlementKeys)) return [];
 
   return module.items.filter((item) => {
+    if (item.settingsOnly) return false;
     if (item.requiredPermission && !permissions.includes(item.requiredPermission)) return false;
     if (!item.requiredEntitlements?.length || enabledEntitlementKeys === null) return true;
     return item.requiredEntitlements.every((featureKey) => enabledEntitlementKeys.has(featureKey));

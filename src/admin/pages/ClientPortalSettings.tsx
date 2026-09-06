@@ -1,3 +1,4 @@
+import { AdminActionLabel } from "../components/ui/AdminActionControl";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties, ChangeEvent } from "react";
 import { ExternalLink, Image, Monitor, Save, Smartphone, Upload } from "lucide-react";
@@ -114,7 +115,7 @@ export function ClientPortalSettings() {
   }) : undefined, [workspace]);
 
   if (loading) return <div className="text-neutral-500">Loading client portal settings…</div>;
-  if (!workspace) return <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-red-800">{error || "Workspace unavailable."}</div>;
+  if (!workspace) return <div className="admin-surface-card border border-red-200 bg-red-50 text-red-800">{error || "Workspace unavailable."}</div>;
 
   const settings = workspace.settings;
   const openUrl = portalUrl(workspace);
@@ -138,11 +139,11 @@ export function ClientPortalSettings() {
             <div className="portal-branding-upload-grid">
               <div className="portal-branding-upload">
                 <div className="portal-branding-upload__preview portal-branding-upload__preview--logo">{settings.logoUrl ? <img src={settings.logoUrl} alt="Business logo preview" /> : <span>{workspace.name.slice(0, 2).toUpperCase()}</span>}</div>
-                <div><strong>Business logo</strong><p>PNG, JPEG or WebP. Maximum 8 MB.</p><label className="admin-button admin-button--secondary admin-button--sm"><Upload className="admin-button__icon" />{uploading === "logo" ? "Uploading…" : "Upload logo"}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={Boolean(uploading)} onChange={(event) => void uploadAsset("logo", event)} /></label></div>
+                <div><strong>Business logo</strong><p>PNG, JPEG or WebP. Maximum 8 MB.</p><AdminActionLabel className="admin-button admin-button--secondary admin-button--sm"><Upload className="admin-button__icon" />{uploading === "logo" ? "Uploading…" : "Upload logo"}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={Boolean(uploading)} onChange={(event) => void uploadAsset("logo", event)} /></AdminActionLabel></div>
               </div>
               <div className="portal-branding-upload">
                 <div className="portal-branding-upload__preview portal-branding-upload__preview--banner">{settings.portalBannerUrl ? <img src={settings.portalBannerUrl} alt="Portal banner preview" /> : <span>Banner image</span>}</div>
-                <div><strong>Portal banner</strong><p>Recommended ratio around 3:1 or wider.</p><label className="admin-button admin-button--secondary admin-button--sm"><Upload className="admin-button__icon" />{uploading === "banner" ? "Uploading…" : "Upload banner"}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={Boolean(uploading)} onChange={(event) => void uploadAsset("banner", event)} /></label></div>
+                <div><strong>Portal banner</strong><p>Recommended ratio around 3:1 or wider.</p><AdminActionLabel className="admin-button admin-button--secondary admin-button--sm"><Upload className="admin-button__icon" />{uploading === "banner" ? "Uploading…" : "Upload banner"}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={Boolean(uploading)} onChange={(event) => void uploadAsset("banner", event)} /></AdminActionLabel></div>
               </div>
             </div>
           </AdminPanel>

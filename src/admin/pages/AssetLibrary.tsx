@@ -1,3 +1,4 @@
+import { AdminActionButton } from "../components/ui/AdminActionControl";
 import { FormEvent, useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   ChevronLeft,
@@ -165,7 +166,7 @@ export function AssetLibrary() {
         eyebrow="Workspace assets"
         title="Asset Library"
         description="One canonical record for every photograph, connecting public previews, private originals and every gallery relationship."
-        actions={<button type="button" onClick={() => void sync()} disabled={syncing} className="admin-button admin-button--primary"><RefreshCw className={`admin-button__icon ${syncing ? "animate-spin" : ""}`} />{syncing ? "Indexing…" : "Index missing assets"}</button>}
+        actions={<AdminActionButton type="button" onClick={() => void sync()} disabled={syncing} className="admin-button admin-button--primary"><RefreshCw className={`admin-button__icon ${syncing ? "animate-spin" : ""}`} />{syncing ? "Indexing…" : "Index missing assets"}</AdminActionButton>}
       />
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 12, marginTop: 26 }}>
@@ -202,14 +203,14 @@ export function AssetLibrary() {
             <option value="stored">Private original stored</option>
             <option value="preview">Preview only</option>
           </select>
-          <button type="submit" style={{ ...buttonStyle, background: "#111", color: "#fff", borderColor: "#111" }}>Search</button>
+          <AdminActionButton type="submit" style={{ ...buttonStyle, background: "#111", color: "#fff", borderColor: "#111" }}>Search</AdminActionButton>
         </form>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginTop: 12, flexWrap: "wrap" }}>
           <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#555" }}>
             <input type="checkbox" checked={Boolean(filters.unassigned)} onChange={(e) => setFilter("unassigned", e.target.checked)} />
             Show only assets with no wedding, venue or custom gallery assignment
           </label>
-          <button type="button" onClick={() => { const next = { limit: 60, offset: 0 }; setSearchInput(""); setFilters(next); void load(next); }} style={{ ...buttonStyle, padding: "8px 12px" }}>Clear filters</button>
+          <AdminActionButton type="button" onClick={() => { const next = { limit: 60, offset: 0 }; setSearchInput(""); setFilters(next); void load(next); }} style={{ ...buttonStyle, padding: "8px 12px" }}>Clear filters</AdminActionButton>
         </div>
       </AdminToolbar>
 
@@ -232,8 +233,8 @@ export function AssetLibrary() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 18 }}>
             <div style={{ fontSize: 13, color: "#737373" }}>{start}–{end} of {formatNumber(payload.pagination.total)}</div>
             <div style={{ display: "flex", gap: 8 }}>
-              <button type="button" disabled={payload.pagination.offset <= 0 || loading} onClick={() => setFilters((current) => ({ ...current, offset: Math.max(0, Number(current.offset || 0) - Number(current.limit || 60)) }))} style={buttonStyle}><ChevronLeft size={15} /> Previous</button>
-              <button type="button" disabled={!payload.pagination.hasMore || loading} onClick={() => setFilters((current) => ({ ...current, offset: Number(current.offset || 0) + Number(current.limit || 60) }))} style={buttonStyle}>Next <ChevronRight size={15} /></button>
+              <AdminActionButton type="button" disabled={payload.pagination.offset <= 0 || loading} onClick={() => setFilters((current) => ({ ...current, offset: Math.max(0, Number(current.offset || 0) - Number(current.limit || 60)) }))} style={buttonStyle}><ChevronLeft size={15} /> Previous</AdminActionButton>
+              <AdminActionButton type="button" disabled={!payload.pagination.hasMore || loading} onClick={() => setFilters((current) => ({ ...current, offset: Number(current.offset || 0) + Number(current.limit || 60) }))} style={buttonStyle}>Next <ChevronRight size={15} /></AdminActionButton>
             </div>
           </div>
         </div>

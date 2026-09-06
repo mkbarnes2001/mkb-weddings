@@ -311,7 +311,7 @@ export function CRMContractTemplate() {
         );
 
       navigate(
-        "/admin/crm?view=commercial-settings",
+        "/admin/crm/templates/contracts",
       );
     } catch (archiveError) {
       setError(
@@ -536,17 +536,7 @@ export function CRMContractTemplate() {
               </AdminField>
             </div>
 
-            <div className="mt-4 rounded-xl bg-neutral-50 p-3 text-[10px] leading-5 text-neutral-600">
-              WedPlanned does not insert legal wording automatically.
-              Add the contract terms appropriate to your business
-              before activating the template.
-            </div>
-
-            <div className="mt-3 rounded-xl bg-neutral-50 p-3 text-[10px] leading-5 text-neutral-600">
-              Generated contracts currently require one client
-              signature. Signature count is stored on each generated
-              contract version rather than on the schema-39 template.
-            </div>
+            <p className="mt-4 admin-field__help">Add your business's contract terms before activating this template.</p>
           </AdminPanel>
 
           <AdminPanel

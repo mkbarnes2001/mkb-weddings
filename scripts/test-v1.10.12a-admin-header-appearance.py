@@ -89,7 +89,7 @@ assert MARKER in migration
 assert MARKER in schema
 
 
-# Current canonical release schema reaches 51.
+# Current canonical release schema is 54.
 db = sqlite3.connect(":memory:")
 db.executescript(schema)
 
@@ -113,7 +113,7 @@ version = db.execute(
 ).fetchone()
 
 assert version
-assert version[0] == "51"
+assert version[0] == "54"
 
 
 defaults = db.execute(

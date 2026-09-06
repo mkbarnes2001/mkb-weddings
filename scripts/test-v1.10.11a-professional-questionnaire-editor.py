@@ -56,7 +56,7 @@ version = db.execute(
     "WHERE key='schema_version'"
 ).fetchone()[0]
 
-assert str(version) == "49"
+assert str(version) == "54"
 
 
 # -------------------------------------------------------------
@@ -330,7 +330,7 @@ for token in (
 
 
 assert not list(
-    (ROOT / "d1/migrations").glob("050*")
+    (ROOT / "d1/migrations").glob("055*")
 )
 
 
@@ -365,5 +365,5 @@ print(
     "  responsive WedPlanned UI: verified"
 )
 print(
-    "  schema 49: verified"
+    "  schema 54: verified"
 )
